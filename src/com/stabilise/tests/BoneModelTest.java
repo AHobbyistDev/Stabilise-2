@@ -70,7 +70,7 @@ public class BoneModelTest extends Application implements State {
 	}
 	
 	@Override
-	public void tick() {
+	public void update() {
 		model.hitbox.rotate(0.01f);
 		armLeft.hitbox.rotate(0.02f);
 		

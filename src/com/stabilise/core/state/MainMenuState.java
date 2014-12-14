@@ -25,7 +25,7 @@ public class MainMenuState implements State {
 	}
 
 	@Override
-	public void tick() {
+	public void update() {
 		menu.update();
 	}
 

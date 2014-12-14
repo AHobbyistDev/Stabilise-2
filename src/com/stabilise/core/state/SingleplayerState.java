@@ -42,7 +42,7 @@ public class SingleplayerState implements State {
 	}
 
 	@Override
-	public void tick() {
+	public void update() {
 		profiler.start("game");
 		game.update();
 		

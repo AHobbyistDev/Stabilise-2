@@ -53,7 +53,7 @@ public class CollisionTest extends Application {
 			public boolean collides = false;
 			
 			@Override
-			public void tick() {
+			public void update() {
 				r1Sprite.rotation += rotation * 3;
 				r2Sprite.rotation += rotation * 7;
 				

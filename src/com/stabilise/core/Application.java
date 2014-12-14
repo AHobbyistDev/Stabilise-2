@@ -17,7 +17,7 @@ import com.stabilise.util.Profiler;
  * for their operation.) 
  * 
  * <p>This class oversees program execution by invoking the current state's
- * {@link State#tick() update} method as many times per second equivalent to
+ * {@link State#update() update} method as many times per second equivalent to
  * {@code ticksPerSecond} (which is defined in the
  * {@link #Application(int) Application constructor}), and the current state's
  * {@link State#render() render} method as many times per second as the system
@@ -128,6 +128,8 @@ public abstract class Application {
 		input = InputManager.get();
 		
 		state = getInitialState();
+		if(state == null)
+			crash(new NullPointerException("Initial state is null"));
 		
 		// Try to have the application shut down nicely in all cases of non-
 		// standard closure
@@ -144,11 +146,9 @@ public abstract class Application {
 	}
 	
 	/**
-	 * Gets the initial state of the Application. The returned {@code State}
-	 * will be set as the Application's state as the Application is
-	 * constructed.
+	 * Gets the initial state of the Application.
 	 * 
-	 * @return The State.
+	 * <p>If the returned state is {@code null}, the application will crash.
 	 */
 	protected abstract State getInitialState();
 	
@@ -156,10 +156,12 @@ public abstract class Application {
 	 * Creates the Application - delegated from {@link Listener#create()}.
 	 */
 	private void create() {
-		init();
-		state.start();
-		lastTime = System.nanoTime();
-		running = true;
+		if(!stopped) {
+			init();
+			state.start();
+			lastTime = System.nanoTime();
+			running = true;
+		}
 	}
 	
 	/**
@@ -202,10 +204,10 @@ public abstract class Application {
 		
 		// Make sure nothing has gone wrong with timing
 		if(unprocessed > 5000000000L) { // 5 seconds
-			Log.critical("Can't keep up; running "
-					+ TimeUnit.NANOSECONDS.toMillis(now - lastTime) + " milliseconds (" 
-					+ (unprocessed / nsPerTick) + " ticks) behind! "
-					+ "Is the application overloaded?");
+			Log.critical("Can't keep up! Application is running "
+					+ TimeUnit.NANOSECONDS.toMillis(now - lastTime) + " milliseconds behind; skipping " 
+					+ (unprocessed / nsPerTick) + " ticks!"
+			);
 			unprocessed = 0L;
 		} else if(unprocessed < 0L) {
 			Log.critical("Time ran backwards! Did the timer overflow?");
@@ -259,7 +261,7 @@ public abstract class Application {
 	 */
 	protected void tick() {
 		input.update();		// Input detecting
-		state.tick();		// All application logic as implemented by the current state
+		state.update();		// All application logic as implemented by the current state
 	}
 	
 	/**

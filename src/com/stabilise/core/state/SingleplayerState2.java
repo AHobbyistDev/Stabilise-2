@@ -37,7 +37,7 @@ public class SingleplayerState2 implements State {
 	}
 
 	@Override
-	public void tick() {
+	public void update() {
 		game.update();
 		
 		// Safety net to prevent an NPE from the renderer if the game shuts down this tick

@@ -47,7 +47,7 @@ public interface State {
 	/**
 	 * Called when the state should update.
 	 */
-	void tick();
+	void update();
 	
 	/**
 	 * Called when the state should render.

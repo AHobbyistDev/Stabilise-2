@@ -58,7 +58,7 @@ public class LoadingState implements State {
 	}
 	
 	@Override
-	public void tick() {
+	public void update() {
 		/*
 		if(screen.wasResized()) {
 			splash.x = screen.getCentreX();

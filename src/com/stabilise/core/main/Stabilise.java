@@ -5,6 +5,7 @@ import java.util.Random;
 import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
+import com.stabilise.core.state.GDXTestState;
 import com.stabilise.core.state.LoadingState;
 import com.stabilise.core.state.State;
 import com.stabilise.input.Controller;
@@ -38,7 +39,7 @@ public class Stabilise extends Application {
 	
 	@Override
 	protected State getInitialState() {
-		return new LoadingState();
+		return new GDXTestState();
 	}
 	
 	@Override
@@ -51,10 +52,9 @@ public class Stabilise extends Application {
 	//--------------------==========--------------------
 	
 	/**
-	 * Gets a randomised subtitle for the application window.
+	 * Gets a randomised subtitle for the game window.
 	 */
-	@SuppressWarnings("unused")
-	private static String getApplicationSubtitle() {
+	public static String getGameSubtitle() {
 		final String[] titles = {
 				Constants.VERSION,
 				"Brought to you by Java!",

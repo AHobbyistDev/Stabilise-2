@@ -50,7 +50,7 @@ public class ServerSingleplayerState implements State {
 	}
 
 	@Override
-	public void tick() {
+	public void update() {
 		client.update();
 		
 		renderer.update();
