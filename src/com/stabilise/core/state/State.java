@@ -1,9 +1,5 @@
 package com.stabilise.core.state;
 
-import com.stabilise.core.Application;
-import com.stabilise.util.annotation.UsedByApplication;
-import com.stabilise.util.annotation.UsesApplication;
-
 /**
  * States allow for the circumstantial execution of the application's logic.
  * 
@@ -11,8 +7,6 @@ import com.stabilise.util.annotation.UsesApplication;
  * The current application state determines the manner of logic to be executed.
  * </p>
  */
-@UsedByApplication
-@UsesApplication
 public interface State {
 	
 	/**
@@ -31,6 +25,9 @@ public interface State {
 	
 	/**
 	 * Called when the application is paused.
+	 * 
+	 * <p>This is also invoked before {@link #dispose()} when the application
+	 * is shut down.
 	 */
 	void pause();
 	
@@ -48,23 +45,15 @@ public interface State {
 	void resize(int width, int height);
 	
 	/**
-	 * Updates the state. If this state is the application's current state,
-	 * this method will be invoked a number of times per second equivalent to
-	 * {@link Application#ticksPerSecond}.
-	 * 
-	 * <p>Implementors of {@code State} should make appropriate calls to the
-	 * update methods of objects here.
+	 * Called when the state should update.
 	 */
-	void update();
+	void tick();
 	
 	/**
-	 * Renders the state. If this state is the application's current state,
-	 * this method will be invoked as many times per second as the system will
-	 * allow, or as many times equivalent to the FPS cap, whichever is smaller.
+	 * Called when the state should render.
 	 * 
-	 * <p>Implementors of {@code State} should perform appropriate rendering
-	 * operations here.
+	 * @param delta The time since the last render, in seconds.
 	 */
-	void render();
+	void render(float delta);
 	
 }

@@ -70,7 +70,7 @@ public class BoneModelTest extends Application implements State {
 	}
 	
 	@Override
-	public void update() {
+	public void tick() {
 		model.hitbox.rotate(0.01f);
 		armLeft.hitbox.rotate(0.02f);
 		
@@ -78,7 +78,7 @@ public class BoneModelTest extends Application implements State {
 	}
 	
 	@Override
-	public void render() {
+	public void render(float delta) {
 		model.render();
 	}
 	
@@ -155,6 +155,11 @@ public class BoneModelTest extends Application implements State {
 		void refresh() {
 			
 		}
+		
+	}
+	
+	@Override
+	public void resize(int width, int height) {
 		
 	}
 	

@@ -43,9 +43,14 @@ public class ServerSingleplayerState implements State {
 		
 		this.worldName = worldName;
 	}
+	
+	@Override
+	public void resize(int width, int height) {
+		// meh
+	}
 
 	@Override
-	public void update() {
+	public void tick() {
 		client.update();
 		
 		renderer.update();
@@ -92,7 +97,7 @@ public class ServerSingleplayerState implements State {
 	}
 	
 	@Override
-	public void render() {
+	public void render(float delta) {
 		renderer.render();
 		
 		//menu.render();

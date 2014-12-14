@@ -7,12 +7,10 @@ import java.lang.reflect.Method;
 
 import com.google.common.io.Files;
 import com.stabilise.util.annotation.PrivateBecauseInelegant;
-import com.stabilise.util.annotation.UsedByApplication;
 
 /**
  * This class provides some static utility IO methods.
  */
-@UsedByApplication(com.stabilise.core.Resources.class)
 public class IOUtil {
 	
 	// non-instantiable

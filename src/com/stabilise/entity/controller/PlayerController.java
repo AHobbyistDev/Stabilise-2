@@ -14,14 +14,12 @@ import com.stabilise.opengl.Texture;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Log;
 import com.stabilise.util.MathUtil;
-import com.stabilise.util.annotation.UsesApplication;
 import com.stabilise.world.Direction;
 import com.stabilise.world.tile.Tiles;
 
 /**
  * A PlayerController is a MobController which is managed by player input.
  */
-@UsesApplication
 public class PlayerController extends MobController implements Controllable {
 	
 	/** A reference to the PlayerController's controller. */

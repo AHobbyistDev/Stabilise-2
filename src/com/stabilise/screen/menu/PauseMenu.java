@@ -7,12 +7,10 @@ import com.stabilise.opengl.Rectangle;
 import com.stabilise.screen.menu.submenu.HowToPlayMenu;
 import com.stabilise.screen.menu.submenu.PauseMenuMain;
 import com.stabilise.util.Colour;
-import com.stabilise.util.annotation.UsesApplication;
 
 /**
  * The in-game pause menu.
  */
-@UsesApplication
 public class PauseMenu extends SubMenuBasedMenu {
 	
 	/** A reference to the game. */

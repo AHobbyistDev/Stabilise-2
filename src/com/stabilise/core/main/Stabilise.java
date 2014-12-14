@@ -4,7 +4,6 @@ import java.util.Random;
 
 import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
-import com.stabilise.core.Resources;
 import com.stabilise.core.Settings;
 import com.stabilise.core.state.LoadingState;
 import com.stabilise.core.state.State;
@@ -12,13 +11,11 @@ import com.stabilise.input.Controller;
 import com.stabilise.item.Item;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.annotation.UsesApplication;
 import com.stabilise.world.tile.Tile;
 
 /**
  * The game.
  */
-@UsesApplication
 public class Stabilise extends Application {
 	
 	//--------------------==========--------------------
@@ -45,14 +42,6 @@ public class Stabilise extends Application {
 	}
 	
 	@Override
-	protected void tick() {
-		input.update();
-		state.update();
-		Settings.update();			// Also update settings
-		//screen.update();
-	}
-	
-	@Override
 	public void produceCrashLog() {
 		Log.saveLog(true, GAME_NAME + " v" + Constants.VERSION);
 	}
@@ -63,8 +52,6 @@ public class Stabilise extends Application {
 	
 	/**
 	 * Gets a randomised subtitle for the application window.
-	 * 
-	 * @return A randomised subtitle.
 	 */
 	@SuppressWarnings("unused")
 	private static String getApplicationSubtitle() {
@@ -125,24 +112,6 @@ public class Stabilise extends Application {
 				throw new AssertionError(t);
 			}
 		}
-	}
-	
-	/**
-	 * The main function called by the JVM as soon as the application is
-	 * launched.
-	 * 
-	 * @param args The application arguments. Unused.
-	 */
-	public static void main(String[] args) {
-		Log.message("The application path is: " + Resources.APP_DIR);
-		
-		// Load the OS-specific natives required for LWJGL to run
-		System.setProperty("org.lwjgl.librarypath", Resources.NATIVES_DIR.getAbsolutePath());
-		
-		Log.message("Initialising game - v" + Constants.VERSION);
-		
-		// Initiate ze game!
-		new Stabilise();
 	}
 	
 }

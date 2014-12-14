@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.stabilise.core.Resources;
-import com.stabilise.util.annotation.UsedByApplication;
 
 /**
  * The Log class allows for the logging and more streamlined management of
@@ -27,7 +26,6 @@ import com.stabilise.util.annotation.UsedByApplication;
  * <!-- TODO: Would it not be more effective to funnel System.out into a file?
  * -->
  */
-@UsedByApplication
 public class Log {
 	
 	//--------------------==========--------------------

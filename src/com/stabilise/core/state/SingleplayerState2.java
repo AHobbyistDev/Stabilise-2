@@ -30,9 +30,14 @@ public class SingleplayerState2 implements State {
 		
 		game = new Game(world);
 	}
+	
+	@Override
+	public void resize(int width, int height) {
+		// meh
+	}
 
 	@Override
-	public void update() {
+	public void tick() {
 		game.update();
 		
 		// Safety net to prevent an NPE from the renderer if the game shuts down this tick
@@ -44,7 +49,7 @@ public class SingleplayerState2 implements State {
 	}
 	
 	@Override
-	public void render() {
+	public void render(float delta) {
 		renderer.render();
 		
 		game.render();

@@ -27,7 +27,6 @@ import com.stabilise.util.Colour;
 import com.stabilise.util.Log;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.StringUtil;
-import com.stabilise.util.annotation.UsesApplication;
 import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.concurrent.TaskThread;
 import com.stabilise.world.GameWorld;
@@ -37,7 +36,6 @@ import com.stabilise.world.WorldInfo;
 /**
  * The world selection menu.
  */
-@UsesApplication
 public class WorldSelectMenu extends SubMenu {
 	
 	//--------------------==========--------------------

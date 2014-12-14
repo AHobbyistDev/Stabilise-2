@@ -3,12 +3,11 @@ package com.stabilise.core;
 import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.ApplicationListener;
+import com.badlogic.gdx.Gdx;
 import com.stabilise.core.state.State;
 import com.stabilise.input.InputManager;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
-import com.stabilise.util.annotation.UsedByApplication;
-import com.stabilise.util.annotation.UsesApplication;
 
 /**
  * An {@code Application} forms the basis of any program which seeks to utilise
@@ -18,7 +17,7 @@ import com.stabilise.util.annotation.UsesApplication;
  * for their operation.) 
  * 
  * <p>This class oversees program execution by invoking the current state's
- * {@link State#update() update} method as many times per second equivalent to
+ * {@link State#tick() update} method as many times per second equivalent to
  * {@code ticksPerSecond} (which is defined in the
  * {@link #Application(int) Application constructor}), and the current state's
  * {@link State#render() render} method as many times per second as the system
@@ -47,14 +46,7 @@ import com.stabilise.util.annotation.UsesApplication;
  * 
  * <p>To run the program, simply construct a new instance as per {@code new
  * MyProgram()}, and that instance will control your program henceforth. Note
- * that any code placed after such a construction will never be executed. For
- * example:
- * 
- * <pre>
- * public static void main(String[] args) {
- *     new MyProgram();
- *     doSomethingElse(); // This will never be invoked!
- * }</pre>
+ * that any code placed after such a construction will never be executed.
  * 
  * <p>A program's actual logic should be located in the initial {@code State}
  * and other states which it may set.
@@ -62,8 +54,6 @@ import com.stabilise.util.annotation.UsesApplication;
  * <p>An Application is not thread-safe and should only be interacted with on
  * the thread that created it.
  */
-@UsedByApplication
-@UsesApplication
 public abstract class Application {
 	
 	//--------------------==========--------------------
@@ -77,11 +67,11 @@ public abstract class Application {
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
-	/** The number of update ticks executed per second. */
-	protected final int ticksPerSecond;
-	
 	/** The listener which delegates to this Application. */
 	private final Listener listener;
+	
+	/** The number of update ticks executed per second. */
+	protected final int ticksPerSecond;
 	
 	/** The application's state. */
 	protected State state;
@@ -89,10 +79,8 @@ public abstract class Application {
 	 * it is non-null. */
 	private State newState = null;
 	
-	/** Whether or not the application is currently running. Setting this to
-	 * {@link false} aborts the main loop and shuts down the Application as per
-	 * an invocation of {@link #shutdown()}. */
-	protected boolean running = true;
+	/** Whether or not the application is running. */
+	private boolean running = false;
 	/** Whether or not the application has been shut down. */
 	private boolean stopped = false;
 	/** Whether or not the application is crashing. */
@@ -102,7 +90,7 @@ public abstract class Application {
 	protected final InputManager input;
 	
 	/** The time when last it was checked as per {@code System.nanoTime()}. */
-	private long lastTime = System.nanoTime();
+	private long lastTime;
 	/** The number of 'unprocessed' nanoseconds. An update tick is executed
 	 * when this is greater than or equal to nsPerTick. */
 	private long unprocessed = 0L;
@@ -170,6 +158,8 @@ public abstract class Application {
 	private void create() {
 		init();
 		state.start();
+		lastTime = System.nanoTime();
+		running = true;
 	}
 	
 	/**
@@ -200,23 +190,13 @@ public abstract class Application {
 	
 	/**
 	 * Executes the main loop.
-	 * The main game loop that is in control of the execution of all of the
-	 * application's logic.
-	 * 
-	 * <p>As long as {@code running} is {@code true}, {@link #tick()} will be
-	 * invoked a number of times per second equivalent to
-	 * {@link #ticksPerSecond}, and
-	 * {@link Screen#preRender() screen.preRender()},
-	 * {@link State#render state.render()} &
-	 * {@link Screen#postRender() screen.postRender()} will
-	 * be invoked as many times per second as the system will allow, or as
-	 * many times equivalent to the FPS cap, whichever is smaller.
-	 * 
-	 * <p>If a Throwable is thrown during the execution of any of these
-	 * methods, {@link #crash(Throwable)} will be invoked and the Application
-	 * will abort.
 	 */
 	private void mainLoop() {
+		// Don't let the main loop run until the application has been properly
+		// created.
+		if(!running)
+			return;
+		
 		long now = System.nanoTime();
 		unprocessed += (now - lastTime);
 		
@@ -261,41 +241,101 @@ public abstract class Application {
 				profiler.flush();
 			
 			// Rendering
-			profiler.start("render"); // begin render
-			
-			//profiler.start("preRender");
-			//screen.preRender();
-			//profiler.start("render");
-			state.render();
-			//profiler.next("postRender");
-			//screen.postRender();
-			//profiler.end();
-			
-			profiler.end(); // end render
+			profiler.start("render");
+			state.render(Gdx.graphics.getDeltaTime());
+			profiler.end();
 		} catch(Throwable t) {
 			crash(t);
-			return;
 		}
-		
-		/*
-		// If the loop has been aborted but the application has yet to stop,
-		// stop it
-		if(!stopped)
-			shutdown();
-		*/
 	}
 	
 	/**
 	 * Executes an update tick. This method is invoked a number of times per
-	 * second equivalent to {@link #ticksPerSecond} by the main application
-	 * loop.
+	 * second equivalent to {@link #ticksPerSecond} specified in the
+	 * Application constructor.
 	 * 
 	 * <p>Note that this may be overridden to add any state-independent update
 	 * logic.
 	 */
 	protected void tick() {
 		input.update();		// Input detecting
-		state.update();		// All application logic as implemented by the current state
+		state.tick();		// All application logic as implemented by the current state
+	}
+	
+	/**
+	 * Pauses the application.
+	 * 
+	 * <p>Also invoked before {@link #shutdown()} when the application is shut
+	 * down, thanks to libGDX.
+	 */
+	private void pause() {
+		input.unpressButtons();
+		input.unpressKeys();
+		if(state != null)
+			state.pause();
+	}
+	
+	/**
+	 * Resumes the application.
+	 */
+	private void resume() {
+		if(state != null)
+			state.resume();
+	}
+	
+	/**
+	 * Disposes the application. This executes the actual shutdown code, as
+	 * this is the method routed to by libGDX ({@link #shutdown()} delegates
+	 * to the libGDX shutdown as to follow proper procedure).
+	 */
+	private void dispose() {
+		stopped = true;
+		
+		// try..catch since client code cannot be trusted
+		try {
+			if(state != null)
+				state.dispose();
+		} catch(Throwable t) {
+			crash(t);
+		}
+	}
+	
+	/**
+	 * Schedules a shutdown of the application. The current state will have its
+	 * {@link State#pause() pause()} and {@link State#dispose() dispose()}
+	 * methods invoked once shutdown commences.
+	 */
+	public final void shutdown() {
+		if(stopped)
+			return;
+		stopped = true;
+		
+		Gdx.app.exit();
+	}
+	
+	/**
+	 * Crashes the application.
+	 * 
+	 * <p>The application will attempt to shutdown as per an invocation of
+	 * {@link #shutdown()}, however it should be noted that depending on the nature
+	 * of the exception, doing so may not be possible.
+	 * 
+	 * @param t The Throwable to treat as the cause of the crash.
+	 */
+	public final void crash(Throwable t) {
+		if(crashing)		// TODO: Possibly append a log entry detailing the
+			return;			// double-crash and re-save the log?
+		crashing = true;
+		Log.critical("The application has crashed!", t);
+		produceCrashLog();
+		shutdown();
+	}
+	
+	/**
+	 * Saves the crash log.
+	 */
+	protected void produceCrashLog() {
+		Log.saveLog(true, "");
 	}
 	
 	/**
@@ -327,81 +367,13 @@ public abstract class Application {
 	}
 	
 	/**
-	 * Pauses the application. This is invoked automatically by the active
-	 * {@code Screen} when the application window loses focus, so there is
-	 * typically no need to invoke this manually.
-	 */
-	private void pause() {
-		input.unpressButtons();
-		input.unpressKeys();
-		if(state != null)
-			state.pause();
-	}
-	
-	/**
-	 * Resumes the application. This is invoked automatically by the active
-	 * {@code Screen} when the application window regains focus, so there is
-	 * typically no need to invoke this manually.
-	 */
-	private void resume() {
-		if(state != null)
-			state.resume();
-	}
-	
-	/**
-	 * Crashes the application.
+	 * Gets the ApplicationListener linked to this application for libGDX to
+	 * link to.
 	 * 
-	 * <p>The application will attempt to shutdown as per an invocation of
-	 * {@link #shutdown()}, however it should be noted that depending on the nature
-	 * of the exception, doing so may not be possible.
-	 * 
-	 * @param t The Throwable to treat as the cause of the crash.
+	 * @return This application's backing ApplicationListener.
 	 */
-	public final void crash(Throwable t) {
-		if(crashing)		// TODO: Possibly append a log entry detailing the
-			return;			// double-crash and re-save the log?
-		crashing = true;
-		Log.critical("The application has crashed!", t);
-		produceCrashLog();
-		shutdown();
-	}
-	
-	/**
-	 * Saves the crash log.
-	 */
-	protected void produceCrashLog() {
-		Log.saveLog(true, "");
-	}
-	
-	/**
-	 * Shuts down the application. The current state will have its {@link
-	 * State#dispose() stop()} method invoked, if it is non-null, and the sound
-	 * manager will be cleaned up via {@link SoundManager#clean() clean()}.
-	 * Finally, {@link System#exit(int)} is invoked, which shuts down the JVM
-	 * and thereby the Application.
-	 */
-	public final void shutdown() {
-		if(stopped)
-			return;
-		
-		Log.message("Shutting down application...");
-		
-		stopped = true;
-		running = false;
-		
-		// try..catch since the Application shouldn't trust client code
-		try {
-			if(state != null)
-				state.dispose();
-		} catch(Throwable t) {
-			// Orchestrated in such a way that any chain of crash()-stop()
-			// redirects all work out nicely
-			crash(t);		
-		}
-		
-		Log.message("Application shut down.");
-		
-		System.exit(0);			// Farewell, world!
+	public final ApplicationListener getListener() {
+		return listener;
 	}
 	
 	//--------------------==========--------------------
@@ -437,9 +409,8 @@ public abstract class Application {
 	//--------------------==========--------------------
 	
 	/**
-	 * An implementation of ApplicationListener which delegates to methods in
-	 * Application such that said methods in Application can avoid being
-	 * public.
+	 * An implementation of ApplicationListener which delegates to private
+	 * methods in {@link Application}.
 	 */
 	private static class Listener implements ApplicationListener {
 		
@@ -448,10 +419,11 @@ public abstract class Application {
 		
 		
 		/**
-		 * Creates a new listener for the specified application - never {@code
-		 * null}.
+		 * Creates a wrapping listener for the specified application.
 		 */
 		public Listener(Application app) {
+			if(app == null)
+				throw new NullPointerException("How did you manage to make app null?");
 			this.app = app;
 		}
 		
@@ -482,7 +454,7 @@ public abstract class Application {
 
 		@Override
 		public void dispose() {
-			app.shutdown();
+			app.dispose();
 		}
 		
 	}

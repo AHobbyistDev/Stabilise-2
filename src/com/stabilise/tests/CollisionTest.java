@@ -53,7 +53,7 @@ public class CollisionTest extends Application {
 			public boolean collides = false;
 			
 			@Override
-			public void update() {
+			public void tick() {
 				r1Sprite.rotation += rotation * 3;
 				r2Sprite.rotation += rotation * 7;
 				
@@ -67,7 +67,7 @@ public class CollisionTest extends Application {
 			}
 			
 			@Override
-			public void render() {
+			public void render(float delta) {
 				r1Sprite.draw();
 				r2Sprite.draw();
 				
@@ -126,6 +126,11 @@ public class CollisionTest extends Application {
 				font.destroy();
 				r1Sprite.destroy();
 				r2Sprite.destroy();
+			}
+			
+			@Override
+			public void resize(int width, int height) {
+				
 			}
 			
 		};

@@ -53,7 +53,12 @@ public class LoadingState implements State {
 	}
 	
 	@Override
-	public void update() {
+	public void resize(int width, int height) {
+		// meh
+	}
+	
+	@Override
+	public void tick() {
 		/*
 		if(screen.wasResized()) {
 			splash.x = screen.getCentreX();
@@ -77,7 +82,7 @@ public class LoadingState implements State {
 	}
 	
 	@Override
-	public void render() {
+	public void render(float delta) {
 		splash.draw();
 		
 		//font1.drawLine(text, screen.getCentreX(), screen.getCentreY() - 200, style);

@@ -18,14 +18,19 @@ public class MainMenuState implements State {
 	public MainMenuState() {
 		super();
 	}
+	
+	@Override
+	public void resize(int width, int height) {
+		// meh
+	}
 
 	@Override
-	public void update() {
+	public void tick() {
 		menu.update();
 	}
 
 	@Override
-	public void render() {
+	public void render(float delta) {
 		menu.render();
 	}
 

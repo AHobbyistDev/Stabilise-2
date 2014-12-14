@@ -74,8 +74,8 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * 
 	 * @return The item stack in the slot, or {@link ItemStack#NO_STACK} if the
 	 * slot is empty.
-	 * @throws IndexOutOfBoundsException Thrown if {@code slot < 0}, or this
-	 * container has a capacity and {@code slot >= capacity}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
+	 * has a capacity and {@code slot >= capacity}.
 	 */
 	public ItemStack removeStack(int slot) {
 		return getAndSetSlot(slot, ItemStack.NO_STACK);
@@ -90,7 +90,7 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * 
 	 * @return {@code true} if the item is able to be added; {@code false}
 	 * otherwise.
-	 * @throws NullPointerException Thrown if {@code stack} is {@code null}.
+	 * @throws NullPointerException if {@code stack} is {@code null}.
 	 */
 	public boolean canAddStack(ItemStack stack) {
 		if(stack == null)
@@ -114,8 +114,8 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * @param quantity The number of items to add.
 	 * 
 	 * @return The number of items which were not added to the container.
-	 * @throws NullPointerException Thrown if {@code item} is {@code null}.
-	 * @throws IllegalArgumentException Thrown if {@code quantity <= 0}.
+	 * @throws NullPointerException if {@code item} is {@code null}.
+	 * @throws IllegalArgumentException if {@code quantity <= 0}.
 	 */
 	public int addItem(Item item, int quantity) {
 		if(quantity <= 0)
@@ -213,10 +213,10 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * 
 	 * @return The number of items which were not added to the container, due
 	 * to there not existing enough space in the container.
-	 * @throws NullPointerException Thrown if {@code item} is {@code null}.
-	 * @throws IllegalArgumentException Thrown if {@code quantity <= 0}.
-	 * @throws IndexOutOfBoundsException Thrown if {@code slot < 0}, or this
-	 * container has a capacity and {@code slot >= capacity}.
+	 * @throws NullPointerException if {@code item} is {@code null}.
+	 * @throws IllegalArgumentException if {@code quantity <= 0}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
+	 * has a capacity and {@code slot >= capacity}.
 	 */
 	public int addItem(Item item, int quantity, int slot) {
 		if(quantity <= 0)
@@ -245,7 +245,7 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * 
 	 * @return {@code true} if the stack was added in its entirety and should
 	 * be released; {@code false} otherwise.
-	 * @throws NullPointerException Thrown if {@code stack} is {@code null}.
+	 * @throws NullPointerException if {@code stack} is {@code null}.
 	 */
 	public boolean addStack(ItemStack stack) {
 		if(stack == null)
@@ -281,9 +281,9 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * 
 	 * @return {@code true} if the stack was added in its entirety and should
 	 * be released; {@code false} otherwise.
-	 * @throws NullPointerException Thrown if {@code stack} is {@code null}.
-	 * @throws IndexOutOfBoundsException Thrown if {@code slot < 0}, or this
-	 * container has a capacity and {@code slot >= capacity}.
+	 * @throws NullPointerException if {@code stack} is {@code null}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
+	 * has a capacity and {@code slot >= capacity}.
 	 */
 	public boolean addStack(ItemStack stack, int slot) {
 		if(stack == null)
@@ -312,8 +312,8 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * 
 	 * @return {@code true} if the stack was placed in the slot; {@code false}
 	 * otherwise.
-	 * @throws IndexOutOfBoundsException Thrown if {@code slot < 0}, or this
-	 * container has a capacity and {@code slot >= capacity}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
+	 * has a capacity and {@code slot >= capacity}.
 	 */
 	protected boolean trySetSlot(int slot, ItemStack stack) {
 		setSlot(slot, stack);
@@ -328,8 +328,8 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * @param stack The stack. This should not be {@code null}; {@link
 	 * ItemStack#NO_STACK} should be used to indicate the lack of an item.
 	 * 
-	 * @throws IndexOutOfBoundsException Thrown if {@code slot < 0}, or this
-	 * container has a capacity and {@code slot >= capacity}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
+	 * has a capacity and {@code slot >= capacity}.
 	 */
 	protected abstract void setSlot(int slot, ItemStack stack);
 	
@@ -343,8 +343,8 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * 
 	 * @return The former contents of the slot, or {@link ItemStack#NO_STACK}
 	 * if no stack occupied the specified slot.
-	 * @throws IndexOutOfBoundsException Thrown if {@code slot < 0}, or this
-	 * container has a capacity and {@code slot >= capacity}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
+	 * has a capacity and {@code slot >= capacity}.
 	 */
 	protected abstract ItemStack getAndSetSlot(int slot, ItemStack stack);
 	
@@ -356,8 +356,8 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * @param slot The slot.
 	 * 
 	 * @return {@code true} if the slot is empty; {@code false} otherwise.
-	 * @throws IndexOutOfBoundsException Thrown if {@code slot < 0} or this
-	 * container has a capacity, and {@code slot >= capacity}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
+	 * has a capacity and {@code slot >= capacity}.
 	 */
 	public boolean isSlotEmpty(int slot) {
 		return getStack(slot) == ItemStack.NO_STACK;

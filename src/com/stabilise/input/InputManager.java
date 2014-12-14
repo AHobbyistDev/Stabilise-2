@@ -7,13 +7,11 @@ import org.lwjgl.input.Mouse;
 
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.LWJGLReliant;
-import com.stabilise.util.annotation.UsedByApplication;
 
 /**
  * Manages keyboard and mouse input events so that other classes have a
  * convenient way of detecting user input.
  */
-@UsedByApplication
 @LWJGLReliant
 public class InputManager {
 	

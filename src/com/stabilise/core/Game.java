@@ -11,13 +11,11 @@ import com.stabilise.screen.menu.Menu;
 import com.stabilise.screen.menu.PauseMenu;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
-import com.stabilise.util.annotation.UsesApplication;
 import com.stabilise.world.GameWorld;
 
 /**
  * The game itself.
  */
-@UsesApplication
 public class Game implements Controllable {
 	
 	/** Whether or not the game is currently running. */

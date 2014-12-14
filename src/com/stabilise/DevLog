@@ -221,3 +221,5 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Added Profiler.java
 10/12/14
 	- Projection precomputation for shapes in util.shape is now an optional optimisation
+14/12/14
+	- Ported to libGDX. Everything is broken!

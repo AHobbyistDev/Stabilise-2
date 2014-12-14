@@ -16,12 +16,10 @@ import javax.imageio.ImageIO;
 
 import com.stabilise.util.IOUtil;
 import com.stabilise.util.Log;
-import com.stabilise.util.annotation.UsedByApplication;
 
 /**
  * Manages application resources.
  */
-@UsedByApplication({com.stabilise.util.Log.class})
 public class Resources {
 	
 	/** The directory in which all application data will be saved. */

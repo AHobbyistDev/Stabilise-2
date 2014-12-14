@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import com.stabilise.util.annotation.UsedByApplication;
-
 /**
  * A Profiler object is used to gauge the amount of processing time which is
  * being dedicated to various portions of a program.
@@ -36,7 +34,6 @@ import com.stabilise.util.annotation.UsedByApplication;
  * 
  * <p>A Profiler is not thread-safe.
  */
-@UsedByApplication
 public class Profiler {
 	
 	/** The root section. */

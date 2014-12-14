@@ -12,13 +12,11 @@ import com.stabilise.screen.menu.component.Position;
 import com.stabilise.screen.menu.customcomponents.MenuButton;
 import com.stabilise.util.Colour;
 import com.stabilise.util.Interpolation;
-import com.stabilise.util.annotation.UsesApplication;
 
 /**
  * The main sub-menu of the main menu.
  */
 @SuppressWarnings("unused")
-@UsesApplication
 public class MainMenuMain extends SubMenu {
 	
 	//--------------------==========--------------------
