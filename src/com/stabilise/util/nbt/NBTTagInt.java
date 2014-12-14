@@ -1,0 +1,70 @@
+package com.stabilise.util.nbt;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
+/**
+ * An NBT tag containing a single integer as its payload.
+ * 
+ * @see NBTTag
+ */
+public class NBTTagInt extends NBTTag {
+	
+	/** The tag's data. */
+	public int data;
+	
+	
+	/**
+	 * Creates a new unnamed integer tag.
+	 */
+	public NBTTagInt() {
+		super();
+	}
+	
+	/**
+	 * Creates a new integer tag.
+	 * 
+	 * @param tagName The tag's name.
+	 */
+	public NBTTagInt(String tagName) {
+		super(tagName);
+	}
+	
+	/**
+	 * Creates a new integer tag.
+	 * 
+	 * @param tagName The tag's name.
+	 * @param data The tag's data payload.
+	 */
+	public NBTTagInt(String tagName, int data) {
+		super(tagName);
+		this.data = data;
+	}
+
+	@Override
+	public void write(DataOutputStream out) throws IOException {
+		out.writeInt(data);
+	}
+
+	@Override
+	public void load(DataInputStream in) throws IOException {
+		data = in.readInt();
+	}
+	
+	@Override
+	public String toString() {
+		return "" + data;
+	}
+
+	@Override
+	public byte getId() {
+		return NBTTag.INT;
+	}
+
+	@Override
+	public NBTTag copy() {
+		return new NBTTagInt(name, data);
+	}
+
+}

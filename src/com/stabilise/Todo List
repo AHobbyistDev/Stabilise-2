@@ -1,0 +1,11 @@
+- Move the game to networking (client-server) architecture (again)
+- Implement character creation
+- Add mobs with proper AIs
+- Implement entity saving for worlds
+- Refactor everything in com.stabilise.opengl because everything in there is frankly horrible (LibGDX?)
+- Add gameplay features!
+- Refactor everything in com.stabilise.sound because I've suddenly decided its setup is more complicated than it needs to be
+
+DONE
+- Implement a sound system
+- Refactor WorldLoader and WorldGenerator such that they use ExecutorService for thread delegation
