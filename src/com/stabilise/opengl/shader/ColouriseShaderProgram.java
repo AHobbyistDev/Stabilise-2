@@ -13,6 +13,7 @@ import com.stabilise.util.annotation.Incomplete;
  * http://s22.postimg.org/ezch3tdkh/B3rm_ZGBIAAAQQA0.png
  */
 @Incomplete
+@Deprecated
 public class ColouriseShaderProgram extends ShaderProgram {
 
 	//--------------------==========--------------------

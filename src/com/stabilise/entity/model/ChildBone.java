@@ -1,8 +1,6 @@
 package com.stabilise.entity.model;
 
-import org.lwjgl.util.vector.Matrix2f;
-import org.lwjgl.util.vector.Vector2f;
-
+import com.badlogic.gdx.math.Vector2;
 import com.stabilise.util.shape.Shape;
 
 /**
@@ -13,10 +11,10 @@ public class ChildBone extends Bone {
 	/** This bone's parent bone. */
 	private final Bone parent;
 	/** This bone's position relative to its unrotated parent. */
-	private final Vector2f relativePos;
+	private final Vector2 relativePos;
 	
 	
-	public ChildBone(Shape hitbox, Bone parent, Vector2f relativePos) {
+	public ChildBone(Shape hitbox, Bone parent, Vector2 relativePos) {
 		super(hitbox);
 		this.parent = parent;
 		this.relativePos = relativePos;
@@ -24,7 +22,7 @@ public class ChildBone extends Bone {
 	
 	@Override
 	void flush() {
-		Matrix2f.transform(parent.rotationMatrix, relativePos, position.pos);
+		parent.rotationMatrix.transform(relativePos, position.pos);
 		position.pos.x += parent.position.pos.x;
 		position.pos.y += parent.position.pos.y;
 	}

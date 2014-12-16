@@ -1,36 +1,25 @@
 package com.stabilise.util.shape;
 
-import org.lwjgl.util.vector.Matrix2f;
-import org.lwjgl.util.vector.Vector2f;
-
+import com.badlogic.gdx.math.Vector2;
 import com.stabilise.util.MathUtil;
+import com.stabilise.util.Matrix2;
 
 /**
  * A FastAABB is a lightweight and slightly more optimised variant of
  * {@link AxisAlignedBoundingBox}, which is overall generally less expensive to
  * use.
  * 
- * <p>An AxisAlignedBoundingBox stores 4 Vector2f instances and 2 float
- * variables, whereas a FastAABB only stores 2 Vector2f instances. The tradeoff
- * here is that 2 Vector2f instances will need to be created every time {@link
- * #getVertices()} is invoked, unless a precomputed variant of a FastAABB is
- * being used. In other words, a non-precomputed FastAABB will likely perform
- * less favourably in comparison to AxisAlignedBoundingBox when checking
- * checking collisions with any non-AABB type of shape. Furthermore, width and
- * height values will need to be recalculated when their values need to be
- * known.
- * 
  * <p>Unlike AxisAlignedBoundingBox, FastAABB is not a member of the
- * Quadrilateral hierarchy as to avoid limitations imposed by superclasses.
+ * Polygon hierarchy as to avoid limitations imposed by superclasses.
  */
-public class FastAABB extends AbstractPolygon implements AABB {
+public class FastAABB extends Polygon implements AABB {
 	
 	/** The min vertex (i.e. bottom left) of the AABB. This is exposed for
 	 * convenience purposes, and should be treated as if it is immutable. */
-	public final Vector2f v00;
+	public final Vector2 v00;
 	/** The max vertex (i.e. top right) of the AABB. This is exposed for
 	 * convenience purposes, and should be treated as if it is immutable.*/
-	public final Vector2f v11;
+	public final Vector2 v11;
 	
 	
 	/**
@@ -42,8 +31,8 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	 * @param height The AABB's height.
 	 */
 	public FastAABB(float x, float y, float width, float height) {
-		v00 = new Vector2f(x, y);
-		v11 = new Vector2f(x + width, y + height);
+		v00 = new Vector2(x, y);
+		v11 = new Vector2(x + width, y + height);
 	}
 	
 	/**
@@ -52,7 +41,7 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	 * @param v00 The min vertex (i.e. bottom left) of the AABB.
 	 * @param v11 The max vertex (i.e. top right) of the AABB.
 	 */
-	public FastAABB(Vector2f v00, Vector2f v11) {
+	public FastAABB(Vector2 v00, Vector2 v11) {
 		this.v00 = v00;
 		this.v11 = v11;
 	}
@@ -65,36 +54,36 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	 * and max vertices will be transformed as per the matrix.
 	 */
 	@Override
-	public FastAABB transform(Matrix2f matrix) {
+	public FastAABB transform(Matrix2 matrix) {
 		return newInstance(
-				Matrix2f.transform(matrix, v00, null),
-				Matrix2f.transform(matrix, v11, null)
+				matrix.transform(v00),
+				matrix.transform(v11)
 		);
 	}
 	
 	@Override
-	public Shape translate(float x, float y) {
+	public FastAABB translate(float x, float y) {
 		return newInstance(
-				new Vector2f(v00.x + x, v00.y + y),
-				new Vector2f(v11.x + x, v11.y + y)
+				new Vector2(v00.x + x, v00.y + y),
+				new Vector2(v11.x + x, v11.y + y)
 		);
 	}
 	
 	@Override
-	public Shape reflect() {
+	public FastAABB reflect() {
 		return newInstance(
-				new Vector2f(-v11.x, v00.y),
-				new Vector2f(-v00.x, v11.y)
+				new Vector2(-v11.x, v00.y),
+				new Vector2(-v00.x, v11.y)
 		);
 	}
 	
 	@Override
-	protected Vector2f[] getVertices() {
-		return new Vector2f[] {
+	protected Vector2[] getVertices() {
+		return new Vector2[] {
 				v00,
-				new Vector2f(v11.x, v00.y),//v10
+				new Vector2(v11.x, v00.y),//v10
 				v11,
-				new Vector2f(v00.x, v11.y) //v01
+				new Vector2(v00.x, v11.y) //v01
 		};
 	}
 	
@@ -119,26 +108,6 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	 * @return {@code true} if the two AABBs intersect; {@code false}
 	 * otherwise.
 	 */
-	public boolean intersects(AxisAlignedBoundingBox a) {
-		return intersectsAABB(a.v00, a.v11);
-	}
-	
-	/**
-	 * Calculates whether or not two axis-aligned bounding boxes intersect.
-	 * 
-	 * @param a The AABB with which to test intersection.
-	 * 
-	 * @return {@code true} if the two AABBs intersect; {@code false}
-	 * otherwise.
-	 */
-	public boolean intersects(FastAABB a) {
-		return intersectsAABB(a.v00, a.v11);
-	}
-	
-	/**
-	 * Calculates whether or not two axis-aligned bounding boxes intersect
-	 * based on the general AABB interface.
-	 */
 	private boolean intersects(AABB a) {
 		return intersectsAABB(a.getV00(), a.getV11());
 	}
@@ -153,7 +122,7 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	 * @return {@code true} if the two AABBs intersect; {@code false}
 	 * otherwise.
 	 */
-	private boolean intersectsAABB(Vector2f o00, Vector2f o11) {
+	private boolean intersectsAABB(Vector2 o00, Vector2 o11) {
 		return v00.x <= o11.x && v11.x >= o00.x && v00.y <= o11.y && v11.y >= o00.y;
 	}
 	
@@ -163,12 +132,7 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	}
 	
 	@Override
-	public boolean containsPoint(Vector2f p) {
-		return p.x >= v00.x && p.x <= v11.x && p.y >= v00.y && p.y <= v11.y;
-	}
-	
-	@Override
-	protected Vector2f[] generateAxes() {
+	protected Vector2[] generateAxes() {
 		return MathUtil.UNIT_VECTORS;
 	}
 	
@@ -188,12 +152,12 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	}
 	
 	@Override
-	public Vector2f getV00() {
+	public Vector2 getV00() {
 		return v00;
 	}
 	
 	@Override
-	public Vector2f getV11() {
+	public Vector2 getV11() {
 		return v11;
 	}
 	
@@ -248,7 +212,7 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	 * 
 	 * @return The new AABB.
 	 */
-	protected FastAABB newInstance(Vector2f v00, Vector2f v11) {
+	protected FastAABB newInstance(Vector2 v00, Vector2 v11) {
 		return new FastAABB(v00, v11);
 	}
 	
@@ -264,10 +228,10 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	 */
 	public static final class Precomputed extends FastAABB {
 		
-		/** The AABB's vertices. */
-		protected Vector2f[] vertices;
+		/** All four of the AABB's vertices. */
+		private Vector2[] vertices;
 		/** The AABB's own projections */
-		protected ShapeProjection[] projections;
+		private ShapeProjection[] projections;
 		
 		
 		/**
@@ -289,7 +253,7 @@ public class FastAABB extends AbstractPolygon implements AABB {
 		 * @param v00 The min vertex (i.e. bottom left) of the AABB.
 		 * @param v11 The max vertex (i.e. top right) of the AABB.
 		 */
-		public Precomputed(Vector2f v00, Vector2f v11) {
+		public Precomputed(Vector2 v00, Vector2 v11) {
 			super(v00, v11);
 			precompute();
 		}
@@ -314,7 +278,7 @@ public class FastAABB extends AbstractPolygon implements AABB {
 		}
 		
 		@Override
-		protected Vector2f[] getVertices() {
+		protected Vector2[] getVertices() {
 			return vertices;
 		}
 		
@@ -334,7 +298,7 @@ public class FastAABB extends AbstractPolygon implements AABB {
 		}
 		
 		@Override
-		protected FastAABB newInstance(Vector2f v00, Vector2f v11) {
+		protected FastAABB newInstance(Vector2 v00, Vector2 v11) {
 			return new Precomputed(v00, v11);
 		}
 		

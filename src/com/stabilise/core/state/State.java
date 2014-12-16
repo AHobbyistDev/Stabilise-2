@@ -11,6 +11,9 @@ public interface State {
 	
 	/**
 	 * Called when the state is started.
+	 * 
+	 * <p>If there is an old state, this method is invoked before {@link
+	 * #dispose()} is invoked on the old state.
 	 */
 	void start();
 	
@@ -37,7 +40,9 @@ public interface State {
 	void resume();
 	
 	/**
-	 * Called when the application is resized.
+	 * Called when the application is resized. This is also called when a state
+	 * is set as the application's current state, immediately after {@link
+	 * #start()}.
 	 * 
 	 * @param width The new application width, in pixels.
 	 * @param height The new application height, in pixels.

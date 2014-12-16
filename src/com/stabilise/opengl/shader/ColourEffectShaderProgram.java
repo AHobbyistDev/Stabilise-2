@@ -12,6 +12,7 @@ import com.stabilise.util.annotation.LWJGLReliant;
  * The standard shader which generates colour effects (e.g. tint) for graphics.
  */
 @LWJGLReliant
+@Deprecated
 public class ColourEffectShaderProgram extends ShaderProgram {
 	
 	//--------------------==========--------------------

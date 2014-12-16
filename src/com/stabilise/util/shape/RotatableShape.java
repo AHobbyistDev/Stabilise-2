@@ -1,7 +1,7 @@
 package com.stabilise.util.shape;
 
-import org.lwjgl.util.vector.Matrix2f;
-import org.lwjgl.util.vector.Vector2f;
+import com.badlogic.gdx.math.Vector2;
+import com.stabilise.util.Matrix2;
 
 /**
  * A RotatableShape serves as a wrapper for a Shape which can be rotated,
@@ -107,7 +107,7 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public T transform(Matrix2f matrix) {
+	public T transform(Matrix2 matrix) {
 		return (T)rotatedShape.transform(matrix);
 	}
 	
@@ -132,7 +132,7 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 * <pre>get().getVertices()</pre>
 	 */
 	@Override
-	protected Vector2f[] getVertices() {
+	protected Vector2[] getVertices() {
 		return rotatedShape.getVertices();
 	}
 	
@@ -154,7 +154,7 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 * <pre>get().containsPoint(p)</pre>
 	 */
 	@Override
-	public boolean containsPoint(Vector2f p) {
+	public boolean containsPoint(Vector2 p) {
 		return rotatedShape.containsPoint(p);
 	}
 	

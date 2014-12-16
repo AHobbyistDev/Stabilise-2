@@ -1,12 +1,9 @@
 package com.stabilise.util.shape;
 
-import org.lwjgl.util.vector.Vector2f;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * A polygon is a shape with any number of vertices.
- * 
- * <p>This class provides methods which are used for polygonal shapes other
- * than a standard {@link Polygon}.
  */
 abstract class AbstractPolygon extends PrecomputableShape {
 	
@@ -30,7 +27,7 @@ abstract class AbstractPolygon extends PrecomputableShape {
 	 * intersect, the computation time will always be O(n+m), and if they do
 	 * not, the computation time may be anywhere between O(1) and O(n+m).
 	 * 
-	 * <p> Note that this may return a false positive if either of the polygons
+	 * <p>Note that this may return a false positive if either of the polygons
 	 * are not convex.
 	 * 
 	 * @param p The polygon with which to test intersection.
@@ -48,7 +45,7 @@ abstract class AbstractPolygon extends PrecomputableShape {
 	 * shapes may not necessarily intersect, as in all but a few special
 	 * cases (e.g. two axis-aligned bounding boxes), the axes of both shapes
 	 * need to be checked. Refer instead to - in the case of polygons -
-	 * {@link #intersects(AbstractPolygon)} to check for a collision using the
+	 * {@link #intersects(Polygon)} to check for a collision using the
 	 * axes of both shapes.
 	 * 
 	 * <p>This method has a minimum computation time of O(1) and a maximum of
@@ -68,8 +65,8 @@ abstract class AbstractPolygon extends PrecomputableShape {
 	 * {@code false} if it does not.
 	 */
 	protected boolean intersectsOnOwnAxes(Shape s) {
-		Vector2f[] axes = generateAxes();
-		for(Vector2f axis : axes) {
+		Vector2[] axes = generateAxes();
+		for(Vector2 axis : axes) {
 			if(!getProjection(axis).overlaps(s.getProjection(axis)))
 				return false;
 		}

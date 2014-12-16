@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.lwjgl.util.vector.Vector2f;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * A precomputable shape is a shape wherein the projection axes and their
@@ -53,7 +53,7 @@ public abstract class PrecomputableShape extends Shape {
 	 * @return The shape's projection axes.
 	 */
 	@ForPrecomputedVariant
-	protected Vector2f[] getAxes() {
+	protected Vector2[] getAxes() {
 		// The proper return value:
 		//return axes;
 		
@@ -97,9 +97,9 @@ public abstract class PrecomputableShape extends Shape {
 	 * otherwise.
 	 */
 	@ForPrecomputedVariant
-	public boolean containsPointPrecomputed(Vector2f p) {
+	public boolean containsPointPrecomputed(Vector2 p) {
 		for(int i = 0; i < getAxes().length; i++) {
-			if(!getProjection(i).containsPoint(Vector2f.dot(getAxes()[i], p)))
+			if(!getProjection(i).containsPoint(p.dot(getAxes()[i])))
 				return false;
 		}
 		return true;

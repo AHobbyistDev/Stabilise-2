@@ -1,10 +1,7 @@
 package com.stabilise.util.shape;
 
-import org.lwjgl.util.vector.Matrix2f;
-import org.lwjgl.util.vector.Vector2f;
-
-import com.stabilise.util.MathUtil;
-import com.stabilise.util.MatrixUtil;
+import com.badlogic.gdx.math.Vector2;
+import com.stabilise.util.Matrix2;
 
 /**
  * A shape is a 2D object consisting of a number of vertices, which may be used
@@ -29,20 +26,6 @@ public abstract class Shape {
 	
 	
 	/**
-	 * Rotates this shape about the point (0,0) and returns the rotated shape.
-	 * The shape's vertices, where applicable, will be rotated about the point
-	 * (0,0) appropriately.
-	 * 
-	 * @param rotation The angle by which to rotate the shape anticlockwise, in
-	 * radians.
-	 * 
-	 * @return The rotated shape.
-	 */
-	public Shape rotate(float rotation) {
-		return transform(MatrixUtil.rotationMatrix2f(rotation));
-	}
-	
-	/**
 	 * Transforms this shape by applying the given transformation matrix to
 	 * each of its vertices, where applicable, and returns the transformed
 	 * shape. Each vertex is transformed by
@@ -62,9 +45,7 @@ public abstract class Shape {
 	 * 
 	 * @return The transformed shape.
 	 */
-	// Note: Subclasses must ensure the returned shape must be of the same
-	// class as this shape.
-	public abstract Shape transform(Matrix2f matrix);
+	public abstract Shape transform(Matrix2 matrix);
 	
 	/**
 	 * Gets the vertices of this shape if it were transformed using the given
@@ -80,8 +61,8 @@ public abstract class Shape {
 	 * 
 	 * @return The transformed vertices. 
 	 */
-	protected Vector2f[] getTransformedVertices(Matrix2f matrix) {
-		Vector2f[] vertices = getVertices();
+	protected Vector2[] getTransformedVertices(Matrix2 matrix) {
+		Vector2[] vertices = getVertices();
 		for(int i = 0; i < vertices.length; i++)
 			vertices[i] = transformVertex(matrix, vertices[i]);
 		return vertices;
@@ -89,14 +70,95 @@ public abstract class Shape {
 	
 	/**
 	 * Transforms a vertex by applying the given transformation matrix to it.
+	 * The supplied vertex will not be modified.
 	 * 
 	 * @param matrix The 2x2 transformation matrix.
 	 * @param vertex The vertex to rotate.
 	 * 
 	 * @return The transformed vertex.
 	 */
-	protected final Vector2f transformVertex(Matrix2f matrix, Vector2f vertex) {
-		return Matrix2f.transform(matrix, vertex, null);
+	protected final Vector2 transformVertex(Matrix2 matrix, Vector2 vertex) {
+		return matrix.transform(vertex);
+	}
+	
+	/**
+	 * Rotates a vertex anticlockwise about (0,0) by the specified angle. The
+	 * supplied vertex will not be modified.
+	 * 
+	 * @param vertex The vertex.
+	 * @param rotation The angle, in radians.
+	 * 
+	 * @return The rotated vertex.
+	 */
+	protected final Vector2 rotateVertex(Vector2 vertex, float rotation) {
+		return rotateVertex(vertex, (float)Math.cos(rotation), (float)Math.sin(rotation));
+	}
+	
+	/**
+	 * Rotates a vertex anticlockwise about (0,0) by the specified angle, and
+	 * stores the result in the specified destination vector.
+	 * 
+	 * @param vertex The vertex.
+	 * @param rotation The angle, in radians.
+	 * @param dest The destination vector.
+	 * 
+	 * @return The destination vector.
+	 */
+	protected final Vector2 rotateVertex(Vector2 vertex, float rotation, Vector2 dest) {
+		return rotateVertex(vertex, (float)Math.cos(rotation), (float)Math.sin(rotation), dest);
+	}
+	
+	/**
+	 * Rotates a vertex anticlockwise about (0,0) using the sine and cosine of
+	 * an angle. The supplied vertex will not be modified.
+	 * 
+	 * <p>This method is faster than {@link #rotateVertex(Vector2, float)}.
+	 * 
+	 * @param vertex The vertex.
+	 * @param cos The cosine of the angle.
+	 * @param sin The sine of the angle.
+	 * 
+	 * @return The rotated vertex.
+	 */
+	protected final Vector2 rotateVertex(Vector2 vertex, float cos, float sin) {
+		return new Vector2(
+				vertex.x * cos - vertex.y * sin,
+				vertex.x * sin + vertex.y * cos
+		);
+	}
+	
+	/**
+	 * Rotates a vertex anticlockwise about (0,0) using the sine and cosine of
+	 * an angle, and stores the result in a supplied destination vector.
+	 * 
+	 * <p>This method is faster than {@link
+	 * #rotateVertex(Vector2, float, Vector2)}.
+	 * 
+	 * @param vertex The vertex.
+	 * @param cos The cosine of the angle.
+	 * @param sin The sine of the angle.
+	 * 
+	 * @return The rotated vertex.
+	 */
+	protected final Vector2 rotateVertex(Vector2 vertex, float cos, float sin, Vector2 dest) {
+		return dest.set(
+				vertex.x * cos - vertex.y * sin,
+				vertex.x * sin + vertex.y * cos
+		);
+	}
+	
+	/**
+	 * Rotates this shape about the point (0,0) and returns the rotated shape.
+	 * The shape's vertices, where applicable, will be rotated about the point
+	 * (0,0) appropriately.
+	 * 
+	 * @param rotation The angle by which to rotate the shape anticlockwise, in
+	 * radians.
+	 * 
+	 * @return The rotated shape.
+	 */
+	public Shape rotate(float rotation) {
+		return transform(new Matrix2().setToRotation(rotation));
 	}
 	
 	/**
@@ -131,7 +193,7 @@ public abstract class Shape {
 	 * 
 	 * @return The shape's vertices.
 	 */
-	protected abstract Vector2f[] getVertices();
+	protected abstract Vector2[] getVertices();
 	
 	/**
 	 * Calculates whether or not two shapes intersect.
@@ -154,7 +216,13 @@ public abstract class Shape {
 	 * otherwise.
 	 */
 	public boolean containsPoint(float x, float y) {
-		return containsPoint(new Vector2f(x, y));
+		// Basic implementation for polygons
+		Vector2[] axes = generateAxes();
+		for(Vector2 axis : axes) {
+			if(!getProjection(axis).containsPoint(axis.dot(x, y)))
+				return false;
+		}
+		return true;
 	}
 	
 	/**
@@ -165,14 +233,8 @@ public abstract class Shape {
 	 * @return {@code true} if the shape contains the point; {@code false}
 	 * otherwise.
 	 */
-	public boolean containsPoint(Vector2f p) {
-		// Basic implementation for polygons
-		Vector2f[] axes = generateAxes();
-		for(Vector2f axis : axes) {
-			if(!getProjection(axis).containsPoint(Vector2f.dot(axis, p)))
-				return false;
-		}
-		return true;
+	public boolean containsPoint(Vector2 p) {
+		return containsPoint(p.x, p.y);
 	}
 	
 	/**
@@ -182,8 +244,8 @@ public abstract class Shape {
 	 * 
 	 * @return The shape's projection axes.
 	 */
-	protected Vector2f[] generateAxes() {
-		Vector2f[] vertices = getVertices();
+	protected Vector2[] generateAxes() {
+		Vector2[] vertices = getVertices();
 		
 		for(int i = 0; i < vertices.length; i++)
 			vertices[i] = getAxis(vertices[i], vertices[(i+1) % vertices.length]);
@@ -200,9 +262,13 @@ public abstract class Shape {
 	 * 
 	 * @return The projection axis.
 	 */
-	protected final Vector2f getAxis(Vector2f v1, Vector2f v2) {
+	protected final Vector2 getAxis(Vector2 v1, Vector2 v2) {
 		// Normalising the vectors appears to be unnecessary
-		return MathUtil.getPerpendicularVector(Vector2f.sub(v1, v2, null));//.normalise()
+		
+		// Equivalently:
+		//return MathUtil.rotate90Degrees(MathUtil.sub(v1, v2));
+		// Faster, however:
+		return new Vector2(v2.y - v1.y, v1.x - v2.x);
 	}
 	
 	/**
@@ -212,14 +278,14 @@ public abstract class Shape {
 	 * 
 	 * @return The shape's projection.
 	 */
-	protected ShapeProjection getProjection(Vector2f axis) {
-		Vector2f[] vertices = getVertices();
+	protected ShapeProjection getProjection(Vector2 axis) {
+		Vector2[] vertices = getVertices();
 		
-		float min = Vector2f.dot(axis, vertices[0]);
+		float min = axis.dot(vertices[0]);
 		float max = min;
 		
 		for(int i = 1; i < vertices.length; i++) {
-			float p = Vector2f.dot(axis, vertices[i]);
+			float p = axis.dot(vertices[i]);
 			if(p < min)
 				min = p;
 			else if(p > max)
@@ -236,7 +302,7 @@ public abstract class Shape {
 	 * by:
 	 * 
 	 * <pre>
-	 * {@link #getProjection(Vector2f) getProjection(new Vector2f(1f, 0f))}
+	 * {@link #getProjection(Vector2) getProjection(new Vector2(1f, 0f))}
 	 * </pre>
 	 * 
 	 * @return The horizontal projection.
@@ -244,7 +310,7 @@ public abstract class Shape {
 	 * return by {@link #getVertices()} is of length 0.
 	 */
 	protected ShapeProjection getHorizontalProjection() {
-		Vector2f[] vertices = getVertices();
+		Vector2[] vertices = getVertices();
 		
 		float min = vertices[0].x;
 		float max = min;
@@ -266,7 +332,7 @@ public abstract class Shape {
 	 * by:
 	 * 
 	 * <pre>
-	 * {@link #getProjection(Vector2f) getProjection(new Vector2f(0f, 1f))}
+	 * {@link #getProjection(Vector2) getProjection(new Vector2(0f, 1f))}
 	 * </pre>
 	 * 
 	 * @return The vertical projection.
@@ -274,7 +340,7 @@ public abstract class Shape {
 	 * return by {@link #getVertices()} is of length 0.
 	 */
 	protected ShapeProjection getVerticalProjection() {
-		Vector2f[] vertices = getVertices();
+		Vector2[] vertices = getVertices();
 		
 		float min = vertices[0].y;
 		float max = min;
@@ -326,11 +392,11 @@ public abstract class Shape {
 	 * A blank implementation of Shape used by {@link #NO_SHAPE}.
 	 */
 	private static final class NoShape extends Shape {
-		@Override public Shape transform(Matrix2f matrix) { return this; }
+		@Override public Shape transform(Matrix2 matrix) { return this; }
 		@Override public Shape translate(float x, float y) { return this; }
-		@Override protected Vector2f[] getVertices() { return new Vector2f[0]; }
+		@Override protected Vector2[] getVertices() { return new Vector2[0]; }
 		@Override public boolean intersects(Shape s) { return false; }
-		@Override public boolean containsPoint(Vector2f p) { return false; }
+		@Override public boolean containsPoint(Vector2 p) { return false; }
 		@Override public Shape reflect() { return this; }
 	}
 	

@@ -1,14 +1,13 @@
 package com.stabilise.entity;
 
-import org.lwjgl.util.vector.Vector2f;
-
+import com.badlogic.gdx.math.Vector2;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
-import com.stabilise.util.shape.Quadrilateral;
+import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Rectangle;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.Direction;
@@ -54,33 +53,33 @@ public class EntityPerson extends EntityMob {
 	// Side attack (air)
 	public static final int ATTACK_SIDE_AIR_DURATION = 30;
 	public static final int ATTACK_SIDE_AIR_FRAME_2_BEGIN = 6;
-	public static final Quadrilateral ATTACK_SIDE_AIR_HITBOX_1 = new Quadrilateral.Precomputed(new Vector2f(2.72f,1.29f), new Vector2f(0.96f,0.98f), new Vector2f(-0.45f,2.56f), new Vector2f(1.29f,2.35f));
-	public static final Quadrilateral ATTACK_SIDE_AIR_HITBOX_1_FLIPPED = ATTACK_SIDE_AIR_HITBOX_1.reflect();
+	public static final Polygon ATTACK_SIDE_AIR_HITBOX_1 = new Polygon.Precomputed(new Vector2(2.72f,1.29f), new Vector2(0.96f,0.98f), new Vector2(-0.45f,2.56f), new Vector2(1.29f,2.35f));
+	public static final Polygon ATTACK_SIDE_AIR_HITBOX_1_FLIPPED = ATTACK_SIDE_AIR_HITBOX_1.reflect();
 	public static final int ATTACK_SIDE_AIR_FRAME_3_BEGIN = 8;
-	public static final Quadrilateral ATTACK_SIDE_AIR_HITBOX_2 = new Quadrilateral.Precomputed(new Vector2f(2.72f,1.29f), new Vector2f(1.44f,-0.41f), new Vector2f(0.45f,0.45f), new Vector2f(0.96f,0.98f));
-	public static final Quadrilateral ATTACK_SIDE_AIR_HITBOX_2_FLIPPED = ATTACK_SIDE_AIR_HITBOX_2.reflect();
+	public static final Polygon ATTACK_SIDE_AIR_HITBOX_2 = new Polygon.Precomputed(new Vector2(2.72f,1.29f), new Vector2(1.44f,-0.41f), new Vector2(0.45f,0.45f), new Vector2(0.96f,0.98f));
+	public static final Polygon ATTACK_SIDE_AIR_HITBOX_2_FLIPPED = ATTACK_SIDE_AIR_HITBOX_2.reflect();
 	
 	// Up attack (air)
 	public static final int ATTACK_UP_AIR_DURATION = 30;
 	public static final int ATTACK_UP_AIR_FRAME_2_BEGIN = 6;
-	public static final Quadrilateral ATTACK_UP_AIR_HITBOX_1_1 = new Quadrilateral.Precomputed(new Vector2f(2.72f,1.51f), new Vector2f(1.22f,-0.45f), new Vector2f(0.8f,0.75f), new Vector2f(0.89f,1.38f));
-	public static final Quadrilateral ATTACK_UP_AIR_HITBOX_1_1_FLIPPED = ATTACK_UP_AIR_HITBOX_1_1.reflect();
-	public static final Quadrilateral ATTACK_UP_AIR_HITBOX_1_2 = new Quadrilateral.Precomputed(new Vector2f(2.69f,1.95f), new Vector2f(0.84f,1.49f), new Vector2f(0.27f,2.05f), new Vector2f(0.58f,3.33f));
-	public static final Quadrilateral ATTACK_UP_AIR_HITBOX_1_2_FLIPPED = ATTACK_UP_AIR_HITBOX_1_2.reflect();
+	public static final Polygon ATTACK_UP_AIR_HITBOX_1_1 = new Polygon.Precomputed(new Vector2(2.72f,1.51f), new Vector2(1.22f,-0.45f), new Vector2(0.8f,0.75f), new Vector2(0.89f,1.38f));
+	public static final Polygon ATTACK_UP_AIR_HITBOX_1_1_FLIPPED = ATTACK_UP_AIR_HITBOX_1_1.reflect();
+	public static final Polygon ATTACK_UP_AIR_HITBOX_1_2 = new Polygon.Precomputed(new Vector2(2.69f,1.95f), new Vector2(0.84f,1.49f), new Vector2(0.27f,2.05f), new Vector2(0.58f,3.33f));
+	public static final Polygon ATTACK_UP_AIR_HITBOX_1_2_FLIPPED = ATTACK_UP_AIR_HITBOX_1_2.reflect();
 	public static final int ATTACK_UP_AIR_FRAME_3_BEGIN = 8;
-	public static final Quadrilateral ATTACK_UP_AIR_HITBOX_2 = new Quadrilateral.Precomputed(new Vector2f(-0.8f,1.4f), new Vector2f(-1.65f,2.4f), new Vector2f(0.6f,3.35f), new Vector2f(0.29f,2.04f));
-	public static final Quadrilateral ATTACK_UP_AIR_HITBOX_2_FLIPPED = ATTACK_UP_AIR_HITBOX_2.reflect();
+	public static final Polygon ATTACK_UP_AIR_HITBOX_2 = new Polygon.Precomputed(new Vector2(-0.8f,1.4f), new Vector2(-1.65f,2.4f), new Vector2(0.6f,3.35f), new Vector2(0.29f,2.04f));
+	public static final Polygon ATTACK_UP_AIR_HITBOX_2_FLIPPED = ATTACK_UP_AIR_HITBOX_2.reflect();
 	
 	// Down attack (air)
 	public static final int ATTACK_DOWN_AIR_DURATION = 30;
 	public static final int ATTACK_DOWN_AIR_FRAME_2_BEGIN = 6;
-	public static final Quadrilateral ATTACK_DOWN_AIR_HITBOX_1_1 = new Quadrilateral.Precomputed(new Vector2f(0.78f,0.91f), new Vector2f(0.0f,1.63f), new Vector2f(1.91f,-0.15f), new Vector2f(0.6f,0.65f));
-	public static final Quadrilateral ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED = ATTACK_DOWN_AIR_HITBOX_1_1.reflect();
-	public static final Quadrilateral ATTACK_DOWN_AIR_HITBOX_1_2 = new Quadrilateral.Precomputed(new Vector2f(0.6f,0.65f), new Vector2f(1.91f,-0.15f), new Vector2f(0.44f,-0.87f), new Vector2f(0.25f,0.42f));
-	public static final Quadrilateral ATTACK_DOWN_AIR_HITBOX_1_2_FLIPPED = ATTACK_DOWN_AIR_HITBOX_1_2.reflect();
+	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_1 = new Polygon.Precomputed(new Vector2(0.78f,0.91f), new Vector2(0.0f,1.63f), new Vector2(1.91f,-0.15f), new Vector2(0.6f,0.65f));
+	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED = ATTACK_DOWN_AIR_HITBOX_1_1.reflect();
+	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_2 = new Polygon.Precomputed(new Vector2(0.6f,0.65f), new Vector2(1.91f,-0.15f), new Vector2(0.44f,-0.87f), new Vector2(0.25f,0.42f));
+	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_2_FLIPPED = ATTACK_DOWN_AIR_HITBOX_1_2.reflect();
 	public static final int ATTACK_DOWN_AIR_FRAME_3_BEGIN = 8;
-	public static final Quadrilateral ATTACK_DOWN_AIR_HITBOX_2 = new Quadrilateral.Precomputed(new Vector2f(0.25f,0.42f), new Vector2f(0.44f,-0.87f), new Vector2f(-1.47f,0.11f), new Vector2f(-0.31f,0.69f));
-	public static final Quadrilateral ATTACK_DOWN_AIR_HITBOX_2_FLIPPED = ATTACK_DOWN_AIR_HITBOX_2.reflect();
+	public static final Polygon ATTACK_DOWN_AIR_HITBOX_2 = new Polygon.Precomputed(new Vector2(0.25f,0.42f), new Vector2(0.44f,-0.87f), new Vector2(-1.47f,0.11f), new Vector2(-0.31f,0.69f));
+	public static final Polygon ATTACK_DOWN_AIR_HITBOX_2_FLIPPED = ATTACK_DOWN_AIR_HITBOX_2.reflect();
 	
 	// Specials
 	
@@ -88,38 +87,38 @@ public class EntityPerson extends EntityMob {
 	public static final int SPECIAL_SIDE_GROUND_COST_MANA = 50;
 	public static final int SPECIAL_SIDE_GROUND_DURATION = 40;
 	public static final int SPECIAL_SIDE_GROUND_FRAME_2_BEGIN = 16;
-	public static final Vector2f SPECIAL_SIDE_GROUND_ORIGIN = new Vector2f(1.09f, 1.25f);
+	public static final Vector2 SPECIAL_SIDE_GROUND_ORIGIN = new Vector2(1.09f, 1.25f);
 	
 	// Up special (ground)
 	public static final int SPECIAL_UP_GROUND_COST_MANA = 100;
 	public static final int SPECIAL_UP_GROUND_DURATION = 40;
 	public static final int SPECIAL_UP_GROUND_FRAME_2_BEGIN = 16;
-	public static final Vector2f SPECIAL_UP_GROUND_ORIGIN = new Vector2f(0.25f,2.25f);
+	public static final Vector2 SPECIAL_UP_GROUND_ORIGIN = new Vector2(0.25f,2.25f);
 	
 	// Down special (ground)
 	public static final int SPECIAL_DOWN_GROUND_COST_MANA = 100;
 	public static final int SPECIAL_DOWN_GROUND_DURATION = 40;
 	public static final int SPECIAL_DOWN_GROUND_FRAME_2_BEGIN = 16;
-	public static final Quadrilateral SPECIAL_DOWN_GROUND_HITBOX_1 = new Quadrilateral.Precomputed(new Vector2f(3f,0f), new Vector2f(0f,0f), new Vector2f(0f,2f), new Vector2f(1.5f,2f));
-	public static final Quadrilateral SPECIAL_DOWN_GROUND_HITBOX_2 = new Quadrilateral.Precomputed(new Vector2f(0f,0f), new Vector2f(-3f,0f), new Vector2f(-1.5f,2f), new Vector2f(0f,2f));
+	public static final Polygon SPECIAL_DOWN_GROUND_HITBOX_1 = new Polygon.Precomputed(new Vector2(3f,0f), new Vector2(0f,0f), new Vector2(0f,2f), new Vector2(1.5f,2f));
+	public static final Polygon SPECIAL_DOWN_GROUND_HITBOX_2 = new Polygon.Precomputed(new Vector2(0f,0f), new Vector2(-3f,0f), new Vector2(-1.5f,2f), new Vector2(0f,2f));
 	
 	// Side special (air)
 	public static final int SPECIAL_SIDE_AIR_COST_MANA = 50;
 	public static final int SPECIAL_SIDE_AIR_DURATION = 30;
 	public static final int SPECIAL_SIDE_AIR_FRAME_2_BEGIN = 10;
-	public static final Vector2f SPECIAL_SIDE_AIR_ORIGIN = new Vector2f(1.02f,1.33f);
+	public static final Vector2 SPECIAL_SIDE_AIR_ORIGIN = new Vector2(1.02f,1.33f);
 	
 	// Up special (air)
 	public static final int SPECIAL_UP_AIR_COST_MANA = 100;
 	public static final int SPECIAL_UP_AIR_DURATION = 30;
 	public static final int SPECIAL_UP_AIR_FRAME_2_BEGIN = 10;
-	public static final Vector2f SPECIAL_UP_AIR_ORIGIN = new Vector2f(0.27f,2.18f);
+	public static final Vector2 SPECIAL_UP_AIR_ORIGIN = new Vector2(0.27f,2.18f);
 	
 	// Down special (air)
 	public static final int SPECIAL_DOWN_AIR_COST_MANA = 100;
 	public static final int SPECIAL_DOWN_AIR_DURATION = 30;
 	public static final int SPECIAL_DOWN_AIR_FRAME_2_BEGIN = 10;
-	public static final Vector2f SPECIAL_DOWN_AIR_ORIGIN = new Vector2f(0.33f,0.36f);
+	public static final Vector2 SPECIAL_DOWN_AIR_ORIGIN = new Vector2(0.33f,0.36f);
 		
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -447,8 +446,8 @@ public class EntityPerson extends EntityMob {
 				if(stateTicks == SPECIAL_DOWN_AIR_FRAME_2_BEGIN) {
 					if(useMana(SPECIAL_DOWN_AIR_COST_MANA)) {
 						EntityBigFireball f = new EntityBigFireball(world, this);
-						f.x = x + (facingRight ? SPECIAL_DOWN_AIR_ORIGIN.getX() : -SPECIAL_DOWN_AIR_ORIGIN.getX());
-						f.y = y + SPECIAL_DOWN_AIR_ORIGIN.getY();
+						f.x = x + (facingRight ? SPECIAL_DOWN_AIR_ORIGIN.x : -SPECIAL_DOWN_AIR_ORIGIN.x);
+						f.y = y + SPECIAL_DOWN_AIR_ORIGIN.y;
 						f.dy = world.rng.nextFloat() * 0.05f - 0.25f;
 						world.addEntity(f);
 					} else {
@@ -484,7 +483,7 @@ public class EntityPerson extends EntityMob {
 	 * @param manaCost The mana cost of the storm.
 	 * @param originPoint The point from which the storm is to originate.
 	 */
-	private void fireballStorm(int manaCost, Vector2f originPoint) {
+	private void fireballStorm(int manaCost, Vector2 originPoint) {
 		if(useMana(manaCost)) {
 			int max = 30 + world.rng.nextInt(11);
 			double px = facingRight ? x + originPoint.x : x - originPoint.x;

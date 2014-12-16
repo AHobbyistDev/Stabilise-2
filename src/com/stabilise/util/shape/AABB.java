@@ -1,25 +1,25 @@
 package com.stabilise.util.shape;
 
-import org.lwjgl.util.vector.Vector2f;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * An unifying interface provided for both AABB implementations, intended to
  * allow for uniform optimisation.
  */
-interface AABB {
+public interface AABB {
 	
 	/**
 	 * Gets the AABB's min (i.e. bottom-left) vertex.
 	 * 
 	 * @return The AABB's min vertex.
 	 */
-	Vector2f getV00();
+	Vector2 getV00();
 	
 	/**
 	 * Gets the AABB's max (i.e. top-right) vertex.
 	 * 
 	 * @return The AABB's max vertex.
 	 */
-	Vector2f getV11();
+	Vector2 getV11();
 	
 }

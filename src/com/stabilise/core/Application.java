@@ -70,14 +70,11 @@ public abstract class Application {
 	/** The listener which delegates to this Application. */
 	private final Listener listener;
 	
-	/** The number of update ticks executed per second. */
-	protected final int ticksPerSecond;
-	
 	/** The application's state. */
 	protected State state;
-	/** The new state, which is to be set at the end of the current tick, if
-	 * it is non-null. */
-	private State newState = null;
+	
+	/** The screen dimensions. */
+	private int width, height;
 	
 	/** Whether or not the application is running. */
 	private boolean running = false;
@@ -89,13 +86,18 @@ public abstract class Application {
 	/** The application's input manager. */
 	protected final InputManager input;
 	
+	/** The number of update ticks executed per second. */
+	protected final int ticksPerSecond;
+	/** Nanoseconds per update tick. */
+	private final long nsPerTick;
 	/** The time when last it was checked as per {@code System.nanoTime()}. */
 	private long lastTime;
 	/** The number of 'unprocessed' nanoseconds. An update tick is executed
 	 * when this is greater than or equal to nsPerTick. */
 	private long unprocessed = 0L;
-	/** Nanoseconds per update tick. */
-	private final long nsPerTick;
+	/** The number of updates which have been executed in the lifetime of the
+	 * application. */
+	private long numUpdates = 0L;
 	
 	/** The Application's profiler. It is disabled by default.
 	 * <p>This profiler is flushed automatically; to use it, simply invoke
@@ -187,6 +189,8 @@ public abstract class Application {
 	 * @param height The new height of the application, in pixels.
 	 */
 	private void resize(int width, int height) {
+		this.width = width;
+		this.height = height;
 		state.resize(width, height);
 	}
 	
@@ -222,17 +226,11 @@ public abstract class Application {
 			
 			// Perform any scheduled update ticks
 			while(unprocessed >= nsPerTick) {
-				// Swap out states if necessary
-				if(newState != null) {
-					newState.start();
-					state.dispose();
-					state = newState;
-					newState = null;
-				}
-				
-				tick();
+				numUpdates++;
 				unprocessed -= nsPerTick;
 				updated = true;
+				
+				tick();
 			}
 			
 			profiler.end(); // end update
@@ -311,6 +309,7 @@ public abstract class Application {
 		if(stopped)
 			return;
 		stopped = true;
+		running = false;
 		
 		Gdx.app.exit();
 	}
@@ -319,8 +318,8 @@ public abstract class Application {
 	 * Crashes the application.
 	 * 
 	 * <p>The application will attempt to shutdown as per an invocation of
-	 * {@link #shutdown()}, however it should be noted that depending on the nature
-	 * of the exception, doing so may not be possible.
+	 * {@link #shutdown()}, however it should be noted that depending on the
+	 * state of the application, doing so may not be possible.
 	 * 
 	 * @param t The Throwable to treat as the cause of the crash.
 	 */
@@ -350,13 +349,15 @@ public abstract class Application {
 	}
 	
 	/**
-	 * Sets the application's state.
+	 * Sets the application's state. The following operations will occur in
+	 * order:
 	 * 
-	 * <p>The current state, if it is non-null, will have its
-	 * {@link State#dispose() stop()} method invoked and the new state will have its
-	 * {@link State#start() start()} method invoked at the start of the next
-	 * tick, after which the current state will be discarded and allowed to be
-	 * garbage collected.
+	 * <ul>
+	 * <li>{@link State#start() start} is invoked on the new state.
+	 * <li>{@link State#resize(int, int) resize} is invoked on the new state.
+	 * <li>{@link State#dispose() dispose} is invoked on the old state.
+	 * <li>The old state will be discarded and should be garbage collected.
+	 * </ul>
 	 * 
 	 * @param state The application's new state.
 	 * 
@@ -365,7 +366,42 @@ public abstract class Application {
 	public final void setState(State state) {
 		if(state == null)
 			throw new NullPointerException("state is null!");
-		newState = state;
+		state.start();
+		state.resize(width, height);
+		this.state.dispose();
+		this.state = state;
+	}
+	
+	/**
+	 * @return The application window's width.
+	 */
+	public final int getWidth() {
+		return width;
+	}
+	
+	/**
+	 * @return The application window's height.
+	 */
+	public final int getHeight() {
+		return height;
+	}
+	
+	/**
+	 * @return The number of updates which have been executed during the
+	 * lifetime of the application.
+	 */
+	public final long getUpdateCount() {
+		return numUpdates;
+	}
+	
+	/**
+	 * This method is a wrapper for {@code Gdx.graphics.getFrameId()}.
+	 * 
+	 * @return The number of frames rendered during the lifetime of the
+	 * application.
+	 */
+	public final long getRenderCount() {
+		return Gdx.graphics.getFrameId();
 	}
 	
 	/**
@@ -453,7 +489,7 @@ public abstract class Application {
 		public void resume() {
 			app.resume();
 		}
-
+		
 		@Override
 		public void dispose() {
 			app.dispose();

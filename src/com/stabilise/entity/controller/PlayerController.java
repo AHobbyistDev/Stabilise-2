@@ -10,7 +10,6 @@ import com.stabilise.entity.EntityMob;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
-import com.stabilise.opengl.Texture;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Log;
 import com.stabilise.util.MathUtil;
@@ -94,7 +93,7 @@ public class PlayerController extends MobController implements Controllable {
 	 * tile-lengths.
 	 */
 	private int mouseXToWorldSpace(int x) {
-		return MathUtil.fastFloor(((x - worldRenderer.offsetX) / worldRenderer.getScale()));
+		return MathUtil.floor(((x - worldRenderer.offsetX) / worldRenderer.getScale()));
 	}
 	
 	/**
@@ -107,7 +106,7 @@ public class PlayerController extends MobController implements Controllable {
 	 * tile-lengths.
 	 */
 	private int mouseYToWorldSpace(int y) {
-		return MathUtil.fastFloor(((y - worldRenderer.offsetY) / worldRenderer.getScale()));
+		return MathUtil.floor(((y - worldRenderer.offsetY) / worldRenderer.getScale()));
 	}
 	
 	@Override
@@ -211,17 +210,17 @@ public class PlayerController extends MobController implements Controllable {
 				}
 				break;
 			case PLACE_TILE:
-				mob.world.setTileAt(MathUtil.fastFloor(mob.x), MathUtil.fastFloor(mob.y), Tiles.CHEST.getID());
+				mob.world.setTileAt(MathUtil.floor(mob.x), MathUtil.floor(mob.y), Tiles.CHEST.getID());
 				mob.y++;
 				break;
 			case INTERACT:
-				mob.world.getTileAt(mob.x, mob.y-1).handleInteract(mob.world, MathUtil.fastFloor(mob.x), MathUtil.fastFloor(mob.y-1), mob);
+				mob.world.getTileAt(mob.x, mob.y-1).handleInteract(mob.world, MathUtil.floor(mob.x), MathUtil.floor(mob.y-1), mob);
 				break;
 			case TEST_RANDOM_THING:
 				//mob.x = 0;
 				//mob.y = 0;
 				//game.getWorld().camera.snapToFocus();
-				Log.message(Texture.texturesToString());
+				//Log.message(Texture.texturesToString());
 				break;
 			default:
 				// nothing

@@ -437,7 +437,7 @@ public abstract class WorldGenerator {
 		// skip to the first part of the schematic that is within the region
 		if(initialX >= 0) {
 			tileX = (initialX % REGION_SIZE_IN_TILES) % SLICE_SIZE;
-			sliceX = MathUtil.fastFloor(((initialX / SLICE_SIZE)) % REGION_SIZE);
+			sliceX = MathUtil.floor(((initialX / SLICE_SIZE)) % REGION_SIZE);
 			x = 0;
 		} else {
 			tileX = 0;
@@ -447,7 +447,7 @@ public abstract class WorldGenerator {
 		
 		if(initialY >= 0) {
 			tileY = (initialY % REGION_SIZE_IN_TILES) % SLICE_SIZE;
-			sliceY = MathUtil.fastFloor(((initialY / SLICE_SIZE)) % REGION_SIZE);
+			sliceY = MathUtil.floor(((initialY / SLICE_SIZE)) % REGION_SIZE);
 			y = 0;
 		} else {
 			tileY = 0;

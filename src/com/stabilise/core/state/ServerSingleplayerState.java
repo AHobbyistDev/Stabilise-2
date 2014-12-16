@@ -2,7 +2,6 @@ package com.stabilise.core.state;
 
 import com.stabilise.core.GameClient;
 import com.stabilise.core.GameServer;
-import com.stabilise.opengl.Font;
 import com.stabilise.opengl.render.WorldRenderer;
 //import com.stabilise.screen.menu.GameMenu;
 //import com.stabilise.util.MathUtil;
@@ -28,9 +27,6 @@ public class ServerSingleplayerState implements State {
 	
 	/** The in-game HUD menu. */
 	//public GameMenu menu;
-	
-	/** The font to use for displaying debug text. */
-	public Font debugFont;
 	
 	
 	/**
@@ -113,7 +109,6 @@ public class ServerSingleplayerState implements State {
 	
 	@Override
 	public void start() {
-		debugFont = new Font("sheets/font1", this);
 		//menu = new GameMenu();
 		
 		server = new GameServer(worldName, true, 8);
@@ -126,7 +121,6 @@ public class ServerSingleplayerState implements State {
 	@Override
 	public void dispose() {
 		stopGame();
-		debugFont.destroy();
 		renderer.unloadResources();
 		renderer = null;
 	}

@@ -1,20 +1,29 @@
 package com.stabilise.core.state;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.stabilise.opengl.OrthoCamera;
 
-public class GDXTestState implements State {
+public class GDXTestState implements State, InputProcessor {
 	
 	private SpriteBatch batch;
 	private BitmapFont font12;
+	private Texture texture;
+	private Sprite sprite;
 	
 	private Viewport viewport;
+	
+	private Music music;
 	
 	public GDXTestState() {
 		
@@ -30,15 +39,35 @@ public class GDXTestState implements State {
 		font12 = generator.generateFont(param);
 		generator.dispose(); // don't forget to dispose to avoid memory leaks!
 		
-		batch = new SpriteBatch();
+		texture = new Texture(Gdx.files.absolute("C:/Users/Adam/AppData/Roaming/.stabilise/res/img/loading.png"));
+		batch = new SpriteBatch(256);
 		
-		viewport = new ScreenViewport();
+		sprite = new Sprite(texture);
+		
+		viewport = new ScreenViewport(new OrthoCamera());
+		
+		music = Gdx.audio.newMusic(Gdx.files.absolute("C:/Users/Adam/AppData/Roaming/.stabilise/res/sound/sarabande.wav"));
+		music.setLooping(true);
+		//music.play();
+		
+		// -------------------------
+		
+		boolean isExtAvailable = Gdx.files.isExternalStorageAvailable();
+		boolean isLocAvailable = Gdx.files.isLocalStorageAvailable();
+		String extRoot = Gdx.files.getExternalStoragePath();
+		String locRoot = Gdx.files.getLocalStoragePath();
+		
+		System.out.println("External: " + isExtAvailable + "; " + extRoot);
+		System.out.println("Local: " + isLocAvailable + "; " + locRoot);
 	}
 	
 	@Override
 	public void dispose() {
 		font12.dispose();
+		texture.dispose();
 		batch.dispose();
+		
+		music.dispose();
 	}
 	
 	@Override
@@ -55,10 +84,15 @@ public class GDXTestState implements State {
 	public void resize(int width, int height) {
 		System.out.println("Resized to " + width + "x" + height);
 		viewport.update(width, height);
+		batch.setProjectionMatrix(viewport.getCamera().projection);
+		batch.setTransformMatrix(viewport.getCamera().view);
+		
+		sprite.setPosition(width/2 - sprite.getWidth()/2, height/2 - sprite.getHeight()/2);
 	}
 	
 	@Override
 	public void update() {
+		
 	}
 	
 	@Override
@@ -67,8 +101,49 @@ public class GDXTestState implements State {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
 		batch.begin();
+		sprite.draw(batch);
 		font12.draw(batch, "Hello world!", 0, 128);
 		batch.end();
+	}
+
+	@Override
+	public boolean keyDown(int keycode) {
+		return false;
+	}
+	
+	@Override
+	public boolean keyUp(int keycode) {
+		return false;
+	}
+	
+	@Override
+	public boolean keyTyped(char character) {
+		return false;
+	}
+	
+	@Override
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		return false;
+	}
+	
+	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		return false;
+	}
+	
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		return false;
+	}
+	
+	@Override
+	public boolean mouseMoved(int screenX, int screenY) {
+		return false;
+	}
+	
+	@Override
+	public boolean scrolled(int amount) {
+		return false;
 	}
 	
 }

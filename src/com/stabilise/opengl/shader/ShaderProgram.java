@@ -29,6 +29,7 @@ import com.stabilise.util.annotation.LWJGLReliant;
  * <a href=https://github.com/mattdesl/lwjgl-basics>lwjgl-basics library</a>.
  */
 @LWJGLReliant
+@Deprecated
 public class ShaderProgram {
 	
 	//--------------------==========--------------------

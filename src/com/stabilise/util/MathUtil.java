@@ -1,7 +1,6 @@
 package com.stabilise.util;
 
-import org.lwjgl.util.Point;
-import org.lwjgl.util.vector.Vector2f;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * This class provides some utility methods and fields with mathematical
@@ -19,12 +18,8 @@ public class MathUtil {
 	/** Holds the value given by Math.PI / 2. */
 	public static final double PI_OVER_2 = Math.PI / 2;
 	
-	/** The horizontal unit vector. */
-	public static final Vector2f UNIT_VECTOR_X = new Vector2f(1f, 0f);
-	/** The vertical unit vector. */
-	public static final Vector2f UNIT_VECTOR_Y = new Vector2f(0f, 1f);
 	/** An array containing the unit vectors. */
-	public static final Vector2f[] UNIT_VECTORS = new Vector2f[] { UNIT_VECTOR_X, UNIT_VECTOR_Y };
+	public static final Vector2[] UNIT_VECTORS = new Vector2[] { Vector2.X, Vector2.Y };
 	
 	
 	/**
@@ -140,38 +135,37 @@ public class MathUtil {
 	}
 	
 	/**
+	 * Subtracts {@code v2} from {@code v1} and returns the resultant vector.
+	 * 
+	 * @param v1 The first vector.
+	 * @param v2 The second vector.
+	 * 
+	 * @return The resultant vector.
+	 */
+	public static Vector2 sub(Vector2 v1, Vector2 v2) {
+		return new Vector2(v1.x - v2.x, v1.y - v2.y);
+	}
+	
+	/**
 	 * Clones a 2-dimensional vector and reflects the clone about the y-axis.
 	 * 
 	 * @param v The vector.
 	 * 
 	 * @return The reflected clone of the vector.
 	 */
-	public static Vector2f reflectVector(Vector2f v) {
-		return new Vector2f(-v.x, v.y);
+	public static Vector2 reflect(Vector2 v) {
+		return new Vector2(-v.x, v.y);
 	}
 	
 	/**
-	 * Gets a vector perpendicular to the given vector, or, more precisely,
-	 * a clone of the vector rotated π/2 radians anticlockwise.
+	 * Rotates the specified vector by π/2 radians anticlockwise about (0,0).
 	 * 
-	 * @param v The given vector.
+	 * @param v The vector.
 	 * 
 	 * @return A vector perpendicular to the given vector.
 	 */
-	public static Vector2f getPerpendicularVector(Vector2f v) {
-		return new Vector2f(-v.y, v.x);
-	}
-	
-	/**
-	 * Calculates the distance between two vectors.
-	 * 
-	 * @param v1 The first vector.
-	 * @param v2 The second vector.
-	 * 
-	 * @return The distance between the two vectors.
-	 */
-	public static float distance(Vector2f v1, Vector2f v2) {
-		return Vector2f.sub(v1, v1, null).length();
+	public static Vector2 rotate90Degrees(Vector2 v) {
+		return v.set(-v.y, v.x);
 	}
 	
 	/**
@@ -183,8 +177,8 @@ public class MathUtil {
 	 * @return The rounded value of x.
 	 * @see Math#round(double)
 	 */
-	public static int fastRound(double x) {
-		return fastFloor(x + 0.5D);
+	public static int round(double x) {
+		return floor(x + 0.5D);
 	}
 	
 	/**
@@ -196,9 +190,9 @@ public class MathUtil {
 	 * @return The rounded value of x.
 	 * @see Math#round(double)
 	 */
-	public static int fastRound(float x) {
+	public static int round(float x) {
 		// The fact that duplicating for floats is necessary annoys me
-		return fastFloor(x + 0.5f);
+		return floor(x + 0.5f);
 	}
 	
 	/**
@@ -211,7 +205,7 @@ public class MathUtil {
 	 * @return The floored value of x.
 	 * @see Math#floor(double)
 	 */
-	public static int fastFloor(double x) {
+	public static int floor(double x) {
 		int xi = (int)x;
 		return x < xi ? xi-1 : xi;
 	}
@@ -226,7 +220,7 @@ public class MathUtil {
 	 * @return The floored value of x.
 	 * @see Math#floor(double)
 	 */
-	public static int fastFloor(float x) {
+	public static int floor(float x) {
 		int xi = (int)x;
 		return x < xi ? xi-1 : xi;
 	}
@@ -241,7 +235,7 @@ public class MathUtil {
 	 * @return The ceil'd value of x.
 	 * @see Math#ceil(double)
 	 */
-	public static int fastCeil(double x) {
+	public static int ceil(double x) {
 		int xi = (int)x;
 		return x > xi ? xi+1 : xi;
 	}
@@ -256,7 +250,7 @@ public class MathUtil {
 	 * @return The ceil'd value of x.
 	 * @see Math#ceil(double)
 	 */
-	public static int fastCeil(float x) {
+	public static int ceil(float x) {
 		int xi = (int)x;
 		return x > xi ? xi+1 : xi;
 	}

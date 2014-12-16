@@ -1,7 +1,6 @@
 package com.stabilise.entity;
 
-import org.lwjgl.util.vector.Vector2f;
-
+import com.badlogic.gdx.math.Vector2;
 import com.stabilise.core.Settings;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.collision.LinkedHitbox;
@@ -11,7 +10,7 @@ import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.MathUtil;
-import com.stabilise.util.shape.Quadrilateral;
+import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Rectangle;
 import com.stabilise.world.World;
 
@@ -31,13 +30,13 @@ public class EntityBigFireball extends EntityProjectile {
 	
 	// These hitboxes roughtly construct the four quadrants of a circle of radius 4 tiles
 	/** The first hitbox produced by the fireball. */
-	public static final Quadrilateral HITBOX_1 = new Quadrilateral(new Vector2f(0f,0f), new Vector2f(0f,4f), new Vector2f(3f,3f), new Vector2f(4f,0f));
+	public static final Polygon HITBOX_1 = new Polygon(new Vector2(0f,0f), new Vector2(0f,4f), new Vector2(3f,3f), new Vector2(4f,0f));
 	/** The second hitbox produced by the fireball. */
-	public static final Quadrilateral HITBOX_2 = new Quadrilateral(new Vector2f(0f,0f), new Vector2f(0f,4f), new Vector2f(-3f,3f), new Vector2f(-4f,0f));
+	public static final Polygon HITBOX_2 = new Polygon(new Vector2(0f,0f), new Vector2(0f,4f), new Vector2(-3f,3f), new Vector2(-4f,0f));
 	/** The third hitbox produced by the fireball. */
-	public static final Quadrilateral HITBOX_3 = new Quadrilateral(new Vector2f(0f,0f), new Vector2f(0f,-4f), new Vector2f(-3f,-3f), new Vector2f(-4f,0f));
+	public static final Polygon HITBOX_3 = new Polygon(new Vector2(0f,0f), new Vector2(0f,-4f), new Vector2(-3f,-3f), new Vector2(-4f,0f));
 	/** The fourth hitbox produced by the fireball. */
-	public static final Quadrilateral HITBOX_4 = new Quadrilateral(new Vector2f(0f,0f), new Vector2f(0f,-4f), new Vector2f(3f,-3f), new Vector2f(4f,0f));
+	public static final Polygon HITBOX_4 = new Polygon(new Vector2(0f,0f), new Vector2(0f,-4f), new Vector2(3f,-3f), new Vector2(4f,0f));
 	
 	/** The number of ticks after which a fireball despawns. */
 	private static final int DESPAWN_TICKS = 600;

@@ -1,9 +1,7 @@
 package com.stabilise.entity.model;
 
-import org.lwjgl.util.vector.Matrix2f;
-import org.lwjgl.util.vector.Vector2f;
-
-import com.stabilise.util.MatrixUtil;
+import com.badlogic.gdx.math.Vector2;
+import com.stabilise.util.Matrix2;
 import com.stabilise.util.shape.Shape;
 
 /**
@@ -21,7 +19,7 @@ public class Bone {
 	/** The bone's effective hitbox. */
 	protected Shape rotatedHitbox;
 	/** The rotation matrix corresponding to the bone's rotation. */
-	protected final Matrix2f rotationMatrix;
+	protected final Matrix2 rotationMatrix;
 	
 	
 	/**
@@ -31,7 +29,7 @@ public class Bone {
 	 */
 	public Bone(Shape hitbox) {
 		baseHitbox = rotatedHitbox = hitbox;
-		rotationMatrix = new Matrix2f(); // identity matrix
+		rotationMatrix = new Matrix2(); // identity matrix
 		
 		position = new Position();
 	}
@@ -52,7 +50,7 @@ public class Bone {
 	 * from its originally-defined position, in radians.
 	 */
 	public void setRotation(float rotation) {
-		MatrixUtil.rotationMatrix2f(rotation, rotationMatrix);
+		rotationMatrix.setToRotation(rotation);
 		rotatedHitbox = baseHitbox.transform(rotationMatrix);
 	}
 	
@@ -67,13 +65,13 @@ public class Bone {
 	static class Position {
 		
 		/** The position itself. */
-		Vector2f pos;
+		Vector2 pos;
 		/** The rotation, in radians. */
 		float rotation;
 		
 		
 		Position() {
-			pos = new Vector2f();
+			pos = new Vector2();
 			rotation = 0f;
 		}
 		

@@ -13,6 +13,7 @@ import java.util.Random;
 
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
+import com.badlogic.gdx.utils.ObjectMap;
 import com.stabilise.tests.reference.IntHashMap;
 import com.stabilise.util.Colour;
 import com.stabilise.util.IOUtil;
@@ -268,7 +269,7 @@ public class RandomTests {
 		c1.stop();
 		c2.start();
 		for(double d : nums) {
-			dump = MathUtil.fastFloor(d);
+			dump = MathUtil.floor(d);
 		}
 		c2.stop();
 		
@@ -284,7 +285,7 @@ public class RandomTests {
 		c1.stop();
 		c2.start();
 		for(double d : nums) {
-			dump = MathUtil.fastCeil(d);
+			dump = MathUtil.ceil(d);
 		}
 		c2.stop();
 		
@@ -300,7 +301,7 @@ public class RandomTests {
 		c1.stop();
 		c2.start();
 		for(double d : nums) {
-			dump = MathUtil.fastRound(d);
+			dump = MathUtil.round(d);
 		}
 		c2.stop();
 		
@@ -695,6 +696,72 @@ public class RandomTests {
 		return n;
 	}
 	
+	@SuppressWarnings("unused")
+	protected static void gdxObjectMap() {
+		int elements = 1024;
+		int iterations = 1024;
+		HashMap<String, Object> map1 = new HashMap<String, Object>(elements);
+		ObjectMap<String, Object> map2 = new ObjectMap<String, Object>(elements);
+		String[] keys = new String[elements];
+		Object[] vals = new Object[elements];
+		Random rnd = new Random();
+		int minStringSize = 8;
+		int maxStringSize = 16;
+		
+		for(int i = 0; i < elements; i++) {
+			int stringSize = minStringSize + rnd.nextInt(maxStringSize - minStringSize);
+			StringBuilder sb = new StringBuilder(stringSize);
+			for(int j = 0; j < stringSize; j++)
+				sb.append((char)rnd.nextInt());
+			keys[i] = sb.toString();
+			vals[i] = new Object();
+			
+			//System.out.println("Genned string " + i + ": " + sb.toString());
+		}
+		
+		TaskTimer t1 = new TaskTimer("HashMap - put");
+		TaskTimer t2 = new TaskTimer("ObjectMap - put");
+		
+		t1.start();
+		
+		for(int i = 0; i < elements; i++)
+			map1.put(keys[i], vals[i]);
+		
+		t1.stop();
+		t2.start();
+		
+		for(int i = 0; i < elements; i++)
+			map2.put(keys[i], vals[i]);
+		
+		t2.stop();
+		
+		t1.printComparison(t2);
+		
+		t1 = new TaskTimer("HashMap - get");
+		t2 = new TaskTimer("ObjectMap - get");
+		
+		t1.start();
+		
+		for(int itr = 0; itr < iterations; itr++) {
+			for(int i = 0; i < elements; i++) {
+				Object o = map1.get(keys[i]);
+			}
+		}
+		
+		t1.stop();
+		t2.start();
+		
+		for(int itr = 0; itr < iterations; itr++) {
+			for(int i = 0; i < elements; i++) {
+				Object o = map1.get(keys[i]);
+			}
+		}
+		
+		t2.stop();
+		
+		t1.printComparison(t2);
+	}
+	
 	// ---------- TIMER ----------
 	
 	private static long prev;
@@ -748,7 +815,8 @@ public class RandomTests {
 		//doubleAbbreviations();
 		//listIterationAndClearing();
 		//wrappedRemainder();
-		testHashes();
+		//testHashes();
+		gdxObjectMap();
 		
 		//String s = "abcxyzABCXYZ a()a_a-a*a/a\\a.a'a\"";
 		//System.out.println(s + "\n" + IOUtil.getLegalString(s));

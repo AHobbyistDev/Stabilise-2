@@ -97,8 +97,8 @@ public class SimplexNoise {
 		
 		// Skew the input space to determine which simplex cell we're in
 		double s = (x + y) * SKEW_2D;		// Skew factor for 2D
-		int i = MathUtil.fastFloor(x + s);
-		int j = MathUtil.fastFloor(y + s);
+		int i = MathUtil.floor(x + s);
+		int j = MathUtil.floor(y + s);
 		double t = (i + j) * UNSKEW_2D;
 		double X0 = i - t;		// Unskew the cell origin back to (x,y) space
 		double Y0 = j - t;

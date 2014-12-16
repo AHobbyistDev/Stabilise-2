@@ -222,7 +222,7 @@ public abstract class Entity extends GameObject {
 	private boolean horizontalCollisions(double xp, double yp) {
 		if(dx == 0) return false;
 		
-		float leadingEdge = dxp ? boundingBox.v11.x : boundingBox.v00.x;
+		float leadingEdge = dxp ? boundingBox.getV11().x : boundingBox.getV00().x;
 		
 		xp += leadingEdge;
 		
@@ -234,10 +234,10 @@ public abstract class Entity extends GameObject {
 		// Check the vertical wall of tiles to the left/right of the entity
 		
 		//double max = dyp ? Math.ceil(yp + boundingBox.p11.y) : Math.ceil(yp + boundingBox.p11.y);
-		double max = Math.ceil(yp + boundingBox.v11.y);
+		double max = Math.ceil(yp + boundingBox.getV11().y);
 		
 		// TODO: < vs <= - watch out for this, it may cause problems in the future
-		for(double v = yp + boundingBox.v00.y; v < max; v++) {
+		for(double v = yp + boundingBox.getV00().y; v < max; v++) {
 			if(world.getTileAt(xp, v).isSolid() && rowValid(xp, v)) {
 				//x = dxp ? Math.floor(xp) - boundingBox.p11.x : Math.ceil(xp) - boundingBox.p00.x;
 				// Alternatively... (doesn't really matter though)
@@ -261,7 +261,7 @@ public abstract class Entity extends GameObject {
 	private boolean verticalCollisions(double xp, double yp) {
 		if(dy == 0.0f) return false;
 		
-		float leadingEdge = dyp ? boundingBox.v11.y : boundingBox.v00.y;
+		float leadingEdge = dyp ? boundingBox.getV11().y : boundingBox.getV00().y;
 		
 		yp += leadingEdge;
 		
@@ -273,10 +273,10 @@ public abstract class Entity extends GameObject {
 		// Check the horizontal wall of tiles at the top/bottom of the entity
 		
 		//double max = dxp ? Math.ceil(xp + boundingBox.p11.x) : Math.ceil(xp + boundingBox.p11.x);
-		double max = Math.ceil(xp + boundingBox.v11.x);
+		double max = Math.ceil(xp + boundingBox.getV11().x);
 		
 		// TODO: < vs <= - watch out for this, it may cause problems in the future
-		for(double h = xp + boundingBox.v00.x; h < max; h++) {
+		for(double h = xp + boundingBox.getV00().x; h < max; h++) {
 			if(world.getTileAt(h, yp).isSolid() && columnValid(h, yp)) {
 				//y = dyp ? Math.floor(yp) - boundingBox.p11.y : Math.ceil(yp) - boundingBox.p00.y;
 				//onGround = dy < 0;
@@ -302,7 +302,7 @@ public abstract class Entity extends GameObject {
 	private boolean columnValid(double x, double y) {
 		// Only check as many tiles above or below the tile in question that
 		// the height of the entity's bounding box would require.
-		int max = MathUtil.fastCeil(boundingBox.height);
+		int max = MathUtil.ceil(boundingBox.height);
 		for(int i = 1; i <= max; i++) {
 			if(world.getTileAt(x, y + (dyp ? -i : i)).isSolid())
 				return false;
@@ -324,7 +324,7 @@ public abstract class Entity extends GameObject {
 	private boolean rowValid(double x, double y) {
 		// Only check as many tiles to the left or right of the tile in
 		// question that the width of the entity's bounding box would require.
-		int max = MathUtil.fastCeil(boundingBox.width);
+		int max = MathUtil.ceil(boundingBox.width);
 		for(int i = 1; i <= max; i++) {
 			if(world.getTileAt(x + (dxp ? -i : i), y).isSolid())
 				return false;
@@ -346,9 +346,9 @@ public abstract class Entity extends GameObject {
 		dx = 0;
 		
 		if(direction == Direction.RIGHT) {
-			x = Math.floor(xp) - boundingBox.v11.x;
+			x = Math.floor(xp) - boundingBox.getV11().x;
 		} else {
-			x = Math.ceil(xp) - boundingBox.v00.x;
+			x = Math.ceil(xp) - boundingBox.getV00().x;
 		}
 	}
 	
@@ -366,9 +366,9 @@ public abstract class Entity extends GameObject {
 		dy = 0;
 		
 		if(direction == Direction.UP) {
-			y = Math.floor(yp) - boundingBox.v11.y;
+			y = Math.floor(yp) - boundingBox.getV11().y;
 		} else {
-			y = Math.ceil(yp) - boundingBox.v00.y;
+			y = Math.ceil(yp) - boundingBox.getV00().y;
 			// TODO: Find a better way of doing this
 			Tile t = world.getTileAt(x, y - 0.001D);
 			t.handleStep(world, t.x, t.y, this);
