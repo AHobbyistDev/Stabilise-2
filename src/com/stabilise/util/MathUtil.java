@@ -18,6 +18,8 @@ public class MathUtil {
 	/** Holds the value given by Math.PI / 2. */
 	public static final double PI_OVER_2 = Math.PI / 2;
 	
+	/** A vector with components (1, 1). */
+	public static final Vector2 VEC_1_1 = new Vector2(1f, 1f);
 	/** An array containing the unit vectors. */
 	public static final Vector2[] UNIT_VECTORS = new Vector2[] { Vector2.X, Vector2.Y };
 	

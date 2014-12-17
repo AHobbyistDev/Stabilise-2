@@ -2,7 +2,7 @@ package com.stabilise.util;
 
 import java.util.Random;
 
-import org.lwjgl.util.vector.Vector2f;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * A utility class which generates 2-dimensional simplex noise.
@@ -41,6 +41,9 @@ public class SimplexNoise {
 	private long seed;
 	/** The scale of noise to generate. */
 	private float scale;
+	
+	/** Gradient vector. */
+	private final Vector2 grad = new Vector2();
 	
 	
 	/**
@@ -140,21 +143,21 @@ public class SimplexNoise {
 			n0 = 0.0D;
 		} else {
 			t0 *= t0;
-			n0 = t0 * t0 * Vector2f.dot(genGradient(i, j), new Vector2f((float)x0, (float)y0));	// (x,y) of grad3 used for 2D gradient
+			n0 = t0 * t0 * genGradient(i, j).dot((float)x0, (float)y0);	// (x,y) of grad3 used for 2D gradient
 		}
 		double t1 = 0.5D - x1*x1 - y1*y1;
 		if(t1 < 0D) {
 			n1 = 0.0D;
 		} else {
 			t1 *= t1;
-			n1 = t1 * t1 * Vector2f.dot(genGradient(i+i1, j+j1), new Vector2f((float)x1, (float)y1));
+			n1 = t1 * t1 * genGradient(i+i1, j+j1).dot((float)x1, (float)y1);
 		}
 		double t2 = 0.5D - x2*x2 - y2*y2;
 		if(t2 < 0D) {
 			n2 = 0.0D;
 		} else {
 			t2 *= t2;
-			n2 = t2 * t2 * Vector2f.dot(genGradient(i+1, j+1), new Vector2f((float)x2, (float)y2));
+			n2 = t2 * t2 * genGradient(i+1, j+1).dot((float)x2, (float)y2);
 		}
 		
 		// Add contributions from each corner to get the final noise value.
@@ -172,13 +175,13 @@ public class SimplexNoise {
 	 * 
 	 * @return The noise gradient at (x,y).
 	 */
-	private Vector2f genGradient(int x, int y) {
+	private Vector2 genGradient(int x, int y) {
 		setSeed(x, y);
 		// We require a normalised vector; this is unsatisfactory
 		//return new Vector2f(2*rnd.nextFloat()-1, 2*rnd.nextFloat()-1);
 		
 		double angle = MathUtil.TAU*rnd.nextDouble();
-		return new Vector2f((float)(Math.cos(angle)), (float)(Math.sin(angle)));
+		return grad.set((float)(Math.cos(angle)), (float)(Math.sin(angle)));
 	}
 	
 }

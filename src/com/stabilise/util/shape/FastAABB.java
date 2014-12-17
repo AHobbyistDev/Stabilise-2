@@ -90,7 +90,7 @@ public class FastAABB extends Polygon implements AABB {
 	@Override
 	public boolean intersects(AbstractPolygon p) {
 		if(p.isAABB())
-			return intersects((AABB)p);
+			return intersectsAABB((AABB)p);
 		return super.intersects(p);
 	}
 	
@@ -108,7 +108,7 @@ public class FastAABB extends Polygon implements AABB {
 	 * @return {@code true} if the two AABBs intersect; {@code false}
 	 * otherwise.
 	 */
-	private boolean intersects(AABB a) {
+	public boolean intersectsAABB(AABB a) {
 		return intersectsAABB(a.getV00(), a.getV11());
 	}
 	
@@ -137,12 +137,12 @@ public class FastAABB extends Polygon implements AABB {
 	}
 	
 	@Override
-	public ShapeProjection getHorizontalProjection() {
+	ShapeProjection getHorizontalProjection() {
 		return new ShapeProjection(v00.x, v11.x);
 	}
 	
 	@Override
-	public ShapeProjection getVerticalProjection() {
+	ShapeProjection getVerticalProjection() {
 		return new ShapeProjection(v00.y, v11.y);
 	}
 	
@@ -202,6 +202,12 @@ public class FastAABB extends Polygon implements AABB {
 	@Override
 	public FastAABB precomputed() {
 		return new Precomputed(this);
+	}
+	
+	// Overriding for typecast purposes
+	@Override
+	public FastAABB notPrecomputed() {
+		return this;
 	}
 	
 	/**

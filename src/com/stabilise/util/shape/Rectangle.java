@@ -109,6 +109,12 @@ public class Rectangle extends Polygon {
 		return new Precomputed(this);
 	}
 	
+	// Overriding for typecast purposes
+	@Override
+	public Rectangle notPrecomputed() {
+		return this;
+	}
+	
 	@Override
 	protected Rectangle newInstance() {
 		return new Rectangle();
@@ -156,8 +162,8 @@ public class Rectangle extends Polygon {
 		 * produce undefined behaviour.
 		 * 
 		 * @param vertices The rectangle's vertices. These should be indexed
-	 * such that vertices[0] is v00, vertices[1] is v01, vertices[2] is v11,
-	 * and vertices[3] is v01.
+		 * such that vertices[0] is v00, vertices[1] is v01, vertices[2] is
+		 * v11, and vertices[3] is v01.
 		 * 
 		 * @throws NullPointerException if {@code vertices} or any of its
 		 * elements are {@code null}.

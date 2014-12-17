@@ -97,7 +97,7 @@ public abstract class PrecomputableShape extends Shape {
 	 * otherwise.
 	 */
 	@ForPrecomputedVariant
-	public boolean containsPointPrecomputed(Vector2 p) {
+	protected boolean containsPointPrecomputed(Vector2 p) {
 		for(int i = 0; i < getAxes().length; i++) {
 			if(!getProjection(i).containsPoint(p.dot(getAxes()[i])))
 				return false;

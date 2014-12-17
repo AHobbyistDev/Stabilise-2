@@ -92,6 +92,12 @@ public class Polygon extends AbstractPolygon {
 		return new Precomputed(this);
 	}
 	
+	// Overriding for typecast purposes
+	@Override
+	public Polygon notPrecomputed() {
+		return this;
+	}
+	
 	/**
 	 * Creates and returns a new Polygon for duplication purposes. This is used
 	 * to create a new instance for transform(), rotate(), translate() and

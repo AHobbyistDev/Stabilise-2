@@ -2,7 +2,7 @@ package com.stabilise.util;
 
 import java.util.Random;
 
-import org.lwjgl.util.vector.Vector2f;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * A utility class which generates 2-dimensional perlin noise.
@@ -18,6 +18,14 @@ public class PerlinNoise2D {
 	private long seed;
 	/** The wavelength of noise to generate. */
 	private float wavelength;
+	
+	/** Gradient vectors. */
+	private final Vector2 g00 = new Vector2(),
+			g01 = new Vector2(),
+			g10 = new Vector2(),
+			g11 = new Vector2();
+	/** The cell location vector. */
+	private final Vector2 p = new Vector2();
 	
 	
 	/**
@@ -72,18 +80,19 @@ public class PerlinNoise2D {
 		int flooredY = (int)Math.floor(y);
 		
 		// Gen gradients for the vertices of the square about the point
-		Vector2f g00 = genGradient(flooredX, flooredY);
-		Vector2f g01 = genGradient(flooredX, flooredY+1);
-		Vector2f g10 = genGradient(flooredX+1, flooredY);
-		Vector2f g11 = genGradient(flooredX+1, flooredY+1);
+		genGradient(flooredX, flooredY, g00);
+		genGradient(flooredX, flooredY+1, g01);
+		genGradient(flooredX+1, flooredY, g10);
+		genGradient(flooredX+1, flooredY+1, g11);
 		
-		// Dot the gradients at each vertex with vectors pointing from the corners to p
-		Vector2f p = new Vector2f((float)(x - flooredX), (float)(y - flooredY));
+		// We'll need to dot the gradients at each vertex with vectors pointing
+		// from the corners to p
+		p.set((float)(x - flooredX), (float)(y - flooredY));
 		
-		double v00 = Vector2f.dot(g00, p);
-		double v01 = Vector2f.dot(g01, Vector2f.sub(p, new Vector2f(0f, 1f), null));
-		double v10 = Vector2f.dot(g10, Vector2f.sub(p, new Vector2f(1f, 0f), null));
-		double v11 = Vector2f.dot(g11, Vector2f.sub(p, new Vector2f(1f, 1f), null));
+		float v00 = g00.dot(p);
+		float v01 = g01.dot(p.x, p.y - 1f);		//g01.dot(p.sub(Vector2.Y));
+		float v10 = g10.dot(p.x - 1f, p.y);		//g10.dot(p.sub(Vector2.X));
+		float v11 = g11.dot(p.x - 1f, p.y - 1f);	//g11.dot(p.sub(MathUtil.VEC_1_1));
 		
 		// Interpolate to attain a value
 		return MathUtil.interpolateBisinusoidal(v00, v01, v10, v11, p.x, p.y) * MathUtil.SQRT_2;
@@ -94,14 +103,13 @@ public class PerlinNoise2D {
 	 * 
 	 * @param x The x-coordinate of the gridpoint.
 	 * @param y The y-coordinate of the gridpoint.
-	 * 
-	 * @return The noise gradient at (x,y).
+	 * @param dest The destination vector in which to store the gradient.
 	 */
-	private Vector2f genGradient(int x, int y) {
+	private void genGradient(int x, int y, Vector2 dest) {
 		setSeed(x, y);
 		double angle = MathUtil.TAU*rnd.nextDouble();
-		return new Vector2f((float)Math.cos(angle), (float)Math.sin(angle));
-		//return new Vector2f(2*rnd.nextFloat()-1, 2*rnd.nextFloat()-1);
+		dest.set((float)Math.cos(angle), (float)Math.sin(angle));
+		//dest.set(2*rnd.nextFloat()-1, 2*rnd.nextFloat()-1);
 	}
 	
 }

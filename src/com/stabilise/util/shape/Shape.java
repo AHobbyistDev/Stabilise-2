@@ -309,7 +309,7 @@ public abstract class Shape {
 	 * @throws ArrayIndexOutOfBoundsException if this shape's vertices as
 	 * return by {@link #getVertices()} is of length 0.
 	 */
-	protected ShapeProjection getHorizontalProjection() {
+	ShapeProjection getHorizontalProjection() {
 		Vector2[] vertices = getVertices();
 		
 		float min = vertices[0].x;
@@ -339,7 +339,7 @@ public abstract class Shape {
 	 * @throws ArrayIndexOutOfBoundsException if this shape's vertices as
 	 * return by {@link #getVertices()} is of length 0.
 	 */
-	protected ShapeProjection getVerticalProjection() {
+	ShapeProjection getVerticalProjection() {
 		Vector2[] vertices = getVertices();
 		
 		float min = vertices[0].y;

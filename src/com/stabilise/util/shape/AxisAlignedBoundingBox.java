@@ -165,7 +165,7 @@ public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 	@Override
 	public boolean intersects(AbstractPolygon p) {
 		if(p.isAABB())
-			return intersects((AABB)p);
+			return intersectsAABB((AABB)p);
 		return super.intersects(p);
 	}
 	
@@ -183,7 +183,7 @@ public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 	 * @return {@code true} if the two AABBs intersect; {@code false}
 	 * otherwise.
 	 */
-	private boolean intersects(AABB a) {
+	public boolean intersectsAABB(AABB a) {
 		return intersectsAABB(a.getV00(), a.getV11());
 	}
 	
@@ -214,12 +214,12 @@ public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 	}
 	
 	@Override
-	public ShapeProjection getHorizontalProjection() {
+	ShapeProjection getHorizontalProjection() {
 		return new ShapeProjection(vertices[V00].x, vertices[V11].x);
 	}
 	
 	@Override
-	public ShapeProjection getVerticalProjection() {
+	ShapeProjection getVerticalProjection() {
 		return new ShapeProjection(vertices[V00].y, vertices[V11].y);
 	}
 	
@@ -255,6 +255,12 @@ public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 	@Override
 	public AxisAlignedBoundingBox precomputed() {
 		return new Precomputed(this);
+	}
+	
+	// Overriding for typecast purposes
+	@Override
+	public AxisAlignedBoundingBox notPrecomputed() {
+		return this;
 	}
 	
 	@Override
