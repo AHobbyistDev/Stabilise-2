@@ -1,7 +1,5 @@
 package com.stabilise.util.concurrent;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * A TaskTracker is designed to provide a means of communication between
  * threads as to the progress towards completion of a task. In a typical
@@ -12,16 +10,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TaskTracker {
 	
-	/** Whether or not the task has been started. This is set to true when
-	 * {@link #increment()} is invoked to prevent partsToComplete from
-	 * further increasing. */
-	private volatile boolean started = false;
-	/** The name of the task. */
+	/** Task name. */
 	private volatile String name;
-	/** The number of parts to the task which have been completed. */
-	private AtomicInteger partsCompleted = new AtomicInteger();
-	/** The number of parts which are to be completed. */
-	private int partsToComplete;
+	
+	private Object mutex = new Object();
+	private volatile int numPartsCompleted = 0;
+	private int numPartsToComplete;
 	
 	
 	/**
@@ -37,7 +31,7 @@ public class TaskTracker {
 	 * 
 	 * @param name The name of the task.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code name} is {@code null}.
+	 * @throws NullPointerException if {@code name} is {@code null}.
 	 */
 	public TaskTracker(String name) {
 		this(name, 1);
@@ -48,7 +42,7 @@ public class TaskTracker {
 	 * 
 	 * @param parts The number of parts to complete.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code parts < 0}.
+	 * @throws IllegalArgumentException if {@code parts < 0}.
 	 */
 	public TaskTracker(int parts) {
 		this("Loading", parts);
@@ -60,41 +54,24 @@ public class TaskTracker {
 	 * @param name The name of the task.
 	 * @param parts The number of parts to complete.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code name} is {@code null}
-	 * or {@code parts < 0}.
+	 * @throws NullPointerException if {@code name} is {@code null}.
+	 * @throws IllegalArgumentException if {@code parts < 0}.
 	 */
 	public TaskTracker(String name, int parts) {
 		if(name == null)
-			throw new IllegalArgumentException("name is null");
+			throw new NullPointerException("name is null");
 		if(parts < 0)
 			throw new IllegalArgumentException("parts < 0");
 		this.name = name;
-		partsToComplete = parts;
-	}
-	
-	/**
-	 * Adds a defined number of parts to the TaskTracker.
-	 * 
-	 * @param parts The number of parts to add.
-	 * 
-	 * @throws IllegalStateException Thrown if the task has already started
-	 * (i.e. if {@link #increment()} has been invoked at least once).
-	 * @throws IllegalArgumentException Thrown if {@code parts < 1}.
-	 */
-	public void addParts(int parts) {
-		if(started)
-			throw new IllegalStateException("Cannot add more parts once the task has started!");
-		if(parts < 1)
-			throw new IllegalArgumentException("Cannot add < 1 parts!");
-		partsToComplete += parts;
+		numPartsToComplete = parts;
 	}
 	
 	/**
 	 * Sets the name of the task.
 	 * 
-	 * @param name The name of the task.
+	 * @param name The desired name.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code name} is {@code null}.
+	 * @throws NullPointerException if {@code name} is {@code null}.
 	 */
 	public void setName(String name) {
 		if(name == null)
@@ -115,14 +92,46 @@ public class TaskTracker {
 	}
 	
 	/**
-	 * Registers a part of the task as completed.
+	 * Registers a part of the task as completed. This method is equivalent to
+	 * {@link #increment(int) increment(1)}.
 	 * 
-	 * <!-- TODO: Memory consistency effects. I'm still a little fuzzy on the
-	 * details for Atomic objects. -->
+	 * <p>Memory consistency effects: actions in a thread prior to invoking
+	 * this method happen before actions in another thread which invokes {@link
+	 * #parts()}, {@link #percentComplete()} or {@link #completed()}.
 	 */
 	public void increment() {
-		started = true;
-		partsCompleted.getAndIncrement();
+		increment(1);
+	}
+	
+	/**
+	 * Registers parts of the task as completed.
+	 * 
+	 * <p>Memory consistency effects: actions in a thread prior to invoking
+	 * this method happen before actions in another thread which invokes {@link
+	 * #parts()}, {@link #percentComplete()} or {@link #completed()}.
+	 */
+	public void increment(int parts) {
+		synchronized(mutex) {
+			numPartsCompleted += parts;
+		}
+	}
+	
+	/**
+	 * @return The number of parts in the task, as defined in the constructor.
+	 */
+	public float parts() {
+		return numPartsToComplete;
+	}
+	
+	/**
+	 * Memory consistency effects: actions in a thread prior to invoking {@link
+	 * #increment()} or {@link #increment(int)} happen-before actions in the
+	 * current thread.
+	 * 
+	 * @return The number of parts of the task completed.
+	 */
+	public float partsCompleted() {
+		return numPartsCompleted;
 	}
 	
 	/**
@@ -130,27 +139,26 @@ public class TaskTracker {
 	 * that the returned value may be greater than {@code 1.0} if
 	 * {@link #increment()} is invoked an incorrect number of times.
 	 * 
-	 * @return The percentage, from {@code 0.0} to {@code 1.0}.
+	 * <p>Memory consistency effects: actions in a thread prior to invoking
+	 * {@link #increment()} or {@link #increment(int)} happen-before actions in
+	 * the current thread.
+	 * 
+	 * @return The percentage, usually from {@code 0.0} to {@code 1.0}.
 	 */
 	public float percentComplete() {
-		// Though there exists the possibility for an inconsistent view of
-		// partsToComplete, this shouldn't matter as it should only be changed
-		// before the task has started and this should only be invoked once the
-		// task has started; hence no need to strive for atomicity.
-		return partsToComplete == 0f ? 1f : (float)partsCompleted.get() / partsToComplete;
+		return numPartsToComplete == 0f ? 1f : numPartsCompleted / numPartsToComplete;
 	}
 	
 	/**
 	 * Checks for whether or not the task has been completed. Note that this
 	 * may never return {@code true} if implementing code does not ensure to
-	 * invoke {@link #increment()} for every part the TaskTracker was
-	 * designed to track.
+	 * invoke {@link #increment()} or {@link #increment(int)} appropriately.
 	 * 
 	 * @return {@code true} if the task has been completed; {@code false} if it
 	 * has not.
 	 */
 	public boolean completed() {
-		return partsCompleted.get() >= partsToComplete;
+		return numPartsCompleted >= numPartsToComplete;
 	}
 	
 	/**
@@ -168,6 +176,10 @@ public class TaskTracker {
 	 * <blockquote>
 	 * {@code (int)(100*percentComplete())}
 	 * </blockquote>
+	 * 
+	 * <p>Memory consistency effects: actions in a thread prior to invoking
+	 * {@link #increment()} or {@link #increment(int)} happen-before actions in
+	 * the current thread.
 	 */
 	@Override
 	public String toString() {

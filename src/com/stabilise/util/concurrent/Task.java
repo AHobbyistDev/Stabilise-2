@@ -40,12 +40,10 @@ public abstract class Task implements Runnable {
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
-	/** The thread which is executing the task. */
+	/** The thread on which this task is executing. */
 	private Thread thread;
 	
-	/** The task's state. */
 	private volatile TaskState state = TaskState.UNSTARTED;
-	/** Whether or not the task has been cancelled. */
 	private volatile boolean cancelled = false;
 	/** The throwable thrown during execution of the task. A value of
 	 * {@code null} indicates the task ran without encountering anything. */
@@ -73,7 +71,7 @@ public abstract class Task implements Runnable {
 	 * 
 	 * @param parts The number of parts in the task.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code parts < 0}.
+	 * @throws IllegalArgumentException if {@code parts < 0}.
 	 */
 	public Task(int parts) {
 		this(new TaskTracker(parts));
@@ -87,12 +85,11 @@ public abstract class Task implements Runnable {
 	 * 
 	 * @param tracker The task's {@code TaskTracker}.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code tracker} is
-	 * {@code null}.
+	 * @throws NullPointerException if {@code tracker} is {@code null}.
 	 */
 	public Task(TaskTracker tracker) {
 		if(tracker == null)
-			throw new IllegalArgumentException("tracker is null");
+			throw new NullPointerException("tracker is null");
 		this.tracker = tracker;
 	}
 	
@@ -100,7 +97,7 @@ public abstract class Task implements Runnable {
 	 * Runs the task. If {@link #cancel()} was invoked before this method is
 	 * invoked, the task will abort immediately.
 	 * 
-	 * @throws IllegalStateException Thrown if the task is already running.
+	 * @throws IllegalStateException if the task is already running.
 	 */
 	public final void run() {
 		if(state.equals(TaskState.RUNNING))
@@ -127,7 +124,7 @@ public abstract class Task implements Runnable {
 	 * Executes the task. Implementations are encouraged to allow exceptions
 	 * to propagate if they are severe enough to halt the task.
 	 * 
-	 * @throws Exception Thrown as per standard exceptional conditions,
+	 * @throws Exception as per standard exceptional conditions,
 	 * circumstantially defined based on the implementation. A
 	 * {@code CancellationException} is thrown if the implementation invoked
 	 * {@link #checkCancel()} and another thread had cancelled this task via
@@ -165,7 +162,7 @@ public abstract class Task implements Runnable {
 	 * {@link #execute(boolean)} method. Any subclass of Task should not
 	 * attempt to catch this.
 	 * 
-	 * @throws CancellationException Thrown if the task has been cancelled.
+	 * @throws CancellationException if the task has been cancelled.
 	 */
 	protected final void checkCancel() throws CancellationException {
 		if(state.equals(TaskState.RUNNING) && isCurrentThread() && (cancelled || Thread.interrupted()))
@@ -281,10 +278,10 @@ public abstract class Task implements Runnable {
 	 * happen-before actions in the current thread if this method returns
 	 * without throwing an {@code InterruptedException}.
 	 * 
-	 * @throws InterruptedException Thrown if the current thread was
-	 * interrupted while waiting for the task to stop.
-	 * @throws ExecutionException Thrown if the task threw an exception or
-	 * error while executing.
+	 * @throws InterruptedException if the current thread was interrupted while
+	 * waiting for the task to stop.
+	 * @throws ExecutionException if the task threw an exception or error while
+	 * executing.
 	 */
 	public final void waitUntilStopped() throws InterruptedException, ExecutionException {
 		if(canWait()) {
@@ -308,8 +305,8 @@ public abstract class Task implements Runnable {
 	 * <p>Memory consistency effects: actions by the thread executing this task
 	 * happen-before actions in the current thread when this method returns.
 	 * 
-	 * @throws ExecutionException Thrown if the task threw an exception or
-	 * error while executing.
+	 * @throws ExecutionException if the task threw an exception or error while
+	 * executing.
 	 */
 	public final void waitUninterruptibly() throws ExecutionException {
 		if(canWait()) {
@@ -358,7 +355,7 @@ public abstract class Task implements Runnable {
 	 * {@link #execute()}) happen-before actions in the current thread when
 	 * that Throwable is thrown by this method.
 	 * 
-	 * @throws Throwable Thrown if a throwable was thrown by the task.
+	 * @throws Throwable if a throwable was thrown by the task.
 	 */
 	public final void throwThrowable() throws Throwable {
 		Throwable t = getThrowable();
@@ -391,7 +388,7 @@ public abstract class Task implements Runnable {
 	 * Throwable thrown by the task, provided a Throwable was thrown. This
 	 * clears the currently stored Throwable.
 	 * 
-	 * @throws ExecutionException Thrown if the task threw a Throwable while
+	 * @throws ExecutionException if the task threw a Throwable while
 	 * executing.
 	 */
 	private void throwExcecutionException() throws ExecutionException {

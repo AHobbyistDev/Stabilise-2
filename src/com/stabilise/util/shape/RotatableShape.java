@@ -1,7 +1,7 @@
 package com.stabilise.util.shape;
 
 import com.badlogic.gdx.math.Vector2;
-import com.stabilise.util.Matrix2;
+import com.stabilise.util.maths.Matrix2;
 
 /**
  * A RotatableShape serves as a wrapper for a Shape which can be rotated,

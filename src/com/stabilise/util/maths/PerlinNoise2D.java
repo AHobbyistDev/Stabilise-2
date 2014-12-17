@@ -1,4 +1,4 @@
-package com.stabilise.util;
+package com.stabilise.util.maths;
 
 import java.util.Random;
 
@@ -95,7 +95,7 @@ public class PerlinNoise2D {
 		float v11 = g11.dot(p.x - 1f, p.y - 1f);	//g11.dot(p.sub(MathUtil.VEC_1_1));
 		
 		// Interpolate to attain a value
-		return MathUtil.interpolateBisinusoidal(v00, v01, v10, v11, p.x, p.y) * MathUtil.SQRT_2;
+		return MathsUtil.interpolateBisinusoidal(v00, v01, v10, v11, p.x, p.y) * MathsUtil.SQRT_2;
 	}
 	
 	/**
@@ -107,7 +107,7 @@ public class PerlinNoise2D {
 	 */
 	private void genGradient(int x, int y, Vector2 dest) {
 		setSeed(x, y);
-		double angle = MathUtil.TAU*rnd.nextDouble();
+		double angle = MathsUtil.TAU*rnd.nextDouble();
 		dest.set((float)Math.cos(angle), (float)Math.sin(angle));
 		//dest.set(2*rnd.nextFloat()-1, 2*rnd.nextFloat()-1);
 	}

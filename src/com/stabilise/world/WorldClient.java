@@ -10,7 +10,7 @@ import com.stabilise.entity.EntityPlayer;
 import com.stabilise.entity.GameCamera;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
-import com.stabilise.util.MathUtil;
+import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -113,8 +113,8 @@ public class WorldClient extends World {
 		Slice slice = getSliceAt(x, y);
 		if(slice != null) {
 			return slice.getTileAt(
-					(int)Math.floor(MathUtil.wrappedRemainder(x, Slice.SLICE_SIZE)),
-					(int)Math.floor(MathUtil.wrappedRemainder(y, Slice.SLICE_SIZE))
+					(int)Math.floor(MathsUtil.wrappedRemainder(x, Slice.SLICE_SIZE)),
+					(int)Math.floor(MathsUtil.wrappedRemainder(y, Slice.SLICE_SIZE))
 			);
 		} else {
 			// If a slice hasn't yet been loaded from a server, the client will

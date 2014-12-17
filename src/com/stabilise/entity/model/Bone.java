@@ -1,7 +1,7 @@
 package com.stabilise.entity.model;
 
 import com.badlogic.gdx.math.Vector2;
-import com.stabilise.util.Matrix2;
+import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.shape.Shape;
 
 /**

@@ -22,9 +22,9 @@ import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.IOUtil;
 import com.stabilise.util.Log;
-import com.stabilise.util.MathUtil;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.tile.Tile;
@@ -499,10 +499,10 @@ public abstract class World {
 		if(!inRange)
 			return;
 		
-		int minX = MathUtil.floor(x + mob.boundingBox.v00.x);
-		int maxX = MathUtil.ceil(minX + mob.boundingBox.width);
-		int minY = MathUtil.floor(y + mob.boundingBox.v00.y);
-		int maxY = MathUtil.ceil(minY + mob.boundingBox.height);
+		int minX = MathsUtil.floor(x + mob.boundingBox.getV00().x);
+		int maxX = MathsUtil.ceil(minX + mob.boundingBox.width);
+		int minY = MathsUtil.floor(y + mob.boundingBox.getV00().y);
+		int maxY = MathsUtil.ceil(minY + mob.boundingBox.height);
 		
 		// Check to see if the mob would be spawning in any tiles
 		for(int tileX = minX; tileX < maxX; tileX++) {
@@ -560,7 +560,7 @@ public abstract class World {
 	 * tile if no such tile is loaded.
 	 */
 	public final Tile getTileAt(double x, double y) {
-		return getTileAt(MathUtil.floor(x), MathUtil.floor(y));
+		return getTileAt(MathsUtil.floor(x), MathsUtil.floor(y));
 	}
 	
 	/**
@@ -739,7 +739,7 @@ public abstract class World {
 	public static int sliceCoordFromTileCoord(double c) {
 		// TODO: Is there a way to make a faster alternative for floating-point
 		// input?
-		return MathUtil.floor(c / Slice.SLICE_SIZE);
+		return MathsUtil.floor(c / Slice.SLICE_SIZE);
 	}
 	
 	/**

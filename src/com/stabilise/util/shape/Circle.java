@@ -1,8 +1,8 @@
 package com.stabilise.util.shape;
 
 import com.badlogic.gdx.math.Vector2;
-import com.stabilise.util.Matrix2;
 import com.stabilise.util.annotation.Incomplete;
+import com.stabilise.util.maths.Matrix2;
 
 /**
  * For the uninitiated: <i>A circle is a simple shape of Euclidean geometry

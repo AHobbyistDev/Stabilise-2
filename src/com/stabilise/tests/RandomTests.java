@@ -17,10 +17,10 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.stabilise.tests.reference.IntHashMap;
 import com.stabilise.util.Colour;
 import com.stabilise.util.IOUtil;
-import com.stabilise.util.MathUtil;
-import com.stabilise.util.SimplexNoise;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.StringUtil;
+import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.SimplexNoise;
 
 /**
  * This class contains an assortment of tests I have conducted, primarily to
@@ -245,7 +245,7 @@ public class RandomTests {
 	}
 	
 	/**
-	 * Compares fastFloor, fastCeil and fastRound in {@link MathUtil} to their
+	 * Compares fastFloor, fastCeil and fastRound in {@link MathsUtil} to their
 	 * standard counterparts.
 	 */
 	@SuppressWarnings("unused")
@@ -269,7 +269,7 @@ public class RandomTests {
 		c1.stop();
 		c2.start();
 		for(double d : nums) {
-			dump = MathUtil.floor(d);
+			dump = MathsUtil.floor(d);
 		}
 		c2.stop();
 		
@@ -285,7 +285,7 @@ public class RandomTests {
 		c1.stop();
 		c2.start();
 		for(double d : nums) {
-			dump = MathUtil.ceil(d);
+			dump = MathsUtil.ceil(d);
 		}
 		c2.stop();
 		
@@ -301,7 +301,7 @@ public class RandomTests {
 		c1.stop();
 		c2.start();
 		for(double d : nums) {
-			dump = MathUtil.round(d);
+			dump = MathsUtil.round(d);
 		}
 		c2.stop();
 		
@@ -659,12 +659,12 @@ public class RandomTests {
 		
 		c1.start();
 		for(int i = 0; i < elements; i++) {
-			dump = MathUtil.wrappedRemainder(nums[i], divs[i]);
+			dump = MathsUtil.wrappedRemainder(nums[i], divs[i]);
 		}
 		c1.stop();
 		c2.start();
 		for(int i = 0; i < elements; i++) {
-			dump = MathUtil.wrappedRemainder2(nums[i], divs[i]);
+			dump = MathsUtil.wrappedRemainder2(nums[i], divs[i]);
 		}
 		c2.stop();
 		
@@ -673,8 +673,8 @@ public class RandomTests {
 		c1.printComparison(c2);
 		
 		for(int i = 0; i < elements; i++) {
-			if(MathUtil.wrappedRemainder(nums[i], divs[i]) != MathUtil.wrappedRemainder2(nums[i], divs[i]))
-				System.out.println(nums[i] + "/" + divs[i] + ": " + MathUtil.wrappedRemainder(nums[i], divs[i]) + "||" + MathUtil.wrappedRemainder2(nums[i], divs[i]));
+			if(MathsUtil.wrappedRemainder(nums[i], divs[i]) != MathsUtil.wrappedRemainder2(nums[i], divs[i]))
+				System.out.println(nums[i] + "/" + divs[i] + ": " + MathsUtil.wrappedRemainder(nums[i], divs[i]) + "||" + MathsUtil.wrappedRemainder2(nums[i], divs[i]));
 		}
 	}
 	

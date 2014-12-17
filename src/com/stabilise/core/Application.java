@@ -5,24 +5,13 @@ import java.util.concurrent.TimeUnit;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.stabilise.core.state.State;
-import com.stabilise.input.InputManager;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 
 /**
- * An {@code Application} forms the basis of any program which seeks to utilise
- * {@link State} or {@link Screen} architecture. (Note that while
- * {@link InputManager} and {@link SoundManager} may be used independent of an
- * {@code Application}, this class automatically invokes all methods necessary
- * for their operation.) 
- * 
- * <p>This class oversees program execution by invoking the current state's
- * {@link State#update() update} method as many times per second equivalent to
- * {@code ticksPerSecond} (which is defined in the
- * {@link #Application(int) Application constructor}), and the current state's
- * {@link State#render() render} method as many times per second as the system
- * will allow, or as many times equivalent to the FPS cap, whichever is
- * smaller.
+ * An {@code Application} is designed to form the basis of any program which
+ * seeks to utilise a more advanced variant of the libGDX application
+ * architecture.
  * 
  * <p>In practice, a program's main class should extend {@code Application} as
  * such:
@@ -34,25 +23,26 @@ import com.stabilise.util.Profiler;
  *     }
  *     
  *     &#64;Override
- *     protected Screen getScreen() {
- *         return ScreenLWJGL.get("My Program");
- *     }
- *     
- *     &#64;Override
  *     protected State getInitialState() {
  *         return new MyState(); // Implementor of State; does whatever
  *     }
  * }</pre>
  * 
- * <p>To run the program, simply construct a new instance as per {@code new
- * MyProgram()}, and that instance will control your program henceforth. Note
- * that any code placed after such a construction will never be executed.
+ * <p>To use an application, simply pass its {@code ApplicationListener} to the
+ * libGDX application class in a manner similar to:
  * 
- * <p>A program's actual logic should be located in the initial {@code State}
- * and other states which it may set.
+ * <pre>new MyProgram().getListener()</pre>
+ * 
+ * <p>e.g. For a desktop application, the code may be similar to:
+ * 
+ * <pre>
+ * LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+ * new LwjglApplication(new MyProgram().getListener(), config);
+ * </pre>
  * 
  * <p>An Application is not thread-safe and should only be interacted with on
- * the thread that created it.
+ * the main thread (i.e. the one through which the Application itself invokes
+ * the current state's methods).
  */
 public abstract class Application {
 	
@@ -82,9 +72,6 @@ public abstract class Application {
 	private boolean stopped = false;
 	/** Whether or not the application is crashing. */
 	private boolean crashing = false;
-	
-	/** The application's input manager. */
-	protected final InputManager input;
 	
 	/** The number of update ticks executed per second. */
 	protected final int ticksPerSecond;
@@ -126,8 +113,6 @@ public abstract class Application {
 		nsPerTick = 1000000000L / ticksPerSecond;
 		
 		listener = new Listener(this);
-		
-		input = InputManager.get();
 		
 		state = getInitialState();
 		if(state == null)
@@ -231,6 +216,7 @@ public abstract class Application {
 				updated = true;
 				
 				tick();
+				state.update();
 			}
 			
 			profiler.end(); // end update
@@ -252,14 +238,14 @@ public abstract class Application {
 	/**
 	 * Executes an update tick. This method is invoked a number of times per
 	 * second equivalent to {@link #ticksPerSecond} specified in the
-	 * Application constructor.
+	 * Application constructor. The current state has {@link State#update()
+	 * update()} invoked immediately after this method is invoked.
 	 * 
-	 * <p>Note that this may be overridden to add any state-independent update
-	 * logic.
+	 * <p>This method does nothing in the default implementation and may be
+	 * optionally overridden.
 	 */
 	protected void tick() {
-		input.update();		// Input detecting
-		state.update();		// All application logic as implemented by the current state
+		// nothing in the default implementation
 	}
 	
 	/**
@@ -269,8 +255,6 @@ public abstract class Application {
 	 * down, thanks to libGDX.
 	 */
 	private void pause() {
-		input.unpressButtons();
-		input.unpressKeys();
 		if(state != null)
 			state.pause();
 	}

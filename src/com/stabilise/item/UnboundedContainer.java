@@ -33,7 +33,7 @@ public class UnboundedContainer extends Container {
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * @throws IndexOutOfBoundsException Thrown if {@code slot < 0}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}.
 	 */
 	@Override
 	public ItemStack getStack(int slot) {
@@ -61,8 +61,8 @@ public class UnboundedContainer extends Container {
 	 * <p><b>Note</b>: this operation always succeeds and hence always returns
 	 * {@code 0} for an UnboundedContainer.
 	 * 
-	 * @throws NullPointerException Thrown if {@code item} is {@code null}.
-	 * @throws IllegalArgumentException Thrown if {@code quantity <= 0}.
+	 * @throws NullPointerException if {@code item} is {@code null}.
+	 * @throws IllegalArgumentException if {@code quantity <= 0}.
 	 */
 	@Override
 	public int addItem(Item item, int quantity) {

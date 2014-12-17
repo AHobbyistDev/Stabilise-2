@@ -5,7 +5,6 @@ import com.stabilise.entity.controller.PlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
-import com.stabilise.input.InputManager;
 import com.stabilise.opengl.render.HUDRenderer;
 import com.stabilise.screen.menu.Menu;
 import com.stabilise.screen.menu.PauseMenu;

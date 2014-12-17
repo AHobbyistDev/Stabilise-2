@@ -8,7 +8,7 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 import com.stabilise.util.IOUtil;
-import com.stabilise.util.SimplexNoise;
+import com.stabilise.util.maths.SimplexNoise;
 
 public class SimplexTest {
 	

@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.stabilise.util.MathUtil;
+import com.stabilise.util.maths.MathsUtil;
 
 /**
  * This class represents a region of the world, which contains 16x16 slices,
@@ -501,7 +501,7 @@ public class Region {
 	 * @return The key to use for a region of the given coordinates.
 	 */
 	public static int getKey(int x, int y) {
-		return MathUtil.compactInt(x, y);
+		return MathsUtil.compactInt(x, y);
 	}
 	
 }

@@ -1,4 +1,4 @@
-package com.stabilise.util;
+package com.stabilise.util.maths;
 
 import java.util.Random;
 
@@ -62,10 +62,10 @@ public class PerlinNoise1D {
 	 */
 	public double noise(float x) {
 		x /= wavelength;
-		int flooredX = MathUtil.floor(x);
+		int flooredX = MathsUtil.floor(x);
 		
 		// Note: this implementation is technically that of value noise instead of perlin noise
-		return MathUtil.interpolateSinusoidal(genValue(flooredX), genValue(flooredX + 1), x - flooredX);
+		return MathsUtil.interpolateSinusoidal(genValue(flooredX), genValue(flooredX + 1), x - flooredX);
 	}
 	
 	/**

@@ -5,7 +5,7 @@ import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.entity.particle.ParticleSmoke;
-import com.stabilise.util.MathUtil;
+import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.World;
 
@@ -123,10 +123,10 @@ public class TileEntityMobSpawner extends TileEntity {
 	 */
 	private void spawnParticleOnMob(EntityMob e) {
 		ParticleSmoke p = new ParticleSmoke(world);
-		p.x = e.x + e.boundingBox.v00.x + world.rng.nextFloat() * e.boundingBox.width;
-		p.y = e.y + e.boundingBox.v00.y + world.rng.nextFloat() * e.boundingBox.height;
+		p.x = e.x + e.boundingBox.getV00().x + world.rng.nextFloat() * e.boundingBox.width;
+		p.y = e.y + e.boundingBox.getV11().y + world.rng.nextFloat() * e.boundingBox.height;
 		
-		ParticleGenerator.directParticle(p, 0.04f, 0.12f, 0, MathUtil.TAU);
+		ParticleGenerator.directParticle(p, 0.04f, 0.12f, 0, MathsUtil.TAU);
 		p.dy *= 0.1;
 		
 		world.addParticle(p);

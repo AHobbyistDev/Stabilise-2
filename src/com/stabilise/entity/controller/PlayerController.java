@@ -12,7 +12,7 @@ import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Log;
-import com.stabilise.util.MathUtil;
+import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.world.Direction;
 import com.stabilise.world.tile.Tiles;
 
@@ -93,7 +93,7 @@ public class PlayerController extends MobController implements Controllable {
 	 * tile-lengths.
 	 */
 	private int mouseXToWorldSpace(int x) {
-		return MathUtil.floor(((x - worldRenderer.offsetX) / worldRenderer.getScale()));
+		return MathsUtil.floor(((x - worldRenderer.offsetX) / worldRenderer.getScale()));
 	}
 	
 	/**
@@ -106,7 +106,7 @@ public class PlayerController extends MobController implements Controllable {
 	 * tile-lengths.
 	 */
 	private int mouseYToWorldSpace(int y) {
-		return MathUtil.floor(((y - worldRenderer.offsetY) / worldRenderer.getScale()));
+		return MathsUtil.floor(((y - worldRenderer.offsetY) / worldRenderer.getScale()));
 	}
 	
 	@Override
@@ -210,11 +210,11 @@ public class PlayerController extends MobController implements Controllable {
 				}
 				break;
 			case PLACE_TILE:
-				mob.world.setTileAt(MathUtil.floor(mob.x), MathUtil.floor(mob.y), Tiles.CHEST.getID());
+				mob.world.setTileAt(MathsUtil.floor(mob.x), MathsUtil.floor(mob.y), Tiles.CHEST.getID());
 				mob.y++;
 				break;
 			case INTERACT:
-				mob.world.getTileAt(mob.x, mob.y-1).handleInteract(mob.world, MathUtil.floor(mob.x), MathUtil.floor(mob.y-1), mob);
+				mob.world.getTileAt(mob.x, mob.y-1).handleInteract(mob.world, MathsUtil.floor(mob.x), MathsUtil.floor(mob.y-1), mob);
 				break;
 			case TEST_RANDOM_THING:
 				//mob.x = 0;
@@ -248,7 +248,7 @@ public class PlayerController extends MobController implements Controllable {
 		// TODO: temporary
 		scroll /= 120;			// For some reason this is the base scroll, on my computer at least
 		tileID -= scroll;
-		tileID = MathUtil.wrappedRemainder(tileID, 20);
+		tileID = MathsUtil.wrappedRemainder(tileID, 20);
 	}
 	
 }

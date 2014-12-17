@@ -1,8 +1,8 @@
 package com.stabilise.util.shape;
 
 import com.badlogic.gdx.math.Vector2;
-import com.stabilise.util.MathUtil;
-import com.stabilise.util.Matrix2;
+import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.Matrix2;
 
 /**
  * A FastAABB is a lightweight and slightly more optimised variant of
@@ -133,7 +133,7 @@ public class FastAABB extends Polygon implements AABB {
 	
 	@Override
 	protected Vector2[] generateAxes() {
-		return MathUtil.UNIT_VECTORS;
+		return MathsUtil.UNIT_VECTORS;
 	}
 	
 	@Override

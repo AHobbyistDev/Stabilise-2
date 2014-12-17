@@ -21,12 +21,12 @@ public class TaskThread extends Thread {
 	 * 
 	 * @param task The Task to run.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code task == null}.
+	 * @throws NullPointerException if {@code task == null}.
 	 */
 	public TaskThread(Task task) {
 		super(task);
 		if(task == null)
-			throw new IllegalArgumentException("task is null!");
+			throw new NullPointerException("task is null!");
 		this.task = task;
 	}
 	

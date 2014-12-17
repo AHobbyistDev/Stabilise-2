@@ -1,4 +1,4 @@
-package com.stabilise.util;
+package com.stabilise.util.maths;
 
 import com.badlogic.gdx.math.Vector2;
 
@@ -6,10 +6,10 @@ import com.badlogic.gdx.math.Vector2;
  * This class provides some utility methods and fields with mathematical
  * purpose.
  */
-public class MathUtil {
+public class MathsUtil {
 	
 	// non-instantiable
-	private MathUtil() {}
+	private MathsUtil() {}
 	
 	/** Holds the value given by Math.sqrt(2). */
 	public static final double SQRT_2 = Math.sqrt(2);
@@ -132,8 +132,8 @@ public class MathUtil {
 	 * 
 	 * @return The reflected clone of the point.
 	 */
-	public static Point reflectPoint(Point p) {
-		return new Point(-p.getX(), p.getY());
+	public static Point reflect(Point p) {
+		return new Point(-p.x, p.y);
 	}
 	
 	/**

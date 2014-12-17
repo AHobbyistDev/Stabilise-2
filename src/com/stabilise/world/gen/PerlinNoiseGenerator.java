@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Random;
 
 import com.stabilise.item.Items;
-import com.stabilise.util.PerlinNoise1D;
-import com.stabilise.util.SimplexNoise;
+import com.stabilise.util.maths.PerlinNoise1D;
+import com.stabilise.util.maths.SimplexNoise;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
 import com.stabilise.world.WorldData;

@@ -1,7 +1,7 @@
 package com.stabilise.util.shape;
 
 import com.badlogic.gdx.math.Vector2;
-import com.stabilise.util.Matrix2;
+import com.stabilise.util.maths.Matrix2;
 
 /**
  * A polygon is a shape with any number of vertices.

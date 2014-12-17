@@ -1,7 +1,7 @@
 package com.stabilise.entity;
 
 import com.stabilise.util.Log;
-import com.stabilise.util.MathUtil;
+import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.world.Direction;
 import com.stabilise.world.World;
@@ -302,7 +302,7 @@ public abstract class Entity extends GameObject {
 	private boolean columnValid(double x, double y) {
 		// Only check as many tiles above or below the tile in question that
 		// the height of the entity's bounding box would require.
-		int max = MathUtil.ceil(boundingBox.height);
+		int max = MathsUtil.ceil(boundingBox.height);
 		for(int i = 1; i <= max; i++) {
 			if(world.getTileAt(x, y + (dyp ? -i : i)).isSolid())
 				return false;
@@ -324,7 +324,7 @@ public abstract class Entity extends GameObject {
 	private boolean rowValid(double x, double y) {
 		// Only check as many tiles to the left or right of the tile in
 		// question that the width of the entity's bounding box would require.
-		int max = MathUtil.ceil(boundingBox.width);
+		int max = MathsUtil.ceil(boundingBox.width);
 		for(int i = 1; i <= max; i++) {
 			if(world.getTileAt(x + (dxp ? -i : i), y).isSolid())
 				return false;

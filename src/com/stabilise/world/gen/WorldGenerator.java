@@ -16,9 +16,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.stabilise.util.Log;
-import com.stabilise.util.MathUtil;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.world.GameWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Schematic;
@@ -437,7 +437,7 @@ public abstract class WorldGenerator {
 		// skip to the first part of the schematic that is within the region
 		if(initialX >= 0) {
 			tileX = (initialX % REGION_SIZE_IN_TILES) % SLICE_SIZE;
-			sliceX = MathUtil.floor(((initialX / SLICE_SIZE)) % REGION_SIZE);
+			sliceX = MathsUtil.floor(((initialX / SLICE_SIZE)) % REGION_SIZE);
 			x = 0;
 		} else {
 			tileX = 0;
@@ -447,7 +447,7 @@ public abstract class WorldGenerator {
 		
 		if(initialY >= 0) {
 			tileY = (initialY % REGION_SIZE_IN_TILES) % SLICE_SIZE;
-			sliceY = MathUtil.floor(((initialY / SLICE_SIZE)) % REGION_SIZE);
+			sliceY = MathsUtil.floor(((initialY / SLICE_SIZE)) % REGION_SIZE);
 			y = 0;
 		} else {
 			tileY = 0;

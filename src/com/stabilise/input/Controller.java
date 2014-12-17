@@ -1,24 +1,31 @@
 package com.stabilise.input;
 
+import static com.badlogic.gdx.Input.*;
+
 import java.io.IOException;
 
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
-import org.lwjgl.input.Keyboard;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.stabilise.core.Constants;
 import com.stabilise.util.ConfigFile;
 import com.stabilise.util.Log;
 
 /**
- * The Controller class manages mouse and keyboard inputs, and directs them in
- * accordance with the key config.
- * 
- * <p>Before interacting with this class, it it recommended that
- * {@link #initialise()} is invoked.
+ * A Controller translates keys into configurable controls.
  * 
  * @see InputManager
  */
-public class Controller implements Focusable {
+public class Controller implements InputProcessor {
+	
+	static {
+		initialise();
+	}
+	
+	/** Invoking this loads this class into memory. */
+	public static void poke() {}
 	
 	//--------------------==========--------------------
 	//-----=====Static Constants and Variables=====-----
@@ -26,43 +33,33 @@ public class Controller implements Focusable {
 	
 	/** Game controls. */
 	public static enum Control {
-		LEFT("left", Keyboard.KEY_LEFT, false),
-		RIGHT("right", Keyboard.KEY_RIGHT, false),
-		UP("up", Keyboard.KEY_UP, false),
-		DOWN("down", Keyboard.KEY_DOWN, false),
-		JUMP("jump", Keyboard.KEY_SPACE, false),
-		ATTACK("attack", Keyboard.KEY_F, false),
-		SPECIAL("special", Keyboard.KEY_G, false),
+		LEFT("left", Keys.LEFT),
+		RIGHT("right", Keys.RIGHT),
+		UP("up", Keys.UP),
+		DOWN("down", Keys.DOWN),
+		JUMP("jump", Keys.SPACE),
+		ATTACK("attack", Keys.F),
+		SPECIAL("special", Keys.G),
 		
-		PAUSE("pause", Keyboard.KEY_ESCAPE, false),
-		DEBUG("debug", Keyboard.KEY_F3, false),
+		PAUSE("pause", Keys.ESCAPE),
+		DEBUG("debug", Keys.F3),
 		
 		// Dev controls
 		
-		SAVE_LOG("savelog", Keyboard.KEY_L, true),
-		RESTORE("restore", Keyboard.KEY_R, true),
-		SUMMON("summon", Keyboard.KEY_T, true),
-		SUMMON_SWARM("summonswarm", Keyboard.KEY_Y, true),
-		KILL_MOBS("killallmobs", Keyboard.KEY_K, true),
-		FLYLEFT("flyleft", Keyboard.KEY_A, true),
-		FLYRIGHT("flyright", Keyboard.KEY_D, true),
-		FLYUP("flyup", Keyboard.KEY_W, true),
-		FLYDOWN("flydown", Keyboard.KEY_S, true),
-		DESTROY_TILES("destroytiles", Keyboard.KEY_Q, true),
-		ZOOM_OUT("zoomout", Keyboard.KEY_MINUS, true),
-		ZOOM_IN("zoomin", Keyboard.KEY_EQUALS, true),
-		PLACE_TILE("placetile", Keyboard.KEY_P, true),
-		INTERACT("interact", Keyboard.KEY_I, true),
-		TEST_RANDOM_THING("testrandomthing", Keyboard.KEY_0, true),
-		
-		SOUND_LOAD("loadsound", Keyboard.KEY_1, true),
-		SOUND_LOAD_STREAM("loadsoundasstream", Keyboard.KEY_2, true),
-		SOUND_UNLOAD("unloadsound", Keyboard.KEY_3, true),
-		SOUND_UNLOAD_INSTANCE("unloadsoundinstance", Keyboard.KEY_4, true),
-		SOUND_PLAY("playsound", Keyboard.KEY_5, true),
-		SOUND_PAUSE("pausesound", Keyboard.KEY_6, true),
-		SOUND_STOP("stopsound", Keyboard.KEY_7, true),
-		SOUND_LOOP("togglesoundloop", Keyboard.KEY_8, true);
+		SAVE_LOG("savelog", Keys.L, true),
+		RESTORE("restore", Keys.R, true),
+		SUMMON("summon", Keys.T, true),
+		SUMMON_SWARM("summonswarm", Keys.Y, true),
+		KILL_MOBS("killallmobs", Keys.K, true),
+		FLYLEFT("flyleft", Keys.A, true),
+		FLYRIGHT("flyright", Keys.D, true),
+		FLYUP("flyup", Keys.W, true),
+		FLYDOWN("flydown", Keys.S, true),
+		DESTROY_TILES("destroytiles", Keys.Q, true),
+		ZOOM_OUT("zoomout", Keys.MINUS, true),
+		ZOOM_IN("zoomin", Keys.EQUALS, true),
+		INTERACT("interact", Keys.I, true),
+		TEST_RANDOM_THING("testrandomthing", Keys.NUM_0, true);
 		
 		/** The field's name in the config file. */
 		public final String fieldName;
@@ -72,7 +69,22 @@ public class Controller implements Focusable {
 		 * testing. If {@code true}, the control will be inaccessible in
 		 * non-dev versions. */
 		public final boolean devControl;
+		/** Whether this is a valid control. An invalid control should not be
+		 * used. */
+		public final boolean valid;
 		
+		
+		/**
+		 * Creates a new non-dev Control.
+		 * 
+		 * @param fieldName The Control's field name in the config file. It is
+		 * implicitly trusted that this value is unique.
+		 * @param defaultKey The default key bound to the Control. It is
+		 * implicitly trusted that this value is unique.
+		 */
+		private Control(String fieldName, int defaultKey) {
+			this(fieldName, defaultKey, false);
+		}
 		
 		/**
 		 * Creates a new Control.
@@ -88,20 +100,13 @@ public class Controller implements Focusable {
 			this.fieldName = fieldName;
 			this.defaultKey = defaultKey;
 			this.devControl = devControl;
+			
+			valid = !devControl || Constants.DEV_VERSION;
 		}
 		
-		/**
-		 * Checks for whether or not the control is a valid and usable one.
-		 * 
-		 * @return {@code true} if the game is a dev version or the control
-		 * is not a dev control; {@code false} otherwise.
-		 */
-		private boolean isValid() {
-			return !devControl || Constants.DEV_VERSION;
-		}
 	};
 	
-	/** The key mappings. */
+	/** The key mappings. Maps keycodes to controls. */
 	private static DualHashBidiMap<Integer, Control> KEY_MAP = new DualHashBidiMap<Integer, Control>();
 	
 	/** Whether or not the controller mappings have been set up. */
@@ -111,12 +116,11 @@ public class Controller implements Focusable {
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
-	/** The input manager. */
-	public InputManager input;
+	/** The main Input. */
+	private final Input input;
 	
 	/** The focus of the controller. */
-	public Controllable focus;
-	
+	private Controllable focus;
 	
 	/**
 	 * Creates a new Controller. This will set itself as the focus of the
@@ -125,8 +129,7 @@ public class Controller implements Focusable {
 	public Controller(Controllable focus) {
 		this.focus = focus;
 		
-		input = InputManager.get();
-		input.setFocus(this);
+		input = Gdx.input;
 	}
 	
 	/**
@@ -136,46 +139,57 @@ public class Controller implements Focusable {
 	 * 
 	 * @return {@code true} if the key bound to the control is pressed,
 	 * {@code false} otherwise.
+	 * 
+	 * @throws NullPointerException if {@code control} is {@code null}.
 	 */
 	public boolean isControlPressed(Control control) {
-		// TODO: possible NPE
-		return control.isValid() && input.isKeyDown(KEY_MAP.getKey(control));
+		return control.valid && input.isKeyPressed(KEY_MAP.getKey(control));
 	}
 	
 	@Override
-	public void handleButtonPress(int button, int x, int y) {
-		focus.handleButtonPress(button, x, y);
+	public boolean keyDown(int keycode) {
+		Control control = KEY_MAP.get(keycode);
+		if(control != null && control.valid)
+			return focus.handleControlPress(control);
+		return false;
 	}
 	
 	@Override
-	public void handleButtonRelease(int button, int x, int y) {
-		focus.handleButtonRelease(button, x, y);
+	public boolean keyUp(int keycode) {
+		Control control = KEY_MAP.get(keycode);
+		if(control != null && control.valid)
+			return focus.handleControlRelease(control);
+		return false;
 	}
 	
 	@Override
-	public void handleKeyPress(int key) {
-		Control control = KEY_MAP.get(key);
-		if(control != null && control.isValid())
-			focus.handleControlPress(control);
-		focus.handleKeyPress(key);
+	public boolean keyTyped(char character) {
+		return false;
 	}
 	
 	@Override
-	public void handleKeyRelease(int key) {
-		Control control = KEY_MAP.get(key);
-		if(control != null && control.isValid())
-			focus.handleControlRelease(control);
-		focus.handleKeyRelease(key);
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		return false;
 	}
 	
 	@Override
-	public void handleMouseMove(int dx, int dy) {
-		// nothing to see here, move along
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		return false;
 	}
 	
 	@Override
-	public void handleMouseWheelScroll(int scroll) {
-		focus.handleMouseWheelScroll(scroll);
+	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		return false;
+	}
+	
+	@Override
+	public boolean mouseMoved(int screenX, int screenY) {
+		return false;
+	}
+	
+	@Override
+	public boolean scrolled(int amount) {
+		return false;
 	}
 	
 	//--------------------==========--------------------
@@ -221,17 +235,19 @@ public class Controller implements Focusable {
 	}
 	
 	/**
-	 * Initialises the Controller class.
+	 * Initialises the Controller class. This is invoked when this class is
+	 * loaded into memory.
 	 */
-	public static void initialise() {
+	private static void initialise() {
 		if(!initialised) {
-			setupConfig();
 			initialised = true;
+			setupConfig();
 		}
 	}
 	
 	/**
-	 * Sets up the control configuration.
+	 * Sets up the control configuration. If the configuration is already set
+	 * up, it will be reset.
 	 */
 	public static void setupConfig() {
 		if(!loadConfig()) {
@@ -271,30 +287,30 @@ public class Controller implements Focusable {
 		boolean missingConfigs = false;
 		
 		// Attempt to bind every control, whether it was stored or not
-		for(int i = 0; i < controls.length; i++) {
-			if(!bindKey(config.getInteger(controls[i].fieldName), controls[i]))
+		for(Control c : controls) {
+			if(!bindKey(config.getInteger(c.fieldName), c))
 				return false;
 		}
 		
 		// Check to see if any configs are missing from the config file, and
 		// bind them to the default value if so
-		for(int i = 0; i < controls.length; i++) {
-			if(!KEY_MAP.containsValue(controls[i]) && controls[i].isValid()) {
-				bindKey(controls[i].defaultKey, controls[i]);
+		for(Control c : controls) {
+			if(!KEY_MAP.containsValue(c) && c.valid) {
+				bindKey(c.defaultKey, c);
 				missingConfigs = true;
 			}
 		}
 		
 		// Lastly, weakly bind any unbound controls (e.g., if a new control was
 		// added since last the config was saved, it will need to be added)
-		for(int i = 0; i < controls.length; i++) {
-			if(controls[i].isValid() && bindKeyWeak(controls[i].defaultKey, controls[i]))
+		for(Control c : controls) {
+			if(c.valid && bindKeyWeak(c.defaultKey, c))
 				missingConfigs = true;
 		}
 		
 		// Finally, check to see if there remain any unbound configs
-		for(int i = 0; i < controls.length; i++) {
-			if(!KEY_MAP.containsValue(controls[i]) && controls[i].isValid())
+		for(Control c : controls) {
+			if(!KEY_MAP.containsValue(c) && c.valid)
 				return false;
 		}
 		
@@ -311,9 +327,9 @@ public class Controller implements Focusable {
 		ConfigFile config = new ConfigFile("controls");
 		
 		Control[] controls = Control.values();
-		for(int i = 0; i < controls.length; i++) {
-			if(controls[i].isValid())
-				config.addInteger(controls[i].fieldName, KEY_MAP.getKey(controls[i]));
+		for(Control c : controls) {
+			if(c.valid)
+				config.addInteger(c.fieldName, KEY_MAP.getKey(c));
 		}
 		
 		try {

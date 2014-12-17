@@ -1,11 +1,8 @@
 package com.stabilise.opengl.render.model;
 
-import org.lwjgl.util.Point;
-
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPerson;
-import com.stabilise.opengl.SpriteSheet;
-import com.stabilise.opengl.Texture;
+import com.stabilise.util.maths.Point;
 
 /**
  * The player model.

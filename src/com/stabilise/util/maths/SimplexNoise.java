@@ -1,4 +1,4 @@
-package com.stabilise.util;
+package com.stabilise.util.maths;
 
 import java.util.Random;
 
@@ -100,8 +100,8 @@ public class SimplexNoise {
 		
 		// Skew the input space to determine which simplex cell we're in
 		double s = (x + y) * SKEW_2D;		// Skew factor for 2D
-		int i = MathUtil.floor(x + s);
-		int j = MathUtil.floor(y + s);
+		int i = MathsUtil.floor(x + s);
+		int j = MathsUtil.floor(y + s);
 		double t = (i + j) * UNSKEW_2D;
 		double X0 = i - t;		// Unskew the cell origin back to (x,y) space
 		double Y0 = j - t;
@@ -164,7 +164,7 @@ public class SimplexNoise {
 		// The result is scaled to return values in the interval [-1,1].
 		
 		//return 70.0 * (n0 + n1 + n2);			// Produces a value between -1 and 1
-		return 0.5 + 35.0 * (n0 + n1 + n2) * MathUtil.SQRT_2;		// Produces a value between 0 and 1
+		return 0.5 + 35.0 * (n0 + n1 + n2) * MathsUtil.SQRT_2;		// Produces a value between 0 and 1
 	}
 	
 	/**
@@ -180,7 +180,7 @@ public class SimplexNoise {
 		// We require a normalised vector; this is unsatisfactory
 		//return new Vector2f(2*rnd.nextFloat()-1, 2*rnd.nextFloat()-1);
 		
-		double angle = MathUtil.TAU*rnd.nextDouble();
+		double angle = MathsUtil.TAU*rnd.nextDouble();
 		return grad.set((float)(Math.cos(angle)), (float)(Math.sin(angle)));
 	}
 	

@@ -1,4 +1,4 @@
-package com.stabilise.util;
+package com.stabilise.util.maths;
 
 import com.badlogic.gdx.math.Vector2;
 

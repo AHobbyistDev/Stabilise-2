@@ -6,7 +6,7 @@ import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.util.MathUtil;
+import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.shape.Rectangle;
 import com.stabilise.world.World;
 
@@ -95,7 +95,7 @@ public class EntityFireball extends EntityProjectile {
 			ParticleFlame p = new ParticleFlame(world);
 			p.x = x;
 			p.y = y;
-			ParticleGenerator.directParticle(p, 0.02f, 0.05f, 0, MathUtil.TAU);
+			ParticleGenerator.directParticle(p, 0.02f, 0.05f, 0, MathsUtil.TAU);
 			world.addParticle(p);
 		}
 	}
@@ -113,7 +113,7 @@ public class EntityFireball extends EntityProjectile {
 			p.x = x;
 			p.y = y;
 			//ParticleGenerator.directParticle(p, velocity - 0.05f, velocity + 0.15f, angle - Math.PI / 6, angle + Math.PI / 6);
-			ParticleGenerator.directParticle(p, 0.08f, 0.15f, 0, MathUtil.TAU);
+			ParticleGenerator.directParticle(p, 0.08f, 0.15f, 0, MathsUtil.TAU);
 			world.addParticle(p);
 		}
 	}

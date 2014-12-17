@@ -104,7 +104,7 @@ public class Stabilise extends Application {
 				Class.forName("com.stabilise.item.Items");
 				
 				Settings.initialise();
-				Controller.initialise();
+				Controller.poke();
 				
 				bootstrapped = true;
 			} catch(Throwable t) {
