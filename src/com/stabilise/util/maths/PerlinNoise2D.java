@@ -92,7 +92,7 @@ public class PerlinNoise2D {
 		float v00 = g00.dot(p);
 		float v01 = g01.dot(p.x, p.y - 1f);		//g01.dot(p.sub(Vector2.Y));
 		float v10 = g10.dot(p.x - 1f, p.y);		//g10.dot(p.sub(Vector2.X));
-		float v11 = g11.dot(p.x - 1f, p.y - 1f);	//g11.dot(p.sub(MathUtil.VEC_1_1));
+		float v11 = g11.dot(p.x - 1f, p.y - 1f);//g11.dot(p.sub(MathUtil.VEC_1_1));
 		
 		// Interpolate to attain a value
 		return MathsUtil.interpolateBisinusoidal(v00, v01, v10, v11, p.x, p.y) * MathsUtil.SQRT_2;

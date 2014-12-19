@@ -83,10 +83,10 @@ public class MathsUtil {
 	 * Calculates the remainder of a division operation; negative remainders
 	 * are wrapped as if by adding {@code div} to such remainders.
 	 * 
-	 * <p><b>Note</b>: This method is faster than
-	 * {@link #wrappedRemainder(int, int)},
-	 * <!-- See {@link com.stabilise.tests.RandomTests#wrappedRemainder()} -->
-	 * but this only works if {@code div} is a positive power of 2.
+	 * <p><b>Note</b>: This method is faster than {@link
+	 * #wrappedRemainder(int, int)}, but this only works if {@code div} is a
+	 * positive power of 2. As such, this method functions as a faster
+	 * alternative to the modulus operator for valid divisors.
 	 * 
 	 * @param num The numerator.
 	 * @param div The divisor, which should be a power of 2.
@@ -110,10 +110,10 @@ public class MathsUtil {
 	 * Calculates the remainder of a division operation; negative remainders
 	 * are wrapped as if by adding {@code div} to such remainders.
 	 * 
-	 * <p><b>Note</b>: This method is faster than
-	 * {@link #wrappedRemainder(long, long)},
-	 * <!-- See {@link com.stabilise.tests.RandomTests#wrappedRemainder()} -->
-	 * but this only works if {@code div} is a positive power of 2.
+	 * <p><b>Note</b>: This method is faster than {@link
+	 * #wrappedRemainder(long, long)}, but this only works if {@code div} is a
+	 * positive power of 2. As such, this method functions as a faster
+	 * alternative to the modulus operator for valid divisors.
 	 * 
 	 * @param num The numerator.
 	 * @param div The divisor, which should be a power of 2.
@@ -123,40 +123,6 @@ public class MathsUtil {
 	 */
 	public static long wrappedRemainder2(long num, long div) {
 		return num & (div - 1);
-	}
-	
-	/**
-	 * Clones a point and reflects the clone about the y-axis.
-	 * 
-	 * @param p The point.
-	 * 
-	 * @return The reflected clone of the point.
-	 */
-	public static Point reflect(Point p) {
-		return new Point(-p.x, p.y);
-	}
-	
-	/**
-	 * Subtracts {@code v2} from {@code v1} and returns the resultant vector.
-	 * 
-	 * @param v1 The first vector.
-	 * @param v2 The second vector.
-	 * 
-	 * @return The resultant vector.
-	 */
-	public static Vector2 sub(Vector2 v1, Vector2 v2) {
-		return new Vector2(v1.x - v2.x, v1.y - v2.y);
-	}
-	
-	/**
-	 * Clones a 2-dimensional vector and reflects the clone about the y-axis.
-	 * 
-	 * @param v The vector.
-	 * 
-	 * @return The reflected clone of the vector.
-	 */
-	public static Vector2 reflect(Vector2 v) {
-		return new Vector2(-v.x, v.y);
 	}
 	
 	/**

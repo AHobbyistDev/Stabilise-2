@@ -56,4 +56,36 @@ public class StringUtil {
 		}
 	}
 	
+	/**
+	 * Returns a string representation of the given float in decimal form,
+	 * with the fractional part, or <i>mantissa</i>, abbreviated to the
+	 * specified number of digits.
+	 * 
+	 * <p>Note that this method rounds toward negative infinity, so, for
+	 * example, {@code floatToNPlaces(1.19f, 1)} will return {@code "1.1"},
+	 * not {@code "1.2"}.
+	 * 
+	 * @param f The float to abbreviate.
+	 * @param n The number of digits to abbreviate the mantissa to.
+	 * 
+	 * @return The abbreviated number.
+	 */
+	public static String floatToNPlaces(float f, int n) {
+		if(n <= 0)
+			return Integer.toString((int)f);
+		String s = Float.toString(f);
+		int index = s.indexOf('.');
+		if(index == -1)
+			return s;
+		int mantissaChars = s.length() - index;
+		if(mantissaChars > n) {
+			return s.substring(0, index + n + 1);
+		} else {
+			StringBuilder sb = new StringBuilder(s);
+			for(; mantissaChars <= n; mantissaChars++)
+				sb.append('0');
+			return sb.toString();
+		}
+	}
+	
 }

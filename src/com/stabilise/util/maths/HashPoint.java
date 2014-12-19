@@ -3,7 +3,7 @@ package com.stabilise.util.maths;
 /**
  * A HashPoint is an optionally immutable point with a decently distributed
  * hashcode which may as such be used to compress two integers into a single
- * HashMap key more efficiently than an ordinary Point.
+ * Map key more efficiently than an ordinary Point.
  * 
  * <p>A HashPoint precomputes its hash code whenever it is modified.
  * 
@@ -13,7 +13,7 @@ public class HashPoint {
 	
 	private int x, y;
 	private int hash;
-	private final boolean immutable;
+	private final boolean immutable; // very autological
 	
 	
 	/**
@@ -76,16 +76,32 @@ public class HashPoint {
 		return y;
 	}
 	
+	/**
+	 * @throws IllegalStateException if this point is immutable.
+	 */
 	public void setX(int x) {
 		checkCanModify();
 		this.x = x;
 		genHash();
 	}
 	
+	/**
+	 * @throws IllegalStateException if this point is immutable.
+	 */
 	public void setY(int y) {
 		checkCanModify();
 		this.y = y;
 		genHash();
+	}
+	
+	/**
+	 * Checks for whether or not this point is mutable.
+	 * 
+	 * @return {@code true} if this point is mutable; {@code false} if it is
+	 * immutable.
+	 */
+	public boolean isMutable() {
+		return !immutable;
 	}
 	
 	/**
@@ -103,7 +119,7 @@ public class HashPoint {
 		//hash = ((x & 0xFFFF) << 16) + (y & 0xFFFF);
 		
 		// Shifts y by 16 bits modularly
-		hash = x ^ (y << 16) ^ ((y & 0xFFFF0000) >> 16);
+		hash = x ^ (y << 16) ^ ((y & 0xFFFF0000) >>> 16);
 	}
 	
 	@Override

@@ -12,7 +12,7 @@ import com.stabilise.util.maths.Matrix2;
  * <p>Unlike AxisAlignedBoundingBox, FastAABB is not a member of the
  * Polygon hierarchy as to avoid limitations imposed by superclasses.
  */
-public class FastAABB extends Polygon implements AABB {
+public class FastAABB extends AbstractPolygon implements AABB {
 	
 	/** The min vertex (i.e. bottom left) of the AABB. This is exposed for
 	 * convenience purposes, and should be treated as if it is immutable. */

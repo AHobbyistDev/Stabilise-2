@@ -63,8 +63,7 @@ public class TaskTimer {
 	/**
 	 * Stops the timer.
 	 * 
-	 * @throws IllegalStateException Thrown if the timer has not yet been
-	 * started.
+	 * @throws IllegalStateException if the timer has not yet been started.
 	 */
 	public void stop() {
 		if(init == 0L)
@@ -87,20 +86,16 @@ public class TaskTimer {
 	}
 	
 	/**
-	 * Gets the result of the timing operation, in nanoseconds.
-	 * 
-	 * @return The result.
+	 * @return The result of the timing operation, in nanoseconds.
 	 */
 	public String getResult() {
 		return getResult(TimeUnit.NANOSECONDS);
 	}
 	
 	/**
-	 * Gets the result of the timing operation, in the specified units.
-	 * 
 	 * @param unit The unit in which form to return the result.
 	 * 
-	 * @return The result.
+	 * @return The result of the timing operation, in the specified units.
 	 */
 	public String getResult(TimeUnit unit) {
 		return name + " took " + getDuration(unit) + " " + unitName(unit) + ".";
@@ -172,7 +167,7 @@ public class TaskTimer {
 	 * @param other The other task's timer.
 	 * 
 	 * @return The comparison string.
-	 * @throws IllegalStateException Thrown if either timer has not been run.
+	 * @throws IllegalStateException if either timer has not been run.
 	 */
 	public String getComparison(TaskTimer other) {
 		if(duration == 0L || other.duration == 0L)
@@ -191,7 +186,7 @@ public class TaskTimer {
 	 * 
 	 * @param other The other task's timer.
 	 * 
-	 * @throws IllegalStateException Thrown if either timer has not been run.
+	 * @throws IllegalStateException if either timer has not been run.
 	 */
 	public void printComparison(TaskTimer other) {
 		System.out.println(getComparison(other));
@@ -203,7 +198,7 @@ public class TaskTimer {
 	 * 
 	 * @param other The other task's timer.
 	 * 
-	 * @throws IllegalStateException Thrown if either timer has not been run.
+	 * @throws IllegalStateException if either timer has not been run.
 	 * @see com.stabilise.util.Log
 	 */
 	public void logComparison(TaskTimer other) {
@@ -217,7 +212,7 @@ public class TaskTimer {
 	 * @param other The other task's timer.
 	 * @param log The logging agent.
 	 * 
-	 * @throws IllegalStateException Thrown if either timer has not been run.
+	 * @throws IllegalStateException if either timer has not been run.
 	 * @see com.stabilise.util.Log
 	 */
 	public void logComparison(TaskTimer other, Log log) {

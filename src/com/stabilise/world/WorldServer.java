@@ -115,7 +115,7 @@ public class WorldServer extends World {
 	public Region getRegionAt(int x, int y, boolean generate) {
 		//x = (int)Math.floor((float)x / REGION_SIZE);
 		//y = (int)Math.floor((float)y / REGION_SIZE);
-		int key = Region.getKey(x, y);
+		int key = 0;//Region.getKey(x, y);
 		if(regions.containsKey(key)) {
 			return regions.get(key);
 		} else {

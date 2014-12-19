@@ -36,13 +36,6 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 	
 	
 	/**
-	 * Creates a new BiObjectIntMap, with an initial capacity of 512 entries.
-	 */
-	public BiObjectIntMap() {
-		this(512);
-	}
-	
-	/**
 	 * Creates a new BiObjectIntMap.
 	 * 
 	 * @param capacity The initial entry capacity.
@@ -51,7 +44,7 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 	 */
 	public BiObjectIntMap(int capacity) {
 		map = new IdentityHashMap<V, Integer>(capacity);
-		list = new ArrayList<V>();
+		list = new ArrayList<V>(capacity);
 	}
 	
 	/**

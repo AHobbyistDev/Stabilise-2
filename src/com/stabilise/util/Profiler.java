@@ -120,7 +120,7 @@ public class Profiler {
 	public void start(String section) {
 		if(effectivelyEnabled) {
 			if(section == null)
-				throw new NullPointerException("sectionName is null");
+				throw new NullPointerException("section is null");
 			
 			List<Section> curConstituents = stack.getLast().constituents;
 			
@@ -149,12 +149,15 @@ public class Profiler {
 	 * <p>This method should only be invoked following - and should correspond
 	 * to - an invocation of {@link #start(String)}.
 	 * 
-	 * @throws NoSuchElementException if this method is invoked more times than
+	 * @throws IllegalStateException if this method is invoked more times than
 	 * {@link #start(String)}. If this happens, remove the rogue call!
 	 */
 	public void end() {
-		if(effectivelyEnabled)
-			stack.removeLast().end();
+		if(effectivelyEnabled) {
+			Section s = stack.removeLast();
+			if(s == root)
+				throw new IllegalStateException();
+		}
 	}
 	
 	/**
@@ -218,7 +221,7 @@ public class Profiler {
 		enabled = false;
 		effectivelyEnabled = false;
 		
-		// try to free up memory for the gc
+		// let the gc do its work
 		stack.clear();
 		root = new Section(lastRoot.name);
 		stack.add(root);
@@ -291,7 +294,7 @@ public class Profiler {
 		 * @return The data.
 		 */
 		private SectionData getData() {
-			return getData("", 100D, 100D);
+			return getData("", 100f, 100f);
 		}
 		
 		/**
@@ -305,9 +308,9 @@ public class Profiler {
 		 * 
 		 * @return The data.
 		 */
-		private SectionData getData(String parentName, double localPercent, double totalPercent) {
+		private SectionData getData(String parentName, float localPercent, float totalPercent) {
 			if(parentName != "")
-				parentName += "." + name; 
+				parentName += "." + name;
 			else
 				parentName = name;
 			
@@ -320,17 +323,17 @@ public class Profiler {
 			for(Section s : constituents) {
 				unspecified -= s.duration;
 				
-				double locPercent = duration == 0L ? 0D :
-					((double)s.duration / duration);
-				double totPercent = locPercent * totalPercent;
+				float locPercent = duration == 0L ? 0f :
+					((float)s.duration / duration);
+				float totPercent = locPercent * totalPercent;
 				
 				children.add(s.getData(parentName, 100*locPercent, totPercent));
 			}
 			
 			//if(unspecified > 0L) {
-			double locPercent = duration == 0L ? 0D :
-				((double)unspecified / duration);
-			double totPercent = locPercent * totalPercent;
+			float locPercent = duration == 0L ? 0f :
+				((float)unspecified / duration);
+			float totPercent = locPercent * totalPercent;
 			children.add(new SectionDataUnspecified(parentName, unspecified, 100*locPercent, totPercent));
 			//}
 			
@@ -344,6 +347,11 @@ public class Profiler {
 	
 	/**
 	 * Data about a profiling section.
+	 * 
+	 * <p>There are two types of sections which may be represented by an
+	 * instance of this class - an ordinary section and an unspecified section.
+	 * Ordinary sections always contain an unspecified section, plus any
+	 * child sections added during program lifetime.
 	 */
 	public static abstract class SectionData implements Comparable<SectionData> {
 		
@@ -357,16 +365,16 @@ public class Profiler {
 		public final long duration;
 		/** The percentage of its parent section which is constituted by this
 		 * section. */
-		public final double localPercent;
+		public final float localPercent;
 		/** The overall percentage which is constituted by this section. */
-		public final double totalPercent;
+		public final float totalPercent;
 		
 		
 		/**
 		 * Creates a new SectionData. Neither string parameter should be null.
 		 */
 		private SectionData(String name, String absoluteName,
-				long duration, double localPercent, double totalPercent) {
+				long duration, float localPercent, float totalPercent) {
 			this.name = name;
 			this.absoluteName = absoluteName;
 			this.duration = duration;
@@ -376,8 +384,7 @@ public class Profiler {
 		
 		/**
 		 * Checks for whether or not this section has any constituent sections.
-		 * This should only return {@code false} if this is an unspecified
-		 * section.
+		 * This only returns {@code false} if this is an unspecified section.
 		 * 
 		 * @return {@code true} if this section has constituent sections;
 		 * {@code false} otherwise.
@@ -417,9 +424,9 @@ public class Profiler {
 		 */
 		private String toString(String prefix) {
 			StringBuilder sb = new StringBuilder(prefix);
-			sb.append(StringUtil.doubleToNPlaces(totalPercent, 2));
+			sb.append(StringUtil.floatToNPlaces(totalPercent, 2));
 			sb.append("% ");
-			sb.append(StringUtil.doubleToNPlaces(localPercent, 2));
+			sb.append(StringUtil.floatToNPlaces(localPercent, 2));
 			sb.append("% ");
 			sb.append(name);
 			sb.append(" (");
@@ -459,7 +466,7 @@ public class Profiler {
 		
 		
 		private SectionDataNormal(String name, String absoluteName,
-				long duration, double localPercent, double totalPercent) {
+				long duration, float localPercent, float totalPercent) {
 			super(name, absoluteName, duration, localPercent, totalPercent);
 		}
 		
@@ -486,7 +493,7 @@ public class Profiler {
 	private static class SectionDataUnspecified extends SectionData {
 		
 		private SectionDataUnspecified(String parentName,
-				long duration, double localPercent, double totalPercent) {
+				long duration, float localPercent, float totalPercent) {
 			super("unspecified", parentName + ".unspecified", duration, localPercent, totalPercent);
 		}
 		

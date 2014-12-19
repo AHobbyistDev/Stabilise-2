@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
@@ -762,6 +763,68 @@ public class RandomTests {
 		t1.printComparison(t2);
 	}
 	
+	protected static void wrappedRemainder2() {
+		final int elements = 10000000;
+		final int numMax = 0xFFFF + 1;
+		final int numMin = 0;
+		final int numDiff = numMax - numMin;
+		final int[] nums = new int[elements];
+		final int[] divs = new int[elements];
+		Random rnd = new Random();
+		
+		for(int i = 0; i < 32; i++) { // assign every PoT to a div
+			divs[i] = 1 << i;
+		}
+		
+		System.out.println("Populating elements...");
+		for(int i = 0; i < elements; i++) {
+			nums[i] = rnd.nextInt(numDiff) - numMin;
+			divs[i] = divs[MathsUtil.wrappedRemainder2(i, 32)];
+		}
+		
+		final Runnable modulus = new Runnable() {
+			@Override public void run() {
+				@SuppressWarnings("unused")
+				int dump;
+				for(int i = 0; i < elements; i++) {
+					dump = nums[i] % divs[i];
+				}
+			}
+		};
+		
+		final Runnable rem1 = new Runnable() {
+			@Override public void run() {
+				@SuppressWarnings("unused")
+				int dump;
+				for(int i = 0; i < elements; i++) {
+					dump = MathsUtil.wrappedRemainder(nums[i], divs[i]);
+				}
+			}
+		};
+		
+		final Runnable rem2 = new Runnable() {
+			@Override public void run() {
+				@SuppressWarnings("unused")
+				int dump;
+				for(int i = 0; i < elements; i++) {
+					dump = MathsUtil.wrappedRemainder2(nums[i], divs[i]);
+				}
+			}
+		};
+		
+		final int iterations = 64;
+		
+		test(new Runnable() {
+			@Override
+			public void run() {
+				time("% operator", iterations, modulus);
+				time("wrappedRemainder", iterations, rem1);
+				time("wrappedRemainder2", iterations, rem2);
+			}
+		}, 10);
+		
+	}
+	
 	// ---------- TIMER ----------
 	
 	private static long prev;
@@ -795,6 +858,49 @@ public class RandomTests {
 		System.out.println("Time to " + task + ": " + (now - prev));
 	}
 	
+	private static void test(Runnable tester, int warmups) {
+		System.out.println("\nStarting warmup...\n<<-------------------->>\n");
+		printResult = false;
+		for(int i = 0; i < warmups; i++) {
+			System.out.println("Doing warmup " + (i+1) + "/" + warmups);
+			tester.run();
+		}
+		System.out.println("\nWarmup completed...\n<<-------------------->>\n");
+		printResult = true;
+		tester.run();
+	}
+	
+	private static boolean printResult = false;
+	
+	/**
+	 * invoke this instead of {@link #time(boolean, String, int, Runnable)} if
+	 * {@link #test(Runnable)} is beinng used to oversee testing.
+	 */
+	private static TaskTimer time(String name, int iterations, Runnable task) {
+		return time(printResult, name, iterations, task);
+	}
+	
+	/**
+	 * times a runnable
+	 * 
+	 * @param print true if the result should be printed to system.out
+	 * @param name the name of the task
+	 * @param iterations the number of times to perform the task
+	 * @param task the task
+	 * 
+	 * @return the TaskTimer which timed the task
+	 */
+	private static TaskTimer time(boolean print, String name, int iterations, Runnable task) {
+		TaskTimer t = new TaskTimer(name);
+		t.start();
+		while(iterations-- > 0)
+			task.run();
+		t.stop();
+		if(print)
+			t.printResult(TimeUnit.MILLISECONDS);
+		return t;
+	}
+	
 	// ---------- MAIN ----------
 	public static void main(String[] args) {
 		//hashMapVsIntHashMap();
@@ -816,7 +922,8 @@ public class RandomTests {
 		//listIterationAndClearing();
 		//wrappedRemainder();
 		//testHashes();
-		gdxObjectMap();
+		//gdxObjectMap();
+		wrappedRemainder2();
 		
 		//String s = "abcxyzABCXYZ a()a_a-a*a/a\\a.a'a\"";
 		//System.out.println(s + "\n" + IOUtil.getLegalString(s));
