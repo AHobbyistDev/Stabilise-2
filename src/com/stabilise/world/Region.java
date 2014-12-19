@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.HashPoint;
 
 /**
  * This class represents a region of the world, which contains 16x16 slices,
@@ -56,10 +56,10 @@ public class Region {
 	 * <i>Note slices are indexed in the form <b>[y][x]</b>.</i> */
 	public final Slice[][] slices = new Slice[REGION_SIZE][REGION_SIZE];
 	
-	/** The region's x-coordinate, in region lengths. */
-	public final int x;
-	/** The region's y-coordinate, in region lengths. */
-	public final int y;
+	/** The region's location, whose components are in region-lengths. This
+	 * should be used as this region's key in any sort of Map implementation.
+	 * This is constructed as immutable. */
+	public final HashPoint loc;
 	
 	/** The coordinate offset on the x-axis due to the coordinates of the
 	 * region, in slice-lengths. */
@@ -114,8 +114,8 @@ public class Region {
 	 */
 	public Region(GameWorld world, int x, int y) {
 		this.world = world;
-		this.x = x;
-		this.y = y;
+		
+		loc = getKey(x, y);
 		
 		offsetX = x * REGION_SIZE;
 		offsetY = y * REGION_SIZE;
@@ -247,7 +247,7 @@ public class Region {
 	 * file system.
 	 */
 	public File getFile() {
-		return new File(world.getDir(), World.DIR_REGIONS + "r_" + x + "_" + y + ".region");
+		return new File(world.getDir(), World.DIR_REGIONS + "r_" + loc.getX() + "_" + loc.getY() + ".region");
 	}
 	
 	/**
@@ -314,7 +314,7 @@ public class Region {
 	 * {@link Slice#clone()}.
 	 */
 	public Region clone() {
-		Region region = new Region(world, x, y);
+		Region region = new Region(world, loc.getX(), loc.getY());
 		
 		region.generated = generated;
 		
@@ -384,12 +384,12 @@ public class Region {
 	 */
 	@Override
 	public int hashCode() {
-		return getKey(x, y);
+		return loc.hashCode();
 	}
 	
 	@Override
 	public String toString() {
-		return "Region[" + x + "," + y + "]";
+		return "Region[" + loc.getX() + "," + loc.getY() + "]";
 	}
 	
 	//--------------------==========--------------------
@@ -493,15 +493,17 @@ public class Region {
 	//--------------------==========--------------------
 	
 	/**
-	 * Gets the integer key to use for referencing a region.
+	 * Returns an immutable HashPoint to use for referencing a region. The
+	 * returned point is equivalent to a region with the same coordinates'
+	 * {@link Region#loc loc} member.
 	 * 
 	 * @param x The x-coordinate of the region, in region-lengths.
 	 * @param y The y-coordinate of the region, in region-lengths.
 	 * 
 	 * @return The key to use for a region of the given coordinates.
 	 */
-	public static int getKey(int x, int y) {
-		return MathsUtil.compactInt(x, y);
+	public static HashPoint getKey(int x, int y) {
+		return new HashPoint(x, y, false);
 	}
 	
 }

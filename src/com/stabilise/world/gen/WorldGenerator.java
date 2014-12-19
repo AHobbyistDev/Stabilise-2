@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.stabilise.util.Log;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.maths.HashPoint;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.world.GameWorld;
 import com.stabilise.world.Region;
@@ -96,18 +97,15 @@ public abstract class WorldGenerator {
 	/** Whether or not the generator has been shut down. This is volatile. */
 	private volatile boolean isShutdown = false;
 	
-	/** A map of region IDs to each region's lock. We don't map regions
-	 * directly because storing them here will have them avoid garbage
-	 * collection, plus potential collisions may arise when a region is
-	 * unloaded then loaded again by the world (even though this should never
-	 * happen while the world generator is operating with the region), which
-	 * causes discrepancies. */
-	private final ConcurrentHashMap<Integer, RegionLock> regionLocks =
-			new ConcurrentHashMap<Integer, RegionLock>();
+	/** A map of region points to each region's lock. A region's {@link
+	 * Region#loc loc} member should be used as its key. */
+	private final ConcurrentHashMap<HashPoint, RegionLock> regionLocks =
+			new ConcurrentHashMap<HashPoint, RegionLock>();
 	
-	/** A map of regions which have been cached by the world generator. */
-	private final ConcurrentHashMap<Integer, CachedRegion> cachedRegions =
-			new ConcurrentHashMap<Integer, CachedRegion>();
+	/** A map of regions which have been cached by the world generator. A
+	 * region's {@link Region#loc loc} member should be used as its key.*/
+	private final ConcurrentHashMap<HashPoint, CachedRegion> cachedRegions =
+			new ConcurrentHashMap<HashPoint, CachedRegion>();
 	/** The object to synchronise on to ensure region storage operations in the
 	 * world and WorldGenerator remain atomic. */
 	public final Object lock = new Object();
@@ -156,7 +154,7 @@ public abstract class WorldGenerator {
 	 * 
 	 * @param region The region to generate.
 	 * 
-	 * @throws NullPointerException Thrown if {@code region} is {@code null}.
+	 * @throws NullPointerException if {@code region} is {@code null}.
 	 */
 	@UserThread("MainThread")
 	public final void generate(final Region region) {
@@ -164,7 +162,7 @@ public abstract class WorldGenerator {
 		if(region.isGenerated() || !region.loaded)
 			return;
 		
-		System.out.println(region + " - " + region.generated + ", " + region.hasQueuedSchematics);
+		//System.out.println(region + " - " + region.generated + ", " + region.hasQueuedSchematics);
 		
 		// Abort if the region is being generated.
 		
@@ -197,7 +195,7 @@ public abstract class WorldGenerator {
 	 * 
 	 * @param region The region to generate.
 	 * 
-	 * @throws NullPointerException Thrown if {@code region} is {@code null}.
+	 * @throws NullPointerException if {@code region} is {@code null}.
 	 */
 	@UserThread("WorkerThread")
 	public final void generateSynchronously(Region region) {
@@ -215,12 +213,12 @@ public abstract class WorldGenerator {
 	 * @param cached Whether or not the region should be treated as a cached
 	 * region.
 	 * 
-	 * @throws NullPointerException Thrown if {@code r} is {@code null}.
+	 * @throws NullPointerException if {@code r} is {@code null}.
 	 */
 	@UserThread("WorkerThread")
 	private void genRegion(Region r, boolean cached) {
 		// This should be non-null
-		RegionLock l = regionLocks.get(r.hashCode());
+		RegionLock l = regionLocks.get(r.loc);
 		
 		if(isShutdown) {
 			releaseRegion(r);
@@ -242,7 +240,12 @@ public abstract class WorldGenerator {
 				// Set up the region's slices
 				for(int y = 0; y < REGION_SIZE; y++) {
 					for(int x = 0; x < REGION_SIZE; x++) {
-						r.slices[y][x] = new Slice(x + r.x * REGION_SIZE, y + r.y * REGION_SIZE, r, new int[SLICE_SIZE][SLICE_SIZE]);
+						r.slices[y][x] = new Slice(
+								x + r.loc.getX() * REGION_SIZE,
+								y + r.loc.getY() * REGION_SIZE,
+								r,
+								new int[SLICE_SIZE][SLICE_SIZE]
+						);
 					}
 				}
 				
@@ -407,18 +410,18 @@ public abstract class WorldGenerator {
 		
 		// Inform neighbouring regions of the schematic if the schematic overlaps into them
 		if(params.informRegions) {
-			for(int regionY = r.y + params.offsetY + ((tileY + sliceY * SLICE_SIZE - sc.y) / (REGION_SIZE_IN_TILES));
-					regionY <= r.y + params.offsetY + ((tileY + sliceY * SLICE_SIZE - sc.y + sc.height) / (REGION_SIZE_IN_TILES));
+			for(int regionY = r.loc.getX() + params.offsetY + ((tileY + sliceY * SLICE_SIZE - sc.y) / (REGION_SIZE_IN_TILES));
+					regionY <= r.loc.getY() + params.offsetY + ((tileY + sliceY * SLICE_SIZE - sc.y + sc.height) / (REGION_SIZE_IN_TILES));
 					regionY++) {
-				for(int regionX = r.x + params.offsetX + ((tileX + sliceX * SLICE_SIZE - sc.x) / (REGION_SIZE_IN_TILES));
-						regionX <= r.x + params.offsetX + ((tileX + sliceX * SLICE_SIZE - sc.x + sc.width) / (REGION_SIZE_IN_TILES));
+				for(int regionX = r.loc.getX() + params.offsetX + ((tileX + sliceX * SLICE_SIZE - sc.x) / (REGION_SIZE_IN_TILES));
+						regionX <= r.loc.getX() + params.offsetX + ((tileX + sliceX * SLICE_SIZE - sc.x + sc.width) / (REGION_SIZE_IN_TILES));
 						regionX++) {
-					if(regionY != r.y || regionX != r.x) {
+					if(regionY != r.loc.getY() || regionX != r.loc.getX()) {
 						Region cachedRegion = cacheRegion(regionX, regionY);
 						// Synchronise on the region's schematics in case they
 						// are being implanted on its gen thread
 						synchronized(cachedRegion.queuedSchematics) {
-							cachedRegion.queueSchematic(sc.name, sliceX, sliceY, tileX, tileY, r.x - regionX, r.y - regionY);
+							cachedRegion.queueSchematic(sc.name, sliceX, sliceY, tileX, tileY, r.loc.getX() - regionX, r.loc.getY() - regionY);
 							cachedRegion.unsavedChanges = true;
 						}
 					}
@@ -545,7 +548,7 @@ public abstract class WorldGenerator {
 		
 		// If the region is already cached by this thread, use it
 		for(Region r : cRegions) {
-			if(r.x == x && r.y == y)
+			if(r.loc.getX() == x && r.loc.getY() == y)
 				return r;
 		}
 		
@@ -567,7 +570,7 @@ public abstract class WorldGenerator {
 					if(region == null)
 						region = new Region(world, x, y);
 					cachedRegion = new CachedRegion(region);
-					cachedRegions.put(Region.getKey(x, y), cachedRegion);
+					cachedRegions.put(region.loc, cachedRegion);
 				}
 				wasUncached = true;
 			}
@@ -602,11 +605,10 @@ public abstract class WorldGenerator {
 	 */
 	@UserThread("WorkerThread")
 	private void uncacheRegion(Region region) {
-		int key = Region.getKey(region.x, region.y);
 		// Synchronised to make this atomic
 		synchronized(cachedRegions) {
-			if(cachedRegions.get(key).decrementAndCheck())
-				cachedRegions.remove(key);
+			if(cachedRegions.get(region.loc).decrementAndCheck())
+				cachedRegions.remove(region.loc);
 			else
 				return;	
 		}
@@ -637,7 +639,7 @@ public abstract class WorldGenerator {
 	 * otherwise.
 	 */
 	private boolean isGenerating(Region r) {
-		RegionLock l = regionLocks.get(r.hashCode());
+		RegionLock l = regionLocks.get(r.loc);
 		return l != null && l.isLocked();
 	}
 	
@@ -656,8 +658,11 @@ public abstract class WorldGenerator {
 		// Synchronised to make this atomic. See releaseRegion().
 		// Is there a way to avoid overt synchronisation?
 		synchronized(r) {
-			if((l = regionLocks.get(r.hashCode())) == null)
-				regionLocks.put(r.hashCode(), l = new RegionLock());
+			l = regionLocks.get(r.loc);
+			if(l == null) {
+				l = new RegionLock();
+				regionLocks.put(r.loc, l);
+			}
 			// Pre-lock while synced so isUnused() returns false in releaseRegion
 			l.preLock();
 		}
@@ -705,12 +710,12 @@ public abstract class WorldGenerator {
 	private void releaseRegion(Region r) {
 		// No need to check to see if this is null; no thread should remove the
 		// mapping while the lock is obtained
-		RegionLock l = regionLocks.get(r.hashCode());
+		RegionLock l = regionLocks.get(r.loc);
 		l.unlock();
 		// Synchronised to make this atomic. See prepareLock().
 		synchronized(r) {
 			if(l.isUnused())
-				regionLocks.remove(r.hashCode());
+				regionLocks.remove(r.loc);
 		}
 	}
 	

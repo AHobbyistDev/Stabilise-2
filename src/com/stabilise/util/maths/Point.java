@@ -9,7 +9,7 @@ public class Point {
 	
 	
 	/**
-	 * Creates a new point with x and y components 0.
+	 * Creates a new point with x = 0 and y = 0.
 	 */
 	public Point() {
 		x = 0;
@@ -34,5 +34,22 @@ public class Point {
 		this.y = y;
 		return this;
 	}
-
+	
+	@Override
+	public int hashCode() {
+		return x ^ y; // fairly basic hash
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(!(o instanceof Point)) return false;
+		Point p = (Point)o;
+		return x == p.x && y == p.y;
+	}
+	
+	@Override
+	public String toString() {
+		return "Point[" + x + "," + y + "]";
+	}
+	
 }

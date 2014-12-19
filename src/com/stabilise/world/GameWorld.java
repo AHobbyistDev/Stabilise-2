@@ -18,6 +18,7 @@ import com.stabilise.entity.GameCamera;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.maths.HashPoint;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.save.WorldLoader;
 import com.stabilise.world.tile.Tile;
@@ -47,7 +48,7 @@ public class GameWorld extends World {
 	
 	/** The map of all loaded regions. This is concurrent as to prevent
 	 * problems when relevant methods are accessed by the world loader. */
-	public final ConcurrentHashMap<Integer, Region> regions;
+	public final ConcurrentHashMap<HashPoint, Region> regions;
 	/** The slice map, which manages 'loaded' slices. */
 	private SliceMap sliceMap;
 	
@@ -87,7 +88,7 @@ public class GameWorld extends World {
 		log = Log.getAgent("world");
 		log.mute();
 		
-		regions = new ConcurrentHashMap<Integer, Region>();
+		regions = new ConcurrentHashMap<HashPoint, Region>();
 		
 		config = new WorldData(this, info);
 		loader = WorldLoader.getLoader(config);
@@ -273,7 +274,7 @@ public class GameWorld extends World {
 	}
 	
 	/**
-	 * Checks for whether or not a region is loaded by the server.
+	 * Checks for whether or not a region is in memory.
 	 * 
 	 * @param x The x-coordinate of the region, in region-lengths.
 	 * @param y The y-coordinate of the region, in region-lengths.
@@ -333,10 +334,8 @@ public class GameWorld extends World {
 	 */
 	@UserThread("MainThread")
 	public Region loadRegion(int x, int y, boolean generate) {
-		int key = Region.getKey(x, y);
-		
 		// Get the region if it is already loaded
-		Region r = regions.get(key);
+		Region r = regions.get(Region.getKey(x, y));
 		if(r != null) {
 			if(generate)
 				generator.generate(r);
@@ -348,14 +347,9 @@ public class GameWorld extends World {
 		// Synchronised to make this atomic. See WorldGenerator.cacheRegion()
 		synchronized(generator.lock) {
 			r = generator.getCachedRegion(x, y);
-			if(r != null)
-				regions.put(key, r);
-		}
-		
-		// If that doesn't work, simply create the region
-		if(r == null) {
-			r = new Region(this, x, y);
-			regions.put(key, r);
+			if(r == null) // if it's not cached, create it
+				r = new Region(this, x, y);
+			regions.put(r.loc, r);
 		}
 		
 		// Now, we load the region appropriately
@@ -381,9 +375,9 @@ public class GameWorld extends World {
 		saveRegion(r);
 		
 		// Now unload entities in the region as well...
-		int minX = r.x * Region.REGION_SIZE_IN_TILES;
+		int minX = r.loc.getX() * Region.REGION_SIZE_IN_TILES;
 		int maxX = minX + Region.REGION_SIZE_IN_TILES;
-		int minY = r.y * Region.REGION_SIZE_IN_TILES;
+		int minY = r.loc.getY() * Region.REGION_SIZE_IN_TILES;
 		int maxY = minY + Region.REGION_SIZE_IN_TILES;
 		
 		for(Entity e : getEntities()) {
