@@ -164,14 +164,10 @@ public abstract class WorldGenerator {
 		
 		//System.out.println(region + " - " + region.generated + ", " + region.hasQueuedSchematics);
 		
-		// Abort if the region is being generated.
-		
+		// Abort if the region is being generated:
 		// Obtaining the region here prevents a large flux of calls (e.g.
 		// when the world is initially loaded) from each creating a new
-		// request; however, the possibility of deadlock exists in that the
-		// executor may not execute the following task because all currently-
-		// executing tasks are waiting to obtain the lock (however unlikely).
-		// TODO: Find a way to fix the deadlock while minimising flux.
+		// request and cluttering the executor
 		if(isGenerating(region) || !tryObtainRegion(region))
 			return;
 		
@@ -282,7 +278,7 @@ public abstract class WorldGenerator {
 			
 			r.generated = true;
 		} catch(Throwable t) {
-			log.logCritical("Worldgen failed?", t);
+			log.logCritical("Worldgen failed!", t);
 		} finally {
 			// Enclosed in a finally block in case generateRegion() disobeys
 			// the order to not throw an exception or error.
@@ -309,7 +305,7 @@ public abstract class WorldGenerator {
 			final Region cRegion = i.next();
 			i.remove();
 			
-			RegionLock cLock = regionLocks.get(cRegion.hashCode()); // may be null
+			RegionLock cLock = regionLocks.get(cRegion.loc); // may be null
 			
 			// If the region is generated for the most part, implant the
 			// schematics

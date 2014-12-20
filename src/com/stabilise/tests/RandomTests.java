@@ -660,12 +660,12 @@ public class RandomTests {
 		
 		c1.start();
 		for(int i = 0; i < elements; i++) {
-			dump = MathsUtil.wrappedRemainder(nums[i], divs[i]);
+			dump = MathsUtil.wrappedRem(nums[i], divs[i]);
 		}
 		c1.stop();
 		c2.start();
 		for(int i = 0; i < elements; i++) {
-			dump = MathsUtil.wrappedRemainder2(nums[i], divs[i]);
+			dump = MathsUtil.wrappedRem2(nums[i], divs[i]);
 		}
 		c2.stop();
 		
@@ -674,8 +674,8 @@ public class RandomTests {
 		c1.printComparison(c2);
 		
 		for(int i = 0; i < elements; i++) {
-			if(MathsUtil.wrappedRemainder(nums[i], divs[i]) != MathsUtil.wrappedRemainder2(nums[i], divs[i]))
-				System.out.println(nums[i] + "/" + divs[i] + ": " + MathsUtil.wrappedRemainder(nums[i], divs[i]) + "||" + MathsUtil.wrappedRemainder2(nums[i], divs[i]));
+			if(MathsUtil.wrappedRem(nums[i], divs[i]) != MathsUtil.wrappedRem2(nums[i], divs[i]))
+				System.out.println(nums[i] + "/" + divs[i] + ": " + MathsUtil.wrappedRem(nums[i], divs[i]) + "||" + MathsUtil.wrappedRem2(nums[i], divs[i]));
 		}
 	}
 	
@@ -779,7 +779,7 @@ public class RandomTests {
 		System.out.println("Populating elements...");
 		for(int i = 0; i < elements; i++) {
 			nums[i] = rnd.nextInt(numDiff) - numMin;
-			divs[i] = divs[MathsUtil.wrappedRemainder2(i, 32)];
+			divs[i] = divs[MathsUtil.wrappedRem2(i, 32)];
 		}
 		
 		final Runnable modulus = new Runnable() {
@@ -797,7 +797,7 @@ public class RandomTests {
 				@SuppressWarnings("unused")
 				int dump;
 				for(int i = 0; i < elements; i++) {
-					dump = MathsUtil.wrappedRemainder(nums[i], divs[i]);
+					dump = MathsUtil.wrappedRem(nums[i], divs[i]);
 				}
 			}
 		};
@@ -807,7 +807,7 @@ public class RandomTests {
 				@SuppressWarnings("unused")
 				int dump;
 				for(int i = 0; i < elements; i++) {
-					dump = MathsUtil.wrappedRemainder2(nums[i], divs[i]);
+					dump = MathsUtil.wrappedRem2(nums[i], divs[i]);
 				}
 			}
 		};

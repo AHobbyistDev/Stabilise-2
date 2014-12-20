@@ -156,7 +156,7 @@ public class WorldServer extends World {
 		//region.anchorSlice(x, y);
 		region.anchorSlice();
 		if(region.generated) {
-			return region.getSliceAt(MathsUtil.wrappedRemainder(x, REGION_SIZE), MathsUtil.wrappedRemainder(y, REGION_SIZE));
+			return region.getSliceAt(MathsUtil.wrappedRem(x, REGION_SIZE), MathsUtil.wrappedRem(y, REGION_SIZE));
 		} else {
 			//----region.queueSlice(owner, MathUtil.calcWrappedRemainder(x, REGION_SIZE), MathUtil.calcWrappedRemainder(y, REGION_SIZE));
 			//if(!region.generating) generator.generate(region);
@@ -182,15 +182,15 @@ public class WorldServer extends World {
 	@Override
 	public Slice getSliceAt(int x, int y) {
 		return getRegionAt((int)Math.floor((float)x / REGION_SIZE), (int)Math.floor((float)y / REGION_SIZE), false).getSliceAt(
-				MathsUtil.wrappedRemainder(x, REGION_SIZE),
-				MathsUtil.wrappedRemainder(y, REGION_SIZE));
+				MathsUtil.wrappedRem(x, REGION_SIZE),
+				MathsUtil.wrappedRem(y, REGION_SIZE));
 	}
 	
 	@Override
 	public Tile getTileAt(int x, int y) {
 		return getSliceAt(x, y).getTileAt(
-				(int)Math.floor(MathsUtil.wrappedRemainder(x, SLICE_SIZE)),
-				(int)Math.floor(MathsUtil.wrappedRemainder(y, SLICE_SIZE))
+				(int)Math.floor(MathsUtil.wrappedRem(x, SLICE_SIZE)),
+				(int)Math.floor(MathsUtil.wrappedRem(y, SLICE_SIZE))
 		);
 	}
 	

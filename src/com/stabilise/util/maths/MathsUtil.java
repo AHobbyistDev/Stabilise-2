@@ -45,7 +45,7 @@ public class MathsUtil {
 	 * 
 	 * @return The wrapped remainder of {@code num % div}.
 	 */
-	public static int wrappedRemainder(int num, int div) {
+	public static int wrappedRem(int num, int div) {
 		num %= div;
 		return num >= 0 ? num : num + div;
 	}
@@ -59,7 +59,7 @@ public class MathsUtil {
 	 * 
 	 * @return The wrapped remainder of {@code num % div}.
 	 */
-	public static long wrappedRemainder(long num, long div) {
+	public static long wrappedRem(long num, long div) {
 		num %= div;
 		return num >= 0 ? num : num + div;
 	}
@@ -74,7 +74,7 @@ public class MathsUtil {
 	 * @return The wrapped remainder of {@code num % div}.
 	 * @throws ArithmeticException Thrown if {@code div == 0}.
 	 */
-	public static double wrappedRemainder(double num, double div) {
+	public static double wrappedRem(double num, double div) {
 		num %= div;
 		return num >= 0 ? num : num + div;
 	}
@@ -84,7 +84,7 @@ public class MathsUtil {
 	 * are wrapped as if by adding {@code div} to such remainders.
 	 * 
 	 * <p><b>Note</b>: This method is faster than {@link
-	 * #wrappedRemainder(int, int)}, but this only works if {@code div} is a
+	 * #wrappedRem(int, int)}, but this only works if {@code div} is a
 	 * positive power of 2. As such, this method functions as a faster
 	 * alternative to the modulus operator for valid divisors.
 	 * 
@@ -94,7 +94,7 @@ public class MathsUtil {
 	 * @return The wrapped remainder of {@code num % div}. If {@code div} is
 	 * not a power of 2, the result may be incorrect.
 	 */
-	public static int wrappedRemainder2(int num, int div) {
+	public static int wrappedRem2(int num, int div) {
 		// This is a bit-level hack which uses a bitmask to get the wrapped
 		// remainder. Remember: this only works with powers of 2 since
 		// decrementing a Po2 results in a consistent set of 1s to the right
@@ -111,7 +111,7 @@ public class MathsUtil {
 	 * are wrapped as if by adding {@code div} to such remainders.
 	 * 
 	 * <p><b>Note</b>: This method is faster than {@link
-	 * #wrappedRemainder(long, long)}, but this only works if {@code div} is a
+	 * #wrappedRem(long, long)}, but this only works if {@code div} is a
 	 * positive power of 2. As such, this method functions as a faster
 	 * alternative to the modulus operator for valid divisors.
 	 * 
@@ -121,7 +121,7 @@ public class MathsUtil {
 	 * @return The wrapped remainder of {@code num % div}. If {@code div} is
 	 * not a power of 2, the result may be incorrect.
 	 */
-	public static long wrappedRemainder2(long num, long div) {
+	public static long wrappedRem2(long num, long div) {
 		return num & (div - 1);
 	}
 	

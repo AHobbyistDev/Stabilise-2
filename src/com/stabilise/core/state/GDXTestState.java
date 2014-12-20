@@ -1,6 +1,8 @@
 package com.stabilise.core.state;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.TextInputListener;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
@@ -59,6 +61,10 @@ public class GDXTestState implements State, InputProcessor {
 		
 		System.out.println("External: " + isExtAvailable + "; " + extRoot);
 		System.out.println("Local: " + isLocAvailable + "; " + locRoot);
+		
+		//---------------------------
+		
+		Gdx.input.setInputProcessor(this);
 	}
 	
 	@Override
@@ -108,6 +114,16 @@ public class GDXTestState implements State, InputProcessor {
 
 	@Override
 	public boolean keyDown(int keycode) {
+		if(keycode == Input.Keys.ENTER) {
+			Gdx.input.getTextInput(new TextInputListener() {
+				public void input(String text) {
+					System.out.println("Input: " + text);
+				}
+				public void canceled() {
+					System.out.println("cancelled");
+				}
+			}, "Enter something pls", "", "right here");
+		}
 		return false;
 	}
 	

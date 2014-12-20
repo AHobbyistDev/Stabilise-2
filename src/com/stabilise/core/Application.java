@@ -63,9 +63,6 @@ public abstract class Application {
 	/** The application's state. */
 	protected State state;
 	
-	/** The screen dimensions. */
-	private int width, height;
-	
 	/** Whether or not the application is running. */
 	private boolean running = false;
 	/** Whether or not the application has been shut down. */
@@ -174,8 +171,6 @@ public abstract class Application {
 	 * @param height The new height of the application, in pixels.
 	 */
 	private void resize(int width, int height) {
-		this.width = width;
-		this.height = height;
 		state.resize(width, height);
 	}
 	
@@ -351,7 +346,7 @@ public abstract class Application {
 		if(state == null)
 			throw new NullPointerException("state is null!");
 		state.start();
-		state.resize(width, height);
+		state.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		this.state.dispose();
 		this.state = state;
 	}
@@ -360,14 +355,14 @@ public abstract class Application {
 	 * @return The application window's width.
 	 */
 	public final int getWidth() {
-		return width;
+		return Gdx.graphics.getWidth();
 	}
 	
 	/**
 	 * @return The application window's height.
 	 */
 	public final int getHeight() {
-		return height;
+		return Gdx.graphics.getHeight();
 	}
 	
 	/**

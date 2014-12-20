@@ -16,11 +16,11 @@ public class Matrix2 {
 	
 	/** The top-left entry - use this to reference entry array indices. */
 	public static final int M00 = 0;
-	/** The top-right entry. */
+	/** The top-right entry - use this to reference entry array indices. */
 	public static final int M01 = 1;
-	/** The bottom-left entry. */
+	/** The bottom-left entry - use this to reference entry array indices. */
 	public static final int M10 = 2;
-	/** The bottom-right entry. */
+	/** The bottom-right entry - use this to reference entry array indices. */
 	public static final int M11 = 3;
 	
 	
@@ -134,8 +134,7 @@ public class Matrix2 {
 	 * @param vec The vector to multiply.
 	 * 
 	 * @return The resulting vector.
-	 * @throws NullPointerException if either {@code vec} or {@code dest} are
-	 * {@code null}.
+	 * @throws NullPointerException if {@code vec} is {@code null}.
 	 */
 	public Vector2 transform(Vector2 vec) {
 		return new Vector2(

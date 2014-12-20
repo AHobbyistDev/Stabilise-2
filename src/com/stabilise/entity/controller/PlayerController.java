@@ -248,7 +248,7 @@ public class PlayerController extends MobController implements Controllable {
 		// TODO: temporary
 		scroll /= 120;			// For some reason this is the base scroll, on my computer at least
 		tileID -= scroll;
-		tileID = MathsUtil.wrappedRemainder(tileID, 20);
+		tileID = MathsUtil.wrappedRem(tileID, 20);
 	}
 	
 }

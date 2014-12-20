@@ -154,8 +154,7 @@ public class Profiler {
 	 */
 	public void end() {
 		if(effectivelyEnabled) {
-			Section s = stack.removeLast();
-			if(s == root)
+			if(stack.removeLast() == root)
 				throw new IllegalStateException();
 		}
 	}

@@ -113,8 +113,8 @@ public class WorldClient extends World {
 		Slice slice = getSliceAt(x, y);
 		if(slice != null) {
 			return slice.getTileAt(
-					(int)Math.floor(MathsUtil.wrappedRemainder(x, Slice.SLICE_SIZE)),
-					(int)Math.floor(MathsUtil.wrappedRemainder(y, Slice.SLICE_SIZE))
+					(int)Math.floor(MathsUtil.wrappedRem(x, Slice.SLICE_SIZE)),
+					(int)Math.floor(MathsUtil.wrappedRem(y, Slice.SLICE_SIZE))
 			);
 		} else {
 			// If a slice hasn't yet been loaded from a server, the client will

@@ -281,7 +281,7 @@ public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 	public static final class Precomputed extends AxisAlignedBoundingBox {
 		
 		/** The shape's projections for each of its axes. */
-		protected ShapeProjection[] projections;
+		private ShapeProjection[] projections;
 		
 		
 		/**

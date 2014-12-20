@@ -13,7 +13,7 @@ public class HashPoint {
 	
 	private int x, y;
 	private int hash;
-	private final boolean immutable; // very autological
+	private final boolean mutable; // somewhat ironic
 	
 	
 	/**
@@ -42,14 +42,14 @@ public class HashPoint {
 	/**
 	 * Creates a point.
 	 * 
-	 * @param x
-	 * @param y
+	 * @param x The point's x component.
+	 * @param y The point's y component.
 	 * @param mutable Whether or not this point's components may be modified.
 	 */
 	public HashPoint(int x, int y, boolean mutable) {
 		this.x = x;
 		this.y = y;
-		immutable = !mutable;
+		this.mutable = mutable;
 		genHash();
 	}
 	
@@ -101,14 +101,14 @@ public class HashPoint {
 	 * immutable.
 	 */
 	public boolean isMutable() {
-		return !immutable;
+		return mutable;
 	}
 	
 	/**
 	 * @throws IllegalStateException if this point is immutable.
 	 */
 	private void checkCanModify() {
-		if(immutable)
+		if(!mutable)
 			throw new IllegalStateException("This HashPoint is immutable");
 	}
 	
@@ -119,7 +119,7 @@ public class HashPoint {
 		//hash = ((x & 0xFFFF) << 16) + (y & 0xFFFF);
 		
 		// Shifts y by 16 bits modularly
-		hash = x ^ (y << 16) ^ ((y & 0xFFFF0000) >>> 16);
+		hash = x ^ (y << 16) ^ (y >>> 16);
 	}
 	
 	@Override

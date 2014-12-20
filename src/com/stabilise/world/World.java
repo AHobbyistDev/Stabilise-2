@@ -682,7 +682,7 @@ public abstract class World {
 	 * region-lengths.
 	 */
 	public static int regionCoordFromTileCoord(int c) {
-		//return MathUtil.fastFloor((float)c / Region.REGION_SIZE_IN_TILES)
+		//return MathsUtil.fastFloor((float)c / Region.REGION_SIZE_IN_TILES)
 		//return c < 0 ?								// Faster
 		//		(c+1) / Region.REGION_SIZE_IN_TILES - 1 :
 		//		c / Region.REGION_SIZE_IN_TILES;
@@ -701,7 +701,7 @@ public abstract class World {
 	 * region-lengths.
 	 */
 	public static int regionCoordFromSliceCoord(int c) {
-		//return MathUtil.fastFloor((float)c / Region.REGION_SIZE)
+		//return MathsUtil.fastFloor((float)c / Region.REGION_SIZE)
 		//return c < 0 ?								// Faster
 		//		(c+1) / Region.REGION_SIZE - 1 :
 		//		c / Region.REGION_SIZE;
@@ -719,7 +719,7 @@ public abstract class World {
 	 * slice-lengths.
 	 */
 	public static int sliceCoordFromTileCoord(int c) {
-		//return MathUtil.fastFloor((float)c / Slice.SLICE_SIZE)
+		//return MathsUtil.fastFloor((float)c / Slice.SLICE_SIZE)
 		//return c < 0 ?							// Faster
 		//		(c+1) / Slice.SLICE_SIZE - 1 :
 		//		c / Slice.SLICE_SIZE;
@@ -770,11 +770,11 @@ public abstract class World {
 	 */
 	public static int sliceCoordRelativeToRegionFromTileCoord(int c) {
 		//c = sliceCoordFromTileCoord(c);
-		//return MathUtil.getWrappedRemainder1(c, Region.REGION_SIZE);
-		//return MathUtil.getWrappedRemainder2(c, Region.REGION_SIZE);		// Slightly faster
+		//return MathsUtil.wrappedRem(c, Region.REGION_SIZE);
+		//return MathsUtil.wrappedRem2(c, Region.REGION_SIZE);				// Way faster
 		
 		// i.e. (c >> Slice.SLICE_SIZE_SHIFT) & Region.REGION_SIZE_MINUS_ONE
-		return sliceCoordFromTileCoord(c) & Region.REGION_SIZE_MINUS_ONE;	// Even faster
+		return sliceCoordFromTileCoord(c) & Region.REGION_SIZE_MINUS_ONE;	// One less instruction
 	}
 	
 	/**
@@ -790,9 +790,9 @@ public abstract class World {
 	 * parent region.
 	 */
 	public static int sliceCoordRelativeToRegionFromSliceCoord(int c) {
-		//return MathUtil.getWrappedRemainder1(c, Region.REGION_SIZE);
-		//return MathUtil.getWrappedRemainder2(c, Region.REGION_SIZE);		// Faster
-		return c & Region.REGION_SIZE_MINUS_ONE;							// Even faster
+		//return MathsUtil.wrappedRem(c, Region.REGION_SIZE);
+		//return MathsUtil.wrappedRem2(c, Region.REGION_SIZE);		// Way faster
+		return c & Region.REGION_SIZE_MINUS_ONE;					// One less instruction
 	}
 	
 	/**
@@ -840,9 +840,9 @@ public abstract class World {
 	 * parent slice.
 	 */
 	public static int tileCoordRelativeToSliceFromTileCoord(int c) {
-		//return MathUtil.getWrappedRemainder1(c, Slice.SLICE_SIZE);
-		//return MathUtil.getWrappedRemainder2(c, Slice.SLICE_SIZE);		// Faster
-		return c & Slice.SLICE_SIZE_MINUS_ONE;								// Even faster
+		//return MathsUtil.wrappedRem(c, Slice.SLICE_SIZE);
+		//return MathsUtil.wrappedRem2(c, Slice.SLICE_SIZE);		// Way faster
+		return c & Slice.SLICE_SIZE_MINUS_ONE;						// One less instruction
 	}
 	
 	/**
@@ -858,9 +858,9 @@ public abstract class World {
 	 * parent region.
 	 */
 	public static int tileCoordRelativeToRegionFromTileCoord(int c) {
-		//return MathUtil.getWrappedRemainder1(c, Region.REGION_SIZE_IN_TILES);
-		//return MathUtil.getWrappedRemainder2(c, Region.REGION_SIZE_IN_TILES);		// Faster
-		return c & Region.REGION_SIZE_IN_TILES_MINUS_ONE;					// Even faster
+		//return MathsUtil.wrappedRem(c, Region.REGION_SIZE_IN_TILES);
+		//return MathsUtil.wrappedRem2(c, Region.REGION_SIZE_IN_TILES);		// Way faster
+		return c & Region.REGION_SIZE_IN_TILES_MINUS_ONE;					// One less instruction
 	}
 	
 	/**

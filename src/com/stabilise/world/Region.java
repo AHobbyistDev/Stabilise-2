@@ -379,8 +379,8 @@ public class Region {
 	}
 	
 	/**
-	 * Gets this region's hash code. The returned value is given as if by to
-	 * {@link #getKey(int, int) Region.getKey(this.x, this.y)}.
+	 * Gets this region's hash code. The returned value is given as if by
+	 * {@link #loc}{@code .hashCode()}.
 	 */
 	@Override
 	public int hashCode() {
