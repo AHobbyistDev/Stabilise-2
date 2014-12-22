@@ -45,7 +45,7 @@ public class ItemStack {
 	 * @param item The stack's underlying item.
 	 * @param quantity The number of items in the stack.
 	 * 
-	 * @throws NullPointerException Thrown if {@code item} is {@code null}.
+	 * @throws NullPointerException if {@code item} is {@code null}.
 	 */
 	public ItemStack(Item item, int quantity) {
 		if(item == null)
@@ -81,7 +81,7 @@ public class ItemStack {
 	 * 
 	 * @return {@code true} if this stack can accept items from the specified
 	 * stack; {@code false} otherwise.
-	 * @throws NullPointerException Thrown if {@code stack} is {@code null}.
+	 * @throws NullPointerException if {@code stack} is {@code null}.
 	 */
 	public boolean accepts(ItemStack stack) {
 		return holds(stack.item) && quantity < item.getMaxStackSize();
@@ -101,7 +101,7 @@ public class ItemStack {
 	 * 
 	 * @return {@code true} if the stack was added in its entirety (i.e. {@code
 	 * stack.quantity == 0}); {@code false} otherwise.
-	 * @throws NullPointerException Thrown if {@code stack} is {@code null}.
+	 * @throws NullPointerException if {@code stack} is {@code null}.
 	 */
 	public boolean add(ItemStack stack) {
 		if(!accepts(stack))
@@ -120,9 +120,7 @@ public class ItemStack {
 	}
 	
 	/**
-	 * Gets the number of items in the stack.
-	 * 
-	 * @return The number of items in the stack.
+	 * @return The number of items in this stack.
 	 */
 	public int getQuantity() {
 		return quantity;
@@ -136,7 +134,7 @@ public class ItemStack {
 	 * 
 	 * @param quantity The quantity.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code quantity < 0}.
+	 * @throws IllegalArgumentException if {@code quantity < 0}.
 	 */
 	public void setQuantity(int quantity) {
 		if(quantity < 0)
@@ -205,7 +203,7 @@ public class ItemStack {
 	 * @param stack The ItemStack.
 	 * 
 	 * @return The stack in the form of an NBT compound tag.
-	 * @throws NullPointerException Thrown if {@code stack} is {@code null}.
+	 * @throws NullPointerException if {@code stack} is {@code null}.
 	 */
 	public static NBTTagCompound toNBT(ItemStack stack) {
 		NBTTagCompound tag = Item.toNBT(stack.item);
@@ -220,7 +218,7 @@ public class ItemStack {
 	 * 
 	 * @return The stack, or {@link #NO_STACK} if the tag represents an invalid
 	 * item stack.
-	 * @throws NullPointerException Thrown if {@code tag} is {@code null}.
+	 * @throws NullPointerException if {@code tag} is {@code null}.
 	 */
 	public static ItemStack fromNBT(NBTTagCompound tag) {
 		Item item = Item.fromNBT(tag);

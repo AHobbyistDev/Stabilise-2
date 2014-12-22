@@ -21,10 +21,12 @@ public class Item {
 	
 	/** An item which should be used as a placeholder to indicate the lack of
 	 * an item, in preference to using a null pointer.
-	 * <p>The name and max stack size are arbitrary, and the ID is -1, the
-	 * quintessential "invalid index" number (though any ID should
-	 * theoretically be acceptable as things currently stand). */
-	public static final Item NO_ITEM = new Item(-1, "null", 1);
+	 * <p>The name and max stack size are arbitrary, and the ID is 0, the
+	 * 'default' ID.  */
+	public static final Item NO_ITEM = new Item(0, "", Integer.MAX_VALUE);
+	
+	/** Flag which is set to true when items are registered. */
+	private static boolean REGISTERED = false;
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -51,7 +53,7 @@ public class Item {
 	 * 
 	 * @param maxStackSize The item's maximum stack size.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code maxStackSize < 1}.
+	 * @throws IllegalArgumentException if {@code maxStackSize < 1}.
 	 */
 	protected Item(int maxStackSize) {
 		if(maxStackSize < 1)
@@ -67,8 +69,8 @@ public class Item {
 	 * @param name The items name.
 	 * @param maxStackSize The item's maximum stack size.
 	 * 
-	 * @throws NullPointerException Thrown if {@code name} is {@code null}.
-	 * @throws IllegalArgumentException Thrown if {@code maxStackSize < 1}.
+	 * @throws NullPointerException  if {@code name} is {@code null}.
+	 * @throws IllegalArgumentException if {@code maxStackSize < 1}.
 	 */
 	protected Item(int id, String name, int maxStackSize) {
 		if(name == null)
@@ -151,7 +153,7 @@ public class Item {
 	 * 
 	 * @return The item, or {@link #NO_ITEM} if the tag represents an invalid
 	 * item.
-	 * @throws NullPointerException Thrown if {@code tag} is {@code null}.
+	 * @throws NullPointerException if {@code tag} is {@code null}.
 	 */
 	public static Item fromNBT(NBTTagCompound tag) {
 		return getItem(tag.getInt("id"));
@@ -164,14 +166,17 @@ public class Item {
 	 * as respective items are created for every tile.
 	 */
 	public static void registerItems() {
-		registerItem(0, "tile", new Item());
-		registerItem(1, "sword", new Item());
-		registerItem(2, "apple", new Item());
-		registerItem(3, "arrow", new Item());
+		registerItem(0, "", NO_ITEM);
+		registerItem(1, "tile", new Item());
+		registerItem(2, "sword", new Item());
+		registerItem(3, "apple", new Item());
+		registerItem(4, "arrow", new Item());
 		
 		// Create an item for every tile
 		//for(Tile tile : Tile.TILES)
 		//	registerItem(tile.getID(), tile.getName(), new ItemTile(tile));
+		
+		REGISTERED = true;
 	}
 	
 	/**
@@ -185,6 +190,14 @@ public class Item {
 		ITEMS.registerObject(id, name, item);
 		item.id = id;
 		item.name = name;
+	}
+	
+	/**
+	 * @return {@code true} if the items have been registered; {@code false}
+	 * otherwise.
+	 */
+	static boolean isRegistered() {
+		return REGISTERED;
 	}
 	
 }

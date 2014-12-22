@@ -65,9 +65,8 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 		map.put(value, Integer.valueOf(key));
 		
 		// Fill up any intermediate values in the array
-		while(list.size() <= key) {
+		while(list.size() <= key)
 			list.add(null);
-		}
 		
 		list.set(key, value);
 	}

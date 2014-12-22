@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ import java.util.List;
  * 
  * @see NBTTag
  */
-public class NBTTagList extends NBTTag {
+public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
 	
 	/** The tag's data. */
 	private List<NBTTag> data = new ArrayList<NBTTag>();
@@ -137,5 +138,10 @@ public class NBTTagList extends NBTTag {
 			clone.appendTag(t.copy());
 		return clone;
 	}
-
+	
+	@Override
+	public Iterator<NBTTag> iterator() {
+		return data.iterator();
+	}
+	
 }

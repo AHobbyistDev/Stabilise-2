@@ -5,6 +5,7 @@ import static com.stabilise.world.Region.REGION_SIZE;
 import java.io.IOException;
 
 import com.stabilise.util.nbt.NBTIO;
+import com.stabilise.util.nbt.NBTTag;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.util.nbt.NBTTagList;
 import com.stabilise.world.Region;
@@ -52,20 +53,18 @@ public class PreAlphaWorldLoader extends WorldLoader {
 					s.setTilesAsIntArray(sliceTag.getIntArray("tiles"));
 					
 					NBTTagList tileEntities = sliceTag.getList("tileEntities");
-					if(tileEntities != null) {
-						s.numTileEntities = tileEntities.size();
-						for(int i = 0; i < tileEntities.size(); i++) {
-							NBTTagCompound tileEntity = (NBTTagCompound)tileEntities.getTagAt(i);
-							//int id = tileEntity.getInt("id");
-							//int tileX = tileEntity.getInt("x");
-							//int tileY = tileEntity.getInt("y");
-							//TileEntity t = TileEntity.createTileEntity(id, tileX, tileY);
-							//t.fromNBT(tileEntity);
-							TileEntity t = TileEntity.createTileEntityFromNBT(tileEntity);
-							s.tileEntities		// Poor syntax, but I want this to fit
-								[World.tileCoordRelativeToSliceFromTileCoord(t.y)]
-								[World.tileCoordRelativeToSliceFromTileCoord(t.x)] = t; 
-						}
+					s.numTileEntities = tileEntities.size();
+					for(NBTTag t : tileEntities) {
+						NBTTagCompound tc = (NBTTagCompound)t;
+						//int id = tileEntity.getInt("id");
+						//int tileX = tileEntity.getInt("x");
+						//int tileY = tileEntity.getInt("y");
+						//TileEntity t = TileEntity.createTileEntity(id, tileX, tileY);
+						//t.fromNBT(tileEntity);
+						TileEntity te = TileEntity.createTileEntityFromNBT(tc);
+						s.tileEntities		// Poor syntax, but I want this to fit
+							[World.tileCoordRelativeToSliceFromTileCoord(te.y)]
+							[World.tileCoordRelativeToSliceFromTileCoord(te.x)] = te; 
 					}
 					
 					r.slices[y][x] = s;

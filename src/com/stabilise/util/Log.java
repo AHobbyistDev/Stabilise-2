@@ -89,7 +89,7 @@ public class Log {
 	 * @param message The message to post.
 	 * @param t The Throwable to post.
 	 * 
-	 * @throws NullPointerException Thrown if {@code t} is {@code null}.
+	 * @throws NullPointerException if {@code t} is {@code null}.
 	 */
 	public void logCritical(String message, Throwable t) {
 		// Synchronise so this prints as a block.
@@ -104,7 +104,7 @@ public class Log {
 	 * 
 	 * @param t The throwable to post.
 	 * 
-	 * @throws NullPointerException Thrown if {@code t} is {@code null}.
+	 * @throws NullPointerException if {@code t} is {@code null}.
 	 */
 	public void logThrowable(Throwable t) {
 		// Synchronise everything here since we want this to print as a block.
@@ -265,7 +265,7 @@ public class Log {
 	 * An invocation of this is equivalent to:
 	 * <pre>{@code getAgent().logThrowable(t)}</pre>
 	 * 
-	 * @param e The exception to post.
+	 * @param t The throwable to post.
 	 */
 	public static void throwable(Throwable t) {
 		defaultAgent.logThrowable(t);

@@ -90,8 +90,7 @@ public class GDXTestState implements State, InputProcessor {
 	public void resize(int width, int height) {
 		System.out.println("Resized to " + width + "x" + height);
 		viewport.update(width, height);
-		batch.setProjectionMatrix(viewport.getCamera().projection);
-		batch.setTransformMatrix(viewport.getCamera().view);
+		batch.setProjectionMatrix(viewport.getCamera().combined);
 		
 		sprite.setPosition(width/2 - sprite.getWidth()/2, height/2 - sprite.getHeight()/2);
 	}

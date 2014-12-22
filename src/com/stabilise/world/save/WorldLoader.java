@@ -17,6 +17,22 @@ import com.stabilise.world.WorldData;
  * before the WorldLoader is otherwise used - preferably immediately after the
  * WorldLoader is constructed) to perform its I/O tasks; each individual load
  * or save request for a region is delegated to a separate thread.
+ * 
+ * <p>TODO: Synchronisation policy on saved regions. Since it is incredibly
+ * inefficient and wasteful to make a defensive copy of a region and its
+ * contents when it is being saved, it can be expected that concurrency
+ * problems will arise from the fact that said region and contents will be
+ * modified while it is in the process of being saved. This can be rectified
+ * either by:
+ * 
+ * <ul>
+ * <li>never saving regions mid-game (though this lends itself to potential
+ *     of data if, say, the JVM crashes and as such the game can't properly
+ *     shut down), or
+ * <li>defining a synchronisation policy wherein at minimum no exceptions or
+ *     errors will be thrown, and cases of deadlock, livelock and starvation
+ *     are impossible.
+ * </ul>
  */
 public abstract class WorldLoader {
 	
@@ -268,9 +284,6 @@ public abstract class WorldLoader {
 	 */
 	private class RegionSaver extends RegionIO {
 		
-		/** The clone of the region. */
-		private Region regionClone;
-		
 		/**
 		 * Creates a new RegionSaver.
 		 * 
@@ -278,7 +291,6 @@ public abstract class WorldLoader {
 		 */
 		public RegionSaver(Region region) {
 			super(region);
-			regionClone = region.clone();
 		}
 		
 		@Override
@@ -291,7 +303,7 @@ public abstract class WorldLoader {
 				r.saving = true;
 			}
 			r.pendingSave = false;
-			save(regionClone);
+			save(r);
 			r.saving = false;
 		}
 		

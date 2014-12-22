@@ -1,7 +1,5 @@
 package com.stabilise.world;
 
-import java.util.Arrays;
-
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
@@ -199,27 +197,4 @@ public class Slice {
 		}
 	}
 	
-	/**
-	 * Gets a clone of the slice.
-	 * 
-	 * @return A clone of the slice.
-	 */
-	public Slice clone() {
-		int[][] tilesCopy = new int[SLICE_SIZE][SLICE_SIZE];
-		for(int i = 0; i < tiles.length; i++) {
-			tilesCopy[i] = Arrays.copyOf(tiles[i], SLICE_SIZE);
-		}
-		Slice s = new Slice(x, y, null, tilesCopy);
-		s.numTileEntities = numTileEntities;
-		if(numTileEntities > 0) {
-			// TODO: clone the individual tile entities
-			TileEntity[][] tileEntitiesCopy = new TileEntity[SLICE_SIZE][SLICE_SIZE];
-			for(int i = 0; i < tiles.length; i++) {
-				tileEntitiesCopy[i] = Arrays.copyOf(tileEntities[i], SLICE_SIZE);
-			}
-			s.tileEntities = tileEntitiesCopy;
-		}
-		return s;
-	}
-
 }

@@ -18,13 +18,6 @@ import com.stabilise.util.nbt.NBTTagList;
 public abstract class Container implements Iterable<ItemStack> {
 	
 	/**
-	 * Creates a new Container.
-	 */
-	public Container() {
-		// nothing to see here, move along
-	}
-	
-	/**
 	 * Checks for whether or not this container is a bounded container.
 	 * 
 	 * @return {@code true} if this container is bounded; {@code false} if it
@@ -60,8 +53,8 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * 
 	 * @return The item stack in the slot, or {@link ItemStack#NO_STACK} if the
 	 * slot is empty.
-	 * @throws IndexOutOfBoundsException Thrown if {@code slot < 0}, or this
-	 * container has a capacity and {@code slot >= capacity}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this is a
+	 * bounded container and {@code slot >= size()}.
 	 */
 	public abstract ItemStack getStack(int slot);
 	
@@ -74,21 +67,21 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * 
 	 * @return The item stack in the slot, or {@link ItemStack#NO_STACK} if the
 	 * slot is empty.
-	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
-	 * has a capacity and {@code slot >= capacity}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this is a
+	 * bounded container and {@code slot >= size()}.
 	 */
 	public ItemStack removeStack(int slot) {
 		return getAndSetSlot(slot, ItemStack.NO_STACK);
 	}
 	
 	/**
-	 * Checks for whether or not an item is able to be added to the container
-	 * - that is, whether or not a valid slot exists in which at least one of
-	 * the item can be placed.
+	 * Checks for whether or not an item stack is able to be added to the
+	 * container - that is, whether or not a valid slot exists in which at
+	 * least one of the item can be placed.
 	 * 
-	 * @param item The item.
+	 * @param stack The item stack.
 	 * 
-	 * @return {@code true} if the item is able to be added; {@code false}
+	 * @return {@code true} if the stack may be to be added; {@code false}
 	 * otherwise.
 	 * @throws NullPointerException if {@code stack} is {@code null}.
 	 */
@@ -106,7 +99,7 @@ public abstract class Container implements Iterable<ItemStack> {
 	/**
 	 * Adds a specified quantity of items to the container in the first
 	 * available slot (or slots, if such a quantity does not fit in a single
-	 * stack - larger quantities will be partitioned into multiple stacks). If
+	 * stack; larger quantities will be partitioned into multiple stacks). If
 	 * there are any incompletely filled stacks with a matching item in the
 	 * container, they will be added to before any new slots are used.
 	 * 
@@ -215,8 +208,8 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * to there not existing enough space in the container.
 	 * @throws NullPointerException if {@code item} is {@code null}.
 	 * @throws IllegalArgumentException if {@code quantity <= 0}.
-	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
-	 * has a capacity and {@code slot >= capacity}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this is a
+	 * bounded container and {@code slot >= size()}.
 	 */
 	public int addItem(Item item, int quantity, int slot) {
 		if(quantity <= 0)
@@ -282,8 +275,8 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * @return {@code true} if the stack was added in its entirety and should
 	 * be released; {@code false} otherwise.
 	 * @throws NullPointerException if {@code stack} is {@code null}.
-	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
-	 * has a capacity and {@code slot >= capacity}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this is a
+	 * bounded container and {@code slot >= size()}.
 	 */
 	public boolean addStack(ItemStack stack, int slot) {
 		if(stack == null)
@@ -312,8 +305,8 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * 
 	 * @return {@code true} if the stack was placed in the slot; {@code false}
 	 * otherwise.
-	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
-	 * has a capacity and {@code slot >= capacity}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this is a
+	 * bounded container and {@code slot >= size()}.
 	 */
 	protected boolean trySetSlot(int slot, ItemStack stack) {
 		setSlot(slot, stack);
@@ -328,8 +321,8 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * @param stack The stack. This should not be {@code null}; {@link
 	 * ItemStack#NO_STACK} should be used to indicate the lack of an item.
 	 * 
-	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
-	 * has a capacity and {@code slot >= capacity}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this is a
+	 * bounded container and {@code slot >= size()}.
 	 */
 	protected abstract void setSlot(int slot, ItemStack stack);
 	
@@ -343,8 +336,8 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * 
 	 * @return The former contents of the slot, or {@link ItemStack#NO_STACK}
 	 * if no stack occupied the specified slot.
-	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
-	 * has a capacity and {@code slot >= capacity}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this is a
+	 * bounded container and {@code slot >= size()}.
 	 */
 	protected abstract ItemStack getAndSetSlot(int slot, ItemStack stack);
 	
@@ -356,8 +349,8 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * @param slot The slot.
 	 * 
 	 * @return {@code true} if the slot is empty; {@code false} otherwise.
-	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this container
-	 * has a capacity and {@code slot >= capacity}.
+	 * @throws IndexOutOfBoundsException if {@code slot < 0}, or this is a
+	 * bounded container and {@code slot >= size()}.
 	 */
 	public boolean isSlotEmpty(int slot) {
 		return getStack(slot) == ItemStack.NO_STACK;

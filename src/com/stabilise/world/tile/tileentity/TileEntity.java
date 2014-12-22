@@ -40,7 +40,8 @@ public abstract class TileEntity {
 	 * Creates a new tile entity.
 	 * 
 	 * <p>Note that is is <b>absolutely crucial</b> that subclasses of
-	 * TileEntity implement a constructor with the same arguments as this.
+	 * TileEntity implement a constructor with the same arguments as this for
+	 * the purpose of reflective construction.
 	 * 
 	 * @param x The x-coordinate of the tile entity, in tile-lengths.
 	 * @param y The y-coordinate of the tile entity, in tile-lengths.
@@ -187,8 +188,7 @@ public abstract class TileEntity {
 	 * 
 	 * @return The tile entity, or {@code null} if it could not be constructed
 	 * for whatever reason.
-	 * @throws IllegalArgumentException Thrown if the {@code tag} parameter
-	 * is {@code null}.
+	 * @throws IllegalArgumentException if {@code tag} is {@code null}.
 	 */
 	public static TileEntity createTileEntityFromNBT(NBTTagCompound tag) {
 		if(tag == null)

@@ -1,10 +1,5 @@
 package com.stabilise.opengl.render;
 
-import static org.lwjgl.opengl.GL11.*;
-
-import org.lwjgl.util.Point;
-
-import com.stabilise.opengl.SpriteSheet;
 import com.stabilise.world.GameWorld;
 import com.stabilise.world.Slice;
 

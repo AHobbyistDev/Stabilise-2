@@ -309,31 +309,6 @@ public class Region {
 	}
 	
 	/**
-	 * Clones the region. The clone will only have its coordinates and queued
-	 * schematics copied, and the all slices will be cloned as if by
-	 * {@link Slice#clone()}.
-	 */
-	public Region clone() {
-		Region region = new Region(world, loc.getX(), loc.getY());
-		
-		region.generated = generated;
-		
-		if(generated) {	// TODO: temporary conditional to avoid an NPE for non-generated regions with schematics
-			for(int r = 0; r < REGION_SIZE; r++)
-				for(int c = 0; c < REGION_SIZE; c++)
-					region.slices[r][c] = slices[r][c].clone();
-		}
-
-		region.hasQueuedSchematics = hasQueuedSchematics;
-		synchronized(queuedSchematics) {
-			for(QueuedSchematic q : queuedSchematics)
-				region.queuedSchematics.add(new QueuedSchematic(q.schematicName, q.sliceX, q.sliceY, q.tileX, q.tileY, q.offsetX, q.offsetY));
-		}
-		
-		return region;
-	}
-	
-	/**
 	 * Adds any entities and tile entities contained by the region to the
 	 * world.
 	 * 

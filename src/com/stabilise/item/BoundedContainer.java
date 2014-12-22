@@ -36,8 +36,8 @@ public class BoundedContainer extends Container {
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * @throws ArrayIndexOutOfBoundsException Thrown if {@code slot < 0} or
-	 * {@code slot >= capacity}.
+	 * @throws ArrayIndexOutOfBoundsException if {@code slot < 0} or {@code
+	 * slot >= size()}.
 	 */
 	@Override
 	public ItemStack getStack(int slot) {
