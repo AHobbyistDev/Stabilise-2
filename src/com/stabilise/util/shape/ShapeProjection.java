@@ -6,10 +6,8 @@ package com.stabilise.util.shape;
  */
 class ShapeProjection {
 	
-	/** The minimum value/coordinate of the projection. */
-	public float min;
-	/** The maximum value/coordinate of the projection. */
-	public float max;
+	/** The minimum and maximum values/coordinates of the projection. */
+	public final float min, max;
 	
 	
 	/**

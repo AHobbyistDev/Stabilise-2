@@ -4,8 +4,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.stabilise.util.maths.Matrix2;
 
 /**
- * A shape is a 2D object consisting of a number of vertices, which may be used
- * to represent such things as collision volumes.
+ * A shape is a 2D object usually consisting of a number of vertices, which may
+ * be used to represent such things as collision areas.
  * 
  * <p>Most classes in the {@code Shape} hierarchy are designed to be treated as
  * immutable, even though they expose their mutable vertices. As such, client
@@ -64,21 +64,8 @@ public abstract class Shape {
 	protected Vector2[] getTransformedVertices(Matrix2 matrix) {
 		Vector2[] vertices = getVertices();
 		for(int i = 0; i < vertices.length; i++)
-			vertices[i] = transformVertex(matrix, vertices[i]);
+			vertices[i] = matrix.transform(vertices[i]);
 		return vertices;
-	}
-	
-	/**
-	 * Transforms a vertex by applying the given transformation matrix to it.
-	 * The supplied vertex will not be modified.
-	 * 
-	 * @param matrix The 2x2 transformation matrix.
-	 * @param vertex The vertex to rotate.
-	 * 
-	 * @return The transformed vertex.
-	 */
-	protected final Vector2 transformVertex(Matrix2 matrix, Vector2 vertex) {
-		return matrix.transform(vertex);
 	}
 	
 	/**
@@ -95,20 +82,6 @@ public abstract class Shape {
 	}
 	
 	/**
-	 * Rotates a vertex anticlockwise about (0,0) by the specified angle, and
-	 * stores the result in the specified destination vector.
-	 * 
-	 * @param vertex The vertex.
-	 * @param rotation The angle, in radians.
-	 * @param dest The destination vector.
-	 * 
-	 * @return The destination vector.
-	 */
-	protected final Vector2 rotateVertex(Vector2 vertex, float rotation, Vector2 dest) {
-		return rotateVertex(vertex, (float)Math.cos(rotation), (float)Math.sin(rotation), dest);
-	}
-	
-	/**
 	 * Rotates a vertex anticlockwise about (0,0) using the sine and cosine of
 	 * an angle. The supplied vertex will not be modified.
 	 * 
@@ -122,26 +95,6 @@ public abstract class Shape {
 	 */
 	protected final Vector2 rotateVertex(Vector2 vertex, float cos, float sin) {
 		return new Vector2(
-				vertex.x * cos - vertex.y * sin,
-				vertex.x * sin + vertex.y * cos
-		);
-	}
-	
-	/**
-	 * Rotates a vertex anticlockwise about (0,0) using the sine and cosine of
-	 * an angle, and stores the result in a supplied destination vector.
-	 * 
-	 * <p>This method is faster than {@link
-	 * #rotateVertex(Vector2, float, Vector2)}.
-	 * 
-	 * @param vertex The vertex.
-	 * @param cos The cosine of the angle.
-	 * @param sin The sine of the angle.
-	 * 
-	 * @return The rotated vertex.
-	 */
-	protected final Vector2 rotateVertex(Vector2 vertex, float cos, float sin, Vector2 dest) {
-		return dest.set(
 				vertex.x * cos - vertex.y * sin,
 				vertex.x * sin + vertex.y * cos
 		);
@@ -228,6 +181,9 @@ public abstract class Shape {
 	/**
 	 * Calculates whether or not a point is within the bounds of the shape.
 	 * 
+	 * <p>This method redirects to {@link #containsPoint(float, float)
+	 * containsPoint(p.x, p.y)}.
+	 * 
 	 * @param p The point.
 	 * 
 	 * @return {@code true} if the shape contains the point; {@code false}
@@ -246,10 +202,8 @@ public abstract class Shape {
 	 */
 	protected Vector2[] generateAxes() {
 		Vector2[] vertices = getVertices();
-		
 		for(int i = 0; i < vertices.length; i++)
-			vertices[i] = getAxis(vertices[i], vertices[(i+1) % vertices.length]);
-		
+			vertices[i] = getAxis(vertices[i], vertices[(i+1) == vertices.length ? 0 : i+1]);
 		return vertices;
 	}
 	
@@ -263,11 +217,11 @@ public abstract class Shape {
 	 * @return The projection axis.
 	 */
 	protected final Vector2 getAxis(Vector2 v1, Vector2 v2) {
-		// Normalising the vectors appears to be unnecessary
+		// N.B. Normalising the vectors appears to be unnecessary
 		
-		// Equivalently:
-		//return MathUtil.rotate90Degrees(MathUtil.sub(v1, v2));
-		// Faster, however:
+		// The following is how it's typically done:
+		//return MathsUtil.rotate90Degrees(MathUtil.sub(v1, v2));
+		// Faster, however, is:
 		return new Vector2(v2.y - v1.y, v1.x - v2.x);
 	}
 	

@@ -62,8 +62,8 @@ public class Registry<K, V> {
 	 * @param key The object's key.
 	 * @param object The object.
 	 * 
-	 * @throws NullPointerException Thrown if either {@code key} or {@code
-	 * object} is {@code null}.
+	 * @throws NullPointerException if either {@code key} or {@code object} are
+	 * {@code null}.
 	 */
 	public void registerObject(K key, V object) {
 		if(key == null || object == null)

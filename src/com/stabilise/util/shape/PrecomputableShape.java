@@ -14,10 +14,6 @@ import com.badlogic.gdx.math.Vector2;
  * faster collision computation. This provides a form of optimisation which
  * trades memory and initial computation for reduced computation at the time of
  * collisions.
- * 
- * <p>Since for now I'm too lazy to write comprehensive usage documentation,
- * refer to Quadrilateral or any of its subclasses to see how the functionality
- * of a precomputable shape should be implemented.
  */
 public abstract class PrecomputableShape extends Shape {
 	
@@ -72,8 +68,8 @@ public abstract class PrecomputableShape extends Shape {
 	 * @param i The axis number.
 	 * 
 	 * @return The shape's projection.
-	 * @throws ArrayIndexOutOfBoundsException Thrown if {@code i} is negative
-	 * or greater than {@code n-1}, where {@code n} is the shape's number of
+	 * @throws ArrayIndexOutOfBoundsException if {@code i} is negative or
+	 * greater than {@code n-1}, where {@code n} is the shape's number of
 	 * projection axes as returned by {@link #getAxes()} (that is, {@code n ==
 	 * getAxes().length}).
 	 */
@@ -91,15 +87,17 @@ public abstract class PrecomputableShape extends Shape {
 	 * 
 	 * <p>This method is optimised for the precomputed variant of a shape.
 	 * 
-	 * @param p The point.
+	 * @param x The x-coordinate of the point.
+	 * @param y The y-coordinate of the point.
 	 * 
 	 * @return {@code true} if the shape contains the point; {@code false}
 	 * otherwise.
 	 */
 	@ForPrecomputedVariant
-	protected boolean containsPointPrecomputed(Vector2 p) {
-		for(int i = 0; i < getAxes().length; i++) {
-			if(!getProjection(i).containsPoint(p.dot(getAxes()[i])))
+	protected boolean containsPointPrecomputed(float x, float y) {
+		Vector2[] axes = getAxes();
+		for(int i = 0; i < axes.length; i++) {
+			if(!getProjection(i).containsPoint(axes[i].dot(x, y)))
 				return false;
 		}
 		return true;
@@ -117,8 +115,6 @@ public abstract class PrecomputableShape extends Shape {
 	@Documented
 	@Retention(RetentionPolicy.SOURCE)
 	@Target({ElementType.METHOD})
-	protected @interface ForPrecomputedVariant {
-		// nothing to see here, move along
-	}
+	protected @interface ForPrecomputedVariant {}
 	
 }

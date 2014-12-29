@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * An NBT tag containing an arbitrary-length list of tags of the same tag type.
@@ -16,7 +15,7 @@ import java.util.List;
 public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
 	
 	/** The tag's data. */
-	private List<NBTTag> data = new ArrayList<NBTTag>();
+	private ArrayList<NBTTag> data = new ArrayList<NBTTag>();
 	/** The tag's data type. */
 	private byte dataType;
 	
@@ -131,11 +130,11 @@ public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
 		return NBTTag.LIST;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public NBTTag copy() {
 		NBTTagList clone = new NBTTagList(name);
-		for(NBTTag t : data)
-			clone.appendTag(t.copy());
+		clone.data = (ArrayList<NBTTag>) data.clone();
 		return clone;
 	}
 	

@@ -215,7 +215,7 @@ public class Polygon extends AbstractPolygon {
 		// Precomputification
 		@Override protected Vector2[] getAxes() { return axes; }
 		@Override protected ShapeProjection getProjection(int i) { return projections[i]; }
-		@Override public boolean containsPoint(Vector2 p) { return containsPointPrecomputed(p); }
+		@Override public boolean containsPoint(float x, float y) { return containsPointPrecomputed(x,y); }
 		@Override protected boolean intersectsOnOwnAxes(Shape s) { return intersectsOnOwnAxesPrecomputed(s); }
 		
 		@Override

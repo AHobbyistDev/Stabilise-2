@@ -2,6 +2,7 @@ package com.stabilise.world;
 
 import static com.stabilise.core.Constants.LOADED_SLICE_RADIUS;
 
+import com.stabilise.core.Constants;
 import com.stabilise.entity.GameObject;
 
 /**
@@ -13,10 +14,20 @@ import com.stabilise.entity.GameObject;
  * ensure the world is properly loaded about the target and unloaded when
  * necessary. When a SliceMap is no longer needed, invoke {@link #unload()} and
  * ensure that {@link #update()} is no longer invoked thereafter.
- * 
- * <p>
  */
 public class SliceMap {
+	
+	//--------------------==========--------------------
+	//-----=====Static Constants and Variables=====-----
+	//--------------------==========--------------------
+	
+	/** The number of slices which must be travelled along any axis in a tick
+	 * to trigger a complete refresh. */
+	private static final int REFRESH_BOUNDARY = Constants.LOADED_SLICE_RADIUS;
+	
+	//--------------------==========--------------------
+	//-------------=====Member Variables=====-----------
+	//--------------------==========--------------------
 	
 	/** A reference to the world object. */
 	private GameWorld world;
@@ -60,6 +71,12 @@ public class SliceMap {
 		if(centreX == sliceX && centreY == sliceY)
 			return;
 		
+		// If the target has moved very far, opt to refresh instead.
+		if(Math.abs(sliceX - centreX) >= REFRESH_BOUNDARY || Math.abs(sliceY - centreY) >= REFRESH_BOUNDARY) {
+			refresh();
+			return;
+		}
+		
 		centreX = sliceX;
 		centreY = sliceY;
 		
@@ -84,7 +101,7 @@ public class SliceMap {
 		//   approaches very high speeds (or moves very far due to, say,
 		//   teleporting) as it loads and unloads as necessary everything
 		//   between point A and point B, no matter how far apart they are. For
-		//   purposes such as these, it may be wiser to invoke refresh().
+		//   purposes such as these, refresh() is invoked instead.
 		
 		for(int x = minSliceXLoaded; x < oldMinX; x++) loadCol(x);
 		for(int x = maxSliceXLoaded; x > oldMaxX; x--) loadCol(x);
@@ -193,8 +210,7 @@ public class SliceMap {
 		maxSliceYLoaded = centreY + LOADED_SLICE_RADIUS;
 		
 		for(int x = minSliceXLoaded; x <= maxSliceXLoaded; x++)
-			for(int y = minSliceYLoaded; y <= maxSliceYLoaded; y++)
-				world.loadSlice(x, y);
+			loadCol(x);
 	}
 	
 	/**

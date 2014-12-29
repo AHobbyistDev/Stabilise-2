@@ -50,9 +50,9 @@ public abstract class Entity extends GameObject {
 	/** The entity's velocity along the y-axis. */
 	public float dy = 0;
 	
-	/** True if dx is positive (dx > 0). (N.B. dxp = dx positive) */
+	/** True if dx is positive (dx > 0). (N.B. dxp -> "dx positive") */
 	private boolean dxp = false;
-	/** True if dy is positive (dy > 0). (N.B. dyp = dy positive) */
+	/** True if dy is positive (dy > 0). (N.B. dyp -> "dy positive") */
 	private boolean dyp = false;
 	
 	/** Whether or not the entity is facing right. */
