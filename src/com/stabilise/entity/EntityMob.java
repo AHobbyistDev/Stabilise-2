@@ -483,7 +483,7 @@ public abstract class EntityMob extends Entity {
 	 * @param count The quantity of the item.
 	 * @param chance The chance of dropping the item, from 0.0 to 1.0.
 	 */
-	public void dropItem(int id, int count, float chance) {
+	protected void dropItem(int id, int count, float chance) {
 		if(world.rng.nextFloat() > chance)
 			return;
 		EntityItem e = new EntityItem(world, new ItemStack(Item.getItem(id), count));

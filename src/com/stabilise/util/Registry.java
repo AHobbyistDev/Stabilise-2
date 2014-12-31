@@ -2,6 +2,7 @@ package com.stabilise.util;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,7 +13,7 @@ import java.util.Set;
  * <p>This class has been reconstructed from the decompiled Minecraft 1.7.10
  * source.
  */
-public class Registry<K, V> {
+public class Registry<K, V> implements Iterable<V> {
 	
 	/** The name of the registry. */
 	public final String name;
@@ -65,12 +66,12 @@ public class Registry<K, V> {
 	 * @throws NullPointerException if either {@code key} or {@code object} are
 	 * {@code null}.
 	 */
-	public void registerObject(K key, V object) {
+	public void register(K key, V object) {
 		if(key == null || object == null)
 			throw new NullPointerException("null key or value!");
 		
 		if(objects.containsKey(key))
-			log.logCritical("Adding duplicate key \"" + key + "\" to registry!");
+			log.logCritical("Adding duplicate key \"" + key + "\"!");
 		
 		objects.put(key, object);
 	}
@@ -82,7 +83,7 @@ public class Registry<K, V> {
 	 * 
 	 * @return The object, or {@code null} if the key lacks a mapping.
 	 */
-	public V getObject(K key) {
+	public V get(K key) {
 		return objects.get(key);
 	}
 	
@@ -98,12 +99,23 @@ public class Registry<K, V> {
 	}
 	
 	/**
-	 * Gets the set of keys recognised by the registry.
+	 * Gets the set of keys recognised by the registry. The returned set is
+	 * unmodifiable and hence should only be used for iteration.
 	 * 
 	 * @return The set of keys.
 	 */
 	public Set<K> getKeys() {
 		return Collections.unmodifiableSet(objects.keySet());
+	}
+	
+	/**
+	 * Gets the iterator for the registered objects.
+	 * 
+	 * @return The iterator.
+	 */
+	@Override
+	public Iterator<V> iterator() {
+		return objects.values().iterator();
 	}
 	
 }

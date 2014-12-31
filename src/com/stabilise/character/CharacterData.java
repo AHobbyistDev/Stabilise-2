@@ -83,10 +83,8 @@ public class CharacterData {
 	 * @param characterName The character's name. This serves as both the file
 	 * system name and the aesthetic name by default.
 	 * 
-	 * @throws NullPointerException Thrown if {@code characterName} is {@code
-	 * null}.
-	 * @throws IllegalArgumentException Thrown if {@code characterName} is an
-	 * empty string.
+	 * @throws NullPointerException if {@code characterName} is {@code null}.
+	 * @throws IllegalArgumentException if {@code characterName} is empty.
 	 */
 	public CharacterData(String characterName) {
 		if(characterName == null)
@@ -124,8 +122,8 @@ public class CharacterData {
 	/**
 	 * Loads the character data.
 	 * 
-	 * @throws IOException Thrown if an I/O exception is encountered while
-	 * attempting to load the character data.
+	 * @throws IOException if an I/O exception is encountered while attempting
+	 * to load the character data.
 	 */
 	public void load() throws IOException {
 		NBTTagCompound tag = NBTIO.readCompressed(new File(getCharacterDir(fileSystemName), FILE_DATA));
@@ -151,8 +149,8 @@ public class CharacterData {
 	/**
 	 * Saves the character data.
 	 * 
-	 * @throws IOException Thrown if an I/O exception is encountered while
-	 * attempting to save the character data.
+	 * @throws IOException if an I/O exception is encountered while attempting
+	 * to save the character data.
 	 */
 	public void save() throws IOException {
 		lastPlayed = new Date().getTime();
@@ -185,8 +183,7 @@ public class CharacterData {
 	 * used, such that the most recently used character is at the head of the
 	 * array.
 	 * 
-	 * @return An array of created characters. This will be an empty array if
-	 * there are 
+	 * @return An array of created characters.
 	 */
 	public static CharacterData[] getCharactersList() {
 		IOUtil.createDirQuietly(Resources.CHARACTERS_DIR);
@@ -225,8 +222,7 @@ public class CharacterData {
 	 * @return The file representing the character's directory on the file 
 	 * system.
 	 * @throws NullPointerException if {@code characterName} is {@code null}.
-	 * @throws IllegalArgumentException if {@code characterName} is an empty
-	 * string.
+	 * @throws IllegalArgumentException if {@code characterName} is empty.
 	 */
 	public static File getCharacterDir(String characterName) {
 		if(characterName == null)

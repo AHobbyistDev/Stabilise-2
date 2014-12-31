@@ -1,7 +1,9 @@
 
 package com.stabilise.tests;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,6 +14,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import javax.imageio.ImageIO;
+
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 import com.badlogic.gdx.utils.ObjectMap;
@@ -20,6 +24,7 @@ import com.stabilise.util.Colour;
 import com.stabilise.util.IOUtil;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.StringUtil;
+import com.stabilise.util.maths.HashPoint;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.maths.SimplexNoise;
 
@@ -825,6 +830,59 @@ public class RandomTests {
 		
 	}
 	
+	protected static final void hashPointCollisions() {
+		List<HashPoint> points = new LinkedList<HashPoint>();
+		int len = 20;
+		for(int x = -len; x <= len; x++)
+			for(int y = -len; y <= len; y++)
+				points.add(new HashPoint(x, y));
+		
+		List<HashPoint> hashCollisions = new LinkedList<HashPoint>();
+		while(points.size() > 0) {
+			HashPoint p1 = points.remove(0);
+			for(HashPoint p2 : points) {
+				if(p1.hashCode() == p2.hashCode())
+					hashCollisions.add(p2);
+			}
+			if(hashCollisions.size() > 0) {
+				System.out.println(p1 + " collisions:");
+				Iterator<HashPoint> i = hashCollisions.iterator();
+				while(i.hasNext()) {
+					System.out.println("    " + i.next());
+					i.remove();
+				}
+			}
+		}
+	}
+	
+	protected static final void hashPointCollisions2() {
+		final int width = 1024;
+		final int height = 1024;
+		int[] pixels = new int[width*height];
+		HashPoint p = new HashPoint(0, 0);
+		final int collisionYes = 0xFFFF0000;
+		final int collisionNo = 0xFFFFFFFF;
+		
+		for(int y = 0; y < height; y++) {
+			for(int x = 0; x < width; x++) {
+				boolean collision = p.hashCode() == new HashPoint(x-width/2,y-height/2).hashCode();
+				pixels[y*height+x] = collision ? collisionYes : collisionNo;
+			}
+		}
+		
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        image.setRGB(0, 0, width, height, pixels, 0, width);
+		
+        File dir = new File("C:/Users/Adam/Documents/Hash Collisions/");
+		IOUtil.createDirQuietly(dir);
+		
+		try {
+			ImageIO.write(image, "png", new File(dir, p.toString() + ".png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	// ---------- TIMER ----------
 	
 	private static long prev;
@@ -923,7 +981,9 @@ public class RandomTests {
 		//wrappedRemainder();
 		//testHashes();
 		//gdxObjectMap();
-		wrappedRemainder2();
+		//wrappedRemainder2();
+		//hashPointCollisions();
+		hashPointCollisions2();
 		
 		//String s = "abcxyzABCXYZ a()a_a-a*a/a\\a.a'a\"";
 		//System.out.println(s + "\n" + IOUtil.getLegalString(s));

@@ -13,7 +13,9 @@ public class HashPoint {
 	
 	private int x, y;
 	private int hash;
-	private final boolean mutable; // somewhat ironic
+	
+	/** Whether this HashPoint is mutable - that is, may be modified. */
+	public final boolean mutable; // somewhat ironic
 	
 	
 	/**
@@ -95,16 +97,6 @@ public class HashPoint {
 	}
 	
 	/**
-	 * Checks for whether or not this point is mutable.
-	 * 
-	 * @return {@code true} if this point is mutable; {@code false} if it is
-	 * immutable.
-	 */
-	public boolean isMutable() {
-		return mutable;
-	}
-	
-	/**
 	 * @throws IllegalStateException if this point is immutable.
 	 */
 	private void checkCanModify() {
@@ -118,8 +110,9 @@ public class HashPoint {
 		// This loses information
 		//hash = ((x & 0xFFFF) << 16) + (y & 0xFFFF);
 		
-		// Shifts y by 16 bits modularly
-		hash = x ^ (y << 16) ^ (y >>> 16);
+		// Collisions are nicely distributed this way (though there's collision
+		// clumping nearby (0,0))
+		hash = x ^ (y << 16) ^ (y >>> 16); // Cyclicly shift y by 16 bits
 	}
 	
 	@Override

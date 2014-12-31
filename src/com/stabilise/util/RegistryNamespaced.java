@@ -9,13 +9,17 @@ import com.google.common.collect.HashBiMap;
 /**
  * The namespaced registry extends upon a standard registry to also include
  * names for registered objects, which are stored under a namespace in the
- * format: <tt>namespace:objectname</tt>. A namespaced registry also provides
- * bi-directional integer-object mappings.
+ * format: <tt>namespace:objectname</tt>.
+ * 
+ * <p>A namespaced registry also provides bi-directional integer-object
+ * mappings. As such, it it recommended to register entries through {@link
+ * #register(int, String, Object)} instead of {@link
+ * #register(Object, Object)}.
  * 
  * <p>This class has been reconstructed from the decompiled Minecraft 1.7.10
  * source.
  */
-public class RegistryNamespaced<V> extends Registry<String, V> implements Iterable<V> {
+public class RegistryNamespaced<V> extends Registry<String, V> {
 	
 	/** The default namespace. */
 	public final String defaultNamespace;
@@ -50,6 +54,12 @@ public class RegistryNamespaced<V> extends Registry<String, V> implements Iterab
 		nameMap = ((BiMap<String, V>)objects).inverse();
 	}
 	
+	@Override
+	protected Map<String, V> createUnderlyingMap(int capacity) {
+		// Java automatically infers generic types, which is nice
+		return HashBiMap.create(capacity);
+	}
+	
 	/**
 	 * Registers an object.
 	 * 
@@ -61,31 +71,42 @@ public class RegistryNamespaced<V> extends Registry<String, V> implements Iterab
 	 * @throws NullPointerException if either {@code name} or {@code object}
 	 * are {@code null}.
 	 */
-	public void registerObject(int id, String name, V object) {
-		registerObject(ensureNamespaced(name), object);
+	public void register(int id, String name, V object) {
+		if(idMap.getObject(id) != null)
+			log.logCritical("Adding duplicate id \"" + id + "\"!");
+		super.register(ensureNamespaced(name), object);
 		idMap.put(id, object);
 	}
 	
+	/**
+	 * Throws an UnsupportedOperationException.
+	 * 
+	 * @throws UnsupportedOperationException if this method is invoked.
+	 * Remember to use {@link #register(int, String, Object)} for a namespaced
+	 * registry!
+	 */
 	@Override
-	protected Map<String, V> createUnderlyingMap(int capacity) {
-		// Java automatically infers generic types, which is nice
-		return HashBiMap.create(capacity);
+	public void register(String name, V object) {
+		throw new UnsupportedOperationException(
+				"Attempted to use register(String, Object)! Use register(int, String, V) instead!"
+		);
 	}
 	
 	@Override
-	public V getObject(String key) {
-		return super.getObject(ensureNamespaced(key));
+	public V get(String key) {
+		return super.get(ensureNamespaced(key));
 	}
 	
 	/**
-	 * Gets the object with the specified ID.
+	 * Gets the object mapped to the specified ID.
 	 * 
 	 * @param id The ID.
 	 * 
 	 * @return The object, or {@code null} if the key is negative or otherwise
 	 * lacks a mapping.
+	 * @throws IndexOutOfBoundsException if {@code key < 0}.
 	 */
-	public V getObject(int id) {
+	public V get(int id) {
 		return idMap.getObject(id);
 	}
 	
@@ -118,16 +139,6 @@ public class RegistryNamespaced<V> extends Registry<String, V> implements Iterab
 	}
 	
 	/**
-	 * Gets the iterator for the registered objects.
-	 * 
-	 * @return The iterator.
-	 */
-	@Override
-	public Iterator<V> iterator() {
-		return idMap.iterator();
-	}
-	
-	/**
 	 * Checks for whether or not an object with the specified ID has been
 	 * registered.
 	 * 
@@ -138,6 +149,16 @@ public class RegistryNamespaced<V> extends Registry<String, V> implements Iterab
 	 */
 	public boolean containsID(int id) {
 		return idMap.objectExists(id);
+	}
+	
+	/**
+	 * Gets the iterator for the registered objects.
+	 * 
+	 * @return The iterator.
+	 */
+	@Override
+	public Iterator<V> iterator() {
+		return idMap.iterator();
 	}
 	
 	/**

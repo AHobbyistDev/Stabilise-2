@@ -50,7 +50,7 @@ public class GDXTestState implements State, InputProcessor {
 		
 		music = Gdx.audio.newMusic(Gdx.files.absolute("C:/Users/Adam/AppData/Roaming/.stabilise/res/sound/sarabande.wav"));
 		music.setLooping(true);
-		//music.play();
+		music.play();
 		
 		// -------------------------
 		

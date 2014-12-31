@@ -14,7 +14,8 @@ public class Item {
 	//--------------------==========--------------------
 	
 	/** The registry containing all items in the game. */
-	public static final RegistryNamespaced<Item> ITEMS = new RegistryNamespaced<Item>("ITEMS", 8, "stabilise");
+	public static final RegistryNamespaced<Item> ITEMS = 
+			new RegistryNamespaced<Item>("ITEMS", 8, "stabilise");
 	
 	/** The default maximum stack size. */
 	public static final int DEFAULT_MAX_STACK_SIZE = 64;
@@ -26,7 +27,7 @@ public class Item {
 	public static final Item NO_ITEM = new Item(0, "", Integer.MAX_VALUE);
 	
 	/** Flag which is set to true when items are registered. */
-	private static boolean REGISTERED = false;
+	private static boolean registered = false;
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -110,8 +111,10 @@ public class Item {
 		return maxStackSize;
 	}
 	
-	// Note: Overriding equals() isn't necessary since the equality operator
-	// is sufficient.
+	@Override
+	public boolean equals(Object o) {
+		return o == this;
+	}
 	
 	@Override
 	public String toString() {
@@ -131,7 +134,7 @@ public class Item {
 	 * exists.
 	 */
 	public static Item getItem(int id) {
-		Item item = ITEMS.getObject(id);
+		Item item = ITEMS.get(id);
 		return item == null ? NO_ITEM : item;
 	}
 	
@@ -160,14 +163,18 @@ public class Item {
 	}
 	
 	/**
-	 * Registers all items.
+	 * Registers all items, and then loads the {@link Items} class into memory.
 	 * 
-	 * <p>This should be called after {@link Tile#registerTiles()} is invoked,
-	 * as respective items are created for every tile.
+	 * <p>This should be called after {@link Tile#registerTiles()} is invoked.
+	 * 
+	 * @throws IllegalStateException if this method has already been invoked.
 	 */
 	public static void registerItems() {
+		if(registered)
+			throw new IllegalStateException("Items have already been registered!");
+		
 		registerItem(0, "", NO_ITEM);
-		registerItem(1, "tile", new Item());
+		registerItem(1, "tile", new Item()); // TODO: ItemTile
 		registerItem(2, "sword", new Item());
 		registerItem(3, "apple", new Item());
 		registerItem(4, "arrow", new Item());
@@ -176,7 +183,9 @@ public class Item {
 		//for(Tile tile : Tile.TILES)
 		//	registerItem(tile.getID(), tile.getName(), new ItemTile(tile));
 		
-		REGISTERED = true;
+		registered = true;
+		
+		Items.poke();
 	}
 	
 	/**
@@ -187,7 +196,7 @@ public class Item {
 	 * @param item The item.
 	 */
 	private static void registerItem(int id, String name, Item item) {
-		ITEMS.registerObject(id, name, item);
+		ITEMS.register(id, name, item);
 		item.id = id;
 		item.name = name;
 	}
@@ -197,7 +206,7 @@ public class Item {
 	 * otherwise.
 	 */
 	static boolean isRegistered() {
-		return REGISTERED;
+		return registered;
 	}
 	
 }

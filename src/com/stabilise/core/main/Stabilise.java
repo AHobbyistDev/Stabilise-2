@@ -98,11 +98,6 @@ public class Stabilise extends Application {
 				Tile.registerTiles();
 				Item.registerItems();
 				
-				// Initialises these classes - that is, loads them into memory
-				// and performs any static blocks of code
-				Class.forName("com.stabilise.world.tile.Tiles");		
-				Class.forName("com.stabilise.item.Items");
-				
 				Settings.initialise();
 				Controller.poke();
 				

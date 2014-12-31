@@ -23,6 +23,7 @@ public class TileEntityMobSpawner extends TileEntity {
 	private int ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS;
 	private double xPos, yPos;
 	
+	
 	/**
 	 * Creates a new mob spawner tile entity.
 	 * 

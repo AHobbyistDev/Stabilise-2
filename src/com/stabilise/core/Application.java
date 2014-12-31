@@ -19,7 +19,7 @@ import com.stabilise.util.Profiler;
  * <pre>
  * public class MyProgram extends Application {
  *     public MyProgram() {
- *         super(60); // Arbitrary example value	
+ *         super(60); // Arbitrary TPS value	
  *     }
  *     
  *     &#64;Override
@@ -87,6 +87,8 @@ public abstract class Application {
 	 * <p>This profiler is flushed automatically; to use it, simply invoke
 	 * {@code start}, {@code next} and {@code end} where desired. */
 	public final Profiler profiler = new Profiler(false, "root");
+	/** The last update at which the profiler was flushed. */
+	private long lastProfilerFlush = 0L;
 	
 	
 	/**
@@ -202,13 +204,11 @@ public abstract class Application {
 		
 		try {
 			profiler.start("update"); // start update
-			boolean updated = false;
 			
 			// Perform any scheduled update ticks
 			while(unprocessed >= nsPerTick) {
 				numUpdates++;
 				unprocessed -= nsPerTick;
-				updated = true;
 				
 				tick();
 				state.update();
@@ -216,10 +216,14 @@ public abstract class Application {
 			
 			profiler.end(); // end update
 			
-			// Flush the profiler, but only if at least one update tick
-			// occurred.
-			if(updated)
+			// Flush the profiler every 1 second worth of ticks
+			if(numUpdates - lastProfilerFlush >= ticksPerSecond) {
+				lastProfilerFlush = numUpdates;
 				profiler.flush();
+			} else if(numUpdates < lastProfilerFlush) {
+				// numUpdates must have overflowed
+				lastProfilerFlush = numUpdates;
+			}
 			
 			// Rendering
 			profiler.start("render");

@@ -47,11 +47,11 @@ public class RegistryNamespacedDefaulted<V> extends RegistryNamespaced<V> {
 	 * are {@code null}.
 	 */
 	@Override
-	public void registerObject(int id, String name, V object) {
+	public void register(int id, String name, V object) {
 		if(defaultName.equals(name))
 			defaultValue = object;
 		
-		super.registerObject(id, name, object);
+		super.register(id, name, object);
 	}
 	
 	/**
@@ -59,11 +59,12 @@ public class RegistryNamespacedDefaulted<V> extends RegistryNamespaced<V> {
 	 * 
 	 * @param name The name.
 	 * 
-	 * @return The object, or the default value if the name lacks a mapping.
+	 * @return The object, or the default value (note that this may be {@code
+	 * null}) if the name lacks a mapping.
 	 */
 	@Override
-	public V getObject(String name) {
-		V obj = super.getObject(name);
+	public V get(String name) {
+		V obj = super.get(name);
 		return obj == null ? defaultValue : obj;
 	}
 	
@@ -72,11 +73,12 @@ public class RegistryNamespacedDefaulted<V> extends RegistryNamespaced<V> {
 	 * 
 	 * @param id The ID.
 	 * 
-	 * @return The object, or the default value if the ID lacks a mapping.
+	 * @return The object, or the default value (note that this may be {@code
+	 * null}) if the ID lacks a mapping.
 	 */
 	@Override
-	public V getObject(int id) {
-		V obj = super.getObject(id);
+	public V get(int id) {
+		V obj = super.get(id);
 		return obj == null ? defaultValue : obj;
 	}
 	

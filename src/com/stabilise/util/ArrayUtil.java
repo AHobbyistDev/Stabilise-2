@@ -13,29 +13,6 @@ public class ArrayUtil {
 	private ArrayUtil() {}
 	
 	/**
-	 * Flips a two-dimensional array with non-primitive elements, such that:
-	 * <pre>{ {foo1}, {foo2}, {foo3} }</pre> becomes
-	 * <pre>{ {foo3}, {foo2}, {foo1} }</pre>
-	 * 
-	 * @param arr The array to flip.
-	 * 
-	 * @return {@code arr}
-	 */
-	public static <T> T[][] reverse2DArray(T[][] arr) {
-		if(arr == null || arr.length < 2)
-			return arr;
-		
-		T[] temp;
-		for(int i = 0; i < arr.length / 2; i++) {
-			temp = arr[arr.length - i - 1];
-			arr[arr.length - i - 1] = arr[i];
-			arr[i] = temp;
-		}
-		
-		return arr;
-	}
-	
-	/**
 	 * Flips a two-dimensional integer array, such that:
 	 * <pre>{ {foo1}, {foo2}, {foo3} }</pre> becomes
 	 * <pre>{ {foo3}, {foo2}, {foo1} }</pre>

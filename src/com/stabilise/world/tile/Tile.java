@@ -2,7 +2,6 @@ package com.stabilise.world.tile;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
-import com.stabilise.util.RegistryNamespaced;
 import com.stabilise.util.RegistryNamespacedDefaulted;
 import com.stabilise.world.World;
 
@@ -15,8 +14,9 @@ public class Tile {
 	//-----=====Static Constants and Variables=====-----
 	//--------------------==========--------------------
 	
-	/** The registry of all tiles in the game. */
-	public static final RegistryNamespaced<Tile> TILES =
+	/** The registry of all tiles in the game. The default tile is the air
+	 * tile. */
+	public static final RegistryNamespacedDefaulted<Tile> TILES =
 			new RegistryNamespacedDefaulted<Tile>("TILES", 32, "stabilise", "air");
 	
 	
@@ -29,6 +29,9 @@ public class Tile {
 	protected static final float HARDNESS_WOOD = 3.0f;
 	/** The hardness for invulnerable tiles. */
 	protected static final float HARDNESS_INVULNERABLE = 1000000;
+	
+	/** Flag which is set to true when tiles are registered. */
+	private static boolean registered = false;
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -261,7 +264,7 @@ public class Tile {
 	 * exists.
 	 */
 	public static Tile getTile(int id) {
-		return TILES.getObject(id);
+		return TILES.get(id);
 	}
 	
 	/**
@@ -273,13 +276,18 @@ public class Tile {
 	 * exists.
 	 */
 	public static Tile getTile(String name) {
-		return TILES.getObject(name);
+		return TILES.get(name);
 	}
 	
 	/**
-	 * Registers all tiles.
+	 * Registers all tiles, and then loads the {@link Tiles} class into memory.
+	 * 
+	 * @throws IllegalStateException if this method has already been invoked.
 	 */
 	public static void registerTiles() {
+		if(registered)
+			throw new IllegalStateException("Tiles have already been registered!");
+		
 		registerTile(0, "air", new TileAir());
 		registerTile(1, "stone", (new Tile()).setHardness(HARDNESS_STONE));
 		registerTile(2, "dirt", (new Tile()).setHardness(HARDNESS_DIRT));
@@ -300,6 +308,10 @@ public class Tile {
 		registerTile(17, "oreDiamond", (new TileOre()).setHardness(HARDNESS_STONE));
 		registerTile(18, "chest", (new TileChest()).setHardness(HARDNESS_WOOD));
 		registerTile(19, "mobSpawner", new TileMobSpawner());
+		
+		registered = true;
+		
+		Tiles.poke();
 	}
 	
 	/**
@@ -311,9 +323,17 @@ public class Tile {
 	 * @param tile The tile.
 	 */
 	private static void registerTile(int id, String name, Tile tile) {
-		TILES.registerObject(id, name, tile);
+		TILES.register(id, name, tile);
 		tile.id = id;
 		tile.name = name;
+	}
+	
+	/**
+	 * @return {@code true} if the tiles have been registered; {@code false}
+	 * otherwise.
+	 */
+	static boolean isRegistered() {
+		return registered;
 	}
 
 }

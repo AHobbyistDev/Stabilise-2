@@ -12,8 +12,8 @@ public class Items {
 	// non-instantiable
 	public Items() {}
 	
-	/** Invoking this loads this class into memory. */
-	static void poke() {}
+	/** Invoking this loads this class into memory but otherwise does nothing. */
+	public static void poke() {}
 	
 	// Invoked when this class is loaded into memory
 	static {
@@ -24,9 +24,9 @@ public class Items {
 			);
 	}
 	
-	public static final Item TILE = Item.ITEMS.getObject("tile");
-	public static final Item SWORD = Item.ITEMS.getObject("sword");
-	public static final Item APPLE = Item.ITEMS.getObject("apple");
-	public static final Item ARROW = Item.ITEMS.getObject("arrow");
+	public static final Item TILE = Item.ITEMS.get("tile");
+	public static final Item SWORD = Item.ITEMS.get("sword");
+	public static final Item APPLE = Item.ITEMS.get("apple");
+	public static final Item ARROW = Item.ITEMS.get("arrow");
 	
 }
