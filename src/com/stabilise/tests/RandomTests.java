@@ -883,6 +883,13 @@ public class RandomTests {
 		}
 	}
 	
+	@SuppressWarnings("unused")
+	protected static void autoboxing() {
+		HashMap<String, Integer> map = new HashMap<String, Integer>();
+		int i = map.get(""); // will there be an autoboxing-induced NPE?
+		int j = map.get("").intValue(); // definitely one here
+	}
+	
 	// ---------- TIMER ----------
 	
 	private static long prev;
@@ -983,7 +990,8 @@ public class RandomTests {
 		//gdxObjectMap();
 		//wrappedRemainder2();
 		//hashPointCollisions();
-		hashPointCollisions2();
+		//hashPointCollisions2();
+		autoboxing();
 		
 		//String s = "abcxyzABCXYZ a()a_a-a*a/a\\a.a'a\"";
 		//System.out.println(s + "\n" + IOUtil.getLegalString(s));

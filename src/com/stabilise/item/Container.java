@@ -420,12 +420,14 @@ public abstract class Container implements Iterable<ItemStack> {
 		}
 		
 		// Replace any of the default null array entries with NO_STACK.
+		/*
 		if(isBounded()) {
 			for(int i = 0; i < size(); i++) {
 				if(getStack(i) == null)
 					setSlot(i, ItemStack.NO_STACK);
 			}
 		}
+		*/
 	}
 	
 	@Override

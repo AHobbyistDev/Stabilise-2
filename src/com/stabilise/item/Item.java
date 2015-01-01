@@ -15,7 +15,7 @@ public class Item {
 	
 	/** The registry containing all items in the game. */
 	public static final RegistryNamespaced<Item> ITEMS = 
-			new RegistryNamespaced<Item>("ITEMS", 8, "stabilise");
+			new RegistryNamespaced<Item>("ITEMS", "stabilise", 8);
 	
 	/** The default maximum stack size. */
 	public static final int DEFAULT_MAX_STACK_SIZE = 64;

@@ -21,12 +21,29 @@ public class Registry<K, V> implements Iterable<V> {
 	/** The map of objects registered in the registry. */
 	protected final Map<K, V> objects;
 	
-	/** The registry's log. */
-	protected final Log log;
+	/** Whether or not duplicate keys overwrite old ones. */
+	protected final boolean overwrite;
+	
+	/** The registry's log. This is public as to allow muting. */
+	public final Log log;
 	
 	
 	/**
-	 * Creates a new Registry.
+	 * Creates a new Registry with an initial capacity of 16. Attempting to
+	 * register duplicate keys in this registry will result in the newer entry
+	 * being ignored.
+	 * 
+	 * @param name The name of the registry.
+	 * 
+	 * @throws NullPointerException if {@code name} is {@code null}.
+	 */
+	public Registry(String name) {
+		this(name, 16, false);
+	}
+	
+	/**
+	 * Creates a new Registry. Attempting to register duplicate keys in this
+	 * registry will result in the newer entry being ignored.
 	 * 
 	 * @param name The name of the registry.
 	 * @param capacity The initial registry capacity.
@@ -35,9 +52,25 @@ public class Registry<K, V> implements Iterable<V> {
 	 * @throws IllegalArgumentException if {@code capacity < 0}.
 	 */
 	public Registry(String name, int capacity) {
+		this(name, capacity, false);
+	}
+	
+	/**
+	 * Creates a new Registry.
+	 * 
+	 * @param name The name of the registry.
+	 * @param capacity The initial registry capacity.
+	 * @param overwrite Whether or not duplicate keys overwrite old ones. If
+	 * {@code false}, duplicate keys are ignored.
+	 * 
+	 * @throws NullPointerException if {@code name} is {@code null}.
+	 * @throws IllegalArgumentException if {@code capacity < 0}.
+	 */
+	public Registry(String name, int capacity, boolean overwrite) {
 		if(name == null)
 			throw new NullPointerException("name is null");
 		this.name = name;
+		this.overwrite = overwrite;
 		
 		log = Log.getAgent("Registry: " + name);
 		
@@ -70,8 +103,14 @@ public class Registry<K, V> implements Iterable<V> {
 		if(key == null || object == null)
 			throw new NullPointerException("null key or value!");
 		
-		if(objects.containsKey(key))
-			log.logCritical("Adding duplicate key \"" + key + "\"!");
+		if(objects.containsKey(key)) {
+			if(overwrite) {
+				log.logCritical("Duplicate key \"" + key + "\"; replacing old mapping");
+			} else {
+				log.logCritical("Duplicate key \"" + key + "\"; ignoring new mapping");
+				return;
+			}
+		}
 		
 		objects.put(key, object);
 	}

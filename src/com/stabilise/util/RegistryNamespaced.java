@@ -24,26 +24,63 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	/** The default namespace. */
 	public final String defaultNamespace;
 	
-	/** The map of objects to their IDs. */
+	/** The map of objects to their IDs and visa-versa. */
 	protected final BiObjectIntMap<V> idMap;
-	/** The map of objects to their names. */
+	/** The map of objects to their names - the inverse of the standard
+	 * registry map. */
 	protected final Map<V, String> nameMap;
 	
 	
 	/**
-	 * Creates a new namespaced registry.
+	 * Creates a new namespaced registry with an initial capacity of 16.
+	 * Attempting to register duplicate names and IDs in this registry will
+	 * result in the newer ones being ignored.
 	 * 
 	 * @param name The name of the registry.
-	 * @param capacity The intial registry capacity.
 	 * @param defaultNamespace The default namespace under which to register
 	 * objects.
 	 * 
 	 * @throws NullPointerException if either {@code name} or {@code 
 	 * defaultNamespace} are {@code null}.
+	 */
+	public RegistryNamespaced(String name, String defaultNamespace) {
+		this(name, defaultNamespace, 16);
+	}
+	
+	/**
+	 * Creates a new namespaced registry. Attempting to register duplicate
+	 * names and IDs in this registry will result in the new ones being
+	 * ignored.
+	 * 
+	 * @param name The name of the registry.
+	 * @param defaultNamespace The default namespace under which to register
+	 * objects.
+	 * @param capacity The initial registry capacity.
+	 * 
+	 * @throws NullPointerException if either {@code name} or {@code 
+	 * defaultNamespace} are {@code null}.
 	 * @throws IllegalArgumentException if {@code capacity < 0}.
 	 */
-	public RegistryNamespaced(String name, int capacity, String defaultNamespace) {
-		super(name, capacity);
+	public RegistryNamespaced(String name, String defaultNamespace, int capacity) {
+		this(name, defaultNamespace, capacity, false);
+	}
+	
+	/**
+	 * Creates a new namespaced registry.
+	 * 
+	 * @param name The name of the registry.
+	 * @param defaultNamespace The default namespace under which to register
+	 * objects.
+	 * @param capacity The initial registry capacity.
+	 * @param overwrite Whether or not duplicate names and IDs overwrite old
+	 * ones. If {@code false}, duplicate names and IDs are ignored.
+	 * 
+	 * @throws NullPointerException if either {@code name} or {@code 
+	 * defaultNamespace} are {@code null}.
+	 * @throws IllegalArgumentException if {@code capacity < 0}.
+	 */
+	public RegistryNamespaced(String name, String defaultNamespace, int capacity, boolean overwrite) {
+		super(name, capacity, overwrite);
 		
 		if(defaultNamespace == null)
 			throw new NullPointerException("defaultNamespace is null");
@@ -72,8 +109,15 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	 * are {@code null}.
 	 */
 	public void register(int id, String name, V object) {
-		if(idMap.getObject(id) != null)
-			log.logCritical("Adding duplicate id \"" + id + "\"!");
+		if(idMap.getObject(id) != null) {
+			if(overwrite) {
+				log.logCritical("Duplicate id \"" + id + "\"; replacing old mapping");
+			} else {
+				log.logCritical("Duplicate id \"" + id + "\"; ignoring new mapping");
+				super.register(ensureNamespaced(name), object);
+				return;
+			}
+		}
 		super.register(ensureNamespaced(name), object);
 		idMap.put(id, object);
 	}
