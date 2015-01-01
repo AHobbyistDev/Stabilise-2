@@ -67,7 +67,7 @@ abstract class AbstractPolygon extends PrecomputableShape {
 	protected boolean intersectsOnOwnAxes(Shape s) {
 		Vector2[] axes = generateAxes();
 		for(Vector2 axis : axes) {
-			if(!getProjection(axis).overlaps(s.getProjection(axis)))
+			if(!getProjection(axis).intersects(s.getProjection(axis)))
 				return false;
 		}
 		return true;
@@ -84,8 +84,35 @@ abstract class AbstractPolygon extends PrecomputableShape {
 	 */
 	@ForPrecomputedVariant
 	protected boolean intersectsOnOwnAxesPrecomputed(Shape s) {
-		for(int i = 0; i < getAxes().length; i++) {
-			if(!getProjection(i).overlaps(s.getProjection(getAxes()[i])))
+		Vector2[] axes = getAxes();
+		for(int i = 0; i < axes.length; i++) {
+			if(!getProjection(i).intersects(s.getProjection(axes[i])))
+				return false;
+		}
+		return true;
+	}
+	
+	@Override
+	public boolean contains(Shape s) {
+		Vector2[] axes = generateAxes();
+		for(Vector2 axis : axes) {
+			if(!getProjection(axis).contains(s.getProjection(axis)))
+				return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * As, {@link #contains(Shape)}, but optimised for precomputation.
+	 * 
+	 * @return {@code true} if this polygon contains the given shape; {@code
+	 * false} otherwise.
+	 */
+	@ForPrecomputedVariant
+	protected boolean containsPrecomputed(Shape s) {
+		Vector2[] axes = getAxes();
+		for(int i = 0; i < axes.length; i++) {
+			if(!getProjection(i).contains(s.getProjection(axes[i])))
 				return false;
 		}
 		return true;

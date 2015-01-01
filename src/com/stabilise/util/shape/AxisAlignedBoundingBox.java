@@ -171,41 +171,42 @@ public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 	
 	@Override
 	protected boolean intersectsOnOwnAxes(Shape s) {
-		return getHorizontalProjection().overlaps(s.getHorizontalProjection()) &&
-				getVerticalProjection().overlaps(s.getVerticalProjection());
+		return getHorizontalProjection().intersects(s.getHorizontalProjection()) &&
+				getVerticalProjection().intersects(s.getVerticalProjection());
 	}
 	
 	/**
-	 * Calculates whether or not two axis-aligned bounding boxes intersect.
+	 * Calculates whether or not this AABB intersects with another.
 	 * 
-	 * @param a The AABB with which to test intersection.
-	 * 
-	 * @return {@code true} if the two AABBs intersect; {@code false}
+	 * @return {@code true} if this intersects with {@code a}; {@code false}
 	 * otherwise.
 	 */
 	public boolean intersectsAABB(AABB a) {
-		return intersectsAABB(a.getV00(), a.getV11());
+		return getV00().x <= a.getV11().x && getV11().x >= a.getV00().x
+				&& getV00().y <= a.getV11().y && getV11().y >= a.getV00().y;
+	}
+	
+	@Override
+	public boolean contains(Shape s) {
+		return getHorizontalProjection().contains(s.getHorizontalProjection()) &&
+				getVerticalProjection().contains(s.getVerticalProjection());
 	}
 	
 	/**
-	 * Calculates whether or not two AABBs intersect based on the min and max
-	 * vertices of the other.
+	 * Calculates whether or not this AABB contains the specified AABB.
 	 * 
-	 * @param v00 The min vertex (i.e. bottom left) of the other AABB.
-	 * @param v11 The max vertex (i.e. top right) of the other AABB.
-	 * 
-	 * @return {@code true} if the two AABBs intersect; {@code false}
+	 * @return {@code true} if this AABB contains {@code a}; {@code false}
 	 * otherwise.
 	 */
-	private boolean intersectsAABB(Vector2 o00, Vector2 o11) {
-		return vertices[V00].x <= o11.x && vertices[V11].x >= o00.x
-				&& vertices[V00].y <= o11.y && vertices[V11].y >= o00.y;
+	public boolean containsAABB(AABB a) {
+		return getV00().x <= a.getV00().x && getV11().x >= a.getV11().x
+				&& getV00().y <= a.getV00().y && getV11().y >= a.getV11().y;
 	}
 	
 	@Override
 	public boolean containsPoint(float x, float y) {
-		return x >= vertices[V00].x && x <= vertices[V11].x 
-				&& y >= vertices[V00].y && y <= vertices[V11].y;
+		return x >= getV00().x && x <= getV11().x 
+				&& y >= getV00().y && y <= getV11().y;
 	}
 	
 	@Override
@@ -364,8 +365,8 @@ public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 		 */
 		private void calculateProjections() {
 			projections = new ShapeProjection[] {
-					new ShapeProjection(vertices[V00].x, vertices[V11].x),
-					new ShapeProjection(vertices[V00].y, vertices[V11].y)
+					super.getHorizontalProjection(),
+					super.getVerticalProjection()
 			};
 		}
 		

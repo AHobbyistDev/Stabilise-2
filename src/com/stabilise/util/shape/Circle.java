@@ -75,6 +75,14 @@ public class Circle extends Shape {
 		return new Circle(this.x + x, this.y + y, radius);
 	}
 	
+	/**
+	 * Returns this circle.
+	 */
+	@Override
+	public Circle reflect() {
+		return this;
+	}
+	
 	@Override
 	protected Vector2[] getVertices() {
 		return new Vector2[] {new Vector2(x, y)};
@@ -94,11 +102,9 @@ public class Circle extends Shape {
 	}
 	
 	/**
-	 * Calculates whether or not two circles intersect.
+	 * Calculates whether or not this circle intersects with another.
 	 * 
-	 * @param c The circle with which to test intersection.
-	 * 
-	 * @return {@code true} if the two circles intersect; {@code false}
+	 * @return {@code true} if this intersects with {@code c}; {@code false}
 	 * otherwise.
 	 */
 	public boolean intersects(Circle c) {
@@ -106,6 +112,25 @@ public class Circle extends Shape {
 		float dy = this.y - c.y;
 		float radii = radius + c.radius;
 		return dx*dx + dy*dy <= radii*radii;
+	}
+	
+	@Override
+	public boolean contains(Shape s) {
+		if(s instanceof Circle)
+			return contains((Circle)s);
+		return s.contains(this);
+	}
+	
+	/**
+	 * Calculates whether or not this circle contains another.
+	 * 
+	 * @return {@code true} if this contains {@code c}; {@code false}
+	 * otherwise.
+	 */
+	public boolean contains(Circle c) {
+		float dx = this.x - c.x;
+		float dy = this.y - c.y;
+		return radius >= dx*dx + dy*dy + c.radius;
 	}
 	
 	@Override
@@ -130,14 +155,6 @@ public class Circle extends Shape {
 	@Override
 	protected ShapeProjection getVerticalProjection() {
 		return new ShapeProjection(y - radius, y + radius);
-	}
-	
-	/**
-	 * Returns this circle.
-	 */
-	@Override
-	public Circle reflect() {
-		return this;
 	}
 	
 }

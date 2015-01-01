@@ -22,22 +22,28 @@ class ShapeProjection {
 	}
 	
 	/**
-	 * Calculates whether or not two projections overlap, and returns the
-	 * result.
-	 * 
 	 * @param p The projection to compare against.
 	 * 
 	 * @return {@code true} if the two projections overlap; {@code false}
 	 * if they do not.
+	 * @throws NullPointerException if {@code p} is {@code null}.
 	 */
-	public boolean overlaps(ShapeProjection p) {
+	public boolean intersects(ShapeProjection p) {
 		return min <= p.max && max >= p.min;
 	}
 	
 	/**
-	 * Calculates whether or not a point is within the bounds of the
-	 * projection.
+	 * @param p The projection to compare against.
 	 * 
+	 * @return {@code true} if this projection contains the other; {@code
+	 * false} otherwise.
+	 * @throws NullPointerException if {@code p} is {@code null}.
+	 */
+	public boolean contains(ShapeProjection p) {
+		return min <= p.min && max >= p.max;
+	}
+	
+	/**
 	 * @param x The point.
 	 * 
 	 * @return {@code true} if the projection contains the point; {@code false}

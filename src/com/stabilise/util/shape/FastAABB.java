@@ -96,8 +96,8 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	
 	@Override
 	protected boolean intersectsOnOwnAxes(Shape s) {
-		return getHorizontalProjection().overlaps(s.getHorizontalProjection()) &&
-				getVerticalProjection().overlaps(s.getVerticalProjection());
+		return getHorizontalProjection().intersects(s.getHorizontalProjection()) &&
+				getVerticalProjection().intersects(s.getVerticalProjection());
 	}
 	
 	/**
@@ -109,21 +109,25 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	 * otherwise.
 	 */
 	public boolean intersectsAABB(AABB a) {
-		return intersectsAABB(a.getV00(), a.getV11());
+		return getV00().x <= a.getV11().x && getV11().x >= a.getV00().x
+				&& getV00().y <= a.getV11().y && getV11().y >= a.getV00().y;
+	}
+	
+	@Override
+	public boolean contains(Shape s) {
+		return getHorizontalProjection().contains(s.getHorizontalProjection()) &&
+				getVerticalProjection().contains(s.getVerticalProjection());
 	}
 	
 	/**
-	 * Calculates whether or not two AABBs intersect based on the min and max
-	 * vertices of the other.
+	 * Calculates whether or not this AABB contains the specified AABB.
 	 * 
-	 * @param v00 The min vertex (i.e. bottom left) of the other AABB.
-	 * @param v11 The max vertex (i.e. top right) of the other AABB.
-	 * 
-	 * @return {@code true} if the two AABBs intersect; {@code false}
+	 * @return {@code true} if this AABB contains {@code a}; {@code false}
 	 * otherwise.
 	 */
-	private boolean intersectsAABB(Vector2 o00, Vector2 o11) {
-		return v00.x <= o11.x && v11.x >= o00.x && v00.y <= o11.y && v11.y >= o00.y;
+	public boolean containsAABB(AABB a) {
+		return getV00().x <= a.getV00().x && getV11().x >= a.getV11().x
+				&& getV00().y <= a.getV00().y && getV11().y >= a.getV11().y;
 	}
 	
 	@Override

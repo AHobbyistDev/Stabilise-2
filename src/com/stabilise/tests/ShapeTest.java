@@ -17,13 +17,20 @@ public class ShapeTest {
 		final AxisAlignedBoundingBox b1Pre = b1.precomputed();
 		final FastAABB b2Pre = b2.precomputed();
 		
-		int collisions = 16384*8;
+		int collisions = 16384*1024;
 		
-		time(print, "AABB v FastAABB as AbstractPolygon", collisions, () -> b1.intersects(b2));
-		time(print, "AABB v FastAABB as AABB", collisions, () -> b1.intersectsAABB(b2));
-		time(print, "AABB v FastAABB as AbstractPolygon (Precomputed)", collisions, () -> b1Pre.intersects(b2Pre));
-		time(print, "AABB v FastAABB as AABB (Precomputed)", collisions, () -> b1Pre.intersectsAABB(b2Pre));
+		time(print, "AABB i FastAABB as AbstractPolygon", collisions, () -> b1.intersects(b2));
+		time(print, "AABB i FastAABB as AABB", collisions, () -> b1.intersectsAABB(b2));
+		time(print, "AABB i FastAABB as AbstractPolygon (Precomputed)", collisions, () -> b1Pre.intersects(b2Pre));
+		time(print, "AABB i FastAABB as AABB (Precomputed)", collisions, () -> b1Pre.intersectsAABB(b2Pre));
 		
+		time(print, "AABB c FastAABB as AbstractPolygon", collisions, () -> b1.contains(b2));
+		time(print, "AABB c FastAABB as AABB", collisions, () -> b1.containsAABB(b2));
+		time(print, "AABB c FastAABB as AbstractPolygon (Precomputed)", collisions, () -> b1Pre.contains(b2Pre));
+		time(print, "AABB c FastAABB as AABB (Precomputed)", collisions, () -> b1Pre.containsAABB(b2Pre));
+		
+		
+		/*
 		final Polygon p = circlePoly(32);
 		final Polygon pPre = p.precomputed();
 		
@@ -38,6 +45,7 @@ public class ShapeTest {
 		
 		time(print, "Polygon (BotLeft) v FastAABB (Pre)", collisions, () -> p.translate(-1f, -1f).intersects(b2Pre));
 		time(print, "Polygon (TopRight) v FastAABB (Pre)", collisions, () -> p.translate(1f, 1f).intersects(b2Pre));
+		*/
 	}
 	
 	private void time(boolean print, String name, int iterations, Runnable task) {
@@ -50,7 +58,7 @@ public class ShapeTest {
 			t.printResult(TimeUnit.MILLISECONDS);
 	}
 	
-	private Polygon circlePoly(int vertices) {
+	protected Polygon circlePoly(int vertices) {
 		if(vertices < 3)
 			throw new IllegalArgumentException();
 		Vector2[] verts = new Vector2[vertices];

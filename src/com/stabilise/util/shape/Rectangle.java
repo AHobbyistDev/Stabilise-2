@@ -215,6 +215,7 @@ public class Rectangle extends Polygon {
 		@Override protected ShapeProjection getProjection(int i) { return projections[i]; }
 		@Override public boolean containsPoint(float x, float y) { return containsPointPrecomputed(x,y); }
 		@Override protected boolean intersectsOnOwnAxes(Shape s) { return intersectsOnOwnAxesPrecomputed(s); }
+		@Override public boolean contains(Shape s) { return containsPrecomputed(s); }
 		
 		@Override
 		public Rectangle notPrecomputed() {

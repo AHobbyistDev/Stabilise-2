@@ -149,14 +149,22 @@ public abstract class Shape {
 	protected abstract Vector2[] getVertices();
 	
 	/**
-	 * Calculates whether or not two shapes intersect.
-	 * 
-	 * @param s The shape with which to test intersection.
+	 * Calculates whether or not this shape intersects with another.
 	 * 
 	 * @return {@code true} if the two shapes intersect; {@code false}
 	 * otherwise.
+	 * @throws NullPointerException if {@code s} is {@code null}.
 	 */
 	public abstract boolean intersects(Shape s);
+	
+	/**
+	 * Calculates whether or this shape contains the specified shape.
+	 * 
+	 * @return {@code true} if this shape contains {@code s}; {@code false}
+	 * otherwise.
+	 * @throws NullPointerException if {@code s} is {@code null}.
+	 */
+	public abstract boolean contains(Shape s);
 	
 	/**
 	 * Calculates whether or not the given point is within the bounds of the
@@ -350,6 +358,7 @@ public abstract class Shape {
 		@Override public Shape translate(float x, float y) { return this; }
 		@Override protected Vector2[] getVertices() { return new Vector2[0]; }
 		@Override public boolean intersects(Shape s) { return false; }
+		@Override public boolean contains(Shape s) { return false; }
 		@Override public boolean containsPoint(Vector2 p) { return false; }
 		@Override public Shape reflect() { return this; }
 	}

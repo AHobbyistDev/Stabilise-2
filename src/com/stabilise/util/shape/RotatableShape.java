@@ -32,17 +32,30 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 * 
 	 * @param shape The base shape.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code shape} is an
-	 * {@code AxisAlignedBoundingBox}.
+	 * @throws IllegalArgumentException if {@code shape} is an AABB.
 	 */
 	public RotatableShape(T shape) {
-		if(shape instanceof AxisAlignedBoundingBox)
-			throw new IllegalArgumentException("Cannot wrap an AxisAlignedBoundingBox " +
-					"in a RotatableShape; an AABB may not be rotated!");
+		if(shape instanceof AABB)
+			throw new IllegalArgumentException("Cannot wrap an AABB in a RotatableShape " +
+					"since it may not be rotated!");
 		
 		this.baseShape = shape;
 		rotatedShape = shape;
 		rotation = 0f;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * <p>
+	 * Invoking this method is equivalent to invoking
+	 * <pre>get().transform(matrix)</pre>
+	 * </p>
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public T transform(Matrix2 matrix) {
+		return (T)rotatedShape.transform(matrix);
 	}
 	
 	/**
@@ -102,20 +115,6 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 * 
 	 * <p>
 	 * Invoking this method is equivalent to invoking
-	 * <pre>get().transform(matrix)</pre>
-	 * </p>
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public T transform(Matrix2 matrix) {
-		return (T)rotatedShape.transform(matrix);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p>
-	 * Invoking this method is equivalent to invoking
 	 * <pre>get().translate(x, y)</pre>
 	 * </p>
 	 */
@@ -123,6 +122,18 @@ public class RotatableShape<T extends Shape> extends Shape {
 	@Override
 	public T translate(float x, float y) {
 		return (T)rotatedShape.translate(x, y);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * <p>Invoking this method is equivalent to invoking
+	 * <pre>get().reflect()</pre>
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public T reflect() {
+		return (T)rotatedShape.reflect();
 	}
 	
 	/**
@@ -151,23 +162,22 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 * {@inheritDoc}
 	 * 
 	 * <p>Invoking this method is equivalent to invoking
-	 * <pre>get().containsPoint(p)</pre>
+	 * <pre>get().contains(s)</pre>
 	 */
 	@Override
-	public boolean containsPoint(Vector2 p) {
-		return rotatedShape.containsPoint(p);
+	public boolean contains(Shape s) {
+		return rotatedShape.contains(s);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 * 
 	 * <p>Invoking this method is equivalent to invoking
-	 * <pre>get().reflect()</pre>
+	 * <pre>get().containsPoint(p)</pre>
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	public T reflect() {
-		return (T)rotatedShape.reflect();
+	public boolean containsPoint(Vector2 p) {
+		return rotatedShape.containsPoint(p);
 	}
 	
 }
