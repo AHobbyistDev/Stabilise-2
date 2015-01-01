@@ -154,7 +154,7 @@ public class Profiler {
 	 */
 	public void end() {
 		if(effectivelyEnabled) {
-			if(stack.removeLast() == root)
+			if(stack.removeLast().end() == root)
 				throw new IllegalStateException();
 		}
 	}
@@ -282,9 +282,12 @@ public class Profiler {
 		
 		/**
 		 * Stops timing the section.
+		 * 
+		 * @return this
 		 */
-		private void end() {
+		private Section end() {
 			duration += System.nanoTime() - startTime;
+			return this;
 		}
 		
 		/**

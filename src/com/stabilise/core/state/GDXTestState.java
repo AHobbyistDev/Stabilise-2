@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.TextInputListener;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -14,9 +13,13 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.stabilise.core.Application;
 import com.stabilise.opengl.OrthoCamera;
+import com.stabilise.util.Profiler;
 
 public class GDXTestState implements State, InputProcessor {
+	
+	private Profiler profiler;
 	
 	private SpriteBatch batch;
 	private BitmapFont font12;
@@ -25,14 +28,17 @@ public class GDXTestState implements State, InputProcessor {
 	
 	private Viewport viewport;
 	
-	private Music music;
-	
 	public GDXTestState() {
 		
 	}
 	
 	@Override
 	public void start() {
+		// ------------
+		profiler = Application.get().profiler;
+		profiler.enable();
+		// ------------
+		
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 				Gdx.files.absolute("D:/USB Backup; 2014-07-05 - Full/Useful Stuff/Fonts/BLKCHCRY.ttf")
 		);
@@ -48,9 +54,9 @@ public class GDXTestState implements State, InputProcessor {
 		
 		viewport = new ScreenViewport(new OrthoCamera());
 		
-		music = Gdx.audio.newMusic(Gdx.files.absolute("C:/Users/Adam/AppData/Roaming/.stabilise/res/sound/sarabande.wav"));
-		music.setLooping(true);
-		music.play();
+		//music = Gdx.audio.newMusic(Gdx.files.absolute("C:/Users/Adam/AppData/Roaming/.stabilise/res/sound/sarabande.wav"));
+		//music.setLooping(true);
+		//music.play();
 		
 		// -------------------------
 		
@@ -73,7 +79,7 @@ public class GDXTestState implements State, InputProcessor {
 		texture.dispose();
 		batch.dispose();
 		
-		music.dispose();
+		//music.dispose();
 	}
 	
 	@Override
@@ -122,6 +128,8 @@ public class GDXTestState implements State, InputProcessor {
 					System.out.println("cancelled");
 				}
 			}, "Enter something pls", "", "right here");
+		} else if(keycode == Input.Keys.NUM_0) {
+			System.out.println(profiler.getData().toString());
 		}
 		return false;
 	}

@@ -255,6 +255,8 @@ public class Log {
 	 * 
 	 * @param message The message to post.
 	 * @param t The throwable to post.
+	 * 
+	 * @throws NullPointerException if {@code t} is {@code null}.
 	 */
 	public static void critical(String message, Throwable t) {
 		defaultAgent.logCritical(message, t);
@@ -266,6 +268,8 @@ public class Log {
 	 * <pre>{@code getAgent().logThrowable(t)}</pre>
 	 * 
 	 * @param t The throwable to post.
+	 * 
+	 * @throws NullPointerException if {@code t} is {@code null}.
 	 */
 	public static void throwable(Throwable t) {
 		defaultAgent.logThrowable(t);

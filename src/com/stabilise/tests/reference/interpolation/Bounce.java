@@ -1,4 +1,4 @@
-package com.stabilise.tests.reference.tweens;
+package com.stabilise.tests.reference.interpolation;
 
 /*
  * http://hosted.zeh.com.br/tweener/docs/en-us/misc/transitions.html

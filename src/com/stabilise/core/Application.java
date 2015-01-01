@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.stabilise.core.state.State;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
@@ -90,6 +91,11 @@ public abstract class Application {
 	/** The last update at which the profiler was flushed. */
 	private long lastProfilerFlush = 0L;
 	
+	/** The Application's input listener - this is a multiplexer which is set
+	 * as the main input processor. It is cleared automatically when a new
+	 * state is set. */
+	public InputMultiplexer input = new InputMultiplexer();
+	
 	
 	/**
 	 * Creates the Application.
@@ -143,10 +149,12 @@ public abstract class Application {
 	 */
 	private void create() {
 		if(!stopped) {
+			Gdx.input.setInputProcessor(input);
 			init();
 			state.start();
 			lastTime = System.nanoTime();
 			running = true;
+			profiler.start("wait");
 		}
 	}
 	
@@ -203,7 +211,7 @@ public abstract class Application {
 		lastTime = now;
 		
 		try {
-			profiler.start("update"); // start update
+			profiler.next("update"); // end wait, start update
 			
 			// Perform any scheduled update ticks
 			while(unprocessed >= nsPerTick) {
@@ -228,7 +236,8 @@ public abstract class Application {
 			// Rendering
 			profiler.start("render");
 			state.render(Gdx.graphics.getDeltaTime());
-			profiler.end();
+			
+			profiler.next("wait");
 		} catch(Throwable t) {
 			crash(t);
 		}
@@ -310,7 +319,10 @@ public abstract class Application {
 		if(crashing)		// TODO: Possibly append a log entry detailing the
 			return;			// double-crash and re-save the log?
 		crashing = true;
-		Log.critical("The application has crashed!", t);
+		if(t == null)
+			Log.critical("The application has crashed!", new Exception("I am here to provide a stack trace."));
+		else
+			Log.critical("The application has crashed!", t);
 		produceCrashLog();
 		shutdown();
 	}
@@ -336,9 +348,10 @@ public abstract class Application {
 	 * order:
 	 * 
 	 * <ul>
-	 * <li>{@link State#start() start} is invoked on the new state.
-	 * <li>{@link State#resize(int, int) resize} is invoked on the new state.
-	 * <li>{@link State#dispose() dispose} is invoked on the old state.
+	 * <li>{@link #input} is cleared.
+	 * <li>{@link State#start() start()} is invoked on the new state.
+	 * <li>{@link State#resize(int, int) resize()} is invoked on the new state.
+	 * <li>{@link State#dispose() dispose()} is invoked on the old state.
 	 * <li>The old state will be discarded and should be garbage collected.
 	 * </ul>
 	 * 
@@ -349,24 +362,11 @@ public abstract class Application {
 	public final void setState(State state) {
 		if(state == null)
 			throw new NullPointerException("state is null!");
+		input.clear();
 		state.start();
 		state.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		this.state.dispose();
 		this.state = state;
-	}
-	
-	/**
-	 * @return The application window's width.
-	 */
-	public final int getWidth() {
-		return Gdx.graphics.getWidth();
-	}
-	
-	/**
-	 * @return The application window's height.
-	 */
-	public final int getHeight() {
-		return Gdx.graphics.getHeight();
 	}
 	
 	/**
