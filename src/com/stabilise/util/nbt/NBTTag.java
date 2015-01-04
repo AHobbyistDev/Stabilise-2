@@ -18,18 +18,18 @@ public abstract class NBTTag {
 	
 	// I personally would order these differently, but I want this to be
 	// compatible with Minecraft.
-	public static final byte COMPOUND_END = 0x0;
-	public static final byte BYTE = 0x1;
-	public static final byte SHORT = 0x2;
-	public static final byte INT = 0x3;
-	public static final byte LONG = 0x4;
-	public static final byte FLOAT = 0x5;
-	public static final byte DOUBLE = 0x6;
-	public static final byte BYTE_ARRAY = 0x7;
-	public static final byte STRING = 0x8;
-	public static final byte LIST = 0x9;
-	public static final byte COMPOUND = 0xA;
-	public static final byte INT_ARRAY = 0xB;
+	static final byte COMPOUND_END = 0x0;
+	static final byte BYTE = 0x1;
+	static final byte SHORT = 0x2;
+	static final byte INT = 0x3;
+	static final byte LONG = 0x4;
+	static final byte FLOAT = 0x5;
+	static final byte DOUBLE = 0x6;
+	static final byte BYTE_ARRAY = 0x7;
+	static final byte STRING = 0x8;
+	static final byte LIST = 0x9;
+	static final byte COMPOUND = 0xA;
+	static final byte INT_ARRAY = 0xB;
 	
 	//--------------------==========--------------------
 	//------------=====Member Variables=====------------
@@ -56,11 +56,12 @@ public abstract class NBTTag {
 	}
 	
 	/**
-	 * Sets the tag's name.
+	 * Sets the tag's name. If {@code name} is {@code null}, the name is set to
+	 * an empty string.
 	 * 
 	 * @param name The desired tag name.
 	 * 
-	 * @return The tag, for chaining operations.
+	 * @return This tag, for chaining operations.
 	 */
 	public NBTTag setName(String name) {
 		if(name != null)
@@ -87,7 +88,7 @@ public abstract class NBTTag {
 	 * @throws IOException Thrown if there is an I/O exception while writing to
 	 * the output stream.
 	 */
-	public abstract void write(DataOutputStream out) throws IOException;
+	abstract void write(DataOutputStream out) throws IOException;
 	
 	/**
 	 * Reads the tag from the specified input.
@@ -97,7 +98,7 @@ public abstract class NBTTag {
 	 * @throws IOException Thrown if there is an I/O exception while reading
 	 * from the input stream.
 	 */
-	public abstract void load(DataInputStream in) throws IOException;
+	abstract void load(DataInputStream in) throws IOException;
 	
 	/**
 	 * Gets a string representation of the tag, as per the contract of
@@ -114,11 +115,9 @@ public abstract class NBTTag {
 	}
 	
 	/**
-	 * Gets the type byte for the tag.
-	 * 
-	 * @return The tag's type byte.
+	 * @return This tag's ID.
 	 */
-	public abstract byte getId();
+	abstract byte getId();
 	
 	/**
 	 * Clones the tag and returns the duplicate.
@@ -139,7 +138,7 @@ public abstract class NBTTag {
 	 * 
 	 * @return The new tag, or {@code null} if the tag type is invalid.
 	 */
-	public static NBTTag createTag(byte tagType, String tagName) {
+	static NBTTag createTag(byte tagType, String tagName) {
 		switch(tagType) {
 			case BYTE:
 				return new NBTTagByte(tagName);
@@ -176,7 +175,7 @@ public abstract class NBTTag {
 	 * 
 	 * @return The name of a tag type.
 	 */
-	public static String getTagName(byte tagType) {
+	static String getTagName(byte tagType) {
 		switch(tagType) {
 			case BYTE:
 				return "Tag_Byte";

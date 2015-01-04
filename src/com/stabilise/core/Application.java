@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.LifecycleListener;
 import com.stabilise.core.state.State;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
@@ -60,15 +60,19 @@ public abstract class Application {
 	
 	/** The listener which delegates to this Application. */
 	private final Listener listener;
+	/** The lifecycle listener which we'll use to catch the pause()-dispose()
+	 * combo when the application is shut down before the main listener catches
+	 * it. */
+	private final LCListener lcListener;
 	
 	/** The application's state. */
 	protected State state;
 	
-	/** Whether or not the application is running. */
+	/** {@code true} if the application is running. */
 	private boolean running = false;
-	/** Whether or not the application has been shut down. */
+	/** {@code true} if the application has been shut down. */
 	private boolean stopped = false;
-	/** Whether or not the application is crashing. */
+	/** {@code true} if the application is crashing. */
 	private boolean crashing = false;
 	
 	/** The number of update ticks executed per second. */
@@ -91,11 +95,6 @@ public abstract class Application {
 	/** The last update at which the profiler was flushed. */
 	private long lastProfilerFlush = 0L;
 	
-	/** The Application's input listener - this is a multiplexer which is set
-	 * as the main input processor. It is cleared automatically when a new
-	 * state is set. */
-	public InputMultiplexer input = new InputMultiplexer();
-	
 	
 	/**
 	 * Creates the Application.
@@ -117,15 +116,17 @@ public abstract class Application {
 		this.ticksPerSecond = ticksPerSecond;
 		nsPerTick = 1000000000L / ticksPerSecond;
 		
-		listener = new Listener(this);
+		listener = new Listener();
+		lcListener = new LCListener();
 		
 		state = getInitialState();
 		if(state == null)
 			crash(new NullPointerException("Initial state is null"));
 		
+		// Not needed for libgdx I think
+		/*
 		// Try to have the application shut down nicely in all cases of non-
 		// standard closure
-		/*
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
@@ -149,11 +150,15 @@ public abstract class Application {
 	 */
 	private void create() {
 		if(!stopped) {
-			Gdx.input.setInputProcessor(input);
+			Gdx.app.addLifecycleListener(lcListener);
+			
 			init();
 			state.start();
 			lastTime = System.nanoTime();
 			running = true;
+			
+			// Only really does anything if the initial state invoked enable()
+			// and then flush(), but we might as well cover our bases.
 			profiler.start("wait");
 		}
 	}
@@ -211,6 +216,7 @@ public abstract class Application {
 		lastTime = now;
 		
 		try {
+			profiler.verify(2, "root.wait");
 			profiler.next("update"); // end wait, start update
 			
 			// Perform any scheduled update ticks
@@ -222,6 +228,7 @@ public abstract class Application {
 				state.update();
 			}
 			
+			profiler.verify(2, "root.update");
 			profiler.end(); // end update
 			
 			// Flush the profiler every 1 second worth of ticks
@@ -237,6 +244,7 @@ public abstract class Application {
 			profiler.start("render");
 			state.render(Gdx.graphics.getDeltaTime());
 			
+			profiler.verify(2, "root.render");
 			profiler.next("wait");
 		} catch(Throwable t) {
 			crash(t);
@@ -258,12 +266,9 @@ public abstract class Application {
 	
 	/**
 	 * Pauses the application.
-	 * 
-	 * <p>Also invoked before {@link #shutdown()} when the application is shut
-	 * down, thanks to libGDX.
 	 */
 	private void pause() {
-		if(state != null)
+		if(!stopped && state != null)
 			state.pause();
 	}
 	
@@ -271,7 +276,7 @@ public abstract class Application {
 	 * Resumes the application.
 	 */
 	private void resume() {
-		if(state != null)
+		if(!stopped && state != null)
 			state.resume();
 	}
 	
@@ -282,11 +287,14 @@ public abstract class Application {
 	 */
 	private void dispose() {
 		stopped = true;
+		running = false;
 		
 		// try..catch since client code cannot be trusted
 		try {
-			if(state != null)
+			if(state != null) {
+				state.predispose();
 				state.dispose();
+			}
 		} catch(Throwable t) {
 			crash(t);
 		}
@@ -294,8 +302,8 @@ public abstract class Application {
 	
 	/**
 	 * Schedules a shutdown of the application. The current state will have its
-	 * {@link State#pause() pause()} and {@link State#dispose() dispose()}
-	 * methods invoked once shutdown commences.
+	 * {@link State#predispose() predispose()} and {@link State#dispose()
+	 * dispose()} methods invoked once shutdown commences.
 	 */
 	public final void shutdown() {
 		if(stopped)
@@ -303,7 +311,7 @@ public abstract class Application {
 		stopped = true;
 		running = false;
 		
-		Gdx.app.exit();
+		Gdx.app.exit(); // will redirect to pause() then dispose()
 	}
 	
 	/**
@@ -320,7 +328,7 @@ public abstract class Application {
 			return;			// double-crash and re-save the log?
 		crashing = true;
 		if(t == null)
-			Log.critical("The application has crashed!", new Exception("I am here to provide a stack trace."));
+			Log.critical("The application has crashed!", new Exception("<<stack trace buddy>>"));
 		else
 			Log.critical("The application has crashed!", t);
 		produceCrashLog();
@@ -344,11 +352,11 @@ public abstract class Application {
 	}
 	
 	/**
-	 * Sets the application's state. The following operations will occur in
-	 * order:
+	 * Sets the application's state. This method performs the following
+	 * operations in order:
 	 * 
 	 * <ul>
-	 * <li>{@link #input} is cleared.
+	 * <li>{@link State#predispose() predispose()} is invoked on the old state.
 	 * <li>{@link State#start() start()} is invoked on the new state.
 	 * <li>{@link State#resize(int, int) resize()} is invoked on the new state.
 	 * <li>{@link State#dispose() dispose()} is invoked on the old state.
@@ -362,7 +370,7 @@ public abstract class Application {
 	public final void setState(State state) {
 		if(state == null)
 			throw new NullPointerException("state is null!");
-		input.clear();
+		this.state.predispose();
 		state.start();
 		state.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		this.state.dispose();
@@ -433,49 +441,49 @@ public abstract class Application {
 	 * An implementation of ApplicationListener which delegates to private
 	 * methods in {@link Application}.
 	 */
-	private static class Listener implements ApplicationListener {
+	private class Listener implements ApplicationListener {
 		
-		/** The target application. */
-		private final Application app;
-		
-		
-		/**
-		 * Creates a wrapping listener for the specified application.
-		 */
-		public Listener(Application app) {
-			if(app == null)
-				throw new NullPointerException("How did you manage to make app null?");
-			this.app = app;
+		@Override public void create() {
+			Application.this.create();
 		}
 		
-		@Override
-		public void create() {
-			app.create();
+		@Override public void resize(int width, int height) {
+			Application.this.resize(width, height);
 		}
 		
-		@Override
-		public void resize(int width, int height) {
-			app.resize(width, height);
+		@Override public void render() {
+			Application.this.mainLoop();
 		}
 		
-		@Override
-		public void render() {
-			app.mainLoop();
+		@Override public void pause() {
+			Application.this.pause();
 		}
 		
-		@Override
-		public void pause() {
-			app.pause();
+		@Override public void resume() {
+			Application.this.resume();
 		}
 		
-		@Override
-		public void resume() {
-			app.resume();
+		@Override public void dispose() {
+			Application.this.dispose();
 		}
+		
+	}
+	
+	/**
+	 * When the libgdx application shuts down, for some reason it invokes
+	 * pause() then dispose() on the main ApplicationListener, which is kind
+	 * of inconvenient if the user doesn't want to execute all the pause logic
+	 * on a shutdown. As such, by attaching this lifecycle listener to Gdx.app,
+	 * we can catch the pause()-dispose() combo before the main listener does,
+	 * and tell it to ignore the pause().
+	 */
+	private class LCListener implements LifecycleListener {
+		@Override public void pause() {}
+		@Override public void resume() {}
 		
 		@Override
 		public void dispose() {
-			app.dispose();
+			Application.this.stopped = true;
 		}
 		
 	}

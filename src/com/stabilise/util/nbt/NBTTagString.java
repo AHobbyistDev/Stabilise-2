@@ -37,8 +37,8 @@ public class NBTTagString extends NBTTag {
 	 * @param tagName The tag's name.
 	 * @param data The tag's data payload.
 	 * 
-	 * @throws IllegalArgumentException Thrown if the given string is either
-	 * null or empty.
+	 * @throws IllegalArgumentException if the given string is either {@code
+	 * null} or empty.
 	 */
 	public NBTTagString(String tagName, String data) {
 		super(tagName);
@@ -46,7 +46,7 @@ public class NBTTagString extends NBTTag {
 		if(data == null || data == "")
 			throw new IllegalArgumentException("An NBT String may not be empty!");
 	}
-
+	
 	@Override
 	public void write(DataOutputStream out) throws IOException {
 		if(data != null)
@@ -54,25 +54,25 @@ public class NBTTagString extends NBTTag {
 		else
 			throw new IOException("Attempting to write an undefined string! (" + name + ")");
 	}
-
+	
 	@Override
 	public void load(DataInputStream in) throws IOException {
 		data = in.readUTF();
 	}
 	
 	@Override
-	public String toString() {
-		return "" + data;
-	}
-
-	@Override
 	public byte getId() {
 		return NBTTag.STRING;
 	}
-
+	
 	@Override
 	public NBTTag copy() {
 		return new NBTTagString(name, data);
 	}
-
+	
+	@Override
+	public String toString() {
+		return data;
+	}
+	
 }

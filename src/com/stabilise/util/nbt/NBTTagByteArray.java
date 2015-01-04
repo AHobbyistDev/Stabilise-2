@@ -41,32 +41,32 @@ public class NBTTagByteArray extends NBTTag {
 		super(tagName);
 		this.data = data;
 	}
-
+	
 	@Override
-	public void write(DataOutputStream out) throws IOException {
+	void write(DataOutputStream out) throws IOException {
 		out.writeInt(data.length);
 		out.write(data);
 	}
-
+	
 	@Override
-	public void load(DataInputStream in) throws IOException {
+	void load(DataInputStream in) throws IOException {
         data = new byte[in.readInt()];
         in.readFully(data);
+	}
+	
+	@Override
+	byte getId() {
+		return NBTTag.BYTE_ARRAY;
+	}
+	
+	@Override
+	public NBTTag copy() {
+		return new NBTTagByteArray(name, data);
 	}
 	
 	@Override
 	public String toString() {
 		return "[" + data.length + " bytes]";
 	}
-
-	@Override
-	public byte getId() {
-		return NBTTag.BYTE_ARRAY;
-	}
-
-	@Override
-	public NBTTag copy() {
-		return new NBTTagByteArray(name, data);
-	}
-
+	
 }

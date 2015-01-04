@@ -41,30 +41,30 @@ public class NBTTagFloat extends NBTTag {
 		super(tagName);
 		this.data = data;
 	}
-
+	
 	@Override
-	public void write(DataOutputStream out) throws IOException {
+	void write(DataOutputStream out) throws IOException {
 		out.writeFloat(data);
 	}
-
+	
 	@Override
-	public void load(DataInputStream in) throws IOException {
+	void load(DataInputStream in) throws IOException {
 		data = in.readFloat();
 	}
 	
 	@Override
-	public String toString() {
-		return "" + data;
-	}
-
-	@Override
-	public byte getId() {
+	byte getId() {
 		return NBTTag.FLOAT;
 	}
-
+	
 	@Override
 	public NBTTag copy() {
 		return new NBTTagFloat(name, data);
 	}
-
+	
+	@Override
+	public String toString() {
+		return Float.toString(data);
+	}
+	
 }

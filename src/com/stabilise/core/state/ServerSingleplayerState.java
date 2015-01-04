@@ -135,4 +135,10 @@ public class ServerSingleplayerState implements State {
 		// TODO Auto-generated method stub
 	}
 
+	@Override
+	public void predispose() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

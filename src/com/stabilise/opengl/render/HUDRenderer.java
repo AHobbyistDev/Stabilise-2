@@ -196,8 +196,8 @@ public class HUDRenderer implements Renderer {
 			font.drawLines(ArrayUtils.addAll(new String[] {
 					"Stabilise II v" + Constants.VERSION,
 					//"FPS: " + screen.getFPS() + " (" + screen.getFPSCap() + ")",
-					"x: " + StringUtil.doubleToNPlaces(worldRenderer.world.player.x, 2),
-					"y: " + StringUtil.doubleToNPlaces(worldRenderer.world.player.y, 2),
+					"x: " + StringUtil.cullFP(worldRenderer.world.player.x, 2),
+					"y: " + StringUtil.cullFP(worldRenderer.world.player.y, 2),
 					"Entities:  " + worldRenderer.world.getEntities().size() + "/" + worldRenderer.world.entityCount,
 					"Hitboxes:  " + worldRenderer.world.getHitboxes().size() + "/" + worldRenderer.world.hitboxCount,
 					"Particles: " + worldRenderer.world.particles.size() + "/" + worldRenderer.world.particleCount,
@@ -223,14 +223,14 @@ public class HUDRenderer implements Renderer {
 		List<String> lines = new ArrayList<String>();
 		lines.add(
 				profilerLevel.absoluteName + "    "
-				+ StringUtil.doubleToNPlaces(profilerLevel.totalPercent, 2) + "%"
+				+ StringUtil.cullFP(profilerLevel.totalPercent, 2) + "%"
 		);
 		int num = 1;
 		for(Profiler.SectionData data : profilerLevel.getConstituents()) {
 			lines.add(
 					"[" + num + "] "
-					+ StringUtil.doubleToNPlaces(data.totalPercent, 2) + "% "
-					+ StringUtil.doubleToNPlaces(data.localPercent, 2) + "% "
+					+ StringUtil.cullFP(data.totalPercent, 2) + "% "
+					+ StringUtil.cullFP(data.localPercent, 2) + "% "
 					+ data.name
 			//		+ " ("
 			//		+ data.duration

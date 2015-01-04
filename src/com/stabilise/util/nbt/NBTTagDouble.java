@@ -41,30 +41,30 @@ public class NBTTagDouble extends NBTTag {
 		super(tagName);
 		this.data = data;
 	}
-
+	
 	@Override
-	public void write(DataOutputStream out) throws IOException {
+	void write(DataOutputStream out) throws IOException {
 		out.writeDouble(data);
 	}
-
+	
 	@Override
-	public void load(DataInputStream in) throws IOException {
+	void load(DataInputStream in) throws IOException {
 		data = in.readDouble();
 	}
 	
 	@Override
-	public String toString() {
-		return "" + data;
-	}
-
-	@Override
-	public byte getId() {
+	byte getId() {
 		return NBTTag.DOUBLE;
 	}
-
+	
 	@Override
 	public NBTTag copy() {
 		return new NBTTagDouble(name, data);
 	}
-
+	
+	@Override
+	public String toString() {
+		return Double.toString(data);
+	}
+	
 }

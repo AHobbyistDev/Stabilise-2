@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.stabilise.core.Application;
@@ -28,10 +29,13 @@ public class GDXTestState implements State, InputProcessor {
 	
 	private Viewport viewport;
 	
+	Stage stage;
+	
 	public GDXTestState() {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	@Override
 	public void start() {
 		// ------------
@@ -65,12 +69,17 @@ public class GDXTestState implements State, InputProcessor {
 		String extRoot = Gdx.files.getExternalStoragePath();
 		String locRoot = Gdx.files.getLocalStoragePath();
 		
-		System.out.println("External: " + isExtAvailable + "; " + extRoot);
-		System.out.println("Local: " + isLocAvailable + "; " + locRoot);
+		//System.out.println("External: " + isExtAvailable + "; " + extRoot);
+		//System.out.println("Local: " + isLocAvailable + "; " + locRoot);
 		
 		//---------------------------
 		
 		Gdx.input.setInputProcessor(this);
+	}
+	
+	@Override
+	public void predispose() {
+		
 	}
 	
 	@Override
@@ -94,7 +103,7 @@ public class GDXTestState implements State, InputProcessor {
 	
 	@Override
 	public void resize(int width, int height) {
-		System.out.println("Resized to " + width + "x" + height);
+		//System.out.println("Resized to " + width + "x" + height);
 		viewport.update(width, height);
 		batch.setProjectionMatrix(viewport.getCamera().combined);
 		

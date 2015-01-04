@@ -49,6 +49,15 @@ public class Matrix2 {
 	}
 	
 	/**
+	 * Creates a new matrix with the specified entries.
+	 * 
+	 * @param vals The entries. This should have a length of at least 4.
+	 */
+	public Matrix2(float... vals) {
+		this.val = vals;
+	}
+	
+	/**
 	 * Sets the entries of this matrix.
 	 * 
 	 * @return This matrix, for chaining operations.
@@ -80,6 +89,18 @@ public class Matrix2 {
 	 */
 	public Matrix2 identity() {
 		return set(1f, 0f, 0f, 1f);
+	}
+	
+	/**
+	 * Gets the transpose of this matrix. This matrix will remain unmodified.
+	 * 
+	 * @return The transpose of this matrix.
+	 */
+	public Matrix2 transpose() {
+		return new Matrix2(new float[] {
+				val[M00], val[M10],
+				val[M01], val[M11]
+		});
 	}
 	
 	/**

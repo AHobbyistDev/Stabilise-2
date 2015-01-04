@@ -155,18 +155,22 @@ public class NBTIO {
 	//--------------------==========--------------------
 	
 	/**
-	 * Writes a compound NBT tag to a file.
+	 * Writes a compound NBT tag to a file. If the file already exists, it will
+	 * be deleted and replaced by this one.
 	 * 
 	 * @param file The file to write the tag to.
 	 * @param tag The tag to write.
 	 * 
 	 * @throws IllegalArgumentException if {@code file} is {@code null}.
-	 * @throws NullPointerException 
-	 * @throws IOException Thrown if an I/O exception is encountered while
-	 * writing the file.
+	 * @throws NullPointerException if either {@code file} or {@code tag} are
+	 * {@code null}.
+	 * @throws IOException if an I/O exception is encountered while writing
+	 * the file.
 	 */
 	public static void write(File file, NBTTagCompound tag) throws IOException {
 		IOUtil.createParentDirQuietly(file);
+		if(file.exists())
+			file.delete();
 		FileOutputStream out = new FileOutputStream(file);
 		try {
 			write(out, tag);

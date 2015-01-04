@@ -53,5 +53,11 @@ public class MainMenuState implements State {
 	public void dispose() {
 		menu.unloadResources();
 	}
+
+	@Override
+	public void predispose() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

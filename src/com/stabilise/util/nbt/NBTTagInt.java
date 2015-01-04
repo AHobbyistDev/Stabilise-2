@@ -41,30 +41,30 @@ public class NBTTagInt extends NBTTag {
 		super(tagName);
 		this.data = data;
 	}
-
+	
 	@Override
-	public void write(DataOutputStream out) throws IOException {
+	void write(DataOutputStream out) throws IOException {
 		out.writeInt(data);
 	}
-
+	
 	@Override
-	public void load(DataInputStream in) throws IOException {
+	void load(DataInputStream in) throws IOException {
 		data = in.readInt();
 	}
 	
 	@Override
-	public String toString() {
-		return "" + data;
-	}
-
-	@Override
-	public byte getId() {
+	byte getId() {
 		return NBTTag.INT;
 	}
-
+	
 	@Override
 	public NBTTag copy() {
 		return new NBTTagInt(name, data);
 	}
-
+	
+	@Override
+	public String toString() {
+		return Integer.toString(data);
+	}
+	
 }

@@ -18,15 +18,15 @@ public class NBTTagCompoundEnd extends NBTTag {
 	public NBTTagCompoundEnd() {
 		super(null);
 	}
-
+	
 	@Override
-	public void write(DataOutputStream out) throws IOException {
-		// nothing
+	void write(DataOutputStream out) throws IOException {
+		// nothing to see here, move along
 	}
-
+	
 	@Override
-	public void load(DataInputStream in) throws IOException {
-		// nothing
+	void load(DataInputStream in) throws IOException {
+		// nothing to see here, move along
 	}
 	
 	@Override
@@ -35,13 +35,13 @@ public class NBTTagCompoundEnd extends NBTTag {
 	}
 	
 	@Override
-	public byte getId() {
+	byte getId() {
 		return NBTTag.COMPOUND_END;
 	}
-
+	
 	@Override
 	public NBTTag copy() {
 		return new NBTTagCompoundEnd();
 	}
-
+	
 }

@@ -37,7 +37,7 @@ public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
 	}
 	
 	@Override
-	public void write(DataOutputStream out) throws IOException {
+	void write(DataOutputStream out) throws IOException {
 		if(!data.isEmpty()) {
 			dataType = ((NBTTag)data.get(0)).getId();
 		} else {
@@ -50,9 +50,9 @@ public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
 		for(NBTTag t : data)
 			t.write(out);
 	}
-
+	
 	@Override
-	public void load(DataInputStream in) throws IOException {
+	void load(DataInputStream in) throws IOException {
 		dataType = in.readByte();
 		int length = in.readInt();
 		data = new ArrayList<NBTTag>();
@@ -66,19 +66,22 @@ public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
 	
 	/**
 	 * Appends a tag to the list.
-	 * If the list is empty, it's tag type will become that of the given tag.
-	 * If the given tag is not the same type as all pre-existing tags, this
+	 * 
+	 * <p>If the list is empty, it's tag type will become that of the given
+	 * tag.If the given tag is not the same type as all pre-existing tags, this
 	 * method will throw an exception.
 	 * 
 	 * @param tag The tag to append to the list.
 	 * 
-	 * @throws IllegalArgumentException Thrown if the given tag's type is not
-	 * the same as the rest of the list.
+	 * @throws IllegalArgumentException if the given tag's type is not the same
+	 * as the rest of the list.
 	 */
 	public void appendTag(NBTTag tag) {
 		if(data.size() != 0) {
 			if(tag.getId() != dataType)
-				throw new IllegalArgumentException("Attempting to append to a list (" + name + ") a tag of a different data type!");
+				throw new IllegalArgumentException("Attempting to append to a list ("
+						+ name + ") a tag of type" + getTagName(tag.getId()) + " (the"
+						+ "list holds tags of type " + getTagName(dataType) + ")!");
 			else
 				data.add(tag);
 		} else {
@@ -88,45 +91,35 @@ public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
 	}
 	
 	/**
-	 * Removes a tag from the list.
+	 * Removes a tag from the list at the specified index.
 	 * 
-	 * @param index The index from which to remove a tag.
+	 * @throws IndexOutOfBoundsException if {@code index < 0} or {@code index
+	 * >= size()}.
 	 */
 	public void removeTagAt(int index) {
 		data.remove(index);
 	}
 	
 	/**
-	 * Gets a tag from the list.
+	 * Gets a tag from the list at the specified index.
 	 * 
-	 * @param index The index from which to get the tag.
-	 * 
-	 * @return The tag at the given index, or null if there is no tag at that
-	 * index.
+	 * @return The tag, or {@code null} if there is no tag at that index.
+	 * @throws IndexOutOfBoundsException if {@code index < 0} or {@code index
+	 * >= size()}.
 	 */
 	public NBTTag getTagAt(int index) {
 		return data.get(index);
 	}
 	
 	/**
-	 * Gets the number of tags in the list.
-	 * 
-	 * @return The number of tags in the list.
+	 * @return The number of tags in this list.
 	 */
 	public int size() {
 		return data.size();
 	}
 	
 	@Override
-	public String toString() {
-		if(data.size() == 1)
-			return data.size() + " entry of type " + NBTTag.getTagName(dataType);
-		else
-			return data.size() + " entries of type " + NBTTag.getTagName(dataType);
-	}
-	
-	@Override
-	public byte getId() {
+	byte getId() {
 		return NBTTag.LIST;
 	}
 	
@@ -141,6 +134,14 @@ public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
 	@Override
 	public Iterator<NBTTag> iterator() {
 		return data.iterator();
+	}
+	
+	@Override
+	public String toString() {
+		if(data.size() == 1)
+			return data.size() + " entry of type " + getTagName(dataType);
+		else
+			return data.size() + " entries of type " + getTagName(dataType);
 	}
 	
 }

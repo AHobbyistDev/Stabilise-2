@@ -95,4 +95,10 @@ public class SingleplayerState implements State {
 		System.gc();
 	}
 
+	@Override
+	public void predispose() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

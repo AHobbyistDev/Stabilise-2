@@ -41,17 +41,16 @@ public class NBTTagIntArray extends NBTTag {
 		super(tagName);
 		this.data = data;
 	}
-
+	
 	@Override
-	public void write(DataOutputStream out) throws IOException {
+	void write(DataOutputStream out) throws IOException {
 		out.writeInt(data.length);
-
         for(int i = 0; i < data.length; i++)
             out.writeInt(data[i]);
 	}
-
+	
 	@Override
-	public void load(DataInputStream in) throws IOException {
+	void load(DataInputStream in) throws IOException {
 		int length = in.readInt();
         data = new int[length];
 
@@ -60,18 +59,18 @@ public class NBTTagIntArray extends NBTTag {
 	}
 	
 	@Override
-	public String toString() {
-		return "[" + data.length + " ints]";
-	}
-
-	@Override
-	public byte getId() {
+	byte getId() {
 		return NBTTag.INT_ARRAY;
 	}
-
+	
 	@Override
 	public NBTTag copy() {
 		return new NBTTagIntArray(name, data);
 	}
-
+	
+	@Override
+	public String toString() {
+		return "[" + data.length + " ints]";
+	}
+	
 }

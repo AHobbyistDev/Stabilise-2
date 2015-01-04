@@ -65,7 +65,8 @@ public class Constants {
 	 */
 	private static int getRevision() {
 		if(DEV_VERSION) {
-			File file = IOUtil.createParentDirQuietly(new File(Resources.APP_DIR, "revision"));
+			IOUtil.createDirQuietly(Resources.APP_DIR);
+			File file = new File(Resources.APP_DIR, "revision");
 			try {
 				NBTTagCompound tag = null;
 				
@@ -79,7 +80,7 @@ public class Constants {
 					NBTIO.write(file, tag);
 					
 					// Throw an exception so we skip the to the end of the method body
-					throw new Exception("Revision tracker file not found - generated new one.");
+					throw new Exception("Revision tracker file not found - generated new one. (" + e.getClass().getSimpleName() + ")");
 				}
 				
 				NBTTagCompound release, patchMajor, patchMinor, build;

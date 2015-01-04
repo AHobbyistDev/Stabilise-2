@@ -139,5 +139,11 @@ public class LoadingState implements State {
 			Log.throwable(e);
 		}
 	}
+
+	@Override
+	public void predispose() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

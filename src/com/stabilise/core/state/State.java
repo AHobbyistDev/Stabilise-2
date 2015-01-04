@@ -1,36 +1,67 @@
 package com.stabilise.core.state;
 
+import com.stabilise.core.Application;
+
 /**
  * States allow for the circumstantial execution of the application's logic.
  * 
  * <p>
- * The current application state determines the manner of logic to be executed.
- * </p>
+ * The application's current state, in essence, determines and controls what
+ * the application does.
+ * 
+ * @see Application
  */
 public interface State {
 	
 	/**
 	 * Called when the state is started.
 	 * 
-	 * <p>If there is an old state, this method is invoked before {@link
-	 * #dispose()} is invoked on the old state.
+	 * <p>If there is an old state, this method is invoked after {@link
+	 * #predispose()} is invoked on the old state, and before {@link
+	 * #dispose()} is invoked.
 	 */
 	void start();
 	
 	/**
-	 * Called when the state is stopped and disposed.
+	 * Called when the state is stopped and disposed, and before {@link
+	 * #start()} is invoked on the new state, if one has been set.
 	 * 
-	 * <p>Any used resources should be appropriately disposed of and any
-	 * necessary cleanups should be performed here. This operation should
-	 * ideally be performed swiftly.
+	 * <p>Between this and {@link #dispose()}, and used resources should be
+	 * disposed of an any necessary cleanups should be performed here, as to
+	 * prevent any memory leaks. This operation should ideally be a swift
+	 * one.
+	 * 
+	 * <p>The need for a distinction between {@code predispose()} and {@code
+	 * dispose()} emerges from the fact that some cached resources may be
+	 * shared across states - when a new state is set, such resources may be
+	 * marked for caching by the new state before they are unmarked by the old
+	 * state in {@code dispose()}. Conversely, a new state may only be able to
+	 * obtain a resource once the old state has first released it in {@code
+	 * predispose()}.
+	 */
+	void predispose();
+	
+	/**
+	 * Called when the state is stopped and disposed, and after {@link
+	 * #start()} is invoked on the new state, if one has been set.
+	 * 
+	 * <p>Between this and {@link #predispose()}, and used resources should be
+	 * disposed of an any necessary cleanups should be performed here, as to
+	 * prevent any memory leaks. This operation should ideally be a swift
+	 * one.
+	 * 
+	 * <p>The need for a distinction between {@code predispose()} and {@code
+	 * dispose()} emerges from the fact that some cached resources may be
+	 * shared across states - when a new state is set, such resources may be
+	 * marked for caching by the new state before they are unmarked by the old
+	 * state in {@code dispose()}. Conversely, a new state may only be able to
+	 * obtain a resource once the old state has first released it in {@code
+	 * predispose()}.
 	 */
 	void dispose();
 	
 	/**
 	 * Called when the application is paused.
-	 * 
-	 * <p>This is also invoked before {@link #dispose()} when the application
-	 * is shut down.
 	 */
 	void pause();
 	

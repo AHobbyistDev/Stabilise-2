@@ -606,7 +606,7 @@ public class RandomTests {
 		};
 		
 		for(DoubleIntPair p : nums) {
-			System.out.println(StringUtil.doubleToNPlaces(p.d, p.i) + " : " + oldAbb(p.d, p.i));
+			System.out.println(StringUtil.cullFP(p.d, p.i) + " : " + oldAbb(p.d, p.i));
 		}
 	}
 	

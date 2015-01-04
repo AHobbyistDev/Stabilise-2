@@ -82,4 +82,10 @@ public class SingleplayerState2 implements State {
 		System.gc();
 	}
 
+	@Override
+	public void predispose() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

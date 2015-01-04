@@ -139,7 +139,8 @@ public class Item {
 	}
 	
 	/**
-	 * Writes an Item to an NBT compound tag.
+	 * Writes an Item to an NBT compound tag. The returned compound tag
+	 * possesses an integer tag "id" corresponding to the item's ID.
 	 * 
 	 * @return The item in the form of an NBT compound tag.
 	 */
@@ -150,7 +151,8 @@ public class Item {
 	}
 	
 	/**
-	 * Reads an Item from an NBT compound tag.
+	 * Reads an Item from an NBT compound tag. Such a tag should possess an
+	 * integer tag "id" corresponding to the item's ID.
 	 * 
 	 * @param tag The tag.
 	 * 

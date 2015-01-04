@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 
 import com.stabilise.util.Log;
 
@@ -39,25 +40,30 @@ public class NBTTagCompound extends NBTTag {
 	}
 	
 	@Override
-	public void write(DataOutputStream out) throws IOException {
-		Iterator<NBTTag> iterator = data.values().iterator();
-		
-		while(iterator.hasNext()) {
-			NBTTag tag = (NBTTag)iterator.next();
+	void write(DataOutputStream out) throws IOException {
+		for(NBTTag tag : data.values())
 			NBTIO.writeTag(out, tag);
-		}
 		
 		out.writeByte(NBTTag.COMPOUND_END);
 	}
 	
 	@Override
-	public void load(DataInputStream in) throws IOException {
+	void load(DataInputStream in) throws IOException {
 		data.clear();
 		NBTTag tag;
 		
-		while((tag = NBTIO.readTag(in)).getId() != NBTTag.COMPOUND_END) {
+		while((tag = NBTIO.readTag(in)).getId() != NBTTag.COMPOUND_END)
 			data.put(tag.name, tag);
-		}
+	}
+	
+	/**
+	 * Adds an NBTTag object to the tag compound. If a tag by the given name
+	 * already exists within the compound, it will be overwritten.
+	 * 
+	 * @param tag The tag to add to the compound.
+	 */
+	public void addTag(NBTTag tag) {
+		data.put(tag.name, tag);
 	}
 	
 	/**
@@ -663,21 +669,35 @@ public class NBTTagCompound extends NBTTag {
 	}
 	
 	/**
-	 * Gets a Collection of the tags held by the compound tag.
-	 * 
-	 * @return A Collection of the tags held by the compound tag.
+	 * @return A Collection of the tags held by this compound tag.
 	 */
 	public Collection<NBTTag> getTags() {
 		return data.values();
 	}
 	
 	/**
-	 * Checks for whether or not the tag compound is empty.
-	 * 
-	 * @return {@code true} if the compound is empty; {@code false} otherwise.
+	 * @return {@code true} if this compound is empty; {@code false} otherwise.
 	 */
 	public boolean isEmpty() {
 		return data.size() == 0;
+	}
+	
+	@Override
+	byte getId() {
+		return NBTTag.COMPOUND;
+	}
+	
+	@Override
+	public NBTTagCompound copy() {
+		NBTTagCompound clone = new NBTTagCompound(name);
+		Iterator<Entry<String, NBTTag>> iterator = data.entrySet().iterator();
+		
+		while(iterator.hasNext()) {
+			Entry<String, NBTTag> entry = iterator.next();
+			clone.addTag(entry.getKey(), entry.getValue().copy());
+		}
+		
+		return clone;
 	}
 	
 	@Override
@@ -687,7 +707,7 @@ public class NBTTagCompound extends NBTTag {
 	
 	@Override
 	String toString(String prefix) {
-		String pre = prefix + "\t";
+		String pre = prefix + "    ";
 		StringBuilder sb = new StringBuilder("[\n");
 		
 		for(String tagName : data.keySet()) {
@@ -704,23 +724,5 @@ public class NBTTagCompound extends NBTTag {
 
         return sb.toString();
 	}
-
-	@Override
-	public byte getId() {
-		return NBTTag.COMPOUND;
-	}
 	
-	@Override
-	public NBTTagCompound copy() {
-		NBTTagCompound clone = new NBTTagCompound(name);
-		Iterator<String> iterator = data.keySet().iterator();
-		
-		while(iterator.hasNext()) {
-			String tagName = iterator.next();
-			clone.addTag(tagName, data.get(tagName).copy());
-		}
-		
-		return clone;
-	}
-
 }

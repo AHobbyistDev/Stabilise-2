@@ -102,6 +102,7 @@ public class ItemStack {
 	 * @return {@code true} if the stack was added in its entirety (i.e. {@code
 	 * stack.quantity == 0}); {@code false} otherwise.
 	 * @throws NullPointerException if {@code stack} is {@code null}.
+	 * @throws IllegalArgumentException if {@code stack.getQuantity() < 0}.
 	 */
 	public boolean add(ItemStack stack) {
 		if(!accepts(stack))
@@ -149,13 +150,11 @@ public class ItemStack {
 	 * @param amount The number of items to add.
 	 * 
 	 * @return The number of items which were not added.
-	 * @throws IllegalArgumentException Thrown if {@code amount < 0}.
+	 * @throws IllegalArgumentException if {@code amount < 0}.
 	 */
 	public int addQuantity(int amount) {
 		if(amount < 0)
 			throw new IllegalArgumentException("amount < 0: " + amount);
-		// Param is named 'amount' instead of 'quantity' because it gets
-		// annoying to read otherwise. Ditto with removeQuantity()
 		quantity += amount;
 		if(quantity > item.getMaxStackSize()) {
 			amount = quantity - item.getMaxStackSize();
@@ -173,7 +172,7 @@ public class ItemStack {
 	 * @param amount The number of items to remove.
 	 * 
 	 * @return The number of items which were not removed.
-	 * @throws IllegalArgumentException Thrown if {@code amount < 0}.
+	 * @throws IllegalArgumentException if {@code amount < 0}.
 	 */
 	public int removeQuantity(int amount) {
 		if(amount < 0)

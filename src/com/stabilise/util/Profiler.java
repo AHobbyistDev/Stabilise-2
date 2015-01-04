@@ -3,9 +3,9 @@ package com.stabilise.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * A Profiler object is used to gauge the amount of processing time which is
@@ -16,21 +16,20 @@ import java.util.NoSuchElementException;
  * invocations control these sections:
  * 
  * <pre>
- * new Profiler() // flush() is invoked on construction
- * > flush()
- *     > start("Section1")
- *         > start("Subsection1.1")
- *         > next("Subsection1.2")
- *             > start("Subsection 1.2.1")
- *             > end()
- *         > end()                  // <-- these two are equivalent to
- *         > start("Subsection1.3") // <-- next("Subsection1.3")
+ * new Profiler(true) // flush() is invoked on construction
+ * > start("Section1")
+ *     > start("Subsection1.1")
+ *     > next("Subsection1.2")
+ *         > start("Subsection 1.2.1")
  *         > end()
- *     > next("Section2")
- *     > next("Section3")
- *         > start("Subsection3.1")
- *         > end()   
+ *     > end()                  // <-- these two are equivalent to
+ *     > start("Subsection1.3") // <-- next("Subsection1.3")
  *     > end()
+ * > next("Section2")
+ * > next("Section3")
+ *     > start("Subsection3.1")
+ *     > end()   
+ * > end()</pre>
  * 
  * <p>A Profiler is not thread-safe.
  */
@@ -114,8 +113,6 @@ public class Profiler {
 	 * @param section The name of the section.
 	 * 
 	 * @throws NullPointerException if {@code section} is {@code null}.
-	 * @throws NoSuchElementException if {@link #end()} has been invoked more
-	 * times than this method. If this happens, remove the rogue call!
 	 */
 	public void start(String section) {
 		if(effectivelyEnabled) {
@@ -150,7 +147,8 @@ public class Profiler {
 	 * to - an invocation of {@link #start(String)}.
 	 * 
 	 * @throws IllegalStateException if this method is invoked more times than
-	 * {@link #start(String)}. If this happens, remove the rogue call!
+	 * {@link #start(String)} (i.e. if {@link #getStackLevel()} would return
+	 * {@code 1}). If this happens, remove the rogue call!
 	 */
 	public void end() {
 		if(effectivelyEnabled) {
@@ -169,10 +167,11 @@ public class Profiler {
 	 * 
 	 * @param section The name of the section.
 	 * 
+	 * @throws IllegalStateException if this method has been invoked without
+	 * a prior call to {@link #start(String)} which hasn't yet been terminated
+	 * by {@link #end()} (i.e. if {@link #getStackLevel()} would return
+	 * {@code 1}).
 	 * @throws NullPointerException if {@code section} is {@code null}.
-	 * @throws NoSuchElementException if {@link #end()} has been invoked more
-	 * times than {@link #start(String)}. If this happens, remove the rogue
-	 * call!
 	 * 
 	 * @see #end()
 	 * @see #start(String)
@@ -204,13 +203,31 @@ public class Profiler {
 	}
 	
 	/**
-	 * Enables profiling.
+	 * Enables profiling. Note that the profiler will not act as if it is
+	 * enabled until {@link #flush()} is next invoked as to prevent problems
+	 * with unbalanced invocations of {@link #start(String)} and {@link
+	 * #end()}.
+	 * 
+	 * <p>For example, the following code will not cause an ISE to be thrown:
+	 * 
+	 * <pre>
+	 * profiler.disable();
+	 * profiler.start("blah"); // ignored as the profiler is disabled
+	 * profiler.enable();
+	 * profiler.end(); // ignored as flush() hasn't yet been invoked</pre>
+	 * 
+	 * <p>The following, however, will:
+	 * 
+	 * <pre>
+	 * profiler.disable();
+	 * profiler.start("blah"); // ignored as the profiler is disabled
+	 * profiler.enable();
+	 * profiler.flush();
+	 * profiler.end(); // this will throw an ISE!</pre>
+	 * </pre>
 	 */
 	public void enable() {
 		enabled = true;
-		// Do not set effectivelyEnabled = true until flush() is invoked as
-		// this may have been invoked between invocations of start() and end(),
-		// which can and will lead to exceptions being thrown.
 	}
 	
 	/**
@@ -228,10 +245,57 @@ public class Profiler {
 	}
 	
 	/**
+	 * Note that this will only return {@code true} when profiling is
+	 * effectively enabled - that is, only once {@link #flush()} is invoked
+	 * following an invocation of {@link #enable()}.
+	 * 
 	 * @return {@code true} if profiling is enabled; {@code false} otherwise.
 	 */
 	public boolean isEnabled() {
-		return enabled;
+		return effectivelyEnabled;
+	}
+	
+	/**
+	 * This method allows a user to verify that the profiler is in the desired
+	 * state.
+	 * 
+	 * @throws IllegalStateException if profiling is enabled, the {@link
+	 * #getStackLevel() stack level} does not equal {@code level}, and the
+	 * {@link #getStackName() stack name} does not equal {@code stack}.
+	 */
+	public void verify(int level, String stack) {
+		if(isEnabled() && getStackLevel() != level && getStackName() != stack)
+			throw new IllegalStateException("Profiler stack is \"" + getStackName()
+					+ "\" (it should be \"" + stack + "\")");
+	}
+	
+	/**
+	 * Gets the size of the current profiler stack. If this returns 1, the
+	 * current profiling section is the root section, and an invocation of
+	 * either {@link #end()} or {@link #next(String)} would result in an ISE
+	 * being thrown.
+	 * 
+	 * <p>Note that when profiling is disabled, this will always return {@code
+	 * 1} and as such the above warning doesn't apply.
+	 */
+	public int getStackLevel() {
+		return stack.size();
+	}
+	
+	/**
+	 * @return The name of the current section stack. This takes the form of
+	 * period-delimited names of the section stack. If profiling is disabled
+	 * this returns the name of the root section.
+	 */
+	public String getStackName() {
+		Iterator<Section> i = stack.iterator();
+		StringBuilder sb = new StringBuilder();
+		while(i.hasNext()) {
+			sb.append(i.next().name);
+			if(i.hasNext())
+				sb.append('.');
+		}
+		return sb.toString();
 	}
 	
 	/**
@@ -283,7 +347,7 @@ public class Profiler {
 		/**
 		 * Stops timing the section.
 		 * 
-		 * @return this
+		 * @return This section.
 		 */
 		private Section end() {
 			duration += System.nanoTime() - startTime;
@@ -311,12 +375,12 @@ public class Profiler {
 		 * @return The data.
 		 */
 		private SectionData getData(String parentName, float localPercent, float totalPercent) {
+			// Make parentName function as absoluteName
 			if(parentName != "")
 				parentName += "." + name;
 			else
 				parentName = name;
 			
-			// parentName functions as absoluteName for our purposes here
 			SectionData data = new SectionDataNormal(name, parentName, duration, localPercent, totalPercent);
 			
 			List<SectionData> children = new ArrayList<SectionData>();
@@ -426,9 +490,9 @@ public class Profiler {
 		 */
 		private String toString(String prefix) {
 			StringBuilder sb = new StringBuilder(prefix);
-			sb.append(StringUtil.floatToNPlaces(totalPercent, 2));
+			sb.append(StringUtil.cullFP(totalPercent, 2));
 			sb.append("% ");
-			sb.append(StringUtil.floatToNPlaces(localPercent, 2));
+			sb.append(StringUtil.cullFP(localPercent, 2));
 			sb.append("% ");
 			sb.append(name);
 			sb.append(" (");
