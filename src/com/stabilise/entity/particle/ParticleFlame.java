@@ -41,7 +41,7 @@ public class ParticleFlame extends ParticlePhysical {
 		opacity = (float)(DESPAWN_TICKS - age) / DESPAWN_TICKS;
 		
 		if(age == DESPAWN_TICKS)
-			world.removeParticle(this);
+			destroy();
 	}
 	
 	@Override

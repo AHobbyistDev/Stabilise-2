@@ -7,11 +7,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import com.stabilise.core.Resources;
+import com.stabilise.util.collect.LightLinkedList;
 
 /**
  * The Log class allows for the logging and more streamlined management of
@@ -37,7 +36,7 @@ public class Log {
 	private static final int LOG_CAPACITY = 256;
 	
 	/** Stores the log entries. Access to this list should be synchronised. */
-	private static List<String> entries = new LinkedList<String>();
+	private static List<String> entries = new LightLinkedList<String>();
 	
 	/** A cache of the untagged logging agent to save on processor time. */
 	private static final Log defaultAgent = new Log("");
@@ -331,7 +330,7 @@ public class Log {
 	 */
 	public static void saveLog(boolean crashLog, String prefixMessage, File file) {
 		synchronized(entries) {
-			if(entries.size() == 0)
+			if(entries.isEmpty())
 				return;
 		}
 		
@@ -354,9 +353,8 @@ public class Log {
 			}
 			
 			synchronized(entries) {
-				Iterator<String> i = entries.iterator();
-				while(i.hasNext()) {
-					writer.write(i.next());
+				for(String entry : entries) {
+					writer.write(entry);
 					writer.newLine();
 				}
 			}

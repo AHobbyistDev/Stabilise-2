@@ -377,7 +377,7 @@ public class MathsUtil {
 	 * @return The compacted value.
 	 */
 	public static long compactLong(int x, int y) {
-		return (long)((x << 32) & y);
+		return ((long)x << 32) & (long)y;
 	}
 	
 }

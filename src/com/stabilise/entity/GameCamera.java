@@ -88,8 +88,8 @@ public class GameCamera extends GameObject {
 	 * 
 	 * @param followStrength The follow strength.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code followStrength} is
-	 * <= 0 or > 1.
+	 * @throws IllegalArgumentException if {@code followStrength} is not within
+	 * the range {@code 0 < followStrength <= 1}.
 	 */
 	public void setFollowStrength(float followStrength) {
 		if(followStrength <= 0 || followStrength > 1)

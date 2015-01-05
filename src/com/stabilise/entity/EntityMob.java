@@ -495,14 +495,14 @@ public abstract class EntityMob extends Entity {
 	/**
 	 * Sets the Mob's controller. This method sets the controller's linked mob,
 	 * as per an invocation of
-	 * {@link MobController#setControlledMob(EntityMob)
+	 * {@link MobController#setTarget(EntityMob)
 	 * setControlledMob(this)}.
 	 * 
 	 * @param controller The controller.
 	 */
 	public void setController(MobController controller) {
 		this.controller = controller;
-		controller.setControlledMob(this);
+		controller.setTarget(this);
 	}
 	
 	/**

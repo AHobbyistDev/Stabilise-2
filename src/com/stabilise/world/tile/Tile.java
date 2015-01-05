@@ -2,7 +2,7 @@ package com.stabilise.world.tile;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
-import com.stabilise.util.RegistryNamespacedDefaulted;
+import com.stabilise.util.collect.RegistryNamespacedDefaulted;
 import com.stabilise.world.World;
 
 /**

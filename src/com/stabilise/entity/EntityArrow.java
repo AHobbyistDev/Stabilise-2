@@ -65,7 +65,7 @@ public class EntityArrow extends EntityProjectile {
 	@Override
 	public void update() {
 		if(removeHitbox && hitbox != null) {
-			world.removeHitbox(hitbox.id); 
+			world.removeHitbox(hitbox.id);
 			hitbox = null;
 			removeHitbox = false;
 		}

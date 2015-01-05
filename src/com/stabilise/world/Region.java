@@ -3,10 +3,10 @@ package com.stabilise.world;
 import static com.stabilise.core.Constants.REGION_UNLOAD_TICK_BUFFER;
 
 import java.io.File;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.maths.HashPoint;
 
 /**
@@ -98,7 +98,7 @@ public class Region {
 	 * <p><i>Design specifications:</i> This is a LinkedList such that add
 	 * operations are O(1). This comes at the cost of O(n) performance when
 	 * making a defensive copy in the world generator, but that is acceptable.*/
-	public final List<QueuedSchematic> queuedSchematics = new LinkedList<QueuedSchematic>();
+	public final List<QueuedSchematic> queuedSchematics = new LightLinkedList<QueuedSchematic>();
 	
 	/** The object to use for locking purposes restricted to the WorldGenerator
 	 * and WorldLoader. */

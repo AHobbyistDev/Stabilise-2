@@ -52,7 +52,8 @@ public abstract class Task implements Runnable {
 	/** The task tracker. This is initially constructed as per
 	 * {@link TaskTracker#TaskTracker(int) new TaskTracker(parts)} when the
 	 * Task is constructed through {@link #Task(int) new Task(parts)}, or may
-	 * be otherwise set by {@link Task#Task(TaskTracker)}. */
+	 * be otherwise set by {@link Task#Task(TaskTracker) new
+	 * Task(TaskTracker)}. */
 	protected final TaskTracker tracker;
 	
 	/** The lock used for waiting on the task for completion. */
@@ -79,9 +80,6 @@ public abstract class Task implements Runnable {
 	
 	/**
 	 * Creates a new Task.
-	 * 
-	 * <p>This constructor should typically be used only when multiple tasks
-	 * are intended to report to the same {@code TaskTracker}.
 	 * 
 	 * @param tracker The task's {@code TaskTracker}.
 	 * 

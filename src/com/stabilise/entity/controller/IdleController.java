@@ -9,10 +9,8 @@ public class IdleController extends MobController {
 	 * nothing, this may be shared between multiple mobs. */
 	public static final IdleController INSTANCE = new IdleController();
 	
-	/**
-	 * Creates a new IdleController. Private as to make the global instance the
-	 * only usable instance.
-	 */
+	
+	// Only privately instantiable
 	private IdleController() {
 		super();
 	}

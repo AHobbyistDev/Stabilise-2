@@ -1,4 +1,4 @@
-package com.stabilise.util;
+package com.stabilise.util.collect;
 
 import java.util.Iterator;
 import java.util.Map;

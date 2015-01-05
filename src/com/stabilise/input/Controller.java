@@ -4,17 +4,17 @@ import static com.badlogic.gdx.Input.*;
 
 import java.io.IOException;
 
-import org.apache.commons.collections4.bidimap.DualHashBidiMap;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.stabilise.core.Constants;
 import com.stabilise.util.ConfigFile;
 import com.stabilise.util.Log;
 
 /**
- * A Controller translates keys into configurable controls.
+ * A Controller translates key input into configurable controls.
  * 
  * @see InputManager
  */
@@ -107,7 +107,10 @@ public class Controller implements InputProcessor {
 	};
 	
 	/** The key mappings. Maps keycodes to controls. */
-	private static DualHashBidiMap<Integer, Control> KEY_MAP = new DualHashBidiMap<Integer, Control>();
+	private static BiMap<Integer, Control> CONTROL_MAP = HashBiMap.create();
+	/** The control mappings. Maps controls to keycodes. The inverse of
+	 * {@link #CONTROL_MAP}. */
+	private static BiMap<Control, Integer> KEY_MAP = CONTROL_MAP.inverse();
 	
 	/** Whether or not the controller mappings have been set up. */
 	private static boolean initialised = false;
@@ -143,12 +146,12 @@ public class Controller implements InputProcessor {
 	 * @throws NullPointerException if {@code control} is {@code null}.
 	 */
 	public boolean isControlPressed(Control control) {
-		return control.valid && input.isKeyPressed(KEY_MAP.getKey(control));
+		return control.valid && input.isKeyPressed(KEY_MAP.get(control));
 	}
 	
 	@Override
 	public boolean keyDown(int keycode) {
-		Control control = KEY_MAP.get(keycode);
+		Control control = CONTROL_MAP.get(keycode);
 		if(control != null && control.valid)
 			return focus.handleControlPress(control);
 		return false;
@@ -156,7 +159,7 @@ public class Controller implements InputProcessor {
 	
 	@Override
 	public boolean keyUp(int keycode) {
-		Control control = KEY_MAP.get(keycode);
+		Control control = CONTROL_MAP.get(keycode);
 		if(control != null && control.valid)
 			return focus.handleControlRelease(control);
 		return false;
@@ -207,10 +210,10 @@ public class Controller implements InputProcessor {
 	 * key.
 	 */
 	public static boolean bindKey(int key, Control control) {
-		if(key < 0 || (KEY_MAP.containsValue(control) && KEY_MAP.getKey(control) != key))
+		if(key < 0 || (CONTROL_MAP.containsValue(control) && KEY_MAP.get(control) != key))
 			return false;
 		
-		KEY_MAP.put(key, control);
+		CONTROL_MAP.put(key, control);
 		
 		return true;
 	}
@@ -226,10 +229,10 @@ public class Controller implements InputProcessor {
 	 * {@code false} otherwise.
 	 */
 	private static boolean bindKeyWeak(int key, Control control) {
-		if(key < 0 || KEY_MAP.containsKey(key) || KEY_MAP.containsValue(control))
+		if(key < 0 || CONTROL_MAP.containsKey(key) || CONTROL_MAP.containsValue(control))
 			return false;
 		
-		KEY_MAP.put(key, control);
+		CONTROL_MAP.put(key, control);
 		
 		return true;
 	}
@@ -295,7 +298,7 @@ public class Controller implements InputProcessor {
 		// Check to see if any configs are missing from the config file, and
 		// bind them to the default value if so
 		for(Control c : controls) {
-			if(!KEY_MAP.containsValue(c) && c.valid) {
+			if(!CONTROL_MAP.containsValue(c) && c.valid) {
 				bindKey(c.defaultKey, c);
 				missingConfigs = true;
 			}
@@ -310,7 +313,7 @@ public class Controller implements InputProcessor {
 		
 		// Finally, check to see if there remain any unbound configs
 		for(Control c : controls) {
-			if(!KEY_MAP.containsValue(c) && c.valid)
+			if(!CONTROL_MAP.containsValue(c) && c.valid)
 				return false;
 		}
 		
@@ -329,7 +332,7 @@ public class Controller implements InputProcessor {
 		Control[] controls = Control.values();
 		for(Control c : controls) {
 			if(c.valid)
-				config.addInteger(c.fieldName, KEY_MAP.getKey(c));
+				config.addInteger(c.fieldName, KEY_MAP.get(c));
 		}
 		
 		try {

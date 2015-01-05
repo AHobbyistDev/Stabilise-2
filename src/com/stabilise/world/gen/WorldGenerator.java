@@ -5,8 +5,6 @@ import static com.stabilise.world.Region.REGION_SIZE_IN_TILES;
 import static com.stabilise.world.Slice.SLICE_SIZE;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.stabilise.util.Log;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.world.GameWorld;
@@ -110,11 +109,12 @@ public abstract class WorldGenerator {
 	 * world and WorldGenerator remain atomic. */
 	public final Object lock = new Object();
 	
-	/** Regions which have been cached by the current worker thread. */
+	/** Regions which have been cached by the current worker thread. The list
+	 * member is a {@link ClearOnIterateLinkedList}. */
 	private final ThreadLocal<List<Region>> localCachedRegions = new ThreadLocal<List<Region>>() {
 		@Override
 		protected List<Region> initialValue() {
-			return new LinkedList<Region>();
+			return new ClearOnIterateLinkedList<Region>();
 		}
 	};
 	
@@ -299,12 +299,7 @@ public abstract class WorldGenerator {
 		//     any queued schematics to it (since now is a convenient time to
 		//     implant schematics), and then uncache the region from the world.
 		// Finally, we clear the threadlocal instance.
-		List<Region> cRegions = localCachedRegions.get();
-		Iterator<Region> i = cRegions.iterator();
-		while(i.hasNext()) {
-			final Region cRegion = i.next();
-			i.remove();
-			
+		for(Region cRegion : localCachedRegions.get()) {
 			RegionLock cLock = regionLocks.get(cRegion.loc); // may be null
 			
 			// If the region is generated for the most part, implant the

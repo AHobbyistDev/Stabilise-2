@@ -27,13 +27,10 @@ public abstract class MobController {
 	}
 	
 	/**
-	 * Sets the mob which is to be the subject of the controller.
-	 * 
-	 * @param mob The mob.
-	 * 
-	 * @return This MobController, for chaining operations.
+	 * Makes the specified mob the subject of this controller, and returns this
+	 * controller for chaining operations.
 	 */
-	public MobController setControlledMob(EntityMob mob) {
+	public MobController setTarget(EntityMob mob) {
 		this.mob = mob;
 		return this;
 	}

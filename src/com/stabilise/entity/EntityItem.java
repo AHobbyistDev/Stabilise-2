@@ -56,10 +56,8 @@ public class EntityItem extends Entity {
 	public void update() {
 		super.update();
 		
-		if(age == DESPAWN_TICKS) {
-			world.removeEntity(id);
-			destroyed = true;
-		}
+		if(age == DESPAWN_TICKS)
+			destroy();
 		
 		// Note: Won't work if uncommented.
 		/*

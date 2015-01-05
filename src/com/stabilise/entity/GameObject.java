@@ -4,19 +4,25 @@ import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.world.World;
 
 /**
- * A GameObject is an object which exists within the game.
+ * A GameObject is an object which exists within the game world at self-defined
+ * coordinates {@link #x} and {@link #y}.
  */
 public abstract class GameObject {
 	
 	/** A reference to the world the GameObject is in. */
 	public World world;
-	/** The GameObject's ID. */
+	/** The GameObject's ID. Such an ID is not necessarily unique amongst all
+	 * GameObjects; merely ones of the same type amongst which distinction is
+	 * required (e.g. entities, hitboxes). */
 	public int id;
 	
-	/** The GameObject's x-coordinate. */
+	/** The GameObject's x-coordinate, in tile-lengths. */
 	public double x;
-	/** The GameObject's y-coordinate. */
+	/** The GameObject's y-coordinate, in tile-lengths. */
 	public double y;
+	
+	/** If {@code true}, this GameObject should be removed from the world ASAP. */
+	protected boolean destroyed = false;
 	
 	
 	/**
@@ -36,21 +42,50 @@ public abstract class GameObject {
 	}
 	
 	/**
-	 * Updates the GameObject.
+	 * Updates this GameObject.
 	 */
 	public abstract void update();
 	
 	/**
-	 * Renders the GameObject.
+	 * Updates this GameObject, and then returns the {@link #isDestroyed()}.
 	 * 
+	 * <p>This method performs as if by:
+	 * 
+	 * <pre>
+	 * update();
+	 * return isDestroyed();</pre>
+	 */
+	public final boolean updateAndCheck() {
+		update();
+		return isDestroyed();
+	}
+	
+	/**
 	 * @param renderer The renderer with which to render the GameObject.
 	 */
 	public abstract void render(WorldRenderer renderer);
 	
 	/**
-	 * Destroys the GameObject.
+	 * Destroys this GameObject.
+	 * 
+	 * <p>In the default implementation, this sets the {@link #destroyed} flag
+	 * to {@code true}, and {@link #isDestroyed()} will return {@code true}
+	 * henceforth.
 	 */
-	public abstract void destroy();
+	public void destroy() {
+		destroyed = true;
+	}
+	
+	/**
+	 * If {@code true} is returned, this GameObject should be removed from the
+	 * world ASAP.
+	 * 
+	 * @return {@code true} if this GameObject is considered destroyed; {@code
+	 * false} otherwise.
+	 */
+	public boolean isDestroyed() {
+		return destroyed;
+	}
 	
 	/**
 	 * Gets the x-coordinate of the slice the game object is within.
@@ -69,5 +104,5 @@ public abstract class GameObject {
 	public final int getSliceY() {
 		return World.sliceCoordFromTileCoord(y);
 	}
-
+	
 }

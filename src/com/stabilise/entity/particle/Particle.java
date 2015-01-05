@@ -27,9 +27,4 @@ public abstract class Particle extends GameObject {
 		age++;
 	}
 	
-	@Override
-	public void destroy() {
-		world.removeParticle(this);
-	}
-
 }

@@ -1,4 +1,4 @@
-package com.stabilise.util;
+package com.stabilise.util.collect;
 
 /**
  * This class allows for the creation of a namespaced registry which returns a

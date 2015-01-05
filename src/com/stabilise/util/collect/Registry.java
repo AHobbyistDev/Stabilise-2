@@ -1,10 +1,12 @@
-package com.stabilise.util;
+package com.stabilise.util.collect;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import com.stabilise.util.Log;
 
 /**
  * A registry allows for objects of a certain type to be registered and

@@ -4,7 +4,7 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.stabilise.util.RegistryNamespaced;
+import com.stabilise.util.collect.RegistryNamespaced;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.World;
 

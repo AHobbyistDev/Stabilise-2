@@ -33,9 +33,6 @@ public abstract class Entity extends GameObject {
 	/** The Entity's age, in ticks. */
 	public int age = 0;
 	
-	/** Whether or not the entity has been destroyed. */
-	public boolean destroyed = false;
-	
 	/** Whether or not the entity is invulnerable. */
 	public boolean invulnerable = false;
 	
@@ -435,7 +432,7 @@ public abstract class Entity extends GameObject {
 	 */
 	@Override
 	public void destroy() {
-		destroyed = true;
+		super.destroy();
 		world.removeEntity(id);
 	}
 	

@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
@@ -24,6 +25,8 @@ import com.stabilise.util.IOUtil;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.collect.ClearOnIterateLinkedList;
+import com.stabilise.util.maths.HashPoint;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
@@ -57,28 +60,34 @@ public abstract class World {
 	//--------------------==========--------------------
 	
 	/** All players in the world. */
-	protected LinkedHashMap<Integer, EntityMob> players = new LinkedHashMap<Integer, EntityMob>(1);
-	/** The map of loaded entities in the world. */
-	protected LinkedHashMap<Integer, Entity> entities = new LinkedHashMap<Integer, Entity>(64);
-	/** The total number of entities in the world. */
+	protected Map<Integer, EntityMob> players = new HashMap<Integer, EntityMob>(1);
+	/** The map of loaded entities in the world. This is a LinkedHashMap as to
+	 * allow for consistent iteration. */
+	protected Map<Integer, Entity> entities = new LinkedHashMap<Integer, Entity>(64);
+	/** The total number of entities which have existed during the lifetime of
+	 * the world. When a new entity is created its assigned ID is typically
+	 * this value + 1, after which this is incremented.*/
 	public int entityCount = 0;
-	/** Entities queued to be added to the world at the end of the tick. */
-	private List<Entity> entitiesToAdd = new LinkedList<Entity>();
-	/** Entities queued to be removed from the world at the end of the tick. */
-	private List<Integer> entitiesToRemove = new LinkedList<Integer>();
+	/** Entities queued to be added to the world at the end of the tick. This
+	 * list clears automatically when it is iterated over. */
+	private List<Entity> entitiesToAdd = new ClearOnIterateLinkedList<Entity>();
+	/** The IDs of entities queued to be removed from the world at the end of
+	 * the tick. This list clears automatically when it is iterated over.*/
+	private List<Integer> entitiesToRemove = new ClearOnIterateLinkedList<Integer>();
 	/** The number of hostile mobs in the world. */
 	public int hostileMobCount = 0;
 	
 	/** The map of tile entities in the world. */
-	protected LinkedHashMap<Integer, TileEntity> tileEntities = new LinkedHashMap<Integer, TileEntity>();
+	protected Map<HashPoint, TileEntity> tileEntities = new HashMap<HashPoint, TileEntity>();
 	
 	/** All hitboxes. */
 	protected LinkedHashMap<Integer, Hitbox> hitboxes = new LinkedHashMap<Integer, Hitbox>(20);
 	/** The total number of hitboxes in the world. */
 	public int hitboxCount = 0;
 	
-	/** Hitboxes queued to be added to the world. */
-	private List<Hitbox> hitboxesToAdd = new LinkedList<Hitbox>();
+	/** Hitboxes queued to be added to the world. This list clears
+	 * automatically when it is iterated over. */
+	private List<Hitbox> hitboxesToAdd = new ClearOnIterateLinkedList<Hitbox>();
 	/** Hitboxes queued to be removed from the world. */
 	//private List<Integer> hitboxesToRemove = new LinkedList<Integer>();
 	
@@ -92,7 +101,8 @@ public abstract class World {
 	/** The gravity of the world. */
 	public float gravity = -0.02f;
 	
-	/** An easy-access utility RNG. */
+	/** An easy-access utility RNG which should be used by any GameObject with
+	 * a reference to this world in preference to constructing a new one. */
 	public Random rng = new Random();
 	
 	/** The profiler. */
@@ -113,64 +123,61 @@ public abstract class World {
 	 */
 	@UserThread("MainThread")
 	public void update() {
-		profiler.start("entity");
-		// Update all entities
-		for(Entity e : getEntities())
-			e.update();
+		profiler.start("entity"); // "entity"
+		{ // Update all entities
+			Iterator<Entity> i = getEntities().iterator();
+			while(i.hasNext())
+				if(i.next().updateAndCheck())
+					i.remove();
+		}
 		
 		// Since it is expected that hitboxesToAdd, hitboxesToRemove, etc. will
 		// be empty most of the time, it is faster to perform the size() != 0
-		// check. For benchmarking, refer to
-		// com.stabilise.tests.RandomTests#listIterationAndClearing()
+		// check.
 		
-		profiler.next("hitbox");
-		profiler.start("add");
+		profiler.next("hitbox"); // "hitbox"
+		profiler.start("add"); // "hitbox.add"
 		// Now, add and remove all queued hitboxes
-		if(hitboxesToAdd.size() != 0) {
-			for(Hitbox h : hitboxesToAdd) {
+		if(!hitboxesToAdd.isEmpty()) {
+			for(Hitbox h : hitboxesToAdd)
 				hitboxes.put(h.id, h);
+		}
+		
+		profiler.next("update"); // "hitbox.update"
+		
+		{ // Now, update the hitboxes
+			Iterator<Hitbox> i = getHitboxes().iterator();
+			while(i.hasNext()) {
+				Hitbox h = i.next();
+				h.update();
+				if(!h.persistent)
+					i.remove();
 			}
-			hitboxesToAdd.clear();
 		}
 		
-		/*
-		if(hitboxesToRemove.size() != 0) {
-			for(Integer i : hitboxesToRemove) {
-				hitboxes.remove(i);
-			}
-			hitboxesToRemove.clear();
-		}
-		*/
+		profiler.end(); // "hitbox"
 		
-		profiler.next("update");
-		// Now, update the hitboxes
-		Iterator<Hitbox> hi = getHitboxes().iterator();
-		while(hi.hasNext()) {
-			Hitbox h = hi.next();
-			h.update();
-			if(!h.persistent)
-				hi.remove();
-		}
-		profiler.end();
-		
+		profiler.next("entity"); // "entity"
+		profiler.start("add"); // "entity.add"
 		// Now, add and remove all queued entities
-		if(entitiesToAdd.size() != 0) {
-			for(Entity e : entitiesToAdd) {
+		if(!entitiesToAdd.isEmpty()) {
+			Iterator<Entity> i = entitiesToAdd.iterator();
+			while(i.hasNext()) {
+				Entity e = i.next();
 				entities.put(e.id, e);
-				//e.onAdd();
+				i.remove(); // faster than clear() for a LinkedList
 			}
-			entitiesToAdd.clear();
 		}
 		
+		profiler.next("remove"); // "entity.remove"
 		if(entitiesToRemove.size() != 0) {
-			for(Integer i : entitiesToRemove) {
-				entities.remove(i);
-			}
-			entitiesToRemove.clear();
+			for(Integer id : entitiesToRemove)
+				entities.remove(id);
 		}
+		profiler.end(); // "entity"
 		
-		profiler.next("tileEntities");
-		profiler.start("update");
+		profiler.next("tileEntity"); // "tileEntity"
+		profiler.start("update"); // "tileEntity.update"
 		// Now, iterate over all tile entities
 		for(TileEntity t : getTileEntities())
 			t.update();
@@ -182,8 +189,6 @@ public abstract class World {
 	/**
 	 * Sets a mob as a player. The mob will be treated as if the player is
 	 * controlling it thereafter.
-	 * 
-	 * @param m The mob.
 	 */
 	public void setPlayer(EntityMob m) {
 		players.put(m.id, m);
@@ -192,8 +197,6 @@ public abstract class World {
 	/**
 	 * Removes the status of player from a mob. The mob will no longer be
 	 * treated as if controlled by a player thereafter.
-	 * 
-	 * @param m The mob.
 	 */
 	public void unsetPlayer(EntityMob m) {
 		players.remove(m.id);
@@ -225,13 +228,12 @@ public abstract class World {
 	 * prevent a {@code ConcurrentModificationException} from being thrown if
 	 * the entity is added while the map of entities is being iterated over.
 	 * 
-	 * @param e The entity.
+	 * <p>Though the entity is not immediately added to the world, {@link
+	 * Entity#onAdd() onAdd()} is invoked on {@code e}.
 	 */
 	public void addEntity(Entity e) {
 		e.id = ++entityCount;
-		
 		e.onAdd();
-		
 		entitiesToAdd.add(e);
 	}
 	
@@ -386,14 +388,12 @@ public abstract class World {
 	 * @param y The y-coordinate of the tile entity, in tile-lengths.
 	 */
 	protected void addTileEntity(TileEntity t, int x, int y) {
-		tileEntities.put(((x & 0xFFFF) << 16) + (y & 0xFFFF), t);
+		tileEntities.put(new HashPoint(x, y), t);
 	}
 	
 	/**
 	 * Removes a tile entity from the map of tile entities. This does not
 	 * remove it from its owner slice.
-	 * 
-	 * @param t The tile entity.
 	 */
 	protected void removeTileEntity(TileEntity t) {
 		removeTileEntity(t.x, t.y);
@@ -407,58 +407,49 @@ public abstract class World {
 	 * @param y The y-coordinate of the tile entity, in tile-lengths.
 	 */
 	protected void removeTileEntity(int x, int y) {
-		tileEntities.remove(((x & 0xFFFF) << 16) + (y & 0xFFFF));
+		tileEntities.remove(new HashPoint(x, y));
 	}
 	
 	// ==========Collection getters==========
 	
 	/**
-	 * Gets the Collection object representing all players in the world, such
-	 * that they may be iterated over.
-	 * 
-	 * @return The collection of players.
+	 * @return The collection of all players in the world. Note that a player
+	 * is also treated as an entity and as such every element in the returned
+	 * collection is also a member of the one returned by {@link
+	 * #getEntityIterator()}.
 	 */
 	public Collection<EntityMob> getPlayers() {
 		return players.values();
 	}
 	
 	/**
-	 * Gets the Collection object representing all entities in the world, such
-	 * that they may be iterated over.
-	 * 
-	 * @return The collection of entities.
+	 * @return The collection of entities in the world.
 	 */
 	public Collection<Entity> getEntities() {
 		return entities.values();
 	}
 	
 	/**
-	 * Gets the Collection object representing all hitboxes in the world, such
-	 * that they may be iterated over.
-	 * 
-	 * @return The collection of hitboxes.
+	 * @return The collection of hitboxes in the world.
 	 */
 	public Collection<Hitbox> getHitboxes() {
 		return hitboxes.values();
 	}
 	
 	/**
-	 * Gets the Collection object representing all particles in the world, such
-	 * that they may be iterated over.
-	 * 
-	 * @return The collection of particles.
-	 */
-	public abstract Collection<Particle> getParticles();
-	
-	/**
-	 * Gets the Collection object representing all tile entities in the world,
-	 * such that they may be iterated over.
-	 * 
-	 * @return The collection of tile entities.
+	 * @return The collection of tile entities in the world.
 	 */
 	public Collection<TileEntity> getTileEntities() {
 		return tileEntities.values();
 	}
+	
+	/**
+	 * @return The collection of particles in the world, or {@code null} if
+	 * this view of the world is one which does not include particles (i.e.
+	 * this would be the case if this is a server's world, as particles are
+	 * purely aesthetic and a server doesn't concern itself with them).
+	 */
+	public abstract Collection<Particle> getParticles();
 	
 	/**
 	 * Adds a player to the world.
@@ -485,15 +476,15 @@ public abstract class World {
 		// For now, mobs must spawn in a radius from a player in the
 		// bounds of 32 <= r <= 128
 		boolean inRange = false;		// In range of at least 1 player
+		double dx, dy, dist2;
 		for(EntityMob p : players.values()) {
-			double dx = p.x - x;
-			double dy = p.y - y;
-			// For micro-optimisation purposes, dump distSquared in dx
-			dx = dx*dx + dy*dy;
+			dx = p.x - x;
+			dy = p.y - y;
+			dist2 = dx*dx + dy*dy;
 			
-			if(dx <= 1024D)//32*32
+			if(dist2 <= 1024D)//32*32
 				return;
-			else if(dx <= 16384D)//128*128
+			else if(dist2 <= 16384D)//128*128
 				inRange = true;
 		}
 		if(!inRange)

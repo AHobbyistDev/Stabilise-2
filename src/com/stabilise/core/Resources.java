@@ -127,9 +127,6 @@ public class Resources {
 	 * @throws NullPointerException if {@code path} is {@code null}.
 	 */
 	public static InputStream getClasspathInputStream(String path) {
-		if(path == null)
-			throw new NullPointerException("path is null");
-		
 		return Resources.class.getResourceAsStream(path);
 	}
 	
@@ -146,8 +143,6 @@ public class Resources {
 	 * @throws NullPointerException if {@code file} is {@code null}.
 	 */
 	public static FileInputStream getFilepathInputStream(File file) {
-		if(file == null)
-			throw new NullPointerException("file is null");
 		if(!file.exists())
 			return null;
 		
@@ -172,9 +167,6 @@ public class Resources {
 	 * @throws NullPointerException if {@code file} is {@code null}.
 	 */
 	public static FileOutputStream getFilepathOutputStream(File file) {
-		if(file == null)
-			throw new NullPointerException("file is null");
-		
 		try {
 			return new FileOutputStream(file);
 		} catch(FileNotFoundException e) {
@@ -194,9 +186,6 @@ public class Resources {
 	 * encountered while loading the image.
 	 */
 	public static BufferedImage loadImageFromClasspath(String imagePath) throws IOException {
-		if(imagePath == null)
-			throw new NullPointerException("imagePath is null");
-		
 		if(!imagePath.toLowerCase().endsWith(".png"));
 			imagePath += ".png";
 		
@@ -216,9 +205,6 @@ public class Resources {
 	 * encountered while loading the image.
 	 */
 	public static BufferedImage loadImageFromFileSystem(String imagePath) throws IOException {
-		if(imagePath == null)
-			throw new NullPointerException("imagePath is null");
-		
 		if(!imagePath.toLowerCase().endsWith(".png"))
 			imagePath += ".png";
 		
@@ -237,9 +223,6 @@ public class Resources {
 	 * encountered while loading the image.
 	 */
 	public static BufferedImage loadImageFromFileSystem(File imageFile) throws IOException {
-		if(imageFile == null)
-			throw new NullPointerException("imageFile is null");
-		
 		if(imageFile.getAbsolutePath().toLowerCase().endsWith(".png"))
 			return doLoadImageFromFileSystem(imageFile);
 		else
@@ -271,9 +254,6 @@ public class Resources {
 	 * encountered while reading the file.
 	 */
 	public static String[] loadTextFileFromClasspath(String filePath) throws IOException {
-		if(filePath == null)
-			throw new NullPointerException("filePath is null");
-		
 		InputStream is = Resources.class.getResourceAsStream(filePath);
 		if(is == null)
 			throw new IOException("Text resource does not exist!");
@@ -309,9 +289,6 @@ public class Resources {
 	 * encountered while reading the file.
 	 */
 	public static String[] loadTextFileFromFileSystem(File file) throws IOException {
-		if(file == null)
-			throw new NullPointerException("file is null");
-		
 		if(!file.exists())
 			throw new IOException("Text resource does not exist!");
 		

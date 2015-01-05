@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.stabilise.util.collect.LightLinkedList;
+
 /**
  * A Profiler object is used to gauge the amount of processing time which is
  * being dedicated to various portions of a program.
@@ -189,6 +191,10 @@ public class Profiler {
 	 * #start(String)} and {@link #end()}, as invoking this method will
 	 * reset all declared sections, thus invalidating {@code start()} and
 	 * causing {@code end()} to throw an exception.
+	 * 
+	 * <p>Note that this method will not throw an exception even if the {@link
+	 * #getStackLevel() stack level} is greater than 1 (even though this should
+	 * be the case for any proper profiling implementation).
 	 */
 	public void flush() {
 		if(enabled) {
@@ -325,7 +331,7 @@ public class Profiler {
 		private long duration = 0L;
 		/** The sections's constituent sections. This may be indefinitely
 		 * recursive. */
-		private final List<Section> constituents = new LinkedList<Section>();
+		private final List<Section> constituents = new LightLinkedList<Section>();
 		
 		
 		/**

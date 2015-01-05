@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -18,6 +16,8 @@ import com.stabilise.entity.GameCamera;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.collect.ClearOnIterateLinkedList;
+import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.save.WorldLoader;
@@ -59,14 +59,13 @@ public class GameWorld extends World {
 	/** The game camera. */
 	public GameCamera camera;
 	
-	/** The map of all particles in the world. */
-	public final LinkedHashMap<Integer, Particle> particles = new LinkedHashMap<Integer, Particle>();
+	/** */
+	public final List<Particle> particles = new LightLinkedList<Particle>();
 	/** The total number of particles in the world. */
 	public int particleCount = 0;
-	/** Particles queued to be added to the world at the end of the tick. */
-	private final List<Particle> particlesToAdd = new LinkedList<Particle>();
-	/** Particles queued to be removed from the world at the end of the tick. */
-	private final List<Integer> particlesToRemove = new LinkedList<Integer>();
+	/** Particles queued to be added to the world at the end of the tick. This
+	 * list clears automatically when it is iterated over. */
+	private final List<Particle> particlesToAdd = new ClearOnIterateLinkedList<Particle>();
 	
 	/** Whether or not the world has been prepared. */
 	private boolean prepared = false;
@@ -197,28 +196,23 @@ public class GameWorld extends World {
 		profiler.start("particles");
 		profiler.start("update");
 		// Update all particles
-		for(Particle p : getParticles())
-			p.update();
+		{
+			Iterator<Particle> i = particles.iterator();
+			while(i.hasNext()) {
+				Particle p = i.next();
+				p.update();
+				if(p.isDestroyed())
+					i.remove();
+			}
+		}
 		
 		profiler.next("add");
 		if(particlesToAdd.size() != 0) {
-			Iterator<Particle> i = particlesToAdd.iterator();
-			while(i.hasNext()) {
-				Particle p = i.next();
-				particles.put(p.id, p);
-				i.remove();
-			}
+			for(Particle p : particlesToAdd)
+				particles.add(p);
 		}
 		
-		profiler.next("remove");
-		if(particlesToRemove.size() != 0) {
-			Iterator<Integer> i = particlesToRemove.iterator();
-			while(i.hasNext()) {
-				particles.remove(i.next());
-				i.remove();
-			}
-		}
-		profiler.end();
+		profiler.end(); // end particles
 		
 		profiler.next("camera");
 		// Update the camera
@@ -253,24 +247,13 @@ public class GameWorld extends World {
 	
 	@Override
 	public void addParticle(Particle p) {
-		p.id = ++particleCount;
-		
+		p.id = ++particleCount; // TODO: not really ever used
 		particlesToAdd.add(p);
 	}
 	
 	@Override
-	public void removeParticle(Particle p) {
-		removeParticle(p.id);
-	}
-	
-	@Override
-	public void removeParticle(int id) {
-		particlesToRemove.add(id);
-	}
-	
-	@Override
 	public Collection<Particle> getParticles() {
-		return particles.values();
+		return particles;
 	}
 	
 	/**

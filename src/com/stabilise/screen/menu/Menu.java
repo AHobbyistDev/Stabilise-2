@@ -17,6 +17,7 @@ import com.stabilise.screen.menu.component.ComponentGrid;
 import com.stabilise.screen.menu.component.Image;
 import com.stabilise.screen.menu.component.MenuItem;
 import com.stabilise.screen.menu.component.TextBox;
+import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 
 /**
@@ -51,7 +52,7 @@ public abstract class Menu implements Focusable {
 	//private boolean itemHoveredOver = false;
 	
 	/** The scheduled events. */
-	private List<ScheduledEvent> scheduledEvents = new LinkedList<ScheduledEvent>();
+	private List<ScheduledEvent> scheduledEvents = new LightLinkedList<ScheduledEvent>();
 	
 	
 	/** Whether or not the menu is to be closed; this is {@code false} by

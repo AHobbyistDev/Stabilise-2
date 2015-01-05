@@ -1,4 +1,4 @@
-package com.stabilise.util;
+package com.stabilise.util.collect;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterators;

@@ -18,7 +18,7 @@ public interface State {
 	 * 
 	 * <p>If there is an old state, this method is invoked after {@link
 	 * #predispose()} is invoked on the old state, and before {@link
-	 * #dispose()} is invoked.
+	 * #dispose()} is invoked on it.
 	 */
 	void start();
 	

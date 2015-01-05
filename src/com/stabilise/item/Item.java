@@ -1,6 +1,6 @@
 package com.stabilise.item;
 
-import com.stabilise.util.RegistryNamespaced;
+import com.stabilise.util.collect.RegistryNamespaced;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.tile.Tile;
 
