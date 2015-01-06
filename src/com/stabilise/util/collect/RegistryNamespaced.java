@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.stabilise.util.collect.Registry.DuplicatePolicy;
 
 /**
  * The namespaced registry extends upon a standard registry to also include
@@ -32,37 +33,36 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	
 	
 	/**
-	 * Creates a new namespaced registry with an initial capacity of 16.
-	 * Attempting to register duplicate names and IDs in this registry will
-	 * result in the newer ones being ignored.
+	 * Creates a new namespaced registry with an initial capacity of 16 and the
+	 * {@link DuplicatePolicy#REJECT REJECT} duplicate policy.
 	 * 
 	 * @param name The name of the registry.
 	 * @param defaultNamespace The default namespace under which to register
 	 * objects.
 	 * 
-	 * @throws NullPointerException if either {@code name} or {@code 
-	 * defaultNamespace} are {@code null}.
+	 * @throws NullPointerException if any of the arguments are {@code null}.
+	 * @throws IllegalArgumentException if there is a colon (:) in {@code
+	 * defaultNamespace}.
 	 */
 	public RegistryNamespaced(String name, String defaultNamespace) {
 		this(name, defaultNamespace, 16);
 	}
 	
 	/**
-	 * Creates a new namespaced registry. Attempting to register duplicate
-	 * names and IDs in this registry will result in the new ones being
-	 * ignored.
+	 * Creates a new namespaced registry with the {@link DuplicatePolicy#REJECT
+	 * REJECT} duplicate policy.
 	 * 
 	 * @param name The name of the registry.
 	 * @param defaultNamespace The default namespace under which to register
 	 * objects.
 	 * @param capacity The initial registry capacity.
 	 * 
-	 * @throws NullPointerException if either {@code name} or {@code 
-	 * defaultNamespace} are {@code null}.
-	 * @throws IllegalArgumentException if {@code capacity < 0}.
+	 * @throws NullPointerException if any of the arguments are {@code null}.
+	 * @throws IllegalArgumentException if there is a colon (:) in {@code
+	 * defaultNamespace}, or {@code capacity < 0}.
 	 */
 	public RegistryNamespaced(String name, String defaultNamespace, int capacity) {
-		this(name, defaultNamespace, capacity, false);
+		this(name, defaultNamespace, capacity, DuplicatePolicy.REJECT);
 	}
 	
 	/**
@@ -72,18 +72,21 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	 * @param defaultNamespace The default namespace under which to register
 	 * objects.
 	 * @param capacity The initial registry capacity.
-	 * @param overwrite Whether or not duplicate names and IDs overwrite old
-	 * ones. If {@code false}, duplicate names and IDs are ignored.
+	 * @param dupePolicy The duplicate entry policy.
 	 * 
-	 * @throws NullPointerException if either {@code name} or {@code 
-	 * defaultNamespace} are {@code null}.
-	 * @throws IllegalArgumentException if {@code capacity < 0}.
+	 * @throws NullPointerException if any of the arguments are {@code null}.
+	 * @throws IllegalArgumentException if there is a colon (:) in {@code
+	 * defaultNamespace}, or {@code capacity < 0}.
+	 * @see DuplicatePolicy
 	 */
-	public RegistryNamespaced(String name, String defaultNamespace, int capacity, boolean overwrite) {
-		super(name, capacity, overwrite);
+	public RegistryNamespaced(String name, String defaultNamespace, int capacity,
+			DuplicatePolicy dupePolicy) {
+		super(name, capacity, dupePolicy);
 		
 		if(defaultNamespace == null)
 			throw new NullPointerException("defaultNamespace is null");
+		if(defaultNamespace.indexOf(':') != -1)
+			throw new IllegalArgumentException("There should not be a colon (:) in defaultNamespace!");
 		
 		this.defaultNamespace = defaultNamespace + ":";
 		
@@ -104,35 +107,32 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	 * @param name The object's name.
 	 * @param object The object.
 	 * 
+	 * @return {@code true} if the object was successfully registered;
+	 * {@code false} otherwise.
 	 * @throws IndexOufOfBoundsException if {@code id < 0}.
-	 * @throws NullPointerException if either {@code name} or {@code object}
-	 * are {@code null}.
+	 * @throws NullPointerException if any argument is {@code null}.
+	 * @throws IllegalArgumentException if either {@code id} or {@code key} is
+	 * are already mapped to an entry and this registry uses the {@link
+	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
 	 */
-	public void register(int id, String name, V object) {
-		if(idMap.getObject(id) != null) {
-			if(overwrite) {
-				log.logCritical("Duplicate id \"" + id + "\"; replacing old mapping");
-			} else {
-				log.logCritical("Duplicate id \"" + id + "\"; ignoring new mapping");
-				super.register(ensureNamespaced(name), object);
-				return;
-			}
-		}
-		super.register(ensureNamespaced(name), object);
+	public boolean register(int id, String name, V object) {
+		if(idMap.getObject(id) != null && dupePolicy.handle(log, "Duplicate id \"" + id + "\""))
+			return false;
+		if(!super.register(ensureNamespaced(name), object))
+			return false;
 		idMap.put(id, object);
+		return true;
 	}
 	
 	/**
-	 * Throws an UnsupportedOperationException.
-	 * 
-	 * @throws UnsupportedOperationException if this method is invoked.
+	 * Throws an UnsupportedOperationException if this method is invoked.
 	 * Remember to use {@link #register(int, String, Object)} for a namespaced
 	 * registry!
 	 */
 	@Override
-	public void register(String name, V object) {
+	public boolean register(String name, V object) throws UnsupportedOperationException {
 		throw new UnsupportedOperationException(
-				"Attempted to use register(String, Object)! Use register(int, String, V) instead!"
+				"Attempted to use register(String, Object)! Use register(int, String, Object) instead!"
 		);
 	}
 	

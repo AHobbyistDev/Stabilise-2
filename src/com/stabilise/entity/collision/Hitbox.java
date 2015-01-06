@@ -2,7 +2,7 @@ package com.stabilise.entity.collision;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
-import com.stabilise.entity.GameObject;
+import com.stabilise.entity.FreeGameObject;
 import com.stabilise.entity.effect.Effect;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.Shape;
@@ -16,7 +16,7 @@ import com.stabilise.world.World;
  * has the potential to make things nice, but based on a failed attempt to do
  * so, do not do this (for now at least). -->
  */
-public class Hitbox extends GameObject {
+public class Hitbox extends FreeGameObject {
 	
 	/** The entity which owns the hitbox. */
 	public Entity owner;
@@ -74,6 +74,9 @@ public class Hitbox extends GameObject {
 	 */
 	@Override
 	public void update() {
+		if(isDestroyed())
+			return;
+		
 		moveToOwner();
 		
 		float distX, distY;
@@ -90,7 +93,7 @@ public class Hitbox extends GameObject {
 			}
 		}
 		
-		if(--persistenceTimer == 0)
+		if(!persistent || --persistenceTimer == 0)
 			destroy();
 	}
 	
@@ -136,11 +139,6 @@ public class Hitbox extends GameObject {
 	@Override
 	public void render(WorldRenderer renderer) {
 		// hitboxes are not rendered
-	}
-
-	@Override
-	public void destroy() {
-		persistent = false;
 	}
 	
 }

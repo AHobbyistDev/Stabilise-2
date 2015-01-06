@@ -1,10 +1,12 @@
 package com.stabilise.world.tile.tileentity;
 
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.Map;
+import static com.stabilise.util.collect.Registry.DuplicatePolicy.*;
 
-import com.stabilise.util.collect.RegistryNamespaced;
+import java.lang.reflect.Constructor;
+
+import com.stabilise.entity.FixedGameObject;
+import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.util.collect.InstantiationRegistry;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.World;
 
@@ -15,27 +17,11 @@ import com.stabilise.world.World;
  * <p>Tile entities may not be added to the world by another tile entity, and
  * and a queue for tile entities is hence not required.
  */
-public abstract class TileEntity {
-	
-	//--------------------==========--------------------
-	//-----=====Static Constants and Variables=====-----
-	//--------------------==========--------------------
+public abstract class TileEntity extends FixedGameObject {
 	
 	/** The tile entity registry. */
-	private static final RegistryNamespaced<TEFactory> TILE_ENTITIES =
-			new RegistryNamespaced<TEFactory>("tile entities", "stabilise", 4);
-	/** The map of tile entity classes to their factory. */
-	private static final Map<Class<? extends TileEntity>, TEFactory> CLASS_MAP =
-			new HashMap<Class<? extends TileEntity>, TEFactory>(4);
-	
-	//--------------------==========--------------------
-	//-------------=====Member Variables=====-----------
-	//--------------------==========--------------------
-	
-	/** A reference to the world the tile entity is in. */
-	public World world;
-	/** The x/y coordinates of this tile entity, in tile-lengths. */
-	public int x, y;
+	private static final InstantiationRegistry<TileEntity> TILE_ENTITY_REGISTRY =
+			new InstantiationRegistry<TileEntity>("tile entities", "stabilise", 4, THROW_EXCEPTION);
 	
 	
 	/**
@@ -64,10 +50,10 @@ public abstract class TileEntity {
 		this.y = y;
 	}
 	
-	/**
-	 * Updates the tile entity.
-	 */
-	public abstract void update();
+	@Override
+	public void render(WorldRenderer renderer) {
+		// nothing in the default implementation
+	}
 	
 	/**
 	 * Handles being added to the world.
@@ -88,19 +74,17 @@ public abstract class TileEntity {
 	public abstract void handleRemove(World world, int x, int y);
 	
 	/**
-	 * @return The ID of this tile entity.
+	 * @return The ID of this tile entity's type.
 	 */
 	public final int getID() {
-		// Could throw an NPE if this TE wasn't registered properly
-		return TILE_ENTITIES.getObjectID(CLASS_MAP.get(getClass()));
+		return TILE_ENTITY_REGISTRY.getID(getClass());
 	}
 	
 	/**
-	 * @return The name of this tile entity.
+	 * @return The name of this tile entity's type.
 	 */
 	public final String getName() {
-		// Could throw an NPE if this TE wasn't registered properly
-		return TILE_ENTITIES.getObjectName(CLASS_MAP.get(getClass()));
+		return TILE_ENTITY_REGISTRY.getName(getClass());
 	}
 	
 	/**
@@ -123,16 +107,12 @@ public abstract class TileEntity {
 	}
 	
 	/**
-	 * Writes the tile entity's data to an NBT tag.
-	 * 
-	 * @param tag The tag to write the tile entity's data to.
+	 * Writes this tile entity's data to the specified compound NBT tag.
 	 */
 	protected abstract void writeNBT(NBTTagCompound tag);
 	
 	/**
-	 * Reads the tile entity from an NBT tag.
-	 * 
-	 * @param tag The NBT tag.
+	 * Reads the tile entity from the specified compound NBT tag.
 	 */
 	public abstract void fromNBT(NBTTagCompound tag);
 	
@@ -141,24 +121,17 @@ public abstract class TileEntity {
 	//--------------------==========--------------------
 	
 	/**
-	 * Creates a TileEntity object.
+	 * Instantiates a tile entity with the specified ID.
 	 * 
-	 * @param id The ID of the tile entity, as would be given by its
-	 * {@link #getID()} method. 
-	 * @param x The x-coordinate of the tile entity, in tile-lengths.
-	 * @param y The y-coordinate of the tile entity, in tile-lengths.
+	 * @param id The ID of the tile entity type.
+	 * @param args The constructor arguments.
 	 * 
-	 * @return A TileEntity object of class determined by the {@code id}
-	 * parameter, or {@code null} if the {@code id} parameter is invalid or
-	 * the tile entity could not be constructed for whatever reason.
-	 * @throws RuntimeException if the tile entity corresponding to the ID was
-	 * registered incorrectly.
+	 * @return A new tile entity, or {@code null} if the specified ID is
+	 * invalid.
+	 * @throws RuntimeException if tile entity creation failed.
 	 */
 	public static TileEntity createTileEntity(int id, int x, int y) {
-		TEFactory creator = TILE_ENTITIES.get(id);
-		if(creator == null)
-			return null;
-		return creator.create(x, y);
+		return TILE_ENTITY_REGISTRY.instantiate(id, x, y);
 	}
 	
 	/**
@@ -170,6 +143,7 @@ public abstract class TileEntity {
 	 * @return The tile entity, or {@code null} if it could not be constructed
 	 * for whatever reason.
 	 * @throws NullPointerException if {@code tag} is {@code null}.
+	 * @throws RuntimeException if tile entity creation failed.
 	 */
 	public static TileEntity createTileEntityFromNBT(NBTTagCompound tag) {
 		TileEntity t = createTileEntity(tag.getInt("id"), tag.getInt("x"), tag.getInt("y"));
@@ -181,45 +155,8 @@ public abstract class TileEntity {
 	
 	// Register all tile entity types.
 	static {
-		registerTileEntity(0, "Chest", TileEntityChest.class);
-		registerTileEntity(1, "Mob Spawner", TileEntityMobSpawner.class);
-	}
-	
-	/**
-	 * Registers a tile entity.
-	 * 
-	 * @param id The ID of the tile entity.
-	 * @param name The name of the tile entity.
-	 * @param teClass The tile entity's class.
-	 * 
-	 * @throws RuntimeException if the specified class does not have a
-	 * constructor accepting only two integer parameters (i.e. it doesn't have
-	 * a constructor corresponding to {@code new TileEntity(x, y)}).
-	 * @throws IndexOufOfBoundsException if {@code id < 0}.
-	 * @throws NullPointerException if either {@code name} or {@code teClass}
-	 * are {@code null}.
-	 */
-	private static void registerTileEntity(int id, String name, Class<? extends TileEntity> teClass) {
-		registerTileEntity(id, name, teClass, new ReflectiveTEFactory(teClass));
-	}
-	
-	/**
-	 * Registers a tile entity.
-	 * 
-	 * @param id The ID of the tile entity.
-	 * @param name The name of the tile entity.
-	 * @param teClass The tile entity's class.
-	 * @param factory The factory object with which to create instances of the
-	 * tile entity.
-	 * 
-	 * @throws IndexOufOfBoundsException if {@code id < 0}.
-	 * @throws NullPointerException if either {@code name} or {@code factory}
-	 * are {@code null}.
-	 */
-	private static void registerTileEntity(int id, String name, Class<? extends TileEntity> teClass,
-			TEFactory factory) {
-		TILE_ENTITIES.register(id, name, factory);
-		CLASS_MAP.put(teClass, factory);
+		TILE_ENTITY_REGISTRY.register(0, "Chest", TileEntityChest.class);
+		TILE_ENTITY_REGISTRY.register(1, "Mob Spawner", TileEntityMobSpawner.class);
 	}
 	
 	//--------------------==========--------------------

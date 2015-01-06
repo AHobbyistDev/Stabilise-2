@@ -254,17 +254,17 @@ public abstract class WorldGenerator {
 			// After normal generation processes have been completed, add any
 			// queued schematics.
 			
-			// Copy to a temporary array before adding the schematics to
-			// minimise hold time on the lock.
+			// Make a defensive copy of schematics while we have the lock
 			Region.QueuedSchematic[] rSchematics = new Region.QueuedSchematic[0];
+			
 			// Notifies other gen threads that this region is now beyond the
 			// point where schematics can be queued and still generated.
 			l.schematicsPlaced = true;
+			
 			synchronized(r.queuedSchematics) {
 				if(r.hasQueuedSchematics) {
 					r.hasQueuedSchematics = false;
 					rSchematics = r.queuedSchematics.toArray(rSchematics);
-					r.queuedSchematics.clear();
 					changes = true;
 				}
 			}
@@ -610,14 +610,14 @@ public abstract class WorldGenerator {
 	 * Gets a region cached by the world generator. This should be accessed
 	 * within a synchronised block which holds the monitor on {@link #lock}.
 	 * 
-	 * @param x The x-coordinate of the region, in region-lengths.
-	 * @param y The y-coordinate of the region, in region-lengths.
+	 * @param loc The region's location, whose coordinates are in region-
+	 * lengths.
 	 * 
 	 * @return The region, or {@code null} if the region is not cached.
 	 */
 	@UserThread("MainThread")
-	public Region getCachedRegion(int x, int y) {
-		CachedRegion cachedRegion = cachedRegions.get(Region.getKey(x, y));
+	public Region getCachedRegion(HashPoint loc) {
+		CachedRegion cachedRegion = cachedRegions.get(loc);
 		return cachedRegion == null ? null : cachedRegion.region;
 	}
 	
@@ -800,7 +800,7 @@ public abstract class WorldGenerator {
 		/** The region. */
 		private final Region region;
 		/** The number of times the region has been cached. */
-		private final AtomicInteger timesCached = new AtomicInteger(1);
+		private final AtomicInteger timesCached = new AtomicInteger(0);
 		
 		
 		/**

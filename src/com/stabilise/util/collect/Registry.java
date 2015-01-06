@@ -23,29 +23,28 @@ public class Registry<K, V> implements Iterable<V> {
 	/** The map of objects registered in the registry. */
 	protected final Map<K, V> objects;
 	
-	/** Whether or not duplicate keys overwrite old ones. */
-	protected final boolean overwrite;
+	/** The duplicate entry policy. */
+	protected final DuplicatePolicy dupePolicy;
 	
 	/** The registry's log. This is public as to allow muting. */
 	public final Log log;
 	
 	
 	/**
-	 * Creates a new Registry with an initial capacity of 16. Attempting to
-	 * register duplicate keys in this registry will result in the newer entry
-	 * being ignored.
+	 * Creates a new Registry with an initial capacity of 16 and the {@link
+	 * DuplicatePolicy#REJECT REJECT} duplicate policy.
 	 * 
 	 * @param name The name of the registry.
 	 * 
 	 * @throws NullPointerException if {@code name} is {@code null}.
 	 */
 	public Registry(String name) {
-		this(name, 16, false);
+		this(name, 16);
 	}
 	
 	/**
-	 * Creates a new Registry. Attempting to register duplicate keys in this
-	 * registry will result in the newer entry being ignored.
+	 * Creates a new Registry with the {@link DuplicatePolicy#REJECT REJECT}
+	 * duplicate policy.
 	 * 
 	 * @param name The name of the registry.
 	 * @param capacity The initial registry capacity.
@@ -54,7 +53,7 @@ public class Registry<K, V> implements Iterable<V> {
 	 * @throws IllegalArgumentException if {@code capacity < 0}.
 	 */
 	public Registry(String name, int capacity) {
-		this(name, capacity, false);
+		this(name, capacity, DuplicatePolicy.REJECT);
 	}
 	
 	/**
@@ -62,17 +61,19 @@ public class Registry<K, V> implements Iterable<V> {
 	 * 
 	 * @param name The name of the registry.
 	 * @param capacity The initial registry capacity.
-	 * @param overwrite Whether or not duplicate keys overwrite old ones. If
-	 * {@code false}, duplicate keys are ignored.
+	 * @param dupePolicy The duplicate entry policy.
 	 * 
-	 * @throws NullPointerException if {@code name} is {@code null}.
+	 * @throws NullPointerException if any of the arguments are {@code null}.
 	 * @throws IllegalArgumentException if {@code capacity < 0}.
+	 * @see DuplicatePolicy
 	 */
-	public Registry(String name, int capacity, boolean overwrite) {
+	public Registry(String name, int capacity, DuplicatePolicy dupePolicy) {
 		if(name == null)
 			throw new NullPointerException("name is null");
+		if(dupePolicy == null)
+			throw new NullPointerException("dupePolicy is null");
 		this.name = name;
-		this.overwrite = overwrite;
+		this.dupePolicy = dupePolicy;
 		
 		log = Log.getAgent("Registry: " + name);
 		
@@ -98,23 +99,22 @@ public class Registry<K, V> implements Iterable<V> {
 	 * @param key The object's key.
 	 * @param object The object.
 	 * 
-	 * @throws NullPointerException if either {@code key} or {@code object} are
-	 * {@code null}.
+	 * @return {@code true} if the object was successfully registered;
+	 * {@code false} otherwise.
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IllegalArgumentException if {@code key} is already mapped to an
+	 * entry and this registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
+	 * THROW_EXCEPTION} duplicate policy.
 	 */
-	public void register(K key, V object) {
+	public boolean register(K key, V object) {
 		if(key == null || object == null)
 			throw new NullPointerException("null key or value!");
 		
-		if(objects.containsKey(key)) {
-			if(overwrite) {
-				log.logCritical("Duplicate key \"" + key + "\"; replacing old mapping");
-			} else {
-				log.logCritical("Duplicate key \"" + key + "\"; ignoring new mapping");
-				return;
-			}
-		}
+		if(objects.containsKey(key) && dupePolicy.handle(log, "Duplicate key \"" + key + "\""))
+			return false;
 		
 		objects.put(key, object);
+		return true;
 	}
 	
 	/**
@@ -157,6 +157,57 @@ public class Registry<K, V> implements Iterable<V> {
 	@Override
 	public Iterator<V> iterator() {
 		return objects.values().iterator();
+	}
+	
+	//--------------------==========--------------------
+	//-------------=====Nested Classes=====-------------
+	//--------------------==========--------------------
+	
+	/**
+	 * Defines the policy for handling duplicate entries.
+	 * 
+	 * @see #OVERRIDE
+	 * @see #REJECT
+	 * @see #THROW_EXCEPTION
+	 */
+	public enum DuplicatePolicy {
+		/** Duplicate entries override old ones using this policy. */
+		OVERRIDE {
+			@Override
+			protected boolean handle(Log log, String msg) {
+				log.logCritical(msg + "; replacing old mapping");
+				return false;
+			}
+		},
+		/** Duplicate entries are rejected using this policy. */
+		REJECT {
+			@Override
+			protected boolean handle(Log log, String msg) {
+				log.logCritical(msg + "; ignoring new mapping");
+				return true;
+			}
+		},
+		/** Duplicate entries are rejected through an IllegalArgumentException
+		 * being thrown using this policy. */
+		THROW_EXCEPTION {
+			@Override
+			protected boolean handle(Log log, String msg) {
+				throw new IllegalArgumentException(msg + "; rejecting new mapping");
+			}
+		};
+		
+		/**
+		 * Handles an attempt to register a duplicate entry.
+		 * 
+		 * @param log The registry's logging agent.
+		 * @param msg The details of the attempt to register a duplicate.
+		 * 
+		 * @return {@code true} if the duplicate should be ignored; {@code
+		 * false} if it shoud be allowed to override the old entry.
+		 * @throws IllegalArgumentException if this is the {@link
+		 * #THROW_EXCEPTION} policy.
+		 */
+		protected abstract boolean handle(Log log, String msg);
 	}
 	
 }

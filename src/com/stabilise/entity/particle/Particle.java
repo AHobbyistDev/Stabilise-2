@@ -1,12 +1,12 @@
 package com.stabilise.entity.particle;
 
-import com.stabilise.entity.GameObject;
+import com.stabilise.entity.FreeGameObject;
 import com.stabilise.world.World;
 
 /**
  * A particle is a non-functional GameObject with solely aesthetic purposes.
  */
-public abstract class Particle extends GameObject {
+public abstract class Particle extends FreeGameObject {
 	
 	/** The age of the particle, in ticks. */
 	public int age = 0;

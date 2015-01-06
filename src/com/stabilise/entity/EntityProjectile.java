@@ -46,8 +46,7 @@ public abstract class EntityProjectile extends Entity {
 	@Override
 	public void update() {
 		if(destroyed) {
-			if(hitbox != null)
-				world.removeHitbox(hitbox.id);
+			hitbox.destroy();
 			return;
 		}
 		
@@ -70,6 +69,19 @@ public abstract class EntityProjectile extends Entity {
 			((RotatableShape<Shape>)hitbox.boundingBox).setRotation(rotation);
 		
 		setFacingRight(dx > 0);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * <p>This method also invokes {@code destroy()} on this projectile's
+	 * linked hitbox, if it is non-null.
+	 */
+	@Override
+	public void destroy() {
+		super.destroy();
+		if(hitbox != null)
+			hitbox.destroy();
 	}
 	
 }

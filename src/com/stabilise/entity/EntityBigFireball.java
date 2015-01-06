@@ -90,10 +90,8 @@ public class EntityBigFireball extends EntityProjectile {
 		else if(Settings.settingParticlesReduced())
 			addFlightParticles(4);
 		
-		if(age == DESPAWN_TICKS) {
+		if(age == DESPAWN_TICKS)
 			destroy();
-			world.removeHitbox(hitbox);
-		}
 	}
 	
 	@Override
@@ -101,8 +99,6 @@ public class EntityBigFireball extends EntityProjectile {
 		destroy();
 		
 		if(tileCollision) {		// Since it removes itself with an entity collision
-			world.removeHitbox(hitbox);
-			
 			if(Settings.settingParticlesAll())
 				addImpactParticles(15);
 			else if(Settings.settingParticlesReduced())

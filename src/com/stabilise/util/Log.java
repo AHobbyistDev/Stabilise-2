@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.stabilise.core.Resources;
-import com.stabilise.util.collect.LightLinkedList;
+import com.stabilise.util.collect.LightweightLinkedList;
 
 /**
  * The Log class allows for the logging and more streamlined management of
@@ -36,7 +36,7 @@ public class Log {
 	private static final int LOG_CAPACITY = 256;
 	
 	/** Stores the log entries. Access to this list should be synchronised. */
-	private static List<String> entries = new LightLinkedList<String>();
+	private static List<String> entries = new LightweightLinkedList<String>();
 	
 	/** A cache of the untagged logging agent to save on processor time. */
 	private static final Log defaultAgent = new Log("");

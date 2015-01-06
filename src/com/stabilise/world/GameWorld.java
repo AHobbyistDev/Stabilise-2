@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -16,8 +15,7 @@ import com.stabilise.entity.GameCamera;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.ClearOnIterateLinkedList;
-import com.stabilise.util.collect.LightLinkedList;
+import com.stabilise.util.collect.LightweightLinkedList;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.save.WorldLoader;
@@ -60,12 +58,9 @@ public class GameWorld extends World {
 	public GameCamera camera;
 	
 	/** */
-	public final List<Particle> particles = new LightLinkedList<Particle>();
+	public final LightweightLinkedList<Particle> particles = new LightweightLinkedList<Particle>();
 	/** The total number of particles in the world. */
 	public int particleCount = 0;
-	/** Particles queued to be added to the world at the end of the tick. This
-	 * list clears automatically when it is iterated over. */
-	private final List<Particle> particlesToAdd = new ClearOnIterateLinkedList<Particle>();
 	
 	/** Whether or not the world has been prepared. */
 	private boolean prepared = false;
@@ -194,25 +189,7 @@ public class GameWorld extends World {
 		info.age++;
 		
 		profiler.start("particles");
-		profiler.start("update");
-		// Update all particles
-		{
-			Iterator<Particle> i = particles.iterator();
-			while(i.hasNext()) {
-				Particle p = i.next();
-				p.update();
-				if(p.isDestroyed())
-					i.remove();
-			}
-		}
-		
-		profiler.next("add");
-		if(particlesToAdd.size() != 0) {
-			for(Particle p : particlesToAdd)
-				particles.add(p);
-		}
-		
-		profiler.end(); // end particles
+		updateObjects(getParticles());
 		
 		profiler.next("camera");
 		// Update the camera
@@ -248,7 +225,7 @@ public class GameWorld extends World {
 	@Override
 	public void addParticle(Particle p) {
 		p.id = ++particleCount; // TODO: not really ever used
-		particlesToAdd.add(p);
+		particles.add(p);
 	}
 	
 	@Override
@@ -317,8 +294,10 @@ public class GameWorld extends World {
 	 */
 	@UserThread("MainThread")
 	public Region loadRegion(int x, int y, boolean generate) {
+		HashPoint loc = Region.getKey(x, y);
+		
 		// Get the region if it is already loaded
-		Region r = regions.get(Region.getKey(x, y));
+		Region r = regions.get(loc);
 		if(r != null) {
 			if(generate)
 				generator.generate(r);
@@ -329,10 +308,10 @@ public class GameWorld extends World {
 		// generator's cache.
 		// Synchronised to make this atomic. See WorldGenerator.cacheRegion()
 		synchronized(generator.lock) {
-			r = generator.getCachedRegion(x, y);
+			r = generator.getCachedRegion(loc);
 			if(r == null) // if it's not cached, create it
-				r = new Region(this, x, y);
-			regions.put(r.loc, r);
+				r = new Region(this, loc);
+			regions.put(loc, r);
 		}
 		
 		// Now, we load the region appropriately
@@ -388,7 +367,7 @@ public class GameWorld extends World {
 	
 	/**
 	 * Marks a slice as loaded. This will attempt to load and generate the
-	 * slice's parent region, as per {@link #loadRegion(int, int, boolean)}.
+	 * slice's parent region, as per {@link #loadRegion(int, int)}.
 	 * 
 	 * @param x The x-coordinate of the slice, in slice lengths.
 	 * @param y The y-coordinate of the slice, in slice lengths.
@@ -414,9 +393,6 @@ public class GameWorld extends World {
 		Region r = getRegionAt(regionCoordFromSliceCoord(x), regionCoordFromSliceCoord(y));
 		return r == null ? null : r.getSliceAt(
 				sliceCoordRelativeToRegionFromSliceCoord(x), sliceCoordRelativeToRegionFromSliceCoord(y));
-		// TODO: Go back to using this once I fix up the tile renderer
-		//return getRegionAt(regionCoordFromSliceCoord(x), regionCoordFromSliceCoord(y)).getSliceAt(
-		//		sliceCoordRelativeToRegionFromSliceCoord(x), sliceCoordRelativeToRegionFromSliceCoord(y));
 	}
 	
 	@Override
@@ -504,7 +480,7 @@ public class GameWorld extends World {
 			
 			slice.setTileEntityAt(tileX, tileY, t);
 			
-			addTileEntity(t, x, y);
+			addTileEntity(t);
 		}
 	}
 	

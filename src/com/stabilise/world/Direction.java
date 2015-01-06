@@ -6,9 +6,9 @@ package com.stabilise.world;
  */
 public enum Direction {
 	
-	UP((byte)(Bit.VERTICAL_BIT + Bit.UP_BIT)),			// 0101
+	UP((byte)(Bit.VERTICAL_BIT | Bit.UP_BIT)),			// 0101
 	DOWN(Bit.VERTICAL_BIT),								// 0001
-	RIGHT((byte)(Bit.HORIZONTAL_BIT + Bit.RIGHT_BIT)),	// 1010
+	RIGHT((byte)(Bit.HORIZONTAL_BIT | Bit.RIGHT_BIT)),	// 1010
 	LEFT(Bit.HORIZONTAL_BIT),							// 0010
 	UP_LEFT(UP, LEFT),									// 0111
 	UP_RIGHT(UP, RIGHT),								// 1111
@@ -158,15 +158,15 @@ public enum Direction {
 	// for those values if they are defined after them.)
 	private static class Bit {
 		/** The bit indicating a Direction contains a vertical component. */
-		private static final byte VERTICAL_BIT = 1 << 0;
+		private static final byte VERTICAL_BIT = 1;
 		/** The bit indicating a Direction contains a horizontal component. */
-		private static final byte HORIZONTAL_BIT = 1 << 1;
+		private static final byte HORIZONTAL_BIT = 2;
 		/** The bit indicating whether or not a Direction has an up component
 		 * (down otherwise). */
-		private static final byte UP_BIT = 1 << 2;
+		private static final byte UP_BIT = 4;
 		/** The bit indicating whether or not a Direction has a right component
 		 * (left otherwise). */
-		private static final byte RIGHT_BIT = 1 << 3;
+		private static final byte RIGHT_BIT = 8;
 	}
 	
 }

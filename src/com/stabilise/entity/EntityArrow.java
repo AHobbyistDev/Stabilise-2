@@ -65,7 +65,7 @@ public class EntityArrow extends EntityProjectile {
 	@Override
 	public void update() {
 		if(removeHitbox && hitbox != null) {
-			world.removeHitbox(hitbox.id);
+			hitbox.destroy();
 			hitbox = null;
 			removeHitbox = false;
 		}
@@ -83,7 +83,7 @@ public class EntityArrow extends EntityProjectile {
 		if(age == DESPAWN_TICKS) {
 			destroy();
 			if(hitbox != null)
-				world.removeHitbox(hitbox.id);
+				hitbox.destroy();
 		}
 	}
 	

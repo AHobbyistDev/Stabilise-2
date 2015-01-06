@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.stabilise.util.collect.LightLinkedList;
+import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.maths.HashPoint;
 
 /**
@@ -58,7 +58,7 @@ public class Region {
 	
 	/** The region's location, whose components are in region-lengths. This
 	 * should be used as this region's key in any sort of Map implementation.
-	 * This is constructed as immutable. */
+	 * This should be assumed to be immutable. */
 	public final HashPoint loc;
 	
 	/** The coordinate offset on the x-axis due to the coordinates of the
@@ -95,10 +95,10 @@ public class Region {
 	 * ArrayList. Access to this is usually performed while synchronised on
 	 * itself.
 	 * <p>For world generator use only.
-	 * <p><i>Design specifications:</i> This is a LinkedList such that add
-	 * operations are O(1). This comes at the cost of O(n) performance when
-	 * making a defensive copy in the world generator, but that is acceptable.*/
-	public final List<QueuedSchematic> queuedSchematics = new LightLinkedList<QueuedSchematic>();
+	 * <p><i>Design specifications:</i> This is a ClearOnIterateLinkedList;
+	 * add() is O(1) and toArray() is O(n). */
+	public final List<QueuedSchematic> queuedSchematics =
+			new ClearOnIterateLinkedList<QueuedSchematic>();
 	
 	/** The object to use for locking purposes restricted to the WorldGenerator
 	 * and WorldLoader. */
@@ -113,12 +113,22 @@ public class Region {
 	 * @param y The region's y-coordinate, in region lengths.
 	 */
 	public Region(GameWorld world, int x, int y) {
+		this(world, getKey(x, y));
+	}
+	
+	/**
+	 * Creates a new region.
+	 * 
+	 * @param world A reference to the world to which the region belongs.
+	 * @param loc The region's location, whose coordinates are in region-
+	 * lengths.
+	 */
+	public Region(GameWorld world, HashPoint loc) {
 		this.world = world;
+		this.loc = loc;
 		
-		loc = getKey(x, y);
-		
-		offsetX = x * REGION_SIZE;
-		offsetY = y * REGION_SIZE;
+		offsetX = loc.getX() * REGION_SIZE;
+		offsetY = loc.getY() * REGION_SIZE;
 		
 		lastSaved = world.info.age;
 	}
@@ -144,13 +154,12 @@ public class Region {
 		*/
 		
 		if(anchoredSlices.get() == 0) {
-			if(ticksToUnload > 0) {
+			if(ticksToUnload > 0)
 				ticksToUnload--;
-			} else if(ticksToUnload == -1) {
+			else if(ticksToUnload == -1)
 				ticksToUnload = REGION_UNLOAD_TICK_BUFFER;
-			} else {
+			else
 				unload = true;
-			}
 		} else {
 			ticksToUnload = -1;
 			

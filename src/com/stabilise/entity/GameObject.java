@@ -4,8 +4,11 @@ import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.world.World;
 
 /**
- * A GameObject is an object which exists within the game world at self-defined
- * coordinates {@link #x} and {@link #y}.
+ * A GameObject is an object which exists within the game world. GameObjects
+ * may be updated every tick, rendered if appropriate, and destroyed.
+ * 
+ * <p>A GameObject also possesses x and y coordinates; for these, see {@link
+ * FixedGameObject} and {@link FreeGameObject}.
  */
 public abstract class GameObject {
 	
@@ -15,11 +18,6 @@ public abstract class GameObject {
 	 * GameObjects; merely ones of the same type amongst which distinction is
 	 * required (e.g. entities, hitboxes). */
 	public int id;
-	
-	/** The GameObject's x-coordinate, in tile-lengths. */
-	public double x;
-	/** The GameObject's y-coordinate, in tile-lengths. */
-	public double y;
 	
 	/** If {@code true}, this GameObject should be removed from the world ASAP. */
 	protected boolean destroyed = false;
@@ -92,17 +90,13 @@ public abstract class GameObject {
 	 * 
 	 * @return The x-coordinate of the slice, in slice-lengths.
 	 */
-	public final int getSliceX() {
-		return World.sliceCoordFromTileCoord(x);
-	}
+	public abstract int getSliceX();
 	
 	/**
 	 * Gets the y-coordinate of the slice the game object is within.
 	 * 
 	 * @return The y-coordinate of the slice, in slice-lengths.
 	 */
-	public final int getSliceY() {
-		return World.sliceCoordFromTileCoord(y);
-	}
+	public abstract int getSliceY();
 	
 }

@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.stabilise.util.collect.LightLinkedList;
+import com.stabilise.util.collect.LightweightLinkedList;
 
 /**
  * A Profiler object is used to gauge the amount of processing time which is
@@ -331,7 +331,7 @@ public class Profiler {
 		private long duration = 0L;
 		/** The sections's constituent sections. This may be indefinitely
 		 * recursive. */
-		private final List<Section> constituents = new LightLinkedList<Section>();
+		private final List<Section> constituents = new LightweightLinkedList<Section>();
 		
 		
 		/**

@@ -7,7 +7,7 @@ import com.stabilise.world.GameWorld;
  * The GameCamera controls the player's perspective, and hence which parts of
  * the world are visible to them.
  */
-public class GameCamera extends GameObject {
+public class GameCamera extends FreeGameObject {
 	
 	/** The entity upon which to focus the camera. */
 	private Entity focus;

@@ -70,19 +70,15 @@ public class EntityFireball extends EntityProjectile {
 		else if(Settings.settingParticlesReduced())
 			addFlightParticles(4);
 		
-		if(age == DESPAWN_TICKS) {
+		if(age == DESPAWN_TICKS)
 			destroy();
-			world.removeHitbox(hitbox);
-		}
 	}
 	
 	@Override
 	protected void impact(float dv, boolean tileCollision) {
-		world.removeEntity(this);
+		destroy();
 		
 		if(tileCollision) {		// Since it removes itself with an entity collision
-			world.removeHitbox(hitbox);
-			
 			if(Settings.settingParticlesAll())
 				addImpactParticles(15);
 			else if(Settings.settingParticlesReduced())

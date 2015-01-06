@@ -19,6 +19,7 @@ import com.stabilise.core.Application;
 import com.stabilise.core.Resources;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
+import com.stabilise.entity.GameObject;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.IOUtil;
@@ -26,6 +27,7 @@ import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearOnIterateLinkedList;
+import com.stabilise.util.collect.LightweightLinkedList;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.nbt.NBTIO;
@@ -69,27 +71,23 @@ public abstract class World {
 	 * this value + 1, after which this is incremented.*/
 	public int entityCount = 0;
 	/** Entities queued to be added to the world at the end of the tick. This
-	 * list clears automatically when it is iterated over. */
+	 * is a ClearOnIterateLinkedList. */
 	private List<Entity> entitiesToAdd = new ClearOnIterateLinkedList<Entity>();
 	/** The IDs of entities queued to be removed from the world at the end of
-	 * the tick. This list clears automatically when it is iterated over.*/
+	 * the tick. This is a ClearOnIterateLinkedList. */
 	private List<Integer> entitiesToRemove = new ClearOnIterateLinkedList<Integer>();
 	/** The number of hostile mobs in the world. */
 	public int hostileMobCount = 0;
 	
-	/** The map of tile entities in the world. */
-	protected Map<HashPoint, TileEntity> tileEntities = new HashMap<HashPoint, TileEntity>();
+	/** Stores tile entities for iteration and updating. This is a
+	 * LightweightLinkedList. */
+	protected List<TileEntity> tileEntities = new LightweightLinkedList<TileEntity>();
 	
-	/** All hitboxes. */
-	protected LinkedHashMap<Integer, Hitbox> hitboxes = new LinkedHashMap<Integer, Hitbox>(20);
-	/** The total number of hitboxes in the world. */
+	/** The list of hitboxes in the world. This is a LightweightLinkedList. */
+	protected LightweightLinkedList<Hitbox> hitboxes = new LightweightLinkedList<Hitbox>();
+	/** The total number of hitboxes which have existed during the lifetime of
+	 * the world. */
 	public int hitboxCount = 0;
-	
-	/** Hitboxes queued to be added to the world. This list clears
-	 * automatically when it is iterated over. */
-	private List<Hitbox> hitboxesToAdd = new ClearOnIterateLinkedList<Hitbox>();
-	/** Hitboxes queued to be removed from the world. */
-	//private List<Integer> hitboxesToRemove = new LinkedList<Integer>();
 	
 	/** The x-coordinate the slice in which players initially spawn, in
 	 * slice-lengths. */
@@ -105,7 +103,7 @@ public abstract class World {
 	 * a reference to this world in preference to constructing a new one. */
 	public Random rng = new Random();
 	
-	/** The profiler. */
+	/** The {@link Application#profiler application profiler}. */
 	public Profiler profiler = Application.get().profiler;
 	/** The world's logging agent. */
 	public Log log;
@@ -124,49 +122,19 @@ public abstract class World {
 	@UserThread("MainThread")
 	public void update() {
 		profiler.start("entity"); // "entity"
-		{ // Update all entities
-			Iterator<Entity> i = getEntities().iterator();
-			while(i.hasNext())
-				if(i.next().updateAndCheck())
-					i.remove();
-		}
-		
-		// Since it is expected that hitboxesToAdd, hitboxesToRemove, etc. will
-		// be empty most of the time, it is faster to perform the size() != 0
-		// check.
-		
+		updateObjects(getEntities());
 		profiler.next("hitbox"); // "hitbox"
-		profiler.start("add"); // "hitbox.add"
-		// Now, add and remove all queued hitboxes
-		if(!hitboxesToAdd.isEmpty()) {
-			for(Hitbox h : hitboxesToAdd)
-				hitboxes.put(h.id, h);
-		}
+		updateObjects(getHitboxes());
+		profiler.next("tileEntity"); // "tileEntity"
+		updateObjects(getTileEntities());
 		
-		profiler.next("update"); // "hitbox.update"
-		
-		{ // Now, update the hitboxes
-			Iterator<Hitbox> i = getHitboxes().iterator();
-			while(i.hasNext()) {
-				Hitbox h = i.next();
-				h.update();
-				if(!h.persistent)
-					i.remove();
-			}
-		}
-		
-		profiler.end(); // "hitbox"
-		
+		// Now, add and remove all queued entities
 		profiler.next("entity"); // "entity"
 		profiler.start("add"); // "entity.add"
-		// Now, add and remove all queued entities
+		
 		if(!entitiesToAdd.isEmpty()) {
-			Iterator<Entity> i = entitiesToAdd.iterator();
-			while(i.hasNext()) {
-				Entity e = i.next();
+			for(Entity e : entitiesToAdd)
 				entities.put(e.id, e);
-				i.remove(); // faster than clear() for a LinkedList
-			}
 		}
 		
 		profiler.next("remove"); // "entity.remove"
@@ -176,14 +144,20 @@ public abstract class World {
 		}
 		profiler.end(); // "entity"
 		
-		profiler.next("tileEntity"); // "tileEntity"
-		profiler.start("update"); // "tileEntity.update"
-		// Now, iterate over all tile entities
-		for(TileEntity t : getTileEntities())
-			t.update();
 		profiler.end();
-		
-		profiler.end();
+	}
+	
+	/**
+	 * Iterates over the specified collection of GameObjects as per {@link
+	 * GameObject#updateAndCheck()}. GameObjects are removed from the
+	 * collection by the iterator if {@code updateAndCheck()} returns {@code
+	 * true}.
+	 */
+	protected <E extends GameObject> void updateObjects(Collection<E> collection) {
+		Iterator<E> i = collection.iterator();
+		while(i.hasNext())
+			if(i.next().updateAndCheck())
+				i.remove();
 	}
 	
 	/**
@@ -289,52 +263,11 @@ public abstract class World {
 	/**
 	 * Adds a hitbox to the world. The hitbox's ID is assigned automatically.
 	 * 
-	 * <p>The hitbox is not added to the map of hitboxes immediately; rather,
-	 * it is added mid tick; after the entities have been updated, but before
-	 * the hitboxes have been updated. This is intended as to prevent a
-	 * {@code ConcurrentModificationException} from being thrown if the hitbox
-	 * is added while the map of hitboxes is being iterated over.
-	 * 
 	 * @param h The hitbox.
 	 */
 	public void addHitbox(Hitbox h) {
 		h.id = ++hitboxCount;
-		hitboxesToAdd.add(h);
-	}
-	
-	/**
-	 * Removes a hitbox from the world.
-	 * 
-	 * <!--
-	 * <p>The hitbox is not removed from the map of hitboxes immediately;
-	 * rather, it is removed mid tick; after the entities have been updated,
-	 * but before the hitboxes have been updated. This is intended as to
-	 * prevent a {@code ConcurrentModificationException} from being thrown if
-	 * the hitbox is removed while the map of hitbox is being iterated over.
-	 * </p>
-	 * -->
-	 * 
-	 * @param h The hitbox.
-	 */
-	public void removeHitbox(Hitbox h) {
-		removeHitbox(h.id);
-	}
-	
-	/**
-	 * Removes a hitbox from the world.
-	 * 
-	 * <!--
-	 * <p>The hitbox is not removed from the map of hitboxes immediately;
-	 * rather, it is removed mid tick; after the entities have been updated,
-	 * but before the hitboxes have been updated. This is intended as to
-	 * prevent a {@code ConcurrentModificationException} from being thrown if
-	 * the hitbox is removed while the map of hitbox is being iterated over.
-	 * -->
-	 * 
-	 * @param id The ID of the hitbox.
-	 */
-	public void removeHitbox(int id) {
-		hitboxes.remove(id);
+		hitboxes.add(h);
 	}
 	
 	/**
@@ -380,23 +313,21 @@ public abstract class World {
 	}
 	
 	/**
-	 * Adds a tile entity to the map of tile entities, so that it may be
-	 * updated. This does not add it to its owner slice.
+	 * Adds a tile entity to the list of tile entities, so that it may be
+	 * updated.
 	 * 
 	 * @param t The tile entity.
-	 * @param x The x-coordinate of the tile entity, in tile-lengths.
-	 * @param y The y-coordinate of the tile entity, in tile-lengths.
 	 */
-	protected void addTileEntity(TileEntity t, int x, int y) {
-		tileEntities.put(new HashPoint(x, y), t);
+	protected void addTileEntity(TileEntity t) {
+		tileEntities.add(t);
 	}
 	
 	/**
-	 * Removes a tile entity from the map of tile entities. This does not
-	 * remove it from its owner slice.
+	 * Removes a tile entity from the list of tile entities. It will no longer
+	 * be updated.
 	 */
 	protected void removeTileEntity(TileEntity t) {
-		removeTileEntity(t.x, t.y);
+		
 	}
 	
 	/**
@@ -433,14 +364,14 @@ public abstract class World {
 	 * @return The collection of hitboxes in the world.
 	 */
 	public Collection<Hitbox> getHitboxes() {
-		return hitboxes.values();
+		return hitboxes;
 	}
 	
 	/**
 	 * @return The collection of tile entities in the world.
 	 */
 	public Collection<TileEntity> getTileEntities() {
-		return tileEntities.values();
+		return tileEntities;
 	}
 	
 	/**
@@ -589,9 +520,8 @@ public abstract class World {
 	 * @param x The x-coordinate of the tile, in tile-lengths.
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 * 
-	 * @return The tile at the given coordinates, or the
-	 * {@link com.stabilise.world.tile.Tiles#BEDROCK_INVISIBLE invisible
-	 * bedrock} tile if no such tile is loaded.
+	 * @return The tile entity at the given coordinates, or {@code null} if no
+	 * such tile entity is loaded.
 	 */
 	public abstract TileEntity getTileEntityAt(int x, int y);
 	
@@ -638,8 +568,7 @@ public abstract class World {
 	 * 
 	 * @param character The character data for which to load the info.
 	 * 
-	 * @throws NullPointerException Thrown if {@code character} is
-	 * {@code null}.
+	 * @throws NullPointerException if {@code character} is {@code null}.
 	 */
 	protected void loadCharacterData(CharacterData character) {
 		new PlayerDataFile(character);

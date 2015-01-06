@@ -56,11 +56,6 @@ public class PreAlphaWorldLoader extends WorldLoader {
 					s.numTileEntities = tileEntities.size();
 					for(NBTTag t : tileEntities) {
 						NBTTagCompound tc = (NBTTagCompound)t;
-						//int id = tileEntity.getInt("id");
-						//int tileX = tileEntity.getInt("x");
-						//int tileY = tileEntity.getInt("y");
-						//TileEntity t = TileEntity.createTileEntity(id, tileX, tileY);
-						//t.fromNBT(tileEntity);
 						TileEntity te = TileEntity.createTileEntityFromNBT(tc);
 						s.tileEntities		// Poor syntax, but I want this to fit
 							[World.tileCoordRelativeToSliceFromTileCoord(te.y)]
