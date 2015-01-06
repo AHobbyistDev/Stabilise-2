@@ -9,14 +9,57 @@ import com.stabilise.util.collect.Registry.DuplicatePolicy;
 /**
  * A registry which provides instantiation facilities for registered classes.
  * 
+ * <h3>Usage Example</h3>
+ * 
+ * <pre>
+ * public static class MyClass {
+ *     // generic superclass
+ * }
+ * public static class MyOtherClass extends MyClass {
+ *     public MyOtherClass(int x, int y) {
+ *         super();
+ *     }
+ * }
+ * public static class YetAnotherClass extends MyClass {
+ *     {@code // Note that this constructor is private (this means reflection would}
+ *     {@code // fail at instantiating it).}
+ *     private YetAnotherClass(String name) {
+ *         super();
+ *     }
+ * }
+ * 
+ * public InstantiationRegistry{@code <MyClass>} registry =
+ *     new InstantiationRegistry{@code <MyClass>}("objects", "", 2, Registry.DuplicatePolicy.THROW_EXCEPTION);
+ * 
+ * registry.register(0, "objType1", MyOtherClass.class, Integer.TYPE, Integer.TYPE);
+ * registry.register(1, "objType2", YetAnotherClass.class,
+ *     new InstantiationRegistry.Factory{@code <YetAnotherClass>}() {
+ *         &#64;Override
+ *         public YetAnotherClass create(Object... args) {
+ *             return new YetAnotherClass((String)args[0]);
+ *         }
+ *     });
+ * 
+ * {@code // Henceforth there following blocks of code are equivalent:}
+ * 
+ * MyClass obj1 = new MyOtherClass(0, 1);
+ * MyClass obj2 = new YetAnotherClass("Penguin");
+ * 
+ * MyClass obj1 = registry.instantiate(0, 0, 1);
+ * MyClass obj2 = registry.instantiate(1, "Penguin");
+ * 
+ * MyClass obj1 = registry.instantiate("objType1", 0, 1);
+ * MyClass obj2 = registry.instantiate("objType2", "Penguin");
+ * </pre>
+ * 
  * @param <T> The type of object to instantiate.
  */
 public class InstantiationRegistry<T> {
 	
 	/** The factory registry. */
-	private final RegistryNamespaced<Factory<T>> factories;
+	private final RegistryNamespaced<Factory<? extends T>> factories;
 	/** The map of object classes to their factory. */
-	private final Map<Class<? extends T>, Factory<T>> classMap;
+	private final Map<Class<? extends T>, Factory<? extends T>> classMap;
 	
 	/** The default constructor arguments. */
 	private final Class<?>[] defaultArgs;
@@ -40,8 +83,8 @@ public class InstantiationRegistry<T> {
 	 */
 	public InstantiationRegistry(String name, String defaultNamespace, int capacity,
 			DuplicatePolicy dupePolicy, Class<?>... defaultArgs) {
-		factories = new RegistryNamespaced<Factory<T>>(name, defaultNamespace, capacity, dupePolicy);
-		classMap = new HashMap<Class<? extends T>, Factory<T>>(capacity);
+		factories = new RegistryNamespaced<Factory<? extends T>>(name, defaultNamespace, capacity, dupePolicy);
+		classMap = new HashMap<Class<? extends T>, Factory<? extends T>>(capacity);
 		this.defaultArgs = defaultArgs != null ? defaultArgs : new Class<?>[0];
 	}
 	
@@ -87,8 +130,8 @@ public class InstantiationRegistry<T> {
 	 * are already mapped to a factory and this registry uses the {@link
 	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
 	 */
-	public void register(int id, String name, Class<? extends T> objClass, Class<?>... args) {
-		register(id, name, objClass, new ReflectiveFactory<T>(objClass, args));
+	public <S extends T> void register(int id, String name, Class<S> objClass, Class<?>... args) {
+		register(id, name, objClass, new ReflectiveFactory<S>(objClass, args));
 	}
 	
 	/**
@@ -106,7 +149,7 @@ public class InstantiationRegistry<T> {
 	 * are already mapped to a factory and this registry uses the {@link
 	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
 	 */
-	public void register(int id, String name, Class<? extends T> objClass, Factory<T> factory) {
+	public <S extends T> void register(int id, String name, Class<S> objClass, Factory<S> factory) {
 		if(factories.register(id, name, factory))
 			classMap.put(objClass, factory);
 	}
@@ -122,7 +165,7 @@ public class InstantiationRegistry<T> {
 	 * @throws RuntimeException if object creation failed.
 	 */
 	public T instantiate(int id, Object... args) {
-		Factory<T> factory = factories.get(id);
+		Factory<? extends T> factory = factories.get(id);
 		if(factory != null)
 			return factory.create(args);
 		return null;
@@ -140,7 +183,7 @@ public class InstantiationRegistry<T> {
 	 * @throws RuntimeException if object creation failed.
 	 */
 	public T instantiate(String name, Object... args) {
-		Factory<T> factory = factories.get(name);
+		Factory<? extends T> factory = factories.get(name);
 		if(factory != null)
 			return factory.create(args);
 		return null;
@@ -173,7 +216,7 @@ public class InstantiationRegistry<T> {
 	/**
 	 * A Factory instantiates objects of the specified type on request.
 	 */
-	public interface Factory<T> {
+	public static interface Factory<T> {
 		
 		/**
 		 * Creates an object.
@@ -206,12 +249,12 @@ public class InstantiationRegistry<T> {
 		 * @throws RuntimeException if the specified class does not have a
 		 * constructor accepting only two integer parameters.
 		 */
-		protected ReflectiveFactory(Class<? extends T> objClass, Class<?>... args) {
+		private ReflectiveFactory(Class<? extends T> objClass, Class<?>... args) {
 			try {
 				constructor = objClass.getConstructor(args);
 			} catch(Exception e) {
 				throw new RuntimeException("Constructor for " + objClass.getCanonicalName() +
-						" with requested arguments does not exist!");
+						" with requested arguments does not exist! (" + e.getMessage() + ")");
 			}
 		}
 		

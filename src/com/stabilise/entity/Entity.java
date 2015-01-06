@@ -2,26 +2,13 @@ package com.stabilise.entity;
 
 import static com.stabilise.util.collect.Registry.DuplicatePolicy.THROW_EXCEPTION;
 
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.stabilise.util.Log;
 import com.stabilise.util.collect.InstantiationRegistry;
-import com.stabilise.util.collect.RegistryNamespaced;
 import com.stabilise.util.maths.MathsUtil;
-import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.world.Direction;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.TileFluid;
-import com.stabilise.world.tile.tileentity.TileEntity;
-import com.stabilise.world.tile.tileentity.TileEntityChest;
-import com.stabilise.world.tile.tileentity.TileEntityMobSpawner;
-import com.stabilise.world.tile.tileentity.TileEntity.TEFactory;
-
-import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 /**
  * An entity is an object which exists in the world that is subject to
@@ -39,7 +26,7 @@ public abstract class Entity extends FreeGameObject {
 	/** The entity registry. */
 	private static final InstantiationRegistry<Entity> ENTITIES =
 			new InstantiationRegistry<Entity>("entities", "stabilise", 8, THROW_EXCEPTION,
-					Integer.TYPE, Integer.TYPE);
+					World.class);
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -495,108 +482,13 @@ public abstract class Entity extends FreeGameObject {
 	}
 	*/
 	
-	// Register all tile entity types.
+	// Register all entity types.
 	static {
-		registerTileEntity(0, "Chest", TileEntityChest.class);
-		registerTileEntity(1, "Mob Spawner", TileEntityMobSpawner.class);
+		ENTITIES.registerDefaultArgs(0, "item", EntityItem.class);
+		ENTITIES.registerDefaultArgs(1, "fireball", EntityFireball.class);
+		ENTITIES.registerDefaultArgs(2, "bigFireball", EntityBigFireball.class);
+		ENTITIES.registerDefaultArgs(3, "rectangleEnemy", EntityEnemy.class);
+		ENTITIES.registerDefaultArgs(4, "person", EntityPerson.class);
 	}
 	
-	/**
-	 * Registers an entity.
-	 * 
-	 * @param id The ID of the entity.
-	 * @param name The name of the entity.
-	 * @param teClass The entity's class.
-	 * 
-	 * @throws RuntimeException if the specified class does not have a
-	 * constructor accepting only two integer parameters (i.e. it doesn't have
-	 * a constructor corresponding to {@code new TileEntity(x, y)}).
-	 * @throws IndexOufOfBoundsException if {@code id < 0}.
-	 * @throws NullPointerException if either {@code name} or {@code teClass}
-	 * are {@code null}.
-	 */
-	private static void registerEntity(int id, String name, Class<? extends Entity> entityClass) {
-		registerEntity(id, name, entityClass, new ReflectiveEntityFactory(entityClass));
-	}
-	
-	/**
-	 * Registers an entity.
-	 * 
-	 * @param id The ID of the entity.
-	 * @param name The name of the entity.
-	 * @param entityClass The entity's class.
-	 * @param factory The factory object with which to create instances of the
-	 * tile entity.
-	 * 
-	 * @throws IndexOufOfBoundsException if {@code id < 0}.
-	 * @throws NullPointerException if either {@code name} or {@code factory}
-	 * are {@code null}.
-	 */
-	private static void registerEntity(int id, String name, Class<? extends Entity> entityClass,
-			EntityFactory factory) {
-		ENTITIES.register(id, name, factory);
-		CLASS_MAP.put(entityClass, factory);
-	}
-	
-	//--------------------==========--------------------
-	//-------------=====Nested Classes=====-------------
-	//--------------------==========--------------------
-	
-	/**
-	 * An entity factory object is used to instantiate an Entity.
-	 */
-	public static interface EntityFactory {
-		
-		/**
-		 * Creates the entity.
-		 * 
-		 * @param world The game world.
-		 * 
-		 * @return The entity.
-		 * @throws RuntimeException if this EntityFactory is a derp.
-		 */
-		Entity create(World world);
-		
-	}
-	
-	/**
-	 * An entity factory which reflectively instantiates entities.
-	 */
-	static final class ReflectiveEntityFactory implements EntityFactory {
-		
-		/** The entity constructor. */
-		private final Constructor<? extends Entity> constructor;
-		
-		
-		/**
-		 * Creates a new ReflectiveEntityCreator for entities of the specified
-		 * class.
-		 * 
-		 * @param entityClass The entity's class.
-		 * 
-		 * @throws NullPointerException if {@code entityClass} is {@code null}.
-		 * @throws RuntimeException if the specified class does not have a
-		 * constructor accepting only two integer parameters.
-		 */
-		ReflectiveEntityFactory(Class<? extends Entity> entityClass) {
-			try {
-				constructor = entityClass.getConstructor(World.class);
-			} catch(Exception e) {
-				throw new RuntimeException("Constructor for " + entityClass.getCanonicalName() +
-						" with a World parameter does not exist!");
-			}
-		}
-		
-		@Override
-		public Entity create(World world) {
-			try {
-				return constructor.newInstance(world);
-			} catch(Exception e) {
-				throw new RuntimeException("Could not reflectively instantiate entity of class \""
-						+ constructor.getDeclaringClass().getSimpleName() + "\"!");
-			}
-		}
-		
-	}
-
 }

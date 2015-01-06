@@ -16,7 +16,7 @@ public abstract class GameObject {
 	public World world;
 	/** The GameObject's ID. Such an ID is not necessarily unique amongst all
 	 * GameObjects; merely ones of the same type amongst which distinction is
-	 * required (e.g. entities, hitboxes). */
+	 * required (e.g. entities). */
 	public int id;
 	
 	/** If {@code true}, this GameObject should be removed from the world ASAP. */
@@ -45,7 +45,7 @@ public abstract class GameObject {
 	public abstract void update();
 	
 	/**
-	 * Updates this GameObject, and then returns the {@link #isDestroyed()}.
+	 * Updates this GameObject, and then returns {@link #isDestroyed()}.
 	 * 
 	 * <p>This method performs as if by:
 	 * 

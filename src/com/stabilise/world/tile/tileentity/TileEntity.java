@@ -2,8 +2,6 @@ package com.stabilise.world.tile.tileentity;
 
 import static com.stabilise.util.collect.Registry.DuplicatePolicy.*;
 
-import java.lang.reflect.Constructor;
-
 import com.stabilise.entity.FixedGameObject;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.collect.InstantiationRegistry;
@@ -45,7 +43,7 @@ public abstract class TileEntity extends FixedGameObject {
 	 * @param y The y-coordinate of the tile entity, in tile-lengths.
 	 */
 	protected TileEntity(World world, int x, int y) {
-		this.world = world;
+		super(world);
 		this.x = x;
 		this.y = y;
 	}
@@ -157,68 +155,6 @@ public abstract class TileEntity extends FixedGameObject {
 	static {
 		TILE_ENTITY_REGISTRY.register(0, "Chest", TileEntityChest.class);
 		TILE_ENTITY_REGISTRY.register(1, "Mob Spawner", TileEntityMobSpawner.class);
-	}
-	
-	//--------------------==========--------------------
-	//-------------=====Nested Classes=====-------------
-	//--------------------==========--------------------
-	
-	/**
-	 * A tile entity factory object is used to instantiate a TileEntity.
-	 */
-	public static interface TEFactory {
-		
-		/**
-		 * Creates the tile entity.
-		 * 
-		 * @param x The x-coordinate of the tile entity, in tile-lengths.
-		 * @param y The y-coordinate of the tile entity, in tile-lengths.
-		 * 
-		 * @return The tile entity.
-		 * @throws RuntimeException if this TEFactory is a derp.
-		 */
-		TileEntity create(int x, int y);
-		
-	}
-	
-	/**
-	 * A tile entity factory which reflectively instantiates tile entities.
-	 */
-	static final class ReflectiveTEFactory implements TEFactory {
-		
-		/** The tile entity constructor. */
-		private final Constructor<? extends TileEntity> constructor;
-		
-		
-		/**
-		 * Creates a new ReflectiveTileEntityCreator for tile entities of the
-		 * specified class.
-		 * 
-		 * @param teClass The tile entity's class.
-		 * 
-		 * @throws NullPointerException if {@code teClass} is {@code null}.
-		 * @throws RuntimeException if the specified class does not have a
-		 * constructor accepting only two integer parameters.
-		 */
-		ReflectiveTEFactory(Class<? extends TileEntity> teClass) {
-			try {
-				constructor = teClass.getConstructor(Integer.TYPE, Integer.TYPE);
-			} catch(Exception e) {
-				throw new RuntimeException("Constructor for " + teClass.getCanonicalName() +
-						" with x and y parameters does not exist!");
-			}
-		}
-		
-		@Override
-		public TileEntity create(int x, int y) {
-			try {
-				return constructor.newInstance(x, y);
-			} catch(Exception e) {
-				throw new RuntimeException("Could not reflectively instantiate tile entity of class \""
-						+ constructor.getDeclaringClass().getSimpleName() + "\"!");
-			}
-		}
-		
 	}
 	
 }

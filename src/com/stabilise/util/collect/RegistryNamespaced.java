@@ -146,8 +146,7 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	 * 
 	 * @param id The ID.
 	 * 
-	 * @return The object, or {@code null} if the key is negative or otherwise
-	 * lacks a mapping.
+	 * @return The object, or {@code null} if {@code key} lacks a mapping.
 	 * @throws IndexOutOfBoundsException if {@code key < 0}.
 	 */
 	public V get(int id) {

@@ -164,7 +164,9 @@ public class Registry<K, V> implements Iterable<V> {
 	//--------------------==========--------------------
 	
 	/**
-	 * Defines the policy for handling duplicate entries.
+	 * Defines the policy for handling duplicate entries. Note that duplicate
+	 * registry objects are allowed regardless of the policy; it is only
+	 * duplicate keys which are handled by the policy.
 	 * 
 	 * @see #OVERRIDE
 	 * @see #REJECT
