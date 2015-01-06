@@ -6,6 +6,11 @@ import java.util.Map;
 
 import com.stabilise.util.collect.Registry.DuplicatePolicy;
 
+/**
+ * A registry which provides instantiation facilities for registered classes.
+ * 
+ * @param <T> The type of object to instantiate.
+ */
 public class InstantiationRegistry<T> {
 	
 	/** The factory registry. */
@@ -25,6 +30,7 @@ public class InstantiationRegistry<T> {
 	 * objects.
 	 * @param capacity The initial registry capacity.
 	 * @param dupePolicy The duplicate entry policy.
+	 * @param defaultArgs The default constructor arguments.
 	 * 
 	 * @throws NullPointerException if either {@code name}, {@code
 	 * defaultNamespace}, or {@code dupePolicy} are {@code null}.
@@ -42,6 +48,13 @@ public class InstantiationRegistry<T> {
 	/**
 	 * Registers a reflective object factory.
 	 * 
+	 * <p>Invoking this method is equivalent to invoking {@link
+	 * #register(int, String, Class, Class...)
+	 * register(id, name, objClass, defaultArgs)}, where {@code defaultArgs}
+	 * is specified in the {@link
+	 * #InstantiationRegistry(String, String, int, DuplicatePolicy, Class...)
+	 * constructor}.
+	 * 
 	 * @param id The ID of the object type.
 	 * @param name The name of the object type.
 	 * @param objClass The objects' class.
@@ -55,7 +68,7 @@ public class InstantiationRegistry<T> {
 	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
 	 */
 	public void registerDefaultArgs(int id, String name, Class<? extends T> objClass) {
-		register(id, name, objClass, objClass, defaultArgs);
+		register(id, name, objClass, defaultArgs);
 	}
 	
 	/**
@@ -79,13 +92,13 @@ public class InstantiationRegistry<T> {
 	}
 	
 	/**
-	 * Registers a tile entity.
+	 * Registers an object factory.
 	 * 
-	 * @param id The ID of the tile entity.
-	 * @param name The name of the tile entity.
-	 * @param objClass The tile entity's class.
+	 * @param id The ID of the object type.
+	 * @param name The name of the object type.
+	 * @param objClass The objects' class.
 	 * @param factory The factory object with which to create instances of the
-	 * tile entity.
+	 * object.
 	 * 
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.

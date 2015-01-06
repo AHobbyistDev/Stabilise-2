@@ -1,10 +1,13 @@
 package com.stabilise.entity;
 
+import static com.stabilise.util.collect.Registry.DuplicatePolicy.THROW_EXCEPTION;
+
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.stabilise.util.Log;
+import com.stabilise.util.collect.InstantiationRegistry;
 import com.stabilise.util.collect.RegistryNamespaced;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.nbt.NBTTagCompound;
@@ -13,11 +16,9 @@ import com.stabilise.world.Direction;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.TileFluid;
-import com.stabilise.world.tile.tileentity.IndexOufOfBoundsException;
 import com.stabilise.world.tile.tileentity.TileEntity;
 import com.stabilise.world.tile.tileentity.TileEntityChest;
 import com.stabilise.world.tile.tileentity.TileEntityMobSpawner;
-import com.stabilise.world.tile.tileentity.TileEntity.ReflectiveTEFactory;
 import com.stabilise.world.tile.tileentity.TileEntity.TEFactory;
 
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
@@ -36,11 +37,9 @@ public abstract class Entity extends FreeGameObject {
 	protected static final float AIR_FRICTION = 0.001f;
 	
 	/** The entity registry. */
-	private static final RegistryNamespaced<EntityFactory> ENTITIES =
-			new RegistryNamespaced<EntityFactory>("entities", "stabilise", 8);
-	/** The map of entity classes to their factory. */
-	private static final Map<Class<? extends Entity>, EntityFactory> CLASS_MAP =
-			new HashMap<Class<? extends Entity>, EntityFactory>(4);
+	private static final InstantiationRegistry<Entity> ENTITIES =
+			new InstantiationRegistry<Entity>("entities", "stabilise", 8, THROW_EXCEPTION,
+					Integer.TYPE, Integer.TYPE);
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -472,15 +471,12 @@ public abstract class Entity extends FreeGameObject {
 	 * @throws RuntimeException if the tile entity corresponding to the ID was
 	 * registered incorrectly.
 	 */
-	public static Entity createEntity(int id, int x, int y) {
-		EntityFactory creator = ENTITIES.get(id);
-		if(creator == null)
-			return null;
-		return creator.create(x, y);
+	public static Entity createEntity(int id, World world) {
+		return ENTITIES.instantiate(id, world);
 	}
 	
 	/**
-	 * Creates a tile entity object from its NBT representation. The given tag
+	 * Creates an entity object from its NBT representation. The given tag
 	 * compound should at least contain "id", "x" and "y" integer tags.
 	 * 
 	 * @param tag The compound tag from which to read the tile entity.
@@ -489,13 +485,15 @@ public abstract class Entity extends FreeGameObject {
 	 * for whatever reason.
 	 * @throws NullPointerException if {@code tag} is {@code null}.
 	 */
-	public static TileEntity createTileEntityFromNBT(NBTTagCompound tag) {
-		TileEntity t = createTileEntity(tag.getInt("id"), tag.getInt("x"), tag.getInt("y"));
-		if(t == null)
+	/*
+	public static Entity createEntityFromNBT(NBTTagCompound tag, World world) {
+		Entity e = createEntity(tag.getInt("id"), world);
+		if(e == null)
 			return null;
-		t.fromNBT(tag);
-		return t;
+		e.fromNBT(tag);
+		return e;
 	}
+	*/
 	
 	// Register all tile entity types.
 	static {
