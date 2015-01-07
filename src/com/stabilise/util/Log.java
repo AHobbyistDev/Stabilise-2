@@ -19,6 +19,9 @@ import com.stabilise.util.collect.LightweightLinkedList;
  * <p>Instances of this class represent "logging agents", which may produce log
  * entries prepended with identifying tags.
  * 
+ * <p>The default {@link #setLogLevel(Level) output level} is {@link
+ * Level#INFO}.
+ * 
  * <p>This class and its instances are thread-safe, and hence may be used by
  * multiple threads.
  * 
@@ -123,7 +126,7 @@ public class Log {
 	}
 	
 	/** The log level. */
-	private static Level logLevel = Level.INFO;
+	private static volatile Level logLevel = Level.INFO;
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -159,7 +162,7 @@ public class Log {
 		level.checkAllowable();
 		synchronized(entries) {
 			DATE.setTime(System.currentTimeMillis());
-			add(level, DATE.toString() + " - " + tag + level.tag + msg);
+			add(level, logLevel, DATE.toString() + " - " + tag + level.tag + msg);
 			if(entries.size() > LOG_CAPACITY)
 				entries.remove(0);
 		}
@@ -179,16 +182,18 @@ public class Log {
 	public void post(Level level, String msg, Throwable t) {
 		level.checkAllowable();
 		
+		Level outputLevel = logLevel; // since it may be modified concurrently
 		String prefix;
 		StackTraceElement[] stackTrace = t.getStackTrace();
 		
 		synchronized(entries) {
 			DATE.setTime(System.currentTimeMillis());
 			prefix = DATE.toString() + " - " + tag + level.tag;
-			add(level, prefix + msg);
-			add(level, prefix + t.toString());
+			add(level, outputLevel, prefix + msg);
+			add(level, outputLevel, prefix + t.toString());
+			prefix += "    at ";
 			for(StackTraceElement e : stackTrace)
-				add(level, prefix + "    at " + e.toString());
+				add(level, outputLevel, prefix + e.toString());
 			while(entries.size() > LOG_CAPACITY)
 				entries.remove(0);
 		}
@@ -199,11 +204,12 @@ public class Log {
 	 * able.
 	 * 
 	 * @param level The message level.
+	 * @param outputLevel The log's output level.
 	 * @param msg The message.
 	 */
-	private void add(Level level, String msg) {
+	private void add(Level level, Level outputLevel, String msg) {
 		entries.add(msg);
-		level.printIfAble(logLevel, msg);
+		level.printIfAble(outputLevel, msg);
 	}
 	
 	/**
@@ -306,6 +312,17 @@ public class Log {
 	 */
 	public static Log getAgent(String tag) {
 		return new Log(tag);
+	}
+	
+	/**
+	 * Sets the log's output level.
+	 * 
+	 * @throws NullPointerException if {@code level} is {@code null}.
+	 */
+	public static void setLogLevel(Level level) {
+		if(level == null)
+			throw new NullPointerException();
+		logLevel = level;
 	}
 	
 	/**

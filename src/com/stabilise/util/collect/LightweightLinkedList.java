@@ -98,8 +98,10 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 	public boolean add(E e) {
 		if(head == null)
 			head = tail = new Node<E>(e);
-		else
+		else {
 			tail.next = new Node<E>(e);
+			tail = tail.next;
+		}
 		size++;
 		return true;
 	}
