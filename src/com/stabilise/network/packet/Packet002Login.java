@@ -14,12 +14,7 @@ public class Packet002Login extends Packet {
 	public String playerName;
 	
 	
-	/**
-	 * Creates a new generic login request packet.
-	 */
-	public Packet002Login() {
-		
-	}
+	public Packet002Login() {}
 	
 	/**
 	 * Creates a new login request packet.
@@ -39,10 +34,5 @@ public class Packet002Login extends Packet {
 	public void writeData(DataOutputStream out) throws IOException {
 		writeString(playerName, out);
 	}
-
-	@Override
-	public int getBytes() {
-		return getStringBytes(playerName);
-	}
-
+	
 }

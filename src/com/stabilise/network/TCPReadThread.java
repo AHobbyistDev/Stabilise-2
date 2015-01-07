@@ -9,6 +9,7 @@ public class TCPReadThread extends Thread {
 	/** The TCPConnection instance the thread is linked to. */
 	private TCPConnection connection;
 	
+	
 	/**
 	 * Creates a new TCPReadThread object.
 	 * 
@@ -30,7 +31,7 @@ public class TCPReadThread extends Thread {
 			
 			try {
 				sleep(10L);
-			} catch (InterruptedException e) {}
+			} catch(InterruptedException e) {}
 		}
 	}
 

@@ -9,11 +9,9 @@ import java.io.IOException;
  */
 public class Packet006PlayerPosition extends Packet {
 	
-	/** The player's x position. */
-	public double x;
-	/** The player's y position. */
-	public double y;
-	//public some state variable; TODO: later
+	/** The player's coordinates. */
+	public double x, y;
+	
 	
 	public Packet006PlayerPosition() {
 		
@@ -23,22 +21,17 @@ public class Packet006PlayerPosition extends Packet {
 		this.x = x;
 		this.y = y;
 	}
-
+	
 	@Override
 	public void readData(DataInputStream in) throws IOException {
 		x = in.readDouble();
 		y = in.readDouble();
 	}
-
+	
 	@Override
 	public void writeData(DataOutputStream out) throws IOException {
 		out.writeDouble(x);
 		out.writeDouble(y);
 	}
-
-	@Override
-	public int getBytes() {
-		return 2 * Double.SIZE / Byte.SIZE;
-	}
-
+	
 }

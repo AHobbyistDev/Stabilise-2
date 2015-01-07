@@ -29,10 +29,10 @@ import com.stabilise.util.collect.Registry.DuplicatePolicy;
  * }
  * 
  * public InstantiationRegistry{@code <MyClass>} registry =
- *     new InstantiationRegistry{@code <MyClass>}("objects", "", 2, Registry.DuplicatePolicy.THROW_EXCEPTION);
+ *     new InstantiationRegistry{@code <MyClass>}("objects", 2, Registry.DuplicatePolicy.THROW_EXCEPTION);
  * 
- * registry.register(0, "objType1", MyOtherClass.class, Integer.TYPE, Integer.TYPE);
- * registry.register(1, "objType2", YetAnotherClass.class,
+ * registry.register(0, MyOtherClass.class, Integer.TYPE, Integer.TYPE);
+ * registry.register(1, YetAnotherClass.class,
  *     new InstantiationRegistry.Factory{@code <YetAnotherClass>}() {
  *         &#64;Override
  *         public YetAnotherClass create(Object... args) {
@@ -47,9 +47,6 @@ import com.stabilise.util.collect.Registry.DuplicatePolicy;
  * 
  * MyClass obj1 = registry.instantiate(0, 0, 1);
  * MyClass obj2 = registry.instantiate(1, "Penguin");
- * 
- * MyClass obj1 = registry.instantiate("objType1", 0, 1);
- * MyClass obj2 = registry.instantiate("objType2", "Penguin");
  * </pre>
  * 
  * @param <T> The type of object to instantiate.
@@ -58,8 +55,8 @@ public class InstantiationRegistry<T> {
 	
 	/** The factory registry. */
 	private final RegistryNamespaced<Factory<? extends T>> factories;
-	/** The map of object classes to their factory. */
-	private final Map<Class<? extends T>, Factory<? extends T>> classMap;
+	/** Maps classes to IDs. */
+	private final Map<Class<? extends T>, Integer> idMap;
 	
 	/** The default constructor arguments. */
 	private final Class<?>[] defaultArgs;
@@ -69,22 +66,19 @@ public class InstantiationRegistry<T> {
 	 * Creates a new instantiation registry.
 	 * 
 	 * @param name The name of the registry.
-	 * @param defaultNamespace The default namespace under which to register
-	 * objects.
 	 * @param capacity The initial registry capacity.
 	 * @param dupePolicy The duplicate entry policy.
 	 * @param defaultArgs The default constructor arguments.
 	 * 
-	 * @throws NullPointerException if either {@code name}, {@code
-	 * defaultNamespace}, or {@code dupePolicy} are {@code null}.
-	 * @throws IllegalArgumentException if there is a colon (:) in {@code
-	 * defaultNamespace}, or {@code capacity < 0}.
+	 * @throws NullPointerException if either {@code name} or {@code
+	 * dupePolicy} are {@code null}.
+	 * @throws IllegalArgumentException if {@code capacity < 0}.
 	 * @see DuplicatePolicy
 	 */
-	public InstantiationRegistry(String name, String defaultNamespace, int capacity,
+	public InstantiationRegistry(String name, int capacity,
 			DuplicatePolicy dupePolicy, Class<?>... defaultArgs) {
-		factories = new RegistryNamespaced<Factory<? extends T>>(name, defaultNamespace, capacity, dupePolicy);
-		classMap = new HashMap<Class<? extends T>, Factory<? extends T>>(capacity);
+		factories = new RegistryNamespaced<Factory<? extends T>>(name, "", capacity, dupePolicy);
+		idMap = new HashMap<Class<? extends T>, Integer>();
 		this.defaultArgs = defaultArgs != null ? defaultArgs : new Class<?>[0];
 	}
 	
@@ -99,26 +93,25 @@ public class InstantiationRegistry<T> {
 	 * constructor}.
 	 * 
 	 * @param id The ID of the object type.
-	 * @param name The name of the object type.
 	 * @param objClass The objects' class.
 	 * 
 	 * @throws RuntimeException if the specified class does not have a
 	 * constructor accepting the default arguments.
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
-	 * @throws IllegalArgumentException if either {@code id} or {@code name}
-	 * are already mapped to a factory and this registry uses the {@link
-	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
+	 * @throws IllegalArgumentException if either {@code id} is already mapped
+	 * to a factory or a class with the same name has already been registered,
+	 * and this registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
+	 * THROW_EXCEPTION} duplicate policy.
 	 */
-	public void registerDefaultArgs(int id, String name, Class<? extends T> objClass) {
-		register(id, name, objClass, defaultArgs);
+	public void registerDefaultArgs(int id, Class<? extends T> objClass) {
+		register(id, objClass, defaultArgs);
 	}
 	
 	/**
 	 * Registers a reflective object factory.
 	 * 
 	 * @param id The ID of the object type.
-	 * @param name The name of the object type.
 	 * @param objClass The objects' class.
 	 * @param args The desired constructor's arguments.
 	 * 
@@ -126,12 +119,13 @@ public class InstantiationRegistry<T> {
 	 * constructor accepting arguments of the specified type.
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
-	 * @throws IllegalArgumentException if either {@code id} or {@code name}
-	 * are already mapped to a factory and this registry uses the {@link
-	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
+	 * @throws IllegalArgumentException if either {@code id} is already mapped
+	 * to a factory or a class with the same name has already been registered,
+	 * and this registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
+	 * THROW_EXCEPTION} duplicate policy.
 	 */
-	public <S extends T> void register(int id, String name, Class<S> objClass, Class<?>... args) {
-		register(id, name, objClass, new ReflectiveFactory<S>(objClass, args));
+	public <S extends T> void register(int id, Class<S> objClass, Class<?>... args) {
+		register(id, objClass, new ReflectiveFactory<S>(objClass, args));
 	}
 	
 	/**
@@ -145,13 +139,14 @@ public class InstantiationRegistry<T> {
 	 * 
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
-	 * @throws IllegalArgumentException if either {@code id} or {@code name}
-	 * are already mapped to a factory and this registry uses the {@link
-	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
+	 * @throws IllegalArgumentException if either {@code id} is already mapped
+	 * to a factory or a class with the same name has already been registered,
+	 * and this registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
+	 * THROW_EXCEPTION} duplicate policy.
 	 */
-	public <S extends T> void register(int id, String name, Class<S> objClass, Factory<S> factory) {
-		if(factories.register(id, name, factory))
-			classMap.put(objClass, factory);
+	public <S extends T> void register(int id, Class<S> objClass, Factory<S> factory) {
+		if(factories.register(id, objClass.getSimpleName(), factory))
+			idMap.put(objClass, Integer.valueOf(id));
 	}
 	
 	/**
@@ -172,18 +167,17 @@ public class InstantiationRegistry<T> {
 	}
 	
 	/**
-	 * Instantiates an object which has been registered with the specified
-	 * name.
+	 * Instantiates an object of the specified class name.
 	 * 
-	 * @param name The name of the object type.
+	 * @param className The name the object's class.
 	 * @param args The constructor arguments.
 	 * 
-	 * @return The newly-created object, or {@code null} if the specified name
-	 * lacks a mapping.
+	 * @return The newly-created object, or {@code null} if there is no class
+	 * of the specified name mapped.
 	 * @throws RuntimeException if object creation failed.
 	 */
-	public T instantiate(String name, Object... args) {
-		Factory<? extends T> factory = factories.get(name);
+	public T instantiate(String className, Object... args) {
+		Factory<? extends T> factory = factories.get(className);
 		if(factory != null)
 			return factory.create(args);
 		return null;
@@ -196,17 +190,9 @@ public class InstantiationRegistry<T> {
 	 * registered.
 	 */
 	public int getID(Class<? extends T> objClass) {
-		return factories.getObjectID(classMap.get(objClass));
-	}
-	
-	/**
-	 * Gets the name of the specified object class.
-	 * 
-	 * @return The name, or {@code null} if the object class has not been
-	 * registered.
-	 */
-	public String getName(Class<? extends T> objClass) {
-		return factories.getObjectName(classMap.get(objClass));
+		//return factories.getObjectID(factories.get(objClass.getSimpleName()));
+		Integer i = idMap.get(objClass);
+		return i == null ? -1 : i.intValue();
 	}
 	
 	//--------------------==========--------------------

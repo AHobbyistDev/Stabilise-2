@@ -27,10 +27,7 @@ public class Packet001ServerInfo extends Packet {
 	public int onlinePlayers;
 	/** The maximum number of players able to be online. */
 	public int maxPlayers;
-
-	public Packet001ServerInfo() {
-		
-	}
+	
 	
 	@Override
 	public void readData(DataInputStream in) throws IOException {
@@ -59,11 +56,4 @@ public class Packet001ServerInfo extends Packet {
 		out.write(maxPlayers);
 	}
 	
-	@Override
-	public int getBytes() {
-		// Server name + each of the ints
-		// Note that the ints are being sent as bytes, however
-		return getStringBytes(serverName) + 5/* * Integer.SIZE / Byte.SIZE */;
-	}
-
 }

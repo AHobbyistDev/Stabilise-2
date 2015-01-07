@@ -9,15 +9,11 @@ import java.io.IOException;
  * client and the server to ensure the connection is still active.
  */
 public class Packet000KeepAlive extends Packet {
-
-	public Packet000KeepAlive() {
-		
-	}
 	
 	@Override
 	public void readData(DataInputStream in) throws IOException {
-		// don't read anything - until I find it apt to include the 'random number + 1'
-		// protocol, we'll just be sending unnecessary bytes
+		// don't read anything - until I find it apt to use a "process random
+		// number" protocol, we'll just be sending useless data
 	}
 	
 	@Override
@@ -25,9 +21,4 @@ public class Packet000KeepAlive extends Packet {
 		// ditto for writing
 	}
 	
-	@Override
-	public int getBytes() {
-		return 0;
-	}
-
 }

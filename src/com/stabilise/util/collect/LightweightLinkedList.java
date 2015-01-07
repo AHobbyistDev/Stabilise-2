@@ -142,11 +142,7 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 			Node<E> node = head;
 			while(--index > 0)
 				node = node.next;
-			Node<E> nodeToRemove = node.next; // never null
-			node.next = nodeToRemove.next; // bridge nodes
-			if(node.next == null)
-				tail = node;
-			return nodeToRemove.e;
+			return unlink(node, node.next);
 		}
 	}
 	
@@ -171,16 +167,18 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 	 * Unlinks the specified node from the list. size is decremented. This
 	 * method is inefficient as the previous node must first be found for
 	 * proper unlinking.
+	 * 
+	 * @return The element of the removed node.
 	 */
 	@SuppressWarnings("unused")
-	private void unlink(Node<E> node) {
+	private E unlink(Node<E> node) {
 		if(node == head) {
-			unlink(null, node);
+			return unlink(null, node);
 		} else {
 			Node<E> prev = head;
 			while(prev.next != node)
 				prev = prev.next;
-			unlink(prev, node);
+			return unlink(prev, node);
 		}
 	}
 	
@@ -190,8 +188,10 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 	 * @param prev The node before {@code node}. A value of {@code null}
 	 * implies {@code node == head}.
 	 * @param node The node to remove.
+	 * 
+	 * @return The element of the removed node.
 	 */
-	private void unlink(Node<E> prev, Node<E> node) {
+	private E unlink(Node<E> prev, Node<E> node) {
 		size--;
 		if(prev == null) // i.e. node == head
 			head = node.next;
@@ -199,6 +199,7 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 			prev.next = node.next;
 		if(node == tail)
 			tail = prev;
+		return node.e;
 	}
 	
 	@Override

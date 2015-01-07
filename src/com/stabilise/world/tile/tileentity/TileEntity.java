@@ -19,12 +19,12 @@ public abstract class TileEntity extends FixedGameObject {
 	
 	/** The tile entity registry. */
 	private static final InstantiationRegistry<TileEntity> TILE_ENTITY_REGISTRY =
-			new InstantiationRegistry<TileEntity>("tile entities", "stabilise", 4, THROW_EXCEPTION);
+			new InstantiationRegistry<TileEntity>("tile entities", 4, THROW_EXCEPTION);
 	
 	// Register all tile entity types.
 	static {
-		TILE_ENTITY_REGISTRY.register(0, "Chest", TileEntityChest.class);
-		TILE_ENTITY_REGISTRY.register(1, "Mob Spawner", TileEntityMobSpawner.class);
+		TILE_ENTITY_REGISTRY.register(0, TileEntityChest.class);
+		TILE_ENTITY_REGISTRY.register(1, TileEntityMobSpawner.class);
 	}
 	
 	
@@ -82,13 +82,6 @@ public abstract class TileEntity extends FixedGameObject {
 	 */
 	public final int getID() {
 		return TILE_ENTITY_REGISTRY.getID(getClass());
-	}
-	
-	/**
-	 * @return The name of this tile entity's type.
-	 */
-	public final String getName() {
-		return TILE_ENTITY_REGISTRY.getName(getClass());
 	}
 	
 	/**

@@ -11,11 +11,8 @@ import com.stabilise.world.Slice;
  */
 public class Packet004Slice extends Packet {
 	
-	/** The slice's x-coordinate, in slice-lengths. */
-	public int x;
-	/** The slice's y coordinate, in slice-lengths. */
-	public int y;
-	
+	/** The slice coordinates, in slice-lengths. */
+	public int x, y;
 	/** The tiles constituting the slice. */
 	public int[] tiles;
 	
@@ -37,21 +34,15 @@ public class Packet004Slice extends Packet {
 		
 		tiles = new int[Slice.SLICE_SIZE * Slice.SLICE_SIZE];
 		for(int i = 0; i < Slice.SLICE_SIZE * Slice.SLICE_SIZE; i++)
-			tiles[i] = in.read();	// TODO: For now, sending the tile IDs as bytes, not ints
+			tiles[i] = in.read();
 	}
 	
 	@Override
 	public void writeData(DataOutputStream out) throws IOException {
 		out.writeInt(x);
 		out.writeInt(y);
-		
-		for(int i = 0; i < tiles.length; i++)
-			out.write(tiles[i]);
-	}
-	
-	@Override
-	public int getBytes() {
-		return tiles.length + 2 * Integer.SIZE / Byte.SIZE;
+		for(int i : tiles)
+			out.write(i);
 	}
 	
 }

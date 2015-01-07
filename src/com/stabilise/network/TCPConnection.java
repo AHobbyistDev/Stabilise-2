@@ -8,47 +8,33 @@ import com.stabilise.network.packet.Packet;
 import com.stabilise.util.Log;
 
 /**
- * A TCPConnection object represents the connection between a server and a
- * client, and provides a gateway for them to interact.
+ * A TCPConnection instance maintains a connection between a server and a
+ * client, and is the gateway for interaction between the two.
  */
 public class TCPConnection {
 	
-	/** The socket upon which to base the connection. */
-	protected Socket socket;
+	protected final Socket socket;
 	
-	/** The socket's input stream. */
-	private DataInputStream in;
-	/** The socket's output stream. */
-	private DataOutputStream out;
+	private final DataInputStream in;
+	private final DataOutputStream out;
 	
-	/** The queue of received packets. */
-	private LinkedBlockingQueue<Packet> packetQueueIn = new LinkedBlockingQueue<Packet>();
-	/** The queue of packets to be sent. */
-	private LinkedBlockingQueue<Packet> packetQueueOut = new LinkedBlockingQueue<Packet>();
+	private final LinkedBlockingQueue<Packet> packetQueueIn = new LinkedBlockingQueue<Packet>();
+	private final LinkedBlockingQueue<Packet> packetQueueOut = new LinkedBlockingQueue<Packet>();
 	
-	/** True if this is a server-side connection. */
-	private boolean server;
+	/** {@code true} if this is a server-side connection. */
+	private final boolean server;
 	
-	/** True if the connection is active. */
+	/** {@code true} if this connection is active. This is volatile. */
 	private volatile boolean running = true;
-	/** True if the connection has been terminated. */
+	/** {@code true} if the connection has been terminated. This is volatile. */
 	private volatile boolean terminated = false;
 	
-	/** The thread to handle all packet read operations. */
 	private TCPReadThread readThread;
-	/** The thread to handle all packet write operations. */
 	private TCPWriteThread writeThread;
 	
-	/** Tracks the number of packets sent though the connection. */
 	private int totalPacketsSent = 0;
-	/** Tracks the total number of bytes sent through the connection. */
-	private long totalBytesSent = 0;
-	/** Tracks the total number of packets received through the connection. */
 	private int totalPacketsReceived = 0;
-	/** Tracks the total number of bytes received through the connection. */
-	private long totalBytesReceived = 0;
 	
-	/** The connection's logging agent. */
 	private Log log;
 	
 	
@@ -56,10 +42,9 @@ public class TCPConnection {
 	 * Creates a new TCPConnection.
 	 * 
 	 * @param socket The socket upon which to base the connection.
-	 * @param server Whether or not the connection represents a server-side
-	 * connection.
+	 * @param server Whether or not this is a server-side connection.
 	 * 
-	 * @throws IOException Thrown if the connection could not be created.
+	 * @throws IOException if the connection could not be established.
 	 */
 	public TCPConnection(Socket socket, boolean server) throws IOException {
 		this.socket = socket;
@@ -70,14 +55,6 @@ public class TCPConnection {
 		in = new DataInputStream(socket.getInputStream());
 		out = new DataOutputStream(socket.getOutputStream());
 		
-		/*
-		try {
-			socket.setSoTimeout(5);
-		} catch(SocketException e) {
-			log.logCritical("Could not set timeout", e);
-		}
-		*/
-		
 		readThread = new TCPReadThread(this, server ? "ServerSocket" : "ClientSocket");
 		writeThread = new TCPWriteThread(this, server ? "ServerSocket" : "ClientSocket");
 		
@@ -87,8 +64,6 @@ public class TCPConnection {
 	
 	/**
 	 * Queues a packet for sending.
-	 * 
-	 * @param The packet to queue for sending.
 	 * 
 	 * @return True if the packet was successfully queued, and false if the
 	 * packet is null, the packet is invalid, or the queue is full.
@@ -165,16 +140,10 @@ public class TCPConnection {
 	public boolean readPacket() {
 		try {
 			Packet packet = Packet.readPacket(in);
-			
-			if(packet == null) return false;
-			
+			if(packet == null)
+				return false;
 			packetQueueIn.offer(packet);
-			
 			totalPacketsReceived++;
-			totalBytesReceived += 1 + packet.getBytes();
-			
-			// TODO: Is it better to do it this way?
-			//return packetQueueIn.offer(packet);
 			return true;
 		} catch (IOException e) {
 			log.postSevere("Exception while reading packet", e);
@@ -185,24 +154,17 @@ public class TCPConnection {
 	/**
 	 * Writes a packet to the socket's output stream.
 	 * 
-	 * @return True if the packet was successfully written.
+	 * @return {@code true} if the packet was sent; {@code false} otherwise.
 	 */
 	public boolean writePacket() {
 		Packet packet = packetQueueOut.poll();
-		
-		if(packet != null) {
-			try {
-				if(Packet.writePacket(out, packet)) {
-					totalPacketsSent++;
-					totalBytesSent += 1 + packet.getBytes();
-				}
-				
-				return true;
-			} catch (IOException e) {
-				log.postSevere("Exception while writing packet", e);
-			}
+		try {
+			Packet.writePacket(out, packet);
+			totalPacketsSent++;
+			return true;
+		} catch(IOException e) {
+			log.postSevere("Exception while writing packet", e);
 		}
-		
 		return false;
 	}
 	
@@ -223,19 +185,15 @@ public class TCPConnection {
 		
 		try {
 			in.close();
-		} catch (IOException e) {
+		} catch(IOException e) {
 			log.postSevere("Could not close input stream!");
 		}
 		
-		in = null;
-		
 		try {
 			out.close();
-		} catch (IOException e) {
+		} catch(IOException e) {
 			log.postSevere("Could not close output stream!");
 		}
-		
-		out = null;
 		
 		running =  false;
 		
@@ -266,9 +224,9 @@ public class TCPConnection {
 		readThread = null;
 		writeThread = null;
 		
-		log.postInfo("Connection closed; " + 
-				totalPacketsSent + " packet(s) sent (" + totalBytesSent + "/" + written + " bytes), " +
-				totalPacketsReceived + " packet(s) received (" + totalBytesReceived + " bytes).");
+		log.postInfo("Connection closed; "
+				+ totalPacketsSent + " packet(s) sent (" + written + " bytes), "
+				+ totalPacketsReceived + " packet(s) received .");
 	}
 	
 	//--------------------==========--------------------
