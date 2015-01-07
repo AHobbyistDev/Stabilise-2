@@ -56,9 +56,15 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 	
 	@Override
 	public boolean contains(Object o) {
-		for(E e : this)
-			if(e == o)
-				return true;
+		if(o == null) {
+			for(E e : this)
+				if(e == null)
+					return true;
+		} else {
+			for(E e : this)
+				if(o.equals(e))
+					return true;
+		}
 		return false;
 	}
 	
@@ -323,7 +329,7 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 	//--------------------==========--------------------
 	
 	/**
-	 * List node. Stores its element and the pointer to the enxt node.
+	 * List node. Stores its element and the pointer to the next node.
 	 */
 	protected static class Node<E> {
 		

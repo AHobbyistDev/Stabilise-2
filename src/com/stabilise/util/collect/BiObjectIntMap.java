@@ -99,12 +99,10 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 	/**
 	 * Checks for whether or not a value is mapped to the specified key.
 	 * 
-	 * @param key The key.
-	 * 
 	 * @return {@code true} if the key has a mapping; {@code false} otherwise.
 	 * @throws IndexOutOfBoundsException if {@code key < 0}.
 	 */
-	public boolean objectExists(int key) {
+	public boolean hasKey(int key) {
 		return getObject(key) != null;
 	}
 	

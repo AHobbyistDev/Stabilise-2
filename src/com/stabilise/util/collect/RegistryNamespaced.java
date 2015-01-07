@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.stabilise.util.collect.Registry.DuplicatePolicy;
 
 /**
  * The namespaced registry extends upon a standard registry to also include
@@ -191,7 +190,7 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	 * {@code false} otherwise.
 	 */
 	public boolean containsID(int id) {
-		return idMap.objectExists(id);
+		return idMap.hasKey(id);
 	}
 	
 	/**

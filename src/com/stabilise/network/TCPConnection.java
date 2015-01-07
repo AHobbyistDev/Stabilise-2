@@ -2,10 +2,12 @@ package com.stabilise.network;
 
 import java.io.*;
 import java.net.*;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.stabilise.network.packet.Packet;
 import com.stabilise.util.Log;
+import com.stabilise.util.annotation.UserThread;
 
 /**
  * A TCPConnection instance maintains a connection between a server and a
@@ -18,8 +20,8 @@ public class TCPConnection {
 	private final DataInputStream in;
 	private final DataOutputStream out;
 	
-	private final LinkedBlockingQueue<Packet> packetQueueIn = new LinkedBlockingQueue<Packet>();
-	private final LinkedBlockingQueue<Packet> packetQueueOut = new LinkedBlockingQueue<Packet>();
+	private final Queue<Packet> packetQueueIn = new ConcurrentLinkedQueue<Packet>();
+	private final Queue<Packet> packetQueueOut = new ConcurrentLinkedQueue<Packet>();
 	
 	/** {@code true} if this is a server-side connection. */
 	private final boolean server;
@@ -69,7 +71,8 @@ public class TCPConnection {
 	 * packet is null, the packet is invalid, or the queue is full.
 	 */
 	public boolean queuePacket(Packet packet) {
-		if(packet == null) return false;
+		if(packet == null)
+			return false;
 		
 		if((!server && packet.isClientPacket()) || (server && packet.isServerPacket())) {
 			return packetQueueOut.offer(packet);
@@ -113,8 +116,6 @@ public class TCPConnection {
 	
 	/**
 	 * Blocks the current thread until a packet is received.
-	 * This should be used sparingly and only when it is absolutely essential
-	 * to block until the packet is received.
 	 * 
 	 * @return The oldest queued packet, or the first packet to be added if the
 	 * queue is empty.
@@ -132,11 +133,14 @@ public class TCPConnection {
 	}
 	
 	/**
-	 * Reads a packet from the socket's input stream.
+	 * Reads a packet from the socket's input stream. A return value of {@code
+	 * false} indicates either an I/O exception or the end of the stream having
+	 * been reached.
 	 * 
-	 * @return True if a packet was successfully read. A value of false
-	 * indicates either an I/O Exception or the end of the stream having been reached.
+	 * @return {@code true} if a packet was successfully read; {@code false}
+	 * otherwise.
 	 */
+	@UserThread("ReadThread")
 	public boolean readPacket() {
 		try {
 			Packet packet = Packet.readPacket(in);
@@ -156,8 +160,11 @@ public class TCPConnection {
 	 * 
 	 * @return {@code true} if the packet was sent; {@code false} otherwise.
 	 */
+	@UserThread("WriteThread")
 	public boolean writePacket() {
 		Packet packet = packetQueueOut.poll();
+		if(packet == null)
+			return false;
 		try {
 			Packet.writePacket(out, packet);
 			totalPacketsSent++;

@@ -1,6 +1,6 @@
 package com.stabilise.network.packet;
 
-import static com.stabilise.util.collect.Registry.DuplicatePolicy.*;
+import static com.stabilise.util.collect.DuplicatePolicy.*;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -17,14 +17,12 @@ public abstract class Packet {
 	
 	/** The packet registry. */
 	private static final InstantiationRegistry<Packet> PACKETS =
-			new InstantiationRegistry<Packet>("packets", 256, THROW_EXCEPTION);
-	/** Flags corredponsing to whether a packet may be sent by a client. */
+			new InstantiationRegistry<Packet>(256, THROW_EXCEPTION, Packet.class);
+	/** Flags corresponding to whether a packet may be sent by a client. */
 	private static final boolean[] clientPackets = new boolean[256];
-	/** Flags corredponsing to whether a packet may be sent by a server. */
+	/** Flags corresponding to whether a packet may be sent by a server. */
 	private static final boolean[] serverPackets = new boolean[256];
 	
-	
-	public Packet() {}
 	
 	/**
 	 * @return This packet's ID.
@@ -44,66 +42,48 @@ public abstract class Packet {
 	public abstract void writeData(DataOutputStream out) throws IOException;
 	
 	/**
-	 * Reads and returns a string from the input stream.
-	 * This should be used instead of in.readUTF() or in.readChar() in
-	 * subclasses of packet.
+	 * Reads and returns a string from the provided input stream.
 	 * 
 	 * @param in The input stream from which to read the string.
 	 * 
 	 * @return The read string.
-	 * @throws IOException Thrown if an I/O exception is encountered while
-	 * reading the string.
+	 * @throws NullPointerException if {@code in} is {@code null}.
+	 * @throws IOException
 	 */
 	protected final String readString(DataInputStream in) throws IOException {
 		short length = in.readShort();
-		
-		// Note: No < 0 or > Short.MAX_VALUE checks for now
-		
-		StringBuilder builder = new StringBuilder();
-		
-		for(short i = 0; i < length; i++)
-			builder.append(in.readChar());
-		
-		return builder.toString();
+		StringBuilder sb = new StringBuilder();
+		while(length-- > 0)
+			sb.append(in.readChar());
+		return sb.toString();
 	}
 	
 	/**
-	 * Writes a string to the output stream.
-	 * This should be used instead of out.writeUTF() or out.writeChars() in
-	 * subclasses of packet.
+	 * Writes a string to the provided output stream.
 	 * 
-	 * @param string The string to write to the output stream.
-	 * @param out The output stream to write the string to.
-	 * 
-	 * @throws IllegalArgumentException Thrown if the given string is null, or
-	 * exceeds 32767 characters.
-	 * @throws IOException Thrown if an I/O exception is encountered while
-	 * writing the string.
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IllegalArgumentException {@code string} exceeds 32767
+	 * characters.
+	 * @throws IOException
 	 */
 	protected final void writeString(String string, DataOutputStream out) throws IOException {
-		if(string == null) {
-			throw new IllegalArgumentException("The given string is null!");
-		} else if(string.length() > Short.MAX_VALUE) {
+		if(string.length() > Short.MAX_VALUE)
 			throw new IllegalArgumentException("The given string is too large!");
-		} else {
-			out.writeShort(string.length());
-			out.writeChars(string);
-		}
+		out.writeShort(string.length());
+		out.writeChars(string);
 	}
 	
 	/**
-	 * Checks for whether or not the packet may be sent by a client.
-	 * 
-	 * @return True if the packet may be sent by a client.
+	 * @return {@code true} if this packet may be sent by a client; {@code
+	 * false} otherwise.
 	 */
 	public final boolean isClientPacket() {
 		return clientPackets[getID()];
 	}
 	
 	/**
-	 * Checks for whether or not the packet may be sent by a server.
-	 * 
-	 * @return True if the packet may be sent by a server.
+	 * @return {@code true} if this packet may be sent by a server; {@code
+	 * false} otherwise.
 	 */
 	public final boolean isServerPacket() {
 		return serverPackets[getID()];
@@ -116,7 +96,8 @@ public abstract class Packet {
 	/**
 	 * Instantiates an instance of a packet with the specified ID.
 	 * 
-	 * @return The packet, or {@code null} if it could not be created.
+	 * @return The packet, or {@code null} if it could not be created, either
+	 * due to {@code id} lacking a mapping or instantiation outright failing.
 	 */
 	public static Packet createPacket(int id) {
 		try {

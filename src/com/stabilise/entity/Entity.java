@@ -1,6 +1,6 @@
 package com.stabilise.entity;
 
-import static com.stabilise.util.collect.Registry.DuplicatePolicy.THROW_EXCEPTION;
+import static com.stabilise.util.collect.DuplicatePolicy.THROW_EXCEPTION;
 
 import com.stabilise.util.collect.InstantiationRegistry;
 import com.stabilise.util.maths.MathsUtil;
@@ -25,7 +25,7 @@ public abstract class Entity extends FreeGameObject {
 	
 	/** The entity registry. */
 	private static final InstantiationRegistry<Entity> ENTITIES =
-			new InstantiationRegistry<Entity>("entities", 8, THROW_EXCEPTION,
+			new InstantiationRegistry<Entity>(8, THROW_EXCEPTION, Entity.class,
 					World.class);
 	
 	// Register all entity types.

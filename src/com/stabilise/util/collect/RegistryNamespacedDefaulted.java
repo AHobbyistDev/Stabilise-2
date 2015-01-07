@@ -1,7 +1,5 @@
 package com.stabilise.util.collect;
 
-import com.stabilise.util.collect.Registry.DuplicatePolicy;
-
 /**
  * This class allows for the creation of a namespaced registry which returns a
  * specified default value if no other value could be found.

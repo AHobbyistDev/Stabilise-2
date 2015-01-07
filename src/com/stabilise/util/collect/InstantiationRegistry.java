@@ -4,7 +4,7 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.stabilise.util.collect.Registry.DuplicatePolicy;
+import com.stabilise.util.Log;
 
 /**
  * A registry which provides instantiation facilities for registered classes.
@@ -29,7 +29,7 @@ import com.stabilise.util.collect.Registry.DuplicatePolicy;
  * }
  * 
  * public InstantiationRegistry{@code <MyClass>} registry =
- *     new InstantiationRegistry{@code <MyClass>}("objects", 2, Registry.DuplicatePolicy.THROW_EXCEPTION);
+ *     new InstantiationRegistry{@code <MyClass>}(2, DuplicatePolicy.THROW_EXCEPTION, MyClass.class);
  * 
  * registry.register(0, MyOtherClass.class, Integer.TYPE, Integer.TYPE);
  * registry.register(1, YetAnotherClass.class,
@@ -53,10 +53,11 @@ import com.stabilise.util.collect.Registry.DuplicatePolicy;
  */
 public class InstantiationRegistry<T> {
 	
-	/** The factory registry. */
-	private final RegistryNamespaced<Factory<? extends T>> factories;
-	/** Maps classes to IDs. */
+	private final BiObjectIntMap<Factory<? extends T>> factoryMap;
 	private final Map<Class<? extends T>, Integer> idMap;
+	
+	private final DuplicatePolicy dupePolicy;
+	private final Log log;
 	
 	/** The default constructor arguments. */
 	private final Class<?>[] defaultArgs;
@@ -65,21 +66,30 @@ public class InstantiationRegistry<T> {
 	/**
 	 * Creates a new instantiation registry.
 	 * 
-	 * @param name The name of the registry.
 	 * @param capacity The initial registry capacity.
 	 * @param dupePolicy The duplicate entry policy.
-	 * @param defaultArgs The default constructor arguments.
+	 * @param baseClass The base class - i.e. the {@code Class} object which T
+	 * technically defines.
+	 * @param defaultArgs The default constructor arguments. Permitted to be
+	 * empty.
 	 * 
-	 * @throws NullPointerException if either {@code name} or {@code
-	 * dupePolicy} are {@code null}.
+	 * @throws NullPointerException if {@code dupePolicy} or any of the {@code
+	 * defaultArgs} - if any are provided - are {@code null}.
 	 * @throws IllegalArgumentException if {@code capacity < 0}.
 	 * @see DuplicatePolicy
 	 */
-	public InstantiationRegistry(String name, int capacity,
-			DuplicatePolicy dupePolicy, Class<?>... defaultArgs) {
-		factories = new RegistryNamespaced<Factory<? extends T>>(name, "", capacity, dupePolicy);
-		idMap = new HashMap<Class<? extends T>, Integer>();
+	public InstantiationRegistry(int capacity, DuplicatePolicy dupePolicy, Class<T> baseClass,
+			Class<?>... defaultArgs) {
+		factoryMap = new BiObjectIntMap<Factory<? extends T>>(capacity);
+		idMap = new HashMap<Class<? extends T>, Integer>(capacity);
+		this.dupePolicy = dupePolicy;
 		this.defaultArgs = defaultArgs != null ? defaultArgs : new Class<?>[0];
+		
+		log = Log.getAgent(baseClass.getSimpleName() + "InstRegistry");
+		
+		for(Class<?> c : defaultArgs)
+			if(c == null)
+				throw new NullPointerException("A default arg is null!");
 	}
 	
 	/**
@@ -89,7 +99,7 @@ public class InstantiationRegistry<T> {
 	 * #register(int, String, Class, Class...)
 	 * register(id, name, objClass, defaultArgs)}, where {@code defaultArgs}
 	 * is specified in the {@link
-	 * #InstantiationRegistry(String, String, int, DuplicatePolicy, Class...)
+	 * #InstantiationRegistry(int, DuplicatePolicy, Class, Class...)
 	 * constructor}.
 	 * 
 	 * @param id The ID of the object type.
@@ -145,8 +155,10 @@ public class InstantiationRegistry<T> {
 	 * THROW_EXCEPTION} duplicate policy.
 	 */
 	public <S extends T> void register(int id, Class<S> objClass, Factory<S> factory) {
-		if(factories.register(id, objClass.getSimpleName(), factory))
-			idMap.put(objClass, Integer.valueOf(id));
+		if(factoryMap.hasKey(id) && dupePolicy.handle(log, "Duplicate id " + id))
+			return;
+		factoryMap.put(id, factory);
+		idMap.put(objClass, Integer.valueOf(id));
 	}
 	
 	/**
@@ -157,27 +169,11 @@ public class InstantiationRegistry<T> {
 	 * 
 	 * @return The newly-created object, or {@code null} if the specified ID
 	 * lacks a mapping.
+	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws RuntimeException if object creation failed.
 	 */
 	public T instantiate(int id, Object... args) {
-		Factory<? extends T> factory = factories.get(id);
-		if(factory != null)
-			return factory.create(args);
-		return null;
-	}
-	
-	/**
-	 * Instantiates an object of the specified class name.
-	 * 
-	 * @param className The name the object's class.
-	 * @param args The constructor arguments.
-	 * 
-	 * @return The newly-created object, or {@code null} if there is no class
-	 * of the specified name mapped.
-	 * @throws RuntimeException if object creation failed.
-	 */
-	public T instantiate(String className, Object... args) {
-		Factory<? extends T> factory = factories.get(className);
+		Factory<? extends T> factory = factoryMap.getObject(id);
 		if(factory != null)
 			return factory.create(args);
 		return null;
@@ -190,7 +186,6 @@ public class InstantiationRegistry<T> {
 	 * registered.
 	 */
 	public int getID(Class<? extends T> objClass) {
-		//return factories.getObjectID(factories.get(objClass.getSimpleName()));
 		Integer i = idMap.get(objClass);
 		return i == null ? -1 : i.intValue();
 	}

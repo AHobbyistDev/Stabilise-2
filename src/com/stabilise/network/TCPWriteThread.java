@@ -31,23 +31,21 @@ public class TCPWriteThread extends Thread {
 			boolean flushStream = false;
 			
 			while(connection.writePacket())
-				// TODO: Possibly check for interruptions here
 				flushStream = true;
 			
 			// Flush the stream if any packets have been sent
 			if(flushStream) {
 				try {
 					connection.getOutputStream().flush();
-				} catch (IOException e) {
-					//Log.getAgent().logCritical("Could not flush output stream!);
+				} catch(IOException e) {
 					Log.getAgent("TCP_WRITE_THREAD").postSevere("Could not flush output stream!", e);
 				}
 			}
 			
 			try {
 				sleep(2L);
-			} catch (InterruptedException e) {}
+			} catch (InterruptedException ignored) {}
 		}
 	}
-
+	
 }

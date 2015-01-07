@@ -136,7 +136,7 @@ public abstract class Task implements Runnable {
 	 */
 	private void wakeWaitingThreads() {
 		synchronized(lock) {
-			lock.notifyAll(); 
+			lock.notifyAll();
 		}
 	}
 	
@@ -308,18 +308,18 @@ public abstract class Task implements Runnable {
 	 */
 	public final void waitUninterruptibly() throws ExecutionException {
 		if(canWait()) {
-			boolean interrupted = true;
-			while(state.equals(TaskState.RUNNING) && interrupted) {
-				interrupted = false;
-				synchronized(lock) {
-					try {
-						lock.wait();
-					} catch(InterruptedException ignored) {
-						interrupted = true;
+			try {
+				while(state.equals(TaskState.RUNNING)) {
+					synchronized(lock) {
+						try {
+							lock.wait(); // Awoken by wakeWaitingThreads()
+							return;
+						} catch(InterruptedException ignored) {}
 					}
 				}
+			} finally {
+				throwExcecutionException();
 			}
-			throwExcecutionException();
 		}
 	}
 	

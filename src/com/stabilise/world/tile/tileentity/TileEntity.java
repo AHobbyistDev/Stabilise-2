@@ -1,6 +1,6 @@
 package com.stabilise.world.tile.tileentity;
 
-import static com.stabilise.util.collect.Registry.DuplicatePolicy.*;
+import static com.stabilise.util.collect.DuplicatePolicy.*;
 
 import com.stabilise.entity.FixedGameObject;
 import com.stabilise.opengl.render.WorldRenderer;
@@ -19,7 +19,7 @@ public abstract class TileEntity extends FixedGameObject {
 	
 	/** The tile entity registry. */
 	private static final InstantiationRegistry<TileEntity> TILE_ENTITY_REGISTRY =
-			new InstantiationRegistry<TileEntity>("tile entities", 4, THROW_EXCEPTION);
+			new InstantiationRegistry<TileEntity>(4, THROW_EXCEPTION, TileEntity.class);
 	
 	// Register all tile entity types.
 	static {
