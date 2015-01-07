@@ -35,7 +35,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 		try {
 			regionTag = NBTIO.readCompressed(r.getFile());
 		} catch(IOException e) {
-			log.logCritical("Could not load the NBT data for region " + r.loc.getX() + "," + r.loc.getY() + "!", e);
+			log.postSevere("Could not load the NBT data for region " + r.loc.getX() + "," + r.loc.getY() + "!", e);
 			return;
 		}
 		
@@ -85,7 +85,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 			
 			r.hasQueuedSchematics = true;
 			
-			log.logMessage("Loaded " + schematics.size() + " schematics into " + r);
+			log.postDebug("Loaded " + schematics.size() + " schematics into " + r);
 		}
 	}
 	
@@ -142,13 +142,13 @@ public class PreAlphaWorldLoader extends WorldLoader {
 			
 			regionTag.addList("queuedSchematics", schematics);
 			
-			log.logMessage("Saved " + schematics.size() + " schematics in " + r);
+			log.postDebug("Saved " + schematics.size() + " schematics in " + r);
 		}
 		
 		try {
 			NBTIO.safeWriteCompressed(r.getFile(), regionTag);
 		} catch(IOException e) {
-			log.logCritical("Could not save " + r + "!", e);
+			log.postSevere("Could not save " + r + "!", e);
 		}
 	}
 

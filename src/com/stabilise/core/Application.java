@@ -203,13 +203,13 @@ public abstract class Application {
 		
 		// Make sure nothing has gone wrong with timing
 		if(unprocessed > 5000000000L) { // 5 seconds
-			Log.critical("Can't keep up! Application is running "
+			Log.get().postWarning("Can't keep up! Application is running "
 					+ TimeUnit.NANOSECONDS.toMillis(now - lastTime) + " milliseconds behind; skipping " 
 					+ (unprocessed / nsPerTick) + " ticks!"
 			);
 			unprocessed = 0L;
 		} else if(unprocessed < 0L) {
-			Log.critical("Time ran backwards! Did the timer overflow?");
+			Log.get().postWarning("Time ran backwards! Did the timer overflow?");
 			unprocessed = 0L;
 		}
 		
@@ -328,9 +328,9 @@ public abstract class Application {
 			return;			// double-crash and re-save the log?
 		crashing = true;
 		if(t == null)
-			Log.critical("The application has crashed!", new Exception("<<stack trace buddy>>"));
+			Log.get().postSevere("The application has crashed!", new Exception("<<stack trace buddy>>"));
 		else
-			Log.critical("The application has crashed!", t);
+			Log.get().postSevere("The application has crashed!", t);
 		produceCrashLog();
 		shutdown();
 	}

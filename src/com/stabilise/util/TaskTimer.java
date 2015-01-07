@@ -123,7 +123,7 @@ public class TaskTimer {
 	 * @see com.stabilise.util.Log
 	 */
 	public void logResult() {
-		logResult(Log.getAgent());
+		logResult(Log.get());
 	}
 	
 	/**
@@ -134,7 +134,7 @@ public class TaskTimer {
 	 * @see com.stabilise.util.Log
 	 */
 	public void logResult(TimeUnit unit) {
-		logResult(Log.getAgent(), unit);
+		logResult(Log.get(), unit);
 	}
 	
 	/**
@@ -145,7 +145,7 @@ public class TaskTimer {
 	 * @see com.stabilise.util.Log
 	 */
 	public void logResult(Log log) {
-		log.logMessage(getResult());
+		log.postInfo(getResult());
 	}
 	
 	/**
@@ -157,7 +157,7 @@ public class TaskTimer {
 	 * @see com.stabilise.util.Log
 	 */
 	public void logResult(Log log, TimeUnit unit) {
-		log.logMessage(getResult(unit));
+		log.postInfo(getResult(unit));
 	}
 	
 	/**
@@ -202,7 +202,7 @@ public class TaskTimer {
 	 * @see com.stabilise.util.Log
 	 */
 	public void logComparison(TaskTimer other) {
-		logComparison(other, Log.getAgent());
+		logComparison(other, Log.get());
 	}
 	
 	/**
@@ -216,7 +216,7 @@ public class TaskTimer {
 	 * @see com.stabilise.util.Log
 	 */
 	public void logComparison(TaskTimer other, Log log) {
-		log.logMessage(getComparison(other));
+		log.postInfo(getComparison(other));
 	}
 	
 	// ----------Static Methods----------

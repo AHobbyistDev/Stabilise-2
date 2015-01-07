@@ -177,7 +177,7 @@ public class Registry<K, V> implements Iterable<V> {
 		OVERRIDE {
 			@Override
 			protected boolean handle(Log log, String msg) {
-				log.logCritical(msg + "; replacing old mapping");
+				log.postWarning(msg + "; replacing old mapping");
 				return false;
 			}
 		},
@@ -185,7 +185,7 @@ public class Registry<K, V> implements Iterable<V> {
 		REJECT {
 			@Override
 			protected boolean handle(Log log, String msg) {
-				log.logCritical(msg + "; ignoring new mapping");
+				log.postWarning(msg + "; ignoring new mapping");
 				return true;
 			}
 		},

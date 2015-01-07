@@ -841,7 +841,7 @@ public abstract class World {
 		try {
 			info.save();
 		} catch(IOException e) {
-			Log.critical("Could not save world info during creation process!", e);
+			Log.get().postSevere("Could not save world info during creation process!", e);
 			return null;
 		}
 		
@@ -884,7 +884,7 @@ public abstract class World {
 			try {
 				worlds.get(validWorlds).load();
 			} catch(IOException e) {
-				Log.critical("Could not load world info for world \"" + worldDirs[i].getName() + "\"!");
+				Log.get().postWarning("Could not load world info for world \"" + worldDirs[i].getName() + "\"!", e);
 				worlds.remove(validWorlds);
 				continue;
 			}
@@ -915,7 +915,7 @@ public abstract class World {
 		try {
 			FileUtils.deleteDirectory(world);
 		} catch(IOException e) {
-			Log.critical("Could not delete world \"" + worldName + "\"!", e);
+			Log.get().postSevere("Could not delete world \"" + worldName + "\"!", e);
 		}
 	}
 	
@@ -992,7 +992,7 @@ public abstract class World {
 						tagLoaded = true;
 					loaded = true;
 				} catch(IOException e) {
-					log.logCritical("Could not load character data file for character " + character.name, e);
+					log.postSevere("Could not load character data file for character " + character.name, e);
 				}
 			} else {
 				nbt = new NBTTagCompound("");
@@ -1018,7 +1018,7 @@ public abstract class World {
 			try {
 				NBTIO.writeCompressed(file, nbt);
 			} catch(IOException e) {
-				log.logCritical("Could not save character data file for character " + character.name, e);
+				log.postSevere("Could not save character data file for character " + character.name, e);
 			}
 		}
 		

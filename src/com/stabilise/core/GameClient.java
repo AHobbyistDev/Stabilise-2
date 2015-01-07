@@ -41,7 +41,7 @@ public class GameClient {
 	 */
 	public GameClient() {
 		try {
-			log.logMessage("Initiating client...");
+			log.postInfo("Initiating client...");
 			socket = new Socket(InetAddress.getLocalHost(), DEFAULT_PORT);
 			
 			connection = new TCPConnection(socket, false);
@@ -55,9 +55,9 @@ public class GameClient {
 				return;
 			}
 			
-			log.logMessage("Got server data!");
+			log.postDebug("Got server data!");
 		} catch (IOException e) {
-			log.logCritical("Error creating client-server connection!");
+			log.postSevere("Error creating client-server connection!");
 			if(socket != null) {
 				if(connection != null) {
 					connection.closeConnection();
@@ -110,7 +110,7 @@ public class GameClient {
 				// TODO: Send packets and whatnot
 				
 			} catch(Exception e) {
-				log.logCritical("Client encountered error!");
+				log.postSevere("Client encountered error!");
 				e.printStackTrace();	// temporary
 				close();
 				return;
@@ -229,10 +229,10 @@ public class GameClient {
 		}
 		
 		if(serverOutdated) {
-			log.logCritical("Outdated server!");
+			log.postWarning("Outdated server!");
 			return false;
 		} else if(clientOutdated) {
-			log.logCritical("Outdated client!");
+			log.postWarning("Outdated client!");
 			return false;
 		}
 		
@@ -278,7 +278,7 @@ public class GameClient {
 	 * @param packet The disconnect packet.
 	 */
 	private void handlePacketDisconnect(Packet254Disconnect packet) {
-		log.logMessage("Was kicked for reason \"" + packet.reason + "\"");
+		log.postInfo("Was kicked for reason \"" + packet.reason + "\"");
 		close();
 	}
 	

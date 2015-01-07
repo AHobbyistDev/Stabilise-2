@@ -212,13 +212,13 @@ public class WorldServer extends World {
 	 * Saves the world.
 	 */
 	public void save() {
-		log.logMessage("Saving world...");
+		log.postInfo("Saving world...");
 		
 		try {
 			// TODO: Save regions too, not just the info.
 			info.save();
 		} catch (IOException e) {
-			log.logCritical("Could not save world info!");
+			log.postSevere("Could not save world info!");
 		}
 	}
 	
@@ -250,7 +250,7 @@ public class WorldServer extends World {
 		if(info != null)
 			return new WorldServer(server, info);
 		
-		Log.critical("Could not load info file of world \"" + worldName + "\" during world loading!");
+		Log.get().postSevere("Could not load info file of world \"" + worldName + "\" during world loading!");
 		return null;
 	}
 	

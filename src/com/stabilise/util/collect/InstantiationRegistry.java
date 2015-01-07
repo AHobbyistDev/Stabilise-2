@@ -264,7 +264,8 @@ public class InstantiationRegistry<T> {
 				return constructor.newInstance(args);
 			} catch(Exception e) {
 				throw new RuntimeException("Could not reflectively instantiate object of class \""
-						+ constructor.getDeclaringClass().getSimpleName() + "\"!", e);
+						+ constructor.getDeclaringClass().getSimpleName() + "\"! (" + e.getMessage() + ")",
+						e);
 			}
 		}
 		

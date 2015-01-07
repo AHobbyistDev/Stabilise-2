@@ -247,6 +247,8 @@ public class MathsUtil {
 	 * positive infinity.
 	 */
 	public static int meanCeil(int a, int b) {
+		// I haven't quite figured out how this works yet. Taken from hacker's
+		// delight
 		return (a | b) - ((a ^ b) >> 1);
 	}
 	
@@ -355,8 +357,8 @@ public class MathsUtil {
 	 * {@code y} which satisfy:
 	 * 
 	 * <pre>
-	 * wrappedRemainder(x0, 65536) == wrappedRemainder(x1, 65536) &&
-	 * wrappedRemainder(y0, 65536) == wrappedRemainder(y1, 65536)</pre>
+	 * wrappedRem(x0, 65536) == wrappedRem(x1, 65536) &&
+	 * wrappedRem(y0, 65536) == wrappedRem(y1, 65536)</pre>
 	 * 
 	 * @param x The first value.
 	 * @param y The second value.
@@ -364,7 +366,7 @@ public class MathsUtil {
 	 * @return The compacted value.
 	 */
 	public static int compactInt(int x, int y) {
-		return ((x & 0xFFFF) << 16) + (y & 0xFFFF);
+		return (x << 16) + (y & 0xFFFF);
 	}
 	
 	/**

@@ -67,9 +67,9 @@ public class TileChest extends Tile {
 		TileEntityChest c = (TileEntityChest)world.getTileEntityAt(x, y);
 		// TODO: temporary
 		if(c == null)
-			Log.message("The chest tile entity is missing!");
+			Log.get().postWarning("The chest tile entity is missing!");
 		else
-			Log.message(c.toString());
+			Log.get().postDebug(c.toString());
 	}
 	
 }

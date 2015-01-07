@@ -28,6 +28,15 @@ public abstract class Entity extends FreeGameObject {
 			new InstantiationRegistry<Entity>("entities", "stabilise", 8, THROW_EXCEPTION,
 					World.class);
 	
+	// Register all entity types.
+	static {
+		ENTITIES.registerDefaultArgs(0, "item", EntityItem.class);
+		ENTITIES.registerDefaultArgs(1, "fireball", EntityFireball.class);
+		ENTITIES.registerDefaultArgs(2, "bigFireball", EntityBigFireball.class);
+		ENTITIES.registerDefaultArgs(3, "rectangleEnemy", EntityEnemy.class);
+		ENTITIES.registerDefaultArgs(4, "person", EntityPerson.class);
+	}
+	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
@@ -481,14 +490,5 @@ public abstract class Entity extends FreeGameObject {
 		return e;
 	}
 	*/
-	
-	// Register all entity types.
-	static {
-		ENTITIES.registerDefaultArgs(0, "item", EntityItem.class);
-		ENTITIES.registerDefaultArgs(1, "fireball", EntityFireball.class);
-		ENTITIES.registerDefaultArgs(2, "bigFireball", EntityBigFireball.class);
-		ENTITIES.registerDefaultArgs(3, "rectangleEnemy", EntityEnemy.class);
-		ENTITIES.registerDefaultArgs(4, "person", EntityPerson.class);
-	}
 	
 }

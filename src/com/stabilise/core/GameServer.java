@@ -75,7 +75,7 @@ public class GameServer implements Runnable {
 		multiplayer = maxPlayers > 1;
 		
 		// Load the world before setting up the server...
-		log.logMessage("Loading world...");
+		log.postInfo("Loading world...");
 		world = WorldServer.loadWorld(this, worldName);
 		
 		if(world == null)
@@ -88,9 +88,9 @@ public class GameServer implements Runnable {
 	@Override
 	public void run() {
 		try {
-			log.logMessage("Setting up server socket...");
+			log.postDebug("Setting up server socket...");
 			socket = new ServerSocket(DEFAULT_PORT, maxPlayers, InetAddress.getLocalHost());
-			log.logMessage("Game hosted on " + socket.getLocalSocketAddress());
+			log.postInfo("Game hosted on " + socket.getLocalSocketAddress());
 			
 			running = true;			// This is necessary for the client listener thread
 			
@@ -107,7 +107,7 @@ public class GameServer implements Runnable {
 			
 			mainLoop();
 		} catch (Exception e) {
-			log.logCritical("Encountered error!");
+			log.postSevere("Encountered error!");
 			e.printStackTrace();
 			shutdown();
 			//Stabilise.crashGame(e);			// Nononononononono. Concurrency problems!
@@ -173,12 +173,12 @@ public class GameServer implements Runnable {
 		try {
 			connection = new ServerTCPConnection(clientSocket);
 		} catch (IOException e) {
-			log.logCritical("Error creating server-client connection!", e);
+			log.postSevere("Error creating server-client connection!", e);
 			try {
 				clientSocket.close();
 			} catch (IOException e1) {
 				// ASDFGHJKL
-				log.logThrowable(e1);
+				log.postSevere("y u no close client socket", e1);
 			}
 			return;
 		}
@@ -190,7 +190,7 @@ public class GameServer implements Runnable {
 		// Give the client the server's information
 		connection.queuePacketWithBlock(getPacketServerInfo());
 		
-		log.logMessage("Server-client connection successfully created.");
+		log.postInfo("Server-client connection successfully created.");
 	}
 	
 	/**
@@ -201,7 +201,7 @@ public class GameServer implements Runnable {
 	private void logInPlayer(ServerTCPConnection c, Packet002Login packet) {
 		// TODO: Check for banned IPs, etc.
 		
-		log.logMessage("Player \"" + packet.playerName + "\" logged in!");
+		log.postInfo("Player \"" + packet.playerName + "\" logged in!");
 		
 		int id = world.addPlayer(packet.playerName, world.info.spawnSliceX, world.info.spawnSliceY);
 		
@@ -237,7 +237,7 @@ public class GameServer implements Runnable {
 	 */
 	public void sendSliceToClient(ServerTCPConnection client, Slice slice) {
 		if(client == null) {
-			log.logCritical("The client to send the slice to has disappeared!");
+			log.postWarning("The client to send the slice to has disappeared!");
 			return;
 		}
 		client.queuePacket(new Packet004Slice(slice));
@@ -251,7 +251,7 @@ public class GameServer implements Runnable {
 		
 		stopped = true;
 		
-		log.logMessage("Shutting down server...");
+		log.postInfo("Shutting down server...");
 		
 		// This should result in the other threads being shut down
 		running = false;
@@ -271,12 +271,12 @@ public class GameServer implements Runnable {
 		try {
 			socket.close();
 		} catch (IOException e) {
-			log.logCritical("Error closing server socket!");
+			log.postSevere("Error closing server socket!");
 		}
 		
 		world.save();
 		
-		log.logMessage("Server shut down.");
+		log.postInfo("Server shut down.");
 	}
 	
 	//--------------------==========--------------------

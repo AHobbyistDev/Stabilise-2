@@ -278,7 +278,7 @@ public abstract class WorldGenerator {
 			
 			r.generated = true;
 		} catch(Throwable t) {
-			log.logCritical("Worldgen failed!", t);
+			log.postSevere("Worldgen of " + r + " failed!", t);
 		} finally {
 			// Enclosed in a finally block in case generateRegion() disobeys
 			// the order to not throw an exception or error.
@@ -512,7 +512,7 @@ public abstract class WorldGenerator {
 			try {
 				s.load();
 			} catch(IOException e) {
-				log.logCritical("Could not load schematic \"" + schematic + "\"!", e);
+				log.postWarning("Could not load schematic \"" + schematic + "\"!", e);
 				return null;
 			}
 			schematics.put(schematic, s);
@@ -795,7 +795,7 @@ public abstract class WorldGenerator {
 	 * A class which holds a cached region and a counter as to the number of
 	 * times it has been cached.
 	 */
-	private class CachedRegion {
+	private static class CachedRegion {
 		
 		/** The region. */
 		private final Region region;
@@ -841,7 +841,7 @@ public abstract class WorldGenerator {
 	 * A lock used to prevent a region from being generated multiple times
 	 * simultaneously.
 	 */
-	private class RegionLock {
+	private static class RegionLock {
 		
 		/** The RegionLock's backing semaphore. This is used instead of a
 		 * ReentrantLock so that the permit may be acquired and released on

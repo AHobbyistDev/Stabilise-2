@@ -40,7 +40,7 @@ public class TCPWriteThread extends Thread {
 					connection.getOutputStream().flush();
 				} catch (IOException e) {
 					//Log.getAgent().logCritical("Could not flush output stream!);
-					Log.getAgent("TCP_WRITE_THREAD").logCritical("Could not flush output stream!", e);
+					Log.getAgent("TCP_WRITE_THREAD").postSevere("Could not flush output stream!", e);
 				}
 			}
 			

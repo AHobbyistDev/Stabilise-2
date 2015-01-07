@@ -32,7 +32,7 @@ public class Uninstaller {
 			//FileUtils.deleteQuietly(new File("Uninstaller.jar"));
 			//FileUtils.copyFile(new File("files/Installer.jar"), new File("Installer.jar"));
 		} catch(IOException e) {
-			Log.critical("Could not uninstall game!", e);
+			Log.get().postSevere("Could not uninstall game!", e);
 			Log.saveLog(false, "", new File("Uninstall output.txt"));
 			System.exit(0);
 		}

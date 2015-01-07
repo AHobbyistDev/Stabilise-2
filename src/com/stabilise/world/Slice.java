@@ -113,8 +113,8 @@ public class Slice {
 	 * 
 	 * @return The tile entity at the specified coordinates, or {@code null}
 	 * if no such tile entity exists.
-	 * @throws ArrayIndexOutOfBoundsException Thrown if either x or y is
-	 * negative or greater than 15.
+	 * @throws ArrayIndexOutOfBoundsException if either x or y is negative or
+	 * greater than 15.
 	 */
 	public TileEntity getTileEntityAt(int x, int y) {
 		return tileEntities[y][x];
@@ -131,20 +131,18 @@ public class Slice {
 	 * tile-lengths.
 	 * @param tileEntity The tile entity.
 	 * 
-	 * @throws ArrayIndexOutOfBoundsException Thrown if either x or y is
-	 * negative or greater than 15.
+	 * @throws ArrayIndexOutOfBoundsException if either x or y is negative or
+	 * greater than 15.
 	 */
 	public void setTileEntityAt(int x, int y, TileEntity tileEntity) {
 		if(tileEntities[y][x] != null) {
 			if(tileEntity == null)
 				numTileEntities--;
-			tileEntities[y][x] = null;
-			region.unsavedChanges = true;
 		} else if(tileEntity != null) {
 			numTileEntities++;
-			tileEntities[y][x] = tileEntity;
-			region.unsavedChanges = true;
 		}
+		tileEntities[y][x] = tileEntity;
+		region.unsavedChanges = true;
 	}
 	
 	/**
@@ -154,11 +152,8 @@ public class Slice {
 	 */
 	public int[] getTilesAsIntArray() {
 		int[] tileArray = new int[SLICE_SIZE * SLICE_SIZE];
-		for(int r = 0; r < SLICE_SIZE; r++) {
-			for(int c = 0; c < SLICE_SIZE; c++) {
-				tileArray[r * SLICE_SIZE + c] = tiles[r][c];
-			}
-		}
+		for(int r = 0; r < SLICE_SIZE; r++)
+			System.arraycopy(tiles[r], 0, tileArray, r * SLICE_SIZE, SLICE_SIZE);
 		return tileArray;
 	}
 	
@@ -171,11 +166,8 @@ public class Slice {
 	public void setTilesAsIntArray(int[] tileArray) {
 		tiles = new int[SLICE_SIZE][SLICE_SIZE];
 		
-		for(int r = 0; r < SLICE_SIZE; r++) {
-			for(int c = 0; c < SLICE_SIZE; c++) {
-				tiles[r][c] = tileArray[r * SLICE_SIZE + c];
-			}
-		}
+		for(int r = 0; r < SLICE_SIZE; r++)
+			System.arraycopy(tileArray, r*SLICE_SIZE, tiles[r], 0, SLICE_SIZE);
 	}
 	
 	/**
@@ -195,6 +187,11 @@ public class Slice {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return "Slice[" + x + "," + y + "]";
 	}
 	
 }

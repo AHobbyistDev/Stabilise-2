@@ -74,25 +74,24 @@ public class ConfigFile {
 	 * (:) and {@code value} holds a valid data type.
 	 */
 	public void addTag(String name, Object value) {
-		if(value instanceof Boolean) {
+		if(value instanceof Boolean)
 			addBoolean(name, ((Boolean)value).booleanValue());
-		} else if(value instanceof Byte) {
+		else if(value instanceof Byte)
 			addByte(name, ((Byte)value).byteValue());
-		} else if(value instanceof Short) {
+		else if(value instanceof Short)
 			addShort(name, ((Short)value).shortValue());
-		} else if(value instanceof Integer) {
+		else if(value instanceof Integer)
 			addInteger(name, ((Integer)value).intValue());
-		} else if(value instanceof Long) {
+		else if(value instanceof Long)
 			addLong(name, ((Long)value).longValue());
-		} else if(value instanceof Float) {
+		else if(value instanceof Float)
 			addFloat(name, ((Float)value).floatValue());
-		} else if(value instanceof Double) {
+		else if(value instanceof Double)
 			addDouble(name, ((Double)value).doubleValue());
-		} else if(value instanceof String) {
+		else if(value instanceof String)
 			addString(name, (String)value);
-		} else {
-			Log.critical("Invalid tag type " + value.getClass().toString() + " for tag \"" + name + "\"!");
-		}
+		else
+			Log.get().postWarning("Invalid tag type " + value.getClass().toString() + " for tag \"" + name + "\"!");
 	}
 	
 	/**
@@ -212,26 +211,25 @@ public class ConfigFile {
 	 * {@code tagClass} parameter is an unrecognised class.
 	 */
 	public Object getTag(String name, Class<?> tagClass) {
-		if(tagClass == Boolean.class) {
+		if(tagClass == Boolean.class)
 			return new Boolean(getBoolean(name));
-		} else if(tagClass == Byte.class) {
+		else if(tagClass == Byte.class)
 			return new Byte(getByte(name));
-		} else if(tagClass == Short.class) {
+		else if(tagClass == Short.class)
 			return new Short(getShort(name));
-		} else if(tagClass == Integer.class) {
+		else if(tagClass == Integer.class)
 			return new Integer(getInteger(name));
-		} else if(tagClass == Long.class) {
+		else if(tagClass == Long.class)
 			return new Long(getLong(name));
-		} else if(tagClass == Float.class) {
+		else if(tagClass == Float.class)
 			return new Float(getFloat(name));
-		} else if(tagClass == Double.class) {
+		else if(tagClass == Double.class)
 			return new Double(getDouble(name));
-		} else if(tagClass == String.class) {
+		else if(tagClass == String.class)
 			return getString(name);
-		} else {
-			Log.critical("Invalid tag class \"" + tagClass.toString() + "\" for tag \"" + name + "\"!");
-			return null;
-		}
+		else
+			Log.get().postWarning("Invalid tag class \"" + tagClass.toString() + "\" for tag \"" + name + "\"!");
+		return null;
 	}
 	
 	/**
@@ -455,6 +453,9 @@ public class ConfigFile {
 	 * attempting to save the config file.
 	 */
 	public void save() throws IOException {
+		File file = getFile();
+		if(file.exists())
+			file.delete();
 		save(getFile());
 	}
 	

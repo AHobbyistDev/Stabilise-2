@@ -55,7 +55,7 @@ public class Game implements Controllable {
 	public Game(GameWorld world) {
 		this.world = world;
 		
-		log.logMessage("Initiating game...");
+		log.postInfo("Initiating game...");
 		
 		// Handled by a separate thread in the main menu now
 		//world.prepare();
@@ -90,7 +90,7 @@ public class Game implements Controllable {
 					world.update();
 				profiler.end();
 			} catch(Exception e) {
-				log.logCritical("Game encountered error!", e);
+				log.postSevere("Game encountered error!", e);
 				Application a = Application.get();
 				a.produceCrashLog();
 				//close();			// Simply calling close() makes the game freeze

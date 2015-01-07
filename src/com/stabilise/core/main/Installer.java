@@ -34,13 +34,13 @@ public class Installer {
 			//FileUtils.copyFile(new File("files/Uninstaller.jar"), new File("Uninstaller.jar"));
 			//FileUtils.deleteQuietly(new File("Installer.jar"));
 		} catch(IOException e) {
-			Log.critical("Could not copy game files!", e);
+			Log.get().postSevere("Could not copy game files!", e);
 			Log.saveLog(false, "", new File("Install output.txt"));
 			System.exit(0);
 		}
-		Log.message("The game files have been installed to: \"" + Resources.APP_DIR.getAbsolutePath().toString() + "\"");
-		Log.message("You have successfully installed Stabilise II!");
-		Log.message("Simply run \"StabiliseII.jar\" and enjoy!");
+		Log.get().postInfo("The game files have been installed to: \"" + Resources.APP_DIR.getAbsolutePath().toString() + "\"");
+		Log.get().postInfo("You have successfully installed Stabilise II!");
+		Log.get().postInfo("Simply run \"StabiliseII.jar\" and enjoy!");
 		Log.saveLog(false, "", new File("Game successfully installed.txt"));
 		System.exit(0);
 	}

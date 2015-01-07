@@ -258,7 +258,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagByte)data.get(tagName)).data : 0;
 		} catch(ClassCastException e) {
-			Log.critical("Error reading byte \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading byte \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return 0;
 		}
 	}
@@ -275,7 +275,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? (((NBTTagByte)data.get(tagName)).data == 1 ? true : false) : false;
 		} catch(ClassCastException e) {
-			Log.critical("Error reading byte \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading byte \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return false;
 		}
 	}
@@ -292,7 +292,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagByteArray)data.get(tagName)).data : new byte[0];
 		} catch(ClassCastException e) {
-			Log.critical("Error reading byte array \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading byte array \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return new byte[0];
 		}
 	}
@@ -309,7 +309,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagShort)data.get(tagName)).data : 0;
 		} catch(ClassCastException e) {
-			Log.critical("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return 0;
 		}
 	}
@@ -326,7 +326,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagInt)data.get(tagName)).data : 0;
 		} catch(ClassCastException e) {
-			Log.critical("Error reading int \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading int \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return 0;
 		}
 	}
@@ -343,7 +343,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagIntArray)data.get(tagName)).data : new int[0];
 		} catch(ClassCastException e) {
-			Log.critical("Error reading int array \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading int array \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return new int[0];
 		}
 	}
@@ -360,7 +360,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagLong)data.get(tagName)).data : 0L;
 		} catch(ClassCastException e) {
-			Log.critical("Error reading long \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading long \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return 0L;
 		}
 	}
@@ -377,7 +377,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagFloat)data.get(tagName)).data : 0.0F;
 		} catch(ClassCastException e) {
-			Log.critical("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return 0.0F;
 		}
 	}
@@ -394,7 +394,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagDouble)data.get(tagName)).data : 0.0D;
 		} catch(ClassCastException e) {
-			Log.critical("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return 0.0D;
 		}
 	}
@@ -411,7 +411,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagString)data.get(tagName)).data : "";
 		} catch(ClassCastException e) {
-			Log.critical("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return "";
 		}
 	}
@@ -428,7 +428,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagList)data.get(tagName)) : new NBTTagList(tagName);
 		} catch(ClassCastException e) {
-			Log.critical("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return new NBTTagList(tagName);
 		}
 	}
@@ -445,7 +445,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagCompound)data.get(tagName)) : new NBTTagCompound(tagName);
 		} catch(ClassCastException e) {
-			Log.critical("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return new NBTTagCompound(tagName);
 		}
 	}

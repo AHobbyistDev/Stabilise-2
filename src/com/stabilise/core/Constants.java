@@ -125,7 +125,7 @@ public class Constants {
 				
 				return buildCompilations;
 			} catch(Exception e) {
-				Log.critical("Could not get game revision", e);
+				Log.get().postWarning("Could not get game revision", e);
 				return 1;
 			}
 		}

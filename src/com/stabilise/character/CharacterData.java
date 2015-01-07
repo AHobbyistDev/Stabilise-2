@@ -200,7 +200,7 @@ public class CharacterData {
 				character.load();
 				characters.add(character);
 			} catch(IOException e) {
-				Log.critical("Could not load character data for character \"" + charDir.getName() + "\"!");
+				Log.get().postSevere("Could not load character data for character \"" + charDir.getName() + "\"!");
 				continue;
 			}
 		}

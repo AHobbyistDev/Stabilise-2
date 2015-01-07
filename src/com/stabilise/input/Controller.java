@@ -254,7 +254,7 @@ public class Controller implements InputProcessor {
 	 */
 	public static void setupConfig() {
 		if(!loadConfig()) {
-			Log.message("Controls config could not be loaded - resetting to default values.");
+			Log.get().postWarning("Controls config could not be loaded - resetting to default values.");
 			defaultConfig();
 			saveConfig();
 		}
@@ -281,7 +281,7 @@ public class Controller implements InputProcessor {
 		try {
 			config.load();
 		} catch(IOException e) {
-			Log.critical("Could not load controls config!");
+			Log.get().postWarning("Could not load controls config!");
 			return false;
 		}
 		
@@ -338,7 +338,7 @@ public class Controller implements InputProcessor {
 		try {
 			config.safeSave();
 		} catch(IOException e) {
-			Log.critical("Could not save controls config!", e);
+			Log.get().postWarning("Could not save controls config!", e);
 		}
 	}
 	

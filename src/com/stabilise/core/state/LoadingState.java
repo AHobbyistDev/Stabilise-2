@@ -136,7 +136,7 @@ public class LoadingState implements State {
 		try {
 			taskThread.waitUninterruptibly();
 		} catch(ExecutionException e) {
-			Log.throwable(e);
+			Log.get().postSevere("Load task is a derp", e);
 		}
 	}
 

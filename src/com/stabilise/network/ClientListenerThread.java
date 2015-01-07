@@ -34,7 +34,7 @@ public final class ClientListenerThread extends Thread {
 				server.addConnection(socket);
 			}
 		} catch (IOException e) {
-			if(server.running) server.log.logCritical("(This can probably be ignored)", e);
+			if(server.running) server.log.postWarning("(This can probably be ignored)", e);
 			//Stabilise.crashGame(e);
 		}
 	}

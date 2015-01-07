@@ -113,7 +113,7 @@ public class Settings {
 	 */
 	private static void setup() {
 		if(!load()) {
-			Log.message("Game settings could not be loaded - resetting to default values!");
+			Log.get().postInfo("Game settings could not be loaded - resetting to default values!");
 			setDefaults();
 			save();
 		}
@@ -138,7 +138,7 @@ public class Settings {
 		try {
 			config.load();
 		} catch(IOException e) {
-			Log.critical("Could not load settings config!");
+			Log.get().postWarning("Could not load settings config!");
 			return false;
 		}
 		
@@ -183,7 +183,7 @@ public class Settings {
 			try {
 				config.safeSave();
 			} catch(IOException e) {
-				Log.critical("Could not save settings config file after fixing loaded settings!");
+				Log.get().postSevere("Could not save settings config file after fixing loaded settings!");
 			}
 		}
 		
@@ -202,7 +202,7 @@ public class Settings {
 		try {
 			config.safeSave();
 		} catch(IOException e) {
-			Log.critical("Could not save settings config file!");
+			Log.get().postSevere("Could not save settings config file!");
 		}
 	}
 	
@@ -283,7 +283,7 @@ public class Settings {
 	 */
 	public static void setSettingGUIScale(int guiScale) {
 		if(guiScale != GUI_SCALE_AUTO && guiScale != GUI_SCALE_SMALL && guiScale != GUI_SCALE_MEDIUM && guiScale != GUI_SCALE_LARGE) {
-			Log.critical("Attempting to set the GUI scaling setting to an invalid value!");
+			Log.get().postWarning("Attempting to set the GUI scaling setting to an invalid value!");
 			return;
 		}
 		
@@ -353,7 +353,7 @@ public class Settings {
 	 */
 	public static void setSettingParticles(int particles) {
 		if(particles != PARTICLES_ALL && particles != PARTICLES_REDUCED && particles != PARTICLES_NONE)
-			Log.critical("Attempting to set the particles setting to an invalid value!");
+			Log.get().postWarning("Attempting to set the particles setting to an invalid value!");
 		else
 			PARTICLES = particles;
 	}

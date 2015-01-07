@@ -239,25 +239,31 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 		if(isEmpty())
 			return false;
 		if(o == null) {
-			if(size == 1 && head.e == null) {
-				unlink(null, head);
-				return true;
-			}
-			for(Node<E> x = head; x.next != null; x = x.next) {
-				if(x.next.e == null) {
-					unlink(x, x.next);
+			if(size == 1) {
+				if(head.e == null) {
+					unlink(null, head);
 					return true;
+				}
+			} else {
+				for(Node<E> x = head; x.next != null; x = x.next) {
+					if(x.next.e == null) {
+						unlink(x, x.next);
+						return true;
+					}
 				}
 			}
 		} else {
-			if(size == 1 && o.equals(head.e)) {
-				unlink(null, head);
-				return true;
-			}
-			for(Node<E> x = head; x.next != null; x = x.next) {
-				if(o.equals(x.next.e)) {
-					unlink(x, x.next);
+			if(size == 1) {
+				if(o.equals(head.e)) {
+					unlink(null, head);
 					return true;
+				}
+			} else {
+				for(Node<E> x = head; x.next != null; x = x.next) {
+					if(o.equals(x.next.e)) {
+						unlink(x, x.next);
+						return true;
+					}
 				}
 			}
 		}

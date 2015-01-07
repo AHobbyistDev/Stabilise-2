@@ -80,7 +80,6 @@ public class GameWorld extends World {
 		spawnSliceY = info.spawnSliceY;
 		
 		log = Log.getAgent("world");
-		log.mute();
 		
 		regions = new ConcurrentHashMap<HashPoint, Region>();
 		
@@ -529,12 +528,12 @@ public class GameWorld extends World {
 	 * Saves the world.
 	 */
 	public void save() {
-		log.logMessage("Saving world...");
+		log.postInfo("Saving world...");
 		
 		try {
 			info.save();
 		} catch(IOException e) {
-			log.logCritical("Could not save world info!");
+			log.postSevere("Could not save world info!");
 		}
 		
 		savePlayers();
@@ -577,9 +576,9 @@ public class GameWorld extends World {
 		config.executor.shutdown();
 		try {
 			if(!config.executor.awaitTermination(10, TimeUnit.SECONDS))
-				log.logCritical("The world's worker threads took more than 10 seconds to shut down!");
+				log.postWarning("The world's worker threads took more than 10 seconds to shut down!");
 		} catch(InterruptedException e) {
-			log.logCritical("Interrupted while waiting for the worker threads to finish!", e);
+			log.postWarning("Interrupted while waiting for the worker threads to finish!", e);
 		}
 	}
 	
@@ -620,7 +619,7 @@ public class GameWorld extends World {
 		if(info != null)
 			return new GameWorld(info);
 		
-		Log.critical("Could not load info file of world \"" + worldName + "\" during world loading!");
+		Log.get().postSevere("Could not load info file of world \"" + worldName + "\" during world loading!");
 		return null;
 	}
 	

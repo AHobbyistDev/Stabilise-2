@@ -92,7 +92,7 @@ public class Resources {
 				appDir = new File(dir, appName);
 				break;
 			default:	// Other
-				Log.critical("OS not supported");
+				Log.get().postSevere("OS not supported");
 				System.exit(0);
 				break;
 		}

@@ -164,9 +164,9 @@ public abstract class Packet {
 		try {
 			return packetMap.get(packetID).newInstance();
 		} catch(InstantiationException e) {
-			Log.critical("Packet of id " + packetID + " could not be instantiated!", e);
+			Log.get().postWarning("Packet of id " + packetID + " could not be instantiated!", e);
 		} catch(IllegalAccessException e) {
-			Log.critical("Packet of id " + packetID + " could not be instantiated!", e);
+			Log.get().postWarning("Packet of id " + packetID + " could not be instantiated!", e);
 		}
 		return null;
 	}
@@ -186,7 +186,7 @@ public abstract class Packet {
 		
 		
 		if(in == null) {
-			Log.critical("The given DataInputStream from which to read a packet is null!");
+			Log.get().postWarning("The given DataInputStream from which to read a packet is null!");
 			return null;
 		}
 		
@@ -204,14 +204,14 @@ public abstract class Packet {
 		if(id == -1) return null;
 		
 		if(!packetMap.containsKey(id)) {
-			Log.critical("Invalid packet ID " + id + " - ID not registered.");
+			Log.get().postWarning("Invalid packet ID " + id + " - ID not registered.");
 			return null;
 		}
 		
 		Packet packet = createPacket(id);
 		
 		if(packet == null) {
-			Log.critical("Invalid packet ID " + id + " - createPacket() returned null.");
+			Log.get().postWarning("Invalid packet ID " + id + " - createPacket() returned null.");
 			return null;
 		}
 		
@@ -232,7 +232,7 @@ public abstract class Packet {
 	 */
 	public static boolean writePacket(DataOutputStream out, Packet packet) throws IOException {
 		if(out == null) {
-			Log.critical("The given DataOutputStream from which a packet is to be written is null!");
+			Log.get().postWarning("The given DataOutputStream from which a packet is to be written is null!");
 			return false;
 		}
 		
@@ -253,11 +253,11 @@ public abstract class Packet {
 	 */
 	private static void registerPacket(int id, Class<? extends Packet> packetClass, boolean clientPacket, boolean serverPacket) {
 		if(packetMap.containsKey(id)) {
-			Log.critical("Could not register packet class " + packetClass.toString() + " with ID " + id +
+			Log.get().postWarning("Could not register packet class " + packetClass.toString() + " with ID " + id +
 					" - ID is already being used by packet class " + packetMap.get(id).toString() + "!");
 			return;
 		} else if(packetIDMap.containsKey(packetClass)) {
-			Log.critical("Could not register packet class " + packetClass.toString() + " with ID " + id +
+			Log.get().postWarning("Could not register packet class " + packetClass.toString() + " with ID " + id +
 					" - class is already registed to ID " + packetIDMap.get(packetClass) + "!");
 			return;
 		}

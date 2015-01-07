@@ -100,9 +100,9 @@ public class TCPConnection {
 			return packetQueueOut.offer(packet);
 		} else {
 			if(server) {
-				log.logCritical("Attempting to send a client-only packet!");
+				log.postWarning("Attempting to send a client-only packet!");
 			} else {
-				log.logCritical("Attempting to send a server-only packet!");
+				log.postWarning("Attempting to send a server-only packet!");
 			}
 			return false;
 		}
@@ -177,7 +177,7 @@ public class TCPConnection {
 			//return packetQueueIn.offer(packet);
 			return true;
 		} catch (IOException e) {
-			log.logCritical("Exception while reading packet", e);
+			log.postSevere("Exception while reading packet", e);
 		}
 		return false;
 	}
@@ -199,7 +199,7 @@ public class TCPConnection {
 				
 				return true;
 			} catch (IOException e) {
-				log.logCritical("Exception while writing packet", e);
+				log.postSevere("Exception while writing packet", e);
 			}
 		}
 		
@@ -211,20 +211,20 @@ public class TCPConnection {
 	 */
 	public void closeConnection() {
 		if(terminated) {
-			log.logCritical("Connection already closed!");
+			log.postWarning("Connection already closed!");
 			return;
 		}
 		
 		terminated = true;
 		
-		log.logMessage("Closing connection...");
+		log.postInfo("Closing connection...");
 		
 		int written = out.size();
 		
 		try {
 			in.close();
 		} catch (IOException e) {
-			log.logCritical("Could not close input stream!");
+			log.postSevere("Could not close input stream!");
 		}
 		
 		in = null;
@@ -232,7 +232,7 @@ public class TCPConnection {
 		try {
 			out.close();
 		} catch (IOException e) {
-			log.logCritical("Could not close output stream!");
+			log.postSevere("Could not close output stream!");
 		}
 		
 		out = null;
@@ -245,7 +245,7 @@ public class TCPConnection {
 		try {
 			socket.close();
 		} catch (IOException e) {
-			log.logCritical("Connection socket could not close!");
+			log.postSevere("Connection socket could not close!");
 		}
 		
 		readThread.interrupt();
@@ -254,19 +254,19 @@ public class TCPConnection {
 		try {
 			readThread.join();
 		} catch (InterruptedException e) {
-			log.logCritical("Interrupted while waiting for read thread to join!");
+			log.postWarning("Interrupted while waiting for read thread to join!");
 		}
 		
 		try {
 			writeThread.join();
 		} catch (InterruptedException e) {
-			log.logCritical("Interrupted while waiting for write thread to join!");
+			log.postWarning("Interrupted while waiting for write thread to join!");
 		}
 		
 		readThread = null;
 		writeThread = null;
 		
-		log.logMessage("Connection closed; " + 
+		log.postInfo("Connection closed; " + 
 				totalPacketsSent + " packet(s) sent (" + totalBytesSent + "/" + written + " bytes), " +
 				totalPacketsReceived + " packet(s) received (" + totalBytesReceived + " bytes).");
 	}

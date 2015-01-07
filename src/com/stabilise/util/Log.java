@@ -41,15 +41,96 @@ public class Log {
 	/** A cache of the untagged logging agent to save on processor time. */
 	private static final Log defaultAgent = new Log("");
 	
+	/** The date. */
+	private static final Date DATE = new Date();
+	
+	/**
+	 * A log level is used to indicate granularity to which log messages will
+	 * be posted.
+	 */
+	public static enum Level {
+		/** Not valid as a message type. Setting the log's output level to this
+		 * means no messages will be printed.  */
+		NONE(0, true, null),
+		/** A severe message - often an error. Setting the log's output level
+		 * to this means only severe messages will be printed. */
+		SEVERE(1, false, "[SEVERE] - ") {
+			@Override
+			protected void print(String msg) {
+				System.err.println(msg);
+			}
+		},
+		/** A warning message - not necessarily an error. Setting the log's
+		 * output level to this means severe and warning messages will be
+		 * printed. */
+		WARNING(2, false, "[WARNING] - ") {
+			@Override
+			protected void print(String msg) {
+				System.err.println(msg);
+			}
+		},
+		/** An ordinary message. Setting the log's output level to this means
+		 * severe, warning and info messages will be printed. */
+		INFO(3, false, "[INFO] - "),
+		/** A debug message - often granular and specific. Setting the log's
+		 * output level to this means severe, warning, info and debug messages
+		 * will be printed. */
+		DEBUG(4, false, "[DEBUG] - "),
+		/** Not valid as a message type. Setting the log's output level to this
+		 * means all messages will be printed. */
+		ALL(5, true, null);
+		
+		/** This level's value; used for comparison. */
+		private final int value;
+		/** Whether this may only be used as the print level of a log, and not
+		 * a message type. */
+		private final boolean printLevelOnly;
+		/** This level's message tag. */
+		private final String tag;
+		
+		private Level(int value, boolean printLevelOnly, String tag) {
+			this.value = value;
+			this.printLevelOnly = printLevelOnly;
+			this.tag = tag;
+		}
+		
+		/**
+		 * @throws IllegalArgumentException if this level may not be used as
+		 * a message level.
+		 */
+		private void checkAllowable() {
+			if(printLevelOnly)
+				throw new IllegalArgumentException("Invalid message level");
+		}
+		
+		/**
+		 * Prints the message if able.
+		 * 
+		 * @param logLevel The log's output level.
+		 * @param msg The message.
+		 */
+		private void printIfAble(Level logLevel, String msg) {
+			if(value <= logLevel.value)
+				print(msg);
+		}
+		
+		/**
+		 * Prints the specified message to this level's output stream.
+		 */
+		protected void print(String msg) {
+			System.out.println(msg);
+		}
+	}
+	
+	/** The log level. */
+	private static Level logLevel = Level.INFO;
+	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
 	/** The tag with which to prefix log entries. (e.g. "<i>[SERVER] - </i>") */
 	private String tag;
-	/** Whether or not the logging agent is unmuted - that is, allowed to
-	 * print all entries to the console. {@code true} by default. */
-	private boolean unmuted = true;
 	
 	
 	/**
@@ -65,140 +146,144 @@ public class Log {
 	}
 	
 	/**
-	 * Posts an entry to the log.
+	 * Posts a message to the log.
 	 * 
-	 * @param message The message to post.
+	 * @param level The level of the message.
+	 * @param msg The message.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IllegalArgumentException if the given level may not be used as
+	 * a message level.
 	 */
-	public void logMessage(String message) {
-		add(message, false);
-	}
-	
-	/**
-	 * Posts a critical entry to the log.
-	 * 
-	 * @param message The message to post.
-	 */
-	public void logCritical(String message) {
-		add(message, true);
-	}
-	
-	/**
-	 * Posts a critical entry accompanied by a Throwable to the log.
-	 * 
-	 * @param message The message to post.
-	 * @param t The Throwable to post.
-	 * 
-	 * @throws NullPointerException if {@code t} is {@code null}.
-	 */
-	public void logCritical(String message, Throwable t) {
-		// Synchronise so this prints as a block.
+	public void post(Level level, String msg) {
+		level.checkAllowable();
 		synchronized(entries) {
-			logCritical(message);
-			logThrowable(t);
-		}
-	}
-	
-	/**
-	 * Posts a throwable to the log.
-	 * 
-	 * @param t The throwable to post.
-	 * 
-	 * @throws NullPointerException if {@code t} is {@code null}.
-	 */
-	public void logThrowable(Throwable t) {
-		// Synchronise everything here since we want this to print as a block.
-		// If this is not synchronised, a log entry from another thread could
-		// be injected midway though a stack trace, which is never nice.
-		synchronized(entries) {
-			add(t.toString(), true);
-			StackTraceElement[] exceptionStack = t.getStackTrace();
-			for(StackTraceElement ste : exceptionStack) {
-				add("    at " + ste.toString(), true);
-			}
-		}
-	}
-	
-	/**
-	 * Posts a series of booleans to the log, for use in debugging.
-	 * 
-	 * @param booleans The booleans to print.
-	 */
-	public void logBooleans(boolean... booleans) {
-		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < booleans.length; i++) {
-			sb.append(Boolean.toString(booleans[i]));
-			if(i < booleans.length - 1) sb.append(", "); 
-		}
-		add(sb.toString(), false);
-	}
-	
-	/**
-	 * Posts a series of integers to the log, for use in debugging.
-	 * 
-	 * @param ints The integers to print.
-	 */
-	public void logIntegers(int... ints) {
-		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < ints.length; i++) {
-			sb.append(ints[i]);
-			if(i < ints.length - 1) sb.append(", "); 
-		}
-		add(sb.toString(), false);
-	}
-	
-	/**
-	 * Posts a series of doubles to the log, for use in debugging.
-	 * 
-	 * @param doubles The doubles to print.
-	 */
-	public void logDoubles(double... doubles) {
-		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < doubles.length; i++) {
-			sb.append(doubles[i]);
-			if(i < doubles.length - 1) sb.append(", "); 
-		}
-		add(sb.toString(), false);
-	}
-	
-	/**
-	 * Adds a message to the log in a thread-safe manner.
-	 * 
-	 * @param message The message to add to the log.
-	 * @param critical Whether or not the message is a critical one.
-	 */
-	private void add(String message, boolean critical) {
-		message = new Date().toString() + " - " + tag + message;
-		
-		if(critical)
-			System.err.println(message);
-		else if(unmuted)
-			System.out.println(message);
-		
-		synchronized(entries) {
-			entries.add(critical ? "*" + message : message);
-			
+			DATE.setTime(System.currentTimeMillis());
+			add(level, DATE.toString() + " - " + tag + level.tag + msg);
 			if(entries.size() > LOG_CAPACITY)
 				entries.remove(0);
 		}
 	}
 	
 	/**
-	 * Mutes the logging agent - that is, prevents it from printing
-	 * non-critical entries to the console.
+	 * Posts a message accompanied by a throwable to the log.
 	 * 
-	 * @return The logging agent, for chaining operations.
+	 * @param level The level of the message.
+	 * @param msg The message.
+	 * @param t The throwable.
+	 * 
+	 * @throws NullPointerException if any argument is {@code null}.
+	 * @throws IllegalArgumentException if the given level may not be used as
+	 * a message level.
 	 */
-	public Log mute() {
-		unmuted = false;
-		return this;
+	public void post(Level level, String msg, Throwable t) {
+		level.checkAllowable();
+		
+		String prefix;
+		StackTraceElement[] stackTrace = t.getStackTrace();
+		
+		synchronized(entries) {
+			DATE.setTime(System.currentTimeMillis());
+			prefix = DATE.toString() + " - " + tag + level.tag;
+			add(level, prefix + msg);
+			add(level, prefix + t.toString());
+			for(StackTraceElement e : stackTrace)
+				add(level, prefix + "    at " + e.toString());
+			while(entries.size() > LOG_CAPACITY)
+				entries.remove(0);
+		}
 	}
 	
 	/**
-	 * Unmutes the log - that is, allows it to print entries to the console.
-	 * Note that a logging agent is unmuted by default.
+	 * Adds a message to the list of entries, then prints it to the console if
+	 * able.
+	 * 
+	 * @param level The message level.
+	 * @param msg The message.
 	 */
-	public void unmute() {
-		unmuted = true;
+	private void add(Level level, String msg) {
+		entries.add(msg);
+		level.printIfAble(logLevel, msg);
+	}
+	
+	/**
+	 * Posts a severe message to the log, as per {@link #post(Level, String)
+	 * post(Level.SEVERE, msg)}.
+	 * 
+	 * @throws NullPointerException if {@code msg} is {@code null}.
+	 */
+	public void postSevere(String msg) {
+		post(Level.SEVERE, msg);
+	}
+	
+	/**
+	 * Posts a severe message accompanied by a throwable to the log, as per
+	 * {@link #post(Level, String, Throwable) post(Level.SEVERE, msg, t)}.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 */
+	public void postSevere(String msg, Throwable t) {
+		post(Level.SEVERE, msg, t);
+	}
+	
+	/**
+	 * Posts a warning message to the log, as per {@link #post(Level, String)
+	 * post(Level.WARNING, msg)}.
+	 * 
+	 * @throws NullPointerException if {@code msg} is {@code null}.
+	 */
+	public void postWarning(String msg) {
+		post(Level.WARNING, msg);
+	}
+	
+	/**
+	 * Posts a warning message accompanied by a throwable to the log, as per
+	 * {@link #post(Level, String, Throwable) post(Level.WARNING, msg, t)}.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 */
+	public void postWarning(String msg, Throwable t) {
+		post(Level.WARNING, msg, t);
+	}
+	
+	/**
+	 * Posts an info message to the log, as per {@link #post(Level, String)
+	 * post(Level.INFO, msg)}.
+	 * 
+	 * @throws NullPointerException if {@code msg} is {@code null}.
+	 */
+	public void postInfo(String msg) {
+		post(Level.INFO, msg);
+	}
+	
+	/**
+	 * Posts an info message accompanied by a throwable to the log, as per
+	 * {@link #post(Level, String, Throwable) post(Level.INFO, msg, t)}.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 */
+	public void postInfo(String msg, Throwable t) {
+		post(Level.INFO, msg, t);
+	}
+	
+	/**
+	 * Posts a debug message to the log, as per {@link #post(Level, String)
+	 * post(Level.DEBUG, msg)}.
+	 * 
+	 * @throws NullPointerException if {@code msg} is {@code null}.
+	 */
+	public void postDebug(String msg) {
+		post(Level.DEBUG, msg);
+	}
+	
+	/**
+	 * Posts a debug message accompanied by a throwable to the log, as per
+	 * {@link #post(Level, String, Throwable) post(Level.DEBUG, msg, t)}.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 */
+	public void postDebug(String msg, Throwable t) {
+		post(Level.DEBUG, msg, t);
 	}
 	
 	//--------------------==========--------------------
@@ -206,11 +291,9 @@ public class Log {
 	//--------------------==========--------------------
 	
 	/**
-	 * Gets an untagged logging agent.
-	 * 
-	 * @return The default untagged logging agent.
+	 * @return The untagged default logging agent.
 	 */
-	public static Log getAgent() {
+	public static Log get() {
 		return defaultAgent;
 	}
 	
@@ -223,88 +306,6 @@ public class Log {
 	 */
 	public static Log getAgent(String tag) {
 		return new Log(tag);
-	}
-	
-	/**
-	 * Posts an entry to the default log.
-	 * An invocation of this is equivalent to:
-	 * <pre>{@code getAgent().logMessage(message)}</pre>
-	 * 
-	 * @param message The message to post.
-	 */
-	public static void message(String message) {
-		defaultAgent.logMessage(message);
-	}
-	
-	/**
-	 * Posts a critical entry to the default log.
-	 * An invocation of this is equivalent to:
-	 * <pre>{@code getAgent().logCritical(message)}</pre>
-	 * 
-	 * @param message The message to post.
-	 */
-	public static void critical(String message) {
-		defaultAgent.logCritical(message);
-	}
-	
-	/**
-	 * Posts a throwable accompanied by a critical entry to the default log.
-	 * An invocation of this is equivalent to:
-	 * <pre>{@code getAgent().logCritical(message, t)}</pre>
-	 * 
-	 * @param message The message to post.
-	 * @param t The throwable to post.
-	 * 
-	 * @throws NullPointerException if {@code t} is {@code null}.
-	 */
-	public static void critical(String message, Throwable t) {
-		defaultAgent.logCritical(message, t);
-	}
-	
-	/**
-	 * Posts a throwable to the default log.
-	 * An invocation of this is equivalent to:
-	 * <pre>{@code getAgent().logThrowable(t)}</pre>
-	 * 
-	 * @param t The throwable to post.
-	 * 
-	 * @throws NullPointerException if {@code t} is {@code null}.
-	 */
-	public static void throwable(Throwable t) {
-		defaultAgent.logThrowable(t);
-	}
-	
-	/**
-	 * Posts a series of booleans to the default log, for use in debugging.
-	 * An invocation of this is equivalent to:
-	 * <pre>{@code getAgent().logBooleans(booleans)}</pre>
-	 * 
-	 * @param booleans The booleans to print.
-	 */
-	public static void booleans(boolean... booleans) {
-		defaultAgent.logBooleans(booleans);
-	}
-	
-	/**
-	 * Posts a series of integers to the default log, for use in debugging.
-	 * An invocation of this is equivalent to:
-	 * <pre>{@code getAgent().logIntegers(ints)}</pre>
-	 * 
-	 * @param ints The integers to print.
-	 */
-	public static void integers(int... ints) {
-		defaultAgent.logIntegers(ints);
-	}
-	
-	/**
-	 * Posts a series of doubles to the default log, for use in debugging.
-	 * An invocation of this is equivalent to:
-	 * <pre>{@code getAgent().logDoubles(doubles)}</pre>
-	 * 
-	 * @param doubles The doubles to print.
-	 */
-	public static void doubles(double... doubles) {
-		defaultAgent.logDoubles(doubles);
 	}
 	
 	/**
@@ -360,7 +361,7 @@ public class Log {
 			}
 		} catch(IOException e) {
 			// Well... this is a problem.
-			critical("Could not save log!", e);
+			get().postSevere("Could not save log!", e);
 		} finally {
 			try {
 				if(writer != null)

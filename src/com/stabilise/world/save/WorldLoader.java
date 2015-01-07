@@ -47,7 +47,7 @@ public abstract class WorldLoader {
 	private volatile boolean cancelLoadOperations = false;
 	
 	/** The world loader's log. */
-	protected final Log log = Log.getAgent("WORLDLOADER").mute();
+	protected final Log log = Log.getAgent("WORLDLOADER");
 	
 	
 	/**
