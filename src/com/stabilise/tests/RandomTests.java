@@ -1,4 +1,3 @@
-
 package com.stabilise.tests;
 
 import java.awt.image.BufferedImage;
@@ -10,17 +9,12 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.collections4.bidimap.DualHashBidiMap;
-
 import com.badlogic.gdx.utils.ObjectMap;
-import com.stabilise.tests.reference.IntHashMap;
-import com.stabilise.util.Colour;
 import com.stabilise.util.IOUtil;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.StringUtil;
@@ -41,119 +35,6 @@ public class RandomTests {
 	
 	// Non-instantiable
 	private RandomTests() {}
-	
-	@SuppressWarnings("unused")
-	private static void hashMapVsIntHashMap() {
-		final int elements = 900000;
-		
-		initTimer();
-		
-		HashMap<Integer, String> map1 = new HashMap<Integer, String>();
-		tickTimer("declare hashmap");
-		IntHashMap<String> map2 = new IntHashMap<String>();
-		tickTimer("declare inthashmap");
-		
-		for(int i = 0; i < elements; i++) {
-			map1.put(i, "blerp");
-		}
-		
-		tickTimer("fill hashmap");
-		
-		for(int i = 0; i < elements; i++) {
-			map1.put(i, "blerp");
-		}
-		
-		tickTimer("fill inthashmap");
-		
-		String s;
-		
-		for(int i = 0; i < elements; i++) {
-			s = map1.get(i);
-		}
-		
-		tickTimer("read hashmap");
-		
-		for(int i = 0; i < elements; i++) {
-			s = map2.get(i);
-		}
-		
-		tickTimer("read inthashmap");
-	}
-	
-	@SuppressWarnings("unused")
-	private static void bidiHashMapTest() {
-		final int elements = 25000;
-		
-		initTimer();
-		
-		HashMap<Integer, String> stringMap = new HashMap<Integer, String>();
-		HashMap<String, Integer> stringToIntMap = new HashMap<String, Integer>();
-		
-		tickTimer("declare maps");
-		
-		DualHashBidiMap<Integer, String> bidiMap = new DualHashBidiMap<Integer, String>();
-		
-		tickTimer("declare bidi map");
-		
-		for(int i = 0; i < elements; i++) {
-			stringMap.put(i, "blerp" + i);
-			stringToIntMap.put("blerp" + i, i);
-		}
-		
-		tickTimer("fill maps");
-		
-		for(int i = 0; i < elements; i++) {
-			bidiMap.put(i, "blerp" + i);
-		}
-		
-		tickTimer("fill bidimap");
-		
-		int k;
-		String v;
-		
-		for(int i = 0; i < elements; i++) {
-			v = stringMap.get(i);
-			k = stringToIntMap.get("blerp" + i);
-		}
-		
-		tickTimer("read maps");
-		
-		for(int i = 0; i < elements; i++) {
-			v = bidiMap.get(i);
-			k = bidiMap.getKey("blerp" + i);
-		}
-		
-		tickTimer("read bidimap");
-		
-	}
-	
-	@SuppressWarnings("unused")
-	private static void hashMapIterations() {
-		final int elements = 500000;
-		initTimer();
-		try {
-			Thread.sleep(100L);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		tickTimer("sleep");
-		HashMap<Integer, String> stringMap = new HashMap<Integer, String>();
-		tickTimer("declare hashmap");
-		for(int i = 0; i < elements; i++) {
-			stringMap.put(i, "blerp");
-		}
-		tickTimer("fill hashmap");
-		Iterator<Integer> i = stringMap.keySet().iterator();
-		String s;
-		while(i.hasNext()) {
-			s = stringMap.get(i.next());
-		}
-		tickTimer("iterator lookup");
-		for(Map.Entry<Integer, String> entry : stringMap.entrySet()) {
-			s = entry.getValue();
-		}
-		tickTimer("for in lookup");
-	}
 	
 	@SuppressWarnings("unused")
 	private static void hashMapVsLinkedHashMap() {
@@ -364,96 +245,6 @@ public class RandomTests {
 		System.out.println(IOUtil.getNewFile(new File("E:/file1 - 1.txt")).getAbsolutePath());
 		System.out.println(IOUtil.getNewFile("file2.txt", dir).getAbsolutePath());
 		System.out.println(IOUtil.getNewFile(new File("E:/file2.txt")).getAbsolutePath());
-	}
-	
-	@SuppressWarnings("unused")
-	private static void getFloatingPointBits(float fp) {
-		int unusedDummyInteger;
-		
-		int i = Float.floatToRawIntBits(fp);
-		String str = Integer.toBinaryString(i);
-		
-		while(str.length() < 32)
-			str = "0" + str; // inefficient but meh
-		
-		String signBit = str.substring(0,1);
-		String exponent = str.substring(1,9);
-		String mantissa = str.substring(9);
-		
-		str = signBit + " " + exponent + " " + mantissa;
-		System.out.println(str);
-	}
-	
-	@SuppressWarnings("unused")
-	private static void colourHexTest() {
-		System.out.println("Black: " + Integer.toHexString(Colour.BLACK.getIntValue()));
-		System.out.println("Dark grey: " + Integer.toHexString(Colour.DARK_GREY.getIntValue()));
-		System.out.println("Grey: " + Integer.toHexString(Colour.GREY.getIntValue()));
-		System.out.println("Light grey: " + Integer.toHexString(Colour.LIGHT_GREY.getIntValue()));
-		System.out.println("White: " + Integer.toHexString(Colour.WHITE.getIntValue()));
-	}
-	
-	@SuppressWarnings("unused")
-	private static void calculatingPowers() {
-		final int nums = 50000;
-		Random rnd = new Random();
-		float[] floats = new float[nums];
-		for(int i = 0; i < nums; i++) {
-			floats[i] = rnd.nextFloat();
-		}
-		
-		initTimer();
-		try {
-			Thread.sleep(300L);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		tickTimer("sleep");
-		
-		for(int i = 0; i < nums; i++) {
-			float x = floats[i];
-			float n = x*x*x*x;
-		}
-		
-		tickTimer("x*x*x*x");
-		
-		for(int i = 0; i < nums; i++) {
-			float x = floats[i];
-			x *= x;
-			float n = x*x;
-		}
-		
-		tickTimer("xSquared*xSquared");
-		
-		for(int i = 0; i < nums; i++) {
-			float x = floats[i];
-			float n = x*x*x*x*x;
-		}
-		
-		tickTimer("x*x*x*x*x");
-		
-		for(int i = 0; i < nums; i++) {
-			float x = floats[i];
-			float xSquared = x*x;
-			float n = xSquared*xSquared*x;
-		}
-		
-		tickTimer("xSquared*xSquared*x");
-		
-		for(int i = 0; i < nums; i++) {
-			float x = floats[i];
-			float n = x*x*x*x*x*x;
-		}
-		
-		tickTimer("x*x*x*x*x*x");
-		
-		for(int i = 0; i < nums; i++) {
-			float x = floats[i];
-			x *= x*x;
-			float n = x*x;
-		}
-		
-		tickTimer("xCubed*xCubed");
 	}
 	
 	@SuppressWarnings("unused")

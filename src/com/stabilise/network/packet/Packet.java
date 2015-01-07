@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.stabilise.network.Sendable;
 import com.stabilise.util.Log;
 import com.stabilise.util.collect.InstantiationRegistry;
 
@@ -13,7 +14,7 @@ import com.stabilise.util.collect.InstantiationRegistry;
  * Packets are modular chunks of data which may be sent over a network as a
  * means of transmitting information.
  */
-public abstract class Packet {
+public abstract class Packet implements Sendable {
 	
 	/** The packet registry. */
 	private static final InstantiationRegistry<Packet> PACKETS =
@@ -29,48 +30,6 @@ public abstract class Packet {
 	 */
 	public final int getID() {
 		return PACKETS.getID(getClass());
-	}
-	
-	/**
-	 * Reads the packet data from the provided input stream.
-	 */
-	public abstract void readData(DataInputStream in) throws IOException;
-	
-	/**
-	 * Writes the packet data to the provided output stream.
-	 */
-	public abstract void writeData(DataOutputStream out) throws IOException;
-	
-	/**
-	 * Reads and returns a string from the provided input stream.
-	 * 
-	 * @param in The input stream from which to read the string.
-	 * 
-	 * @return The read string.
-	 * @throws NullPointerException if {@code in} is {@code null}.
-	 * @throws IOException
-	 */
-	protected final String readString(DataInputStream in) throws IOException {
-		short length = in.readShort();
-		StringBuilder sb = new StringBuilder();
-		while(length-- > 0)
-			sb.append(in.readChar());
-		return sb.toString();
-	}
-	
-	/**
-	 * Writes a string to the provided output stream.
-	 * 
-	 * @throws NullPointerException if either argument is {@code null}.
-	 * @throws IllegalArgumentException {@code string} exceeds 32767
-	 * characters.
-	 * @throws IOException
-	 */
-	protected final void writeString(String string, DataOutputStream out) throws IOException {
-		if(string.length() > Short.MAX_VALUE)
-			throw new IllegalArgumentException("The given string is too large!");
-		out.writeShort(string.length());
-		out.writeChars(string);
 	}
 	
 	/**
@@ -92,6 +51,37 @@ public abstract class Packet {
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------
+	
+	/**
+	 * Reads and returns a string from the provided input stream.
+	 * 
+	 * @param in The input stream from which to read the string.
+	 * 
+	 * @throws NullPointerException if {@code in} is {@code null}.
+	 * @throws IOException
+	 */
+	protected static String readString(DataInputStream in) throws IOException {
+		short length = in.readShort();
+		StringBuilder sb = new StringBuilder();
+		while(length-- > 0)
+			sb.append(in.readChar());
+		return sb.toString();
+	}
+	
+	/**
+	 * Writes a string to the provided output stream.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IllegalArgumentException if {@code string} exceeds 32767
+	 * characters.
+	 * @throws IOException
+	 */
+	protected static void writeString(String string, DataOutputStream out) throws IOException {
+		if(string.length() > Short.MAX_VALUE)
+			throw new IllegalArgumentException("The given string is too large!");
+		out.writeShort(string.length());
+		out.writeChars(string);
+	}
 	
 	/**
 	 * Instantiates an instance of a packet with the specified ID.

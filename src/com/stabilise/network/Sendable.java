@@ -1,52 +1,35 @@
 package com.stabilise.network;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 /**
- * The {@code Sendable} interface provides an object with methods to export it
- * as and import it from a byte array.
+ * Defines the two complementary methods {@code readData} and {@code writeData}
+ * which allow an object to export its properties across a data stream, across
+ * which it may be reconstructed.
+ * 
+ * <p>As a general guideline, if {@code obj1} is an object whose data is
+ * exported through {@code writeData}, and {@code obj2} is an object which
+ * reads in {@code obj1}'s exported data through {@code readData}, then {@code
+ * obj1.equals(obj2)} should return {@code true}.
  */
 public interface Sendable {
 	
 	/**
-	 * Requests for the object's data in the form of a byte array.
-	 * <p>This should be such that the object's {@code fromByteArray} method
-	 * is capable of completely reconstructing the object from the given array.
-	 * </p>
+	 * Reads this object's data in from the given DataInputStream.
 	 * 
-	 * @return An array of bytes representing the object's properties.
+	 * @throws NullPointerException if {@code in} is {@code null}.
+	 * @throws IOException for standard reasons.
 	 */
-	void write(OutputStream dos);
+	void readData(DataInputStream in) throws IOException;
 	
 	/**
-	 * Sets the object's properties based on the given byte array.
-	 * <p>This should be such that the properties set by this method should be
-	 * the same as those of the object from which an invocation of {@code
-	 * toByteArray} generated the byte array.</p>
+	 * Writes this object's data to the given DataOutputStream.
 	 * 
-	 * @param data An array of bytes representing the object's properties.
+	 * @throws NullPointerException if {@code out} is {@code null}.
+	 * @throws IOException for standard reasons.
 	 */
-	void read(InputStream in);
-	
-	/**
-	 * Requests for the object's data in the form of a byte array.
-	 * <p>This should be such that the object's {@code fromByteArray} method
-	 * is capable of completely reconstructing the object from the given array.
-	 * </p>
-	 * 
-	 * @return An array of bytes representing the object's properties.
-	 */
-	//byte[] toByteArray();
-	
-	/**
-	 * Sets the object's properties based on the given byte array.
-	 * <p>This should be such that the properties set by this method should be
-	 * the same as those of the object from which an invocation of {@code
-	 * toByteArray} generated the byte array.</p>
-	 * 
-	 * @param data An array of bytes representing the object's properties.
-	 */
-	//void fromByteArray(byte[] data);
+	void writeData(DataOutputStream out) throws IOException;
 	
 }

@@ -110,8 +110,8 @@ public class InstantiationRegistry<T> {
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
 	 * @throws IllegalArgumentException if either {@code id} is already mapped
-	 * to a factory or a class with the same name has already been registered,
-	 * and this registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
+	 * to a factory or {@code objClass} has already been registered, and this
+	 * registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
 	 * THROW_EXCEPTION} duplicate policy.
 	 */
 	public void registerDefaultArgs(int id, Class<? extends T> objClass) {
@@ -130,8 +130,8 @@ public class InstantiationRegistry<T> {
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
 	 * @throws IllegalArgumentException if either {@code id} is already mapped
-	 * to a factory or a class with the same name has already been registered,
-	 * and this registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
+	 * to a factory or {@code objClass} has already been registered, and this
+	 * registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
 	 * THROW_EXCEPTION} duplicate policy.
 	 */
 	public <S extends T> void register(int id, Class<S> objClass, Class<?>... args) {
@@ -150,12 +150,14 @@ public class InstantiationRegistry<T> {
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
 	 * @throws IllegalArgumentException if either {@code id} is already mapped
-	 * to a factory or a class with the same name has already been registered,
-	 * and this registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
+	 * to a factory or {@code objClass} has already been registered, and this
+	 * registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
 	 * THROW_EXCEPTION} duplicate policy.
 	 */
 	public <S extends T> void register(int id, Class<S> objClass, Factory<S> factory) {
 		if(factoryMap.hasKey(id) && dupePolicy.handle(log, "Duplicate id " + id))
+			return;
+		if(idMap.containsKey(objClass) && dupePolicy.handle(log, "Duplicate class " + objClass.getSimpleName()))
 			return;
 		factoryMap.put(id, factory);
 		idMap.put(objClass, Integer.valueOf(id));

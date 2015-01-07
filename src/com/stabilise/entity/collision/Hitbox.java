@@ -11,10 +11,6 @@ import com.stabilise.world.World;
 /**
  * A Hitbox is an object which, when overlapping with an entity, may damage or
  * otherwise influence it.
- * 
- * <!-- TODO: Genericising hitboxes for the type of Shape used for boundingBox
- * has the potential to make things nice, but based on a failed attempt to do
- * so, do not do this (for now at least). -->
  */
 public class Hitbox extends FreeGameObject {
 	
