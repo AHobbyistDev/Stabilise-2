@@ -5,17 +5,9 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.util.Point;
-
 import com.stabilise.character.CharacterData;
 import com.stabilise.core.Application;
 import com.stabilise.core.state.SingleplayerState;
-import com.stabilise.opengl.Font;
-import com.stabilise.opengl.FontStyle;
-import com.stabilise.opengl.Rectangle;
-import com.stabilise.opengl.SpriteBatch;
-import com.stabilise.opengl.Texture;
 import com.stabilise.screen.menu.SubMenuBasedMenu;
 import com.stabilise.screen.menu.component.Button;
 import com.stabilise.screen.menu.component.MenuItem;
@@ -29,6 +21,7 @@ import com.stabilise.util.TaskTimer;
 import com.stabilise.util.StringUtil;
 import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.concurrent.TaskThread;
+import com.stabilise.util.maths.Point;
 import com.stabilise.world.GameWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
@@ -672,10 +665,6 @@ public class WorldSelectMenu extends SubMenu {
 					setState(State.LIST, selectedWorld);
 				break;
 			case ACTION_SELECT_WORLD:
-				// Very explicitly set the game state - there may be a better way to do this.
-				// This works fine for now, though.
-				//Application.get().setState(new SingleplayerState(worlds[selectedWorld]));
-				
 				loadingWorld = true;
 				final WorldInfo info = worlds[selectedWorld];
 				worldLoader = new TaskThread(new Task(1) {
@@ -694,7 +683,7 @@ public class WorldSelectMenu extends SubMenu {
 						
 						while(!world.regionsLoaded()) {
 							try {
-								Thread.sleep(1);
+								Thread.sleep(5L);
 							} catch(InterruptedException ignored) {}
 						}
 						

@@ -154,7 +154,6 @@ public class Polygon extends AbstractPolygon {
 		Polygon p = new Polygon();
 		p.vertices = vertices;
 		return p;
-		
 	}
 	
 	//--------------------==========--------------------

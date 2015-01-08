@@ -45,7 +45,7 @@ abstract class AbstractPolygon extends PrecomputableShape {
 	 * shapes may not necessarily intersect, as in all but a few special
 	 * cases (e.g. two axis-aligned bounding boxes), the axes of both shapes
 	 * need to be checked. Refer instead to - in the case of polygons -
-	 * {@link #intersects(Polygon)} to check for a collision using the
+	 * {@link #intersects(AbstractPolygon)} to check for a collision using the
 	 * axes of both shapes.
 	 * 
 	 * <p>This method has a minimum computation time of O(1) and a maximum of

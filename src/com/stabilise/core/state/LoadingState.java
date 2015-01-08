@@ -107,7 +107,7 @@ public class LoadingState implements State {
 				Stabilise.bootstrap();
 				tracker.increment();
 				//setName("Loading");
-				super.execute();
+				super.tick();
 			}
 		};
 		task.loadTextures(new String[] {"mainbg", "mainbgtile", "stickfigure", "sheets/cloak", "head", "button", "sheets/font1"});

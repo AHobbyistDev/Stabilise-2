@@ -82,7 +82,7 @@ public class GameClient {
 	 */
 	public void joinServer() {
 		// Queue the login packet
-		connection.queuePacketWithBlock(new Packet002Login("Player"));
+		connection.queuePacket(new Packet002Login("Player"));
 		
 		// Time to initialise everything...
 		world = new WorldClient(this);
@@ -293,7 +293,7 @@ public class GameClient {
 	 * @param y The slice's y-coordinate, in slice-lengths.
 	 */
 	public void requestSlice(int x, int y) {
-		connection.queuePacket(new Packet252SliceRequest(true, x, y));
+		//connection.queuePacket(new Packet252SliceRequest(true, x, y));
 	}
 	
 	/**
@@ -304,7 +304,7 @@ public class GameClient {
 	 * @param y The slice's y-coordinate, in slice-lengths.
 	 */
 	public void notifyOfSliceUnload(int x, int y) {
-		connection.queuePacket(new Packet252SliceRequest(false, x, y));
+		//connection.queuePacket(new Packet252SliceRequest(false, x, y));
 	}
 	
 }

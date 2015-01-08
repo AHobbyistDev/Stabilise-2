@@ -11,7 +11,8 @@ import com.stabilise.util.Log;
 public class TCPWriteThread extends Thread {
 	
 	/** The TCPConnection instance the thread is linked to. */
-	private TCPConnection connection;
+	private final TCPConnection connection;
+	
 	
 	/**
 	 * Creates a new TCPWriteThread object.
@@ -30,8 +31,11 @@ public class TCPWriteThread extends Thread {
 		while(connection.isRunning()) {
 			boolean flushStream = false;
 			
-			while(connection.writePacket())
+			while(connection.writePacket()) {
+				if(Thread.interrupted())
+					break;
 				flushStream = true;
+			}
 			
 			// Flush the stream if any packets have been sent
 			if(flushStream) {
@@ -43,7 +47,7 @@ public class TCPWriteThread extends Thread {
 			}
 			
 			try {
-				sleep(2L);
+				sleep(10L);
 			} catch (InterruptedException ignored) {}
 		}
 	}

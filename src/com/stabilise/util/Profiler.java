@@ -75,6 +75,8 @@ public class Profiler {
 	 * Creates a new Profiler, which is enabled by default.
 	 * 
 	 * @param rootName The name of the root section.
+	 * 
+	 * @throws NullPointerException if {@code rootName} is {@code null}.
 	 */
 	public Profiler(String rootName) {
 		this(true, rootName);
@@ -86,8 +88,13 @@ public class Profiler {
 	 * @param enabled The default 'enabled' status. This may be later changed
 	 * via {@link #enable()} and {@link #disable()}.
 	 * @param rootName The name of the root section.
+	 * 
+	 * @throws NullPointerException if {@code rootName} is {@code null}.
 	 */
 	public Profiler(boolean enabled, String rootName) {
+		if(rootName == null)
+			throw new NullPointerException("rootName is null");
+		
 		this.enabled = enabled;
 		effectivelyEnabled = enabled;
 		
@@ -240,6 +247,9 @@ public class Profiler {
 	 * Disables profiling.
 	 */
 	public void disable() {
+		if(!enabled)
+			return;
+		
 		enabled = false;
 		effectivelyEnabled = false;
 		

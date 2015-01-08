@@ -95,8 +95,7 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	
 	@Override
 	protected Map<String, V> createUnderlyingMap(int capacity) {
-		// Java automatically infers generic types, which is nice
-		return HashBiMap.create(capacity);
+		return HashBiMap.<String, V>create(capacity);
 	}
 	
 	/**
@@ -108,8 +107,10 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	 * 
 	 * @return {@code true} if the object was successfully registered;
 	 * {@code false} otherwise.
-	 * @throws IndexOufOfBoundsException if {@code id < 0}.
+	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
+	 * @throws IllegalStateException if this registry is {@link #lock()
+	 * locked}.
 	 * @throws IllegalArgumentException if either {@code id} or {@code key} is
 	 * are already mapped to an entry and this registry uses the {@link
 	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
@@ -190,14 +191,9 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	 * {@code false} otherwise.
 	 */
 	public boolean containsID(int id) {
-		return idMap.hasKey(id);
+		return idMap.containsKey(id);
 	}
 	
-	/**
-	 * Gets the iterator for the registered objects.
-	 * 
-	 * @return The iterator.
-	 */
 	@Override
 	public Iterator<V> iterator() {
 		return idMap.iterator();

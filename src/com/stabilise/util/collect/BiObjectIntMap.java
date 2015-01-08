@@ -102,14 +102,14 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 	 * @return {@code true} if the key has a mapping; {@code false} otherwise.
 	 * @throws IndexOutOfBoundsException if {@code key < 0}.
 	 */
-	public boolean hasKey(int key) {
+	public boolean containsKey(int key) {
 		return getObject(key) != null;
 	}
 	
 	/**
-	 * Gets the iterator for all the mapped objects.
-	 * 
-	 * @return The iterator.
+	 * Gets the iterator for all the mapped objects. The returned iterator does
+	 * not support {@code remove()} and will throw an {@code
+	 * UnsupportedOperationException}.
 	 */
 	@Override
 	public Iterator<V> iterator() {

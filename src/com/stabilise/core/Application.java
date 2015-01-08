@@ -1,11 +1,12 @@
 package com.stabilise.core;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Random;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.LifecycleListener;
 import com.stabilise.core.state.State;
+import com.stabilise.util.AppDriver;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 
@@ -58,42 +59,29 @@ public abstract class Application {
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
+	private final InternalAppDriver driver;
+	
 	/** The listener which delegates to this Application. */
-	private final Listener listener;
+	private final InternalAppListener listener;
 	/** The lifecycle listener which we'll use to catch the pause()-dispose()
 	 * combo when the application is shut down before the main listener catches
 	 * it. */
-	private final LCListener lcListener;
+	private final InternalLCListener lcListener;
 	
 	/** The application's state. */
 	protected State state;
 	
-	/** {@code true} if the application is running. */
-	private boolean running = false;
 	/** {@code true} if the application has been shut down. */
 	private boolean stopped = false;
 	/** {@code true} if the application is crashing. */
 	private boolean crashing = false;
 	
-	/** The number of update ticks executed per second. */
-	protected final int ticksPerSecond;
-	/** Nanoseconds per update tick. */
-	private final long nsPerTick;
-	/** The time when last it was checked as per {@code System.nanoTime()}. */
-	private long lastTime;
-	/** The number of 'unprocessed' nanoseconds. An update tick is executed
-	 * when this is greater than or equal to nsPerTick. */
-	private long unprocessed = 0L;
-	/** The number of updates which have been executed in the lifetime of the
-	 * application. */
-	private long numUpdates = 0L;
+	/** The application profiler. It is disabled by default.
+	 * <p>This profiler is flushed automatically once per second; to use it,
+	 * simply invoke {@code start}, {@code next} and {@code end} where desired. */
+	public final Profiler profiler;
 	
-	/** The Application's profiler. It is disabled by default.
-	 * <p>This profiler is flushed automatically; to use it, simply invoke
-	 * {@code start}, {@code next} and {@code end} where desired. */
-	public final Profiler profiler = new Profiler(false, "root");
-	/** The last update at which the profiler was flushed. */
-	private long lastProfilerFlush = 0L;
+	private final Log log;
 	
 	
 	/**
@@ -108,16 +96,18 @@ public abstract class Application {
 	protected Application(int ticksPerSecond) {
 		if(instance != null)
 			throw new IllegalStateException("The application has already been created!");
-		if(ticksPerSecond < 1)
-			throw new IllegalArgumentException("ticksPerSecond < 1");
 		
+		// It shouldn't matter that we're publishing this instance before it
+		// has been constructed as an Application should be the starting point
+		// (or effective starting point) for an application anyway.
 		instance = this;
 		
-		this.ticksPerSecond = ticksPerSecond;
-		nsPerTick = 1000000000L / ticksPerSecond;
+		log = Log.getAgent("Application");
+		driver = new InternalAppDriver(ticksPerSecond, ticksPerSecond, log);
+		profiler = driver.profiler;
 		
-		listener = new Listener();
-		lcListener = new LCListener();
+		listener = new InternalAppListener();
+		lcListener = new InternalLCListener();
 		
 		state = getInitialState();
 		if(state == null)
@@ -146,7 +136,7 @@ public abstract class Application {
 	protected abstract State getInitialState();
 	
 	/**
-	 * Creates the Application - delegated from {@link Listener#create()}.
+	 * Creates the Application - delegated from {@link InternalAppListener#create()}.
 	 */
 	private void create() {
 		if(!stopped) {
@@ -154,12 +144,6 @@ public abstract class Application {
 			
 			init();
 			state.start();
-			lastTime = System.nanoTime();
-			running = true;
-			
-			// Only really does anything if the initial state invoked enable()
-			// and then flush(), but we might as well cover our bases.
-			profiler.start("wait");
 		}
 	}
 	
@@ -172,8 +156,8 @@ public abstract class Application {
 	 * <p>The initial state has {@link State#start() start()} invoked on it
 	 * immediately after this method returns.
 	 * 
-	 * <p>This method is not abstract as not all applications may with to do
-	 * anything here, but it may be overridden at will.
+	 * <p>This method does nothing in the default implementation and may be
+	 * optionally overridden.
 	 */
 	protected void init() {
 		// nothing in the default implementation
@@ -195,57 +179,11 @@ public abstract class Application {
 	private void mainLoop() {
 		// Don't let the main loop run until the application has been properly
 		// created.
-		if(!running)
+		if(!driver.running)
 			return;
 		
-		long now = System.nanoTime();
-		unprocessed += (now - lastTime);
-		
-		// Make sure nothing has gone wrong with timing
-		if(unprocessed > 5000000000L) { // 5 seconds
-			Log.get().postWarning("Can't keep up! Application is running "
-					+ TimeUnit.NANOSECONDS.toMillis(now - lastTime) + " milliseconds behind; skipping " 
-					+ (unprocessed / nsPerTick) + " ticks!"
-			);
-			unprocessed = 0L;
-		} else if(unprocessed < 0L) {
-			Log.get().postWarning("Time ran backwards! Did the timer overflow?");
-			unprocessed = 0L;
-		}
-		
-		lastTime = now;
-		
 		try {
-			profiler.verify(2, "root.wait");
-			profiler.next("update"); // end wait, start update
-			
-			// Perform any scheduled update ticks
-			while(unprocessed >= nsPerTick) {
-				numUpdates++;
-				unprocessed -= nsPerTick;
-				
-				tick();
-				state.update();
-			}
-			
-			profiler.verify(2, "root.update");
-			profiler.end(); // end update
-			
-			// Flush the profiler every 1 second worth of ticks
-			if(numUpdates - lastProfilerFlush >= ticksPerSecond) {
-				lastProfilerFlush = numUpdates;
-				profiler.flush();
-			} else if(numUpdates < lastProfilerFlush) {
-				// numUpdates must have overflowed
-				lastProfilerFlush = numUpdates;
-			}
-			
-			// Rendering
-			profiler.start("render");
-			state.render(Gdx.graphics.getDeltaTime());
-			
-			profiler.verify(2, "root.render");
-			profiler.next("wait");
+			driver.tick();
 		} catch(Throwable t) {
 			crash(t);
 		}
@@ -287,7 +225,7 @@ public abstract class Application {
 	 */
 	private void dispose() {
 		stopped = true;
-		running = false;
+		driver.stop();
 		
 		// try..catch since client code cannot be trusted
 		try {
@@ -308,10 +246,11 @@ public abstract class Application {
 	public final void shutdown() {
 		if(stopped)
 			return;
-		stopped = true;
-		running = false;
 		
-		Gdx.app.exit(); // will redirect to pause() then dispose()
+		stopped = true;
+		driver.stop();
+		
+		Gdx.app.exit(); // will result in pause() then dispose() being invoked
 	}
 	
 	/**
@@ -328,11 +267,20 @@ public abstract class Application {
 			return;			// double-crash and re-save the log?
 		crashing = true;
 		if(t == null)
-			Log.get().postSevere("The application has crashed!", new Exception("<<stack trace buddy>>"));
+			log.postSevere("The application has crashed!", new Exception(dummyExceptionMessage()));
 		else
-			Log.get().postSevere("The application has crashed!", t);
+			log.postSevere("The application has crashed!", t);
 		produceCrashLog();
 		shutdown();
+	}
+	
+	private String dummyExceptionMessage() {
+		String[] msgs = new String[] {
+				"I am here to provide a stack trace",
+				"Stack trace buddy!",
+				"All your stack trace are belong to us"
+		};
+		return msgs[new Random().nextInt(msgs.length)];
 	}
 	
 	/**
@@ -382,7 +330,7 @@ public abstract class Application {
 	 * lifetime of the application.
 	 */
 	public final long getUpdateCount() {
-		return numUpdates;
+		return driver.getUpdateCount();
 	}
 	
 	/**
@@ -438,10 +386,32 @@ public abstract class Application {
 	//--------------------==========--------------------
 	
 	/**
+	 * The implementation of AppDriver which powers an application.
+	 */
+	private class InternalAppDriver extends AppDriver {
+		
+		public InternalAppDriver(int tps, int fps, Log log) {
+			super(tps, fps, log);
+		}
+		
+		@Override
+		protected void update() {
+			Application.this.tick();
+			Application.this.state.update();
+		}
+		
+		@Override
+		protected void render() {
+			Application.this.state.render(Gdx.graphics.getDeltaTime());
+		}
+		
+	}
+	
+	/**
 	 * An implementation of ApplicationListener which delegates to private
 	 * methods in {@link Application}.
 	 */
-	private class Listener implements ApplicationListener {
+	private class InternalAppListener implements ApplicationListener {
 		
 		@Override public void create() {
 			Application.this.create();
@@ -477,7 +447,7 @@ public abstract class Application {
 	 * we can catch the pause()-dispose() combo before the main listener does,
 	 * and tell it to ignore the pause().
 	 */
-	private class LCListener implements LifecycleListener {
+	private class InternalLCListener implements LifecycleListener {
 		@Override public void pause() {}
 		@Override public void resume() {}
 		

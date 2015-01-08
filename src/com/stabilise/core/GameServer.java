@@ -12,6 +12,7 @@ import static com.stabilise.core.Constants.DEFAULT_PORT;
 import com.stabilise.network.ClientListenerThread;
 import com.stabilise.network.ServerTCPConnection;
 import com.stabilise.network.packet.*;
+import com.stabilise.util.AppDriver;
 import com.stabilise.util.Log;
 import com.stabilise.world.Slice;
 import com.stabilise.world.WorldServer;
@@ -35,6 +36,8 @@ public class GameServer implements Runnable {
 	
 	/** The socket the server is being hosted on. */
 	private ServerSocket socket;
+	
+	private AppDriver driver;
 	
 	/** True if the server is running. */
 	public volatile boolean running;
@@ -81,10 +84,13 @@ public class GameServer implements Runnable {
 		if(world == null)
 			throw new RuntimeException("Server could not load the world!");
 		
+		int tps = Constants.TICKS_PER_SECOND;
+		driver = new ServerAppDriver(tps, tps, log);
+		
 		serverThread = new Thread(this, "GameServerThread");
 		serverThread.start();
 	}
-
+	
 	@Override
 	public void run() {
 		try {
@@ -105,32 +111,21 @@ public class GameServer implements Runnable {
 				addConnection(clientSocket);
 			}
 			
-			mainLoop();
-		} catch (Exception e) {
-			log.postSevere("Encountered error!");
-			e.printStackTrace();
+			driver.run();
+		} catch(Throwable t) {
+			log.postSevere("Encountered error!", t);
 			shutdown();
-			//Stabilise.crashGame(e);			// Nononononononono. Concurrency problems!
 		}
 	}
 	
-	/**
-	 * The main server update loop within which all calls to server
-	 * logic are made.
-	 */
-	public void mainLoop() {
-		running = true;
+	private class ServerAppDriver extends AppDriver {
 		
-		long lastTime = System.nanoTime();
-		double unprocessed = 0;
-		double nsPerTick = 1000000000.0D / Constants.TICKS_PER_SECOND;
+		public ServerAppDriver(int updatesPerSecond, int fps, Log log) {
+			super(updatesPerSecond, fps, log);
+		}
 		
-		while(running) {
-			
-			long now = System.nanoTime();
-			unprocessed += (now - lastTime) / nsPerTick;
-			lastTime = now;
-			
+		@Override
+		protected void update() {
 			Packet packet;
 			synchronized(connections) {
 				//Iterator i = connections.iterator();
@@ -143,22 +138,24 @@ public class GameServer implements Runnable {
 				}
 			}
 			
-			while(unprocessed >= 1) {
-				world.update();
-				
-				synchronized(connections) {
-					for(ServerTCPConnection connection : connections) {
-						if(connection.loggedIn) {
-							//connection.queuePacket(getPacketDisconnect());
-							//Thread.sleep(750L);
-							//shutdown();
-						}
+			world.update();
+			
+			synchronized(connections) {
+				for(ServerTCPConnection connection : connections) {
+					if(connection.loggedIn) {
+						//connection.queuePacket(getPacketDisconnect());
+						//Thread.sleep(750L);
+						//shutdown();
 					}
 				}
-				
-				unprocessed--;
 			}
 		}
+		
+		@Override
+		protected void render() {
+			// nothing to do here
+		}
+		
 	}
 	
 	/**
@@ -188,7 +185,7 @@ public class GameServer implements Runnable {
 		}
 		
 		// Give the client the server's information
-		connection.queuePacketWithBlock(getPacketServerInfo());
+		connection.queuePacket(getPacketServerInfo());
 		
 		log.postInfo("Server-client connection successfully created.");
 	}
@@ -209,7 +206,7 @@ public class GameServer implements Runnable {
 		c.id = id;
 		
 		// Allow the client to log in by sending it the 'clear to join' packet
-		c.queuePacketWithBlock(getPacketLoginInfo(id, world.info.spawnSliceX, world.info.spawnSliceY));
+		c.queuePacket(getPacketLoginInfo(id, world.info.spawnSliceX, world.info.spawnSliceY));
 		
 		c.loggedIn = true;
 		
@@ -349,7 +346,7 @@ public class GameServer implements Runnable {
 				handlePacketPlayerPosition((Packet006PlayerPosition)packet, connection);
 				break;
 			case 252:		// Packet252RequestSlice
-				handlePacketRequestSlice((Packet252SliceRequest)packet, connection);
+				//handlePacketRequestSlice((Packet252SliceRequest)packet, connection);
 				break;
 			case 253:		// Packet253Pause
 				handlePacketPause((Packet253Pause)packet, connection);
@@ -403,6 +400,7 @@ public class GameServer implements Runnable {
 	 * @param connection The connection through which the packet should be
 	 * handled.
 	 */
+	/*
 	private void handlePacketRequestSlice(Packet252SliceRequest packet, ServerTCPConnection connection) {
 		// TODO: Install a cap as to the number of slices a client is capable of requesting,
 		// as to prevent the server from overloading or flooding the network
@@ -416,6 +414,7 @@ public class GameServer implements Runnable {
 		} else
 			world.unloadSlice(packet.x, packet.y);
 	}
+	*/
 	
 	/**
 	 * Handles a pause packet from a client.

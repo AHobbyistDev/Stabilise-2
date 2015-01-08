@@ -6,16 +6,16 @@ import com.badlogic.gdx.math.Vector2;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
-import com.stabilise.util.shape.FastAABB;
+import com.stabilise.util.shape.LightweightAABB;
 import com.stabilise.util.shape.Polygon;
 
 public class ShapeTest {
 	
 	public ShapeTest(boolean print) {
 		final AxisAlignedBoundingBox b1 = new AxisAlignedBoundingBox(-0.5f, -0.5f, 1f, 1f);
-		final FastAABB b2 = new FastAABB(-0.5f, -0.5f, 1f, 1f);
+		final LightweightAABB b2 = new LightweightAABB(-0.5f, -0.5f, 1f, 1f);
 		final AxisAlignedBoundingBox b1Pre = b1.precomputed();
-		final FastAABB b2Pre = b2.precomputed();
+		final LightweightAABB b2Pre = b2.precomputed();
 		
 		int collisions = 16384*1024;
 		

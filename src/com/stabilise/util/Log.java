@@ -306,7 +306,8 @@ public class Log {
 	/**
 	 * Gets a logging agent.
 	 * 
-	 * @param tag The tag with which to prefix the agent's log entries.
+	 * @param tag The tag with which to prefix the agent's log entries. May be
+	 * {@code null}.
 	 * 
 	 * @return A tagged logging agent.
 	 */

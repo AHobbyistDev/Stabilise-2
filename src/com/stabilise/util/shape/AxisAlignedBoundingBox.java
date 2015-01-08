@@ -9,7 +9,7 @@ import com.stabilise.util.maths.Matrix2;
  * x and y axes, such that collision detection may be simplified.
  * 
  * <p>For cases where regular reference to an AABB's width and height are not
- * required, it may be preferable to use a {@link FastAABB} instead of an
+ * required, it may be preferable to use a {@link LightweightAABB} instead of an
  * AxisAlignedBoundingBox.
  */
 public class AxisAlignedBoundingBox extends Rectangle implements AABB {

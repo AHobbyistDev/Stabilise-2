@@ -177,7 +177,7 @@ public abstract class Shape {
 	 * otherwise.
 	 */
 	public boolean containsPoint(float x, float y) {
-		// Basic implementation for polygons
+		// Basic SAT implementation for polygons
 		Vector2[] axes = generateAxes();
 		for(Vector2 axis : axes) {
 			if(!getProjection(axis).containsPoint(axis.dot(x, y)))

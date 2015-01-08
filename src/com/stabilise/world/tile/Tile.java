@@ -309,6 +309,7 @@ public class Tile {
 		registerTile(18, "chest", (new TileChest()).setHardness(HARDNESS_WOOD));
 		registerTile(19, "mobSpawner", new TileMobSpawner());
 		
+		TILES.lock();
 		registered = true;
 		
 		Tiles.poke();

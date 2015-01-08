@@ -4,17 +4,14 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.stabilise.util.Log;
-
 /**
  * A registry which provides instantiation facilities for registered classes.
  * 
  * <h3>Usage Example</h3>
  * 
  * <pre>
- * public static class MyClass {
- *     // generic superclass
- * }
+ * public static class MyClass {} // generic superclass
+ * 
  * public static class MyOtherClass extends MyClass {
  *     public MyOtherClass(int x, int y) {
  *         super();
@@ -51,13 +48,10 @@ import com.stabilise.util.Log;
  * 
  * @param <T> The type of object to instantiate.
  */
-public class InstantiationRegistry<T> {
+public class InstantiationRegistry<T> extends AbstractRegistry {
 	
 	private final BiObjectIntMap<Factory<? extends T>> factoryMap;
 	private final Map<Class<? extends T>, Integer> idMap;
-	
-	private final DuplicatePolicy dupePolicy;
-	private final Log log;
 	
 	/** The default constructor arguments. */
 	private final Class<?>[] defaultArgs;
@@ -80,12 +74,11 @@ public class InstantiationRegistry<T> {
 	 */
 	public InstantiationRegistry(int capacity, DuplicatePolicy dupePolicy, Class<T> baseClass,
 			Class<?>... defaultArgs) {
+		super(baseClass.getSimpleName() + "InstRegistry", dupePolicy);
+		
 		factoryMap = new BiObjectIntMap<Factory<? extends T>>(capacity);
 		idMap = new HashMap<Class<? extends T>, Integer>(capacity);
-		this.dupePolicy = dupePolicy;
 		this.defaultArgs = defaultArgs != null ? defaultArgs : new Class<?>[0];
-		
-		log = Log.getAgent(baseClass.getSimpleName() + "InstRegistry");
 		
 		for(Class<?> c : defaultArgs)
 			if(c == null)
@@ -107,6 +100,8 @@ public class InstantiationRegistry<T> {
 	 * 
 	 * @throws RuntimeException if the specified class does not have a
 	 * constructor accepting the default arguments.
+	 * @throws IllegalStateException if this registry is {@link #lock()
+	 * locked}.
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
 	 * @throws IllegalArgumentException if either {@code id} is already mapped
@@ -127,6 +122,8 @@ public class InstantiationRegistry<T> {
 	 * 
 	 * @throws RuntimeException if the specified class does not have a
 	 * constructor accepting arguments of the specified type.
+	 * @throws IllegalStateException if this registry is {@link #lock()
+	 * locked}.
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
 	 * @throws IllegalArgumentException if either {@code id} is already mapped
@@ -147,6 +144,8 @@ public class InstantiationRegistry<T> {
 	 * @param factory The factory object with which to create instances of the
 	 * object.
 	 * 
+	 * @throws IllegalStateException if this registry is {@link #lock()
+	 * locked}.
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
 	 * @throws IllegalArgumentException if either {@code id} is already mapped
@@ -155,12 +154,14 @@ public class InstantiationRegistry<T> {
 	 * THROW_EXCEPTION} duplicate policy.
 	 */
 	public <S extends T> void register(int id, Class<S> objClass, Factory<S> factory) {
-		if(factoryMap.hasKey(id) && dupePolicy.handle(log, "Duplicate id " + id))
+		checkLock();
+		if(factoryMap.containsKey(id) && dupePolicy.handle(log, "Duplicate id " + id))
 			return;
 		if(idMap.containsKey(objClass) && dupePolicy.handle(log, "Duplicate class " + objClass.getSimpleName()))
 			return;
 		factoryMap.put(id, factory);
 		idMap.put(objClass, Integer.valueOf(id));
+		size++;
 	}
 	
 	/**

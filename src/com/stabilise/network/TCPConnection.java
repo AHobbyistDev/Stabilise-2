@@ -66,42 +66,16 @@ public class TCPConnection {
 	
 	/**
 	 * Queues a packet for sending.
-	 * 
-	 * @return True if the packet was successfully queued, and false if the
-	 * packet is null, the packet is invalid, or the queue is full.
 	 */
-	public boolean queuePacket(Packet packet) {
-		if(packet == null)
-			return false;
-		
+	@UserThread("MainThread")
+	public void queuePacket(Packet packet) {
 		if((!server && packet.isClientPacket()) || (server && packet.isServerPacket())) {
-			return packetQueueOut.offer(packet);
+			packetQueueOut.offer(packet);
 		} else {
-			if(server) {
+			if(server)
 				log.postWarning("Attempting to send a client-only packet!");
-			} else {
+			else
 				log.postWarning("Attempting to send a server-only packet!");
-			}
-			return false;
-		}
-	}
-	
-	/**
-	 * Queues a packet for sending, and blocks until the packet may be
-	 * queued.
-	 * Note that this WILL continue looping forever if the packet is invalid.
-	 * This should be used sparingly, and only if the packet in question is
-	 * critical to the operation of the program.
-	 * 
-	 * @param The packet to queue for sending.
-	 */
-	public void queuePacketWithBlock(Packet packet) {
-		while(!queuePacket(packet)) {
-			try {
-				Thread.sleep(5L);
-			} catch(InterruptedException e) {
-				// meh
-			}
 		}
 	}
 	
@@ -110,12 +84,14 @@ public class TCPConnection {
 	 * 
 	 * @return The oldest queued packet, or null if the queue is empty.
 	 */
+	@UserThread("MainThread")
 	public Packet getPacket() {
 		return packetQueueIn.poll();
 	}
 	
 	/**
-	 * Blocks the current thread until a packet is received.
+	 * Blocks the current thread until a packet is received, or this thead is
+	 * interrupted.
 	 * 
 	 * @return The oldest queued packet, or the first packet to be added if the
 	 * queue is empty.
@@ -124,9 +100,11 @@ public class TCPConnection {
 		Packet packet;
 		while((packet = getPacket()) == null) {
 			try {
-				Thread.sleep(5L);
+				synchronized(this) {
+					wait(); // wait until the read thread invokes notifyAll
+				}
 			} catch(InterruptedException e) {
-				// meh
+				log.postWarning("Interrupted while waiting for packet");
 			}
 		}
 		return packet;
@@ -142,6 +120,8 @@ public class TCPConnection {
 	 */
 	@UserThread("ReadThread")
 	public boolean readPacket() {
+		if(terminated)
+			return false;
 		try {
 			Packet packet = Packet.readPacket(in);
 			if(packet == null)
@@ -149,7 +129,7 @@ public class TCPConnection {
 			packetQueueIn.offer(packet);
 			totalPacketsReceived++;
 			return true;
-		} catch (IOException e) {
+		} catch(IOException e) {
 			log.postSevere("Exception while reading packet", e);
 		}
 		return false;
@@ -240,14 +220,19 @@ public class TCPConnection {
 	//-------------=====Getters/Setters=====------------
 	//--------------------==========--------------------
 	
-	/** Returns the output stream being used for the connection. */
+	/**
+	 * @return This connection's output stream.
+	 */
 	public DataOutputStream getOutputStream() {
 		return out;
 	}
 	
-	/** Returns true if the connection is active; false otherwise. */
+	/**
+	 * @return {@code true} if the connection is active; {@code false}
+	 * otherwise.
+	 */
 	public boolean isRunning() {
 		return running;
 	}
-
+	
 }

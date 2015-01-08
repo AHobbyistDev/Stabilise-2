@@ -5,14 +5,13 @@ import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.maths.Matrix2;
 
 /**
- * A FastAABB is a lightweight and slightly more optimised variant of
- * {@link AxisAlignedBoundingBox}, which is overall generally less expensive to
- * use.
+ * A LightweightAABB is a slightly more lightweight variant of {@link
+ * AxisAlignedBoundingBox}, which is overall generally less expensive to use.
  * 
- * <p>Unlike AxisAlignedBoundingBox, FastAABB is not a member of the
+ * <p>Unlike AxisAlignedBoundingBox, LightweightAABB is not a member of the
  * Polygon hierarchy as to avoid limitations imposed by superclasses.
  */
-public class FastAABB extends AbstractPolygon implements AABB {
+public class LightweightAABB extends AbstractPolygon implements AABB {
 	
 	/** The min vertex (i.e. bottom left) of the AABB. This is exposed for
 	 * convenience purposes, and should be treated as if it is immutable. */
@@ -30,7 +29,7 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	 * @param width The AABB's width.
 	 * @param height The AABB's height.
 	 */
-	public FastAABB(float x, float y, float width, float height) {
+	public LightweightAABB(float x, float y, float width, float height) {
 		v00 = new Vector2(x, y);
 		v11 = new Vector2(x + width, y + height);
 	}
@@ -41,7 +40,7 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	 * @param v00 The min vertex (i.e. bottom left) of the AABB.
 	 * @param v11 The max vertex (i.e. top right) of the AABB.
 	 */
-	public FastAABB(Vector2 v00, Vector2 v11) {
+	public LightweightAABB(Vector2 v00, Vector2 v11) {
 		this.v00 = v00;
 		this.v11 = v11;
 	}
@@ -49,12 +48,12 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * <p>Note that as a FastAABB is defined in terms of two vertices, the
-	 * returned FastAABB will retain the properties of an AABB, but its min
-	 * and max vertices will be transformed as per the matrix.
+	 * <p>Note that as a LightweightAABB is defined in terms of two vertices,
+	 * the returned LightweightAABB will retain the properties of an AABB, but
+	 * its min and max vertices will be transformed as per the matrix.
 	 */
 	@Override
-	public FastAABB transform(Matrix2 matrix) {
+	public LightweightAABB transform(Matrix2 matrix) {
 		return newInstance(
 				matrix.transform(v00),
 				matrix.transform(v11)
@@ -62,7 +61,7 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	}
 	
 	@Override
-	public FastAABB translate(float x, float y) {
+	public LightweightAABB translate(float x, float y) {
 		return newInstance(
 				new Vector2(v00.x + x, v00.y + y),
 				new Vector2(v11.x + x, v11.y + y)
@@ -70,7 +69,7 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	}
 	
 	@Override
-	public FastAABB reflect() {
+	public LightweightAABB reflect() {
 		return newInstance(
 				new Vector2(-v11.x, v00.y),
 				new Vector2(-v00.x, v11.y)
@@ -204,26 +203,26 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	}
 	
 	@Override
-	public FastAABB precomputed() {
+	public LightweightAABB precomputed() {
 		return new Precomputed(this);
 	}
 	
 	// Overriding for typecast purposes
 	@Override
-	public FastAABB notPrecomputed() {
+	public LightweightAABB notPrecomputed() {
 		return this;
 	}
 	
 	/**
-	 * Creates a new FastAABB for duplication purposes. This is used to
-	 * generate a new FastAABB whenever a duplicate is needed (i.e.,
+	 * Creates a new LightweightAABB for duplication purposes. This is used to
+	 * generate a new LightweightAABB whenever a duplicate is needed (i.e.,
 	 * {@link #transform(Matrix2f)}, {@link #translate(float, float)},
 	 * {@link #reflect()}, etc).
 	 * 
 	 * @return The new AABB.
 	 */
-	protected FastAABB newInstance(Vector2 v00, Vector2 v11) {
-		return new FastAABB(v00, v11);
+	protected LightweightAABB newInstance(Vector2 v00, Vector2 v11) {
+		return new LightweightAABB(v00, v11);
 	}
 	
 	//--------------------==========--------------------
@@ -234,9 +233,9 @@ public class FastAABB extends AbstractPolygon implements AABB {
 	 * The precomputed variant of an AABB.
 	 * 
 	 * <p>Though an instance of this class may be instantiated directly, its
-	 * declared type should simply be that of FastAABB.
+	 * declared type should simply be that of LightweightAABB.
 	 */
-	public static final class Precomputed extends FastAABB {
+	public static final class Precomputed extends LightweightAABB {
 		
 		/** All four of the AABB's vertices. */
 		private Vector2[] vertices;
@@ -269,9 +268,9 @@ public class FastAABB extends AbstractPolygon implements AABB {
 		}
 		
 		/**
-		 * Constructor to be used by FastAABB.
+		 * Constructor to be used by LightweightAABB.
 		 */
-		private Precomputed(FastAABB a) {
+		private Precomputed(LightweightAABB a) {
 			super(a.v00, a.v11);
 			precompute();
 		}
@@ -303,12 +302,12 @@ public class FastAABB extends AbstractPolygon implements AABB {
 		}
 		
 		@Override
-		public FastAABB notPrecomputed() {
-			return new FastAABB(v00, v11);
+		public LightweightAABB notPrecomputed() {
+			return new LightweightAABB(v00, v11);
 		}
 		
 		@Override
-		protected FastAABB newInstance(Vector2 v00, Vector2 v11) {
+		protected LightweightAABB newInstance(Vector2 v00, Vector2 v11) {
 			return new Precomputed(v00, v11);
 		}
 		

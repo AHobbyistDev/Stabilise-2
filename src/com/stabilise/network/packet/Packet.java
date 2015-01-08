@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import com.stabilise.network.Sendable;
 import com.stabilise.util.Log;
+import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.InstantiationRegistry;
 
 /**
@@ -89,6 +90,7 @@ public abstract class Packet implements Sendable {
 	 * @return The packet, or {@code null} if it could not be created, either
 	 * due to {@code id} lacking a mapping or instantiation outright failing.
 	 */
+	@UserThread("ReadThread")
 	public static Packet createPacket(int id) {
 		try {
 			return PACKETS.instantiate(id);
@@ -101,16 +103,23 @@ public abstract class Packet implements Sendable {
 	/**
 	 * Reads the next packet from the provided input stream.
 	 * 
-	 * @return The packet, or {@code null} if a packet could not be read.
+	 * @return The packet, or {@code null} if a packet could not be read, or
+	 * there doesn't appear to be any available bytes in the stream.
 	 * @throws NullPointerException if {@code in} is {@code null}.
-	 * @throws IOException
+	 * @throws IOException if an I/O error occurs.
 	 */
+	@UserThread("ReadThread")
 	public static Packet readPacket(DataInputStream in) throws IOException {
+		// Abort if nothing can be read, to give the read thread a chance to
+		// refresh.
+		if(in.available() == 0)
+			return null;
+		
 		int id = in.read(); // ID is always first byte
-		if(id == -1)
+		if(id == -1) // usually this doesn't happen
 			return null;
 		Packet packet = createPacket(id);
-		if(packet == null)
+		if(packet == null) // usually this doesn't happen
 			return null;
 		packet.readData(in);
 		return packet;
@@ -119,21 +128,19 @@ public abstract class Packet implements Sendable {
 	/**
 	 * Writes a packet to the provided output stream.
 	 * 
-	 * @param out The output stream to write the packet to.
-	 * @param packet The packet to write.
-	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
-	 * @throws IOException
+	 * @throws IOException if an I/O error occurs.
 	 */
+	@UserThread("WriteThread")
 	public static void writePacket(DataOutputStream out, Packet packet) throws IOException {
 		out.writeByte(packet.getID()); // ID is always first byte
 		packet.writeData(out);
 	}
 	
 	/**
-	 * Registers and lists a packet type so that it may be properly referenced.
+	 * Registers a packet type.
 	 * 
-	 * @param id The packet's ID.
+	 * @param id The packet's ID. Must be positive and not a duplicate.
 	 * @param packetClass The packet's class.
 	 * @param clientPacket True if the packet may be sent by a client.
 	 * @param serverPacket True if the packet may be sent by a server.
@@ -157,6 +164,8 @@ public abstract class Packet implements Sendable {
 		registerPacket(253, Packet253Pause.class,			true,	false);
 		registerPacket(254, Packet254Disconnect.class, 		true, 	true);
 		registerPacket(255, Packet255RequestPacket.class, 	true, 	true);
+		
+		PACKETS.lock();
 	}
 	
 }

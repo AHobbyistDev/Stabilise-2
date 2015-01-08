@@ -14,11 +14,11 @@ import com.stabilise.core.GameServer;
 public final class ClientListenerThread extends Thread {
 	
 	/** The GameServer for which the client is listening. */
-	
 	private GameServer server;
 	/** The ServerSocket the thread is to listen for connections through. */
 	private ServerSocket serverSocket;
-
+	
+	
 	public ClientListenerThread(GameServer server, ServerSocket serverSocket) {
 		super("ClientListenerThread");
 		
@@ -33,10 +33,10 @@ public final class ClientListenerThread extends Thread {
 				Socket socket = serverSocket.accept();
 				server.addConnection(socket);
 			}
-		} catch (IOException e) {
-			if(server.running) server.log.postWarning("(This can probably be ignored)", e);
-			//Stabilise.crashGame(e);
+		} catch(IOException e) {
+			if(server.running)
+				server.log.postWarning("Failed to add client (was the server shut down?)", e);
 		}
 	}
-
+	
 }

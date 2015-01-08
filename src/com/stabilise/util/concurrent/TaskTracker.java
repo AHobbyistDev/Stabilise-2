@@ -15,7 +15,7 @@ public class TaskTracker {
 	
 	private Object mutex = new Object();
 	private volatile int numPartsCompleted = 0;
-	private int numPartsToComplete;
+	private float numPartsToComplete; // stored as a float to save on conversion time in percentComplete()
 	
 	
 	/**
@@ -63,7 +63,7 @@ public class TaskTracker {
 		if(parts < 0)
 			throw new IllegalArgumentException("parts < 0");
 		this.name = name;
-		numPartsToComplete = parts;
+		numPartsToComplete = (float)parts;
 	}
 	
 	/**
@@ -92,8 +92,8 @@ public class TaskTracker {
 	}
 	
 	/**
-	 * Registers a part of the task as completed. This method is equivalent to
-	 * {@link #increment(int) increment(1)}.
+	 * Registers a part of the task as completed, as if by {@link
+	 * #increment(int) increment(1)}.
 	 * 
 	 * <p>Memory consistency effects: actions in a thread prior to invoking
 	 * this method happen before actions in another thread which invokes {@link
@@ -104,7 +104,8 @@ public class TaskTracker {
 	}
 	
 	/**
-	 * Registers parts of the task as completed.
+	 * Registers a specified number of parts of the task as completed. Note
+	 * that negative values are technically permitted.
 	 * 
 	 * <p>Memory consistency effects: actions in a thread prior to invoking
 	 * this method happen before actions in another thread which invokes {@link
@@ -119,8 +120,8 @@ public class TaskTracker {
 	/**
 	 * @return The number of parts in the task, as defined in the constructor.
 	 */
-	public float parts() {
-		return numPartsToComplete;
+	public int parts() {
+		return (int)numPartsToComplete;
 	}
 	
 	/**
@@ -130,20 +131,22 @@ public class TaskTracker {
 	 * 
 	 * @return The number of parts of the task completed.
 	 */
-	public float partsCompleted() {
+	public int partsCompleted() {
 		return numPartsCompleted;
 	}
 	
 	/**
 	 * Gets the percentage of the task which has been completed thus far. Note
-	 * that the returned value may be greater than {@code 1.0} if
-	 * {@link #increment()} is invoked an incorrect number of times.
+	 * that the returned value may not necessarily be within the range of
+	 * {@code 0.0} to {@code 1.0} if the task behaves contrary to the general
+	 * contract of this class.
 	 * 
 	 * <p>Memory consistency effects: actions in a thread prior to invoking
 	 * {@link #increment()} or {@link #increment(int)} happen-before actions in
 	 * the current thread.
 	 * 
-	 * @return The percentage, usually from {@code 0.0} to {@code 1.0}.
+	 * @return The percentage, from {@code 0.0} (inclusive) to {@code 1.0}
+	 * (inclusive).
 	 */
 	public float percentComplete() {
 		return numPartsToComplete == 0f ? 1f : numPartsCompleted / numPartsToComplete;

@@ -185,6 +185,7 @@ public class Item {
 		//for(Tile tile : Tile.TILES)
 		//	registerItem(tile.getID(), tile.getName(), new ItemTile(tile));
 		
+		ITEMS.lock();
 		registered = true;
 		
 		Items.poke();

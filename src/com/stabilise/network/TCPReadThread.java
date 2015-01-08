@@ -7,7 +7,7 @@ package com.stabilise.network;
 public class TCPReadThread extends Thread {
 	
 	/** The TCPConnection instance the thread is linked to. */
-	private TCPConnection connection;
+	private final TCPConnection connection;
 	
 	
 	/**
@@ -25,13 +25,20 @@ public class TCPReadThread extends Thread {
 	@Override
 	public void run() {
 		while(connection.isRunning()) {
-			while(connection.readPacket())
-				// possibly check for interruptions here
-				;
-			
+			boolean gotPacket = false;
+			while(connection.readPacket()) {
+				if(Thread.interrupted())
+					break;
+				gotPacket = true;
+			}
+			if(gotPacket) {
+				synchronized(connection) {
+					connection.notifyAll(); // notify in case the main thread is blocking
+				}
+			}
 			try {
 				sleep(10L);
-			} catch(InterruptedException e) {}
+			} catch(InterruptedException ignored) {}
 		}
 	}
 

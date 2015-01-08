@@ -30,7 +30,7 @@ public class ServerTCPConnection extends TCPConnection {
 	 * 
 	 * @param socket The socket upon which to base the connection.
 	 * 
-	 * @throws IOException Thrown if the connection could not be created.
+	 * @throws IOException if the connection could not be created.
 	 */
 	public ServerTCPConnection(Socket socket) throws IOException {
 		super(socket, true);

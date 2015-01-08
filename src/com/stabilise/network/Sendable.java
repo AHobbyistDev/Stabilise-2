@@ -20,7 +20,7 @@ public interface Sendable {
 	 * Reads this object's data in from the given DataInputStream.
 	 * 
 	 * @throws NullPointerException if {@code in} is {@code null}.
-	 * @throws IOException for standard reasons.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	void readData(DataInputStream in) throws IOException;
 	
@@ -28,7 +28,7 @@ public interface Sendable {
 	 * Writes this object's data to the given DataOutputStream.
 	 * 
 	 * @throws NullPointerException if {@code out} is {@code null}.
-	 * @throws IOException for standard reasons.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	void writeData(DataOutputStream out) throws IOException;
 	

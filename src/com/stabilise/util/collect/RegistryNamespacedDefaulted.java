@@ -87,8 +87,10 @@ public class RegistryNamespacedDefaulted<V> extends RegistryNamespaced<V> {
 	 * 
 	 * @return {@code true} if the object was successfully registered;
 	 * {@code false} otherwise.
-	 * @throws IndexOufOfBoundsException if {@code id < 0}.
+	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
+	 * @throws IllegalStateException if this registry is {@link #lock()
+	 * locked}.
 	 * @throws IllegalArgumentException if either {@code id} or {@code key} is
 	 * are already mapped to an entry and this registry uses the {@link
 	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
