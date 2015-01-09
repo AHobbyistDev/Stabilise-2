@@ -35,7 +35,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 		try {
 			regionTag = NBTIO.readCompressed(r.getFile());
 		} catch(IOException e) {
-			log.postSevere("Could not load the NBT data for region " + r.loc.getX() + "," + r.loc.getY() + "!", e);
+			log.postSevere("Could not load the NBT data for region " + r.loc.x + "," + r.loc.y + "!", e);
 			return;
 		}
 		

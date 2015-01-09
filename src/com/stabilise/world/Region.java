@@ -127,8 +127,8 @@ public class Region {
 		this.world = world;
 		this.loc = loc;
 		
-		offsetX = loc.getX() * REGION_SIZE;
-		offsetY = loc.getY() * REGION_SIZE;
+		offsetX = loc.x * REGION_SIZE;
+		offsetY = loc.y * REGION_SIZE;
 		
 		lastSaved = world.info.age;
 	}
@@ -256,7 +256,7 @@ public class Region {
 	 * file system.
 	 */
 	public File getFile() {
-		return new File(world.getDir(), World.DIR_REGIONS + "r_" + loc.getX() + "_" + loc.getY() + ".region");
+		return new File(world.getDir(), World.DIR_REGIONS + "r_" + loc.x + "_" + loc.y + ".region");
 	}
 	
 	/**
@@ -373,7 +373,7 @@ public class Region {
 	
 	@Override
 	public String toString() {
-		return "Region[" + loc.getX() + "," + loc.getY() + "]";
+		return "Region[" + loc.x + "," + loc.y + "]";
 	}
 	
 	//--------------------==========--------------------
@@ -477,9 +477,9 @@ public class Region {
 	//--------------------==========--------------------
 	
 	/**
-	 * Returns an immutable HashPoint to use for referencing a region. The
-	 * returned point is equivalent to a region with the same coordinates'
-	 * {@link Region#loc loc} member.
+	 * Returns a HashPoint to use for referencing a region. The returned point
+	 * is equivalent to a region with the same coordinates' {@link Region#loc
+	 * loc} member.
 	 * 
 	 * @param x The x-coordinate of the region, in region-lengths.
 	 * @param y The y-coordinate of the region, in region-lengths.
@@ -487,7 +487,7 @@ public class Region {
 	 * @return The key to use for a region of the given coordinates.
 	 */
 	public static HashPoint getKey(int x, int y) {
-		return new HashPoint(x, y, false);
+		return new HashPoint(x, y);
 	}
 	
 }

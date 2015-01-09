@@ -136,12 +136,13 @@ public abstract class Application {
 	protected abstract State getInitialState();
 	
 	/**
-	 * Creates the Application - delegated from {@link InternalAppListener#create()}.
+	 * Creates the Application - delegated from {@link
+	 * InternalAppListener#create()}.
 	 */
 	private void create() {
 		if(!stopped) {
 			Gdx.app.addLifecycleListener(lcListener);
-			
+			driver.running = true;
 			init();
 			state.start();
 		}
@@ -260,7 +261,9 @@ public abstract class Application {
 	 * {@link #shutdown()}, however it should be noted that depending on the
 	 * state of the application, doing so may not be possible.
 	 * 
-	 * @param t The Throwable to treat as the cause of the crash.
+	 * @param t The Throwable to treat as the cause of the crash. If {@code
+	 * null}, a dummy exception is constructed to provide a stack trace to the
+	 * log.
 	 */
 	public final void crash(Throwable t) {
 		if(crashing)		// TODO: Possibly append a log entry detailing the

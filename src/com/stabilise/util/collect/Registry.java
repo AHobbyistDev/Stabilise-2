@@ -10,7 +10,7 @@ import java.util.Set;
  * A registry allows for objects of a certain type to be registered and
  * allocated keys.
  * 
- * <p>This class has been reconstructed from the decompiled Minecraft 1.7.10
+ * <p>This class is based on a similar one from the decompiled Minecraft 1.7.10
  * source.
  */
 public class Registry<K, V> extends AbstractRegistry implements Iterable<V> {

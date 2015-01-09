@@ -3,7 +3,7 @@ package com.stabilise.util.collect;
 import com.stabilise.util.Log;
 
 /**
- * Skeletal registry implementation.
+ * This class provides a simple base for a registry to extend.
  */
 abstract class AbstractRegistry {
 	
@@ -11,7 +11,8 @@ abstract class AbstractRegistry {
 	protected final DuplicatePolicy dupePolicy;
 	protected final Log log;
 	
-	/** The number of entries in this registry. */
+	/** The number of entries in this registry. Increment this when an object
+	 * is registered. */
 	protected int size = 0; 
 	
 	/** If {@code true}, attempts to register new entries should be rejected. */
@@ -35,7 +36,7 @@ abstract class AbstractRegistry {
 	/**
 	 * @return The number of entries in this registry.
 	 */
-	public int size() {
+	public final int size() {
 		return size;
 	}
 	
@@ -43,8 +44,9 @@ abstract class AbstractRegistry {
 	 * Locks this registry. Once this is done, attempting to register anything
 	 * else will result in an {@code IllegalStateException} being thrown.
 	 */
-	public final void lock() {
+	public void lock() {
 		locked = true;
+		log.postDebug("Locked!");
 	}
 	
 	/**
@@ -55,13 +57,13 @@ abstract class AbstractRegistry {
 	 */
 	protected final void checkLock() {
 		if(locked)
-			throw new IllegalStateException("Registry \"" + name + "\" is locked;"
+			throw new IllegalStateException("\"" + name + "\" is locked;"
 					+ " cannot register more entries!");
 	}
 	
 	@Override
 	public String toString() {
-		return name + "[" + size + " entries]";
+		return "\"" + name + "\":[" + size + " entries]";
 	}
 	
 }

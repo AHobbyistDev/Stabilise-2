@@ -96,9 +96,31 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 	}
 	
 	/**
+	 * Appends the contents of this list (order is preserved) into the
+	 * specified list, and clears this list. This is a highly efficient bulk
+	 * transfer operation with constant-time performance.
+	 * 
+	 * @throws NullPointerException if {@code list} is {@code null}.
+	 */
+	public void dumpInto(LightweightLinkedList<E> list) {
+		if(size == 0)
+			return;
+		
+		if(list.head == null)
+			list.head = head;
+		else
+			list.tail.next = head;
+		list.tail = tail;
+		
+		// clear this list
+		head = tail = null;
+		size = 0;
+	}
+	
+	/**
 	 * {@inheritDoc}
 	 * 
-	 * <p>This method has O(1) performance.
+	 * <p>This method has constant-time performance.
 	 */
 	@Override
 	public boolean add(E e) {

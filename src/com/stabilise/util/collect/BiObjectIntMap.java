@@ -6,7 +6,6 @@ import com.google.common.collect.Iterators;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * BiObjectIntMap provides a bi-directional integer to object mapping
@@ -17,7 +16,7 @@ import java.util.List;
  * <p>As a consequence of the integer-object mapping method used, client code
  * should refrain from using arbitrarily large integer keys, as doing so will
  * similarly create an arbitrarily large array filled with {@code null} values.
- * Also, negative keys are not accepted.
+ * This also means negative keys are not permitted.
  * 
  * <p>It should also be noted that mappings are permanent and can not be
  * removed.
@@ -31,8 +30,8 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 	
 	/** The value-to-key map. */
 	private IdentityHashMap<V, Integer> map;
-	/** The list, which provides easy key-to-value mappings. */
-	private List<V> list;
+	/** The list, which provides constant-time key-to-value mappings. */
+	private ArrayList<V> list;
 	
 	
 	/**
@@ -64,9 +63,9 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 		
 		map.put(value, Integer.valueOf(key));
 		
-		// Fill up any intermediate values in the array
-		while(list.size() <= key)
-			list.add(null);
+		// Expand the array if necessary - intermediate values are null
+		if(list.size() <= key)
+			list.ensureCapacity(key + 1);
 		
 		list.set(key, value);
 	}
@@ -107,9 +106,17 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 	}
 	
 	/**
+	 * Trims the size of the backing ArrayList, to free up memory. This
+	 * operation is most suitable when it is known no more entries will be
+	 * added to this map.
+	 */
+	void trim() {
+		list.trimToSize();
+	}
+	
+	/**
 	 * Gets the iterator for all the mapped objects. The returned iterator does
-	 * not support {@code remove()} and will throw an {@code
-	 * UnsupportedOperationException}.
+	 * not support {@code remove()}.
 	 */
 	@Override
 	public Iterator<V> iterator() {

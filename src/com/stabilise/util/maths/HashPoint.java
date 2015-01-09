@@ -1,117 +1,38 @@
 package com.stabilise.util.maths;
 
 /**
- * A HashPoint is an optionally immutable point with a decently distributed
+ * A HashPoint is an immutable point with a decently distributed precomputed
  * hashcode which may as such be used to compress two integers into a single
- * Map key more efficiently than an ordinary Point.
- * 
- * <p>A HashPoint precomputes its hash code whenever it is modified.
+ * Map key both more effective and more efficiently than an ordinary Point.
  * 
  * @see Point
  */
 public class HashPoint {
 	
-	private int x, y;
-	private int hash;
-	
-	/** Whether this HashPoint is mutable - that is, may be modified. */
-	public final boolean mutable; // somewhat ironic
-	
-	
-	/**
-	 * Creates a mutable point with x = 0 and y = 0.
-	 */
-	public HashPoint() {
-		this(0, 0, true);
-	}
-	
-	/**
-	 * Creates mutable point with the specified components.
-	 */
-	public HashPoint(int x, int y) {
-		this(x, y, true);
-	}
+	public final int x, y;
+	private final int hash;
 	
 	/**
 	 * Creates a point with x = 0 and y = 0.
-	 * 
-	 * @param mutable Whether or not this point's components may be modified.
 	 */
-	public HashPoint(boolean mutable) {
-		this(0, 0, mutable);
+	public HashPoint() {
+		this(0, 0);
 	}
 	
 	/**
-	 * Creates a point.
-	 * 
-	 * @param x The point's x component.
-	 * @param y The point's y component.
-	 * @param mutable Whether or not this point's components may be modified.
+	 * Creates a point with the specified components.
 	 */
-	public HashPoint(int x, int y, boolean mutable) {
+	public HashPoint(int x, int y) {
 		this.x = x;
 		this.y = y;
-		this.mutable = mutable;
-		genHash();
-	}
-	
-	/**
-	 * Sets the components of this point.
-	 * 
-	 * @return This point, for chaining operations.
-	 * 
-	 * @throws IllegalStateException if this point is immutable.
-	 */
-	public HashPoint set(int x, int y) {
-		checkCanModify();
-		this.x = x;
-		this.y = y;
-		genHash();
-		return this;
-	}
-	
-	public int getX() {
-		return x;
-	}
-	
-	public int getY() {
-		return y;
-	}
-	
-	/**
-	 * @throws IllegalStateException if this point is immutable.
-	 */
-	public void setX(int x) {
-		checkCanModify();
-		this.x = x;
-		genHash();
-	}
-	
-	/**
-	 * @throws IllegalStateException if this point is immutable.
-	 */
-	public void setY(int y) {
-		checkCanModify();
-		this.y = y;
-		genHash();
-	}
-	
-	/**
-	 * @throws IllegalStateException if this point is immutable.
-	 */
-	private void checkCanModify() {
-		if(!mutable)
-			throw new IllegalStateException("This HashPoint is immutable");
-	}
-	
-	private void genHash() {
+		
 		// This has too many basic collisions
 		//hash = x ^ y;
 		// This loses information
 		//hash = ((x & 0xFFFF) << 16) + (y & 0xFFFF);
 		
 		// Collisions are nicely distributed this way (though there's collision
-		// clumping nearby (0,0))
+		// clumping nearby (0,0) as there's more or less mirroring about (0,0))
 		hash = x ^ (y << 16) ^ (y >>> 16); // Cyclicly shift y by 16 bits
 	}
 	

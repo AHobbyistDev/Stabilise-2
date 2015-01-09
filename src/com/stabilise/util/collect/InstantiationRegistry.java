@@ -193,6 +193,12 @@ public class InstantiationRegistry<T> extends AbstractRegistry {
 		return i == null ? -1 : i.intValue();
 	}
 	
+	@Override
+	public void lock() {
+		super.lock();
+		factoryMap.trim();
+	}
+	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------
 	//--------------------==========--------------------

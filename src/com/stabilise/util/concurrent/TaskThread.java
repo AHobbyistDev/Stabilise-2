@@ -93,13 +93,6 @@ public class TaskThread extends Thread {
 	}
 	
 	/**
-	 * @see Task#throwThrowable()
-	 */
-	public void throwThrowable() throws Throwable {
-		task.throwThrowable();
-	}
-	
-	/**
 	 * @see Task#setName(String)
 	 */
 	public void setTaskName(String name) {

@@ -237,8 +237,8 @@ public abstract class WorldGenerator {
 				for(int y = 0; y < REGION_SIZE; y++) {
 					for(int x = 0; x < REGION_SIZE; x++) {
 						r.slices[y][x] = new Slice(
-								x + r.loc.getX() * REGION_SIZE,
-								y + r.loc.getY() * REGION_SIZE,
+								x + r.loc.x * REGION_SIZE,
+								y + r.loc.x * REGION_SIZE,
 								r,
 								new int[SLICE_SIZE][SLICE_SIZE]
 						);
@@ -401,18 +401,18 @@ public abstract class WorldGenerator {
 		
 		// Inform neighbouring regions of the schematic if the schematic overlaps into them
 		if(params.informRegions) {
-			for(int regionY = r.loc.getX() + params.offsetY + ((tileY + sliceY * SLICE_SIZE - sc.y) / (REGION_SIZE_IN_TILES));
-					regionY <= r.loc.getY() + params.offsetY + ((tileY + sliceY * SLICE_SIZE - sc.y + sc.height) / (REGION_SIZE_IN_TILES));
+			for(int regionY = r.loc.y + params.offsetY + ((tileY + sliceY * SLICE_SIZE - sc.y) / (REGION_SIZE_IN_TILES));
+					regionY <= r.loc.y + params.offsetY + ((tileY + sliceY * SLICE_SIZE - sc.y + sc.height) / (REGION_SIZE_IN_TILES));
 					regionY++) {
-				for(int regionX = r.loc.getX() + params.offsetX + ((tileX + sliceX * SLICE_SIZE - sc.x) / (REGION_SIZE_IN_TILES));
-						regionX <= r.loc.getX() + params.offsetX + ((tileX + sliceX * SLICE_SIZE - sc.x + sc.width) / (REGION_SIZE_IN_TILES));
+				for(int regionX = r.loc.x + params.offsetX + ((tileX + sliceX * SLICE_SIZE - sc.x) / (REGION_SIZE_IN_TILES));
+						regionX <= r.loc.x + params.offsetX + ((tileX + sliceX * SLICE_SIZE - sc.x + sc.width) / (REGION_SIZE_IN_TILES));
 						regionX++) {
-					if(regionY != r.loc.getY() || regionX != r.loc.getX()) {
+					if(regionY != r.loc.y || regionX != r.loc.x) {
 						Region cachedRegion = cacheRegion(regionX, regionY);
 						// Synchronise on the region's schematics in case they
 						// are being implanted on its gen thread
 						synchronized(cachedRegion.queuedSchematics) {
-							cachedRegion.queueSchematic(sc.name, sliceX, sliceY, tileX, tileY, r.loc.getX() - regionX, r.loc.getY() - regionY);
+							cachedRegion.queueSchematic(sc.name, sliceX, sliceY, tileX, tileY, r.loc.x - regionX, r.loc.y - regionY);
 							cachedRegion.unsavedChanges = true;
 						}
 					}
@@ -539,7 +539,7 @@ public abstract class WorldGenerator {
 		
 		// If the region is already cached by this thread, use it
 		for(Region r : cRegions) {
-			if(r.loc.getX() == x && r.loc.getY() == y)
+			if(r.loc.x == x && r.loc.y == y)
 				return r;
 		}
 		

@@ -27,9 +27,7 @@ public class MathsUtil {
 	/**
 	 * Calculates whether or not a number is a power of two.
 	 * 
-	 * @param n The number.
-	 * 
-	 * @return {@code true} if the number is a power of two; {@code false}
+	 * @return {@code true} if {@code n} is a power of two; {@code false}
 	 * otherwise.
 	 */
 	public static boolean isPowerOfTwo(int n) {

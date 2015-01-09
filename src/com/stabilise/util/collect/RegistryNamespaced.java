@@ -16,7 +16,7 @@ import com.google.common.collect.HashBiMap;
  * #register(int, String, Object)} instead of {@link
  * #register(Object, Object)}.
  * 
- * <p>This class has been reconstructed from the decompiled Minecraft 1.7.10
+ * <p>This class is based on a similar one from the decompiled Minecraft 1.7.10
  * source.
  */
 public class RegistryNamespaced<V> extends Registry<String, V> {
@@ -197,6 +197,12 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	@Override
 	public Iterator<V> iterator() {
 		return idMap.iterator();
+	}
+	
+	@Override
+	public void lock() {
+		super.lock();
+		idMap.trim();
 	}
 	
 	/**

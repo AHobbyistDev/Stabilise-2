@@ -42,6 +42,9 @@ public class Profiler {
 	/** The last root section. */
 	private Section lastRoot;
 	
+	/** Caches lastRoot's data in case it is requested multiple times. */
+	private SectionData lastData;
+	
 	/** The stack of sections being profiled. Sections near the tail of this
 	 * stack are constituents of sections closer to the head, with the first
 	 * section being {@link #root}. */
@@ -208,6 +211,7 @@ public class Profiler {
 			effectivelyEnabled = true;
 			root.end();
 			lastRoot = root;
+			lastData = null;
 			stack.clear();
 			root = new Section(lastRoot.name);
 			stack.add(root);
@@ -258,6 +262,7 @@ public class Profiler {
 		root = new Section(lastRoot.name);
 		stack.add(root);
 		lastRoot = root;
+		lastData = null;
 	}
 	
 	/**
@@ -321,7 +326,10 @@ public class Profiler {
 	 * @return The profiler's data.
 	 */
 	public SectionData getData() {
-		return lastRoot.getData();
+		if(lastData == null)
+			return lastData = lastRoot.getData();
+		else
+			return lastData;
 	}
 	
 	//--------------------==========--------------------

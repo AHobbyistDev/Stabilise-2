@@ -10,7 +10,7 @@ public enum DuplicatePolicy {
 	/** Duplicate entries override old ones using this policy. */
 	OVERRIDE {
 		@Override
-		public boolean handle(Log log, String msg) {
+		boolean handle(Log log, String msg) {
 			log.postWarning(msg + "; replacing old mapping");
 			return false;
 		}
@@ -18,7 +18,7 @@ public enum DuplicatePolicy {
 	/** Duplicate entries are rejected using this policy. */
 	REJECT {
 		@Override
-		public boolean handle(Log log, String msg) {
+		boolean handle(Log log, String msg) {
 			log.postWarning(msg + "; ignoring new mapping");
 			return true;
 		}
@@ -27,7 +27,7 @@ public enum DuplicatePolicy {
 	 * IllegalArgumentException} being thrown using this policy. */
 	THROW_EXCEPTION {
 		@Override
-		public boolean handle(Log log, String msg) {
+		boolean handle(Log log, String msg) {
 			throw new IllegalArgumentException(msg + "; rejecting new mapping");
 		}
 	};
@@ -43,5 +43,5 @@ public enum DuplicatePolicy {
 	 * @throws IllegalArgumentException if this is the {@link #THROW_EXCEPTION}
 	 * policy.
 	 */
-	public abstract boolean handle(Log log, String msg);
+	abstract boolean handle(Log log, String msg);
 }

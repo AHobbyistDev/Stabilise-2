@@ -70,8 +70,8 @@ public class ConfigFile {
 	 * @param name The name of the tag.
 	 * @param value The value for the tag.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code name} contains a colon
-	 * (:) and {@code value} holds a valid data type.
+	 * @throws IllegalArgumentException if {@code name} contains a colon (:)
+	 * and {@code value} holds a valid data type.
 	 */
 	public void addTag(String name, Object value) {
 		if(value instanceof Boolean)
@@ -91,7 +91,8 @@ public class ConfigFile {
 		else if(value instanceof String)
 			addString(name, (String)value);
 		else
-			Log.get().postWarning("Invalid tag type " + value.getClass().toString() + " for tag \"" + name + "\"!");
+			Log.get().postWarning("Invalid tag type " + value.getClass().getSimpleName()
+					+ " for tag \"" + name + "\"!");
 	}
 	
 	/**
@@ -100,8 +101,7 @@ public class ConfigFile {
 	 * @param name The name of the tag.
 	 * @param value The value for the tag.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code name} contains a colon
-	 * (:).
+	 * @throws IllegalArgumentException if {@code name} contains a colon (:).
 	 */
 	public void addBoolean(String name, boolean value) {
 		tags.put(validate(name), Boolean.toString(value));
@@ -113,8 +113,7 @@ public class ConfigFile {
 	 * @param name The name of the tag.
 	 * @param value The value for the tag.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code name} contains a colon
-	 * (:).
+	 * @throws IllegalArgumentException if {@code name} contains a colon (:).
 	 */
 	public void addByte(String name, byte value) {
 		tags.put(validate(name), Byte.toString(value));
@@ -126,8 +125,7 @@ public class ConfigFile {
 	 * @param name The name of the tag.
 	 * @param value The value for the tag.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code name} contains a colon
-	 * (:).
+	 * @throws IllegalArgumentException if {@code name} contains a colon (:).
 	 */
 	public void addShort(String name, short value) {
 		tags.put(validate(name), Short.toString(value));
@@ -139,8 +137,7 @@ public class ConfigFile {
 	 * @param name The name of the tag.
 	 * @param value The value for the tag.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code name} contains a colon
-	 * (:).
+	 * @throws IllegalArgumentException if {@code name} contains a colon (:).
 	 */
 	public void addInteger(String name, int value) {
 		tags.put(validate(name), Integer.toString(value));
@@ -152,8 +149,7 @@ public class ConfigFile {
 	 * @param name The name of the tag.
 	 * @param value The value for the tag.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code name} contains a colon
-	 * (:).
+	 * @throws IllegalArgumentException if {@code name} contains a colon (:).
 	 */
 	public void addLong(String name, long value) {
 		tags.put(validate(name), Long.toString(value));
@@ -165,8 +161,7 @@ public class ConfigFile {
 	 * @param name The name of the tag.
 	 * @param value The value for the tag.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code name} contains a colon
-	 * (:).
+	 * @throws IllegalArgumentException if {@code name} contains a colon (:).
 	 */
 	public void addFloat(String name, float value) {
 		tags.put(validate(name), Float.toString(value));
@@ -178,8 +173,7 @@ public class ConfigFile {
 	 * @param name The name of the tag.
 	 * @param value The value for the tag.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code name} contains a colon
-	 * (:).
+	 * @throws IllegalArgumentException if {@code name} contains a colon (:).
 	 */
 	public void addDouble(String name, double value) {
 		tags.put(validate(name), Double.toString(value));
@@ -513,7 +507,8 @@ public class ConfigFile {
 	 * @param s The string.
 	 * 
 	 * @return The string, for chaining operations.
-	 * @throws IllegalArgumentException Thrown if the string contains a colon.
+	 * @throws NullPointerException if {@code s} is {@code null}.
+	 * @throws IllegalArgumentException if the string contains a colon.
 	 */
 	private String validate(String s) {
 		if(s.contains(":"))

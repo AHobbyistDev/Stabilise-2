@@ -44,7 +44,7 @@ public class FlatlandGeneratorII extends WorldGenerator {
 			}
 		}
 		
-		Random rnd = new Random((seed + r.loc.getX()) ^ r.loc.getY());
+		Random rnd = new Random((seed + r.loc.x) ^ r.loc.y);
 		
 		if(rnd.nextFloat() < 0.75f)
 			addSchematicAt(r, "testhouse", rnd.nextInt(15), 15, rnd.nextInt(15), 15, SchematicParams.defaultParams());

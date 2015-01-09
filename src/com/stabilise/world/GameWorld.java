@@ -336,9 +336,9 @@ public class GameWorld extends World {
 		saveRegion(r);
 		
 		// Now unload entities in the region as well...
-		int minX = r.loc.getX() * Region.REGION_SIZE_IN_TILES;
+		int minX = r.loc.x * Region.REGION_SIZE_IN_TILES;
 		int maxX = minX + Region.REGION_SIZE_IN_TILES;
-		int minY = r.loc.getY() * Region.REGION_SIZE_IN_TILES;
+		int minY = r.loc.y * Region.REGION_SIZE_IN_TILES;
 		int maxY = minY + Region.REGION_SIZE_IN_TILES;
 		
 		for(Entity e : getEntities()) {

@@ -3,8 +3,7 @@ package com.stabilise.util.concurrent;
 import java.util.concurrent.ExecutionException;
 
 /**
- * A Task is a wrapper for a {@code Runnable} with additional facilities, such
- * as those of cancellation and progress tracking.
+ * A Task is a wrapper for a {@code Runnable} with some additional facilities.
  * 
  * <p>Unlike a {@code Runnable}, subclasses should override {@link #execute()}
  * instead of {@link #run()} when implementing code. Furthermore, it is advised
@@ -12,8 +11,8 @@ import java.util.concurrent.ExecutionException;
  * performing the task.
  * 
  * <p>Instances of this class are thread-safe - however, normal synchronisation
- * requirements apply for implemented code, as they would for any
- * {@code Runnable}.
+ * requirements apply for implemented code, as they would for any {@code
+ * Runnable}.
  */
 public abstract class Task implements Runnable {
 	
@@ -41,12 +40,11 @@ public abstract class Task implements Runnable {
 	//--------------------==========--------------------
 	
 	/** The thread on which this task is executing. */
-	private Thread thread;
+	private volatile Thread thread;
 	
 	private volatile TaskState state = TaskState.UNSTARTED;
-	private volatile boolean cancelled = false;
 	/** The throwable thrown during execution of the task. A value of
-	 * {@code null} indicates the task ran without encountering anything. */
+	 * {@code null} indicates the task ran without throwing anything. */
 	private volatile Throwable throwable = null;
 	
 	/** The task tracker. This is initially constructed as per
@@ -59,24 +57,6 @@ public abstract class Task implements Runnable {
 	/** The lock used for waiting on the task for completion. */
 	private final Object lock = new Object();
 	
-	
-	/**
-	 * Creates a new Task, as if by {@link #Task(int) new Task(0)}.
-	 */
-	public Task() {
-		this(0);
-	}
-	
-	/**
-	 * Creates a new Task.
-	 * 
-	 * @param parts The number of parts in the task.
-	 * 
-	 * @throws IllegalArgumentException if {@code parts < 0}.
-	 */
-	public Task(int parts) {
-		this(new TaskTracker(parts));
-	}
 	
 	/**
 	 * Creates a new Task.
@@ -100,16 +80,17 @@ public abstract class Task implements Runnable {
 	public final void run() {
 		if(state.equals(TaskState.RUNNING))
 			throw new IllegalStateException("Task is already running!");
-		if(cancelled) {
+		if(isCancelled()) {
 			state = TaskState.STOPPED;
 			return;
 		}
-		state = TaskState.RUNNING;
+		throwable = null;
 		thread = Thread.currentThread();
+		state = TaskState.RUNNING;
 		try {
 			execute();
 		} catch(Throwable t) {
-			setThrowable(t);
+			throwable = t;
 			state = TaskState.STOPPED;
 			wakeWaitingThreads();
 			return;
@@ -122,11 +103,7 @@ public abstract class Task implements Runnable {
 	 * Executes the task. Implementations are encouraged to allow exceptions
 	 * to propagate if they are severe enough to halt the task.
 	 * 
-	 * @throws Exception as per standard exceptional conditions,
-	 * circumstantially defined based on the implementation. A
-	 * {@code CancellationException} is thrown if the implementation invoked
-	 * {@link #checkCancel()} and another thread had cancelled this task via
-	 * {@link #cancel()}.
+	 * @throws Exception as per standard exceptional conditions.
 	 */
 	protected abstract void execute() throws Exception;
 	
@@ -141,57 +118,33 @@ public abstract class Task implements Runnable {
 	}
 	
 	/**
-	 * Checks for whether or not the task has been cancelled. This method
-	 * returns a boolean value in preference to throwing a
-	 * {@code CancellationException} to allow for a the task implementation to
-	 * perform any cleanup operations.
+	 * Returns {@link Thread#interrupted()}.
 	 * 
-	 * @return {@code true} if the task has been cancelled; {@code false}
-	 * otherwise.
+	 * @return {@code true} if the thread on which this task it executing has
+	 * been interrupted; {@code false} otherwise.
 	 */
-	protected final boolean wasCancelled() {
-		return cancelled || Thread.interrupted();
+	protected final boolean isCancelled() {
+		return Thread.interrupted();
 	}
 	
 	/**
-	 * Checks for whether or not the task has been cancelled. If so, this
-	 * method will throw a {@code CancellationException}, which is handled
-	 * automatically by the Task, thus aborting the current
-	 * {@link #execute(boolean)} method. Any subclass of Task should not
-	 * attempt to catch this.
+	 * Checks for whether or not this task has been cancelled or the thread it
+	 * is running on has been interrupted, and throws an {@code
+	 * InterruptedException} if so.
 	 * 
-	 * @throws CancellationException if the task has been cancelled.
+	 * @throws InterruptedException if the task has been cancelled/interrupted.
 	 */
-	protected final void checkCancel() throws CancellationException {
-		if(state.equals(TaskState.RUNNING) && isCurrentThread() && (cancelled || Thread.interrupted()))
-			throw new CancellationException();
+	protected final void checkCancel() throws InterruptedException {
+		if(state.equals(TaskState.RUNNING) && isCurrentThread() && isCancelled())
+			throw new InterruptedException();
 	}
 	
 	/**
-	 * Sets the task's throwable, as a means of indicating that a throwable
-	 * was encountered during the execution of the task. The throwable will be
-	 * returned on an invocation of {@link #getThrowable()}. Note that setting
-	 * a throwable does not necessarily indicate that the task failed, but
-	 * encountered exceptional conditions which may be worth reporting to the
-	 * main thread.
-	 * 
-	 * <p>If {@code t} is a {@link CancellationException}, it will be ignored.
-	 * 
-	 * @param t The throwable.
-	 */
-	protected final void setThrowable(Throwable t) {
-		if(!(t instanceof CancellationException))
-			throwable = t;
-	}
-	
-	/**
-	 * Attempts to cancel the task; how quickly the task aborts is contingent
-	 * upon how often the tasks checks for cancellation. Invoking this does
-	 * nothing if the task has finished running.
+	 * Attempts to cancel the task by interrupting the thread on which it is
+	 * running. Invoking this does nothing if the task has finished running.
 	 */
 	public final void cancel() {
-		cancelled = true;
-		if(state.equals(TaskState.RUNNING))
+		if(state.equals(TaskState.RUNNING) && !isCurrentThread())
 			thread.interrupt();
 	}
 	
@@ -261,6 +214,7 @@ public abstract class Task implements Runnable {
 	 * Gets the percentage of the task which has been completed thus far.
 	 * 
 	 * @return The percentage, from 0.0 to 1.0.
+	 * @see TaskTracker#percentComplete()
 	 */
 	public final float percentComplete() {
 		return tracker.percentComplete();
@@ -324,46 +278,25 @@ public abstract class Task implements Runnable {
 	}
 	
 	/**
-	 * Gets the Throwable most recently thrown by this task. Note that if a
-	 * Throwable is returned, this does not necessarily indicate that the task
-	 * failed; the executing code could simply have deemed it appropriate to
-	 * report an exceptional condition.
+	 * Gets the Throwable thrown by this task. A return value of {@code null}
+	 * indicates that the task has run (or is still running) without throwing
+	 * an exception or error.
 	 * 
 	 * <p>Memory consistency effects: actions by the thread executing this task
-	 * before setting the Throwable (either via
-	 * {@link #setThrowable(Throwable)} or allowing one to propagate through
-	 * {@link #execute()}) happen-before actions in the current thread when
-	 * that Throwable is returned.
+	 * before allowing a Throwable to propagate through {@link #execute()})
+	 * happen-before actions in the current thread when that Throwable is
+	 * returned.
 	 * 
-	 * @return The Throwable most recently thrown by the task, or {@code null}
-	 * if a Throwable has not been thrown.
+	 * @return The Throwable, or {@code null} if a Throwable has not been
+	 * thrown.
 	 */
 	public final Throwable getThrowable() {
 		return throwable;
 	}
 	
 	/**
-	 * Throws the Throwable most recently thrown by this task. If the Throwable
-	 * which would be returned upon an invocation of {@link #getThrowable()} is
-	 * {@code null}, this method will not throw anything.
-	 * 
-	 * <p>Memory consistency effects: actions by the thread executing this task
-	 * before setting the Throwable (either via
-	 * {@link #setThrowable(Throwable)} or allowing one to propagate through
-	 * {@link #execute()}) happen-before actions in the current thread when
-	 * that Throwable is thrown by this method.
-	 * 
-	 * @throws Throwable if a throwable was thrown by the task.
-	 */
-	public final void throwThrowable() throws Throwable {
-		Throwable t = getThrowable();
-		if(t != null)
-			throw t;
-	}
-	
-	/**
-	 * Checks for whether or not the thread is in a state where it may be
-	 * waited for.
+	 * Checks for whether or not the task may be waited for by the current
+	 * thread.
 	 * 
 	 * @return {@code true} if task may be waited for; {@code false} otherwise.
 	 */
@@ -372,8 +305,6 @@ public abstract class Task implements Runnable {
 	}
 	
 	/**
-	 * Checks for whether or not the task is executing on the current thread.
-	 * 
 	 * @return {@code true} if the task is executing on the current thread;
 	 * {@code false} otherwise.
 	 */
@@ -382,9 +313,8 @@ public abstract class Task implements Runnable {
 	}
 	
 	/**
-	 * Throws an {@code ExecutionException} wrapping the most recently caught
-	 * Throwable thrown by the task, provided a Throwable was thrown. This
-	 * clears the currently stored Throwable.
+	 * Throws an {@code ExecutionException} wrapping the Throwable which halted
+	 * this task, if one was thrown at all. This clears {@code throwable}.
 	 * 
 	 * @throws ExecutionException if the task threw a Throwable while
 	 * executing.
@@ -395,13 +325,12 @@ public abstract class Task implements Runnable {
 		if(throwable != null) {
 			Throwable t = throwable;
 			throwable = null;
-			if(!(t instanceof CancellationException))
-				throw new ExecutionException(t);
+			throw new ExecutionException(t);
 		}
 	}
 	
 	/**
-	 * Gets the task's state.
+	 * @return This task's state.
 	 */
 	protected final TaskState getState() {
 		return state;
@@ -413,7 +342,7 @@ public abstract class Task implements Runnable {
 	 * 
 	 * @param name The name of the current task being executed.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code name} is {@code null}.
+	 * @throws IllegalArgumentException if {@code name} is {@code null}.
 	 */
 	public final void setName(String name) {
 		tracker.setName(name);
@@ -426,30 +355,21 @@ public abstract class Task implements Runnable {
 	 * happen-before actions in the current thread.
 	 * 
 	 * @return The task's identifying name.
+	 * @see TaskTracker#getName()
 	 */
 	public final String getName() {
 		return tracker.getName();
 	}
 	
 	/**
-	 * Gets a String representation of the Task, equivalent to
-	 * {@link TaskTracker#toString()}.
+	 * Gets a String representation of the Task, equivalent to {@link
+	 * TaskTracker#toString()}.
+	 * 
+	 * @see TaskTracker#toString()
 	 */
 	@Override
 	public final String toString() {
 		return tracker.toString();
-	}
-	
-	//--------------------==========--------------------
-	//-------------=====Nested Classes=====-------------
-	//--------------------==========--------------------
-	
-	/**
-	 * A simple exception type used to indicate that the task has been
-	 * cancelled.
-	 */
-	protected static class CancellationException extends RuntimeException {
-		private static final long serialVersionUID = 1L;
 	}
 	
 }
