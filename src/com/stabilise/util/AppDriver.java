@@ -74,8 +74,9 @@ public abstract class AppDriver implements Runnable {
 	
 	/**
 	 * Initiates a loop which invokes {@link #tick()} up to as many times per
-	 * second as {@code fps} as specified in the constructor. This method will
-	 * not return until either of the following occurs:
+	 * second as {@code fps} as specified in the constructor or by {@link
+	 * #setFPS(int)}. This method will not return until either of the following
+	 * occurs:
 	 * 
 	 * <ul>
 	 * <li>{@link #running} is set to {@code false}; or, equivalently,

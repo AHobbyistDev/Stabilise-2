@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.maths.HashPoint;
 
@@ -111,6 +112,8 @@ public class Region {
 	 * @param world A reference to the world to which the region belongs.
 	 * @param x The region's x-coordinate, in region lengths.
 	 * @param y The region's y-coordinate, in region lengths.
+	 * 
+	 * @throws NullPointerException if {@code world} is {@code null}.
 	 */
 	public Region(GameWorld world, int x, int y) {
 		this(world, getKey(x, y));
@@ -122,8 +125,13 @@ public class Region {
 	 * @param world A reference to the world to which the region belongs.
 	 * @param loc The region's location, whose coordinates are in region-
 	 * lengths.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
 	 */
 	public Region(GameWorld world, HashPoint loc) {
+		if(world == null || loc == null)
+			throw new NullPointerException();
+		
 		this.world = world;
 		this.loc = loc;
 		
@@ -140,18 +148,6 @@ public class Region {
 		// If the region is not generated ignore updates
 		if(!loaded)
 			return;
-		
-		// TODO: Commenting out as concurrency issues can potentiate from this
-		/*
-		if(!generated) {
-			// This condition is satisfied only if the region was cached by the
-			// WorldGenerator and has now been uncached
-			if(anchoredSlices.get() == 0)
-				unload = true; 
-			else
-				return;
-		}
-		*/
 		
 		if(anchoredSlices.get() == 0) {
 			if(ticksToUnload > 0)
@@ -332,29 +328,40 @@ public class Region {
 	}
 	
 	/**
-	 * Blocks the current thread until this region has loaded. This method is
-	 * for WorldGenerator use only.
+	 * Blocks the current thread until this region has loaded. If this thread
+	 * is interrupted while waiting, the interrupt status flag will be set when
+	 * this method returns.
+	 * 
+	 * <p>This method is intended for WorldGenerator use only.
 	 */
+	@UserThread("WorldGenThread")
 	public void waitUntilLoaded() {
 		if(loaded)
 			return;
 		synchronized(lock) {
-			boolean interrupted = true;
-			while(!loaded && interrupted) {
-				interrupted = false;
-				try {
-					lock.wait();
-				} catch(InterruptedException ignored) {
-					interrupted = true;
+			boolean interrupted = false;
+			try {
+				while(!loaded) {
+					try {
+						lock.wait();
+					} catch(InterruptedException e) {
+						interrupted = true;
+					}
 				}
+			} finally {
+				if(interrupted)
+					Thread.currentThread().interrupt();
 			}
 		}
 	}
 	
 	/**
 	 * Notifies other threads waiting on {@link #waitUntilLoaded()} that this
-	 * region has been loaded. This method is for WorldLoader use only.
+	 * region has been loaded.
+	 * 
+	 * <p>This method is intended for WorldLoader use only.
 	 */
+	@UserThread("WorldLoaderThread")
 	public void notifyOfLoaded() {
 		synchronized(lock) {
 			loaded = true;

@@ -105,7 +105,6 @@ public class StringUtil {
 				StringBuilder sb = new StringBuilder(Math.max(s.length(), dotIndex + exponent + 1));
 				sb.append(s.substring(0, dotIndex));
 				if(s.length() > dotIndex + exponent) { // there's enough space to shift the point
-					System.out.println("point1");
 					sb.append(s.substring(dotIndex+1, dotIndex + exponent + 1));
 					sb.append('.');
 					sb.append(s.substring(dotIndex + exponent + 1, exponentIndex));

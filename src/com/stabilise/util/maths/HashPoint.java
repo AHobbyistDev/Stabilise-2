@@ -49,6 +49,14 @@ public class HashPoint {
 		return x == p.x && y == p.y;
 	}
 	
+	/**
+	 * @return {@code true} if this HashPoint holds the specified coordinates;
+	 * {@code false} otherwise.
+	 */
+	public boolean equals(int x, int y) {
+		return this.x == x && this.y == y;
+	}
+	
 	@Override
 	public String toString() {
 		return "HashPoint[" + x + "," + y + "]";

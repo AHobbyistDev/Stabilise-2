@@ -15,7 +15,7 @@ public class TaskTracker {
 	
 	private Object mutex = new Object();
 	private volatile int numPartsCompleted = 0;
-	private float numPartsToComplete; // stored as a float to save on conversion time in percentComplete()
+	private int numPartsToComplete;
 	
 	
 	/**
@@ -63,7 +63,7 @@ public class TaskTracker {
 		if(parts < 0)
 			throw new IllegalArgumentException("parts < 0");
 		this.name = name;
-		numPartsToComplete = (float)parts;
+		numPartsToComplete = parts;
 	}
 	
 	/**
@@ -121,7 +121,7 @@ public class TaskTracker {
 	 * @return The number of parts in the task, as defined in the constructor.
 	 */
 	public int parts() {
-		return (int)numPartsToComplete;
+		return numPartsToComplete;
 	}
 	
 	/**
@@ -149,7 +149,7 @@ public class TaskTracker {
 	 * (inclusive).
 	 */
 	public float percentComplete() {
-		return numPartsToComplete == 0f ? 1f : numPartsCompleted / numPartsToComplete;
+		return numPartsToComplete == 0f ? 1f : (float)numPartsCompleted / numPartsToComplete;
 	}
 	
 	/**

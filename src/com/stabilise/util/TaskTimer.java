@@ -235,11 +235,7 @@ public class TaskTimer {
 	}
 	
 	/**
-	 * Gets the name of a specified unit..
-	 * 
-	 * @param unit The unit.
-	 * 
-	 * @return The unit's name.
+	 * @return The name of the specified unit.
 	 */
 	private static String unitName(TimeUnit unit) {
 		switch(unit) {

@@ -122,7 +122,7 @@ public abstract class WorldGenerator {
 	private final Map<String, Schematic> schematics = new ConcurrentHashMap<String, Schematic>(5);
 	
 	/** The generator's log. */
-	protected final Log log = Log.getAgent("GENERATOR");//.mute();
+	protected final Log log = Log.getAgent("GENERATOR");
 	
 	
 	/**
@@ -145,11 +145,11 @@ public abstract class WorldGenerator {
 	 * the given region will not be generated if:
 	 * 
 	 * <ul>
+	 * <li>it has not been loaded (i.e. {@link Region#loaded region.loaded}
+	 *     is {@code false}).
 	 * <li>it has already been generated (i.e.
-	 *     {@link Region#isGenerated()} {@code == true}).
-	 * <li>it is currently being generated on another thread.
-	 * <li>it has not been loaded (i.e. {@link Region#loaded} {@code ==
-	 *     false}).
+	 *     {@link Region#isGenerated() region.isGenerated()} is {@code true}).
+	 * <li>it is being generated concurrently.
 	 * </ul>
 	 * 
 	 * @param region The region to generate.
@@ -162,8 +162,6 @@ public abstract class WorldGenerator {
 		if(region.isGenerated() || !region.loaded)
 			return;
 		
-		//System.out.println(region + " - " + region.generated + ", " + region.hasQueuedSchematics);
-		
 		// Abort if the region is being generated:
 		// Obtaining the region here prevents a large flux of calls (e.g.
 		// when the world is initially loaded) from each creating a new
@@ -174,7 +172,6 @@ public abstract class WorldGenerator {
 		executor.execute(new Runnable() {
 			@Override
 			public void run() {
-				//obtainRegion(region);
 				genRegion(region, false);
 			}
 		});
@@ -184,10 +181,10 @@ public abstract class WorldGenerator {
 	 * Instructs the WorldGenerator to generate the given region on the current
 	 * thread. Unlike {@link #generate(Region)}, this method does not ignore
 	 * the instruction if the region is currently generating (though it will if
-	 * <tt>{@link Region#isGenerated() region.isGenerated()} == true</tt>); it
-	 * will instead block the current thread until generation has completed. 
-	 * Note that there exists the possibility that the current thread may block
-	 * for a prolonged period.
+	 * <tt>{@link Region#isGenerated() region.isGenerated()} == true</tt>);
+	 * this is because it is expected for this method to be invoked only by the
+	 * WorldLoader once it finishes loading a region, and hence it is
+	 * guaranteed that {@code region} is not currently being generated.
 	 * 
 	 * @param region The region to generate.
 	 * 
@@ -195,10 +192,8 @@ public abstract class WorldGenerator {
 	 */
 	@UserThread("WorkerThread")
 	public final void generateSynchronously(Region region) {
-		if(region.isGenerated())
-			return;
-		obtainRegion(region);
-		genRegion(region, false);
+		if(!region.isGenerated() && obtainRegion(region))
+			genRegion(region, false);
 	}
 	
 	/**
@@ -213,8 +208,7 @@ public abstract class WorldGenerator {
 	 */
 	@UserThread("WorkerThread")
 	private void genRegion(Region r, boolean cached) {
-		// This should be non-null
-		RegionLock l = regionLocks.get(r.loc);
+		RegionLock l = regionLocks.get(r.loc); // shouldn't be null
 		
 		if(isShutdown) {
 			releaseRegion(r);
@@ -274,7 +268,7 @@ public abstract class WorldGenerator {
 				addSchematicAt(r, s.schematicName, s.sliceX, s.sliceY, s.tileX, s.tileY, SchematicParams.scheduledGenParams(s.offsetX, s.offsetY));
 			
 			timer.stop();
-			timer.logResult(log, TimeUnit.MILLISECONDS);
+			log.postDebug(timer.getResult(TimeUnit.MILLISECONDS));
 			
 			r.generated = true;
 		} catch(Throwable t) {
@@ -315,8 +309,8 @@ public abstract class WorldGenerator {
 				executor.execute(new Runnable() {
 					@Override
 					public void run() {
-						obtainRegion(cRegion);
-						genRegion(cRegion, true);
+						if(obtainRegion(cRegion))
+							genRegion(cRegion, true);
 					}
 				});
 			} else {
@@ -539,7 +533,7 @@ public abstract class WorldGenerator {
 		
 		// If the region is already cached by this thread, use it
 		for(Region r : cRegions) {
-			if(r.loc.x == x && r.loc.y == y)
+			if(r.loc.equals(x, y));
 				return r;
 		}
 		
@@ -624,8 +618,6 @@ public abstract class WorldGenerator {
 	/**
 	 * Checks for whether or not a region is currently being generated.
 	 * 
-	 * @param r The region.
-	 * 
 	 * @return {@code true} if the region is being generated; {@code false}
 	 * otherwise.
 	 */
@@ -640,9 +632,8 @@ public abstract class WorldGenerator {
 	 * is guaranteed that either {@code lock()} or {@code tryLock()} will be
 	 * invoked on the returned RegionLock.
 	 * 
-	 * @param r The region.
-	 * 
 	 * @return The region's lock.
+	 * @throws NullPointerException if {@code r} is {@code null}.
 	 */
 	private RegionLock prepareLock(Region r) {
 		RegionLock l;
@@ -661,8 +652,8 @@ public abstract class WorldGenerator {
 	}
 	
 	/**
-	 * Acquires the permit to generate the given region. When this method
-	 * returns, it is safe to generate the region.
+	 * Acquires the permit to generate the given region. If this method returns
+	 * {@code true}, it is safe to generate the region.
 	 * 
 	 * <p>To release the generation permit once generation is complete, use
 	 * {@link #releaseRegion(Region) releaseRegion(r)}. Every invocation of
@@ -670,9 +661,13 @@ public abstract class WorldGenerator {
 	 * <i>all</i> code paths.
 	 * 
 	 * @param r The region.
+	 * 
+	 * @return {@code true} if the permit was acquired; {@code false} if the
+	 * current thread was interrupted while waiting to acquire the permit.
+	 * @throws NullPointerException if {@code r} is {@code null}.
 	 */
-	private void obtainRegion(Region r) {
-		prepareLock(r).lock();
+	private boolean obtainRegion(Region r) {
+		return prepareLock(r).lock();
 	}
 	
 	/**
@@ -684,10 +679,9 @@ public abstract class WorldGenerator {
 	 * this method which returns {@code true} should have an associated call to
 	 * {@code releaseRegion} for <i>all</i> code paths.
 	 * 
-	 * @param r The region.
-	 * 
-	 * @return {@code true} if the current thread is allowed to generate the
-	 * region; {@code false} otherwise.
+	 * @return {@code true} if the permit was acquired; {@code false}
+	 * otherwise.
+	 * @throws NullPointerException if {@code r} is {@code null}.
 	 */
 	private boolean tryObtainRegion(Region r) {
 		return prepareLock(r).tryLock();
@@ -697,6 +691,8 @@ public abstract class WorldGenerator {
 	 * Releases the permit to generate the given region.
 	 * 
 	 * @param r The region.
+	 * 
+	 * @throws NullPointerException if {@code r} is {@code null}.
 	 */
 	private void releaseRegion(Region r) {
 		// No need to check to see if this is null; no thread should remove the
@@ -849,7 +845,7 @@ public abstract class WorldGenerator {
 		private final Semaphore semaphore = new Semaphore(1, false);
 		/** Tracks the number of threads which are using this RegionLock, to
 		 * determine whether or not it should be allowed to be garbage
-		 * collected. */
+		 * collected. Do <i>not</i> interact with this directly. */
 		private final AtomicInteger threadsUsing = new AtomicInteger(0);
 		/** Whether or not the schematics have been implanted in the region.
 		 * This is reset to {@code false} every time the lock is freshly
@@ -874,11 +870,19 @@ public abstract class WorldGenerator {
 		 * Acquires the lock. An invocation of this should be prepended by an
 		 * invocation of {@link #preLock()}.
 		 * 
-		 * @see Semaphore#acquireUninterruptibly()
+		 * @return {@code true} if the lock was acquired; {@code false} if the
+		 * current thread was interrupted while waiting to acquire the lock.
+		 * @see Semaphore#acquire()
 		 */
-		private void lock() {
-			semaphore.acquireUninterruptibly();
-			schematicsPlaced = false; // reset at the start of every gen
+		private boolean lock() {
+			try {
+				semaphore.acquire();
+			} catch(InterruptedException e) {
+				onLockFailure();
+				return false;
+			}
+			onLockSuccess();
+			return true;
 		}
 		
 		/**
@@ -890,12 +894,21 @@ public abstract class WorldGenerator {
 		 */
 		private boolean tryLock() {
 			boolean result = semaphore.tryAcquire();
-			if(result) // reset at the start of every gen
-				schematicsPlaced = false; 
-			else // reverse the action of preLock()
-				threadsUsing.getAndDecrement();
-			
+			if(result)
+				onLockSuccess();
+			else
+				onLockFailure();
 			return result;
+		}
+		
+		private void onLockSuccess() {
+			// Reset at the start of every gen
+			schematicsPlaced = false;
+		}
+		
+		private void onLockFailure() {
+			// Undo what preLock() does
+			threadsUsing.getAndDecrement();
 		}
 		
 		/**
