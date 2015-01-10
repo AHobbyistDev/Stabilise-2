@@ -16,4 +16,15 @@ interface IClientWorld extends IWorld {
 	 */
 	void setClientPlayer(CharacterData data, EntityMob mob);
 	
+	/**
+	 * Saves the data for the client player.
+	 * 
+	 * <p>TODO: This is only really a thing for singleplayer, and I'm just
+	 * emulating the old GameWorld code at the moment.
+	 * 
+	 * @param data The client's character data.
+	 * @param mob The player mob.
+	 */
+	void saveClientPlayer(CharacterData data, EntityMob mob);
+	
 }

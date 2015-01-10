@@ -40,6 +40,14 @@ public interface IWorld {
 	
 	
 	/**
+	 * Prepares the world by performing any necessary preemptive loading
+	 * operations, such as preparing the spawn regions, etc.
+	 * 
+	 * @throws IllegalStateException if the world has already been prepared.
+	 */
+	void prepare();
+	
+	/**
 	 * Polls the loaded status of the world.
 	 * 
 	 * @return {@code true} if the world is loaded; {@code false} otherwise.

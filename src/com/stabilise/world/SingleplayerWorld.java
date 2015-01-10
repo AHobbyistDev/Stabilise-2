@@ -30,7 +30,24 @@ public class SingleplayerWorld extends HostWorld implements IClientWorld {
 	
 	@Override
 	public void setClientPlayer(CharacterData data, EntityMob mob) {
-		
+		loadCharacterData(data);
+		if(data.newToWorld) {
+			// TODO: For now I'm placing the character at (0,0) of the spawn
+			// slice. In practice, we'll need to check to see whether or not
+			// this location is valid, and keep searching until a valid
+			// location is found.
+			data.lastX = tileCoordFromSliceCoord(info.spawnSliceX);
+			data.lastY = tileCoordFromSliceCoord(info.spawnSliceY);
+			data.newToWorld = false;
+			saveCharacterData(data);
+		}
+	}
+	
+	@Override
+	public void saveClientPlayer(CharacterData data, EntityMob mob) {
+		data.lastX = mob.x;
+		data.lastY = mob.y;
+		saveCharacterData(data);
 	}
 	
 	@Override
@@ -55,6 +72,11 @@ public class SingleplayerWorld extends HostWorld implements IClientWorld {
 	@Override
 	public Collection<Particle> getParticles() throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public void save() {
+		super.save();
 	}
 	
 }

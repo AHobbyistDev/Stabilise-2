@@ -25,26 +25,27 @@ import java.util.Map;
  *     }
  * }
  * 
- * public InstantiationRegistry{@code <MyClass>} registry =
+ * public static final InstantiationRegistry{@code <MyClass>} registry =
  *     new InstantiationRegistry{@code <MyClass>}(2, DuplicatePolicy.THROW_EXCEPTION, MyClass.class);
  * 
- * registry.register(0, MyOtherClass.class, Integer.TYPE, Integer.TYPE);
- * registry.register(1, YetAnotherClass.class,
- *     new InstantiationRegistry.Factory{@code <YetAnotherClass>}() {
- *         &#64;Override
- *         public YetAnotherClass create(Object... args) {
- *             return new YetAnotherClass((String)args[0]);
- *         }
- *     });
+ * static {
+ *     registry.register(0, MyOtherClass.class, Integer.TYPE, Integer.TYPE);
+ *     registry.register(1, YetAnotherClass.class,
+ *         new InstantiationRegistry.Factory{@code <YetAnotherClass>}() {
+ *             &#64;Override
+ *             public YetAnotherClass create(Object... args) {
+ *                 return new YetAnotherClass((String)args[0]);
+ *             }
+ *         });
+ *         
+ *     {@code // Henceforth the following blocks of code are equivalent:}
  * 
- * {@code // Henceforth there following blocks of code are equivalent:}
- * 
- * MyClass obj1 = new MyOtherClass(0, 1);
- * MyClass obj2 = new YetAnotherClass("Penguin");
- * 
- * MyClass obj1 = registry.instantiate(0, 0, 1);
- * MyClass obj2 = registry.instantiate(1, "Penguin");
- * </pre>
+ *     MyClass obj1 = new MyOtherClass(0, 1);
+ *     MyClass obj2 = new YetAnotherClass("Penguin");
+ *     
+ *     MyClass obj1 = registry.instantiate(0, 0, 1);
+ *     MyClass obj2 = registry.instantiate(1, "Penguin");
+ * }</pre>
  * 
  * @param <T> The type of object to instantiate.
  */
@@ -76,8 +77,8 @@ public class InstantiationRegistry<T> extends AbstractRegistry {
 			Class<?>... defaultArgs) {
 		super(baseClass.getSimpleName() + "InstRegistry", dupePolicy);
 		
-		factoryMap = new BiObjectIntMap<Factory<? extends T>>(capacity);
-		idMap = new HashMap<Class<? extends T>, Integer>(capacity);
+		factoryMap = new BiObjectIntMap<>(capacity);
+		idMap = new HashMap<>(capacity);
 		this.defaultArgs = defaultArgs != null ? defaultArgs : new Class<?>[0];
 		
 		for(Class<?> c : defaultArgs)

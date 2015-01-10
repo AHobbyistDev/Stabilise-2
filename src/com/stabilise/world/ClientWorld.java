@@ -12,11 +12,15 @@ import com.stabilise.entity.particle.Particle;
 
 /**
  * The world as viewed by a client.
+ * 
+ * @param <T> Use {@link SingleplayerWorld} for singleplayer, and {@link
+ * MultiplayerClientWorld} for a multiplayer client.
  */
-public class ClientWorld extends WrappedWorld implements IClientWorld {
+public class ClientWorld<T extends BaseWorld & IClientWorld>
+		extends WrappedWorld<T> implements IClientWorld {
 	
-	/** The player's character. */
-	private CharacterData playerChar;
+	/** The player's character data. */
+	private CharacterData playerData;
 	/** Holds a direct reference to the player controlled by the client. */
 	public EntityMob player;
 	/** The camera which follows the client's player. */
@@ -30,24 +34,27 @@ public class ClientWorld extends WrappedWorld implements IClientWorld {
 	
 	
 	/**
-	 * Use this constructor for a multiplayer client.
+	 * Creates a new ClientWorld.
+	 * 
+	 * @param world The underlying world intended for the client.
 	 */
-	public ClientWorld(MultiplayerClientWorld world) {
-		super(world);
-	}
-	
-	/**
-	 * Use this constructor for a singleplayer world.
-	 */
-	public ClientWorld(HostWorld world) {
+	public ClientWorld(T world) {
 		super(world);
 	}
 	
 	@Override
 	public void setClientPlayer(CharacterData data, EntityMob mob) {
-		this.playerChar = data;
+		this.playerData = data;
 		this.player = mob;
 		camera = new GameCamera(this, player);
+		world.setClientPlayer(data, mob);
+		addEntity(mob, data.lastX, data.lastY);
+		setPlayer(mob);
+	}
+	
+	@Override
+	public void saveClientPlayer(CharacterData data, EntityMob mob) {
+		world.saveClientPlayer(playerData, player);
 	}
 	
 	@Override

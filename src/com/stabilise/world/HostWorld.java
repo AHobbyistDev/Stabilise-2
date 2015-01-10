@@ -50,7 +50,7 @@ public abstract class HostWorld extends BaseWorld {
 	 * problems when relevant methods are accessed by the world loader. */
 	public final ConcurrentHashMap<HashPoint, Region> regions;
 	
-	/** Whether or not the world has been prepared. */
+	/** Whether or not the world has been {@link #prepare() prepared}. */
 	private boolean prepared = false;
 	
 	
@@ -78,12 +78,7 @@ public abstract class HostWorld extends BaseWorld {
 		generator = WorldGenerator.getGenerator(config);
 	}
 	
-	/**
-	 * Prepares the world by loading into memory any spawn regions, entities,
-	 * etc.
-	 * 
-	 * @throws IllegalStateException if the world has already been prepared.
-	 */
+	@Override
 	public void prepare() {
 		if(prepared)
 			throw new IllegalStateException("World has already been prepared!");
@@ -440,7 +435,7 @@ public abstract class HostWorld extends BaseWorld {
 	 * 
 	 * @throws NullPointerException if {@code character} is {@code null}.
 	 */
-	protected void loadCharacterData(CharacterData character) {
+	void loadCharacterData(CharacterData character) {
 		new PlayerDataFile(character);
 		character.dataFile.load();
 	}
@@ -453,7 +448,7 @@ public abstract class HostWorld extends BaseWorld {
 	 * @throws NullPointerException if {@code character} or {@code
 	 * character.dataFile} is {@code null}.
 	 */
-	protected void saveCharacterData(CharacterData character) {
+	void saveCharacterData(CharacterData character) {
 		character.dataFile.save();
 	}
 	
@@ -478,7 +473,7 @@ public abstract class HostWorld extends BaseWorld {
 			log.postSevere("Could not save world info!");
 		}
 		
-		//savePlayers();
+		//savePlayers(); // TODO
 		
 		for(Region r : regions.values())
 			saveRegion(r);

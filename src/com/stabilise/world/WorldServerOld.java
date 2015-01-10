@@ -303,5 +303,11 @@ public class WorldServerOld extends BaseWorld {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@Override
+	public void prepare() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

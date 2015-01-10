@@ -11,14 +11,27 @@ import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 
-public class WrappedWorld extends AbstractWorld {
+/**
+ * A WrappedWorld wraps another world and delegates methods where appropriate.
+ * 
+ * <p>This class is intended to allow worlds of different types have unified
+ * functionality under the same wrapper.
+ * 
+ * @param <T> The type of world to wrap.
+ */
+public class WrappedWorld<T extends BaseWorld> extends AbstractWorld {
 	
 	/** The world being wrapped. */
-	protected BaseWorld world;
+	public T world;
 	
 	
-	public WrappedWorld(BaseWorld world) {
+	public WrappedWorld(T world) {
 		this.world = world;
+	}
+	
+	@Override
+	public void prepare() {
+		world.prepare();
 	}
 	
 	@Override

@@ -31,8 +31,10 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * it comes to documenting interactions between the world, the world loader,
  * and the world generator
  * -->
+ * 
+ * @deprecated
  */
-public class GameWorld extends BaseWorld {
+public class GameWorld extends HostWorld {
 	
 	/** The world's information. */
 	public final WorldInfo info;
@@ -72,14 +74,12 @@ public class GameWorld extends BaseWorld {
 	 * @param info The world's info.
 	 */
 	public GameWorld(WorldInfo info) {
-		super();
+		super(info, null, Log.getAgent("world"));
 		
-		this.info = info;
+		this.info = null;
 		
 		spawnSliceX = info.spawnSliceX;
 		spawnSliceY = info.spawnSliceY;
-		
-		log = Log.getAgent("world");
 		
 		regions = new ConcurrentHashMap<HashPoint, Region>();
 		
@@ -142,7 +142,7 @@ public class GameWorld extends BaseWorld {
 		addEntity(p, character.lastX, character.lastY);
 		setPlayer(p);
 		
-		camera = new GameCamera(this, p);
+		//----camera = new GameCamera(this, p);
 		sliceMap = new SliceMap(this, p);
 		
 		player = p;
@@ -520,7 +520,7 @@ public class GameWorld extends BaseWorld {
 	
 	@Override
 	public File getDir() {
-		return BaseWorld.getWorldDir(info.fileSystemName);
+		return IWorld.getWorldDir(info.fileSystemName);
 	}
 	
 	/**

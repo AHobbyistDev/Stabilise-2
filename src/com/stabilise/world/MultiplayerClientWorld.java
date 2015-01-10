@@ -26,13 +26,23 @@ public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
 	}
 	
 	@Override
-	public boolean isLoaded() {
-		return slices.isLoaded();
+	public void prepare() {
+		// TODO
 	}
 	
 	@Override
 	public void setClientPlayer(CharacterData data, EntityMob mob) {
 		// TODO
+	}
+	
+	@Override
+	public void saveClientPlayer(CharacterData data, EntityMob mob) {
+		// don't really do anything if we're the client...
+	}
+	
+	@Override
+	public boolean isLoaded() {
+		return slices.isLoaded();
 	}
 	
 	@Override
