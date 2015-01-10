@@ -11,7 +11,10 @@ import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.opengl.render.model.ModelPlayer;
 import com.stabilise.util.Colour;
 import com.stabilise.util.Profiler;
+import com.stabilise.world.ClientWorld;
 import com.stabilise.world.GameWorld;
+import com.stabilise.world.IWorld;
+import com.stabilise.world.SingleplayerWorld;
 import com.stabilise.world.Slice;
 
 /**
@@ -37,7 +40,7 @@ public class WorldRenderer implements Renderer {
 	float scale = 48;
 	
 	/** Holds a reference to the world. */
-	public final GameWorld world;
+	public final IWorld world;
 	
 	/** The tile renderer. */
 	public TileRenderer tileRenderer;
@@ -88,7 +91,7 @@ public class WorldRenderer implements Renderer {
 	 * @param game The game.
 	 * @param world The game world.
 	 */
-	public WorldRenderer(Game game, GameWorld world) {
+	public WorldRenderer(Game game, IWorld world) {
 		super();
 		
 		this.world = world;

@@ -2,7 +2,6 @@ package com.stabilise.world;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -11,7 +10,6 @@ import com.google.common.base.Preconditions;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityPlayer;
-import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.UserThread;
@@ -21,7 +19,6 @@ import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.save.WorldLoader;
 import com.stabilise.world.tile.Tile;
-import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -158,8 +155,7 @@ public abstract class HostWorld extends BaseWorld {
 	public void update() {
 		super.update();
 		
-		// Increment the world's age
-		info.age++;
+		info.age++; // our precious world is one tick older
 		
 		profiler.next("region");
 		Iterator<Region> i = regions.values().iterator();
@@ -540,6 +536,7 @@ public abstract class HostWorld extends BaseWorld {
 	 * @return The HostWorld instance, or {@code null} if the world info could
 	 * not be loaded.
 	 */
+	/*
 	public static HostWorld loadWorld(String worldName) {
 		WorldInfo info = WorldInfo.loadInfo(worldName);
 		
@@ -549,6 +546,7 @@ public abstract class HostWorld extends BaseWorld {
 		Log.get().postSevere("Could not load info file of world \"" + worldName + "\" during world loading!");
 		return null;
 	}
+	*/
 	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------

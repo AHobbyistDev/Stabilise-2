@@ -32,7 +32,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * and the world generator
  * -->
  * 
- * @deprecated
+ * @deprecated Due to reconstructing the World hierarchy
  */
 public class GameWorld extends HostWorld {
 	

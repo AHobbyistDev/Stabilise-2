@@ -10,7 +10,9 @@ import com.stabilise.screen.menu.Menu;
 import com.stabilise.screen.menu.PauseMenu;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
+import com.stabilise.world.ClientWorld;
 import com.stabilise.world.GameWorld;
+import com.stabilise.world.SingleplayerWorld;
 
 /**
  * The game itself.
@@ -23,7 +25,7 @@ public class Game implements Controllable {
 	public boolean paused = false;
 	
 	/** The game's world instance. */
-	private final GameWorld world;
+	private final ClientWorld<SingleplayerWorld> world;
 	
 	/** The controller. */
 	public Controller controller;
@@ -49,10 +51,8 @@ public class Game implements Controllable {
 	 * Creates a new Game instance.
 	 * 
 	 * @param world The world to run.
-	 * 
-	 * @throws RuntimeException Thrown if the world could not be loaded.
 	 */
-	public Game(GameWorld world) {
+	public Game(ClientWorld<SingleplayerWorld> world) {
 		this.world = world;
 		
 		log.postInfo("Initiating game...");
@@ -125,7 +125,7 @@ public class Game implements Controllable {
 	 * 
 	 * @return The game world.
 	 */
-	public GameWorld getWorld() {
+	public ClientWorld<SingleplayerWorld> getWorld() {
 		return world;
 	}
 	

@@ -30,7 +30,7 @@ public class SliceMap {
 	//--------------------==========--------------------
 	
 	/** A reference to the world object. */
-	private GameWorld world;
+	private HostWorld world;
 	/** The slice map's central target. */
 	private GameObject target;
 	
@@ -47,7 +47,7 @@ public class SliceMap {
 	 * @param world The world to base the slice map on.
 	 * @param target The entity around which to load slices.
 	 */
-	public SliceMap(GameWorld world, GameObject target) {
+	public SliceMap(HostWorld world, GameObject target) {
 		if(world == null)
 			throw new IllegalArgumentException("world is null!");
 		if(target == null)

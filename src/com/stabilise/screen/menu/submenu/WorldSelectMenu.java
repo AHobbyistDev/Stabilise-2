@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import com.stabilise.character.CharacterData;
 import com.stabilise.core.Application;
 import com.stabilise.core.state.SingleplayerState;
+import com.stabilise.entity.EntityPlayer;
 import com.stabilise.screen.menu.SubMenuBasedMenu;
 import com.stabilise.screen.menu.component.Button;
 import com.stabilise.screen.menu.component.MenuItem;
@@ -21,9 +22,13 @@ import com.stabilise.util.TaskTimer;
 import com.stabilise.util.StringUtil;
 import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.concurrent.TaskThread;
+import com.stabilise.util.concurrent.TaskTracker;
 import com.stabilise.util.maths.Point;
+import com.stabilise.world.ClientWorld;
 import com.stabilise.world.GameWorld;
 import com.stabilise.world.BaseWorld;
+import com.stabilise.world.IWorld;
+import com.stabilise.world.SingleplayerWorld;
 import com.stabilise.world.WorldInfo;
 
 /**
@@ -227,7 +232,7 @@ public class WorldSelectMenu extends SubMenu {
 	/** The world loader. */
 	private TaskThread worldLoader;
 	/** The world. */
-	private GameWorld world;
+	private ClientWorld<SingleplayerWorld> world;
 	
 	
 	/**
@@ -608,9 +613,6 @@ public class WorldSelectMenu extends SubMenu {
 		}
 		
 		super.update();
-		
-		//if(screen.wasResized())
-		//	rescale();
 	}
 	
 	@Override
@@ -667,24 +669,26 @@ public class WorldSelectMenu extends SubMenu {
 			case ACTION_SELECT_WORLD:
 				loadingWorld = true;
 				final WorldInfo info = worlds[selectedWorld];
-				worldLoader = new TaskThread(new Task(1) {
+				worldLoader = new TaskThread(new Task(new TaskTracker(1)) {
 					@Override
 					protected void execute() throws Exception {
 						TaskTimer timer = new TaskTimer("World loading");
 						
-						world = new GameWorld(info);
+						world = new ClientWorld<>(
+								new SingleplayerWorld(
+										info, Application.get().profiler, Log.getAgent("world")
+								)
+						);
 						
 						timer.start();
 						
 						world.prepare();
-						world.addPlayer(CharacterData.defaultCharacter());
+						world.setClientPlayer(CharacterData.defaultCharacter(), new EntityPlayer(world));
 						
 						tracker.increment();
 						
-						while(!world.regionsLoaded()) {
-							try {
-								Thread.sleep(5L);
-							} catch(InterruptedException ignored) {}
+						while(!world.isLoaded()) {
+							Thread.sleep(5L); // cancelled if interrupted
 						}
 						
 						timer.stop();
@@ -700,7 +704,7 @@ public class WorldSelectMenu extends SubMenu {
 				setState(State.DELETE_CONFIRM, selectedWorld);
 				break;
 			case ACTION_DELETE_WORLD_YES:
-				BaseWorld.deleteWorld(worlds[selectedWorld].fileSystemName);
+				IWorld.deleteWorld(worlds[selectedWorld].fileSystemName);
 				loadWorlds();
 				for(int i = 0; i < buttons.length; i++) {
 					buttons[i].setWorld(worlds[i]);
@@ -726,8 +730,8 @@ public class WorldSelectMenu extends SubMenu {
 					}
 				}
 				
-				if(BaseWorld.createWorld(worldName, seed) == null) {
-					Log.critical("Could not create world \"" + worldName + "\"!");
+				if(IWorld.createWorld(worldName, seed) == null) {
+					Log.get().postSevere("Could not create world \"" + worldName + "\"!");
 				} else {
 					loadWorlds();
 					for(int i = 0; i < buttons.length; i++) {

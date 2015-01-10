@@ -4,7 +4,8 @@ import com.stabilise.core.Application;
 import com.stabilise.core.Game;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Profiler;
-import com.stabilise.world.GameWorld;
+import com.stabilise.world.ClientWorld;
+import com.stabilise.world.SingleplayerWorld;
 
 /**
  * The SingleplayerState is the state which will run while singleplayer
@@ -28,9 +29,9 @@ public class SingleplayerState implements State {
 	/**
 	 * Creates a new SingleplayerState instance.
 	 * 
-	 * @param worldInfo The info of the world to play.
+	 * @param world The world on which to play.
 	 */
-	public SingleplayerState(GameWorld world) {
+	public SingleplayerState(ClientWorld<SingleplayerWorld> world) {
 		super();
 		
 		game = new Game(world);
