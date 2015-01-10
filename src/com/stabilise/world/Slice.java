@@ -175,7 +175,7 @@ public class Slice {
 	 * 
 	 * @param world The world.
 	 */
-	public void addContainedEntitiesToWorld(World world) {
+	public void addContainedEntitiesToWorld(AbstractWorld world) {
 		// TODO: A more efficient method of finding tile entities may be ideal
 		if(numTileEntities == 0) return;
 		TileEntity t;

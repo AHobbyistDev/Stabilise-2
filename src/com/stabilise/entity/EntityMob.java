@@ -10,7 +10,7 @@ import com.stabilise.item.Item;
 import com.stabilise.item.ItemStack;
 import com.stabilise.world.Direction;
 import com.stabilise.world.GameWorld;
-import com.stabilise.world.World;
+import com.stabilise.world.AbstractWorld;
 
 /**
  * A mob is an entity capable of acting of its own agency.
@@ -218,7 +218,7 @@ public abstract class EntityMob extends Entity {
 	 * 
 	 * @param world The world in which the Mob will be placed.
 	 */
-	public EntityMob(World world) {
+	public EntityMob(AbstractWorld world) {
 		super(world);
 		
 		initProperties();

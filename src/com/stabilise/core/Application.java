@@ -98,8 +98,8 @@ public abstract class Application {
 			throw new IllegalStateException("The application has already been created!");
 		
 		// It shouldn't matter that we're publishing this instance before it
-		// has been constructed as an Application should be the starting point
-		// (or effective starting point) for an application anyway.
+		// has been constructed as this should be the starting point (or
+		// effective starting point) for an application anyway.
 		instance = this;
 		
 		log = Log.getAgent("Application");

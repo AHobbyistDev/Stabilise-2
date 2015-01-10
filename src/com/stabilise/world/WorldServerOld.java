@@ -23,7 +23,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * 
  * @deprecated Due to the removal of networking architecture.
  */
-public class WorldServer extends World {
+public class WorldServerOld extends AbstractWorld {
 	
 	/** The game server to which the world belongs. */
 	public GameServer server;
@@ -46,7 +46,7 @@ public class WorldServer extends World {
 	 * 
 	 * @param info The WorldInfo object to base the world on.
 	 */
-	public WorldServer(GameServer server, WorldInfo info) {
+	public WorldServerOld(GameServer server, WorldInfo info) {
 		this.server = server;
 		this.info = info;
 		//generator = WorldGenerator.getGenerator(this, info.seed);
@@ -205,7 +205,7 @@ public class WorldServer extends World {
 	 * @return The File representing the world's directory.
 	 */
 	public File getDir() {
-		return World.getWorldDir(info.fileSystemName); //new File(Resources.WORLDS_DIR, IO.getLegalString(info.nameOnDisk) + "/");
+		return AbstractWorld.getWorldDir(info.fileSystemName); //new File(Resources.WORLDS_DIR, IO.getLegalString(info.nameOnDisk) + "/");
 	}
 	
 	/**
@@ -244,11 +244,11 @@ public class WorldServer extends World {
 	 * @return The WorldServer instance, or null if the world could not be
 	 * loaded.
 	 */
-	public static WorldServer loadWorld(GameServer server, String worldName) {
+	public static WorldServerOld loadWorld(GameServer server, String worldName) {
 		WorldInfo info = WorldInfo.loadInfo(worldName);
 		
 		if(info != null)
-			return new WorldServer(server, info);
+			return new WorldServerOld(server, info);
 		
 		Log.get().postSevere("Could not load info file of world \"" + worldName + "\" during world loading!");
 		return null;

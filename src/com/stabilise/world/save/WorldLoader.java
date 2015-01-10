@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.world.GameWorld;
+import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.WorldData;
 
@@ -37,7 +37,7 @@ import com.stabilise.world.WorldData;
 public abstract class WorldLoader {
 	
 	/** The world for which the loader is loading. */
-	protected final GameWorld world;
+	protected final HostWorld world;
 	
 	/** The executor which delegates threads for loading. */
 	private final ExecutorService executor;

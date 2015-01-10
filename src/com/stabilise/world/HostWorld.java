@@ -2,21 +2,18 @@ package com.stabilise.world;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
-import com.stabilise.entity.GameCamera;
-import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.LightweightLinkedList;
 import com.stabilise.util.maths.HashPoint;
+import com.stabilise.util.nbt.NBTIO;
+import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.save.WorldLoader;
 import com.stabilise.world.tile.Tile;
@@ -24,7 +21,8 @@ import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
- * The game world.
+ * The world as viewed by its host (i.e. the client in singleplayer, or the
+ * server (slash hosting client) in multiplayer).
  * 
  * <!--
  * TODO: Implementation details for everything. Details are very important when
@@ -32,7 +30,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * and the world generator
  * -->
  */
-public class GameWorld extends AbstractWorld {
+public abstract class HostWorld extends AbstractWorld {
 	
 	/** The world's information. */
 	public final WorldInfo info;
@@ -47,31 +45,17 @@ public class GameWorld extends AbstractWorld {
 	/** The map of all loaded regions. This is concurrent as to prevent
 	 * problems when relevant methods are accessed by the world loader. */
 	public final ConcurrentHashMap<HashPoint, Region> regions;
-	/** The slice map, which manages 'loaded' slices. */
-	private SliceMap sliceMap;
-	
-	/** The player's character. */
-	private CharacterData playerChar;
-	/** The player. */
-	public EntityMob player;
-	/** The game camera. */
-	public GameCamera camera;
-	
-	/** */
-	public final LightweightLinkedList<Particle> particles = new LightweightLinkedList<Particle>();
-	/** The total number of particles in the world. */
-	public int particleCount = 0;
 	
 	/** Whether or not the world has been prepared. */
 	private boolean prepared = false;
 	
 	
 	/**
-	 * Creates a new GameWorld.
+	 * Creates a new HostWorld.
 	 * 
 	 * @param info The world's info.
 	 */
-	public GameWorld(WorldInfo info) {
+	public HostWorld(WorldInfo info) {
 		super();
 		
 		this.info = info;
@@ -92,8 +76,7 @@ public class GameWorld extends AbstractWorld {
 	 * Prepares the world by loading into memory any spawn regions, entities,
 	 * etc.
 	 * 
-	 * @throws IllegalStateException Thrown if the world has already been
-	 * prepared.
+	 * @throws IllegalStateException if the world has already been prepared.
 	 */
 	public void prepare() {
 		if(prepared)
@@ -105,8 +88,8 @@ public class GameWorld extends AbstractWorld {
 		for(int x = -1; x < 1; x++) {
 			for(int y = -1; y < 1; y++) {
 				// This will induce a permanent anchorage imbalance which
-				// should never be rectified short of a bug; the region will
-				// remain perpetually loaded
+				// should never be rectified; the region will remain
+				// perpetually loaded
 				loadRegion(x, y).anchorSlice();
 			}
 		}
@@ -125,7 +108,7 @@ public class GameWorld extends AbstractWorld {
 	 * @param character The data of the player to add.
 	 */
 	public void addPlayer(CharacterData character) {
-		this.playerChar = character;
+		//this.playerChar = character;
 		
 		EntityPlayer p = new EntityPlayer(this);
 		loadCharacterData(character);
@@ -141,11 +124,6 @@ public class GameWorld extends AbstractWorld {
 		}
 		addEntity(p, character.lastX, character.lastY);
 		setPlayer(p);
-		
-		camera = new GameCamera(this, p);
-		sliceMap = new SliceMap(this, p);
-		
-		player = p;
 	}
 	
 	/**
@@ -170,13 +148,9 @@ public class GameWorld extends AbstractWorld {
 	 */
 	public boolean regionsLoaded() {
 		for(Region r : regions.values()) {
-			// If a region hasn't been generated and has anchored slices, it
-			// has been cached by the world generator. Once it no longer has
-			// any anchored slices, it will have been uncached.
-			if(!r.loaded || (!r.generated && r.getAnchoredSlices() != 0))
+			if(!r.loaded || !r.isGenerated())
 				return false;
 		}
-		
 		return true;
 	}
 	
@@ -186,17 +160,6 @@ public class GameWorld extends AbstractWorld {
 		
 		// Increment the world's age
 		info.age++;
-		
-		profiler.start("particles");
-		updateObjects(getParticles());
-		
-		profiler.next("camera");
-		// Update the camera
-		camera.update();
-		
-		profiler.next("sliceMap");
-		// Update the slices and regions
-		sliceMap.update();
 		
 		profiler.next("region");
 		Iterator<Region> i = regions.values().iterator();
@@ -212,23 +175,6 @@ public class GameWorld extends AbstractWorld {
 			profiler.end();
 		}
 		profiler.end();
-	}
-	
-	@Override
-	public void addParticle(Particle p, double x, double y) {
-		p.x = x;
-		p.y = y;
-		addParticle(p);
-	}
-	
-	@Override
-	public void addParticle(Particle p) {
-		particles.add(p);
-	}
-	
-	@Override
-	public Collection<Particle> getParticles() {
-		return particles;
 	}
 	
 	/**
@@ -278,10 +224,6 @@ public class GameWorld extends AbstractWorld {
 	 * returned. This method should not be invoked regularly as it will induce
 	 * a significant performance deficit; refer to
 	 * {@link #getRegionAt(int, int)} instead.
-	 * 
-	 * <!-- TODO: For the the generate parameter is redundant as this method is
-	 * always being invoked with it as true, but I'm leaving it in in
-	 * anticipation of future uses where it is false. -->
 	 * 
 	 * @param x The x-coordinate of the region, in region-lengths.
 	 * @param y The y-coordinate of the region, in region-lengths.
@@ -357,8 +299,6 @@ public class GameWorld extends AbstractWorld {
 	 * @param r The region to save.
 	 */
 	public void saveRegion(Region r) {
-		//if(!r.unsavedChanges)
-		//	return;
 		if(r.generated)
 			loader.saveRegion(r);
 	}
@@ -518,7 +458,36 @@ public class GameWorld extends AbstractWorld {
 		}
 	}
 	
-	@Override
+	/**
+	 * Loads the character's world-specific data, (i.e. their coordinates,
+	 * current health, etc.)
+	 * 
+	 * @param character The character data for which to load the info.
+	 * 
+	 * @throws NullPointerException if {@code character} is {@code null}.
+	 */
+	protected void loadCharacterData(CharacterData character) {
+		new PlayerDataFile(character);
+		character.dataFile.load();
+	}
+	
+	/**
+	 * Saves the character's world-specific data.
+	 * 
+	 * @param character The character data for which to save the info.
+	 * 
+	 * @throws NullPointerException if {@code character} or {@code
+	 * character.dataFile} is {@code null}.
+	 */
+	protected void saveCharacterData(CharacterData character) {
+		character.dataFile.save();
+	}
+	
+	/**
+	 * Gets the world's directory.
+	 * 
+	 * @return The File representing the world's directory.
+	 */
 	public File getDir() {
 		return AbstractWorld.getWorldDir(info.fileSystemName);
 	}
@@ -535,20 +504,10 @@ public class GameWorld extends AbstractWorld {
 			log.postSevere("Could not save world info!");
 		}
 		
-		savePlayers();
+		//savePlayers();
 		
 		for(Region r : regions.values())
 			saveRegion(r);
-	}
-	
-	/**
-	 * Saves the player data.
-	 */
-	private void savePlayers() {
-		// Simple implementation for just one player
-		playerChar.lastX = player.x;
-		playerChar.lastY = player.y;
-		saveCharacterData(playerChar);
 	}
 	
 	/**
@@ -600,8 +559,8 @@ public class GameWorld extends AbstractWorld {
 	//--------------------==========--------------------
 	
 	/**
-	 * Creates a new GameWorld as per
-	 * {@link #GameWorld(WorldInfo) new GameWorld(info)}, where {@code info} is
+	 * Creates a new HostWorld as per
+	 * {@link #HostWorld(WorldInfo) new HostWorld(info)}, where {@code info} is
 	 * the WorldInfo object returned as if by
 	 * {@link WorldInfo#loadInfo(String) WorldInfo.loadInfo(worldName)}. If you
 	 * already have access to a world's WorldInfo object, it is preferable to
@@ -609,17 +568,130 @@ public class GameWorld extends AbstractWorld {
 	 * 
 	 * @param worldName The name of the world on the file system.
 	 * 
-	 * @return The GameWorld instance, or {@code null} if the world info could
+	 * @return The HostWorld instance, or {@code null} if the world info could
 	 * not be loaded.
 	 */
-	public static GameWorld loadWorld(String worldName) {
+	public static HostWorld loadWorld(String worldName) {
 		WorldInfo info = WorldInfo.loadInfo(worldName);
 		
 		if(info != null)
-			return new GameWorld(info);
+			return new HostWorld(info);
 		
 		Log.get().postSevere("Could not load info file of world \"" + worldName + "\" during world loading!");
 		return null;
+	}
+	
+	//--------------------==========--------------------
+	//-------------=====Nested Classes=====-------------
+	//--------------------==========--------------------
+	
+	/**
+	 * A way of easily working with a world's data file for each
+	 * player/character.
+	 */
+	public class PlayerDataFile {
+		
+		/** The file. */
+		private File file;
+		/** Whether or not the file has been initially loaded in. */
+		private boolean loaded;
+		/** The root compound tag of the player's data file. */
+		private NBTTagCompound nbt;
+		/** The compound representing the character's tag compound, with a name
+		 * which is that of the character's hash. */
+		private NBTTagCompound tag;
+		/** Whether or not the character's tag exists within the file and was
+		 * loaded. */
+		private boolean tagLoaded;
+		/** The character data. */
+		private CharacterData character;
+		
+		
+		/**
+		 * Creates a new player data file.
+		 * 
+		 * @param character The player data upon which to base the data file.
+		 */
+		private PlayerDataFile(CharacterData character) {
+			this.character = character;
+			character.dataFile = this;
+			
+			file = getFile();
+			nbt = null;
+			loaded = !file.exists();
+			tagLoaded = false;
+		}
+		
+		/**
+		 * Loads the file's contents into the character data.
+		 */
+		private void load() {
+			loadNBT();
+			
+			if(tagLoaded) {
+				try {
+					character.lastX = tag.getDoubleUnsafe("x");
+					character.lastY = tag.getDoubleUnsafe("y");
+					character.newToWorld = false;
+					return;
+				} catch(IOException ignored) {}
+			}
+			
+			character.newToWorld = true;
+		}
+		
+		/**
+		 * Loads the NBT file.
+		 */
+		private void loadNBT() {
+			if(file.exists()) {
+				try {
+					nbt = NBTIO.readCompressed(file);
+					tag = nbt.getCompound(character.hash);
+					if(tag.isEmpty())
+						nbt.addCompound(tag.getName(), tag);
+					else
+						tagLoaded = true;
+					loaded = true;
+				} catch(IOException e) {
+					log.postSevere("Could not load character data file for character " + character.name, e);
+				}
+			} else {
+				nbt = new NBTTagCompound("");
+				tag = new NBTTagCompound(character.hash);
+				nbt.addCompound(tag.getName(), tag);
+				loaded = true;
+			}
+		}
+		
+		/**
+		 * Saves the character's data into the file.
+		 */
+		private void save() {
+			// In case there are other characters with the same name but a
+			// different hash, we don't want to completely overwrite their data
+			// in the file, so load in the file's content if possible
+			if(!loaded)
+				loadNBT();
+			
+			tag.addDouble("x", character.lastX);
+			tag.addDouble("y", character.lastY);
+			
+			try {
+				NBTIO.writeCompressed(file, nbt);
+			} catch(IOException e) {
+				log.postSevere("Could not save character data file for character " + character.name, e);
+			}
+		}
+		
+		/**
+		 * Gets the data file's file reference.
+		 * 
+		 * @return The world's local character file.
+		 */
+		private File getFile() {
+			return new File(getDir(), DIR_PLAYERS + character.name + EXTENSION_PLAYERS);
+		}
 	}
 	
 }

@@ -19,7 +19,7 @@ import com.stabilise.util.IOUtil;
 import com.stabilise.util.Log;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
-import com.stabilise.world.World;
+import com.stabilise.world.HostWorld;
 
 /**
  * Data about a character.
@@ -68,7 +68,7 @@ public class CharacterData {
 	public Container inventory;
 	
 	// For in-game use - not saved with the character
-	public World.PlayerDataFile dataFile;
+	public HostWorld.PlayerDataFile dataFile;
 	/** Whether or not the character is new to the world. */
 	public boolean newToWorld;
 	/** The x-coordinate of the player's last known location, in tile-lengths. */

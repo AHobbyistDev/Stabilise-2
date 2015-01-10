@@ -6,7 +6,7 @@ import com.stabilise.entity.FreeGameObject;
 import com.stabilise.entity.effect.Effect;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.Shape;
-import com.stabilise.world.World;
+import com.stabilise.world.AbstractWorld;
 
 /**
  * A Hitbox is an object which, when overlapping with an entity, may damage or
@@ -53,7 +53,7 @@ public class Hitbox extends FreeGameObject {
 	 * @param boundingBox The Hitbox's bounding box.
 	 * @param damage The damage the hitbox deals.
 	 */
-	public Hitbox(World world, Entity owner, Shape boundingBox, int damage) {
+	public Hitbox(AbstractWorld world, Entity owner, Shape boundingBox, int damage) {
 		super(world);
 		
 		this.owner = owner;

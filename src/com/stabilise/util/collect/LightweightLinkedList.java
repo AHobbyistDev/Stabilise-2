@@ -111,6 +111,7 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 		else
 			list.tail.next = head;
 		list.tail = tail;
+		list.size += size;
 		
 		// clear this list
 		head = tail = null;

@@ -30,15 +30,13 @@ import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.collect.LightweightLinkedList;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.util.maths.MathsUtil;
-import com.stabilise.util.nbt.NBTIO;
-import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
  * The World class represents the game world.
  */
-public abstract class World {
+public abstract class AbstractWorld implements IWorld {
 	
 	//--------------------==========--------------------
 	//-----=====Static Constants and Variables=====-----
@@ -62,29 +60,33 @@ public abstract class World {
 	//--------------------==========--------------------
 	
 	/** All players in the world. */
-	protected Map<Integer, EntityMob> players = new HashMap<Integer, EntityMob>(1);
+	protected Map<Integer, EntityMob> players =
+			new HashMap<Integer, EntityMob>(1);
 	/** The map of loaded entities in the world. This is a LinkedHashMap as to
 	 * allow for consistent iteration. */
-	protected Map<Integer, Entity> entities = new LinkedHashMap<Integer, Entity>(64);
+	protected Map<Integer, Entity> entities =
+			new LinkedHashMap<Integer, Entity>(64);
 	/** The total number of entities which have existed during the lifetime of
 	 * the world. When a new entity is created its assigned ID is typically
 	 * this value + 1, after which this is incremented.*/
 	public int entityCount = 0;
-	/** Entities queued to be added to the world at the end of the tick. This
-	 * is a ClearOnIterateLinkedList. */
-	private List<Entity> entitiesToAdd = new ClearOnIterateLinkedList<Entity>();
+	/** Entities queued to be added to the world at the end of the tick. */
+	private ClearOnIterateLinkedList<Entity> entitiesToAdd =
+			new ClearOnIterateLinkedList<Entity>();
 	/** The IDs of entities queued to be removed from the world at the end of
-	 * the tick. This is a ClearOnIterateLinkedList. */
-	private List<Integer> entitiesToRemove = new ClearOnIterateLinkedList<Integer>();
+	 * the tick.  */
+	private ClearOnIterateLinkedList<Integer> entitiesToRemove =
+			new ClearOnIterateLinkedList<Integer>();
 	/** The number of hostile mobs in the world. */
 	public int hostileMobCount = 0;
 	
-	/** Stores tile entities for iteration and updating. This is a
-	 * LightweightLinkedList. */
-	protected List<TileEntity> tileEntities = new LightweightLinkedList<TileEntity>();
+	/** Stores tile entities for iteration and updating. */
+	protected LightweightLinkedList<TileEntity> tileEntities =
+			new LightweightLinkedList<TileEntity>();
 	
-	/** The list of hitboxes in the world. This is a LightweightLinkedList. */
-	protected LightweightLinkedList<Hitbox> hitboxes = new LightweightLinkedList<Hitbox>();
+	/** The list of hitboxes in the world. */
+	protected LightweightLinkedList<Hitbox> hitboxes =
+			new LightweightLinkedList<Hitbox>();
 	/** The total number of hitboxes which have existed during the lifetime of
 	 * the world. */
 	public int hitboxCount = 0;
@@ -96,14 +98,12 @@ public abstract class World {
 	 * slice-lengths. */
 	protected int spawnSliceY;
 	
-	/** The gravity of the world. */
-	public float gravity = -0.02f;
-	
 	/** An easy-access utility RNG which should be used by any GameObject with
 	 * a reference to this world in preference to constructing a new one. */
-	public Random rng = new Random();
+	public final Random rng = new Random();
 	
-	/** The {@link Application#profiler application profiler}. */
+	/** The {@link Application#profiler application profiler}.
+	 * TODO: Not for a server it shouldn't be!*/
 	public Profiler profiler = Application.get().profiler;
 	/** The world's logging agent. */
 	public Log log;
@@ -112,7 +112,7 @@ public abstract class World {
 	/**
 	 * Creates a new World instance.
 	 */
-	public World() {
+	public AbstractWorld() {
 		// nothing to see here, move along
 	}
 	
@@ -266,7 +266,6 @@ public abstract class World {
 	 * @param h The hitbox.
 	 */
 	public void addHitbox(Hitbox h) {
-		h.id = ++hitboxCount;
 		hitboxes.add(h);
 	}
 	
@@ -281,7 +280,9 @@ public abstract class World {
 	 * tile-lengths.
 	 */
 	public void addParticle(Particle p, double x, double y) {
-		// nothing here; implemented in GameWorld
+		p.x = x;
+		p.y = y;
+		addParticle(p);
 	}
 	
 	/**
@@ -554,38 +555,6 @@ public abstract class World {
 	 * @param explosionPower The power of the explosion.
 	 */
 	public abstract void blowUpTile(int x, int y, float explosionPower);
-	
-	/**
-	 * Gets the world's directory.
-	 * 
-	 * @return The File representing the world's directory.
-	 */
-	public abstract File getDir();
-	
-	/**
-	 * Loads the character's world-specific data, (i.e. their coordinates,
-	 * current health, etc.)
-	 * 
-	 * @param character The character data for which to load the info.
-	 * 
-	 * @throws NullPointerException if {@code character} is {@code null}.
-	 */
-	protected void loadCharacterData(CharacterData character) {
-		new PlayerDataFile(character);
-		character.dataFile.load();
-	}
-	
-	/**
-	 * Saves the character's world-specific data.
-	 * 
-	 * @param character The character data for which to save the info.
-	 * 
-	 * @throws NullPointerException Thrown if {@code character} or
-	 * {@code character.dataFile} is {@code null}.
-	 */
-	protected void saveCharacterData(CharacterData character) {
-		character.dataFile.save();
-	}
 	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
@@ -916,119 +885,6 @@ public abstract class World {
 			FileUtils.deleteDirectory(world);
 		} catch(IOException e) {
 			Log.get().postSevere("Could not delete world \"" + worldName + "\"!", e);
-		}
-	}
-	
-	//--------------------==========--------------------
-	//-------------=====Nested Classes=====-------------
-	//--------------------==========--------------------
-	
-	/**
-	 * A way of easily working with a world's data file for each
-	 * player/character.
-	 */
-	public class PlayerDataFile {
-		
-		/** The file. */
-		private File file;
-		/** Whether or not the file has been initially loaded in. */
-		private boolean loaded;
-		/** The root compound tag of the player's data file. */
-		private NBTTagCompound nbt;
-		/** The compound representing the character's tag compound, with a name
-		 * which is that of the character's hash. */
-		private NBTTagCompound tag;
-		/** Whether or not the character's tag exists within the file and was
-		 * loaded. */
-		private boolean tagLoaded;
-		/** The character data. */
-		private CharacterData character;
-		
-		
-		/**
-		 * Creates a new player data file.
-		 * 
-		 * @param character The player data upon which to base the data file.
-		 */
-		private PlayerDataFile(CharacterData character) {
-			this.character = character;
-			character.dataFile = this;
-			
-			file = getFile();
-			nbt = null;
-			loaded = !file.exists();
-			tagLoaded = false;
-		}
-		
-		/**
-		 * Loads the file's contents into the character data.
-		 */
-		private void load() {
-			loadNBT();
-			
-			if(tagLoaded) {
-				try {
-					character.lastX = tag.getDoubleUnsafe("x");
-					character.lastY = tag.getDoubleUnsafe("y");
-					character.newToWorld = false;
-					return;
-				} catch(IOException ignored) {}
-			}
-			
-			character.newToWorld = true;
-		}
-		
-		/**
-		 * Loads the NBT file.
-		 */
-		private void loadNBT() {
-			if(file.exists()) {
-				try {
-					nbt = NBTIO.readCompressed(file);
-					tag = nbt.getCompound(character.hash);
-					if(tag.isEmpty())
-						nbt.addCompound(tag.getName(), tag);
-					else
-						tagLoaded = true;
-					loaded = true;
-				} catch(IOException e) {
-					log.postSevere("Could not load character data file for character " + character.name, e);
-				}
-			} else {
-				nbt = new NBTTagCompound("");
-				tag = new NBTTagCompound(character.hash);
-				nbt.addCompound(tag.getName(), tag);
-				loaded = true;
-			}
-		}
-		
-		/**
-		 * Saves the character's data into the file.
-		 */
-		private void save() {
-			// In case there are other characters with the same name but a
-			// different hash, we don't want to completely overwrite their data
-			// in the file, so load in the file's content if possible
-			if(!loaded)
-				loadNBT();
-			
-			tag.addDouble("x", character.lastX);
-			tag.addDouble("y", character.lastY);
-			
-			try {
-				NBTIO.writeCompressed(file, nbt);
-			} catch(IOException e) {
-				log.postSevere("Could not save character data file for character " + character.name, e);
-			}
-		}
-		
-		/**
-		 * Gets the data file's file reference.
-		 * 
-		 * @return The world's local character file.
-		 */
-		private File getFile() {
-			return new File(getDir(), DIR_PLAYERS + character.name + EXTENSION_PLAYERS);
 		}
 	}
 	

@@ -12,7 +12,7 @@ import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Rectangle;
-import com.stabilise.world.World;
+import com.stabilise.world.AbstractWorld;
 
 /**
  * A flaming projectile which deals damage to mobs.
@@ -55,7 +55,7 @@ public class EntityBigFireball extends EntityProjectile {
 	 * @param world The world in which the fireball will be placed.
 	 * @param owner The fireball's owner.
 	 */
-	public EntityBigFireball(World world, Entity owner) {
+	public EntityBigFireball(AbstractWorld world, Entity owner) {
 		this(world, owner, DEFAULT_FIREBALL_DAMAGE);
 	}
 	
@@ -66,7 +66,7 @@ public class EntityBigFireball extends EntityProjectile {
 	 * @param owner The fireball's owner.
 	 * @param damage The fireball's damage.
 	 */
-	public EntityBigFireball(World world, Entity owner, int damage) {
+	public EntityBigFireball(AbstractWorld world, Entity owner, int damage) {
 		super(world, owner, new LinkedHitbox(world, owner, BIG_FIREBALL_BOUNDING_BOX, damage));
 		((LinkedHitbox)hitbox).linkedEntity = this;
 		hitbox.force = 0.5f;

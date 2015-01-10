@@ -7,7 +7,7 @@ import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.nbt.NBTTagCompound;
-import com.stabilise.world.World;
+import com.stabilise.world.AbstractWorld;
 
 /**
  * The tile entity for mob spawners. For now I'm having this try to mimick
@@ -42,7 +42,7 @@ public class TileEntityMobSpawner extends TileEntity {
 	 * @param x The x-coordinate of the tile entity, in tile-lengths.
 	 * @param y The y-coordinate of the tile entity, in tile-lengths.
 	 */
-	public TileEntityMobSpawner(World world, int x, int y) {
+	public TileEntityMobSpawner(AbstractWorld world, int x, int y) {
 		super(world, x, y);
 		init();
 	}
@@ -134,12 +134,12 @@ public class TileEntityMobSpawner extends TileEntity {
 	}
 	
 	@Override
-	public void handleAdd(World world, int x, int y) {
+	public void handleAdd(AbstractWorld world, int x, int y) {
 		
 	}
 	
 	@Override
-	public void handleRemove(World world, int x, int y) {
+	public void handleRemove(AbstractWorld world, int x, int y) {
 		
 	}
 	

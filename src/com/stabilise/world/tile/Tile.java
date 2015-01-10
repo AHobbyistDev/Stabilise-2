@@ -3,7 +3,7 @@ package com.stabilise.world.tile;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.util.collect.RegistryNamespacedDefaulted;
-import com.stabilise.world.World;
+import com.stabilise.world.AbstractWorld;
 
 /**
  * The fundamental building block of a world.
@@ -69,7 +69,7 @@ public class Tile {
 	 * @param x The x-coordinate of the tile, in tile-lengths.
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 */
-	public void update(World world, int x, int y) {
+	public void update(AbstractWorld world, int x, int y) {
 		// nothing to see here in the default implementation
 	}
 	
@@ -94,7 +94,7 @@ public class Tile {
 	 * @param x The x-coordinate of the tile, in tile-lengths.
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 */
-	public void handlePlace(World world, int x, int y) {
+	public void handlePlace(AbstractWorld world, int x, int y) {
 		// TODO
 	}
 	
@@ -105,19 +105,19 @@ public class Tile {
 	 * @param x The x-coordinate of the tile, in tile-lengths.
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 */
-	public void handleRemove(World world, int x, int y) {
+	public void handleRemove(AbstractWorld world, int x, int y) {
 		// TODO
 	}
 	
 	/**
-	 * Handles being broken. {@link #handleRemove(World, int, int)} is invoked
+	 * Handles being broken. {@link #handleRemove(AbstractWorld, int, int)} is invoked
 	 * in addition to any functionality here.
 	 * 
 	 * @param world The world.
 	 * @param x The x-coordinate of the tile, in tile-lengths.
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 */
-	public void handleBreak(World world, int x, int y) {
+	public void handleBreak(AbstractWorld world, int x, int y) {
 		handleRemove(world, x, y);
 		
 		/*
@@ -136,7 +136,7 @@ public class Tile {
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 * @param e The entity which stepped on the tile.
 	 */
-	public void handleStep(World world, int x, int y, Entity e) {
+	public void handleStep(AbstractWorld world, int x, int y, Entity e) {
 		// TODO
 	}
 	
@@ -148,7 +148,7 @@ public class Tile {
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 * @param e The entity which is overlapping the tile.
 	 */
-	public void handleOverlap(World world, int x, int y, Entity e) {
+	public void handleOverlap(AbstractWorld world, int x, int y, Entity e) {
 		// TODO
 	}
 	
@@ -160,7 +160,7 @@ public class Tile {
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 * @param mob The mob to touch the tile.
 	 */
-	public void handleTouch(World world, int x, int y, EntityMob mob) {
+	public void handleTouch(AbstractWorld world, int x, int y, EntityMob mob) {
 		// nothing in the default implementation
 	}
 	
@@ -172,7 +172,7 @@ public class Tile {
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 * @param mob The mob to interact with the tile.
 	 */
-	public void handleInteract(World world, int x, int y, EntityMob mob) {
+	public void handleInteract(AbstractWorld world, int x, int y, EntityMob mob) {
 		// nothing in the default implementation
 	}
 	

@@ -9,7 +9,7 @@ import com.stabilise.network.TCPConnection;
 import com.stabilise.network.packet.*;
 import com.stabilise.util.Log;
 import com.stabilise.world.Slice;
-import com.stabilise.world.WorldClient;
+import com.stabilise.world.WorldClientOld;
 
 /**
  * The game client.
@@ -30,7 +30,7 @@ public class GameClient {
 	public boolean paused = false;
 	
 	/** The client's world instance. */
-	private WorldClient world;
+	private WorldClientOld world;
 	
 	/** The client's logging agent. */
 	private Log log = Log.getAgent("CLIENT");
@@ -85,7 +85,7 @@ public class GameClient {
 		connection.queuePacket(new Packet002Login("Player"));
 		
 		// Time to initialise everything...
-		world = new WorldClient(this);
+		world = new WorldClientOld(this);
 		
 		running = true;
 	}
@@ -132,7 +132,7 @@ public class GameClient {
 	 * 
 	 * @return The game world, as viewed by the client.
 	 */
-	public WorldClient getWorld() {
+	public WorldClientOld getWorld() {
 		return world;
 	}
 	

@@ -19,7 +19,7 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.util.maths.MathsUtil;
-import com.stabilise.world.GameWorld;
+import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Schematic;
 import com.stabilise.world.Slice;
@@ -62,7 +62,7 @@ import com.stabilise.world.WorldInfo;
  * are cached by the generator to enable inter-region generation, specifically
  * in the case of certain 'structures', or {@link Schematic schematics}, which
  * may be generated across region boundaries. These regions are obtained from
- * the world via invocation of {@link GameWorld#getRegionAt(int, int)
+ * the world via invocation of {@link HostWorld#getRegionAt(int, int)
  * getRegionAt}, and have a slice marked as per {@link Region#anchorSlice()} to
  * indicate that they are being used. {@link Region#deAnchorSlice()} is invoked
  * when the region is no longer being used. If {@code getRegionAt} returns
@@ -85,7 +85,7 @@ import com.stabilise.world.WorldInfo;
 public abstract class WorldGenerator {
 	
 	/** The world for which the generator is generating. */
-	private final GameWorld world;
+	private final HostWorld world;
 	/** The info of the world for which the generator is generating. */
 	protected final WorldInfo info;
 	/** The seed to use for world generation. */
@@ -311,11 +311,13 @@ public abstract class WorldGenerator {
 					public void run() {
 						if(obtainRegion(cRegion))
 							genRegion(cRegion, true);
+						else // game being shut down; save what we can
+							world.loader.saveRegion(r);
 					}
 				});
 			} else {
 				// Save the region here since the current implementation of
-				// GameWorld prevents it from saving non-generated regions
+				// HostWorld prevents it from saving non-generated regions
 				world.loader.saveRegion(cRegion);
 				uncacheRegion(cRegion);
 			}
@@ -549,7 +551,7 @@ public abstract class WorldGenerator {
 			// the world
 			if(cachedRegion == null) {
 				// Synchronise on the public lock to make this atomic. See
-				// GameWorld.loadRegion()
+				// HostWorld.loadRegion()
 				synchronized(lock) {
 					Region region = world.getRegionAt(x, y);
 					if(region == null)
@@ -667,6 +669,10 @@ public abstract class WorldGenerator {
 	 * @throws NullPointerException if {@code r} is {@code null}.
 	 */
 	private boolean obtainRegion(Region r) {
+		// If this fails due to interruption, don't bother removing the lock
+		// through releaseRegion(r) since this thread being interrupted means
+		// the world generator is being shutdown, in which case the lock map
+		// will be GC'd anyway.
 		return prepareLock(r).lock();
 	}
 	
@@ -877,12 +883,12 @@ public abstract class WorldGenerator {
 		private boolean lock() {
 			try {
 				semaphore.acquire();
+				onLockSuccess();
+				return true;
 			} catch(InterruptedException e) {
 				onLockFailure();
 				return false;
 			}
-			onLockSuccess();
-			return true;
 		}
 		
 		/**

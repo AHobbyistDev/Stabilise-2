@@ -16,7 +16,7 @@ import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 public class WorldData {
 	
 	/** The world. */
-	public final GameWorld world;
+	public final HostWorld world;
 	/** The world's info. */
 	public final WorldInfo info;
 	
@@ -30,7 +30,7 @@ public class WorldData {
 	 * @param world The world.
 	 * @param info The world info.
 	 */
-	public WorldData(GameWorld world, WorldInfo info) {
+	public WorldData(HostWorld world, WorldInfo info) {
 		this.world = world;
 		this.info = info;
 		

@@ -1,7 +1,7 @@
 package com.stabilise.entity.particle;
 
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.world.World;
+import com.stabilise.world.AbstractWorld;
 
 /**
  * A tiny flame particle.
@@ -28,7 +28,7 @@ public class ParticleFlame extends ParticlePhysical {
 	 * 
 	 * @param world The world in which the particle is to be placed.
 	 */
-	public ParticleFlame(World world) {
+	public ParticleFlame(AbstractWorld world) {
 		super(world);
 	}
 	
@@ -36,7 +36,7 @@ public class ParticleFlame extends ParticlePhysical {
 	public void update() {
 		super.update();
 		
-		dy += world.gravity / 32f;
+		dy += -0.02f / 32f; //world.gravity / 32f;
 		
 		opacity = (float)(DESPAWN_TICKS - age) / DESPAWN_TICKS;
 		

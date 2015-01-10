@@ -42,7 +42,7 @@ public class Region {
 	//--------------------==========--------------------
 	
 	/** A reference to the world to which the region belongs. */
-	private final GameWorld world;
+	private final HostWorld world;
 	
 	/** The number of ticks until the region is unloaded. */
 	private int ticksToUnload = -1;
@@ -115,7 +115,7 @@ public class Region {
 	 * 
 	 * @throws NullPointerException if {@code world} is {@code null}.
 	 */
-	public Region(GameWorld world, int x, int y) {
+	public Region(HostWorld world, int x, int y) {
 		this(world, getKey(x, y));
 	}
 	
@@ -128,7 +128,7 @@ public class Region {
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public Region(GameWorld world, HashPoint loc) {
+	public Region(HostWorld world, HashPoint loc) {
 		if(world == null || loc == null)
 			throw new NullPointerException();
 		
@@ -252,7 +252,7 @@ public class Region {
 	 * file system.
 	 */
 	public File getFile() {
-		return new File(world.getDir(), World.DIR_REGIONS + "r_" + loc.x + "_" + loc.y + ".region");
+		return new File(world.getDir(), AbstractWorld.DIR_REGIONS + "r_" + loc.x + "_" + loc.y + ".region");
 	}
 	
 	/**

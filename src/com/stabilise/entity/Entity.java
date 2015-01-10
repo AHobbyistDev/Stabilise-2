@@ -6,7 +6,7 @@ import com.stabilise.util.collect.InstantiationRegistry;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.world.Direction;
-import com.stabilise.world.World;
+import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.TileFluid;
 
@@ -26,7 +26,7 @@ public abstract class Entity extends FreeGameObject {
 	/** The entity registry. */
 	private static final InstantiationRegistry<Entity> ENTITIES =
 			new InstantiationRegistry<Entity>(8, THROW_EXCEPTION, Entity.class,
-					World.class);
+					AbstractWorld.class);
 	
 	// Register all entity types.
 	static {
@@ -40,6 +40,9 @@ public abstract class Entity extends FreeGameObject {
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
+	
+	/** The ID of this entity. */
+	public int id;
 	
 	/** The Entity's age, in ticks. */
 	public int age = 0;
@@ -83,12 +86,12 @@ public abstract class Entity extends FreeGameObject {
 	 * 
 	 * @param world The world.
 	 */
-	public Entity(World world) {
+	public Entity(AbstractWorld world) {
 		super(world);
 		
 		// temporary initialisation of variables
 		mass = 20;
-		gravity = world.gravity;
+		gravity = -0.02f;//world.gravity;
 		
 		boundingBox = getAABB();
 	}
@@ -441,7 +444,7 @@ public abstract class Entity extends FreeGameObject {
 	 * {@inheritDoc}
 	 * 
 	 * <p>This Entity is removed from the world as per an invocation of {@link
-	 * World#removeEntity(Entity)}.
+	 * AbstractWorld#removeEntity(Entity)}.
 	 */
 	@Override
 	public void destroy() {
@@ -467,7 +470,7 @@ public abstract class Entity extends FreeGameObject {
 	 * @throws RuntimeException if the tile entity corresponding to the ID was
 	 * registered incorrectly.
 	 */
-	public static Entity createEntity(int id, World world) {
+	public static Entity createEntity(int id, AbstractWorld world) {
 		return ENTITIES.instantiate(id, world);
 	}
 	

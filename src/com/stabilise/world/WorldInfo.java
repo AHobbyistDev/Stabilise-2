@@ -123,7 +123,7 @@ public class WorldInfo implements Comparable<WorldInfo> {
 	 * @return This WorldInfo's file.
 	 */
 	private File getFile() {
-		return new File(World.getWorldDir(fileSystemName), World.FILE_INFO);
+		return new File(AbstractWorld.getWorldDir(fileSystemName), AbstractWorld.FILE_INFO);
 	}
 	
 	/*

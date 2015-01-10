@@ -15,7 +15,7 @@ import com.stabilise.network.packet.*;
 import com.stabilise.util.AppDriver;
 import com.stabilise.util.Log;
 import com.stabilise.world.Slice;
-import com.stabilise.world.WorldServer;
+import com.stabilise.world.WorldServerOld;
 
 /**
  * The game server.
@@ -48,7 +48,7 @@ public class GameServer implements Runnable {
 	public boolean paused = false;
 	
 	/** The world the server is running. */
-	private WorldServer world;
+	private WorldServerOld world;
 	
 	/** Whether or not the server is an integrated singleplayer one as opposed
 	 * to a fully-fledged proper server. */
@@ -79,7 +79,7 @@ public class GameServer implements Runnable {
 		
 		// Load the world before setting up the server...
 		log.postInfo("Loading world...");
-		world = WorldServer.loadWorld(this, worldName);
+		world = WorldServerOld.loadWorld(this, worldName);
 		
 		if(world == null)
 			throw new RuntimeException("Server could not load the world!");
@@ -88,6 +88,14 @@ public class GameServer implements Runnable {
 		driver = new ServerAppDriver(tps, tps, log);
 		
 		serverThread = new Thread(this, "GameServerThread");
+	}
+	
+	/**
+	 * Starts the server.
+	 * 
+	 * @throws IllegalThreadStateException if the server was already started.
+	 */
+	public void start() {
 		serverThread.start();
 	}
 	
@@ -120,8 +128,8 @@ public class GameServer implements Runnable {
 	
 	private class ServerAppDriver extends AppDriver {
 		
-		public ServerAppDriver(int updatesPerSecond, int fps, Log log) {
-			super(updatesPerSecond, fps, log);
+		public ServerAppDriver(int tps, int fps, Log log) {
+			super(tps, fps, log);
 		}
 		
 		@Override
@@ -245,29 +253,28 @@ public class GameServer implements Runnable {
 	 */
 	public void shutdown() {
 		if(stopped) return;
-		
 		stopped = true;
 		
-		log.postInfo("Shutting down server...");
+		log.postInfo("Shutting down...");
 		
 		// This should result in the other threads being shut down
 		running = false;
 		
-		for(ServerTCPConnection connection : connections) {
+		for(ServerTCPConnection connection : connections)
 			connection.closeConnection();
-		}
 		
 		world.generator.shutdown();
 		
 		serverThread.interrupt();
-		if(clientListenerThread != null) clientListenerThread.interrupt();
+		if(clientListenerThread != null)
+			clientListenerThread.interrupt();
 		
 		serverThread = null;
 		clientListenerThread = null;
 		
 		try {
 			socket.close();
-		} catch (IOException e) {
+		} catch(IOException e) {
 			log.postSevere("Error closing server socket!");
 		}
 		

@@ -1,6 +1,6 @@
 package com.stabilise.entity;
 
-import com.stabilise.world.World;
+import com.stabilise.world.AbstractWorld;
 
 /**
  * A FreeGameObject is a game object whose coordinates are not constrained to
@@ -24,18 +24,18 @@ public abstract class FreeGameObject extends GameObject {
 	 * 
 	 * @param world The world.
 	 */
-	public FreeGameObject(World world) {
+	public FreeGameObject(AbstractWorld world) {
 		super(world);
 	}
 	
 	@Override
 	public final int getSliceX() {
-		return World.sliceCoordFromTileCoord(x);
+		return AbstractWorld.sliceCoordFromTileCoord(x);
 	}
 	
 	@Override
 	public final int getSliceY() {
-		return World.sliceCoordFromTileCoord(y);
+		return AbstractWorld.sliceCoordFromTileCoord(y);
 	}
 
 }
