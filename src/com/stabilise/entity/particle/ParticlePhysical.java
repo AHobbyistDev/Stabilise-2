@@ -1,6 +1,6 @@
 package com.stabilise.entity.particle;
 
-import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
 
 /**
  * A physical particle (for want of a better name) is a particle with a dx and
@@ -19,7 +19,7 @@ public abstract class ParticlePhysical extends Particle {
 	 * 
 	 * @param world The world in which the Particle will be placed.
 	 */
-	public ParticlePhysical(AbstractWorld world) {
+	public ParticlePhysical(BaseWorld world) {
 		super(world);
 	}
 	

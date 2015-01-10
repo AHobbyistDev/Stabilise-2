@@ -42,8 +42,8 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 	 * @throws IllegalArgumentException if {@code capacity < 0}.
 	 */
 	public BiObjectIntMap(int capacity) {
-		map = new IdentityHashMap<V, Integer>(capacity);
-		list = new ArrayList<V>(capacity);
+		map = new IdentityHashMap<>(capacity);
+		list = new ArrayList<>(capacity);
 	}
 	
 	/**

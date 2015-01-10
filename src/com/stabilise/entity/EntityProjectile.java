@@ -3,7 +3,7 @@ package com.stabilise.entity;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.util.shape.RotatableShape;
 import com.stabilise.util.shape.Shape;
-import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
 
 /**
  * A projectile is an entity with an associative hitbox.
@@ -26,7 +26,7 @@ public abstract class EntityProjectile extends Entity {
 	 * @param owner The projectile's owner.
 	 * @param hitbox The projectile's hitbox.
 	 */
-	public EntityProjectile(AbstractWorld world, Entity owner, Hitbox hitbox) {
+	public EntityProjectile(BaseWorld world, Entity owner, Hitbox hitbox) {
 		super(world);
 		
 		this.owner = owner;

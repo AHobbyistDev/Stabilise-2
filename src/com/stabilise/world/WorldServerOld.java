@@ -9,7 +9,6 @@ import java.util.Iterator;
 import static com.stabilise.world.Region.REGION_SIZE;
 import static com.stabilise.world.Slice.SLICE_SIZE;
 
-import com.stabilise.character.CharacterData;
 import com.stabilise.core.GameServer;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
@@ -47,10 +46,10 @@ public class WorldServerOld extends BaseWorld {
 	 * @param info The WorldInfo object to base the world on.
 	 */
 	public WorldServerOld(GameServer server, WorldInfo info) {
+		super(null, Log.getAgent("SERVER"));
 		this.server = server;
 		this.info = info;
 		//generator = WorldGenerator.getGenerator(this, info.seed);
-		log = Log.getAgent("SERVER");
 	}
 	
 	@Override
@@ -288,7 +287,13 @@ public class WorldServerOld extends BaseWorld {
 	}
 
 	@Override
-	public void addPlayer(CharacterData player) {
+	public void addParticle(Particle p) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeParticle(Particle p) {
 		// TODO Auto-generated method stub
 		
 	}

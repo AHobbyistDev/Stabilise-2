@@ -1,9 +1,7 @@
 package com.stabilise.world;
 
-import java.io.File;
 import java.util.Collection;
 
-import com.stabilise.character.CharacterData;
 import com.stabilise.core.Constants;
 import com.stabilise.core.GameClient;
 import com.stabilise.entity.EntityPlayer;
@@ -46,14 +44,12 @@ public class WorldClientOld extends BaseWorld {
 	 * @param client The client object to link the world to.
 	 */
 	public WorldClientOld(GameClient client) {
-		super();
+		super(null, Log.getAgent("CLIENT"));
 		
 		this.client = client;
 		
 		//slices = new BufferedSliceMap(this);
 		//player = new EntityPlayer(this, InputManager.get());
-		
-		log = Log.getAgent("CLIENT");
 	}
 	
 	
@@ -164,14 +160,14 @@ public class WorldClientOld extends BaseWorld {
 
 
 	@Override
-	public File getDir() {
+	public void addParticle(Particle p) {
 		// TODO Auto-generated method stub
-		return null;
+		
 	}
-	
-	
+
+
 	@Override
-	public void addPlayer(CharacterData player) {
+	public void removeParticle(Particle p) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -11,7 +11,7 @@ import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Rectangle;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.Direction;
-import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
 
 /**
  * A Person is a Mob intended to be like a human. The Player is a Person.
@@ -157,7 +157,7 @@ public class EntityPerson extends EntityMob {
 	 * 
 	 * @param world The world in which the Person will be placed.
 	 */
-	public EntityPerson(AbstractWorld world) {
+	public EntityPerson(BaseWorld world) {
 		super(world);
 	}
 	

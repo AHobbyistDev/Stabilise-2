@@ -4,7 +4,7 @@ import com.stabilise.entity.controller.IdleController;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.world.Direction;
-import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
 import com.stabilise.world.tile.Tile;
 
 /**
@@ -32,7 +32,7 @@ public class EntityEnemy extends EntityMob {
 	 * 
 	 * @param world The world in which the generic test enemy is to be placed.
 	 */
-	public EntityEnemy(AbstractWorld world) {
+	public EntityEnemy(BaseWorld world) {
 		super(world);
 	}
 	

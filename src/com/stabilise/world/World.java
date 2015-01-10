@@ -156,13 +156,6 @@ public interface World {
 	 */
 	void removeParticle(Particle p);
 	
-	/**
-	 * Removes a particle from the world.
-	 * 
-	 * @param id The ID of the particle.
-	 */
-	void removeParticle(int id);
-	
 	// ==========Collection getters==========
 	
 	/**
@@ -196,7 +189,7 @@ public interface World {
 	 */
 	abstract Collection<Particle> getParticles();
 	
-	// ==========World component getters==========
+	// ==========World component getters and setters==========
 	
 	/**
 	 * Gets the slice at the given coordinates.

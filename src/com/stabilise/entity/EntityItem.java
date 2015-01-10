@@ -2,7 +2,7 @@ package com.stabilise.entity;
 
 import com.stabilise.item.ItemStack;
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
 
 /**
  * An item entity.
@@ -46,7 +46,7 @@ public class EntityItem extends Entity {
 	 * @param world The world in which the entity will be placed.
 	 * @param stack The item the entity represents.
 	 */
-	public EntityItem(AbstractWorld world, ItemStack stack) {
+	public EntityItem(BaseWorld world, ItemStack stack) {
 		super(world);
 		
 		this.stack = stack;

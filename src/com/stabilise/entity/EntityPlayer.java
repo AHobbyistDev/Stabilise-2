@@ -1,6 +1,6 @@
 package com.stabilise.entity;
 
-import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
 
 /**
  * The player entity. Identical to a person entity, for now.
@@ -16,7 +16,7 @@ public class EntityPlayer extends EntityPerson {
 	 * 
 	 * @param world The world in which the player will be placed.
 	 */
-	public EntityPlayer(AbstractWorld world) {
+	public EntityPlayer(BaseWorld world) {
 		super(world);
 	}
 	

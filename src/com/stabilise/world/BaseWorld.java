@@ -2,7 +2,6 @@ package com.stabilise.world;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
@@ -10,7 +9,6 @@ import java.util.Random;
 import com.google.common.base.Preconditions;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
-import com.stabilise.entity.GameObject;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
@@ -32,33 +30,31 @@ public abstract class BaseWorld extends AbstractWorld {
 	//--------------------==========--------------------
 	
 	/** All players in the world. */
-	protected Map<Integer, EntityMob> players =
-			new HashMap<Integer, EntityMob>(1);
+	protected Map<Integer, EntityMob> players = new HashMap<>(1);
 	/** The map of loaded entities in the world. This is a LinkedHashMap as to
 	 * allow for consistent iteration. */
-	protected Map<Integer, Entity> entities =
-			new LinkedHashMap<Integer, Entity>(64);
+	protected Map<Integer, Entity> entities = new LinkedHashMap<>(64);
 	/** The total number of entities which have existed during the lifetime of
 	 * the world. When a new entity is created its assigned ID is typically
 	 * this value + 1, after which this is incremented.*/
 	public int entityCount = 0;
 	/** Entities queued to be added to the world at the end of the tick. */
 	private ClearOnIterateLinkedList<Entity> entitiesToAdd =
-			new ClearOnIterateLinkedList<Entity>();
+			new ClearOnIterateLinkedList<>();
 	/** The IDs of entities queued to be removed from the world at the end of
 	 * the tick.  */
 	private ClearOnIterateLinkedList<Integer> entitiesToRemove =
-			new ClearOnIterateLinkedList<Integer>();
+			new ClearOnIterateLinkedList<>();
 	/** The number of hostile mobs in the world. */
 	public int hostileMobCount = 0;
 	
 	/** Stores tile entities for iteration and updating. */
 	protected LightweightLinkedList<TileEntity> tileEntities =
-			new LightweightLinkedList<TileEntity>();
+			new LightweightLinkedList<>();
 	
 	/** The list of hitboxes in the world. */
 	protected LightweightLinkedList<Hitbox> hitboxes =
-			new LightweightLinkedList<Hitbox>();
+			new LightweightLinkedList<>();
 	/** The total number of hitboxes which have existed during the lifetime of
 	 * the world. */
 	public int hitboxCount = 0;
@@ -119,19 +115,6 @@ public abstract class BaseWorld extends AbstractWorld {
 		profiler.end(); // "entity"
 		
 		profiler.end();
-	}
-	
-	/**
-	 * Iterates over the specified collection of GameObjects as per {@link
-	 * GameObject#updateAndCheck()}. GameObjects are removed from the
-	 * collection by the iterator if {@code updateAndCheck()} returns {@code
-	 * true}.
-	 */
-	protected <E extends GameObject> void updateObjects(Collection<E> collection) {
-		Iterator<E> i = collection.iterator();
-		while(i.hasNext())
-			if(i.next().updateAndCheck())
-				i.remove();
 	}
 	
 	@Override

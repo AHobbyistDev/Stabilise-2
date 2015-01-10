@@ -1,7 +1,7 @@
 package com.stabilise.entity.particle;
 
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
 
 /**
  * A tiny flame particle.
@@ -28,7 +28,7 @@ public class ParticleFlame extends ParticlePhysical {
 	 * 
 	 * @param world The world in which the particle is to be placed.
 	 */
-	public ParticleFlame(AbstractWorld world) {
+	public ParticleFlame(BaseWorld world) {
 		super(world);
 	}
 	

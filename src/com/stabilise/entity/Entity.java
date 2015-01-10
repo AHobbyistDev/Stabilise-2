@@ -6,7 +6,7 @@ import com.stabilise.util.collect.InstantiationRegistry;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.world.Direction;
-import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.TileFluid;
 
@@ -26,7 +26,7 @@ public abstract class Entity extends FreeGameObject {
 	/** The entity registry. */
 	private static final InstantiationRegistry<Entity> ENTITIES =
 			new InstantiationRegistry<Entity>(8, THROW_EXCEPTION, Entity.class,
-					AbstractWorld.class);
+					BaseWorld.class);
 	
 	// Register all entity types.
 	static {
@@ -86,7 +86,7 @@ public abstract class Entity extends FreeGameObject {
 	 * 
 	 * @param world The world.
 	 */
-	public Entity(AbstractWorld world) {
+	public Entity(BaseWorld world) {
 		super(world);
 		
 		// temporary initialisation of variables
@@ -381,8 +381,10 @@ public abstract class Entity extends FreeGameObject {
 		} else {
 			y = Math.ceil(yp) - boundingBox.getV00().y;
 			// TODO: Find a better way of doing this
-			Tile t = world.getTileAt(x, y - 0.001D);
-			t.handleStep(world, t.x, t.y, this);
+			int tx = MathsUtil.floor(x);
+			int ty = MathsUtil.floor(y - 0.001D);
+			Tile t = world.getTileAt(tx, ty);
+			t.handleStep(world, tx, ty, this);
 			floorTile = t.getID();
 			onGround = true;
 		}
@@ -444,7 +446,7 @@ public abstract class Entity extends FreeGameObject {
 	 * {@inheritDoc}
 	 * 
 	 * <p>This Entity is removed from the world as per an invocation of {@link
-	 * AbstractWorld#removeEntity(Entity)}.
+	 * BaseWorld#removeEntity(Entity)}.
 	 */
 	@Override
 	public void destroy() {
@@ -470,7 +472,7 @@ public abstract class Entity extends FreeGameObject {
 	 * @throws RuntimeException if the tile entity corresponding to the ID was
 	 * registered incorrectly.
 	 */
-	public static Entity createEntity(int id, AbstractWorld world) {
+	public static Entity createEntity(int id, BaseWorld world) {
 		return ENTITIES.instantiate(id, world);
 	}
 	

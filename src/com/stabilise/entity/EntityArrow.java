@@ -4,7 +4,7 @@ import com.stabilise.entity.collision.LinkedHitbox;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.util.shape.Rectangle;
-import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
 
 /**
  * A basic projectile.
@@ -40,7 +40,7 @@ public class EntityArrow extends EntityProjectile {
 	 * @param world The world in which the arrow will be placed.
 	 * @param owner The arrow's owner.
 	 */
-	public EntityArrow(AbstractWorld world, Entity owner) {
+	public EntityArrow(BaseWorld world, Entity owner) {
 		this(world, owner, DEFAULT_ARROW_DAMAGE);
 	}
 	
@@ -51,7 +51,7 @@ public class EntityArrow extends EntityProjectile {
 	 * @param owner The arrow's owner.
 	 * @param damage The arrow's damage.
 	 */
-	public EntityArrow(AbstractWorld world, Entity owner, int damage) {
+	public EntityArrow(BaseWorld world, Entity owner, int damage) {
 		super(world, owner, new LinkedHitbox(world, owner, ARROW_BOUNDING_BOX, damage));
 		((LinkedHitbox)hitbox).linkedEntity = this;
 		hitbox.force = 0.3f;

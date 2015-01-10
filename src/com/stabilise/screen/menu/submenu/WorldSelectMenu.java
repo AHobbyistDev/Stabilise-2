@@ -23,7 +23,7 @@ import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.concurrent.TaskThread;
 import com.stabilise.util.maths.Point;
 import com.stabilise.world.GameWorld;
-import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
 import com.stabilise.world.WorldInfo;
 
 /**
@@ -313,7 +313,7 @@ public class WorldSelectMenu extends SubMenu {
 	 * Loads the worlds.
 	 */
 	private void loadWorlds() {
-		worlds = AbstractWorld.getWorldsList();
+		worlds = BaseWorld.getWorldsList();
 		worlds = ArrayUtil.setMinArrayLength(worlds, NUM_WORLDS);
 	}
 	
@@ -700,7 +700,7 @@ public class WorldSelectMenu extends SubMenu {
 				setState(State.DELETE_CONFIRM, selectedWorld);
 				break;
 			case ACTION_DELETE_WORLD_YES:
-				AbstractWorld.deleteWorld(worlds[selectedWorld].fileSystemName);
+				BaseWorld.deleteWorld(worlds[selectedWorld].fileSystemName);
 				loadWorlds();
 				for(int i = 0; i < buttons.length; i++) {
 					buttons[i].setWorld(worlds[i]);
@@ -726,7 +726,7 @@ public class WorldSelectMenu extends SubMenu {
 					}
 				}
 				
-				if(AbstractWorld.createWorld(worldName, seed) == null) {
+				if(BaseWorld.createWorld(worldName, seed) == null) {
 					Log.critical("Could not create world \"" + worldName + "\"!");
 				} else {
 					loadWorlds();

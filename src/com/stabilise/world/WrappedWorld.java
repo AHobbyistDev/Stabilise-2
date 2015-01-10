@@ -13,10 +13,10 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 public class WrappedWorld extends AbstractWorld {
 	
 	/** The world being wrapped. */
-	protected World world;
+	protected BaseWorld world;
 	
 	
-	public WrappedWorld(World world) {
+	public WrappedWorld(BaseWorld world) {
 		this.world = world;
 	}
 	
@@ -63,11 +63,6 @@ public class WrappedWorld extends AbstractWorld {
 	@Override
 	public void removeParticle(Particle p) {
 		world.removeParticle(p);
-	}
-	
-	@Override
-	public void removeParticle(int id) {
-		world.removeParticle(id);
 	}
 	
 	@Override

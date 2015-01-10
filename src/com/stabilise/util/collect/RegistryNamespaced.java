@@ -95,7 +95,7 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	
 	@Override
 	protected Map<String, V> createUnderlyingMap(int capacity) {
-		return HashBiMap.<String, V>create(capacity);
+		return HashBiMap.create(capacity);
 	}
 	
 	/**

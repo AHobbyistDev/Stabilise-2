@@ -2,7 +2,7 @@ package com.stabilise.entity.particle;
 
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Colour;
-import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
 
 /**
  * A flashy explosion particle.
@@ -46,7 +46,7 @@ public class ParticleExplosion extends Particle {
 	 * tile-lengths.
 	 * @param finalRadius The final radius of the explosion, in tile-lengths.
 	 */
-	public ParticleExplosion(AbstractWorld world, float initialRadius, float finalRadius) {
+	public ParticleExplosion(BaseWorld world, float initialRadius, float finalRadius) {
 		super(world);
 		
 		radiusInit = initialRadius;
