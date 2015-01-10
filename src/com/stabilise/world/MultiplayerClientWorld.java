@@ -2,6 +2,8 @@ package com.stabilise.world;
 
 import java.util.Collection;
 
+import com.stabilise.character.CharacterData;
+import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
@@ -13,13 +15,24 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * 
  * <p>TODO: Interactions with server
  */
-public class MultiplayerClientWorld extends BaseWorld {
+public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
 	
+	/** Holds slices provided by the server. */
 	public final SliceMapClient slices = new SliceMapClient();
 	
 	
 	public MultiplayerClientWorld(Profiler profiler, Log log) {
 		super(profiler, log);
+	}
+	
+	@Override
+	public boolean isLoaded() {
+		return slices.isLoaded();
+	}
+	
+	@Override
+	public void setClientPlayer(CharacterData data, EntityMob mob) {
+		// TODO
 	}
 	
 	@Override
@@ -88,7 +101,6 @@ public class MultiplayerClientWorld extends BaseWorld {
 	
 	@Override
 	public void blowUpTile(int x, int y, float explosionPower) {
-		// TODO Auto-generated method stub
 		
 	}
 	

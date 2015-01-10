@@ -4,7 +4,7 @@ import com.stabilise.entity.controller.IdleController;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.world.Direction;
-import com.stabilise.world.BaseWorld;
+import com.stabilise.world.IWorld;
 import com.stabilise.world.tile.Tile;
 
 /**
@@ -32,7 +32,7 @@ public class EntityEnemy extends EntityMob {
 	 * 
 	 * @param world The world in which the generic test enemy is to be placed.
 	 */
-	public EntityEnemy(BaseWorld world) {
+	public EntityEnemy(IWorld world) {
 		super(world);
 	}
 	
@@ -62,29 +62,29 @@ public class EntityEnemy extends EntityMob {
 	
 	@Override
 	public void onAdd() {
-		world.hostileMobCount++;
+		//world.hostileMobCount++;
 	}
 	
 	@Override
 	public void update() {
 		if(!dead) {
 			if(--actionTimeout == 0) {
-				float rnd = world.rng.nextFloat();
+				float rnd = world.getRnd().nextFloat();
 				if(rnd < 0.45) {
 					action = EnumAction.IDLE;
-					actionTimeout = 180 + (int)(world.rng.nextFloat() * 180);
+					actionTimeout = 180 + (int)(world.getRnd().nextFloat() * 180);
 				} else if(rnd < 0.55) {
 					action = EnumAction.IDLE;
 					setFacingRight(!facingRight);
-					actionTimeout = 120 + (int)(world.rng.nextFloat() * 180);
+					actionTimeout = 120 + (int)(world.getRnd().nextFloat() * 180);
 				} else if(rnd < 0.70) {
 					action = EnumAction.IDLE;
 					if(onGround) dy = jumpVelocity;
-					actionTimeout = 180 + (int)(world.rng.nextFloat() * 180);
+					actionTimeout = 180 + (int)(world.getRnd().nextFloat() * 180);
 				} else {
 					if(rnd < 0.85) setFacingRight(!facingRight);
 					action = EnumAction.MOVE;
-					actionTimeout = 30 + (int)(world.rng.nextFloat() * 90);
+					actionTimeout = 30 + (int)(world.getRnd().nextFloat() * 90);
 				}
 			}
 			
@@ -138,7 +138,7 @@ public class EntityEnemy extends EntityMob {
 	@Override
 	public void destroy() {
 		super.destroy();
-		world.hostileMobCount--;
+		//world.hostileMobCount--;
 	}
 	
 	@Override

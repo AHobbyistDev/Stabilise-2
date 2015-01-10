@@ -1,7 +1,7 @@
 package com.stabilise.entity.particle;
 
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.world.BaseWorld;
+import com.stabilise.world.IWorld;
 
 /**
  * A smoke particle which appears when a Mob dies.
@@ -24,7 +24,7 @@ public class ParticleSmoke extends ParticlePhysical {
 	 * 
 	 * @param world The world in which the particle will be placed.
 	 */
-	public ParticleSmoke(BaseWorld world) {
+	public ParticleSmoke(IWorld world) {
 		super(world);
 		
 		/*

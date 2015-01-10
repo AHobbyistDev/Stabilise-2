@@ -1,7 +1,7 @@
 package com.stabilise.entity;
 
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.world.BaseWorld;
+import com.stabilise.world.IWorld;
 
 /**
  * A GameObject is an object which exists within the game world. GameObjects
@@ -13,7 +13,7 @@ import com.stabilise.world.BaseWorld;
 public abstract class GameObject {
 	
 	/** A reference to the world the GameObject is in. */
-	public BaseWorld world;
+	public IWorld world;
 	
 	/** If {@code true}, this GameObject should be removed from the world ASAP. */
 	protected boolean destroyed = false;
@@ -31,7 +31,7 @@ public abstract class GameObject {
 	 * 
 	 * @param world The world.
 	 */
-	public GameObject(BaseWorld world) {
+	public GameObject(IWorld world) {
 		this.world = world;
 	}
 	

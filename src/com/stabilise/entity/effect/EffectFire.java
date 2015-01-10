@@ -43,8 +43,8 @@ public class EffectFire extends Effect {
 	 */
 	private void createFireParticle(EntityMob target) {
 		ParticleFlame p = new ParticleFlame(target.world);
-		p.x = target.x + target.boundingBox.getV00().x + target.world.rng.nextFloat() * target.boundingBox.width;
-		p.y = target.y + target.boundingBox.getV11().y + target.world.rng.nextFloat() * target.boundingBox.height;
+		p.x = target.x + target.boundingBox.getV00().x + target.world.getRnd().nextFloat() * target.boundingBox.width;
+		p.y = target.y + target.boundingBox.getV11().y + target.world.getRnd().nextFloat() * target.boundingBox.height;
 		
 		ParticleGenerator.directParticle(p, 0.02f, 0.07f, Math.PI / 6.0D, Math.PI * 5.0D / 6.0D);
 		

@@ -1,10 +1,9 @@
 package com.stabilise.entity.particle;
 
 import com.stabilise.entity.EntityMob;
-import com.stabilise.opengl.FontStyle;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Colour;
-import com.stabilise.world.BaseWorld;
+import com.stabilise.world.IWorld;
 
 /**
  * A particle which indicates damage dealt to a mob.
@@ -44,7 +43,7 @@ public class ParticleDamageIndicator extends Particle {
 	 * placed.
 	 * @param value The indicator's display value.
 	 */
-	public ParticleDamageIndicator(BaseWorld world, int value) {
+	public ParticleDamageIndicator(IWorld world, int value) {
 		this(world, String.valueOf(value));
 	}
 	
@@ -55,7 +54,7 @@ public class ParticleDamageIndicator extends Particle {
 	 * placed.
 	 * @param text The indicator's display text.
 	 */
-	public ParticleDamageIndicator(BaseWorld world, String text) {
+	public ParticleDamageIndicator(IWorld world, String text) {
 		super(world);
 		
 		this.text = text;
@@ -69,7 +68,7 @@ public class ParticleDamageIndicator extends Particle {
 	 * @param value The indicator's display value.
 	 * @param e The mob above which to place the damage indicator.
 	 */
-	public ParticleDamageIndicator(BaseWorld world, int value, EntityMob e) {
+	public ParticleDamageIndicator(IWorld world, int value, EntityMob e) {
 		this(world, String.valueOf(value), e);
 	}
 	
@@ -81,7 +80,7 @@ public class ParticleDamageIndicator extends Particle {
 	 * @param text The indicator's display text.
 	 * @param e The mob above which to place the damage indicator.
 	 */
-	public ParticleDamageIndicator(BaseWorld world, String text, EntityMob e) {
+	public ParticleDamageIndicator(IWorld world, String text, EntityMob e) {
 		this(world, text);
 		
 		x = e.x;

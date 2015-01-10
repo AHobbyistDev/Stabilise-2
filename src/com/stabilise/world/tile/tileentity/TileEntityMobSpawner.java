@@ -7,7 +7,7 @@ import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.nbt.NBTTagCompound;
-import com.stabilise.world.BaseWorld;
+import com.stabilise.world.IWorld;
 
 /**
  * The tile entity for mob spawners. For now I'm having this try to mimick
@@ -42,7 +42,7 @@ public class TileEntityMobSpawner extends TileEntity {
 	 * @param x The x-coordinate of the tile entity, in tile-lengths.
 	 * @param y The y-coordinate of the tile entity, in tile-lengths.
 	 */
-	public TileEntityMobSpawner(BaseWorld world, int x, int y) {
+	public TileEntityMobSpawner(IWorld world, int x, int y) {
 		super(world, x, y);
 		init();
 	}
@@ -61,12 +61,12 @@ public class TileEntityMobSpawner extends TileEntity {
 			if(--ticksUntilNextSpawn == 0) {
 				ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS;
 				
-				int spawns = MIN_SPAWNS + world.rng.nextInt(1 + MAX_SPAWNS - MIN_SPAWNS);
+				int spawns = MIN_SPAWNS + world.getRnd().nextInt(1 + MAX_SPAWNS - MIN_SPAWNS);
 				while(spawns-- > 0)
 					trySpawn();
 			}
 			
-			if(world.rng.nextInt(5) == 0)
+			if(world.getRnd().nextInt(5) == 0)
 			spawnParticle();
 		}
 	}
@@ -109,8 +109,8 @@ public class TileEntityMobSpawner extends TileEntity {
 	 */
 	private void spawnParticle() {
 		ParticleFlame p = new ParticleFlame(world);
-		p.x = x + world.rng.nextFloat();
-		p.y = y + world.rng.nextFloat();
+		p.x = x + world.getRnd().nextFloat();
+		p.y = y + world.getRnd().nextFloat();
 		
 		ParticleGenerator.directParticle(p, 0.02f, 0.07f, Math.PI / 6.0D, Math.PI * 5.0D / 6.0D);
 		
@@ -124,8 +124,8 @@ public class TileEntityMobSpawner extends TileEntity {
 	 */
 	private void spawnParticleOnMob(EntityMob e) {
 		ParticleSmoke p = new ParticleSmoke(world);
-		p.x = e.x + e.boundingBox.getV00().x + world.rng.nextFloat() * e.boundingBox.width;
-		p.y = e.y + e.boundingBox.getV11().y + world.rng.nextFloat() * e.boundingBox.height;
+		p.x = e.x + e.boundingBox.getV00().x + world.getRnd().nextFloat() * e.boundingBox.width;
+		p.y = e.y + e.boundingBox.getV11().y + world.getRnd().nextFloat() * e.boundingBox.height;
 		
 		ParticleGenerator.directParticle(p, 0.04f, 0.12f, 0, MathsUtil.TAU);
 		p.dy *= 0.1;
@@ -134,12 +134,12 @@ public class TileEntityMobSpawner extends TileEntity {
 	}
 	
 	@Override
-	public void handleAdd(BaseWorld world, int x, int y) {
+	public void handleAdd(IWorld world, int x, int y) {
 		
 	}
 	
 	@Override
-	public void handleRemove(BaseWorld world, int x, int y) {
+	public void handleRemove(IWorld world, int x, int y) {
 		
 	}
 	

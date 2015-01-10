@@ -16,7 +16,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * Provides implementations of methods in World which can be defined in terms
  * of other methods.
  */
-public abstract class AbstractWorld implements World {
+public abstract class AbstractWorld implements IWorld {
 	
 	/**
 	 * Iterates over the specified collection of GameObjects as per {@link

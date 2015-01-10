@@ -1,6 +1,7 @@
 package com.stabilise.world;
 
 import java.util.Collection;
+import java.util.Random;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
@@ -18,6 +19,11 @@ public class WrappedWorld extends AbstractWorld {
 	
 	public WrappedWorld(BaseWorld world) {
 		this.world = world;
+	}
+	
+	@Override
+	public boolean isLoaded() {
+		return world.isLoaded();
 	}
 	
 	@Override
@@ -133,6 +139,11 @@ public class WrappedWorld extends AbstractWorld {
 	@Override
 	public void blowUpTile(int x, int y, float explosionPower) {
 		world.blowUpTile(x, y, explosionPower);
+	}
+	
+	@Override
+	public Random getRnd() {
+		return world.getRnd();
 	}
 	
 }

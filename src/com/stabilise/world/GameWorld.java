@@ -411,9 +411,9 @@ public class GameWorld extends BaseWorld {
 			return slice.getTileAt(
 					tileCoordRelativeToSliceFromTileCoord(x),
 					tileCoordRelativeToSliceFromTileCoord(y)
-			).setLocation(x, y);
+			);
 		} else {
-			return Tiles.BEDROCK_INVISIBLE.setLocation(x, y);
+			return Tiles.BEDROCK_INVISIBLE;
 		}
 	}
 	
@@ -620,6 +620,18 @@ public class GameWorld extends BaseWorld {
 		
 		Log.get().postSevere("Could not load info file of world \"" + worldName + "\" during world loading!");
 		return null;
+	}
+
+	@Override
+	public boolean isLoaded() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void removeParticle(Particle p) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

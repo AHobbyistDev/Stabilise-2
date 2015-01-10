@@ -204,7 +204,7 @@ public class WorldServerOld extends BaseWorld {
 	 * @return The File representing the world's directory.
 	 */
 	public File getDir() {
-		return World.getWorldDir(info.fileSystemName); //new File(Resources.WORLDS_DIR, IO.getLegalString(info.nameOnDisk) + "/");
+		return IWorld.getWorldDir(info.fileSystemName); //new File(Resources.WORLDS_DIR, IO.getLegalString(info.nameOnDisk) + "/");
 	}
 	
 	/**
@@ -296,6 +296,12 @@ public class WorldServerOld extends BaseWorld {
 	public void removeParticle(Particle p) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public boolean isLoaded() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 }

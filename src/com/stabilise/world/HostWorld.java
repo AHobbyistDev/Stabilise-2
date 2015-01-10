@@ -71,8 +71,6 @@ public abstract class HostWorld extends BaseWorld {
 		spawnSliceX = info.spawnSliceX;
 		spawnSliceY = info.spawnSliceY;
 		
-		log = Log.getAgent("world");
-		
 		regions = new ConcurrentHashMap<HashPoint, Region>();
 		
 		config = new WorldData(this, info);
@@ -147,14 +145,13 @@ public abstract class HostWorld extends BaseWorld {
 	}
 	
 	/**
-	 * Checks for whether or not all required regions have been loaded. This
-	 * should only be called when the world is being set up to confirm that the
-	 * world has fully loaded.
+	 * {@inheritDoc}
 	 * 
-	 * @return {@code true} if all required regions have been loaded;
-	 * {@code false} otherwise.
+	 * <p>In the HostWorld implementation, this returns {@code true} iff all
+	 * regions have been loaded and generated.
 	 */
-	public boolean regionsLoaded() {
+	@Override
+	public boolean isLoaded() {
 		for(Region r : regions.values()) {
 			if(!r.loaded || !r.isGenerated())
 				return false;
@@ -466,7 +463,7 @@ public abstract class HostWorld extends BaseWorld {
 	 * @return The File representing the world's directory.
 	 */
 	public File getDir() {
-		return World.getWorldDir(info.fileSystemName);
+		return IWorld.getWorldDir(info.fileSystemName);
 	}
 	
 	/**

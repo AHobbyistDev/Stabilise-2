@@ -3,7 +3,7 @@ package com.stabilise.world.tile;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.util.Log;
-import com.stabilise.world.BaseWorld;
+import com.stabilise.world.IWorld;
 import com.stabilise.world.tile.tileentity.TileEntityChest;
 
 /**
@@ -21,7 +21,7 @@ public class TileChest extends Tile {
 	}
 	
 	@Override
-	public void handleStep(BaseWorld world, int x, int y, Entity e) {
+	public void handleStep(IWorld world, int x, int y, Entity e) {
 		super.handleStep(world, x, y, e);
 		
 		/*
@@ -34,7 +34,7 @@ public class TileChest extends Tile {
 	}
 	
 	@Override
-	public void handlePlace(BaseWorld world, int x, int y) {
+	public void handlePlace(IWorld world, int x, int y) {
 		super.handlePlace(world, x, y);
 		TileEntityChest t = createTileEntity(x, y);
 		t.world = world;
@@ -55,13 +55,13 @@ public class TileChest extends Tile {
 	}
 	
 	@Override
-	public void handleRemove(BaseWorld world, int x, int y) {
+	public void handleRemove(IWorld world, int x, int y) {
 		super.handleRemove(world, x, y);
 		world.removeTileEntityAt(x, y);
 	}
 	
 	@Override
-	public void handleInteract(BaseWorld world, int x, int y, EntityMob mob) {
+	public void handleInteract(IWorld world, int x, int y, EntityMob mob) {
 		super.handleInteract(world, x, y, mob);
 		
 		TileEntityChest c = (TileEntityChest)world.getTileEntityAt(x, y);

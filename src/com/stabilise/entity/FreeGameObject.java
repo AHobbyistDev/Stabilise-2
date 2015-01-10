@@ -1,6 +1,7 @@
 package com.stabilise.entity;
 
 import com.stabilise.world.BaseWorld;
+import com.stabilise.world.IWorld;
 
 /**
  * A FreeGameObject is a game object whose coordinates are not constrained to
@@ -24,7 +25,7 @@ public abstract class FreeGameObject extends GameObject {
 	 * 
 	 * @param world The world.
 	 */
-	public FreeGameObject(BaseWorld world) {
+	public FreeGameObject(IWorld world) {
 		super(world);
 	}
 	

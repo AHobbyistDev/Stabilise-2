@@ -13,13 +13,13 @@ import com.stabilise.entity.particle.Particle;
 /**
  * The world as viewed by a client.
  */
-public class ClientWorld extends WrappedWorld {
+public class ClientWorld extends WrappedWorld implements IClientWorld {
 	
 	/** The player's character. */
 	private CharacterData playerChar;
-	/** The player. */
+	/** Holds a direct reference to the player controlled by the client. */
 	public EntityMob player;
-	/** The game camera. */
+	/** The camera which follows the client's player. */
 	public GameCamera camera;
 	
 	/** LinkedHashSet of particles. */
@@ -41,6 +41,13 @@ public class ClientWorld extends WrappedWorld {
 	 */
 	public ClientWorld(HostWorld world) {
 		super(world);
+	}
+	
+	@Override
+	public void setClientPlayer(CharacterData data, EntityMob mob) {
+		this.playerChar = data;
+		this.player = mob;
+		camera = new GameCamera(this, player);
 	}
 	
 	@Override

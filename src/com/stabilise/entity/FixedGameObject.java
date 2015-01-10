@@ -1,6 +1,7 @@
 package com.stabilise.entity;
 
 import com.stabilise.world.BaseWorld;
+import com.stabilise.world.IWorld;
 
 /**
  * A FixedGameObject is a game object whose coordinates are constrained to the
@@ -24,7 +25,7 @@ public abstract class FixedGameObject extends GameObject {
 	 * 
 	 * @param world The world.
 	 */
-	public FixedGameObject(BaseWorld world) {
+	public FixedGameObject(IWorld world) {
 		super(world);
 	}
 	

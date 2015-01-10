@@ -7,6 +7,7 @@ import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.world.Direction;
 import com.stabilise.world.BaseWorld;
+import com.stabilise.world.IWorld;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.TileFluid;
 
@@ -86,7 +87,7 @@ public abstract class Entity extends FreeGameObject {
 	 * 
 	 * @param world The world.
 	 */
-	public Entity(BaseWorld world) {
+	public Entity(IWorld world) {
 		super(world);
 		
 		// temporary initialisation of variables

@@ -17,14 +17,13 @@ import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.IOUtil;
 import com.stabilise.util.Log;
-import com.stabilise.util.annotation.UserThread;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
  * The world.
  */
-public interface World {
+public interface IWorld {
 	
 	/** The file name of the world info file. */
 	public static final String FILE_INFO = "info";
@@ -41,11 +40,17 @@ public interface World {
 	
 	
 	/**
+	 * Polls the loaded status of the world.
+	 * 
+	 * @return {@code true} if the world is loaded; {@code false} otherwise.
+	 */
+	boolean isLoaded();
+	
+	/**
 	 * Updates the world by executing a single tick of game logic. In general,
 	 * all GameObjects in the world will be updated (i.e. entities, hitboxes,
 	 * tile entities, etc).
 	 */
-	@UserThread("MainThread")
 	void update();
 	
 	/**
@@ -295,6 +300,13 @@ public interface World {
 	 * @param explosionPower The power of the explosion.
 	 */
 	void blowUpTile(int x, int y, float explosionPower);
+	
+	// ========== Utility Methods ==========
+	
+	/**
+	 * @return A {@code Random} instance held by this IWorld.
+	 */
+	Random getRnd();
 	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------

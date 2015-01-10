@@ -200,7 +200,14 @@ public abstract class BaseWorld extends AbstractWorld {
 		return tileEntities;
 	}
 	
-	// ==========Misc mob stuff==========
+	// ========== Utils ==========
+	
+	@Override
+	public Random getRnd() {
+		return rng;
+	}
+	
+	// ========== Misc ==========
 	
 	/**
 	 * Attempts to spawn a mob at a given location.

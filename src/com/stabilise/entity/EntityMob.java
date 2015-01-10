@@ -10,7 +10,7 @@ import com.stabilise.item.Item;
 import com.stabilise.item.ItemStack;
 import com.stabilise.world.Direction;
 import com.stabilise.world.GameWorld;
-import com.stabilise.world.BaseWorld;
+import com.stabilise.world.IWorld;
 
 /**
  * A mob is an entity capable of acting of its own agency.
@@ -218,7 +218,7 @@ public abstract class EntityMob extends Entity {
 	 * 
 	 * @param world The world in which the Mob will be placed.
 	 */
-	public EntityMob(BaseWorld world) {
+	public EntityMob(IWorld world) {
 		super(world);
 		
 		initProperties();
@@ -470,8 +470,8 @@ public abstract class EntityMob extends Entity {
 			p.x = x;
 			p.y = y;
 			//ParticleGenerator.directParticle(p, 0.01f, 0.25f, 0D, Math.PI);
-			p.dx = (world.rng.nextFloat() * 0.4f) - 0.2f;
-			p.dy = world.rng.nextFloat() * 0.015f;
+			p.dx = (world.getRnd().nextFloat() * 0.4f) - 0.2f;
+			p.dy = world.getRnd().nextFloat() * 0.015f;
 			((GameWorld)world).addParticle(p);
 		}
 	}
@@ -484,11 +484,11 @@ public abstract class EntityMob extends Entity {
 	 * @param chance The chance of dropping the item, from 0.0 to 1.0.
 	 */
 	protected void dropItem(int id, int count, float chance) {
-		if(world.rng.nextFloat() > chance)
+		if(world.getRnd().nextFloat() > chance)
 			return;
 		EntityItem e = new EntityItem(world, new ItemStack(Item.getItem(id), count));
-		e.dx = world.rng.nextFloat() * 0.4f - 0.2f;
-		e.dy = 0.1f + world.rng.nextFloat() * 0.2f;
+		e.dx = world.getRnd().nextFloat() * 0.4f - 0.2f;
+		e.dy = 0.1f + world.getRnd().nextFloat() * 0.2f;
 		world.addEntity(e, x, y);
 	}
 	
