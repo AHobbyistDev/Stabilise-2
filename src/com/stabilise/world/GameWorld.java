@@ -32,7 +32,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * and the world generator
  * -->
  */
-public class GameWorld extends AbstractWorld {
+public class GameWorld extends BaseWorld {
 	
 	/** The world's information. */
 	public final WorldInfo info;
@@ -520,7 +520,7 @@ public class GameWorld extends AbstractWorld {
 	
 	@Override
 	public File getDir() {
-		return AbstractWorld.getWorldDir(info.fileSystemName);
+		return BaseWorld.getWorldDir(info.fileSystemName);
 	}
 	
 	/**

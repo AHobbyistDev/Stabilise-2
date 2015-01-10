@@ -11,7 +11,7 @@ import com.stabilise.util.nbt.NBTTagList;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
 import com.stabilise.world.Region.QueuedSchematic;
-import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
 import com.stabilise.world.WorldData;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
@@ -58,8 +58,8 @@ public class PreAlphaWorldLoader extends WorldLoader {
 						NBTTagCompound tc = (NBTTagCompound)t;
 						TileEntity te = TileEntity.createTileEntityFromNBT(tc);
 						s.tileEntities		// Poor syntax, but I want this to fit
-							[AbstractWorld.tileCoordRelativeToSliceFromTileCoord(te.y)]
-							[AbstractWorld.tileCoordRelativeToSliceFromTileCoord(te.x)] = te; 
+							[BaseWorld.tileCoordRelativeToSliceFromTileCoord(te.y)]
+							[BaseWorld.tileCoordRelativeToSliceFromTileCoord(te.x)] = te; 
 					}
 					
 					r.slices[y][x] = s;

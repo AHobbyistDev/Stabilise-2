@@ -252,7 +252,7 @@ public class Region {
 	 * file system.
 	 */
 	public File getFile() {
-		return new File(world.getDir(), AbstractWorld.DIR_REGIONS + "r_" + loc.x + "_" + loc.y + ".region");
+		return new File(world.getDir(), BaseWorld.DIR_REGIONS + "r_" + loc.x + "_" + loc.y + ".region");
 	}
 	
 	/**

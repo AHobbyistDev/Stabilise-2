@@ -2,14 +2,18 @@ package com.stabilise.world;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Preconditions;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityPlayer;
+import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
+import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.util.nbt.NBTIO;
@@ -30,7 +34,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * and the world generator
  * -->
  */
-public abstract class HostWorld extends AbstractWorld {
+public abstract class HostWorld extends BaseWorld {
 	
 	/** The world's information. */
 	public final WorldInfo info;
@@ -54,11 +58,15 @@ public abstract class HostWorld extends AbstractWorld {
 	 * Creates a new HostWorld.
 	 * 
 	 * @param info The world's info.
+	 * @param profiler The profiler to use for profiling the world.
+	 * @param log The log to use for the world.
+	 * 
+	 * @throws NullPointerException if any argument is {@code null}.
 	 */
-	public HostWorld(WorldInfo info) {
-		super();
+	public HostWorld(WorldInfo info, Profiler profiler, Log log) {
+		super(profiler, log);
 		
-		this.info = info;
+		this.info = Preconditions.checkNotNull(info);
 		
 		spawnSliceX = info.spawnSliceX;
 		spawnSliceY = info.spawnSliceY;
@@ -341,23 +349,6 @@ public abstract class HostWorld extends AbstractWorld {
 	}
 	
 	@Override
-	public Tile getTileAt(int x, int y) {
-		// TODO: This and getSliceAtTile(x,y) are pretty inefficient given the
-		// sheer flux of calls this method is likely to receive during the
-		// operation of the game. FIND A BETTER WAY TO DO THIS SOMEHOW, IF AT
-		// ALL POSSIBLE (caching?).
-		Slice slice = getSliceAtTile(x, y);
-		if(slice != null) {
-			return slice.getTileAt(
-					tileCoordRelativeToSliceFromTileCoord(x),
-					tileCoordRelativeToSliceFromTileCoord(y)
-			).setLocation(x, y);
-		} else {
-			return Tiles.BEDROCK_INVISIBLE.setLocation(x, y);
-		}
-	}
-	
-	@Override
 	public void setTileAt(int x, int y, int id) {
 		Slice slice = getSliceAtTile(x, y);
 		
@@ -388,20 +379,6 @@ public abstract class HostWorld extends AbstractWorld {
 		}
 	}
 	
-	@Override
-	public TileEntity getTileEntityAt(int x, int y) {
-		Slice slice = getSliceAtTile(x, y);
-		
-		if(slice != null) {
-			x = tileCoordRelativeToSliceFromTileCoord(x);
-			y = tileCoordRelativeToSliceFromTileCoord(y);
-			
-			return slice.getTileEntityAt(x, y);
-		}
-		
-		return null;
-	}
-
 	@Override
 	public void setTileEntityAt(int x, int y, TileEntity t) {
 		Slice slice = getSliceAtTile(x, y);
@@ -489,7 +466,7 @@ public abstract class HostWorld extends AbstractWorld {
 	 * @return The File representing the world's directory.
 	 */
 	public File getDir() {
-		return AbstractWorld.getWorldDir(info.fileSystemName);
+		return World.getWorldDir(info.fileSystemName);
 	}
 	
 	/**

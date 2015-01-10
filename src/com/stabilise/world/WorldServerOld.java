@@ -23,7 +23,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * 
  * @deprecated Due to the removal of networking architecture.
  */
-public class WorldServerOld extends AbstractWorld {
+public class WorldServerOld extends BaseWorld {
 	
 	/** The game server to which the world belongs. */
 	public GameServer server;
@@ -205,7 +205,7 @@ public class WorldServerOld extends AbstractWorld {
 	 * @return The File representing the world's directory.
 	 */
 	public File getDir() {
-		return AbstractWorld.getWorldDir(info.fileSystemName); //new File(Resources.WORLDS_DIR, IO.getLegalString(info.nameOnDisk) + "/");
+		return World.getWorldDir(info.fileSystemName); //new File(Resources.WORLDS_DIR, IO.getLegalString(info.nameOnDisk) + "/");
 	}
 	
 	/**

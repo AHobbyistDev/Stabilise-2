@@ -10,7 +10,6 @@ import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 
-import com.stabilise.character.CharacterData;
 import com.stabilise.core.Resources;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
@@ -19,18 +18,13 @@ import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.IOUtil;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
  * The world.
  */
-public interface IWorld {
-	
-	//--------------------==========--------------------
-	//-----=====Static Constants and Variables=====-----
-	//--------------------==========--------------------
+public interface World {
 	
 	/** The file name of the world info file. */
 	public static final String FILE_INFO = "info";
@@ -45,8 +39,11 @@ public interface IWorld {
 	/** The maximum number of hostile mobs which may spawn. */
 	public static final int HOSTILE_MOB_CAP = 100;
 	
+	
 	/**
-	 * Updates the world - that is, executes all game logic.
+	 * Updates the world by executing a single tick of game logic. In general,
+	 * all GameObjects in the world will be updated (i.e. entities, hitboxes,
+	 * tile entities, etc).
 	 */
 	@UserThread("MainThread")
 	void update();
@@ -55,13 +52,13 @@ public interface IWorld {
 	 * Sets a mob as a player. The mob will be treated as if the player is
 	 * controlling it thereafter.
 	 */
-	public void setPlayer(EntityMob m);
+	void setPlayer(EntityMob m);
 	
 	/**
 	 * Removes the status of player from a mob. The mob will no longer be
 	 * treated as if controlled by a player thereafter.
 	 */
-	public void unsetPlayer(EntityMob m);
+	void unsetPlayer(EntityMob m);
 	
 	/**
 	 * Adds an entity to the world. The entity's ID is assigned automatically.
@@ -75,7 +72,7 @@ public interface IWorld {
 	 * @param x The x-coordinate at which to place the entity, in tile-lengths.
 	 * @param y The y-coordinate at which to place the entity, in tile-lengths.
 	 */
-	public void addEntity(Entity e, double x, double y);
+	void addEntity(Entity e, double x, double y);
 	
 	/**
 	 * Adds an entity to the world. The entity's ID is assigned automatically.
@@ -88,7 +85,7 @@ public interface IWorld {
 	 * <p>Though the entity is not immediately added to the world, {@link
 	 * Entity#onAdd() onAdd()} is invoked on {@code e}.
 	 */
-	public void addEntity(Entity e);
+	void addEntity(Entity e);
 	
 	/**
 	 * Removes an entity from the world.
@@ -101,7 +98,7 @@ public interface IWorld {
 	 * 
 	 * @param e The entity.
 	 */
-	public void removeEntity(Entity e);
+	void removeEntity(Entity e);
 	
 	/**
 	 * Removes an entity from the world.
@@ -114,7 +111,7 @@ public interface IWorld {
 	 * 
 	 * @param id The ID of the entity.
 	 */
-	public void removeEntity(int id);
+	void removeEntity(int id);
 	
 	/**
 	 * Adds a hitbox to the world. The hitbox's ID is assigned automatically.
@@ -129,18 +126,17 @@ public interface IWorld {
 	 * @param x The x-coordinate at which to place the hitbox, in tile-lengths.
 	 * @param y The y-coordinate at which to place the hitbox, in tile-lengths.
 	 */
-	public void addHitbox(Hitbox h, double x, double y);
+	void addHitbox(Hitbox h, double x, double y);
 	
 	/**
 	 * Adds a hitbox to the world. The hitbox's ID is assigned automatically.
 	 * 
 	 * @param h The hitbox.
 	 */
-	public void addHitbox(Hitbox h);
+	void addHitbox(Hitbox h);
 	
 	/**
-	 * Adds a particle to the world. The particle's ID is assigned
-	 * automatically.
+	 * Adds a particle to the world.
 	 * 
 	 * @param p The particle.
 	 * @param x The x-coordinate at which to place the particle, in
@@ -148,29 +144,24 @@ public interface IWorld {
 	 * @param y The y-coordinate at which to place the particle, in
 	 * tile-lengths.
 	 */
-	public void addParticle(Particle p, double x, double y);
+	void addParticle(Particle p, double x, double y);
 	
 	/**
-	 * Adds a particle to the world. The particle's ID is assigned
-	 * automatically.
-	 * 
-	 * @param p The particle.
+	 * Adds a particle to the world.
 	 */
-	public void addParticle(Particle p);
+	void addParticle(Particle p);
 	
 	/**
 	 * Removes a particle from the world.
-	 * 
-	 * @param p The particle.
 	 */
-	public void removeParticle(Particle p);
+	void removeParticle(Particle p);
 	
 	/**
 	 * Removes a particle from the world.
 	 * 
 	 * @param id The ID of the particle.
 	 */
-	public void removeParticle(int id);
+	void removeParticle(int id);
 	
 	// ==========Collection getters==========
 	
@@ -180,22 +171,22 @@ public interface IWorld {
 	 * collection is also a member of the one returned by {@link
 	 * #getEntityIterator()}.
 	 */
-	public Collection<EntityMob> getPlayers();
+	Collection<EntityMob> getPlayers();
 	
 	/**
 	 * @return The collection of entities in the world.
 	 */
-	public Collection<Entity> getEntities();
+	Collection<Entity> getEntities();
 	
 	/**
 	 * @return The collection of hitboxes in the world.
 	 */
-	public Collection<Hitbox> getHitboxes();
+	Collection<Hitbox> getHitboxes();
 	
 	/**
 	 * @return The collection of tile entities in the world.
 	 */
-	public Collection<TileEntity> getTileEntities();
+	Collection<TileEntity> getTileEntities();
 	
 	/**
 	 * @return The collection of particles in the world, or {@code null} if
@@ -203,14 +194,7 @@ public interface IWorld {
 	 * this would be the case if this is a server's world, as particles are
 	 * purely aesthetic and a server doesn't concern itself with them).
 	 */
-	public abstract Collection<Particle> getParticles();
-	
-	/**
-	 * Adds a player to the world.
-	 * 
-	 * @param player The data for the player.
-	 */
-	public abstract void addPlayer(CharacterData player);
+	abstract Collection<Particle> getParticles();
 	
 	// ==========World component getters==========
 	
@@ -223,7 +207,7 @@ public interface IWorld {
 	 * @return The slice at the given coordinates, or {@code null} if no such
 	 * slice is loaded.
 	 */
-	public Slice getSliceAt(int x, int y);
+	Slice getSliceAt(int x, int y);
 	
 	/**
 	 * Gets the slice at the given coordinates.
@@ -234,7 +218,7 @@ public interface IWorld {
 	 * @return The slice at the given coordinates, or {@code null} if no such
 	 * slice is loaded.
 	 */
-	public Slice getSliceAtTile(int x, int y);
+	Slice getSliceAtTile(int x, int y);
 	
 	/**
 	 * Gets a tile at the given coordinates. Fractional coordinates are rounded
@@ -247,9 +231,7 @@ public interface IWorld {
 	 * {@link com.stabilise.world.tile.Tile#invisibleBedrock invisibleBedrock}
 	 * tile if no such tile is loaded.
 	 */
-	default public Tile getTileAt(double x, double y) {
-		return getTileAt(MathsUtil.floor(x), MathsUtil.floor(y));
-	}
+	Tile getTileAt(double x, double y);
 	
 	/**
 	 * Gets a tile at the given coordinates.
@@ -261,7 +243,7 @@ public interface IWorld {
 	 * {@link com.stabilise.world.tile.Tiles#BEDROCK_INVISIBLE invisible
 	 * bedrock} tile if no such tile is loaded.
 	 */
-	public Tile getTileAt(int x, int y);
+	Tile getTileAt(int x, int y);
 	
 	/**
 	 * Sets a tile at the given coordinates.
@@ -270,7 +252,7 @@ public interface IWorld {
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 * @param id The ID of the tile to set.
 	 */
-	public void setTileAt(int x, int y, int id);
+	void setTileAt(int x, int y, int id);
 	
 	/**
 	 * Breaks a tile.
@@ -278,7 +260,7 @@ public interface IWorld {
 	 * @param x The x-coordinate of the tile, in tile-lengths.
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 */
-	public void breakTileAt(int x, int y);
+	void breakTileAt(int x, int y);
 	
 	/**
 	 * Gets the tile entity at the given coordinates.
@@ -289,7 +271,7 @@ public interface IWorld {
 	 * @return The tile entity at the given coordinates, or {@code null} if no
 	 * such tile entity is loaded.
 	 */
-	public TileEntity getTileEntityAt(int x, int y);
+	TileEntity getTileEntityAt(int x, int y);
 	
 	/**
 	 * Sets a tile entity at the given coordinates.
@@ -300,7 +282,7 @@ public interface IWorld {
 	 * in tile-lengths.
 	 * @param t The tile entity.
 	 */
-	public void setTileEntityAt(int x, int y, TileEntity t);
+	void setTileEntityAt(int x, int y, TileEntity t);
 	
 	/**
 	 * Removes a tile entity at the given coordinates.
@@ -310,7 +292,7 @@ public interface IWorld {
 	 * @param y The y-coordinate of the tile at which the tile entity to remove
 	 * is placed.
 	 */
-	public void removeTileEntityAt(int x, int y);
+	void removeTileEntityAt(int x, int y);
 	
 	/**
 	 * Attempts to blow up a tile at the given coordinates.
@@ -319,203 +301,11 @@ public interface IWorld {
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 * @param explosionPower The power of the explosion.
 	 */
-	public void blowUpTile(int x, int y, float explosionPower);
+	void blowUpTile(int x, int y, float explosionPower);
 	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------
-	
-	/**
-	 * Gets the coordinate of the region at the given tile coordinate.
-	 * 
-	 * <p>Note that the given coordinate may be one along any axis.
-	 * 
-	 * @param c The coordinate, in tile-lengths.
-	 * 
-	 * @return The coordinate of the region occupying the given coordinate, in
-	 * region-lengths.
-	 */
-	public static int regionCoordFromTileCoord(int c) {
-		//return MathsUtil.fastFloor((float)c / Region.REGION_SIZE_IN_TILES)
-		//return c < 0 ?								// Faster
-		//		(c+1) / Region.REGION_SIZE_IN_TILES - 1 :
-		//		c / Region.REGION_SIZE_IN_TILES;
-		return c >> Region.REGION_SIZE_IN_TILES_SHIFT;	// Even faster
-	}
-	
-	/**
-	 * Gets the coordinate of the region at the given absolute slice
-	 * coordinate.
-	 * 
-	 * <p>Note that the given coordinate may be one along any axis.
-	 * 
-	 * @param c The coordinate, in slice-lengths.
-	 * 
-	 * @return The coordinate of the region occupying the given coordinate, in
-	 * region-lengths.
-	 */
-	public static int regionCoordFromSliceCoord(int c) {
-		//return MathsUtil.fastFloor((float)c / Region.REGION_SIZE)
-		//return c < 0 ?								// Faster
-		//		(c+1) / Region.REGION_SIZE - 1 :
-		//		c / Region.REGION_SIZE;
-		return c >> Region.REGION_SIZE_SHIFT;			// Even faster
-	}
-	
-	/**
-	 * Gets the coordinate of the slice at the given coordinate.
-	 * 
-	 * <p>Note that the given coordinate may be one along any axis.
-	 * 
-	 * @param c The coordinate, in tile-lengths.
-	 * 
-	 * @return The coordinate of the slice occupying the given coordinate, in
-	 * slice-lengths.
-	 */
-	public static int sliceCoordFromTileCoord(int c) {
-		//return MathsUtil.fastFloor((float)c / Slice.SLICE_SIZE)
-		//return c < 0 ?							// Faster
-		//		(c+1) / Slice.SLICE_SIZE - 1 :
-		//		c / Slice.SLICE_SIZE;
-		return c >> Slice.SLICE_SIZE_SHIFT;			// Even faster
-	}
-	
-	/**
-	 * Gets the coordinate of the slice at the given coordinate.
-	 * 
-	 * <p>Note that the given coordinate may be one along any axis.
-	 * 
-	 * @param c The coordinate, in tile-lengths.
-	 * 
-	 * @return The coordinate of the slice occupying the given coordinate, in
-	 * slice-lengths.
-	 */
-	public static int sliceCoordFromTileCoord(double c) {
-		// TODO: Is there a way to make a faster alternative for floating-point
-		// input?
-		return MathsUtil.floor(c / Slice.SLICE_SIZE);
-	}
-	
-	/**
-	 * Gets the coordinate of the slice at the start of a region at the given
-	 * coordinate, in slice-lengths.
-	 * 
-	 * <p>Note that the given coordinate may be one along any axis.
-	 * 
-	 * @param c The coordinate, in region-lengths.
-	 * 
-	 * @return The coordinate of the slice at the start of the region, in
-	 * slice-lengths.
-	 */
-	public static int sliceCoordFromRegionCoord(int c) {
-		return c * Region.REGION_SIZE;
-	}
-	
-	/**
-	 * Gets the coordinate of the slice, relative to its parent region, at the
-	 * given coordinate.
-	 * 
-	 * <p>Note that the given coordinate may be one along any axis.
-	 * 
-	 * @param c The coordinate, in tile-lengths.
-	 * 
-	 * @return The coordinate of the slice occupying the given coordinate, in
-	 * slice-lengths, relative to its parent region.
-	 */
-	public static int sliceCoordRelativeToRegionFromTileCoord(int c) {
-		//c = sliceCoordFromTileCoord(c);
-		//return MathsUtil.wrappedRem(c, Region.REGION_SIZE);
-		//return MathsUtil.wrappedRem2(c, Region.REGION_SIZE);				// Way faster
-		
-		// i.e. (c >> Slice.SLICE_SIZE_SHIFT) & Region.REGION_SIZE_MINUS_ONE
-		return sliceCoordFromTileCoord(c) & Region.REGION_SIZE_MINUS_ONE;	// One less instruction
-	}
-	
-	/**
-	 * Gets the coordinate of the slice, relative to its parent region, at the
-	 * given coordinate. That is, converts the given slice coordinate to local
-	 * region space.
-	 * 
-	 * <p>Note that the given coordinate may be one along any axis.
-	 * 
-	 * @param c The coordinate, in slice-lengths.
-	 * 
-	 * @return The coordinate of the slice, in slice-lengths, relative to its
-	 * parent region.
-	 */
-	public static int sliceCoordRelativeToRegionFromSliceCoord(int c) {
-		//return MathsUtil.wrappedRem(c, Region.REGION_SIZE);
-		//return MathsUtil.wrappedRem2(c, Region.REGION_SIZE);		// Way faster
-		return c & Region.REGION_SIZE_MINUS_ONE;					// One less instruction
-	}
-	
-	/**
-	 * Gets the coordinate of the start of a slice at the given coordinate, in
-	 * tile-lengths.
-	 * 
-	 * <p>Note that the given coordinate may be one along any axis.
-	 * 
-	 * <p>Also note that this method also returns the starting tile of a slice
-	 * relative to a region, provided the {@code c} parameter given is that of
-	 * the slice's coordinate relative to the region.
-	 * 
-	 * @param c The coordinate, in slice-lengths.
-	 * 
-	 * @return The coordinate of the start of the slice, in tile-lengths.
-	 */
-	public static int tileCoordFromSliceCoord(int c) {
-		return c * Slice.SLICE_SIZE;
-	}
-	
-	/**
-	 * Gets the coordinate of the start of a region at the given coordinate,in
-	 * tile-lengths.
-	 * 
-	 * <p>Note that the given coordinate may be one along any axis.
-	 * 
-	 * @param c The coordinate, in region-lengths.
-	 * 
-	 * @return The coordinate of the start of the region, in tile-lengths.
-	 */
-	public static int tileCoordFromRegionCoord(int c) {
-		return c * Region.REGION_SIZE_IN_TILES;
-	}
-	
-	/**
-	 * Gets the coordinate of the tile, relative to its parent slice, at the
-	 * given coordinate. That is, converts the given tile coordinate to local
-	 * slice space.
-	 * 
-	 * <p>Note that the given coordinate may be one along any axis.
-	 * 
-	 * @param c The coordinate, in tile-lengths.
-	 * 
-	 * @return The coordinate of the tile, in tile-lengths, relative to its
-	 * parent slice.
-	 */
-	public static int tileCoordRelativeToSliceFromTileCoord(int c) {
-		//return MathsUtil.wrappedRem(c, Slice.SLICE_SIZE);
-		//return MathsUtil.wrappedRem2(c, Slice.SLICE_SIZE);		// Way faster
-		return c & Slice.SLICE_SIZE_MINUS_ONE;						// One less instruction
-	}
-	
-	/**
-	 * Gets the coordinate of the tile, relative to its parent region, at the
-	 * given coordinate. That is, converts the given tile coordinate to local
-	 * region space.
-	 * 
-	 * <p>Note that the given coordinate may be one along any axis.
-	 * 
-	 * @param c The coordinate, in tile-lengths.
-	 * 
-	 * @return The coordinate of the tile, in tile-lengths, relative to its
-	 * parent region.
-	 */
-	public static int tileCoordRelativeToRegionFromTileCoord(int c) {
-		//return MathsUtil.wrappedRem(c, Region.REGION_SIZE_IN_TILES);
-		//return MathsUtil.wrappedRem2(c, Region.REGION_SIZE_IN_TILES);		// Way faster
-		return c & Region.REGION_SIZE_IN_TILES_MINUS_ONE;					// One less instruction
-	}
 	
 	/**
 	 * Creates a new world with a random seed.

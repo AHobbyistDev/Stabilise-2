@@ -20,7 +20,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * 
  * @deprecated Due to the removal of networking architecture.
  */
-public class WorldClientOld extends AbstractWorld {
+public class WorldClientOld extends BaseWorld {
 	
 	/** A reference to the client running the game. */
 	public GameClient client;

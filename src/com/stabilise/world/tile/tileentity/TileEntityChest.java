@@ -5,7 +5,7 @@ import com.stabilise.item.BoundedContainer;
 import com.stabilise.item.Container;
 import com.stabilise.item.ItemStack;
 import com.stabilise.util.nbt.NBTTagCompound;
-import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
 
 /**
  * A tile entity representing a chest and its contents.
@@ -46,7 +46,7 @@ public class TileEntityChest extends TileEntity {
 	 * @param x The x-coordinate of the tile entity, in tile-lengths.
 	 * @param y The y-coordinate of the tile entity, in tile-lengths.
 	 */
-	public TileEntityChest(AbstractWorld world, int x, int y) {
+	public TileEntityChest(BaseWorld world, int x, int y) {
 		super(world, x, y);
 		
 		items = new BoundedContainer(CAPACITY);
@@ -58,12 +58,12 @@ public class TileEntityChest extends TileEntity {
 	}
 	
 	@Override
-	public void handleAdd(AbstractWorld world, int x, int y) {
+	public void handleAdd(BaseWorld world, int x, int y) {
 		// nothing to see here, move along
 	}
 	
 	@Override
-	public void handleRemove(AbstractWorld world, int x, int y) {
+	public void handleRemove(BaseWorld world, int x, int y) {
 		for(ItemStack s : items) {
 			EntityItem e = new EntityItem(world, s);
 			e.dx = world.rng.nextFloat() * 0.4f - 0.2f;

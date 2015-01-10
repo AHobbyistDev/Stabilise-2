@@ -112,22 +112,6 @@ public class SliceMap {
 		for(int x = maxSliceXLoaded; x < oldMaxX; x++) unloadCol(x, oldMinY, oldMaxY);
 		for(int y = oldMinY; y < minSliceYLoaded; y++) unloadRow(y, oldMinX, oldMaxX);
 		for(int y = maxSliceYLoaded; y < oldMaxY; y++) unloadRow(y, oldMinX, oldMaxX);
-		
-		// The following legacy code doesn't work if the player moves >1 slice
-		// in any direction in a tick.
-		/*
-		if(minSliceXLoaded < oldMinX) loadCol(minSliceXLoaded);
-		else if(minSliceXLoaded > oldMinX) unloadCol(oldMinX, oldMinY, oldMaxY);
-		
-		if(maxSliceXLoaded < oldMaxX) unloadCol(oldMaxX, oldMinY, oldMaxY);
-		else if(maxSliceXLoaded > oldMaxX) loadCol(maxSliceXLoaded);
-		
-		if(minSliceYLoaded < oldMinY) loadRow(minSliceYLoaded);
-		else if(minSliceYLoaded > oldMinY) unloadRow(oldMinY, oldMinX, oldMaxX);
-		
-		if(maxSliceYLoaded < oldMaxY) unloadRow(oldMaxY, oldMinX, oldMaxX);
-		else if(maxSliceYLoaded > oldMaxY) loadRow(maxSliceYLoaded);
-		*/
 	}
 	
 	/**

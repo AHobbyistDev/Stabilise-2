@@ -8,7 +8,7 @@ import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 
-public class WorldClient extends AbstractWorld {
+public class WorldClient extends BaseWorld {
 	
 	public WorldClient() {
 		
