@@ -19,8 +19,6 @@ public class Uninstaller {
 	
 	/**
 	 * Runs the installer program.
-	 * 
-	 * @param args Unusued.
 	 */
 	public static void main(String[] args) {
 		try {

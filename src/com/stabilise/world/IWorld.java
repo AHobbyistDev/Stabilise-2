@@ -316,6 +316,19 @@ public interface IWorld {
 	 */
 	Random getRnd();
 	
+	// ========== Lifecycle Methods ==========
+	
+	/**
+	 * Saves the world.
+	 */
+	void save();
+	
+	/**
+	 * Closes the world. This method may block for a prolonged period while the
+	 * the world is closed if this is a HostWorld.
+	 */
+	void close();
+	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------

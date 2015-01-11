@@ -1,5 +1,8 @@
 package com.stabilise.core;
 
+import static com.badlogic.gdx.Input.Keys;
+
+import com.badlogic.gdx.InputProcessor;
 import com.stabilise.core.state.MainMenuState;
 import com.stabilise.entity.controller.PlayerController;
 import com.stabilise.input.Controllable;
@@ -16,7 +19,7 @@ import com.stabilise.world.SingleplayerWorld;
 /**
  * The game itself.
  */
-public class Game implements Controllable {
+public class Game implements Controllable, InputProcessor {
 	
 	/** Whether or not the game is currently running. */
 	public boolean running = true;
@@ -155,7 +158,7 @@ public class Game implements Controllable {
 			menu.unloadResources();
 		menu = null;
 		paused = false;
-		controller.input.setFocus(controller);
+		controller.input.setInputProcessor(controller);
 	}
 	
 	/**
@@ -167,27 +170,7 @@ public class Game implements Controllable {
 	}
 	
 	@Override
-	public void handleButtonPress(int button, int x, int y) {
-		playerController.handleButtonPress(button, x, y);
-	}
-	
-	@Override
-	public void handleButtonRelease(int button, int x, int y) {
-		playerController.handleButtonRelease(button, x, y);
-	}
-	
-	@Override
-	public void handleKeyPress(int key) {
-		hudRenderer.setProfilerSection(InputManager.numericKeyValue(key));
-	}
-	
-	@Override
-	public void handleKeyRelease(int key) {
-		
-	}
-	
-	@Override
-	public void handleControlPress(Control control) {
+	public boolean handleControlPress(Control control) {
 		switch(control) {
 			case PAUSE:
 				openPauseMenu();
@@ -196,19 +179,94 @@ public class Game implements Controllable {
 				debug = !debug;
 				break;
 			default:
-				playerController.handleControlPress(control);
-				break;
+				return playerController.handleControlPress(control);
+		}
+		return true;
+	}
+	
+	@Override
+	public boolean handleControlRelease(Control control) {
+		return playerController.handleControlRelease(control);
+	}
+	
+	@Override
+	public boolean keyDown(int keycode) {
+		hudRenderer.setProfilerSection(keyValue(keycode));
+		return false;
+	}
+	
+	private int keyValue(int keycode) {
+		switch(keycode) {
+			case Keys.NUM_0:
+			case Keys.NUMPAD_0:
+				return 0;
+			case Keys.NUM_1:
+			case Keys.NUMPAD_1:
+				return 1;
+			case Keys.NUM_2:
+			case Keys.NUMPAD_2:
+				return 2;
+			case Keys.NUM_3:
+			case Keys.NUMPAD_3:
+				return 3;
+			case Keys.NUM_4:
+			case Keys.NUMPAD_4:
+				return 4;
+			case Keys.NUM_5:
+			case Keys.NUMPAD_5:
+				return 5;
+			case Keys.NUM_6:
+			case Keys.NUMPAD_6:
+				return 6;
+			case Keys.NUM_7:
+			case Keys.NUMPAD_7:
+				return 7;
+			case Keys.NUM_8:
+			case Keys.NUMPAD_8:
+				return 8;
+			case Keys.NUM_9:
+			case Keys.NUMPAD_9:
+				return 9;
+			default:
+				return -1;
 		}
 	}
-	
+
 	@Override
-	public void handleControlRelease(Control control) {
-		playerController.handleControlRelease(control);
+	public boolean keyUp(int keycode) {
+		return false;
 	}
-	
+
 	@Override
-	public void handleMouseWheelScroll(int scroll) {
-		playerController.handleMouseWheelScroll(scroll);
+	public boolean keyTyped(char character) {
+		return false;
+	}
+
+	@Override
+	public boolean touchDown(int x, int y, int pointer, int button) {
+		return playerController.touchDown(x, y, pointer, button);
+	}
+
+	@Override
+	public boolean touchUp(int x, int y, int pointer, int button) {
+		return playerController.touchUp(x, y, pointer, button);
+	}
+
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean mouseMoved(int screenX, int screenY) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean scrolled(int amount) {
+		return playerController.scrolled(amount);
 	}
 	
 }

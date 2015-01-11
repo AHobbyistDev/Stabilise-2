@@ -159,4 +159,14 @@ public class WrappedWorld<T extends BaseWorld> extends AbstractWorld {
 		return world.getRnd();
 	}
 	
+	@Override
+	public void save() {
+		world.save();
+	}
+	
+	@Override
+	public void close() {
+		world.close();
+	}
+	
 }

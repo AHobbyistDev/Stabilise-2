@@ -10,7 +10,6 @@ import com.stabilise.item.Item;
 import com.stabilise.item.ItemStack;
 import com.stabilise.util.Direction;
 import com.stabilise.world.IWorld;
-import com.stabilise.world.old.GameWorld;
 
 /**
  * A mob is an entity capable of acting of its own agency.
@@ -472,7 +471,7 @@ public abstract class EntityMob extends Entity {
 			//ParticleGenerator.directParticle(p, 0.01f, 0.25f, 0D, Math.PI);
 			p.dx = (world.getRnd().nextFloat() * 0.4f) - 0.2f;
 			p.dy = world.getRnd().nextFloat() * 0.015f;
-			((GameWorld)world).addParticle(p);
+			world.addParticle(p);
 		}
 	}
 	

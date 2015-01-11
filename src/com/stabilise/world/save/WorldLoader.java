@@ -12,11 +12,9 @@ import com.stabilise.world.WorldData;
  * A {@code WorldLoader} instance manages the loading and saving of regions for
  * a world.
  * 
- * <p>Internally, a WorldLoader uses an ExecutorService specified by
- * {@link #setExecutor(ExecutorService)} (note that this <i>must</i> be invoked
- * before the WorldLoader is otherwise used - preferably immediately after the
- * WorldLoader is constructed) to perform its I/O tasks; each individual load
- * or save request for a region is delegated to a separate thread.
+ * <p>Internally, a WorldLoader uses an ExecutorService to perform its I/O
+ * tasks; each individual load or save request for a region is delegated to a
+ * separate thread.
  * 
  * <p>TODO: Synchronisation policy on saved regions. Since it is incredibly
  * inefficient and wasteful to make a defensive copy of a region and its
@@ -27,11 +25,13 @@ import com.stabilise.world.WorldData;
  * 
  * <ul>
  * <li>never saving regions mid-game (though this lends itself to potential
- *     of data if, say, the JVM crashes and as such the game can't properly
- *     shut down), or
+ *     loss of data if, say, the JVM crashes and as such the game can't
+ *     properly shut down), or
  * <li>defining a synchronisation policy wherein at minimum no exceptions or
  *     errors will be thrown, and cases of deadlock, livelock and starvation
- *     are impossible.
+ *     are impossible (though there may be inconsistent state data as the world
+ *     changes while it is being saved - though at least that would be
+ *     preferable to losing data)
  * </ul>
  */
 public abstract class WorldLoader {

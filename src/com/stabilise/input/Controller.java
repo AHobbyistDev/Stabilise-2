@@ -120,7 +120,7 @@ public class Controller implements InputProcessor {
 	//--------------------==========--------------------
 	
 	/** The main Input. */
-	private final Input input;
+	public final Input input;
 	
 	/** The focus of the controller. */
 	private Controllable focus;

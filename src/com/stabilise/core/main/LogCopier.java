@@ -18,8 +18,6 @@ public class LogCopier {
 	
 	/**
 	 * Runs the log copier program.
-	 * 
-	 * @param args Unusued.
 	 */
 	public static void main(String[] args) {
 		if(!Resources.APP_DIR.exists())

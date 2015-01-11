@@ -5,8 +5,7 @@ import com.stabilise.core.Application;
 /**
  * States allow for the circumstantial execution of the application's logic.
  * 
- * <p>
- * The application's current state, in essence, determines and controls what
+ * <p>The application's current state, in essence, determines and controls what
  * the application does.
  * 
  * @see Application

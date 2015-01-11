@@ -1,5 +1,6 @@
 package com.stabilise.entity.controller;
 
+import com.badlogic.gdx.InputProcessor;
 import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Game;
@@ -14,12 +15,11 @@ import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
 import com.stabilise.util.maths.MathsUtil;
-import com.stabilise.world.tile.Tiles;
 
 /**
  * A PlayerController is a MobController which is managed by player input.
  */
-public class PlayerController extends MobController implements Controllable {
+public class PlayerController extends MobController implements Controllable, InputProcessor {
 	
 	/** A reference to the PlayerController's controller. */
 	private Controller controller;
@@ -86,8 +86,11 @@ public class PlayerController extends MobController implements Controllable {
 	/**
 	 * Converts the x-coordinate of the mouse to world space.
 	 * 
+	 * <p>TODO: Libgdx treats the top-left as the origin instead of the
+	 * bottom-left, which is really annoying.
+	 * 
 	 * @param x The x-coordinate of the mouse, as defined by
-	 * {@link Controllable#handleButtonPress(int, int, int)}.
+	 * {@link Controllable#handleControlPress(int, int, int)}.
 	 * 
 	 * @return The x-coordinate of the tile the mouse is pointing at, in
 	 * tile-lengths.
@@ -110,25 +113,7 @@ public class PlayerController extends MobController implements Controllable {
 	}
 	
 	@Override
-	public void handleButtonPress(int button, int x, int y) {
-		if(button < 2) {
-			x = mouseXToWorldSpace(x);
-			y = mouseYToWorldSpace(y);
-			
-			if(button == 0)
-				game.getWorld().breakTileAt(x, y);
-			else
-				game.getWorld().setTileAt(x, y, tileID);
-		}
-	}
-	
-	@Override
-	public void handleButtonRelease(int button, int x, int y) {
-		// nothing to see here, move along
-	}
-	
-	@Override
-	public void handleControlPress(Control control) {
+	public boolean handleControlPress(Control control) {
 		switch(control) {
 			case JUMP:
 				mob.jump();
@@ -163,18 +148,18 @@ public class PlayerController extends MobController implements Controllable {
 				break;
 			case SUMMON_SWARM:
 				{
-					int max = 50 + mob.world.rng.nextInt(25);
+					int max = 50 + mob.world.getRnd().nextInt(25);
 					for(int i = 0; i < max; i++) {
 						EntityEnemy e = new EntityEnemy(mob.world);
-						e.x = mob.x - 10 + mob.world.rng.nextFloat() * 20;
-						e.y = mob.y + mob.world.rng.nextFloat() * 10;
+						e.x = mob.x - 10 + mob.world.getRnd().nextFloat() * 20;
+						e.y = mob.y + mob.world.getRnd().nextFloat() * 10;
 						mob.world.addEntity(e);
 					}
 				}
 				//}
 				break;
 			case KILL_MOBS:
-				mob.world.exterminateMobs();
+				//mob.world.exterminateMobs();
 				break;
 			case RESTORE:
 				mob.restore();
@@ -209,10 +194,6 @@ public class PlayerController extends MobController implements Controllable {
 					state.renderer.setScale(state.renderer.getScale() / 2);
 				}
 				break;
-			case PLACE_TILE:
-				mob.world.setTileAt(MathsUtil.floor(mob.x), MathsUtil.floor(mob.y), Tiles.CHEST.getID());
-				mob.y++;
-				break;
 			case INTERACT:
 				mob.world.getTileAt(mob.x, mob.y-1).handleInteract(mob.world, MathsUtil.floor(mob.x), MathsUtil.floor(mob.y-1), mob);
 				break;
@@ -223,32 +204,64 @@ public class PlayerController extends MobController implements Controllable {
 				//Log.message(Texture.texturesToString());
 				break;
 			default:
-				// nothing
-				break;
+				return false;
 		}
+		return true;
 	}
 	
 	@Override
-	public void handleKeyPress(int key) {
-		// nothing to see here, move along
+	public boolean handleControlRelease(Control control) {
+		return false;
 	}
 	
 	@Override
-	public void handleKeyRelease(int key) {
-		// nothing to see here, move along
+	public boolean keyDown(int keycode) {
+		return false;
 	}
-	
+
 	@Override
-	public void handleControlRelease(Control control) {
-		// nothing to see here, move along
+	public boolean keyUp(int keycode) {
+		return false;
 	}
-	
+
 	@Override
-	public void handleMouseWheelScroll(int scroll) {
-		// TODO: temporary
-		scroll /= 120;			// For some reason this is the base scroll, on my computer at least
-		tileID -= scroll;
-		tileID = MathsUtil.wrappedRem(tileID, 20);
+	public boolean keyTyped(char character) {
+		return false;
+	}
+
+	@Override
+	public boolean touchDown(int x, int y, int pointer, int button) {
+		if(button < 2) {
+			x = mouseXToWorldSpace(x);
+			y = mouseYToWorldSpace(y);
+			
+			if(button == 0)
+				game.getWorld().breakTileAt(x, y);
+			else
+				game.getWorld().setTileAt(x, y, tileID);
+		}
+		return false;
+	}
+
+	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		return false;
+	}
+
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		return false;
+	}
+
+	@Override
+	public boolean mouseMoved(int screenX, int screenY) {
+		return false;
+	}
+
+	@Override
+	public boolean scrolled(int amount) {
+		tileID = MathsUtil.wrappedRem(tileID - amount, 20);
+		return true;
 	}
 	
 }

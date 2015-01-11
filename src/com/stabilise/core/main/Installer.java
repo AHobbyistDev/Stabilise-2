@@ -20,8 +20,6 @@ public class Installer {
 	
 	/**
 	 * Runs the installer program.
-	 * 
-	 * @param args Unusued.
 	 */
 	public static void main(String[] args) {
 		IOUtil.createDirQuietly(Resources.APP_DIR);

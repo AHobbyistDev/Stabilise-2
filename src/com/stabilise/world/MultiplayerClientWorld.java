@@ -15,6 +15,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * instance of this class should be wrapped in a {@link ClientWorld}.
  * 
  * <p>TODO: Interactions with server
+ * <p>TODO: This entire class in general
  */
 @Incomplete
 public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
@@ -114,6 +115,16 @@ public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
 	@Override
 	public void blowUpTile(int x, int y, float explosionPower) {
 		
+	}
+	
+	@Override
+	public void save() {
+		// multiplayer clients don't save
+	}
+	
+	@Override
+	public void close() {
+		// just let the GC do stuff
 	}
 	
 }

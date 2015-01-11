@@ -466,9 +466,7 @@ public abstract class HostWorld extends BaseWorld {
 		return IWorld.getWorldDir(info.fileSystemName);
 	}
 	
-	/**
-	 * Saves the world.
-	 */
+	@Override
 	public void save() {
 		log.postInfo("Saving world...");
 		
@@ -484,11 +482,7 @@ public abstract class HostWorld extends BaseWorld {
 			saveRegion(r);
 	}
 	
-	/**
-	 * Closes the world by saving it as per an invocation of {@link #save()},
-	 * and then shutting down the world loader and generator. The current
-	 * thread will block until the world has been completely saved.
-	 */
+	@Override
 	public void close() {
 		save();
 		

@@ -278,41 +278,37 @@ public class WorldServerOld extends BaseWorld {
 	public void removeTileEntityAt(int x, int y) {
 		// TODO Auto-generated method stub
 	}
-
+	
 	@Override
 	public Collection<Particle> getParticles() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
 	public void breakTileAt(int x, int y) {
 		// TODO Auto-generated method stub
-		
 	}
-
+	
 	@Override
 	public void addParticle(Particle p) {
 		// TODO Auto-generated method stub
-		
 	}
-
+	
 	@Override
 	public void removeParticle(Particle p) {
 		// TODO Auto-generated method stub
-		
 	}
-
+	
 	@Override
 	public boolean isLoaded() {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
 	@Override
 	public void prepare() {
 		// TODO Auto-generated method stub
-		
 	}
 	
 }

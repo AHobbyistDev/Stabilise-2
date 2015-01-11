@@ -4,13 +4,9 @@ import java.util.concurrent.ExecutionException;
 
 import com.stabilise.core.Application;
 import com.stabilise.core.main.Stabilise;
-import com.stabilise.opengl.Font;
-import com.stabilise.opengl.FontStyle;
-import com.stabilise.opengl.Sprite;
 import com.stabilise.util.Colour;
 import com.stabilise.util.Log;
 import com.stabilise.util.concurrent.TaskThread;
-import com.stabilise.util.concurrent.TexturePreloaderTask;
 
 /**
  * A LoadingState is the state which runs as the game loads all preparatory

@@ -245,7 +245,7 @@ public class HUDRenderer implements Renderer {
 	/**
 	 * Sets the currently-displayed profiler section.
 	 * 
-	 * @param section The section number.
+	 * @param section The section number. Negative values are ignored.
 	 */
 	public void setProfilerSection(int section) {
 		if(section == 0) {

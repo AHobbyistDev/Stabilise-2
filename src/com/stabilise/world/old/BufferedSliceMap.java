@@ -1,11 +1,10 @@
-package com.stabilise.world;
+package com.stabilise.world.old;
 
 import static com.stabilise.core.Constants.BUFFER_LENGTH;
 import static com.stabilise.core.Constants.LOADED_SLICE_RADIUS;
 import static com.stabilise.world.Slice.SLICE_SIZE;
 
-import com.stabilise.world.old.GameWorld;
-import com.stabilise.world.old.SliceMapOld;
+import com.stabilise.world.Slice;
 
 /**
  * A BufferedSliceMap is a SliceMap whose slices aren't immediately unloaded when
