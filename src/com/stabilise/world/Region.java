@@ -37,6 +37,11 @@ public class Region {
 	 * purposes. */
 	public static final int REGION_SIZE_IN_TILES_SHIFT = 8;
 	
+	/** A dummy Region object to use when a Region object is required for API
+	 * reasons but isn't actually used. This region's {@link #loc} member will
+	 * return {@code false} for all {@code equals()}. */
+	public static final Region DUMMY_REGION = new Region();
+	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
@@ -107,6 +112,19 @@ public class Region {
 	
 	
 	/**
+	 * Private since this creates an ordinarily-invalid region.
+	 */
+	private Region() {
+		world = null;
+		loc = new HashPoint() {
+			public boolean equals(Object o) { return false; }
+			public boolean equals(int x, int y) { return false; }
+		};
+		offsetX = 0;
+		offsetY = 0;
+	}
+	
+	/**
 	 * Creates a new region.
 	 * 
 	 * @param world A reference to the world to which the region belongs.
@@ -129,9 +147,6 @@ public class Region {
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
 	public Region(HostWorld world, HashPoint loc) {
-		if(world == null || loc == null)
-			throw new NullPointerException();
-		
 		this.world = world;
 		this.loc = loc;
 		

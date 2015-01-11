@@ -10,10 +10,6 @@ import com.stabilise.util.nbt.NBTTagList;
 /**
  * A container is something which contains items - e.g. player inventory,
  * chest.
- * 
- * <p><i>Implementation notes</i>: subclasses should implement the abstract
- * methods such that they have constant-time performance (i.e. O(1)). If not,
- * most methods of this class will suffer heavily.
  */
 public abstract class Container implements Iterable<ItemStack> {
 	

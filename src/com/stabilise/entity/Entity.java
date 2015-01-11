@@ -2,10 +2,10 @@ package com.stabilise.entity;
 
 import static com.stabilise.util.collect.DuplicatePolicy.THROW_EXCEPTION;
 
+import com.stabilise.util.Direction;
 import com.stabilise.util.collect.InstantiationRegistry;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
-import com.stabilise.world.Direction;
 import com.stabilise.world.BaseWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.tile.Tile;

@@ -12,7 +12,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 
 
 /**
- * A WrappedWorld wraps another world and delegates methods where appropriate.
+ * A WrappedWorld wraps another world and delegates all implemented methods.
  * 
  * <p>This class is intended to allow worlds of different types have unified
  * functionality under the same wrapper.

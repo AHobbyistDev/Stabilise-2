@@ -1,4 +1,4 @@
-package com.stabilise.world;
+package com.stabilise.util;
 
 /**
  * The Direction enum allows for the representation of all four cardinal

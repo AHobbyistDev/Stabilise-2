@@ -6,11 +6,11 @@ import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.util.Direction;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Rectangle;
 import com.stabilise.util.shape.Shape;
-import com.stabilise.world.Direction;
 import com.stabilise.world.IWorld;
 
 /**

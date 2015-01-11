@@ -35,10 +35,7 @@ public class WorldData {
 		this.info = info;
 		
 		final int coreThreads = 2; // Don't want to have any threads running if we can avoid it
-		// TODO: Worldgen can oft be faster when this number is exceeded (or even reduced),
-		// though the optimal number varies based on the system. What is the
-		// best all-round compromise?
-		final int maxThreads = Math.max(coreThreads, 2 * Runtime.getRuntime().availableProcessors());
+		final int maxThreads = Math.max(coreThreads, Runtime.getRuntime().availableProcessors());
 		final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
 		
 		BoundedThreadPoolExecutor tpe = new BoundedThreadPoolExecutor(coreThreads, maxThreads,

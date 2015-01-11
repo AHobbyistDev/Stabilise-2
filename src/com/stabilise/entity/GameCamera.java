@@ -32,7 +32,7 @@ public class GameCamera extends FreeGameObject {
 	 * @param world The game world.
 	 * @param focus The entity upon which to focus the camera.
 	 */
-	public GameCamera(ClientWorld world, Entity focus) {
+	public GameCamera(ClientWorld<?> world, Entity focus) {
 		super(world);
 		setFocus(focus);
 	}

@@ -37,7 +37,7 @@ public abstract class BaseWorld extends AbstractWorld {
 	/** The total number of entities which have existed during the lifetime of
 	 * the world. When a new entity is created its assigned ID is typically
 	 * this value + 1, after which this is incremented.*/
-	public int entityCount = 0;
+	protected int entityCount = 0;
 	/** Entities queued to be added to the world at the end of the tick. */
 	private ClearOnIterateLinkedList<Entity> entitiesToAdd =
 			new ClearOnIterateLinkedList<>();
@@ -46,7 +46,7 @@ public abstract class BaseWorld extends AbstractWorld {
 	private ClearOnIterateLinkedList<Integer> entitiesToRemove =
 			new ClearOnIterateLinkedList<>();
 	/** The number of hostile mobs in the world. */
-	public int hostileMobCount = 0;
+	protected int hostileMobCount = 0;
 	
 	/** Stores tile entities for iteration and updating. */
 	protected LightweightLinkedList<TileEntity> tileEntities =
@@ -57,7 +57,7 @@ public abstract class BaseWorld extends AbstractWorld {
 			new LightweightLinkedList<>();
 	/** The total number of hitboxes which have existed during the lifetime of
 	 * the world. */
-	public int hitboxCount = 0;
+	protected int hitboxCount = 0;
 	
 	/** The x-coordinate the slice in which players initially spawn, in
 	 * slice-lengths. */
@@ -70,9 +70,9 @@ public abstract class BaseWorld extends AbstractWorld {
 	 * a reference to this world in preference to constructing a new one. */
 	public final Random rng = new Random();
 	
-	/** Use this to profile the world. */
-	public final Profiler profiler;
-	public final Log log;
+	/** Use this to profile the world's operation. */
+	protected final Profiler profiler;
+	protected final Log log;
 	
 	
 	/**

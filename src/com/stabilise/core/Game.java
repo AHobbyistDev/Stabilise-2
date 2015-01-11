@@ -11,7 +11,6 @@ import com.stabilise.screen.menu.PauseMenu;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.ClientWorld;
-import com.stabilise.world.GameWorld;
 import com.stabilise.world.SingleplayerWorld;
 
 /**

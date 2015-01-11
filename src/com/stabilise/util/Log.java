@@ -44,7 +44,7 @@ public class Log {
 	/** A cache of the untagged logging agent to save on processor time. */
 	private static final Log defaultAgent = new Log("");
 	
-	/** The date. */
+	/** The date. TODO: Would it be better to create Date objects on the fly? */
 	private static final Date DATE = new Date();
 	
 	/**

@@ -25,11 +25,11 @@ import com.stabilise.util.concurrent.TaskThread;
 import com.stabilise.util.concurrent.TaskTracker;
 import com.stabilise.util.maths.Point;
 import com.stabilise.world.ClientWorld;
-import com.stabilise.world.GameWorld;
 import com.stabilise.world.BaseWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.SingleplayerWorld;
 import com.stabilise.world.WorldInfo;
+import com.stabilise.world.old.GameWorld;
 
 /**
  * The world selection menu.

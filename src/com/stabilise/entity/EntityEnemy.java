@@ -2,8 +2,8 @@ package com.stabilise.entity;
 
 import com.stabilise.entity.controller.IdleController;
 import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.util.Direction;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
-import com.stabilise.world.Direction;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.tile.Tile;
 

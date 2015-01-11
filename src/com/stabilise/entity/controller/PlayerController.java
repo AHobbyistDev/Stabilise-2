@@ -11,9 +11,9 @@ import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
 import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
 import com.stabilise.util.maths.MathsUtil;
-import com.stabilise.world.Direction;
 import com.stabilise.world.tile.Tiles;
 
 /**

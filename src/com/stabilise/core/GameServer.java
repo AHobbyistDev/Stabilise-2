@@ -15,7 +15,7 @@ import com.stabilise.network.packet.*;
 import com.stabilise.util.AppDriver;
 import com.stabilise.util.Log;
 import com.stabilise.world.Slice;
-import com.stabilise.world.WorldServerOld;
+import com.stabilise.world.old.WorldServerOld;
 
 /**
  * The game server.

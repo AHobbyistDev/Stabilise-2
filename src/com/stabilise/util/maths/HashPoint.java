@@ -3,7 +3,7 @@ package com.stabilise.util.maths;
 /**
  * A HashPoint is an immutable point with a decently distributed precomputed
  * hashcode which may as such be used to compress two integers into a single
- * Map key both more effective and more efficiently than an ordinary Point.
+ * Map key both more effectively and more efficiently than an ordinary Point.
  * 
  * @see Point
  */

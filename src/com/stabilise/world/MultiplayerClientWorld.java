@@ -7,6 +7,7 @@ import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -15,6 +16,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * 
  * <p>TODO: Interactions with server
  */
+@Incomplete
 public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
 	
 	/** Holds slices provided by the server. */

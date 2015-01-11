@@ -1,6 +1,8 @@
-package com.stabilise.world;
+package com.stabilise.world.old;
 
 import java.util.HashMap;
+
+import com.stabilise.world.Slice;
 
 import static com.stabilise.core.Constants.LOADED_SLICE_RADIUS;
 import static com.stabilise.world.Slice.SLICE_SIZE;

@@ -1,4 +1,4 @@
-package com.stabilise.world;
+package com.stabilise.world.old;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +17,13 @@ import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.LightweightLinkedList;
 import com.stabilise.util.maths.HashPoint;
+import com.stabilise.world.HostWorld;
+import com.stabilise.world.IWorld;
+import com.stabilise.world.Region;
+import com.stabilise.world.Slice;
+import com.stabilise.world.SliceMap;
+import com.stabilise.world.WorldData;
+import com.stabilise.world.WorldInfo;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.save.WorldLoader;
 import com.stabilise.world.tile.Tile;
@@ -128,7 +135,7 @@ public class GameWorld extends HostWorld {
 		this.playerChar = character;
 		
 		EntityPlayer p = new EntityPlayer(this);
-		loadCharacterData(character);
+		//----loadCharacterData(character);
 		if(character.newToWorld) {
 			// TODO: For now I'm placing the character at (0,0) of the spawn
 			// slice. In practice, we'll need to check to see whether or not
@@ -137,7 +144,7 @@ public class GameWorld extends HostWorld {
 			character.lastX = tileCoordFromSliceCoord(info.spawnSliceX);
 			character.lastY = tileCoordFromSliceCoord(info.spawnSliceY);
 			character.newToWorld = false;
-			saveCharacterData(character);
+			//----saveCharacterData(character);
 		}
 		addEntity(p, character.lastX, character.lastY);
 		setPlayer(p);
@@ -548,7 +555,7 @@ public class GameWorld extends HostWorld {
 		// Simple implementation for just one player
 		playerChar.lastX = player.x;
 		playerChar.lastY = player.y;
-		saveCharacterData(playerChar);
+		//----saveCharacterData(playerChar);
 	}
 	
 	/**

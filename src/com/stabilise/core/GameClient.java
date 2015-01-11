@@ -9,7 +9,7 @@ import com.stabilise.network.TCPConnection;
 import com.stabilise.network.packet.*;
 import com.stabilise.util.Log;
 import com.stabilise.world.Slice;
-import com.stabilise.world.WorldClientOld;
+import com.stabilise.world.old.WorldClientOld;
 
 /**
  * The game client.

@@ -21,7 +21,7 @@ import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
- * The world.
+ * Defines methods which summarise a world implementation.
  */
 public interface IWorld {
 	

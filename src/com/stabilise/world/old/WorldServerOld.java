@@ -1,4 +1,4 @@
-package com.stabilise.world;
+package com.stabilise.world.old;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +13,11 @@ import com.stabilise.core.GameServer;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.world.BaseWorld;
+import com.stabilise.world.IWorld;
+import com.stabilise.world.Region;
+import com.stabilise.world.Slice;
+import com.stabilise.world.WorldInfo;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;

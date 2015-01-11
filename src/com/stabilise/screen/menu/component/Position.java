@@ -1,8 +1,7 @@
 package com.stabilise.screen.menu.component;
 
-import org.lwjgl.util.Point;
-
 import com.stabilise.util.Interpolation;
+import com.stabilise.util.maths.Point;
 
 /**
  * This class allows for one to define the position of a MenuItem in terms of

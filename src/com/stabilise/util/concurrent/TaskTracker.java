@@ -1,5 +1,7 @@
 package com.stabilise.util.concurrent;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * A TaskTracker is designed to provide a means of communication between
  * threads as to the progress towards completion of a task. In a typical
@@ -13,9 +15,8 @@ public class TaskTracker {
 	/** Task name. */
 	private volatile String name;
 	
-	private Object mutex = new Object();
-	private volatile int numPartsCompleted = 0;
-	private int numPartsToComplete;
+	private final AtomicInteger numPartsCompleted = new AtomicInteger(0);
+	private final int numPartsToComplete;
 	
 	
 	/**
@@ -112,9 +113,7 @@ public class TaskTracker {
 	 * #parts()}, {@link #percentComplete()} or {@link #completed()}.
 	 */
 	public void increment(int parts) {
-		synchronized(mutex) {
-			numPartsCompleted += parts;
-		}
+		numPartsCompleted.getAndAdd(parts);
 	}
 	
 	/**
@@ -132,7 +131,7 @@ public class TaskTracker {
 	 * @return The number of parts of the task completed.
 	 */
 	public int partsCompleted() {
-		return numPartsCompleted;
+		return numPartsCompleted.get();
 	}
 	
 	/**
@@ -149,7 +148,7 @@ public class TaskTracker {
 	 * (inclusive).
 	 */
 	public float percentComplete() {
-		return numPartsToComplete == 0f ? 1f : (float)numPartsCompleted / numPartsToComplete;
+		return numPartsToComplete == 0f ? 1f : (float)numPartsCompleted.get() / numPartsToComplete;
 	}
 	
 	/**
@@ -161,7 +160,7 @@ public class TaskTracker {
 	 * has not.
 	 */
 	public boolean completed() {
-		return numPartsCompleted >= numPartsToComplete;
+		return numPartsCompleted.get() >= numPartsToComplete;
 	}
 	
 	/**

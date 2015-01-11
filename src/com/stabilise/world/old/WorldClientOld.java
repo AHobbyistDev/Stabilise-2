@@ -1,4 +1,4 @@
-package com.stabilise.world;
+package com.stabilise.world.old;
 
 import java.util.Collection;
 
@@ -9,6 +9,8 @@ import com.stabilise.entity.GameCamera;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.world.BaseWorld;
+import com.stabilise.world.Slice;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntity;

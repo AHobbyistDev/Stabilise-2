@@ -8,9 +8,9 @@ import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.item.Item;
 import com.stabilise.item.ItemStack;
-import com.stabilise.world.Direction;
-import com.stabilise.world.GameWorld;
+import com.stabilise.util.Direction;
 import com.stabilise.world.IWorld;
+import com.stabilise.world.old.GameWorld;
 
 /**
  * A mob is an entity capable of acting of its own agency.

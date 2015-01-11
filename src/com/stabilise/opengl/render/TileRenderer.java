@@ -1,7 +1,7 @@
 package com.stabilise.opengl.render;
 
-import com.stabilise.world.GameWorld;
 import com.stabilise.world.Slice;
+import com.stabilise.world.old.GameWorld;
 
 /**
  * The TileRenderer class manages the rendering of the tiles that constitute a

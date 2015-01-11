@@ -12,10 +12,10 @@ import com.stabilise.opengl.render.model.ModelPlayer;
 import com.stabilise.util.Colour;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.ClientWorld;
-import com.stabilise.world.GameWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.SingleplayerWorld;
 import com.stabilise.world.Slice;
+import com.stabilise.world.old.GameWorld;
 
 /**
  * The WorldRenderer class handles the rendering of a world and its
