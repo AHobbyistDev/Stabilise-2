@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.TextInputListener;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -11,6 +12,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -26,6 +29,7 @@ public class GDXTestState implements State, InputProcessor {
 	private BitmapFont font12;
 	private Texture texture;
 	private Sprite sprite;
+	private ShapeRenderer shapes;
 	
 	private Viewport viewport;
 	
@@ -53,6 +57,8 @@ public class GDXTestState implements State, InputProcessor {
 		
 		texture = new Texture(Gdx.files.absolute("C:/Users/Adam/AppData/Roaming/.stabilise/res/img/loading.png"));
 		batch = new SpriteBatch(256);
+		
+		shapes = new ShapeRenderer();
 		
 		sprite = new Sprite(texture);
 		
@@ -87,6 +93,7 @@ public class GDXTestState implements State, InputProcessor {
 		font12.dispose();
 		texture.dispose();
 		batch.dispose();
+		shapes.dispose();
 		
 		//music.dispose();
 	}
@@ -106,6 +113,7 @@ public class GDXTestState implements State, InputProcessor {
 		//System.out.println("Resized to " + width + "x" + height);
 		viewport.update(width, height);
 		batch.setProjectionMatrix(viewport.getCamera().combined);
+		shapes.setProjectionMatrix(viewport.getCamera().combined);
 		
 		sprite.setPosition(width/2 - sprite.getWidth()/2, height/2 - sprite.getHeight()/2);
 	}
@@ -119,6 +127,10 @@ public class GDXTestState implements State, InputProcessor {
 	public void render(float delta) {
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		
+		shapes.begin(ShapeType.Filled);
+		shapes.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW);
+		shapes.end();
 		
 		batch.begin();
 		sprite.draw(batch);

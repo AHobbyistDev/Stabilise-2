@@ -1,5 +1,9 @@
 package com.stabilise.opengl.render;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.stabilise.core.Application;
 import com.stabilise.core.Game;
 import com.stabilise.entity.*;
@@ -9,13 +13,11 @@ import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.opengl.render.model.ModelPlayer;
-import com.stabilise.util.Colour;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.ClientWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.SingleplayerWorld;
 import com.stabilise.world.Slice;
-import com.stabilise.world.old.GameWorld;
 
 /**
  * The WorldRenderer class handles the rendering of a world and its
@@ -40,7 +42,7 @@ public class WorldRenderer implements Renderer {
 	float scale = 48;
 	
 	/** Holds a reference to the world. */
-	public final IWorld world;
+	public final ClientWorld<?> world;
 	
 	/** The tile renderer. */
 	public TileRenderer tileRenderer;
@@ -53,19 +55,16 @@ public class WorldRenderer implements Renderer {
 	/** The number of slices which may fit vertically on the screen. */
 	int slicesVertical;
 	
-	/** The display font. */
-	Font font1;
+	Viewport viewport;
 	
-	/** The sprite for generic enemies. TODO: Temporary */
-	Sprite mobSprite;
-	/** The sprite for fireballs. */
-	Sprite fireballSprite;
-	/** The sprite for explosions. */
-	Sprite explosionSprite;
-	/** Sprites for items */
-	SpriteSheet itemSprites;
-	/** Sprites for particles. */
-	SpriteSheet particleSprites;
+	BitmapFont font;
+	
+	// Textures for different game objects
+	Texture texEnemy;
+	Texture texFireball;
+	Texture texExplosion;
+	Texture texItems;
+	Texture texParticles;
 	
 	/** The player model. */
 	ModelPlayer personModel;
@@ -91,7 +90,7 @@ public class WorldRenderer implements Renderer {
 	 * @param game The game.
 	 * @param world The game world.
 	 */
-	public WorldRenderer(Game game, IWorld world) {
+	public WorldRenderer(Game game, ClientWorld<?> world) {
 		super();
 		
 		this.world = world;
@@ -100,6 +99,66 @@ public class WorldRenderer implements Renderer {
 		hudRenderer = new HUDRenderer(game, this);
 		
 		loadResources();
+	}
+	
+	@Override
+	public void loadResources() {
+		viewport = new ScreenViewport();
+		
+		font = new Font("sheets/font1");
+		
+		personModel = new ModelPlayer();
+		
+		texEnemy = new Sprite("enemy");
+		texEnemy.setPivot(texEnemy.getTextureWidth() / 2, 0);
+		texEnemy.filter(Texture.NEAREST);
+		
+		//arrowSprite = new Sprite("arrow");
+		//arrowSprite.setPivot(arrowSprite.getTextureWidth() * 3 / 4, arrowSprite.getTextureHeight() / 2);
+		//arrowSprite.filter(Texture.NEAREST);
+		
+		texFireball = new Sprite("fireball");
+		texFireball.setPivot(texFireball.getTextureWidth(), texFireball.getTextureHeight() / 2);
+		texFireball.filter(Texture.NEAREST);
+		
+		texExplosion = new Sprite("explosion");
+		texExplosion.setPivot(texExplosion.getTextureWidth()/2, texExplosion.getTextureHeight()/2);
+		texExplosion.filter(Texture.LINEAR);
+		
+		texItems = new SpriteSheet("sheets/items", 8, 8);
+		texItems.filter(Texture.NEAREST);
+		
+		texParticles = new SpriteSheet("sheets/particles", 8, 8);
+		texParticles.filter(Texture.NEAREST);
+		
+		//background = new Rectangle(screen.getWidth(), screen.getHeight());
+		background.fill(new Colour(0x92D1E4));
+		//background.colourVertices(new Colour(0xFFFFFF), new Colour(0xFF00FF), new Colour(0x00FFFF), new Colour(0xFFFF00));
+		//background.gradientTopToBottom(new Colour(0x000000), new Colour(0xC9300E));
+		
+		hudRenderer.loadResources();
+		
+		setScale(scale);
+	}
+
+	@Override
+	public void unloadResources() {
+		font.destroy();
+		personModel.destroy();
+		texEnemy.destroy();
+		//arrowSprite.destroy();
+		texFireball.destroy();
+		texExplosion.destroy();
+		texItems.destroy();
+		texParticles.destroy();
+		background.destroy();
+		tileRenderer.unloadResources();
+		hudRenderer.unloadResources();
+	}
+	
+	@Override
+	public void resize(int width, int height) {
+		
 	}
 	
 	@Override
@@ -186,15 +245,15 @@ public class WorldRenderer implements Renderer {
 	public void renderBigFireball(EntityBigFireball e) {
 		// TODO: for now the fireball and big fireball code is the same, and the repetition is hence inelegant
 		
-		fireballSprite.x = (float) (e.x * scale + offsetX);
-		fireballSprite.y = (float) (e.y * scale + offsetY);
-		fireballSprite.rotation = (float) Math.toDegrees(((EntityProjectile)e).rotation);
-		if(e.facingRight && fireballSprite.getFlipped())
-			fireballSprite.setPivot(fireballSprite.getTextureWidth() * 3 / 4, fireballSprite.getTextureHeight() / 2);
-		else if(!e.facingRight && !fireballSprite.getFlipped())
-			fireballSprite.setPivot(fireballSprite.getTextureWidth() * 1 / 4, fireballSprite.getTextureHeight() / 2);
-		fireballSprite.setFlipped(!e.facingRight);
-		fireballSprite.draw();
+		texFireball.x = (float) (e.x * scale + offsetX);
+		texFireball.y = (float) (e.y * scale + offsetY);
+		texFireball.rotation = (float) Math.toDegrees(((EntityProjectile)e).rotation);
+		if(e.facingRight && texFireball.getFlipped())
+			texFireball.setPivot(texFireball.getTextureWidth() * 3 / 4, texFireball.getTextureHeight() / 2);
+		else if(!e.facingRight && !texFireball.getFlipped())
+			texFireball.setPivot(texFireball.getTextureWidth() * 1 / 4, texFireball.getTextureHeight() / 2);
+		texFireball.setFlipped(!e.facingRight);
+		texFireball.draw();
 	}
 	
 	/**
@@ -205,19 +264,19 @@ public class WorldRenderer implements Renderer {
 	public void renderEnemy(EntityEnemy e) {
 		if(e.hasTint) {
 			if(e.dead) {
-				mobSprite.tint(Colour.RED, e.tintStrength);
+				texEnemy.tint(Colour.RED, e.tintStrength);
 				//mobSprite.setAlpha(m.tintStrength);
 			} else {
-				mobSprite.tint(Colour.WHITE, e.tintStrength);
+				texEnemy.tint(Colour.WHITE, e.tintStrength);
 			}
 		} else {
-			mobSprite.removeTint();
+			texEnemy.removeTint();
 			//mobSprite.setAlpha(1.0f);
 		}
-		mobSprite.x = (float) (e.x * scale + offsetX);
-		mobSprite.y = (float) (e.y * scale + offsetY);
-		mobSprite.setFlipped(!e.facingRight);
-		mobSprite.draw();
+		texEnemy.x = (float) (e.x * scale + offsetX);
+		texEnemy.y = (float) (e.y * scale + offsetY);
+		texEnemy.setFlipped(!e.facingRight);
+		texEnemy.draw();
 	}
 	
 	/**
@@ -228,15 +287,15 @@ public class WorldRenderer implements Renderer {
 	public void renderFireball(EntityFireball e) {
 		// TODO: for now the fireball and big fireball code is the same, and the repetition is hence inelegant
 		
-		fireballSprite.x = (float) (e.x * scale + offsetX);
-		fireballSprite.y = (float) (e.y * scale + offsetY);
-		fireballSprite.rotation = (float) Math.toDegrees(((EntityProjectile)e).rotation);
-		if(e.facingRight && fireballSprite.getFlipped())
-			fireballSprite.setPivot(fireballSprite.getTextureWidth() * 3 / 4, fireballSprite.getTextureHeight() / 2);
-		else if(!e.facingRight && !fireballSprite.getFlipped())
-			fireballSprite.setPivot(fireballSprite.getTextureWidth() * 1 / 4, fireballSprite.getTextureHeight() / 2);
-		fireballSprite.setFlipped(!e.facingRight);
-		fireballSprite.draw();
+		texFireball.x = (float) (e.x * scale + offsetX);
+		texFireball.y = (float) (e.y * scale + offsetY);
+		texFireball.rotation = (float) Math.toDegrees(((EntityProjectile)e).rotation);
+		if(e.facingRight && texFireball.getFlipped())
+			texFireball.setPivot(texFireball.getTextureWidth() * 3 / 4, texFireball.getTextureHeight() / 2);
+		else if(!e.facingRight && !texFireball.getFlipped())
+			texFireball.setPivot(texFireball.getTextureWidth() * 1 / 4, texFireball.getTextureHeight() / 2);
+		texFireball.setFlipped(!e.facingRight);
+		texFireball.draw();
 	}
 	
 	/**
@@ -271,7 +330,7 @@ public class WorldRenderer implements Renderer {
 	 * @param p The damage indicator particle.
 	 */
 	public void renderDamageIndicator(ParticleDamageIndicator p) {
-		font1.drawLine(p.text, (int)(p.x * scale) + offsetX, (int)(p.y * scale) + offsetY, p.getFontStyle());
+		font.drawLine(p.text, (int)(p.x * scale) + offsetX, (int)(p.y * scale) + offsetY, p.getFontStyle());
 	}
 	
 	/**
@@ -280,11 +339,11 @@ public class WorldRenderer implements Renderer {
 	 * @param p The explosion particle.
 	 */
 	public void renderExplosion(ParticleExplosion p) {
-		explosionSprite.tint(p.colour);
-		explosionSprite.setAlpha(p.alpha);
+		texExplosion.tint(p.colour);
+		texExplosion.setAlpha(p.alpha);
 		int size = (int)(p.radius * scale);
-		explosionSprite.setScaledDimensions(size, size);
-		explosionSprite.drawSprite((int)(p.x * scale + offsetX), (int)(p.y * scale + offsetY));
+		texExplosion.setScaledDimensions(size, size);
+		texExplosion.drawSprite((int)(p.x * scale + offsetX), (int)(p.y * scale + offsetY));
 	}
 	
 	/**
@@ -293,9 +352,9 @@ public class WorldRenderer implements Renderer {
 	 * @param p The flame particle.
 	 */
 	public void renderFlame(ParticleFlame p) {
-		particleSprites.setAlpha(p.opacity);
-		particleSprites.drawSprite(2, 0, (int)(p.x * scale + offsetX - particleSprites.getScaledSpriteWidth() / 2), (int)(p.y * scale + offsetY));
-		particleSprites.setAlpha(1.0f);
+		texParticles.setAlpha(p.opacity);
+		texParticles.drawSprite(2, 0, (int)(p.x * scale + offsetX - texParticles.getScaledSpriteWidth() / 2), (int)(p.y * scale + offsetY));
+		texParticles.setAlpha(1.0f);
 	}
 	
 	/**
@@ -304,7 +363,7 @@ public class WorldRenderer implements Renderer {
 	 * @param p The smoke particle.
 	 */
 	public void renderSmoke(ParticleSmoke p) {
-		particleSprites.drawSprite(0, 0, (int)(p.x * scale + offsetX - particleSprites.getScaledSpriteWidth() / 2), (int)(p.y * scale + offsetY));
+		texParticles.drawSprite(0, 0, (int)(p.x * scale + offsetX - texParticles.getScaledSpriteWidth() / 2), (int)(p.y * scale + offsetY));
 	}
 	
 	/**
@@ -328,11 +387,11 @@ public class WorldRenderer implements Renderer {
 		this.scale = scale;
 		
 		personModel.rescale(scale);
-		mobSprite.setScale(scale / mobSprite.getTextureWidth());
+		texEnemy.setScale(scale / texEnemy.getTextureWidth());
 		//arrowSprite.setScale(scale / arrowSprite.getTextureWidth());
-		fireballSprite.setScale(scale / fireballSprite.getTextureWidth());
-		itemSprites.setScale(scale / itemSprites.getSpriteWidth());
-		particleSprites.setScale(scale * 0.25f / particleSprites.getSpriteWidth());
+		texFireball.setScale(scale / texFireball.getTextureWidth());
+		texItems.setScale(scale / texItems.getSpriteWidth());
+		texParticles.setScale(scale * 0.25f / texParticles.getSpriteWidth());
 		tileRenderer.tiles.setScale(scale / tileRenderer.tiles.getSpriteWidth());
 		
 		recalculateTiles();
@@ -347,58 +406,5 @@ public class WorldRenderer implements Renderer {
 		slicesHorizontal = (int)Math.ceil((float)tilesHorizontal / Slice.SLICE_SIZE);
 		slicesVertical = (int)Math.ceil((float)tilesVertical / Slice.SLICE_SIZE);
 	}
-
-	@Override
-	public void loadResources() {
-		font1 = new Font("sheets/font1");
-		
-		personModel = new ModelPlayer();
-		
-		mobSprite = new Sprite("enemy");
-		mobSprite.setPivot(mobSprite.getTextureWidth() / 2, 0);
-		mobSprite.filter(Texture.NEAREST);
-		
-		//arrowSprite = new Sprite("arrow");
-		//arrowSprite.setPivot(arrowSprite.getTextureWidth() * 3 / 4, arrowSprite.getTextureHeight() / 2);
-		//arrowSprite.filter(Texture.NEAREST);
-		
-		fireballSprite = new Sprite("fireball");
-		fireballSprite.setPivot(fireballSprite.getTextureWidth(), fireballSprite.getTextureHeight() / 2);
-		fireballSprite.filter(Texture.NEAREST);
-		
-		explosionSprite = new Sprite("explosion");
-		explosionSprite.setPivot(explosionSprite.getTextureWidth()/2, explosionSprite.getTextureHeight()/2);
-		explosionSprite.filter(Texture.LINEAR);
-		
-		itemSprites = new SpriteSheet("sheets/items", 8, 8);
-		itemSprites.filter(Texture.NEAREST);
-		
-		particleSprites = new SpriteSheet("sheets/particles", 8, 8);
-		particleSprites.filter(Texture.NEAREST);
-		
-		//background = new Rectangle(screen.getWidth(), screen.getHeight());
-		background.fill(new Colour(0x92D1E4));
-		//background.colourVertices(new Colour(0xFFFFFF), new Colour(0xFF00FF), new Colour(0x00FFFF), new Colour(0xFFFF00));
-		//background.gradientTopToBottom(new Colour(0x000000), new Colour(0xC9300E));
-		
-		hudRenderer.loadResources();
-		
-		setScale(scale);
-	}
-
-	@Override
-	public void unloadResources() {
-		font1.destroy();
-		personModel.destroy();
-		mobSprite.destroy();
-		//arrowSprite.destroy();
-		fireballSprite.destroy();
-		explosionSprite.destroy();
-		itemSprites.destroy();
-		particleSprites.destroy();
-		background.destroy();
-		tileRenderer.unloadResources();
-		hudRenderer.unloadResources();
-	}
-
+	
 }

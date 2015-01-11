@@ -37,7 +37,7 @@ public class AnimationController {
 		float x = func.transform(ticks/maxTicks);
 		for(int i = 0; i < model.bones.length; i++) {
 			Bone b = model.bones[i];
-			b.setRotation(Interpolation.interpolateLinear(from[i].rotation, to[i].rotation, x));
+			b.setRotation(Interpolation.lerp(from[i].rotation, to[i].rotation, x));
 			b.flush();
 		}
 	}

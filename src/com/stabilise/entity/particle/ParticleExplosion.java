@@ -1,7 +1,8 @@
 package com.stabilise.entity.particle;
 
+import com.badlogic.gdx.graphics.Color;
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.util.Colour;
+import com.stabilise.util.Interpolation;
 import com.stabilise.world.IWorld;
 
 /**
@@ -17,16 +18,16 @@ public class ParticleExplosion extends Particle {
 	private static final int DESPAWN_TICKS = 10;
 	
 	/** The initial colour of the explosion. */
-	private static final Colour COLOUR_INIT = new Colour(0xFFFFFFFF);
+	private static final Color COLOUR_INIT = new Color(0xFFFFFFFF);
 	/** The final colour of the explosion. */
-	private static final Colour COLOUR_FINAL = new Colour(0xAAFFA200);
+	private static final Color COLOUR_FINAL = new Color(0xAAFFA200);
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
 	/** The colour of the explosion. */
-	public Colour colour;
+	public Color colour;
 	/** The alpha of the explosion. */
 	public float alpha;
 	
@@ -52,8 +53,8 @@ public class ParticleExplosion extends Particle {
 		radiusInit = initialRadius;
 		radiusFinal = finalRadius;
 		
-		colour = new Colour(COLOUR_INIT);
-		alpha = COLOUR_INIT.getAlpha();
+		colour = new Color(COLOUR_INIT);
+		alpha = COLOUR_INIT.a;
 		radius = radiusInit;
 	}
 	
@@ -63,13 +64,13 @@ public class ParticleExplosion extends Particle {
 		
 		float ratio = (float)age/DESPAWN_TICKS;
 		
-		colour.setRed(COLOUR_FINAL.getRed() * ratio + COLOUR_INIT.getRed() * (1 - ratio));
-		colour.setGreen(COLOUR_FINAL.getGreen() * ratio + COLOUR_INIT.getGreen() * (1 - ratio));
-		colour.setBlue(COLOUR_FINAL.getBlue() * ratio + COLOUR_INIT.getBlue() * (1 - ratio));
+		colour.r = Interpolation.lerp(COLOUR_INIT.r, COLOUR_FINAL.r, ratio);
+		colour.g = Interpolation.lerp(COLOUR_INIT.g, COLOUR_FINAL.g, ratio);
+		colour.b = Interpolation.lerp(COLOUR_INIT.b, COLOUR_FINAL.b, ratio);
 		
-		alpha = COLOUR_FINAL.getAlpha() * ratio + COLOUR_INIT.getAlpha() * (1 - ratio);
+		alpha = Interpolation.lerp(COLOUR_INIT.a, COLOUR_FINAL.a, ratio);
 		
-		radius = radiusFinal * ratio + radiusInit * (1 - ratio);
+		radius = colour.r = Interpolation.lerp(radiusInit, radiusFinal, ratio);
 		
 		if(age == DESPAWN_TICKS)
 			destroy();

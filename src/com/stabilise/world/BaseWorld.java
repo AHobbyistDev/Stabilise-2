@@ -35,8 +35,8 @@ public abstract class BaseWorld extends AbstractWorld {
 	 * allow for consistent iteration. */
 	protected Map<Integer, Entity> entities = new LinkedHashMap<>(64);
 	/** The total number of entities which have existed during the lifetime of
-	 * the world. When a new entity is created its assigned ID is typically
-	 * this value + 1, after which this is incremented.*/
+	 * the world. When a new entity is created this is incremented and set as
+	 * its ID. */
 	protected int entityCount = 0;
 	/** Entities queued to be added to the world at the end of the tick. */
 	private ClearOnIterateLinkedList<Entity> entitiesToAdd =

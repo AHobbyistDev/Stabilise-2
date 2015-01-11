@@ -375,10 +375,7 @@ public class IOUtil {
 	 * @throws RuntimeException if the original file was not deleted.
 	 */
 	public static void safelySaveFile2(File file) {
-		if(file.exists())
-			file.delete();
-		
-		if(file.exists())
+		if(file.exists() && !file.delete())
 			// A checked IOException may be annoying, so use an unchecked RuntimeException
 			//throw new IOException("Failed to delete " + file);
 			throw new RuntimeException("Failed to delete " + file);

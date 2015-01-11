@@ -1,5 +1,7 @@
 package com.stabilise.opengl.render.model;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
 /**
  * A model is a rig or set of animations for a game object, such as a player.
  */
@@ -23,14 +25,15 @@ public abstract class Model {
 	/**
 	 * Renders the model.
 	 * 
+	 * @param batch The batch with which to render; already started.
 	 * @param x The x-coordinate at which to render the model, in pixels.
 	 * @param y The y-coordinate at which to render the model, in pixels.
 	 */
-	public abstract void render(int x, int y);
+	public abstract void render(SpriteBatch batch, int x, int y);
 	
 	/**
 	 * Destroys the model and unloads any resources it is holding.
 	 */
-	public abstract void destroy();
+	public abstract void dispose();
 	
 }

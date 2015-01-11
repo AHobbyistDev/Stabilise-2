@@ -25,7 +25,7 @@ public interface State {
 	 * Called when the state is stopped and disposed, and before {@link
 	 * #start()} is invoked on the new state, if one has been set.
 	 * 
-	 * <p>Between this and {@link #dispose()}, and used resources should be
+	 * <p>Between this and {@link #dispose()}, used resources should be
 	 * disposed of an any necessary cleanups should be performed here, as to
 	 * prevent any memory leaks. This operation should ideally be a swift
 	 * one.
@@ -44,7 +44,7 @@ public interface State {
 	 * Called when the state is stopped and disposed, and after {@link
 	 * #start()} is invoked on the new state, if one has been set.
 	 * 
-	 * <p>Between this and {@link #predispose()}, and used resources should be
+	 * <p>Between this and {@link #predispose()}, used resources should be
 	 * disposed of an any necessary cleanups should be performed here, as to
 	 * prevent any memory leaks. This operation should ideally be a swift
 	 * one.

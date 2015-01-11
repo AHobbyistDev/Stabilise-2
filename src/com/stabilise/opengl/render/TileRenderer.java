@@ -1,7 +1,8 @@
 package com.stabilise.opengl.render;
 
+import com.stabilise.util.maths.Point;
+import com.stabilise.world.ClientWorld;
 import com.stabilise.world.Slice;
-import com.stabilise.world.old.GameWorld;
 
 /**
  * The TileRenderer class manages the rendering of the tiles that constitute a
@@ -20,7 +21,7 @@ public class TileRenderer implements Renderer {
 	public SpriteSheet tiles;
 	
 	/** A reference to the world. */
-	public GameWorld world;
+	public ClientWorld<?> world;
 	
 	/** The sprite coordinates for each tile. */
 	private Point[] tileCoords;
@@ -91,7 +92,7 @@ public class TileRenderer implements Renderer {
 				int id = slice.getTileAt(c, r).getID() - 1;		// Offset of -1 since air has no texture
 				
 				if(id != -1) {
-					tiles.drawSprite(tileCoords[id].getX(), tileCoords[id].getY(),
+					tiles.drawSprite(tileCoords[id].x, tileCoords[id].y,
 							(int)tileX,
 							(int)tileY);
 				}

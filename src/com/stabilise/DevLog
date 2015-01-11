@@ -223,3 +223,9 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Projection precomputation for shapes in util.shape is now an optional optimisation
 14/12/14
 	- Ported to libGDX. Everything is broken!
+07/01/14	
+	- Added InstantiationRegistry to create entities, tile entities, packets, etc.
+10/01/14
+	- Porting World architecture over to something more extensive and usable for old world types
+
+	

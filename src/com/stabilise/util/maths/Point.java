@@ -25,6 +25,14 @@ public class Point {
 	}
 	
 	/**
+	 * Creates a new point with components of those of the specified point.
+	 */
+	public Point(Point p) {
+		this.x = p.x;
+		this.y = p.y;
+	}
+	
+	/**
 	 * Sets the components of this point.
 	 * 
 	 * @return This point, for chaining operations.
@@ -32,6 +40,17 @@ public class Point {
 	public Point set(int x, int y) {
 		this.x = x;
 		this.y = y;
+		return this;
+	}
+	
+	/**
+	 * Sets the components of this point to those of the specified point.
+	 * 
+	 * @return This point, for chaining operations.
+	 */
+	public Point set(Point p) {
+		this.x = p.x;
+		this.y = p.y;
 		return this;
 	}
 	

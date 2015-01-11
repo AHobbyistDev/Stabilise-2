@@ -159,8 +159,8 @@ public class InterpolationController extends ItemController {
 		@Override
 		protected void interpolate() {
 			float t = func.transform(ticks/maxTicks);
-			item.x = (int)Interpolation.interpolateLinear(from.getX(), to.getX(), t);
-			item.y = (int)Interpolation.interpolateLinear(from.getY(), to.getY(), t);
+			item.x = (int)Interpolation.lerp(from.getX(), to.getX(), t);
+			item.y = (int)Interpolation.lerp(from.getY(), to.getY(), t);
 		}
 		
 		/**

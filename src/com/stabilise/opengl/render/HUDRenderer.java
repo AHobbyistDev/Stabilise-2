@@ -6,20 +6,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.lwjgl.util.Point;
 
 import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Game;
 import com.stabilise.entity.EntityPerson;
-import com.stabilise.opengl.Font;
-import com.stabilise.opengl.FontStyle;
-import com.stabilise.opengl.Rectangle;
-import com.stabilise.opengl.Sprite;
-import com.stabilise.opengl.Texture;
 import com.stabilise.util.Colour;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.StringUtil;
+import com.stabilise.util.maths.Point;
 
 /**
  * Renders the in-game HUD.
@@ -292,21 +287,21 @@ public class HUDRenderer implements Renderer {
 	private void resize() {
 		//statusOrigin.setLocation(screen.getCentreX() - STATUS_PANEL_WIDTH / 2, STATUS_PANEL_VERTICAL_OFFSET);
 		
-		statusPanel.x = statusOrigin.getX();
-		statusPanel.y = statusOrigin.getY();
+		statusPanel.x = statusOrigin.x;
+		statusPanel.y = statusOrigin.y;
 		
-		healthBar.x = statusOrigin.getX() + HEALTH_BAR_X;
-		healthBar.y = statusOrigin.getY() + HEALTH_BAR_Y;
+		healthBar.x = statusOrigin.x + HEALTH_BAR_X;
+		healthBar.y = statusOrigin.y + HEALTH_BAR_Y;
 		healthBar.setWidth(HEALTH_BAR_WIDTH);
 		healthBar.setHeight(HEALTH_BAR_HEIGHT);
 		
-		staminaBar.x = statusOrigin.getX() + STAMINA_BAR_X;
-		staminaBar.y = statusOrigin.getY() + STAMINA_BAR_Y;
+		staminaBar.x = statusOrigin.x + STAMINA_BAR_X;
+		staminaBar.y = statusOrigin.y + STAMINA_BAR_Y;
 		staminaBar.setWidth(STAMINA_BAR_WIDTH);
 		staminaBar.setHeight(STAMINA_BAR_HEIGHT);
 		
-		manaBar.x = statusOrigin.getX() + MANA_BAR_X;
-		manaBar.y = statusOrigin.getY() + MANA_BAR_Y;
+		manaBar.x = statusOrigin.x + MANA_BAR_X;
+		manaBar.y = statusOrigin.y + MANA_BAR_Y;
 		manaBar.setWidth(MANA_BAR_WIDTH);
 		manaBar.setHeight(MANA_BAR_HEIGHT);
 	}

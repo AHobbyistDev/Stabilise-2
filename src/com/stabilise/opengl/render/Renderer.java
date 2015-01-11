@@ -6,6 +6,24 @@ package com.stabilise.opengl.render;
 public interface Renderer {
 	
 	/**
+	 * Loads the renderer's resources.
+	 */
+	void loadResources();
+	
+	/**
+	 * Unloads the renderer's resources.
+	 */
+	void unloadResources();
+	
+	/**
+	 * Invoked when the screen is resized.
+	 * 
+	 * @param width The width of the screen, in pixels.
+	 * @param height The height of the screen, in pixels.
+	 */
+	void resize(int width, int height);
+	
+	/**
 	 * Updates the renderer.
 	 */
 	void update();
@@ -15,14 +33,4 @@ public interface Renderer {
 	 */
 	void render();
 	
-	/**
-	 * Loads the renderer's resources.
-	 */
-	void loadResources();
-	
-	/**
-	 * Unloads the renderer's resources.
-	 */
-	void unloadResources();
-
 }

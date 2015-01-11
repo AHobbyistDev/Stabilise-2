@@ -10,7 +10,7 @@ import com.stabilise.util.maths.MathsUtil;
  * values {@code start} and {@code end} by performing a linear interpolation
  * at a point {@code x}, which is transformed using a transformation function
  * {@code f(x)}. That is, the interpolation is performed as if by
- * {@link #interpolateLinear(float, float, float)
+ * {@link #lerp(float, float, float)
  * interpolateLinear(start, end, f(x))}.
  * 
  * <p>There are three typical modes of interpolation, {@link EaseIn ease in},
@@ -452,7 +452,7 @@ public abstract class Interpolation {
 	 * undefined results for {@code x} outside the range {@code 0 <= x <= 1}.
 	 * 
 	 * <p>The returned value is equivalent to:
-	 * <pre>{@link #interpolateLinear(float, float, float)
+	 * <pre>{@link #lerp(float, float, float)
 	 * interpolateLinear(start, end, transform(x))}</pre>
 	 * 
 	 * @param start The start value (i.e. when {@code x == 0}).
@@ -462,7 +462,7 @@ public abstract class Interpolation {
 	 * @return The interpolated value.
 	 */
 	public final float apply(float start, float end, float x) {
-		return interpolateLinear(start, end, transform(x));
+		return lerp(start, end, transform(x));
 	}
 	
 	//--------------------==========--------------------
@@ -480,7 +480,7 @@ public abstract class Interpolation {
 	 * 
 	 * @return A value interpolated between {@code start} and {@code end}.
 	 */
-	public static float interpolateLinear(float start, float end, float x) {
+	public static float lerp(float start, float end, float x) {
 		return start + (end - start) * x;
 	}
 	
@@ -929,7 +929,7 @@ public abstract class Interpolation {
 		 * @see {@link Interpolation.EaseIn} for implementation details.
 		 */
 		public final float easeIn(float start, float end, float x) {
-			return interpolateLinear(start, end, easeInTransform(x));
+			return lerp(start, end, easeInTransform(x));
 		}
 		
 		/**
@@ -957,7 +957,7 @@ public abstract class Interpolation {
 		 * @see {@link Interpolation.EaseOut} for implementation details.
 		 */
 		public final float easeOut(float start, float end, float x) {
-			return interpolateLinear(start, end, easeOutTransform(x));
+			return lerp(start, end, easeOutTransform(x));
 		}
 		
 		/**
@@ -985,7 +985,7 @@ public abstract class Interpolation {
 		 * {@link Interpolation.EaseInOut} for implementation details.
 		 */
 		public final float easeInOut(float start, float end, float x) {
-			return interpolateLinear(start, end, easeInOutTransform(x));
+			return lerp(start, end, easeInOutTransform(x));
 		}
 		
 		/**

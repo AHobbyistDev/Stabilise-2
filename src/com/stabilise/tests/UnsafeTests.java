@@ -18,17 +18,50 @@ public class UnsafeTests {
 		}
 	}
 	
-	public UnsafeTests() {
-		// TODO Auto-generated constructor stub
+	static class HugeIntArray {
+		
+		final long INT_BYTES = 4;
+		
+		final long size;
+		final long arrAddress;
+		
+		HugeIntArray(long size) {
+			this.size = size;
+			arrAddress = unsafe.allocateMemory(size * INT_BYTES);
+			unsafe.setMemory(arrAddress, size * INT_BYTES, (byte)0); // initialise all values to 0
+		}
+		
+		void set(long index, int value) {
+			unsafe.putInt(memIndex(index), value);
+		}
+		
+		int get(long index) {
+			return unsafe.getInt(memIndex(index));
+		}
+		
+		long memIndex(long index) {
+			return arrAddress + index * INT_BYTES;
+		}
+		
+		void deallocate() {
+			unsafe.freeMemory(arrAddress);
+		}
+		
 	}
 	
 	public static void main(String[] args) {
-		long value = 12345;
-		byte size = 8; // 8 bytes
-		long allocateMemory = unsafe.allocateMemory(size);
-		unsafe.putLong(allocateMemory, value);
-		long readValue = unsafe.getLong(allocateMemory);
-		System.out.println("read value : " + readValue);
+		HugeIntArray arr = new HugeIntArray(Integer.MAX_VALUE);
+		System.out.println(arr.get(1));
+		arr.set(1, 123456789);
+		System.out.println(arr.get(1));
+		
+		try {
+			Thread.sleep(2L);
+		} catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		arr.deallocate();
 	}
 	
 }

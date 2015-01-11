@@ -1,5 +1,13 @@
 package com.stabilise.opengl.render.model;
 
+import java.io.File;
+
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.stabilise.core.Resources;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPerson;
 import com.stabilise.util.maths.Point;
@@ -25,8 +33,9 @@ public class ModelPlayer extends Model {
 	public static final Point DIMENSIONS = new Point(1, 2);
 	
 	/** The template dimensions for each sprite. */
-	private static final Point TEMPLATE_DIMENSIONS = new Point(256,256);	//256,256>128,128 > 64,64 > 32,32
+	private static final Point TEMPLATE_DIMENSIONS = new Point(256,256);
 	/** The number of pixels per tile, using the template dimensions. */
+	@SuppressWarnings("unused")
 	private static final int PIXELS_PER_TILE = 55;
 	/** The origin point for each sprite. */
 	private static final Point SPRITE_ORIGIN = new Point(125,56);		//58,23
@@ -81,10 +90,16 @@ public class ModelPlayer extends Model {
 	//--------------------==========--------------------
 	
 	/** The player model's spritesheet. */
-	private SpriteSheet sprites;
+	private final Texture texture;
+	/** Current cell being displayed. */
+	private final TextureRegion cell;
 	
-	/** The amount by which to offset each draw of a sprite. */
-	private Point offset;
+	private final int cellWidth, cellHeight;
+	
+	/** The amount by which to offset each draw of a sprite */
+	private final Point offset;
+	/** The effective transformational origin/pivot. */
+	private final Point pivot;
 	
 	/** Whether or not the model is flipped. */
 	private boolean flipped = false;
@@ -94,19 +109,24 @@ public class ModelPlayer extends Model {
 	 * Creates a new player model.
 	 */
 	public ModelPlayer() {
-		sprites = new SpriteSheet("sheets/player", NUM_COLS, NUM_ROWS);
-		sprites.filter(Texture.LINEAR);
-		float scale = (float)sprites.getSpriteWidth() / TEMPLATE_DIMENSIONS.getX();
+		texture = new Texture(new FileHandle(new File(Resources.IMAGE_DIR, "sheets/player")));
+		cell = new TextureRegion(texture);
+		
+		cellWidth = texture.getWidth() / NUM_COLS;
+		cellHeight = texture.getHeight() / NUM_ROWS;
+		
+		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		float scale = texture.getWidth() / TEMPLATE_DIMENSIONS.x;
 		offset = new Point(
-				(int)(SPRITE_ORIGIN.getX() * scale),
-				(int)(SPRITE_ORIGIN.getY() * scale)
+				(int)(SPRITE_ORIGIN.x * scale),
+				(int)(SPRITE_ORIGIN.x * scale)
 		);
-		sprites.setPivot(offset.getX(), offset.getY());
+		pivot = new Point(offset);
 	}
 	
 	@Override
 	public void rescale(float height) {
-		sprites.setScale(height / PIXELS_PER_TILE);
+		//----sprites.setScale(height / PIXELS_PER_TILE);
 	}
 	
 	/**
@@ -120,12 +140,10 @@ public class ModelPlayer extends Model {
 		
 		this.flipped = flipped;
 		
-		sprites.setFlipped(flipped);
-		
 		if(flipped)
-			sprites.setPivot(TEMPLATE_DIMENSIONS.getX()-offset.getX(), offset.getY());
+			pivot.set(TEMPLATE_DIMENSIONS.x - offset.x, offset.y);
 		else
-			sprites.setPivot(offset.getX(), offset.getY());
+			pivot.set(offset);
 	}
 	
 	/**
@@ -277,19 +295,22 @@ public class ModelPlayer extends Model {
 	 * @param p The sprite's position within the spritesheet.
 	 */
 	private void setSprite(Point p) {
-		sprites.setSprite(p.getX(), p.getY());
+		int x = p.x * cellWidth;
+		int y = p.y * cellHeight;
+		cell.setRegion(x, y, x + cellWidth, y + cellHeight);
 	}
 	
 	@Override
-	public void render(int x, int y) {
-		//x += offset.getX();
-		//y += offset.getY();
-		sprites.drawSprite(x, y);
+	public void render(SpriteBatch batch, int x, int y) {
+		if(flipped)
+			batch.draw(cell, x + offset.x, y + offset.y, -cellWidth, cellHeight);
+		else
+			batch.draw(cell, x + offset.x, y + offset.y, cellWidth, cellHeight);
 	}
 	
 	@Override
-	public void destroy() {
-		sprites.destroy();
+	public void dispose() {
+		texture.dispose();
 	}
 	
 }

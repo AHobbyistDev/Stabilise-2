@@ -90,10 +90,10 @@ public final class Position {
 	 * @param ratio The ratio by which to determine where this position is.
 	 */
 	public Position(Position pos1, Position pos2, float ratio) {
-		this.relativeX = Interpolation.interpolateLinear(pos1.relativeX, pos2.relativeX, ratio);
-		this.relativeY = Interpolation.interpolateLinear(pos1.relativeY, pos2.relativeY, ratio);
-		this.offsetX = (int)Interpolation.interpolateLinear(pos1.offsetX, pos2.offsetX, ratio);
-		this.offsetY = (int)Interpolation.interpolateLinear(pos1.offsetY, pos2.offsetY, ratio);
+		this.relativeX = Interpolation.lerp(pos1.relativeX, pos2.relativeX, ratio);
+		this.relativeY = Interpolation.lerp(pos1.relativeY, pos2.relativeY, ratio);
+		this.offsetX = (int)Interpolation.lerp(pos1.offsetX, pos2.offsetX, ratio);
+		this.offsetY = (int)Interpolation.lerp(pos1.offsetY, pos2.offsetY, ratio);
 	}
 	
 	/**
