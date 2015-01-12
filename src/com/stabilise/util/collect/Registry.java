@@ -13,7 +13,7 @@ import java.util.Set;
  * <p>This class is based on a similar one from the decompiled Minecraft 1.7.10
  * source.
  */
-public class Registry<K, V> extends AbstractRegistry implements Iterable<V> {
+public class Registry<K, V> extends AbstractRegistry<V> {
 	
 	/** The map of objects registered in the registry. */
 	protected final Map<K, V> objects;
@@ -57,7 +57,7 @@ public class Registry<K, V> extends AbstractRegistry implements Iterable<V> {
 	 * @see DuplicatePolicy
 	 */
 	public Registry(String name, int capacity, DuplicatePolicy dupePolicy) {
-		super("Registry: " + name, dupePolicy);
+		super(name, dupePolicy);
 		
 		objects = createUnderlyingMap(capacity);
 	}

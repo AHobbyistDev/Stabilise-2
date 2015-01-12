@@ -51,7 +51,7 @@ public class GDXTestState implements State, InputProcessor {
 				Gdx.files.absolute("D:/USB Backup; 2014-07-05 - Full/Useful Stuff/Fonts/BLKCHCRY.ttf")
 		);
 		FreeTypeFontParameter param = new FreeTypeFontParameter();
-		param.size = 128; // font size 12 pixels
+		param.size = 128;
 		font12 = generator.generateFont(param);
 		generator.dispose(); // don't forget to dispose to avoid memory leaks!
 		

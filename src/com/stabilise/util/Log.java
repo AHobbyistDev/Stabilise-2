@@ -143,7 +143,7 @@ public class Log {
 	 */
 	private Log(String tag) {
 		if(tag != null && tag != "")
-			this.tag = "[" + tag.toUpperCase() + "] - ";
+			this.tag = "[" + tag + "] - "; // formerly tag.toUpperCase()
 		else
 			this.tag = "";
 	}
@@ -162,7 +162,7 @@ public class Log {
 		level.checkAllowable();
 		synchronized(entries) {
 			DATE.setTime(System.currentTimeMillis());
-			add(level, logLevel, DATE.toString() + " - " + tag + level.tag + msg);
+			add(level, logLevel, DATE.toString() + " - " + level.tag + tag + msg);
 			if(entries.size() > LOG_CAPACITY)
 				entries.remove(0);
 		}
@@ -188,7 +188,7 @@ public class Log {
 		
 		synchronized(entries) {
 			DATE.setTime(System.currentTimeMillis());
-			prefix = DATE.toString() + " - " + tag + level.tag;
+			prefix = DATE.toString() + " - " + level.tag + tag;
 			add(level, outputLevel, prefix + msg);
 			add(level, outputLevel, prefix + t.toString());
 			prefix += "    at ";

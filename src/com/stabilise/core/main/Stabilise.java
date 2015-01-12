@@ -5,8 +5,6 @@ import java.util.Random;
 import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
-import com.stabilise.core.state.GDXTestState;
-import com.stabilise.core.state.LoadingState;
 import com.stabilise.core.state.State;
 import com.stabilise.input.Controller;
 import com.stabilise.item.Item;
@@ -35,11 +33,13 @@ public class Stabilise extends Application {
 	 */
 	public Stabilise() {
 		super(Constants.TICKS_PER_SECOND);
+		Log.setLogLevel(Log.Level.ALL);
 	}
 	
 	@Override
 	protected State getInitialState() {
-		return new GDXTestState();
+		//return new com.stabilise.core.state.GDXTestState();
+		return new com.stabilise.core.state.LoadingState();
 	}
 	
 	@Override
@@ -95,6 +95,8 @@ public class Stabilise extends Application {
 	public static void bootstrap() {
 		if(!bootstrapped) {
 			try {
+				Log.get().postDebug("Bootstrapping...");
+				
 				Tile.registerTiles();
 				Item.registerItems();
 				
@@ -102,10 +104,14 @@ public class Stabilise extends Application {
 				Controller.poke();
 				
 				bootstrapped = true;
+				
+				Log.get().postDebug("Bootstrap completed.");
 			} catch(Throwable t) {
-				// JRE 6 doesn't like the arguments (String, Throwable)
+				Log.get().postSevere("Bootstrap failed!", t);
 				throw new AssertionError(t);
 			}
+		} else {
+			Log.get().postWarning("Already bootstrapped!");
 		}
 	}
 	

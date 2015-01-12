@@ -25,17 +25,21 @@ public abstract class Entity extends FreeGameObject {
 	protected static final float AIR_FRICTION = 0.001f;
 	
 	/** The entity registry. */
-	private static final InstantiationRegistry<Entity> ENTITIES =
-			new InstantiationRegistry<Entity>(8, THROW_EXCEPTION, Entity.class,
-					BaseWorld.class);
+	private static final InstantiationRegistry<Entity> ENTITIES;
+			
 	
 	// Register all entity types.
 	static {
+		ENTITIES = new InstantiationRegistry<Entity>(8, THROW_EXCEPTION, Entity.class,
+				IWorld.class);
+		
 		ENTITIES.registerDefaultArgs(0, EntityItem.class);
 		ENTITIES.registerDefaultArgs(1, EntityFireball.class);
 		ENTITIES.registerDefaultArgs(2, EntityBigFireball.class);
 		ENTITIES.registerDefaultArgs(3, EntityEnemy.class);
 		ENTITIES.registerDefaultArgs(4, EntityPerson.class);
+		
+		ENTITIES.lock();
 	}
 	
 	//--------------------==========--------------------

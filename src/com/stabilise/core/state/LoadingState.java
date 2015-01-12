@@ -2,11 +2,26 @@ package com.stabilise.core.state;
 
 import java.util.concurrent.ExecutionException;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.HAlignment;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.stabilise.core.Application;
 import com.stabilise.core.main.Stabilise;
-import com.stabilise.util.Colour;
 import com.stabilise.util.Log;
+import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.concurrent.TaskThread;
+import com.stabilise.util.concurrent.TaskTracker;
 
 /**
  * A LoadingState is the state which runs as the game loads all preparatory
@@ -19,22 +34,15 @@ public class LoadingState implements State {
 	
 	/** A reference to the application. */
 	private Application application;
-	/** A reference to the screen. */
-	//private Screen screen;
 	
-	/** The splash-screen sprite. */
-	private Sprite splash;
-	/** The loading text font. */
-	private Font font1;
-	/** The loading text font style. */
-	@SuppressWarnings("unused")
-	private FontStyle style;
+	private Viewport viewport;
 	
-	/** The last percentage which was displayed. */
-	private int lastPercent = 0;
-	/** The current loading string. */
-	@SuppressWarnings("unused")
-	private String text;
+	private SpriteBatch batch;
+	private Texture texSplash;
+	private Sprite sprSplash;
+	private BitmapFont font;
+	
+	private ShapeRenderer shapes;
 	
 	/** The loader thread. */
 	private TaskThread taskThread;
@@ -45,68 +53,44 @@ public class LoadingState implements State {
 	 */
 	public LoadingState() {
 		application = Application.get();
-		//screen = Screen.get();
-	}
-	
-	@Override
-	public void resize(int width, int height) {
-		// meh
-	}
-	
-	@Override
-	public void update() {
-		/*
-		if(screen.wasResized()) {
-			splash.x = screen.getCentreX();
-			splash.y = screen.getCentreY();
-		}
-		*/
-		
-		int percent = (int)(100*taskThread.percentComplete());
-		if(lastPercent != percent) {
-			lastPercent = percent;
-			text = taskThread.getTaskName() + "... " + percent + "%";
-		}
-		
-		if(taskThread.stopped()) {
-			Throwable t = taskThread.getThrowable();
-			if(!taskThread.completed())
-				Application.crashApplication(t != null ? t : new AssertionError("Bootstrap failed!"));
-			((TexturePreloaderTask)taskThread.task).uploadTextures();
-			application.setState(new MainMenuState());
-		}
-	}
-	
-	@Override
-	public void render(float delta) {
-		splash.draw();
-		
-		//font1.drawLine(text, screen.getCentreX(), screen.getCentreY() - 200, style);
 	}
 	
 	@Override
 	public void start() {
-		splash = new Sprite("loading");
-		splash.setPivot(splash.getWidth() / 2, splash.getHeight() / 2);
-		//splash.x = screen.getCentreX();
-		//splash.y = screen.getCentreY();
+		viewport = new ScreenViewport();
 		
-		font1 = new Font("sheets/font1", this);
-		style = new FontStyle(16, Colour.BLACK, FontStyle.Alignment.CENTRE, 1, 0);
+		batch = new SpriteBatch(64);
 		
-		text = "Loading... 0%";
+		texSplash = new Texture(Gdx.files.absolute("C:/Users/Adam/AppData/Roaming/.stabilise/res/img/loading.png"));
+		sprSplash = new Sprite(texSplash);
 		
-		TexturePreloaderTask task = new TexturePreloaderTask(1) {
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+				Gdx.files.absolute("C:/Users/Adam/AppData/Roaming/.stabilise/res/fonts/arialbd.ttf")
+		);
+		FreeTypeFontParameter param = new FreeTypeFontParameter();
+		param.size = 16; // font size 16 pixels
+		font = generator.generateFont(param);
+		generator.dispose();
+		
+		shapes = new ShapeRenderer();
+		
+		Task task = new Task(new TaskTracker("Loading", 100)) {
 			@Override
 			protected void execute() throws Exception {
-				//setName("Bootstrapping");
 				Stabilise.bootstrap();
 				tracker.increment();
-				//setName("Loading");
-				super.tick();
+				
+				for(int i = 1; i < 100; i++) {
+					Thread.sleep(25L);
+					tracker.increment();
+				}
+				
+				tracker.setName("All is done!");
+				
+				Thread.sleep(1000L);
 			}
 		};
-		task.loadTextures(new String[] {"mainbg", "mainbgtile", "stickfigure", "sheets/cloak", "head", "button", "sheets/font1"});
+		//task.loadTextures(new String[] {"mainbg", "mainbgtile", "stickfigure", "sheets/cloak", "head", "button", "sheets/font1"});
 		
 		taskThread = new TaskThread(task);
 		taskThread.setName("Preloader Thread");
@@ -114,19 +98,18 @@ public class LoadingState implements State {
 	}
 	
 	@Override
-	public void pause() {
-		// We're not going to be halting the startup screen, so no
-	}
-	
-	@Override
-	public void resume() {
-		// See halt()
+	public void predispose() {
+		
 	}
 	
 	@Override
 	public void dispose() {
-		splash.destroy();
-		font1.destroy();
+		batch.dispose();
+		
+		texSplash.dispose();
+		font.dispose();
+		
+		shapes.dispose();
 		
 		taskThread.cancel();
 		try {
@@ -135,11 +118,55 @@ public class LoadingState implements State {
 			Log.get().postSevere("Load task is a derp", e);
 		}
 	}
-
+	
 	@Override
-	public void predispose() {
-		// TODO Auto-generated method stub
+	public void pause() {
+		// We're not going to be pausing the startup screen
+	}
+	
+	@Override
+	public void resume() {
+		// See pause()
+	}
+	
+	@Override
+	public void resize(int width, int height) {
+		viewport.update(width, height);
+		batch.setProjectionMatrix(viewport.getCamera().combined);
+		shapes.setProjectionMatrix(viewport.getCamera().combined);
 		
+		sprSplash.setPosition(-sprSplash.getWidth()/2, -sprSplash.getHeight()/2);
+	}
+	
+	@Override
+	public void update() {
+		if(taskThread.stopped()) {
+			Throwable t = taskThread.getThrowable();
+			if(!taskThread.completed())
+				Application.crashApplication(t != null ? t : new AssertionError("Bootstrap failed!"));
+			//----application.setState(new MainMenuState());
+			
+			application.shutdown();
+		}
+	}
+	
+	@Override
+	public void render(float delta) {
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		
+		int width = Gdx.graphics.getWidth();
+		int height = Gdx.graphics.getHeight();
+		
+		shapes.begin(ShapeType.Filled);
+		shapes.setColor(Color.LIGHT_GRAY);
+		shapes.rect(-width/2, -height/2, width, height);
+		shapes.end();
+		
+		batch.begin();
+		sprSplash.draw(batch);
+		font.drawMultiLine(batch, taskThread.taskToString(), -150, -100, 300, HAlignment.CENTER);
+		batch.end();
 	}
 	
 }

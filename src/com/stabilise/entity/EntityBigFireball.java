@@ -49,6 +49,10 @@ public class EntityBigFireball extends EntityProjectile {
 	private int damage;
 	
 	
+	public EntityBigFireball(IWorld world) {
+		super(world);
+	}
+	
 	/**
 	 * Creates a new fireball entity.
 	 * 

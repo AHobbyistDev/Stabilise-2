@@ -251,13 +251,11 @@ public class ConfigFile {
 	 */
 	public byte getByte(String name) {
 		if(hasTag(name)) {
-			byte value;
 			try {
-				value = Byte.parseByte(tags.get(name));
+				return Byte.parseByte(tags.get(name));
 			} catch(NumberFormatException e) {
 				return -1;
 			}
-			return value;
 		} else {
 			return -1;
 		}
@@ -273,13 +271,11 @@ public class ConfigFile {
 	 */
 	public short getShort(String name) {
 		if(hasTag(name)) {
-			short value;
 			try {
-				value = Short.parseShort(tags.get(name));
+				return Short.parseShort(tags.get(name));
 			} catch(NumberFormatException e) {
 				return -1;
 			}
-			return value;
 		} else {
 			return -1;
 		}
@@ -295,13 +291,11 @@ public class ConfigFile {
 	 */
 	public int getInteger(String name) {
 		if(hasTag(name)) {
-			int value;
 			try {
-				value = Integer.parseInt(tags.get(name));
+				return Integer.parseInt(tags.get(name));
 			} catch(NumberFormatException e) {
 				return -1;
 			}
-			return value;
 		} else {
 			return -1;
 		}
@@ -317,13 +311,11 @@ public class ConfigFile {
 	 */
 	public long getLong(String name) {
 		if(hasTag(name)) {
-			long value;
 			try {
-				value = Long.parseLong(tags.get(name));
+				return Long.parseLong(tags.get(name));
 			} catch(NumberFormatException e) {
 				return -1L;
 			}
-			return value;
 		} else {
 			return -1L;
 		}
@@ -339,13 +331,11 @@ public class ConfigFile {
 	 */
 	public float getFloat(String name) {
 		if(hasTag(name)) {
-			float value;
 			try {
-				value = Float.parseFloat(tags.get(name));
+				return Float.parseFloat(tags.get(name));
 			} catch(NumberFormatException e) {
 				return -1.0f;
 			}
-			return value;
 		} else {
 			return -1.0f;
 		}
@@ -361,13 +351,11 @@ public class ConfigFile {
 	 */
 	public double getDouble(String name) {
 		if(hasTag(name)) {
-			double value;
 			try {
-				value = Double.parseDouble(tags.get(name));
+				return Double.parseDouble(tags.get(name));
 			} catch(NumberFormatException e) {
 				return -1.0D;
 			}
-			return value;
 		} else {
 			return -1.0D;
 		}

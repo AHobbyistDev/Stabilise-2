@@ -31,6 +31,10 @@ public class EntityFireball extends EntityProjectile {
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
+	public EntityFireball(IWorld world) {
+		super(world);
+	}
+	
 	/**
 	 * Creates a new fireball entity.
 	 * 

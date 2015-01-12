@@ -43,6 +43,9 @@ public class Resources {
 	/** The directory in which the application's image resources should be
 	 * located. */
 	public static final File IMAGE_DIR = IOUtil.createDirQuietly(new File(RESOURCE_DIR, "img/"));
+	/** The directory in which the application's font resources should be
+	 * located. */
+	public static final File FONT_DIR = IOUtil.createDirQuietly(new File(RESOURCE_DIR, "fonts/"));
 	/** The directory in which the application's spritesheet resources should
 	 * be located. */
 	public static final File SPRITESHEET_DIR = IOUtil.createDirQuietly(new File(IMAGE_DIR, "sheets/"));

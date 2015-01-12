@@ -71,10 +71,8 @@ public class CharacterData {
 	public HostWorld.PlayerDataFile dataFile;
 	/** Whether or not the character is new to the world. */
 	public boolean newToWorld;
-	/** The x-coordinate of the player's last known location, in tile-lengths. */
-	public double lastX;
-	/** The y-coordinate of the player's last known location, in tile-lengths. */
-	public double lastY;
+	/** The coordinates of the player's last known location, in tile-lengths. */
+	public double lastX, lastY;
 	
 	
 	/**

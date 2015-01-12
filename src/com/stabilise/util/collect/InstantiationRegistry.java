@@ -2,6 +2,7 @@ package com.stabilise.util.collect;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -39,20 +40,22 @@ import java.util.Map;
  *         });
  *         
  *     {@code // Henceforth the following blocks of code are equivalent:}
- * 
- *     MyClass obj1 = new MyOtherClass(0, 1);
- *     MyClass obj2 = new YetAnotherClass("Penguin");
  *     
- *     MyClass obj1 = registry.instantiate(0, 0, 1);
- *     MyClass obj2 = registry.instantiate(1, "Penguin");
+ *     MyClass obj1, obj2;
+ *     
+ *     obj1 = new MyOtherClass(0, 1);
+ *     obj2 = new YetAnotherClass("Penguin");
+ *     
+ *     obj1 = registry.instantiate(0, 0, 1);
+ *     obj2 = registry.instantiate(1, "Penguin");
  * }</pre>
  * 
- * @param <T> The type of object to instantiate.
+ * @param <E> The type of object to instantiate.
  */
-public class InstantiationRegistry<T> extends AbstractRegistry {
+public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E>> {
 	
-	private final BiObjectIntMap<Factory<? extends T>> factoryMap;
-	private final Map<Class<? extends T>, Integer> idMap;
+	private final BiObjectIntMap<Factory<? extends E>> factoryMap;
+	private final Map<Class<? extends E>, Integer> idMap;
 	
 	/** The default constructor arguments. */
 	private final Class<?>[] defaultArgs;
@@ -73,7 +76,7 @@ public class InstantiationRegistry<T> extends AbstractRegistry {
 	 * @throws IllegalArgumentException if {@code capacity < 0}.
 	 * @see DuplicatePolicy
 	 */
-	public InstantiationRegistry(int capacity, DuplicatePolicy dupePolicy, Class<T> baseClass,
+	public InstantiationRegistry(int capacity, DuplicatePolicy dupePolicy, Class<E> baseClass,
 			Class<?>... defaultArgs) {
 		super(baseClass.getSimpleName() + "InstRegistry", dupePolicy);
 		
@@ -110,7 +113,7 @@ public class InstantiationRegistry<T> extends AbstractRegistry {
 	 * registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
 	 * THROW_EXCEPTION} duplicate policy.
 	 */
-	public void registerDefaultArgs(int id, Class<? extends T> objClass) {
+	public void registerDefaultArgs(int id, Class<? extends E> objClass) {
 		register(id, objClass, defaultArgs);
 	}
 	
@@ -132,7 +135,7 @@ public class InstantiationRegistry<T> extends AbstractRegistry {
 	 * registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
 	 * THROW_EXCEPTION} duplicate policy.
 	 */
-	public <S extends T> void register(int id, Class<S> objClass, Class<?>... args) {
+	public <S extends E> void register(int id, Class<S> objClass, Class<?>... args) {
 		register(id, objClass, new ReflectiveFactory<S>(objClass, args));
 	}
 	
@@ -154,7 +157,7 @@ public class InstantiationRegistry<T> extends AbstractRegistry {
 	 * registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
 	 * THROW_EXCEPTION} duplicate policy.
 	 */
-	public <S extends T> void register(int id, Class<S> objClass, Factory<S> factory) {
+	public <S extends E> void register(int id, Class<S> objClass, Factory<S> factory) {
 		checkLock();
 		if(factoryMap.containsKey(id) && dupePolicy.handle(log, "Duplicate id " + id))
 			return;
@@ -176,8 +179,8 @@ public class InstantiationRegistry<T> extends AbstractRegistry {
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws RuntimeException if object creation failed.
 	 */
-	public T instantiate(int id, Object... args) {
-		Factory<? extends T> factory = factoryMap.getObject(id);
+	public E instantiate(int id, Object... args) {
+		Factory<? extends E> factory = factoryMap.getObject(id);
 		if(factory != null)
 			return factory.create(args);
 		return null;
@@ -189,7 +192,7 @@ public class InstantiationRegistry<T> extends AbstractRegistry {
 	 * @return The ID, or {@code -1} if the object class has not been
 	 * registered.
 	 */
-	public int getID(Class<? extends T> objClass) {
+	public int getID(Class<? extends E> objClass) {
 		Integer i = idMap.get(objClass);
 		return i == null ? -1 : i.intValue();
 	}
@@ -198,6 +201,11 @@ public class InstantiationRegistry<T> extends AbstractRegistry {
 	public void lock() {
 		super.lock();
 		factoryMap.trim();
+	}
+	
+	@Override
+	public Iterator<Class<? extends E>> iterator() {
+		return idMap.keySet().iterator();
 	}
 	
 	//--------------------==========--------------------

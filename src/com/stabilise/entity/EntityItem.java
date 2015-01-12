@@ -40,6 +40,10 @@ public class EntityItem extends Entity {
 	public int count;
 	
 	
+	public EntityItem(IWorld world) {
+		super(world);
+	}
+	
 	/**
 	 * Creates a new item entity.
 	 * 

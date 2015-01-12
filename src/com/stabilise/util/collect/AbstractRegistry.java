@@ -4,8 +4,10 @@ import com.stabilise.util.Log;
 
 /**
  * This class provides a simple base for a registry to extend.
+ * 
+ * @param <E> The type of object to register.
  */
-abstract class AbstractRegistry {
+abstract class AbstractRegistry<E> implements Iterable<E> {
 	
 	public final String name;
 	protected final DuplicatePolicy dupePolicy;
@@ -15,7 +17,6 @@ abstract class AbstractRegistry {
 	 * is registered. */
 	protected int size = 0; 
 	
-	/** If {@code true}, attempts to register new entries should be rejected. */
 	private boolean locked = false;
 	
 	

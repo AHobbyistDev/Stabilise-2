@@ -18,13 +18,16 @@ import com.stabilise.world.IWorld;
 public abstract class TileEntity extends FixedGameObject {
 	
 	/** The tile entity registry. */
-	private static final InstantiationRegistry<TileEntity> TILE_ENTITY_REGISTRY =
-			new InstantiationRegistry<TileEntity>(4, THROW_EXCEPTION, TileEntity.class);
+	private static final InstantiationRegistry<TileEntity> TILE_ENTITIES =
+			new InstantiationRegistry<TileEntity>(4, THROW_EXCEPTION, TileEntity.class,
+					Integer.TYPE, Integer.TYPE);
 	
 	// Register all tile entity types.
 	static {
-		TILE_ENTITY_REGISTRY.register(0, TileEntityChest.class);
-		TILE_ENTITY_REGISTRY.register(1, TileEntityMobSpawner.class);
+		TILE_ENTITIES.registerDefaultArgs(0, TileEntityChest.class);
+		TILE_ENTITIES.registerDefaultArgs(1, TileEntityMobSpawner.class);
+		
+		TILE_ENTITIES.lock();
 	}
 	
 	
@@ -81,7 +84,7 @@ public abstract class TileEntity extends FixedGameObject {
 	 * @return The ID of this tile entity's type.
 	 */
 	public final int getID() {
-		return TILE_ENTITY_REGISTRY.getID(getClass());
+		return TILE_ENTITIES.getID(getClass());
 	}
 	
 	/**
@@ -128,7 +131,7 @@ public abstract class TileEntity extends FixedGameObject {
 	 * @throws RuntimeException if tile entity creation failed.
 	 */
 	public static TileEntity createTileEntity(int id, int x, int y) {
-		return TILE_ENTITY_REGISTRY.instantiate(id, x, y);
+		return TILE_ENTITIES.instantiate(id, x, y);
 	}
 	
 	/**

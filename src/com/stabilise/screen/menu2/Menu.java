@@ -61,9 +61,6 @@ public abstract class Menu implements InputProcessor {
 		input.setInputProcessor(this);
 		
 		loadResources();
-		
-		// Provide a way of initially scaling the menu appropriately
-		//rescale(screen.getWidth(), screen.getHeight());
 	}
 	
 	/**
@@ -122,19 +119,14 @@ public abstract class Menu implements InputProcessor {
 	}
 	
 	/**
-	 * Rescales the Menu.
+	 * Rescales the Menu in accordance with the screen dimensions.
 	 * 
-	 * <p><b>Note:</b> this method is invoked after {@link #loadResources()}
-	 * when the Menu is constructed, and on an invocation of {@link #update()}
-	 * if {@link Screen#wasResized()} returns {@code true}.
-	 * 
-	 * @param width The new screen width.
-	 * @param height The new screen height.
+	 * @param width The screen width, in pixels.
+	 * @param height The screen height, in pixels.
 	 */
-	protected void rescale(int width, int height) {
-		for(MenuItem i : items) {
+	protected void resize(int width, int height) {
+		for(MenuItem i : items)
 			i.rescale(width, height);
-		}
 	}
 	
 	/**
@@ -165,9 +157,11 @@ public abstract class Menu implements InputProcessor {
 	 * @param grid The grid of MenuItems.
 	 * 
 	 * @throws NullPointerException as per
-	 * {@link ComponentGrid#ComponentGrid(MenuItem[][]) new ComponentGrid(grid)}.
+	 * {@link ComponentGrid#ComponentGrid(MenuItem[][])
+	 * new ComponentGrid(grid)}.
 	 * @throws IllegalArgumentException as per
-	 * {@link ComponentGrid#ComponentGrid(MenuItem[][]) new ComponentGrid(grid)}.
+	 * {@link ComponentGrid#ComponentGrid(MenuItem[][])
+	 * new ComponentGrid(grid)}.
 	 * 
 	 * @see com.stabilise.screen.menu.component.ComponentGrid
 	 */
@@ -377,16 +371,14 @@ public abstract class Menu implements InputProcessor {
 				}
 			}
 		} else if(focus != null) {
-			if(focus instanceof Button && keycode == Keys.ENTER) {
+			if(focus instanceof Button && keycode == Keys.ENTER)
 				((Button)focus).setState(Button.State.PRESSED);
-			} else if(focus instanceof TextBox) {
+			else if(focus instanceof TextBox)
 				((TextBox)focus).handleKeyPress(keycode);
-			}
 		} else {
-			for(MenuItem i : items) {
+			for(MenuItem i : items)
 				if(i instanceof TextBox)
 					setFocus(i);
-			}
 		}
 		return true;
 	}
@@ -412,11 +404,10 @@ public abstract class Menu implements InputProcessor {
 				if(item.canBeFocusedFromClick() && item.isMouseInBounds(x, y)) {
 					if(!setFocus(item))
 						break;
-					if(focus instanceof Button) {
+					if(focus instanceof Button)
 						((Button)focus).setState(Button.State.PRESSED);
-					} else if(focus instanceof TextBox) {
+					else if(focus instanceof TextBox)
 						((TextBox)focus).focus(x, y);
-					}
 					break;
 				}
 			}

@@ -80,11 +80,8 @@ public class EntityArrow extends EntityProjectile {
 			}
 		}
 		
-		if(age == DESPAWN_TICKS) {
+		if(age == DESPAWN_TICKS)
 			destroy();
-			if(hitbox != null)
-				hitbox.destroy();
-		}
 	}
 	
 	@Override

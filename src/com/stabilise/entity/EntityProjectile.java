@@ -19,6 +19,10 @@ public abstract class EntityProjectile extends Entity {
 	public float rotation = 0;			// TODO: Is this necessary for /all/ projectile types?
 	
 	
+	public EntityProjectile(IWorld world) {
+		super(world);
+	}
+	
 	/**
 	 * Creates a new projectile entity.
 	 * 
