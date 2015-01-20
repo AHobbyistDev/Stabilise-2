@@ -1,39 +1,28 @@
 package com.stabilise.core.state;
 
-import java.util.concurrent.ExecutionException;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.BitmapFont.HAlignment;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.HAlignment;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.stabilise.core.Application;
-import com.stabilise.core.main.Stabilise;
-import com.stabilise.util.Log;
-import com.stabilise.util.concurrent.Task;
-import com.stabilise.util.concurrent.TaskThread;
-import com.stabilise.util.concurrent.TaskTracker;
 
-/**
- * A LoadingState is the state which runs as the game loads all preparatory
- * resources. It displays a simple loading screen while the resources are being
- * loaded on a separate thread. As the thread will die before the application
- * moves onto anything else, all setup processes should sync up with the main
- * thread, and hence concurrency errors should not emerge from this.
- */
-public class LoadingState implements State {
-	
-	/** A reference to the application. */
-	private Application application;
+
+public class MenuTestState implements State {
 	
 	private Viewport viewport;
 	
@@ -44,22 +33,23 @@ public class LoadingState implements State {
 	
 	private ShapeRenderer shapes;
 	
-	/** The loader thread. */
-	private TaskThread taskThread;
+	private Texture texBtnUp, texBtnOver, texBtnDown;
+	private TextureRegion regBtnUp, regBtnOver, regBtnDown;
 	
+	// Scene2D stuff
+	private Stage stage;
+	private Table table;
+	private TextButton button;
 	
-	/**
-	 * Creates the loading state.
-	 */
-	public LoadingState() {
-		application = Application.get();
+	public MenuTestState() {
+		
 	}
 	
 	@Override
 	public void start() {
 		viewport = new ScreenViewport();
 		
-		batch = new SpriteBatch(64);
+		batch = new SpriteBatch(128);
 		
 		texSplash = new Texture(Gdx.files.absolute("C:/Users/Adam/AppData/Roaming/.stabilise/res/img/loading.png"));
 		sprSplash = new Sprite(texSplash);
@@ -74,27 +64,33 @@ public class LoadingState implements State {
 		
 		shapes = new ShapeRenderer();
 		
-		Task task = new Task(new TaskTracker("Loading", 100)) {
-			@Override
-			protected void execute() throws Exception {
-				Stabilise.bootstrap();
-				tracker.increment();
-				
-				for(int i = 1; i < 100; i++) {
-					Thread.sleep(15L);
-					tracker.increment();
-				}
-				
-				tracker.setName("All is done!");
-				
-				Thread.sleep(1000L);
-			}
-		};
-		//task.loadTextures(new String[] {"mainbg", "mainbgtile", "stickfigure", "sheets/cloak", "head", "button", "sheets/font1"});
+		texBtnUp = new Texture(Gdx.files.absolute("C:/Users/Adam/Desktop/img/btnup.png"));
+		texBtnOver = new Texture(Gdx.files.absolute("C:/Users/Adam/Desktop/img/btnover.png"));
+		texBtnDown = new Texture(Gdx.files.absolute("C:/Users/Adam/Desktop/img/btndown.png"));
+		regBtnUp = new TextureRegion(texBtnUp);
+		regBtnOver = new TextureRegion(texBtnOver);
+		regBtnDown = new TextureRegion(texBtnDown);
 		
-		taskThread = new TaskThread(task);
-		taskThread.setName("Preloader Thread");
-		taskThread.start();
+		// <-----<=- Scene2D -=>----->
+		
+		stage = new Stage();
+		Gdx.input.setInputProcessor(stage);
+		
+		table = new Table();
+		table.setFillParent(true);
+		stage.addActor(table);
+		
+		TextButtonStyle style = new TextButtonStyle();
+		style.up = new TextureRegionDrawable(regBtnUp);
+		style.over = new TextureRegionDrawable(regBtnOver);
+		style.down = new TextureRegionDrawable(regBtnDown);
+		style.font = font;
+		style.fontColor = Color.WHITE;
+		style.overFontColor = Color.DARK_GRAY;
+		style.downFontColor = Color.LIGHT_GRAY;
+		button = new TextButton("Click me!", style);
+		
+		table.addActor(button);
 	}
 	
 	@Override
@@ -111,22 +107,21 @@ public class LoadingState implements State {
 		
 		shapes.dispose();
 		
-		taskThread.cancel();
-		try {
-			taskThread.waitUninterruptibly();
-		} catch(ExecutionException e) {
-			Log.get().postSevere("Load task is a derp", e);
-		}
+		stage.dispose();
+		
+		texBtnUp.dispose();
+		texBtnDown.dispose();
+		texBtnOver.dispose();
 	}
 	
 	@Override
 	public void pause() {
-		// We're not going to be pausing the startup screen
+		
 	}
 	
 	@Override
 	public void resume() {
-		// See pause()
+		
 	}
 	
 	@Override
@@ -140,12 +135,7 @@ public class LoadingState implements State {
 	
 	@Override
 	public void update() {
-		if(taskThread.stopped()) {
-			Throwable t = taskThread.getThrowable();
-			if(!taskThread.completed())
-				Application.crashApplication(t != null ? t : new AssertionError("Bootstrap failed!"));
-			application.setState(new MenuTestState());
-		}
+		
 	}
 	
 	@Override
@@ -163,8 +153,11 @@ public class LoadingState implements State {
 		
 		batch.begin();
 		sprSplash.draw(batch);
-		font.drawMultiLine(batch, taskThread.taskToString(), -150, -100, 300, HAlignment.CENTER);
+		font.drawMultiLine(batch, "Test thingy", -150, -100, 300, HAlignment.CENTER);
 		batch.end();
+		
+		stage.draw();
+		table.drawDebug(shapes);
 	}
 	
 }

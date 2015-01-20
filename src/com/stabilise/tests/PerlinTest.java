@@ -7,6 +7,7 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.IOUtil;
 import com.stabilise.util.maths.PerlinNoise2D;
 
@@ -40,7 +41,7 @@ public class PerlinTest {
 		
 		BufferedImage image = getImageFromArray(pixels, width, height);
 		
-		IOUtil.createDirQuietly(new File("noise/"));
+		IOUtil.createDir(new FileHandle("noise/"));
 		
 		// Handles the delegation of duplicate world names
 		String originalName = "noise/perlin";

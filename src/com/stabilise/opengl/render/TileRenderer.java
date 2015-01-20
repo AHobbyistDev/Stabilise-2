@@ -33,15 +33,12 @@ public class TileRenderer implements Renderer {
 	 * @param worldRenderer The world renderer.
 	 */
 	public TileRenderer(WorldRenderer worldRenderer) {
-		super();
-		
 		this.worldRenderer = worldRenderer;
 		world = worldRenderer.world;
 		
 		tileCoords = new Point[64];
-		for(int i = 0; i < tileCoords.length; i++) {
+		for(int i = 0; i < tileCoords.length; i++)
 			tileCoords[i] = new Point(i % 8, 1 + i/8);		// The tile spritesheet is 8x8
-		}
 		
 		loadResources();
 	}

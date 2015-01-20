@@ -85,8 +85,7 @@ public abstract class NBTTag {
 	 * 
 	 * @param out The output stream to which to write the tag.
 	 * 
-	 * @throws IOException Thrown if there is an I/O exception while writing to
-	 * the output stream.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	abstract void write(DataOutputStream out) throws IOException;
 	
@@ -95,20 +94,14 @@ public abstract class NBTTag {
 	 * 
 	 * @param in The input stream from which to read the tag.
 	 * 
-	 * @throws IOException Thrown if there is an I/O exception while reading
-	 * from the input stream.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	abstract void load(DataInputStream in) throws IOException;
 	
 	/**
 	 * Gets a string representation of the tag, as per the contract of
-	 * {@link Object#toString()}.
-	 * 
-	 * @param prefix The string with which to prefix an ordinary invocation of
-	 * {@code toString()}.
-	 * 
-	 * @return A string representation of the tag, as per the contract of
-	 * {@link Object#toString()}.
+	 * {@link Object#toString()}, but with every new line prefixed with {@code
+	 * prefix}.
 	 */
 	String toString(String prefix) {
 		return toString();

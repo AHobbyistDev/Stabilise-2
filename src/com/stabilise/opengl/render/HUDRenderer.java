@@ -11,7 +11,6 @@ import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Game;
 import com.stabilise.entity.EntityPerson;
-import com.stabilise.util.Colour;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.StringUtil;
 import com.stabilise.util.maths.Point;

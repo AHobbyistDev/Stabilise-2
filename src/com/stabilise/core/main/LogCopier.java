@@ -1,12 +1,5 @@
 package com.stabilise.core.main;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.commons.io.FileUtils;
-
-import com.stabilise.core.Resources;
-
 /**
  * The log copier - copies any log files to a local directory.
  */
@@ -19,6 +12,7 @@ public class LogCopier {
 	/**
 	 * Runs the log copier program.
 	 */
+	/*
 	public static void main(String[] args) {
 		if(!Resources.APP_DIR.exists())
 			return;
@@ -29,5 +23,6 @@ public class LogCopier {
 		}
 		System.exit(0);
 	}
+	*/
 	
 }

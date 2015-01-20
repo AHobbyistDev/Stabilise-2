@@ -1,8 +1,8 @@
 package com.stabilise.world;
 
-import java.io.File;
 import java.io.IOException;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Resources;
 import com.stabilise.util.ArrayUtil;
 import com.stabilise.util.nbt.NBTIO;
@@ -107,21 +107,20 @@ public class Schematic {
 	 * @return The schematic's file, or {@code null} if the schematic lacks a
 	 * name.
 	 */
-	private File getFile() {
+	private FileHandle getFile() {
 		if(name == "")
 			return null;
 		
-		return new File(Resources.SCHEMATIC_DIR, name + ".schematic");
+		return Resources.SCHEMATIC_DIR.child(name + ".schematic");
 	}
 	
 	/**
-	 * Loads the schematic.
+	 * Loads this schematic.
 	 * 
-	 * @throws IOException Thrown if an I/O Exception is encountered while
-	 * attempting to load the schematic.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	public void load() throws IOException {
-		File file = getFile();
+		FileHandle file = getFile();
 		
 		if(file == null)
 			throw new IOException("Attempting to load an unnamed schematic!");
@@ -147,11 +146,10 @@ public class Schematic {
 	/**
 	 * Saves the schematic.
 	 * 
-	 * @throws IOException Thrown if an I/O Exception is encountered while
-	 * attempting to save the schematic.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	public void save() throws IOException {
-		File file = getFile();
+		FileHandle file = getFile();
 		
 		if(file == null)
 			throw new IOException("Attempting to save an unnamed schematic!");
@@ -187,7 +185,7 @@ public class Schematic {
 	
 	// Some preconstructed schematics
 	
-	public static final Schematic TREE_1 = new Schematic("tree_1", ArrayUtil.reverse2DIntArray(new int[][] {
+	public static final Schematic TREE_1 = new Schematic("tree_1", ArrayUtil.flip2DIntArray(new int[][] {
 			{ -1,-1, 5, 5, 5,-1,-1 },
 			{ -1, 5, 5, 5, 5, 5,-1 },
 			{  5, 5, 5, 4, 5, 5, 5 },

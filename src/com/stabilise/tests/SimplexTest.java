@@ -1,12 +1,12 @@
 package com.stabilise.tests;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.IOUtil;
 import com.stabilise.util.maths.SimplexNoise;
 
@@ -62,10 +62,10 @@ public class SimplexTest {
 		
 		BufferedImage image = getImageFromArray(pixels, width, height);
 		
-		IOUtil.createDirQuietly(new File("noise/"));
-		File file = IOUtil.getNewFile(new File("noise/simplex.png"));
+		IOUtil.createDir(new FileHandle("noise/"));
+		FileHandle file = IOUtil.getNewFile(new FileHandle("noise/simplex.png"));
 		try {
-			ImageIO.write(image, "png", file);
+			ImageIO.write(image, "png", file.file());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

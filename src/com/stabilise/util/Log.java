@@ -1,14 +1,13 @@
 package com.stabilise.util;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Resources;
 import com.stabilise.util.collect.LightweightLinkedList;
 
@@ -336,7 +335,7 @@ public class Log {
 		String fileName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(Calendar.getInstance().getTime());
 		if(crashLog)
 			fileName += " [CRASH]";
-		File logFile = new File(Resources.LOG_DIR, fileName + ".txt");
+		FileHandle logFile = Resources.LOG_DIR.child(fileName + ".txt");
 		saveLog(crashLog, prefixMessage, logFile);
 	}
 	
@@ -347,17 +346,17 @@ public class Log {
 	 * @param prefixMessage The message with which to prefix the log dump.
 	 * @param file The file to which to save the log.
 	 */
-	public static void saveLog(boolean crashLog, String prefixMessage, File file) {
+	public static void saveLog(boolean crashLog, String prefixMessage, FileHandle file) {
 		synchronized(entries) {
 			if(entries.isEmpty())
 				return;
 		}
 		
-		IOUtil.createParentDirQuietly(file);
+		IOUtil.createParentDir(file);
 		
 		BufferedWriter writer = null;
 		try {
-			writer = new BufferedWriter(new FileWriter(file, true));
+			writer = new BufferedWriter(file.writer(true));
 			
 			if(crashLog) {
 				writer.write("==========Begin crash log==========");
@@ -385,7 +384,7 @@ public class Log {
 				if(writer != null)
 					writer.close();
 			} catch(IOException e) {
-				// asdfghjkl
+				get().postSevere("asdfghjkl", e);
 			}
 		}
 	}

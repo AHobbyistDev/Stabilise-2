@@ -1,9 +1,9 @@
 package com.stabilise.world;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 
@@ -63,11 +63,11 @@ public class WorldInfo implements Comparable<WorldInfo> {
 	 * Loads the world info. Note that {@code fileSystemName} must first be
 	 * set.
 	 * 
-	 * @throws IOException Thrown if the info file does not exist or an I/O
-	 * exception is otherwise encountered when loading the info file.
+	 * @throws IOException if the info file does not exist or an I/O error
+	 * otherwise occurs.
 	 */
 	public void load() throws IOException {
-		File file = getFile();
+		FileHandle file = getFile();
 		if(!file.exists())
 			throw new IOException("Info file does not exist!");
 		
@@ -117,13 +117,10 @@ public class WorldInfo implements Comparable<WorldInfo> {
 	}
 	
 	/**
-	 * Gets the File pointing to this WorldInfo's save location on the file
-	 * system.
-	 * 
-	 * @return This WorldInfo's file.
+	 * Gets this WorldInfo filesystem location.
 	 */
-	private File getFile() {
-		return new File(IWorld.getWorldDir(fileSystemName), BaseWorld.FILE_INFO);
+	private FileHandle getFile() {
+		return IWorld.getWorldDir(fileSystemName).child(IWorld.FILE_INFO);
 	}
 	
 	/*

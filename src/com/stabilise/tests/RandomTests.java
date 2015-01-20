@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 
 import com.badlogic.gdx.utils.ObjectMap;
-import com.stabilise.util.IOUtil;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.StringUtil;
 import com.stabilise.util.maths.HashPoint;
@@ -233,18 +232,6 @@ public class RandomTests {
 		System.out.println("Min: " + min);
 		System.out.println("Max: " + max);
 		System.out.println("Avg: " + avg);
-	}
-	
-	@SuppressWarnings("unused")
-	private static void testNewFiles() {
-		File dir = new File("E:/");
-		
-		System.out.println(IOUtil.getNewFile("file1.txt", dir).getAbsolutePath());
-		System.out.println(IOUtil.getNewFile(new File("E:/file1.txt")).getAbsolutePath());
-		System.out.println(IOUtil.getNewFile("file1 - 1.txt", dir).getAbsolutePath());
-		System.out.println(IOUtil.getNewFile(new File("E:/file1 - 1.txt")).getAbsolutePath());
-		System.out.println(IOUtil.getNewFile("file2.txt", dir).getAbsolutePath());
-		System.out.println(IOUtil.getNewFile(new File("E:/file2.txt")).getAbsolutePath());
 	}
 	
 	@SuppressWarnings("unused")
@@ -665,7 +652,7 @@ public class RandomTests {
         image.setRGB(0, 0, width, height, pixels, 0, width);
 		
         File dir = new File("C:/Users/Adam/Documents/Hash Collisions/");
-		IOUtil.createDirQuietly(dir);
+		dir.mkdirs();
 		
 		try {
 			ImageIO.write(image, "png", new File(dir, p.toString() + ".png"));

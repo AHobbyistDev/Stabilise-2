@@ -21,7 +21,7 @@ public class ArrayUtil {
 	 * 
 	 * @return {@code arr}
 	 */
-	public static int[][] reverse2DIntArray(int[][] arr) {
+	public static int[][] flip2DIntArray(int[][] arr) {
 		if(arr == null || arr.length < 2)
 			return arr;
 		

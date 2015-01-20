@@ -1,12 +1,9 @@
 package com.stabilise.util;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.google.common.io.Files;
-import com.stabilise.util.annotation.PrivateBecauseInelegant;
 
 /**
  * This class provides some static utility IO methods.
@@ -18,100 +15,36 @@ public class IOUtil {
 	
 	/**
 	 * Creates a file directory, including all nonexistent parent directories,
-	 * if it does not already exist. This method fails fast by throwing an
-	 * {@code IOException} if the directory could not be created. Note that if
-	 * this operation fails it may have succeeded in creating some of the
-	 * necessary parent directories.
+	 * if it does not already exist, as per the standard {@link File#mkdirs()}
+	 * contract.
 	 * 
-	 * @param dir The directory to create.
+	 * @param handle The handle for the directory to create.
 	 * 
-	 * @return The {@code File} passed as the {@code dir} parameter, for
-	 * chaining operations.
-	 * @throws NullPointerException if {@code dir} is {@code null}.
-	 * @throws IOException if the directory failed to be created.
+	 * @return {@code handle}, for chaining operations.
+	 * @throws NullPointerException if {@code handle} is {@code null}.
+	 * @throws GDXRuntimeException if {@code handle} is an internal or
+	 * classpath handle.
 	 */
-	public static File createDir(File dir) throws IOException {
-		if(dir == null)
-			throw new NullPointerException("dir is null");
-		
-		if(!dir.exists() && !dir.mkdirs())
-			throw new IOException("Directory \"" + dir.getAbsolutePath() + "\" could not be created!");
-		
-		return dir;
+	public static FileHandle createDir(FileHandle handle) {
+		handle.mkdirs();
+		return handle;
 	}
 	
 	/**
-	 * Creates a file directory, including all nonexistent parent directories,
-	 * if it does not already exist. Note that if this operation fails it may
-	 * have succeeded in creating some of the necessary parent directories.
-	 * Unlike {@link #createDir(File)}, this will not throw an exception if the
-	 * directory could not be created, and so it it not guaranteed that the
-	 * operation was successful.
+	 * Creates a file or directory's parent directory, including all
+	 * nonexistent parent directories, if it does not already exist, as per the
+	 * standard {@link File#mkdirs()} contract.
 	 * 
-	 * @param dir The directory create.
+	 * @param handle The handle for the directory to create.
 	 * 
-	 * @return The {@code File} passed as the {@code dir} parameter, for
-	 * chaining operations.
-	 * @throws NullPointerException if {@code dir} is {@code null}.
+	 * @return {@code handle}, for chaining operations.
+	 * @throws NullPointerException if {@code handle} is {@code null}.
+	 * @throws GDXRuntimeException if {@code handle} is an internal or
+	 * classpath handle.
 	 */
-	public static File createDirQuietly(File dir) {
-		try {
-			createDir(dir);
-		} catch(IOException e) {
-			//Log.exception(e);
-		}
-		
-		return dir;
-	}
-	
-	/**
-	 * Creates a file's parent directory, including all nonexistent parent
-	 * directories of that directory, if it does not already exist. This
-	 * method fails fast by throwing an {@code IOException} if the directory
-	 * could not be created. Note that if this operation fails it may have
-	 * succeeded in creating some of the necessary parent directories.
-	 * 
-	 * @param file The file whose parent directory to create.
-	 * 
-	 * @return The {@code File} passed as the {@code file} parameter, for
-	 * chaining operations.
-	 * @throws NullPointerException if {@code file} is {@code null}.
-	 * @throws IOException if the directory failed to be created.
-	 */
-	public static File createParentDir(File file) throws IOException {
-		if(file == null)
-			throw new NullPointerException("file is null");
-		
-		File parentDir = file.getAbsoluteFile().getParentFile();
-		
-		if(parentDir != null)
-			createDir(parentDir);
-		
-		return file;
-	}
-	
-	/**
-	 * Creates a file's parent directory, including all nonexistent parent
-	 * directories of that directory, if it does not already exist. Note that
-	 * if this operation fails it may have succeeded in creating some of the
-	 * necessary parent directories. Unlike {@link #createParentDir(File)},
-	 * this will not throw an exception if the file's parent directory could
-	 * not be created, and so it it not guaranteed that the operation was
-	 * successful.
-	 * 
-	 * @param file The file whose parent directory to create.
-	 * 
-	 * @return The {@code File} passed as the {@code file} parameter, for
-	 * chaining operations.
-	 * @throws NullPointerException if {@code file} is {@code null}.
-	 */
-	public static File createParentDirQuietly(File file) {
-		try {
-			createParentDir(file);
-		} catch(IOException e) {
-			//Log.exception(e);
-		}
-		return file;
+	public static FileHandle createParentDir(FileHandle handle) {
+		handle.parent().mkdirs();
+		return handle;
 	}
 	
 	/**
@@ -148,17 +81,11 @@ public class IOUtil {
 	 * 
 	 * @return The first valid file.
 	 * @throws NullPointerException if {@code file} is {@code null}.
-	 * @throws IllegalArgumentException if {@code file} lacks a parent
-	 * directory.
 	 */
-	public static File getNewFile(File file) {
+	public static FileHandle getNewFile(FileHandle file) {
 		if(!file.exists())
 			return file;
-		
-		String originalName = file.getName();
-		File parentDir = file.getAbsoluteFile().getParentFile();
-		
-		return getNewFile(originalName, parentDir);
+		return getNewFile(file.name(), file.parent());
 	}
 	
 	/**
@@ -198,21 +125,15 @@ public class IOUtil {
 	 * @throws NullPointerException if either {@code fileName} or {@code
 	 * parentDir} are {@code null}.
 	 */
-	public static File getNewFile(String fileName, File parentDir) {
-		if(parentDir == null)
-			throw new NullPointerException("parentDir is null!");
-		
+	public static FileHandle getNewFile(String fileName, FileHandle parentDir) {
 		String originalName = Files.getNameWithoutExtension(fileName);
 		String extension = Files.getFileExtension(fileName);
-		if(!extension.equals(""))
+		if(extension.length() != 0)
 			extension = "." + extension;
-		File file;
+		FileHandle file;
 		
-		for(int i = 1; (file = new File(parentDir, fileName)).exists(); i++)
+		for(int i = 1; (file = parentDir.child(fileName)).exists(); i++)
 			fileName = originalName + " - " + i + extension;
-		
-		// Outside the scope of this method
-		//createDir(parentDir);
 		
 		return file;
 	}
@@ -221,117 +142,30 @@ public class IOUtil {
 	 * Ensures that the given string contains only legal filename characters,
 	 * and returns a modified version of the string such that it is legal.
 	 * 
-	 * @param string The string.
+	 * @param str The string.
 	 * 
 	 * @return The modified string.
-	 * @throws NullPointerException if {@code string} is {@code null}.
+	 * @throws NullPointerException if {@code str} is {@code null}.
 	 */
-	public static String getLegalString(String string) {
+	public static String getLegalString(String str) {
 		// Allows lowercase+uppercase letters, all numbers, spaces (\u0020),
 		// parentheses, periods, dashes, and inverted commas 
-		return string.replaceAll("[^a-zA-Z0-9\\u0020().'-]", "_");
-	}
-	
-	/**
-	 * Safely saves a file by writing the data to a temporary file and then
-	 * renaming the temporary file to the desired file name. This is done as to
-	 * ensure data is not lost if for some reason the save process is
-	 * interrupted and it is desirable to retain the earlier version of the
-	 * file.
-	 * 
-	 * <p>The {@code saveMethod} parameter specifies the method which will
-	 * execute the actual process of saving. This method <i>must</i> possess a
-	 * {@link java.io.File File} object as its first argument as the file to
-	 * which to safe the file; any further arguments are optional, and the
-	 * {@code args} parameter specifies any further arguments which are to be
-	 * passed to the save method.
-	 * 
-	 * @param file The file.
-	 * @param saveMethod The save method.
-	 * @param arg The save method's optional further arguments.
-	 * 
-	 * @throws Exception if the save method failed to invoke reflectively, or
-	 * threw an exception.
-	 * @throws IOException if the old file was not deleted.
-	 */
-	@PrivateBecauseInelegant(alternative={"safelySaveFile1", "safelySaveFile2"})
-	private static void safelySaveFile(File file, Method saveMethod, Object... arg) throws Exception {
-		safelySaveFile(file, null, saveMethod, arg);
-	}
-	
-	/**
-	 * Safely saves a file by writing the data to a temporary file and then
-	 * renaming the temporary file to the desired file name. This is done as to
-	 * ensure data is not lost if for some reason the save process is
-	 * interrupted and it is desirable to retain the earlier version of the
-	 * file.
-	 * 
-	 * <p>The {@code saveMethod} parameter specifies the method which will
-	 * execute the actual process of saving. This method <i>must</i> possess a
-	 * {@link java.io.File File} object as its first argument as the file to
-	 * which to safe the file; any further arguments are optional, and the
-	 * {@code args} parameter specifies any further arguments which are to be
-	 * passed to the save method. The object passed as the {@code invoker}
-	 * parameter will be treated as the object to have invoked the save method;
-	 * it most cases it should be a {@code this} - however, if the method is
-	 * static, the {@code invoker} parameter is allowed to be {@code null}
-	 * (or, alternatively, you can refer to
-	 * {@link #safelySaveFile(File, Method, Object...)}).
-	 * 
-	 * @param file The file.
-	 * @param invoker The invoker object.
-	 * @param saveMethod The save method.
-	 * @param args The save method's optional further arguments.
-	 * 
-	 * @throws Exception if the save method failed to invoke reflectively, or
-	 * threw an exception.
-	 * @throws IOException if the old file was not deleted.
-	 */
-	@PrivateBecauseInelegant(alternative={"safelySaveFile1", "safelySaveFile2"})
-	private static void safelySaveFile(File file, Object invoker, Method saveMethod, Object... args) throws Exception {
-		File tempFile = new File(file.getAbsolutePath() + "_tmp");
-		
-		if(tempFile.exists())
-			tempFile.delete();
-		
-		// Prepend tempFile to the list of arguments
-		Object[] arguments = new Object[args.length + 1];
-		arguments[0] = tempFile;
-		for(int i = 0; i < args.length; i++) {
-			arguments[i+1] = args[i];
-		}
-		
-		try {
-			saveMethod.invoke(invoker, arguments);		// Can throw any number of exceptions
-		} catch(Exception e) {
-			if(e instanceof InvocationTargetException)	// Try to rethrow any exceptions thrown by the save method
-				throw (Exception)e.getCause();
-			else
-				throw e;
-		}
-		
-		if(file.exists())
-			file.delete();
-		
-		if(file.exists())
-			throw new IOException("Failed to delete " + file);
-		else
-			tempFile.renameTo(file);
+		return str.replaceAll("[^a-zA-Z0-9\\u0020().'-]", "_");
 	}
 	
 	/**
 	 * Performs the first part of a safe file save operation by preparing and
 	 * then returning the temporary file to which to write to. This should be
-	 * used together with {@link #safelySaveFile2(File)} as in a manner
+	 * used together with {@link #safelySaveFile2(FileHandle)} as in a manner
 	 * similar to:
 	 * 
 	 * <pre>
-	 * File tempFile = IOUtil.safelySaveFile1(someFile);
+	 * FileHandle tempFile = IOUtil.safelySaveFile1(someFile);
 	 * saveTheFile(tempFile);
 	 * IOUtil.safelySaveFile2(someFile);</pre>
 	 * 
-	 * <p>This together with <tt>safelySaveFile2(File)</tt> ensures that a file
-	 * is safely saved by writing the data to a temporary file and then
+	 * <p>This together with {@code safelySaveFile2(FileHandle)} ensures that
+	 * a file is safely saved by writing the data to a temporary file and then
 	 * renaming the temporary file to the desired file name. This is done as to
 	 * ensure data is not lost if for some reason the save process is
 	 * interrupted and it is desirable to retain the earlier version of the
@@ -341,29 +175,29 @@ public class IOUtil {
 	 * 
 	 * @return The temporary file to which to write.
 	 * @throws NullPointerException if {@code file} is {@code null}.
+	 * @throws GdxRuntimeException if {@code file} is an internal or classpath
+	 * file.
 	 */
-	public static File safelySaveFile1(File file) {
-		File tempFile = new File(file.getAbsolutePath() + "_tmp");
-		
-		if(tempFile.exists())
-			tempFile.delete();
-		
-		return tempFile;
+	public static FileHandle safelySaveFile1(FileHandle file) {
+		FileHandle tmp = file.sibling(file.name() + "_tmp");
+		if(tmp.exists())
+			tmp.delete();
+		return tmp;
 	}
 	
 	/**
 	 * Performs the second part of a safe file save operation by deleting the
 	 * original file and renaming the temporary file to which the data was
 	 * written to the name of the original file. This should be used together
-	 * with {@link #safelySaveFile1(File)} as in a manner similar to:
+	 * with {@link #safelySaveFile1(FileHandle)} as in a manner similar to:
 	 * 
 	 * <pre>
-	 * File tempFile = IOUtil.safelySaveFile1(someFile);
+	 * FileHandle tempFile = IOUtil.safelySaveFile1(someFile);
 	 * saveTheFile(tempFile);
 	 * IOUtil.safelySaveFile2(someFile);</pre>
 	 * 
-	 * <p>This together with <tt>safelySaveFile1(File)</tt> ensures that a
-	 * file is safely saved by writing the data to a temporary file and then
+	 * <p>This together with {@code safelySaveFile1(FileHandle)} ensures that
+	 * a file is safely saved by writing the data to a temporary file and then
 	 * renaming the temporary file to the desired file name. This is done as to
 	 * ensure data is not lost if for some reason the save process is
 	 * interrupted and it is desirable to retain the earlier version of the
@@ -373,14 +207,16 @@ public class IOUtil {
 	 * 
 	 * @throws NullPointerException if {@code file} is {@code null}.
 	 * @throws RuntimeException if the original file was not deleted.
+	 * @throws GdxRuntimeException if {@code file} is an internal or classpath
+	 * file.
 	 */
-	public static void safelySaveFile2(File file) {
+	public static void safelySaveFile2(FileHandle file) {
 		if(file.exists() && !file.delete())
 			// A checked IOException may be annoying, so use an unchecked RuntimeException
 			//throw new IOException("Failed to delete " + file);
 			throw new RuntimeException("Failed to delete " + file);
 		else
-			(new File(file.getAbsolutePath() + "_tmp")).renameTo(file);
+			file.sibling(file.name() + "_tmp").file().renameTo(file.file());
 	}
 
 }

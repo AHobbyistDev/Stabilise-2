@@ -20,16 +20,6 @@ import com.stabilise.util.Log;
  */
 public class Controller implements InputProcessor {
 	
-	static {
-		BiMap<Integer, Control> controlMap = HashBiMap.create();
-		CONTROL_MAP = controlMap;
-		KEY_MAP = controlMap.inverse();
-		initialise();
-	}
-	
-	/** Invoking this loads this class into memory. */
-	public static void poke() {}
-	
 	//--------------------==========--------------------
 	//-----=====Static Constants and Variables=====-----
 	//--------------------==========--------------------
@@ -110,13 +100,20 @@ public class Controller implements InputProcessor {
 	};
 	
 	/** The key mappings. Maps keycodes to controls. */
-	private static final BiMap<Integer, Control> CONTROL_MAP;
+	private static final BiMap<Integer, Control> CONTROL_MAP = HashBiMap.create();
 	/** The control mappings. Maps controls to keycodes. The inverse of
 	 * {@link #CONTROL_MAP}. */
-	private static final BiMap<Control, Integer> KEY_MAP;
+	private static final BiMap<Control, Integer> KEY_MAP = CONTROL_MAP.inverse();
 	
 	/** Whether or not the controller mappings have been set up. */
 	private static boolean initialised = false;
+	
+	static {
+		initialise();
+	}
+	
+	/** Invoking this loads this class into memory. */
+	public static void poke() {}
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------

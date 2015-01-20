@@ -223,9 +223,8 @@ public class ModelPlayer extends Model {
 						setSprite(SPRITE_ATTACK_AIR_SIDE_1);
 					else
 						setSprite(SPRITE_ATTACK_AIR_SIDE_2);
-				} else {
+				} else
 					setSprite(SPRITE_ATTACK_AIR_SIDE_3);
-				}
 				break;
 			case ATTACK_UP_AIR:
 				if(stateDuration < EntityPerson.ATTACK_UP_AIR_FRAME_3_BEGIN) {
@@ -233,9 +232,8 @@ public class ModelPlayer extends Model {
 						setSprite(SPRITE_ATTACK_AIR_UP_1);
 					else
 						setSprite(SPRITE_ATTACK_AIR_UP_2);
-				} else {
+				} else
 					setSprite(SPRITE_ATTACK_AIR_UP_3);
-				}
 				break;
 			case ATTACK_DOWN_AIR:
 				if(stateDuration < EntityPerson.ATTACK_DOWN_AIR_FRAME_3_BEGIN) {
@@ -243,9 +241,8 @@ public class ModelPlayer extends Model {
 						setSprite(SPRITE_ATTACK_AIR_DOWN_1);
 					else
 						setSprite(SPRITE_ATTACK_AIR_DOWN_2);
-				} else {
+				} else
 					setSprite(SPRITE_ATTACK_AIR_DOWN_3);
-				}
 				break;
 			case SPECIAL_SIDE_GROUND:
 				if(stateDuration < EntityPerson.SPECIAL_SIDE_GROUND_FRAME_2_BEGIN)

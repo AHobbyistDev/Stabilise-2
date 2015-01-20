@@ -1,12 +1,12 @@
 package com.stabilise.character;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
@@ -124,7 +124,7 @@ public class CharacterData {
 	 * to load the character data.
 	 */
 	public void load() throws IOException {
-		NBTTagCompound tag = NBTIO.readCompressed(new File(getCharacterDir(fileSystemName), FILE_DATA));
+		NBTTagCompound tag = NBTIO.readCompressed(getCharacterDir(fileSystemName).child(FILE_DATA));
 		
 		// TODO: For now only the hash and name are configured to throw
 		// IOExceptions, as they're the only important details
@@ -168,7 +168,7 @@ public class CharacterData {
 		
 		tag.addList("inventory", inventory.toNBT());
 		
-		NBTIO.safeWriteCompressed(new File(getCharacterDir(fileSystemName), FILE_DATA), tag);
+		NBTIO.safeWriteCompressed(getCharacterDir(fileSystemName).child(FILE_DATA), tag);
 	}
 	
 	//--------------------==========--------------------
@@ -184,21 +184,21 @@ public class CharacterData {
 	 * @return An array of created characters.
 	 */
 	public static CharacterData[] getCharactersList() {
-		IOUtil.createDirQuietly(Resources.CHARACTERS_DIR);
-		File[] characterDirs = Resources.CHARACTERS_DIR.listFiles();
+		IOUtil.createDir(Resources.CHARACTERS_DIR);
+		FileHandle[] characterDirs = Resources.CHARACTERS_DIR.list();
 		
 		// Initially store as a List because of its dynamic length
 		List<CharacterData> characters = new ArrayList<CharacterData>();
 		
 		// Cycle over all the folders in the characters directory and determine
 		// their validity.
-		for(File charDir : characterDirs) {
-			CharacterData character = new CharacterData(charDir.getName());
+		for(FileHandle charDir : characterDirs) {
+			CharacterData character = new CharacterData(charDir.name());
 			try {
 				character.load();
 				characters.add(character);
 			} catch(IOException e) {
-				Log.get().postSevere("Could not load character data for character \"" + charDir.getName() + "\"!");
+				Log.get().postSevere("Could not load character data for character \"" + charDir.name() + "\"!");
 				continue;
 			}
 		}
@@ -222,12 +222,10 @@ public class CharacterData {
 	 * @throws NullPointerException if {@code characterName} is {@code null}.
 	 * @throws IllegalArgumentException if {@code characterName} is empty.
 	 */
-	public static File getCharacterDir(String characterName) {
-		if(characterName == null)
-			throw new NullPointerException("characterName is null");
-		if(characterName == "")
+	public static FileHandle getCharacterDir(String characterName) {
+		if(characterName.length() == 0)
 			throw new IllegalArgumentException("characterName is empty");
-		return new File(Resources.CHARACTERS_DIR, IOUtil.getLegalString(characterName) + "/");
+		return Resources.CHARACTERS_DIR.child(IOUtil.getLegalString(characterName) + "/");
 	}
 	
 	/**

@@ -1,13 +1,5 @@
 package com.stabilise.core.main;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.commons.io.FileUtils;
-
-import com.stabilise.core.Resources;
-import com.stabilise.util.Log;
-
 /**
  * The game uninstaller
  */
@@ -20,6 +12,7 @@ public class Uninstaller {
 	/**
 	 * Runs the installer program.
 	 */
+	/*
 	public static void main(String[] args) {
 		try {
 			FileUtils.deleteQuietly(new File("Install output.txt"));
@@ -39,5 +32,6 @@ public class Uninstaller {
 		//Log.saveLog(false, "", new File("README.txt"));
 		System.exit(0);
 	}
+	*/
 	
 }

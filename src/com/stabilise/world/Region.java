@@ -2,10 +2,10 @@ package com.stabilise.world;
 
 import static com.stabilise.core.Constants.REGION_UNLOAD_TICK_BUFFER;
 
-import java.io.File;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.maths.HashPoint;
@@ -261,19 +261,17 @@ public class Region {
 	}
 	
 	/**
-	 * Gets the region's file.
-	 * 
-	 * @return The File object representing where the region is stored on the
-	 * file system.
+	 * Gets this region's file.
 	 */
-	public File getFile() {
-		return new File(world.getDir(), BaseWorld.DIR_REGIONS + "r_" + loc.x + "_" + loc.y + ".region");
+	public FileHandle getFile() {
+		return world.getDir().child(BaseWorld.DIR_REGIONS + "r_" + loc.x + "_" + loc.y + ".region");
 	}
 	
 	/**
-	 * Checks for whether or not the region's file exists.
+	 * Checks for whether or not this region's file exists.
 	 * 
-	 * @return {@code true} if the region has a saved file.
+	 * @return {@code true} if this region has a saved file; {@code false}
+	 * otherwise.
 	 */
 	public boolean fileExists() {
 		return getFile().exists();

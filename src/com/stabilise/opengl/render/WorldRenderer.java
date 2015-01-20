@@ -2,6 +2,7 @@ package com.stabilise.opengl.render;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.stabilise.core.Application;
@@ -54,6 +55,8 @@ public class WorldRenderer implements Renderer {
 	int slicesHorizontal;
 	/** The number of slices which may fit vertically on the screen. */
 	int slicesVertical;
+	
+	SpriteBatch batch;
 	
 	Viewport viewport;
 	

@@ -1,14 +1,5 @@
 package com.stabilise.core.main;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.commons.io.FileUtils;
-
-import com.stabilise.core.Resources;
-import com.stabilise.util.IOUtil;
-import com.stabilise.util.Log;
-
 /**
  * The game installer.
  */
@@ -21,6 +12,7 @@ public class Installer {
 	/**
 	 * Runs the installer program.
 	 */
+	/*
 	public static void main(String[] args) {
 		IOUtil.createDirQuietly(Resources.APP_DIR);
 		try {
@@ -42,5 +34,6 @@ public class Installer {
 		Log.saveLog(false, "", new File("Game successfully installed.txt"));
 		System.exit(0);
 	}
+	*/
 	
 }

@@ -1,6 +1,5 @@
 package com.stabilise.world;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,8 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.io.FileUtils;
-
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Resources;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
@@ -369,8 +367,6 @@ public interface IWorld {
 			worldName = originalWorldName + " - " + iteration;
 		}
 		
-		IOUtil.createDirQuietly(Resources.WORLDS_DIR);
-		
 		WorldInfo info = new WorldInfo(worldName);
 		
 		info.name = originalWorldName;
@@ -401,16 +397,16 @@ public interface IWorld {
 	/**
 	 * Gets a world's directory, given its name.
 	 * 
-	 * @param worldName The world's name, on disk.
+	 * @param worldName The world's filesystem name.
 	 * 
-	 * @return The file representing the world's folder.
-	 * @throws IllegalArgumentException Thrown if the given string is empty or
-	 * {@code null}.
+	 * @return The file representing the world's directory.
+	 * @throws NullPointerException if {@code worldName} is {@code null}.
+	 * @throws IllegalArgumentException if {@code worldName} is empty.
 	 */
-	public static File getWorldDir(String worldName) {
-		if(worldName == null || worldName == "")
-			throw new IllegalArgumentException("The world name must not be null or empty!");
-		return new File(Resources.WORLDS_DIR, IOUtil.getLegalString(worldName) + "/");
+	public static FileHandle getWorldDir(String worldName) {
+		if(worldName.length() == 0)
+			throw new IllegalArgumentException("The world name must not be empty!");
+		return Resources.WORLDS_DIR.child(IOUtil.getLegalString(worldName) + "/");
 	}
 	
 	/**
@@ -419,8 +415,8 @@ public interface IWorld {
 	 * @return An array of created worlds.
 	 */
 	public static WorldInfo[] getWorldsList() {
-		IOUtil.createDirQuietly(Resources.WORLDS_DIR);
-		File[] worldDirs = Resources.WORLDS_DIR.listFiles();
+		IOUtil.createDir(Resources.WORLDS_DIR);
+		FileHandle[] worldDirs = Resources.WORLDS_DIR.list();
 		
 		// Initially store as an ArrayList because of its dynamic length
 		List<WorldInfo> worlds = new ArrayList<WorldInfo>();
@@ -430,11 +426,11 @@ public interface IWorld {
 		// Cycle over all the folders in the worlds directory and determine their
 		// validity as worlds.
 		for(int i = 0; i < worldDirs.length; i++) {
-			worlds.add(validWorlds, new WorldInfo(worldDirs[i].getName()));
+			worlds.add(validWorlds, new WorldInfo(worldDirs[i].name()));
 			try {
 				worlds.get(validWorlds).load();
 			} catch(IOException e) {
-				Log.get().postWarning("Could not load world info for world \"" + worldDirs[i].getName() + "\"!", e);
+				Log.get().postWarning("Could not load world info for world \"" + worldDirs[i].name() + "\"!", e);
 				worlds.remove(validWorlds);
 				continue;
 			}
@@ -454,19 +450,13 @@ public interface IWorld {
 	 * Deletes a world. All world files will be removed permanently from the
 	 * file system.
 	 * 
-	 * @param worldName The name of the world, on the file system.
+	 * @param worldName The world's filesystem name.
+	 * 
+	 * @throws NullPointerException if {@code worldName} is {@code null}.
+	 * @throws IllegalArgumentException if {@code worldName} is empty.
 	 */
 	public static void deleteWorld(String worldName) {
-		if(worldName == null || worldName == "")
-			throw new IllegalArgumentException("The world name must not be null or empty!");
-		
-		File world = new File(Resources.WORLDS_DIR, IOUtil.getLegalString(worldName) + "/");
-		
-		try {
-			FileUtils.deleteDirectory(world);
-		} catch(IOException e) {
-			Log.get().postSevere("Could not delete world \"" + worldName + "\"!", e);
-		}
+		getWorldDir(worldName).deleteDirectory();
 	}
 	
 }

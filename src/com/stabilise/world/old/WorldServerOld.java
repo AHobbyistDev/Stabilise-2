@@ -9,6 +9,7 @@ import java.util.Iterator;
 import static com.stabilise.world.Region.REGION_SIZE;
 import static com.stabilise.world.Slice.SLICE_SIZE;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.GameServer;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
@@ -208,7 +209,7 @@ public class WorldServerOld extends BaseWorld {
 	 * 
 	 * @return The File representing the world's directory.
 	 */
-	public File getDir() {
+	public FileHandle getDir() {
 		return IWorld.getWorldDir(info.fileSystemName); //new File(Resources.WORLDS_DIR, IO.getLegalString(info.nameOnDisk) + "/");
 	}
 	

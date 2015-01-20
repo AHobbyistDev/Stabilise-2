@@ -1,12 +1,11 @@
 package com.stabilise.util;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Resources;
 
 /**
@@ -390,68 +389,43 @@ public class ConfigFile {
 	 * currently set.
 	 * 
 	 * @return The ConfigFile, for chain construction.
-	 * @throws IOException Thrown if an I/O exception was encountered while
-	 * attempting to load the config file.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	public ConfigFile load() throws IOException {
 		//tags.clear();
 		
-		String[] lines = Resources.loadTextFileFromFileSystem(getFile());
+		String[] lines = Resources.readTextFile(getFile());
 		String[] keyValuePair;
 		for(String s : lines) {
 			keyValuePair = s.split(":");
-			try {
+			if(keyValuePair.length == 2) // ignore invalid lines
 				tags.put(keyValuePair[0], keyValuePair[1]);
-			} catch(ArrayIndexOutOfBoundsException e) {
-				// ignored - we'll just skip invalid lines
-			}
 		}
-		
-		/*
-		FileReader fr = new FileReader(getFile());		// May throw a FileNotFoundException
-		BufferedReader br = new BufferedReader(fr);
-		
-		String s;
-		String[] keyValue;
-		
-		try {
-			while((s = br.readLine()) != null) {
-				keyValue = s.split(":");
-				tags.put(keyValue[0], keyValue[1]);
-			}
-		} finally {
-			br.close();
-			fr.close();
-		}
-		*/
 		
 		return this;
 	}
 	
 	/**
-	 * Saves the config file.
+	 * Saves this config file.
 	 * 
-	 * @throws IOException Thrown if an I/O exception was encountered while
-	 * attempting to save the config file.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	public void save() throws IOException {
-		File file = getFile();
+		FileHandle file = getFile();
 		if(file.exists())
 			file.delete();
 		save(getFile());
 	}
 	
 	/**
-	 * Saves the config file.
+	 * Saves this config file.
 	 * 
 	 * @param file The file to which to save the file.
 	 * 
-	 * @throws IOException Thrown if an I/O exception was encountered while
-	 * attempting to save the config file.
+	 * @throws IOException if an I/O error occurs.
 	 */
-	private void save(File file) throws IOException {
-		FileWriter fw = new FileWriter(file);			// May throw a FileNotFoundException
-		BufferedWriter bw = new BufferedWriter(fw);
+	private void save(FileHandle file) throws IOException {
+		BufferedWriter bw = new BufferedWriter(file.writer(false));
 		
 		try {
 			for(Entry<String, String> e : tags.entrySet()) {
@@ -460,7 +434,6 @@ public class ConfigFile {
 			}
 		} finally {
 			bw.close();
-			fw.close();
 		}
 	}
 	
@@ -471,19 +444,17 @@ public class ConfigFile {
 	 * attempting to save the config file.
 	 */
 	public void safeSave() throws IOException {
-		File file = getFile();
-		File tempFile = IOUtil.safelySaveFile1(file);
+		FileHandle file = getFile();
+		FileHandle tempFile = IOUtil.safelySaveFile1(file);
 		save(tempFile);
 		IOUtil.safelySaveFile2(file);
 	}
 	
 	/**
-	 * Gets the file reference for the config file.
-	 * 
-	 * @return The file representing the config file.
+	 * Gets the file reference for this config file.
 	 */
-	private File getFile() {
-		return IOUtil.createParentDirQuietly(new File(Resources.CONFIG_DIR, name + CONFIG_FILE_EXTENSION));
+	private FileHandle getFile() {
+		return IOUtil.createParentDir(Resources.CONFIG_DIR.child(name + CONFIG_FILE_EXTENSION));
 	}
 	
 	/**

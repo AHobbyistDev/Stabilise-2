@@ -1,9 +1,8 @@
 package com.stabilise.core;
 
-import java.io.File;
 import java.io.IOException;
 
-import com.stabilise.util.IOUtil;
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.Log;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
@@ -65,8 +64,7 @@ public class Constants {
 	 */
 	private static int getRevision() {
 		if(DEV_VERSION) {
-			IOUtil.createDirQuietly(Resources.APP_DIR);
-			File file = new File(Resources.APP_DIR, "revision");
+			FileHandle file = Resources.APP_DIR.child("revision");
 			try {
 				NBTTagCompound tag = null;
 				

@@ -5,14 +5,13 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.IOUtil;
 
 /**
@@ -51,15 +50,14 @@ public class NBTIO {
 	 * 
 	 * @return The compound tag constituting the file.
 	 * @throws NullPointerException if {@code file} is {@code null}.
-	 * @throws IOException if an I/O exception is encountered while loading the
-	 * file.
+	 * @throws IOException if an I/O error occurs.
 	 */
-	public static NBTTagCompound read(File file) throws IOException {
-		FileInputStream fis = new FileInputStream(file);
+	public static NBTTagCompound read(FileHandle file) throws IOException {
+		InputStream is = file.read(); // usually a FileInputStream
 		try {
-			return read(fis);
+			return read(is);
 		} finally {
-			fis.close();
+			is.close();
 		}
 	}
 	
@@ -71,8 +69,7 @@ public class NBTIO {
 	 * 
 	 * @return The compound tag constituting the file.
 	 * @throws NullPointerException if {@code in} is {@code null}.
-	 * @throws IOException if an I/O exception is encountered while loading the
-	 * file.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	public static NBTTagCompound read(InputStream in) throws IOException {
 		BufferedInputStream bis = new BufferedInputStream(in);
@@ -93,30 +90,25 @@ public class NBTIO {
 	 * 
 	 * @return The compound tag constituting the file.
 	 * @throws NullPointerException if {@code file} is {@code null}.
-	 * @throws IOException if an I/O exception is encountered while loading the
-	 * file.
+	 * @throws IOException if an I/O error occurs.
 	 */
-	public static NBTTagCompound readCompressed(File file) throws IOException {
-		FileInputStream fis = new FileInputStream(file);
-		GZIPInputStream gis = new GZIPInputStream(fis);
+	public static NBTTagCompound readCompressed(FileHandle file) throws IOException {
+		GZIPInputStream gis = new GZIPInputStream(file.read());
 		try {
 			return read(gis);
 		} finally {
 			gis.close();
-			fis.close();
 		}
 	}
 	
 	/**
 	 * Reads an NBT file.
 	 * 
-	 * @param in The DataInputStream object linking to the file to be read
-	 * from.
+	 * @param in The input stream.
 	 * 
 	 * @return The compound tag constituting the file.
-	 * @throws NullPointerException Thrown if {@code in} is {@code null}.
-	 * @throws IOException Thrown if an I/O exception is encountered while
-	 * loading the file.
+	 * @throws NullPointerException if {@code in} is {@code null}.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	private static NBTTagCompound read(DataInputStream in) throws IOException {
 		NBTTag tag = readTag(in);
@@ -130,12 +122,11 @@ public class NBTIO {
 	/**
 	 * Reads an NBT tag from the given input stream.
 	 * 
-	 * @param in The DataInputStream to read the tag from.
+	 * @param in The input stream.
 	 * 
 	 * @return The tag.
-	 * @throws NullPointerException Thrown if {@code in} is {@code null}.
-	 * @throws IOException Thrown if an I/O exception is encountered while
-	 * loading the file.
+	 * @throws NullPointerException if {@code in} is {@code null}.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	static NBTTag readTag(DataInputStream in) throws IOException {
 		byte id = in.readByte();
@@ -161,17 +152,13 @@ public class NBTIO {
 	 * @param file The file to write the tag to.
 	 * @param tag The tag to write.
 	 * 
-	 * @throws IllegalArgumentException if {@code file} is {@code null}.
-	 * @throws NullPointerException if either {@code file} or {@code tag} are
-	 * {@code null}.
-	 * @throws IOException if an I/O exception is encountered while writing
-	 * the file.
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IOException if an I/O error occurs.
 	 */
-	public static void write(File file, NBTTagCompound tag) throws IOException {
-		IOUtil.createParentDirQuietly(file);
+	public static void write(FileHandle file, NBTTagCompound tag) throws IOException {
 		if(file.exists())
 			file.delete();
-		FileOutputStream out = new FileOutputStream(file);
+		OutputStream out = file.write(false); // usually a FileOutputStream
 		try {
 			write(out, tag);
 		} finally {
@@ -182,14 +169,11 @@ public class NBTIO {
 	/**
 	 * Writes a compound NBT tag to a file.
 	 * 
-	 * @param out The OutputStream linking to the file to be written to; this
-	 * is typically a FileOutputStream.
+	 * @param out The output stream.
 	 * @param tag The tag to write.
 	 * 
-	 * @throws NullPointerException if either {@code out} or {@code tag} are
-	 * {@code null}.
-	 * @throws IOException if an I/O exception is encountered while writing the
-	 * file.
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	public static void write(OutputStream out, NBTTagCompound tag) throws IOException {
 		BufferedOutputStream bos = new BufferedOutputStream(out);
@@ -203,39 +187,34 @@ public class NBTIO {
 	}
 	
 	/**
-	 * Writes a compound NBT tag to a file in a compressed format.
+	 * Writes a compound NBT tag to a file in a compressed format. If the file
+	 * already exists, it will be deleted and replaced by this one.
 	 * 
 	 * @param file The file to write the tag to.
 	 * @param tag The tag to write.
 	 * 
-	 * @throws NullPointerException if either {@code file} or {@code tag} are
-	 * {@code null}.
-	 * @throws IOException if an I/O exception is encountered while
-	 * writing the file.
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IOException if an I/O error occurs.
 	 */
-	public static void writeCompressed(File file, NBTTagCompound tag) throws IOException {
-		IOUtil.createParentDirQuietly(file);
-		FileOutputStream fos = new FileOutputStream(file);
-		GZIPOutputStream gos = new GZIPOutputStream(fos);
+	public static void writeCompressed(FileHandle file, NBTTagCompound tag) throws IOException {
+		if(file.exists())
+			file.delete();
+		GZIPOutputStream gos = new GZIPOutputStream(file.write(false));
 		try {
 			write(gos, tag);
 		} finally {
 			gos.close();
-			fos.close();
 		}
 	}
 	
 	/**
 	 * Writes an NBT tag to the given output stream.
 	 * 
-	 * @param out The OutputStream object linking to the file to be written
-	 * to.
+	 * @param out The output stream.
 	 * @param tag The tag to write.
 	 * 
-	 * @throws NullPointerException if {@code out} or {@code tag} is {@code
-	 * null}.
-	 * @throws IOException if an I/O exception is encountered while writing the
-	 * file.
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	static void writeTag(DataOutputStream out, NBTTag tag) throws IOException {
 		out.writeByte(tag.getId());
@@ -254,13 +233,11 @@ public class NBTIO {
 	 * @param file The file to write the tag to.
 	 * @param tag The tag to write.
 	 * 
-	 * @throws NullPointerException if either {@code file} or {@code tag} are
-	 * {@code null}.
-	 * @throws IOException if an I/O exception is encountered while writing the
-	 * file.
+	 * @throws NullPointerException if either argument {@code null}.
+	 * @throws IOException if an I/O error occurs.
 	 */
-	public static void safeWrite(File file, NBTTagCompound tag) throws IOException {
-		File tempFile = IOUtil.safelySaveFile1(file);
+	public static void safeWrite(FileHandle file, NBTTagCompound tag) throws IOException {
+		FileHandle tempFile = IOUtil.safelySaveFile1(file);
 		write(tempFile, tag);
 		IOUtil.safelySaveFile2(file);
 	}
@@ -273,15 +250,13 @@ public class NBTIO {
 	 * @param file The file to write the tag to.
 	 * @param tag The tag to write.
 	 * 
-	 * @throws NullPointerException if either {@code file} or {@code tag} are
-	 * {@code null}.
-	 * @throws IOException if an I/O exception is encountered while writing the
-	 * file.
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IOException if an I/O error occurs.
 	 */
-	public static void safeWriteCompressed(File file, NBTTagCompound tag) throws IOException {
-		File tempFile = IOUtil.safelySaveFile1(file);
+	public static void safeWriteCompressed(FileHandle file, NBTTagCompound tag) throws IOException {
+		FileHandle tempFile = IOUtil.safelySaveFile1(file);
 		writeCompressed(tempFile, tag);
 		IOUtil.safelySaveFile2(file);
 	}
-
+	
 }

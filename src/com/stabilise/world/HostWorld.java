@@ -1,11 +1,11 @@
 package com.stabilise.world;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.google.common.base.Preconditions;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
@@ -459,10 +459,8 @@ public abstract class HostWorld extends BaseWorld {
 	
 	/**
 	 * Gets the world's directory.
-	 * 
-	 * @return The File representing the world's directory.
 	 */
-	public File getDir() {
+	public FileHandle getDir() {
 		return IWorld.getWorldDir(info.fileSystemName);
 	}
 	
@@ -562,7 +560,7 @@ public abstract class HostWorld extends BaseWorld {
 	public class PlayerDataFile {
 		
 		/** The file. */
-		private File file;
+		private FileHandle file;
 		/** Whether or not the file has been initially loaded in. */
 		private boolean loaded;
 		/** The root compound tag of the player's data file. */
@@ -659,8 +657,8 @@ public abstract class HostWorld extends BaseWorld {
 		 * 
 		 * @return The world's local character file.
 		 */
-		private File getFile() {
-			return new File(getDir(), DIR_PLAYERS + character.name + EXTENSION_PLAYERS);
+		private FileHandle getFile() {
+			return getDir().child(DIR_PLAYERS + character.name + EXTENSION_PLAYERS);
 		}
 	}
 	

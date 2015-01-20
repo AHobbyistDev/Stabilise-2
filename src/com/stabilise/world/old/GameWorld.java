@@ -1,12 +1,12 @@
 package com.stabilise.world.old;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
@@ -526,7 +526,7 @@ public class GameWorld extends HostWorld {
 	}
 	
 	@Override
-	public File getDir() {
+	public FileHandle getDir() {
 		return IWorld.getWorldDir(info.fileSystemName);
 	}
 	
