@@ -24,8 +24,8 @@ public abstract class AbstractWorld implements IWorld {
 	 * collection by the iterator if {@code updateAndCheck()} returns {@code
 	 * true}.
 	 */
-	protected <E extends GameObject> void updateObjects(Collection<E> collection) {
-		Iterator<E> i = collection.iterator();
+	protected <E extends GameObject> void updateObjects(Collection<E> objects) {
+		Iterator<E> i = objects.iterator();
 		while(i.hasNext())
 			if(i.next().updateAndCheck())
 				i.remove();
@@ -54,6 +54,7 @@ public abstract class AbstractWorld implements IWorld {
 	
 	@Override
 	public Slice getSliceAtTile(int x, int y) {
+		// This should be optimised for worlds which deal with regions
 		return getSliceAt(
 				sliceCoordFromTileCoord(x),
 				sliceCoordFromTileCoord(y)

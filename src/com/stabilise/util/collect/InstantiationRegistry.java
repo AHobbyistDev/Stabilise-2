@@ -84,7 +84,7 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 		idMap = new HashMap<>(capacity);
 		this.defaultArgs = defaultArgs != null ? defaultArgs : new Class<?>[0];
 		
-		for(Class<?> c : defaultArgs)
+		for(Class<?> c : this.defaultArgs)
 			if(c == null)
 				throw new NullPointerException("A default arg is null!");
 	}

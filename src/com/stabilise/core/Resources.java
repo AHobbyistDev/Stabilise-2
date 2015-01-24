@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.stabilise.util.IOUtil;
 import com.stabilise.util.Log;
 
@@ -100,6 +104,52 @@ public class Resources {
 		}
 		
 		return strings.toArray(new String[0]);
+	}
+	
+	/**
+	 * Creates a texture from a .png image of the specified name in the {@link
+	 * #IMAGE_DIR image directory}.
+	 * 
+	 * <p>Usage example:
+	 * <pre>Texture myTexture = Resources.texture("myTexture");</pre>
+	 * 
+	 * @param name The name of the texture source on the filesystem.
+	 * 
+	 * @return The created texture.
+	 */
+	public static Texture texture(String name) {
+		return new Texture(IMAGE_DIR.child(name + ".png"));
+	}
+	
+	/**
+	 * Generates a BitmapFont from the source file relative to the {@link
+	 * FONT_DIR font directory}.
+	 * 
+	 * @param name The name of the font file.
+	 * @param param The font parameters. May be {@code null}.
+	 * 
+	 * @return The generated font.
+	 * @throws NullPointerException if {@code name} is {@code null}.
+	 */
+	public static BitmapFont font(String name, FreeTypeFontParameter param) {
+		return font(Resources.FONT_DIR.child(name.endsWith(".ttf") ? name : name + ".ttf"), param);
+	}
+	
+	/**
+	 * Generates a BitmapFont from the source file using the specified
+	 * parameters.
+	 * 
+	 * @param file The font file (should be a .ttf file).
+	 * @param param The font parameters. May be {@code null}.
+	 * 
+	 * @return The generated font.
+	 * @throws NullPointerException if {@code file} is {@code null}.
+	 */
+	public static BitmapFont font(FileHandle file, FreeTypeFontParameter param) {
+		FreeTypeFontGenerator gen = new FreeTypeFontGenerator(file);
+		BitmapFont font = gen.generateFont(param);
+		gen.dispose();
+		return font;
 	}
 	
 	

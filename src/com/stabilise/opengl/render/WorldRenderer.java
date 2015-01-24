@@ -3,18 +3,22 @@ package com.stabilise.opengl.render;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.stabilise.core.Application;
 import com.stabilise.core.Game;
+import com.stabilise.core.Resources;
 import com.stabilise.entity.*;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
+import com.stabilise.opengl.Fonts;
 import com.stabilise.opengl.render.model.ModelPlayer;
 import com.stabilise.util.Profiler;
+import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.world.ClientWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.SingleplayerWorld;
@@ -108,11 +112,13 @@ public class WorldRenderer implements Renderer {
 	public void loadResources() {
 		viewport = new ScreenViewport();
 		
-		font = new Font("sheets/font1");
+		FreeTypeFontParameter param = new FreeTypeFontParameter();
+		param.size = 16;
+		font = Resources.font("arialbd", param);
 		
 		personModel = new ModelPlayer();
 		
-		texEnemy = new Sprite("enemy");
+		texEnemy = Resources.texture("enemy");
 		texEnemy.setPivot(texEnemy.getTextureWidth() / 2, 0);
 		texEnemy.filter(Texture.NEAREST);
 		
@@ -161,7 +167,10 @@ public class WorldRenderer implements Renderer {
 	
 	@Override
 	public void resize(int width, int height) {
-		
+		tilesHorizontal = (int)((width/2) / scale) + 1;
+		tilesVertical = (int)((height/2) / scale) + 1;
+		slicesHorizontal = MathsUtil.ceil((float)tilesHorizontal / Slice.SLICE_SIZE);
+		slicesVertical = MathsUtil.ceil((float)tilesVertical / Slice.SLICE_SIZE);
 	}
 	
 	@Override

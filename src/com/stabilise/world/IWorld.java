@@ -307,6 +307,52 @@ public interface IWorld {
 	 */
 	void blowUpTile(int x, int y, float explosionPower);
 	
+	// ========== Insert category name here ==========
+	
+	/**
+	 * Returns the gravity of the world, in ts<sup><font size=-1>-2</font>
+	 * </sup> (tiles per second squared).
+	 */
+	float getGravity();
+	
+	/**
+	 * Returns the gravity increment per update tick.
+	 * 
+	 * @return {@code gt}, where {@code g == }{@link #getGravity()} and {@code
+	 * t == }{@link #getTimeIncrement()}.
+	 */
+	float getGravityIncrement();
+	
+	/**
+	 * Returns the 2<sup><font size=-1>nd</font></sup>-order value for gravity
+	 * with respect to time. This should be added to every non-grounded
+	 * entity's y-coordinate each tick.
+	 * 
+	 * @return {@code gt<sup><font size=-1>2</font></sup>/2}, where {@code g
+	 * == }{@link #getGravity()} and {@code t == }{@link #getTimeIncrement()}.
+	 */
+	float getGravity2ndOrder();
+	
+	/**
+	 * Sets the world's time delta, where a value of {@code 1} is considered
+	 * normal.
+	 * 
+	 * <p>For example, passing {@code 2} to this method will in general cause
+	 * the world to update twice as quickly, and passing {@code 0.5} will cause
+	 * everything to slow down to half as quickly.
+	 */
+	void setTimeDelta(float delta);
+	
+	/**
+	 * @return The world's time delta.
+	 */
+	float getTimeDelta();
+	
+	/**
+	 * @return The time increment of each update tick, in seconds.
+	 */
+	float getTimeIncrement();
+	
 	// ========== Utility Methods ==========
 	
 	/**

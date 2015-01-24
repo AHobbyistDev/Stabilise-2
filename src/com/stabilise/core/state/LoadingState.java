@@ -10,13 +10,13 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.HAlignment;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.stabilise.core.Application;
+import com.stabilise.core.Resources;
 import com.stabilise.core.main.Stabilise;
 import com.stabilise.util.Log;
 import com.stabilise.util.concurrent.Task;
@@ -61,16 +61,12 @@ public class LoadingState implements State {
 		
 		batch = new SpriteBatch(64);
 		
-		texSplash = new Texture(Gdx.files.absolute("C:/Users/Adam/AppData/Roaming/.stabilise/res/img/loading.png"));
+		texSplash = new Texture(Resources.IMAGE_DIR.child("loading.png"));
 		sprSplash = new Sprite(texSplash);
 		
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-				Gdx.files.absolute("C:/Users/Adam/AppData/Roaming/.stabilise/res/fonts/arialbd.ttf")
-		);
 		FreeTypeFontParameter param = new FreeTypeFontParameter();
-		param.size = 16; // font size 16 pixels
-		font = generator.generateFont(param);
-		generator.dispose();
+		param.size = 16;
+		font = Resources.font("arialbd.ttf", param);
 		
 		shapes = new ShapeRenderer();
 		

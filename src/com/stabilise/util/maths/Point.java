@@ -49,8 +49,8 @@ public class Point {
 	 * @return This point, for chaining operations.
 	 */
 	public Point set(Point p) {
-		this.x = p.x;
-		this.y = p.y;
+		x = p.x;
+		y = p.y;
 		return this;
 	}
 	

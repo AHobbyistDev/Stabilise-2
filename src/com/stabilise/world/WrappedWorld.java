@@ -155,6 +155,36 @@ public class WrappedWorld<T extends BaseWorld> extends AbstractWorld {
 	}
 	
 	@Override
+	public float getGravity() {
+		return world.getGravity();
+	}
+	
+	@Override
+	public float getGravityIncrement() {
+		return world.getGravityIncrement();
+	}
+	
+	@Override
+	public float getGravity2ndOrder() {
+		return world.getGravity2ndOrder();
+	}
+	
+	@Override
+	public void setTimeDelta(float delta) {
+		world.setTimeDelta(delta);
+	}
+	
+	@Override
+	public float getTimeDelta() {
+		return world.getTimeDelta();
+	}
+	
+	@Override
+	public float getTimeIncrement() {
+		return world.getTimeIncrement();
+	}
+	
+	@Override
 	public Random getRnd() {
 		return world.getRnd();
 	}

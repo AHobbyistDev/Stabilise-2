@@ -5,6 +5,11 @@ import com.stabilise.util.Log;
 /**
  * This class provides a simple base for a registry to extend.
  * 
+ * <p>Subclasses should invoke {@link #checkLock()} before registering an
+ * object, and increment {@link #size} whenever something is successfully
+ * registered. Furthermore, the {@link #dupePolicy duplicate policy} should be
+ * followed appropriately, and exceptions should be documented.
+ * 
  * @param <E> The type of object to register.
  */
 abstract class AbstractRegistry<E> implements Iterable<E> {

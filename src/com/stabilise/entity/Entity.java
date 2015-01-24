@@ -59,24 +59,18 @@ public abstract class Entity extends FreeGameObject {
 	/** Whether or not the Entity's physics are enabled. */
 	protected boolean physicsEnabled = true;
 	
-	/** The entity's velocity along the x-axis. */
-	public float dx = 0;
-	/** The entity's velocity along the y-axis. */
-	public float dy = 0;
+	/** The entity's velocity values, in tiles per second. */
+	public float dx = 0, dy = 0;
 	
-	/** True if dx is positive (dx > 0). (N.B. dxp -> "dx positive") */
-	private boolean dxp = false;
-	/** True if dy is positive (dy > 0). (N.B. dyp -> "dy positive") */
-	private boolean dyp = false;
+	/** True if dx and dy are positive; false otherwise (n.b. dxp = "dx
+	 * positive") */
+	private boolean dxp = false, dyp = false;
 	
 	/** Whether or not the entity is facing right. */
 	public boolean facingRight = true;
 	
 	/** The entity's mass. TODO: Unused */
 	public float mass;
-	
-	/** The entity's downwards acceleration. */
-	public float gravity;
 	
 	/** Whether or not the entity is on the ground. */
 	public boolean onGround = false;
@@ -94,7 +88,6 @@ public abstract class Entity extends FreeGameObject {
 		
 		// temporary initialisation of variables
 		mass = 20;
-		gravity = -0.02f;//world.gravity;
 		
 		boundingBox = getAABB();
 	}
@@ -127,24 +120,33 @@ public abstract class Entity extends FreeGameObject {
 			//if(dx != 0)
 			//	dx *= (1-friction);
 			
-			//if(!onGround)
-			dy += gravity;
+			// Thanks to calculus, we know that y at the next step (y_next) is
+			// given by (where y' is dy at the end of the last step, and y'' is
+			// gravitational accel).
+			// y_next = y + dy = y + y't + (1/2)y''t^2
+			// In other words, in this step the net effect is the following
+			// (assuming we don't run into a wall or something):
+			// y_next = y_old + dy_old*t + 2ndOrderGravityValue
+			// dy_next = dy_old + gravity*t
+			
+			// dy integral
+			float dyi = dy * world.getTimeIncrement() + world.getGravity2ndOrder();
 			
 			dxp = dx > 0;
-			dyp = dy > 0;
+			dyp = dyi > 0;
 			
 			dx *= (1-getXFriction());
-			dy *= (1-getYFriction());
+			dyi *= (1-getYFriction());
 			
 			onGround = false;
 			
-			if(dx > 1.0f || dx < -1.0f || dy > 1.0f || dy < -1.0f) {
+			if(dx > 1.0f || dx < -1.0f || dyi > 1.0f || dyi < -1.0f) {
 				// TODO: vertical wall offsetting for higher velocities
 				// That is, currently this is pretty screwy and glitches out
 				
-				float divisor = Math.abs(dx) > Math.abs(dy) ? Math.abs(dx) : Math.abs(dy);
+				float divisor = Math.abs(dx) > Math.abs(dyi) ? Math.abs(dx) : Math.abs(dyi);
 				float xInc = dx / divisor;		// x increments
-				float yInc = dy / divisor;		// y increments
+				float yInc = dyi / divisor;		// y increments
 				double px = x + xInc;		// projected x
 				double py = y + yInc;		// projected y
 				boolean xCollided = false;
@@ -163,17 +165,21 @@ public abstract class Entity extends FreeGameObject {
 				//double yp = y + dy + (dy > 0 ? boundingBox.p11.y : boundingBox.p00.y);		// projected y
 				
 				double px = x + dx;		// projected x
-				double py = y + dy;		// projected y
+				double py = y + dyi;		// projected y
 				
 				verticalCollisions(px, py);
 				//collideHorizontal(xp, yp);
+				
+				// TODO: This is broken now that I use dyi instead of dy
 				// The following is necessary because otherwise gravity will offset the vertical
 				// wall being checked for sideways collisions slightly when on the ground.
-				horizontalCollisions(px, y + dy);
+				horizontalCollisions(px, y + dyi);
 			}
 			
-			x += dx;
-			y += dy;
+			x += dx * world.getTimeIncrement();
+			y += dyi;
+			
+			dy += world.getGravityIncrement(); // apply after updating y
 		}
 	}
 	

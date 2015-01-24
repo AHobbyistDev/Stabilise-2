@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Random;
 
 import com.google.common.base.Preconditions;
+import com.stabilise.core.Constants;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.collision.Hitbox;
@@ -65,6 +66,12 @@ public abstract class BaseWorld extends AbstractWorld {
 	/** The x-coordinate the slice in which players initially spawn, in
 	 * slice-lengths. */
 	protected int spawnSliceY;
+	
+	private float timeDelta = 1f;
+	private float timeIncrement = timeDelta / Constants.TICKS_PER_SECOND;
+	private final float gravity = -9.8f;
+	private float gravityIncrement = gravity * timeIncrement;
+	private float gravity2ndOrder = gravity * timeIncrement * timeIncrement / 2;
 	
 	/** An easy-access utility RNG which should be used by any GameObject with
 	 * a reference to this world in preference to constructing a new one. */
@@ -198,6 +205,42 @@ public abstract class BaseWorld extends AbstractWorld {
 	@Override
 	public Collection<TileEntity> getTileEntities() {
 		return tileEntities;
+	}
+	
+	// ========== Stuff ==========
+	
+	@Override
+	public float getGravity() {
+		return gravity;
+	}
+	
+	@Override
+	public float getGravityIncrement() {
+		return gravityIncrement;
+	}
+	
+	@Override
+	public float getGravity2ndOrder() {
+		return gravity2ndOrder;
+	}
+	
+	@Override
+	public void setTimeDelta(float delta) {
+		timeDelta = delta;
+		
+		timeIncrement = delta / Constants.TICKS_PER_SECOND;
+		gravityIncrement = gravity * timeIncrement;
+		gravity2ndOrder = gravity * timeIncrement * timeIncrement / 2;
+	}
+	
+	@Override
+	public float getTimeDelta() {
+		return timeDelta;
+	}
+	
+	@Override
+	public float getTimeIncrement() {
+		return timeIncrement;
 	}
 	
 	// ========== Utils ==========

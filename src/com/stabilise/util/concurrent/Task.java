@@ -357,7 +357,7 @@ public abstract class Task implements Runnable {
 	 * @return The task's identifying name.
 	 * @see TaskTracker#getName()
 	 */
-	public final String getName() {
+	public String getName() {
 		return tracker.getName();
 	}
 	
@@ -368,7 +368,7 @@ public abstract class Task implements Runnable {
 	 * @see TaskTracker#toString()
 	 */
 	@Override
-	public final String toString() {
+	public String toString() {
 		return tracker.toString();
 	}
 	
