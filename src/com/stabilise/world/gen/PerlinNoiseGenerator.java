@@ -178,10 +178,12 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 			}
 			//*/
 			
+			/*
 			// Temporary schematics for testing purposes
 			generator.addSchematicAt(r, "testhouse", 15, 15, 8, 15, SchematicParams.defaultParams());
 			generator.addSchematicAt(r, "testhouse", 0, 14, 8, 15, SchematicParams.defaultParams());
 			generator.addSchematicAt(r, "testStructure", 7, 0, 1, 0, SchematicParams.defaultParams());
+			//*/
 			
 			addSchematics(r);
 		}

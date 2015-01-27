@@ -1,8 +1,5 @@
 package com.stabilise.opengl.render.model;
 
-import java.io.File;
-
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -109,7 +106,7 @@ public class ModelPlayer extends Model {
 	 * Creates a new player model.
 	 */
 	public ModelPlayer() {
-		texture = new Texture(new FileHandle(new File(Resources.IMAGE_DIR, "sheets/player")));
+		texture = Resources.texture("sheets/player");
 		cell = new TextureRegion(texture);
 		
 		cellWidth = texture.getWidth() / NUM_COLS;

@@ -1,6 +1,7 @@
 package com.stabilise.opengl.render;
 
-import com.stabilise.util.maths.Point;
+import com.stabilise.core.Resources;
+import com.stabilise.opengl.TextureSheet;
 import com.stabilise.world.ClientWorld;
 import com.stabilise.world.Slice;
 
@@ -15,16 +16,11 @@ public class TileRenderer implements Renderer {
 	//--------------------==========--------------------
 	
 	/** A reference to the world renderer. */
-	public WorldRenderer worldRenderer;
-	
-	/** The spritesheet of tiles. */
-	public SpriteSheet tiles;
-	
+	public final WorldRenderer worldRenderer;
 	/** A reference to the world. */
-	public ClientWorld<?> world;
+	public final ClientWorld<?> world;
 	
-	/** The sprite coordinates for each tile. */
-	private Point[] tileCoords;
+	public TextureSheet tiles;
 	
 	
 	/**
@@ -36,11 +32,22 @@ public class TileRenderer implements Renderer {
 		this.worldRenderer = worldRenderer;
 		world = worldRenderer.world;
 		
-		tileCoords = new Point[64];
-		for(int i = 0; i < tileCoords.length; i++)
-			tileCoords[i] = new Point(i % 8, 1 + i/8);		// The tile spritesheet is 8x8
-		
 		loadResources();
+	}
+	
+	@Override
+	public void loadResources() {
+		tiles = TextureSheet.sequentiallyOptimised(Resources.texture("sheets/tiles"), 8, 8);
+	}
+	
+	@Override
+	public void unloadResources() {
+		tiles.dispose();
+	}
+	
+	@Override
+	public void resize(int width, int height) {
+		// le nothing
 	}
 	
 	@Override
@@ -50,11 +57,9 @@ public class TileRenderer implements Renderer {
 
 	@Override
 	public void render() {
-		for(int c = world.camera.sliceX - worldRenderer.slicesHorizontal; c <= world.camera.sliceX + worldRenderer.slicesHorizontal; c++) {
-			for(int r = world.camera.sliceY - worldRenderer.slicesVertical; r <= world.camera.sliceY + worldRenderer.slicesVertical; r++) {
+		for(int c = world.camera.sliceX - worldRenderer.slicesHorizontal; c <= world.camera.sliceX + worldRenderer.slicesHorizontal; c++)
+			for(int r = world.camera.sliceY - worldRenderer.slicesVertical; r <= world.camera.sliceY + worldRenderer.slicesVertical; r++)
 				renderSlice(c, r);
-			}
-		}
 	}
 	
 	/**
@@ -69,49 +74,25 @@ public class TileRenderer implements Renderer {
 		if(slice == null)
 			return;
 		
-		final float tileXInit = worldRenderer.offsetX + (x * Slice.SLICE_SIZE * worldRenderer.scale);
+		final float tileXInit = worldRenderer.offsetX + (x * Slice.SLICE_SIZE);
 		float tileX;
-		float tileY = worldRenderer.offsetY + (y * Slice.SLICE_SIZE * worldRenderer.scale);
+		float tileY = worldRenderer.offsetY + (y * Slice.SLICE_SIZE);
 		
 		for(int r = 0; r < Slice.SLICE_SIZE; r++) {
 			tileX = tileXInit;
 			for(int c = 0; c < Slice.SLICE_SIZE; c++) {
-				//System.out.println("Rendering tile " + c + "," + r + " in slice " + x + "," + y);
-				/*
-				if(slice.tiles[r][c] != 0) {
-					tiles.drawSprite(slice.getTileAt(c, r).getID() + 7,		//it was -1 before breaking animations were added to spritesheet
-							(int)((c + Slice.SLICE_SIZE * x) * worldRenderer.scale) + worldRenderer.offsetX,
-							(int)((r + Slice.SLICE_SIZE * y) * worldRenderer.scale) + worldRenderer.offsetY);
-				}
-				*/
+				// Offset of +8 due to tile breaking animations; offset of -1
+				// because air has no texture: sums to +7
+				int id = slice.getTileAt(c, r).getID() + 7;
 				
-				///*
-				int id = slice.getTileAt(c, r).getID() - 1;		// Offset of -1 since air has no texture
+				if(id != 7) // not air
+					worldRenderer.batch.draw(tiles.getRegion(id), tileX, tileY, 1f, 1f);
 				
-				if(id != -1) {
-					tiles.drawSprite(tileCoords[id].x, tileCoords[id].y,
-							(int)tileX,
-							(int)tileY);
-				}
-				
-				tileX += worldRenderer.scale;
-				//*/
+				tileX++; // formerly + worldRenderer.pixelsPerTile
 			}
 			
-			tileY += worldRenderer.scale;
+			tileY++; // formerly + worldRenderer.pixelsPerTile
 		}
-	}
-	
-	@Override
-	public void loadResources() {
-		tiles = new SpriteSheet("sheets/tiles", 8, 8);
-		tiles.setScale((float)worldRenderer.scale / tiles.getSpriteWidth());
-		tiles.filter(GL_NEAREST);
-	}
-
-	@Override
-	public void unloadResources() {
-		tiles.destroy();
 	}
 	
 }

@@ -319,6 +319,8 @@ public abstract class Application {
 	 * @throws NullPointerException if {@code state} is {@code null}.
 	 */
 	public final void setState(State state) {
+		if(stopped)
+			return;
 		if(state == null)
 			throw new NullPointerException("state is null!");
 		this.state.predispose();

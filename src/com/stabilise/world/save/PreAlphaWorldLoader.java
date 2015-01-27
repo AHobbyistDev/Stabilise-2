@@ -41,7 +41,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 		
 		r.generated = regionTag.getBoolean("generated");
 		
-		//System.out.println("Loaded " + r);
+		//System.out.println("Loaded NBT of " + r);
 		//if(!r.generated)
 		//	System.out.println(r + ": " + regionTag.toString());
 		
@@ -49,7 +49,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 			for(int y = 0; y < REGION_SIZE; y++) {			// Row (y)
 				for(int x = 0; x < REGION_SIZE; x++) {		// Col (x)
 					NBTTagCompound sliceTag = regionTag.getCompound("slice" + x + "_" + y);
-					Slice s = new Slice(r.offsetX + x, r.offsetY + y, r);
+					Slice s = new Slice(r.offsetX + x, r.offsetY + y);
 					s.setTilesAsIntArray(sliceTag.getIntArray("tiles"));
 					
 					NBTTagList tileEntities = sliceTag.getList("tileEntities");
@@ -85,7 +85,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 			
 			r.hasQueuedSchematics = true;
 			
-			log.postDebug("Loaded " + schematics.size() + " schematics into " + r);
+			//log.postDebug("Loaded " + schematics.size() + " schematics into " + r);
 		}
 	}
 	
@@ -142,7 +142,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 			
 			regionTag.addList("queuedSchematics", schematics);
 			
-			log.postDebug("Saved " + schematics.size() + " schematics in " + r);
+			//log.postDebug("Saved " + schematics.size() + " schematics in " + r);
 		}
 		
 		try {

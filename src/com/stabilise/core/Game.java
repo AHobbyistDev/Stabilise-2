@@ -8,9 +8,6 @@ import com.stabilise.entity.controller.PlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
-import com.stabilise.opengl.render.HUDRenderer;
-import com.stabilise.screen.menu.Menu;
-import com.stabilise.screen.menu.PauseMenu;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.ClientWorld;
@@ -35,10 +32,10 @@ public class Game implements Controllable, InputProcessor {
 	public PlayerController playerController;
 	
 	/** The current active menu. */
-	public Menu menu;
+	//public Menu menu;
 	
 	/** A reference to the HUD renderer. TODO: Temporary */
-	public HUDRenderer hudRenderer;
+	//public HUDRenderer hudRenderer;
 	
 	/** Whether or not the debug display is active. */
 	public boolean debug = false;
@@ -84,15 +81,16 @@ public class Game implements Controllable, InputProcessor {
 		
 		if(running) {
 			try {
-				profiler.start("menu");
-				if(menu != null)
-					menu.update();
-				profiler.next("world");
+				profiler.start("menu"); // root.update.game.menu
+				//if(menu != null)
+				//	menu.update();
+				profiler.next("world"); // root.update.game.world
 				if(!paused)
 					world.update();
-				profiler.end();
+				profiler.end(); // root.update.game
 			} catch(Exception e) {
 				log.postSevere("Game encountered error!", e);
+				profiler.disable();
 				Application a = Application.get();
 				a.produceCrashLog();
 				//close();			// Simply calling close() makes the game freeze
@@ -106,10 +104,10 @@ public class Game implements Controllable, InputProcessor {
 	 * Renders anything that isn't handled by a renderer.
 	 */
 	public void render() {
-		profiler.start("menu");
-		if(menu != null)
-			menu.render();
-		profiler.end();
+		profiler.start("menu"); // root.render.menu
+		//if(menu != null)
+		//	menu.render();
+		profiler.end(); // root.render
 	}
 	
 	/**
@@ -117,8 +115,8 @@ public class Game implements Controllable, InputProcessor {
 	 */
 	public void close() {
 		running = false;
-		if(menu != null)
-			menu.unloadResources();
+		//if(menu != null)
+		//	menu.unloadResources();
 		world.close();
 	}
 	
@@ -140,6 +138,7 @@ public class Game implements Controllable, InputProcessor {
 	 * @param menu The menu.
 	 * @param pause Whether or not to pause the game.
 	 */
+	/*
 	public void setMenu(Menu menu, boolean pause) {
 		if(menu == null) {
 			closeMenu();
@@ -148,15 +147,16 @@ public class Game implements Controllable, InputProcessor {
 			paused = pause;
 		}
 	}
+	*/
 	
 	/**
 	 * Closes the current menu, if it is non-null. If the game is paused, it
 	 * will resume.
 	 */
 	public void closeMenu() {
-		if(menu != null)
-			menu.unloadResources();
-		menu = null;
+		//if(menu != null)
+		//	menu.unloadResources();
+		//menu = null;
 		paused = false;
 		controller.input.setInputProcessor(controller);
 	}
@@ -165,7 +165,7 @@ public class Game implements Controllable, InputProcessor {
 	 * Opens the pause menu.
 	 */
 	public void openPauseMenu() {
-		setMenu(new PauseMenu(this), true);
+		//setMenu(new PauseMenu(this), true);
 		world.save();
 	}
 	
@@ -191,10 +191,13 @@ public class Game implements Controllable, InputProcessor {
 	
 	@Override
 	public boolean keyDown(int keycode) {
-		hudRenderer.setProfilerSection(keyValue(keycode));
+		if(keycode == Keys.NUM_0)
+			System.out.println(profiler.getData().toString());
+		//hudRenderer.setProfilerSection(keyValue(keycode));
 		return false;
 	}
 	
+	@SuppressWarnings("unused")
 	private int keyValue(int keycode) {
 		switch(keycode) {
 			case Keys.NUM_0:
@@ -231,39 +234,37 @@ public class Game implements Controllable, InputProcessor {
 				return -1;
 		}
 	}
-
+	
 	@Override
 	public boolean keyUp(int keycode) {
 		return false;
 	}
-
+	
 	@Override
 	public boolean keyTyped(char character) {
 		return false;
 	}
-
+	
 	@Override
 	public boolean touchDown(int x, int y, int pointer, int button) {
 		return playerController.touchDown(x, y, pointer, button);
 	}
-
+	
 	@Override
 	public boolean touchUp(int x, int y, int pointer, int button) {
 		return playerController.touchUp(x, y, pointer, button);
 	}
-
+	
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
-		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
 	@Override
 	public boolean scrolled(int amount) {
 		return playerController.scrolled(amount);

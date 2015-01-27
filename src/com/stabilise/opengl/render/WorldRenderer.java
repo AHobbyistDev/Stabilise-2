@@ -1,11 +1,14 @@
 package com.stabilise.opengl.render;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.stabilise.core.Application;
 import com.stabilise.core.Game;
 import com.stabilise.core.Resources;
@@ -15,13 +18,11 @@ import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
-import com.stabilise.opengl.Fonts;
+import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.maths.MathsUtil;
 import com.stabilise.world.ClientWorld;
-import com.stabilise.world.IWorld;
-import com.stabilise.world.SingleplayerWorld;
 import com.stabilise.world.Slice;
 
 /**
@@ -41,28 +42,22 @@ public class WorldRenderer implements Renderer {
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
-	/** The scale at which the world is rendered.
-	 * Note that non-nice numbers (which I'm assuming to be non-integers for
-	 * now) can cause graphical weirdness with tiles. */
-	float scale = 48;
+	float pixelsPerTile = 32;
 	
 	/** Holds a reference to the world. */
 	public final ClientWorld<?> world;
 	
-	/** The tile renderer. */
+	//public final HUDRenderer hudRenderer;
 	public TileRenderer tileRenderer;
-	/** The number of tiles which may fit horizontally on the screen. */
-	int tilesHorizontal;
-	/** The number of tiles which may fit vertically on the screen. */
-	int tilesVertical;
-	/** The number of slices which may fit horizontally on the screen. */
-	int slicesHorizontal;
-	/** The number of slices which may fit vertically on the screen. */
-	int slicesVertical;
+	/** The number of tiles which may fit horizontally and vertically within
+	 * half of the screen. */
+	int tilesHorizontal, tilesVertical;
+	/** The number of slices which may fit horizontally and vertically within
+	 * half of the screen. */
+	int slicesHorizontal, slicesVertical;
 	
 	SpriteBatch batch;
-	
-	Viewport viewport;
+	ScreenViewport viewport;
 	
 	BitmapFont font;
 	
@@ -70,24 +65,14 @@ public class WorldRenderer implements Renderer {
 	Texture texEnemy;
 	Texture texFireball;
 	Texture texExplosion;
-	Texture texItems;
-	Texture texParticles;
+	TextureSheet shtItems;
+	TextureSheet shtParticles;
 	
-	/** The player model. */
 	ModelPlayer personModel;
 	
-	/** The HUD renderer. */
-	public final HUDRenderer hudRenderer;
+	/** The coordinate offsets of everything due to the camera. */
+	public int offsetX, offsetY;
 	
-	/** The background. */
-	Rectangle background;
-	
-	/** The x-offset of everything due to the camera. */
-	public int offsetX;
-	/** The y-offset of everything due to the camera. */
-	public int offsetY;
-	
-	/** The profiler. */
 	private final Profiler profiler = Application.get().profiler;
 	
 	
@@ -103,7 +88,7 @@ public class WorldRenderer implements Renderer {
 		this.world = world;
 		
 		tileRenderer = new TileRenderer(this);
-		hudRenderer = new HUDRenderer(game, this);
+		//hudRenderer = new HUDRenderer(game, this);
 		
 		loadResources();
 	}
@@ -111,6 +96,7 @@ public class WorldRenderer implements Renderer {
 	@Override
 	public void loadResources() {
 		viewport = new ScreenViewport();
+		batch = new SpriteBatch();
 		
 		FreeTypeFontParameter param = new FreeTypeFontParameter();
 		param.size = 16;
@@ -119,56 +105,72 @@ public class WorldRenderer implements Renderer {
 		personModel = new ModelPlayer();
 		
 		texEnemy = Resources.texture("enemy");
-		texEnemy.setPivot(texEnemy.getTextureWidth() / 2, 0);
-		texEnemy.filter(Texture.NEAREST);
+		texEnemy.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+		//texEnemy.setPivot(texEnemy.getTextureWidth() / 2, 0);
 		
 		//arrowSprite = new Sprite("arrow");
 		//arrowSprite.setPivot(arrowSprite.getTextureWidth() * 3 / 4, arrowSprite.getTextureHeight() / 2);
 		//arrowSprite.filter(Texture.NEAREST);
 		
-		texFireball = new Sprite("fireball");
-		texFireball.setPivot(texFireball.getTextureWidth(), texFireball.getTextureHeight() / 2);
-		texFireball.filter(Texture.NEAREST);
+		texFireball = Resources.texture("fireball");
+		texFireball.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+		//texFireball.setPivot(texFireball.getTextureWidth(), texFireball.getTextureHeight() / 2);
 		
-		texExplosion = new Sprite("explosion");
-		texExplosion.setPivot(texExplosion.getTextureWidth()/2, texExplosion.getTextureHeight()/2);
-		texExplosion.filter(Texture.LINEAR);
+		texExplosion = Resources.texture("explosion");
+		texExplosion.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+		//texExplosion.setPivot(texExplosion.getTextureWidth()/2, texExplosion.getTextureHeight()/2);
 		
-		texItems = new SpriteSheet("sheets/items", 8, 8);
-		texItems.filter(Texture.NEAREST);
+		shtItems = TextureSheet.sequentiallyOptimised(Resources.texture("sheets/items"), 8, 8);
+		shtItems.texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
 		
-		texParticles = new SpriteSheet("sheets/particles", 8, 8);
-		texParticles.filter(Texture.NEAREST);
+		shtParticles = TextureSheet.sequentiallyOptimised(Resources.texture("sheets/particles"), 8, 8);
+		shtParticles.texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
 		
 		//background = new Rectangle(screen.getWidth(), screen.getHeight());
-		background.fill(new Colour(0x92D1E4));
+		//----background.fill(new Colour(0x92D1E4));
 		//background.colourVertices(new Colour(0xFFFFFF), new Colour(0xFF00FF), new Colour(0x00FFFF), new Colour(0xFFFF00));
 		//background.gradientTopToBottom(new Colour(0x000000), new Colour(0xC9300E));
 		
-		hudRenderer.loadResources();
+		//hudRenderer.loadResources();
 		
-		setScale(scale);
+		setPixelsPerTile(pixelsPerTile, false); // kickstarts things
 	}
 
 	@Override
 	public void unloadResources() {
-		font.destroy();
-		personModel.destroy();
-		texEnemy.destroy();
-		//arrowSprite.destroy();
-		texFireball.destroy();
-		texExplosion.destroy();
-		texItems.destroy();
-		texParticles.destroy();
-		background.destroy();
+		font.dispose();
+		
+		texEnemy.dispose();
+		texFireball.dispose();
+		texExplosion.dispose();
+		
+		shtItems.dispose();
+		shtParticles.dispose();
+		
+		personModel.dispose();
+		
 		tileRenderer.unloadResources();
-		hudRenderer.unloadResources();
+		//hudRenderer.unloadResources();
+	}
+	
+	/**
+	 * @throws ArithmeticException if {@code pixelsPerTile} is {@code 0}.
+	 */
+	public void setPixelsPerTile(float pixelsPerTile, boolean resize) {
+		this.pixelsPerTile = pixelsPerTile;
+		viewport.setUnitsPerPixel(1f / pixelsPerTile);
+		
+		if(resize)
+			resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
 	@Override
 	public void resize(int width, int height) {
-		tilesHorizontal = (int)((width/2) / scale) + 1;
-		tilesVertical = (int)((height/2) / scale) + 1;
+		viewport.update(width, height);
+		batch.setProjectionMatrix(viewport.getCamera().combined);
+		
+		tilesHorizontal = (int)((width/2) / pixelsPerTile) + 1;
+		tilesVertical = (int)((height/2) / pixelsPerTile) + 1;
 		slicesHorizontal = MathsUtil.ceil((float)tilesHorizontal / Slice.SLICE_SIZE);
 		slicesVertical = MathsUtil.ceil((float)tilesVertical / Slice.SLICE_SIZE);
 	}
@@ -177,55 +179,50 @@ public class WorldRenderer implements Renderer {
 	public void update() {
 		//if(world.loading) return; 
 		
-		/*
-		if(screen.wasResized()) {
-			recalculateTiles();
-			background.setSize(screen.getWidth(), screen.getHeight());
-		}
-		*/
-		
-		profiler.start("hud");
-		hudRenderer.update();
-		profiler.next("tileRenderer");
+		profiler.start("hud"); // root.update.renderer.hud
+		//hudRenderer.update();
+		profiler.next("tileRenderer"); // root.update.renderer.tileRenderer
 		tileRenderer.update();
-		profiler.end();
+		profiler.end(); // // root.update.renderer
 	}
 	
 	@Override
 	public void render() {
-		/*
-		offsetX = (int) (screen.getCentreX() - world.camera.x * scale);
-		offsetY = (int) (screen.getCentreY() - world.camera.y * scale);
-		*/
+		offsetX = (int)-world.camera.x;
+		offsetY = (int)-world.camera.y;
 		
-		profiler.start("background");
-		background.draw();
+		profiler.start("background"); // root.render.background
+		Color bCol = new Color(0x92D1E4FF); // RGBA is annoying in this case: ARGB > RGBA
+		Gdx.gl.glClearColor(bCol.r, bCol.g, bCol.b, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
-		profiler.next("tiles");
+		batch.begin();
+		
+		profiler.next("tiles"); // root.render.tiles
 		tileRenderer.render();
 		
-		profiler.next("entities");
+		profiler.next("entities"); // root.render.entities
 		// Temporary way of ensuring the player is rendered on top
-		boolean first = true;
 		Entity playerEntity = null;
-		for(Entity e : world.getEntities()) {
-			if(first) {
-				playerEntity = e;
-				first = false;
-			} else {
-				e.render(this);
-			}
+		for(EntityMob e : world.getPlayers()) {
+			playerEntity = e;
+			break;
 		}
+		for(Entity e : world.getEntities())
+			if(e != playerEntity)
+				e.render(this);
 		playerEntity.render(this);
 		
-		profiler.next("particles");
+		profiler.next("particles"); // root.render.particles
 		for(Particle p : world.getParticles())
 			p.render(this);
 		
-		profiler.next("hud");
-		hudRenderer.render();
+		profiler.next("hud"); // root.render.hud
+		//hudRenderer.render();
 		
-		profiler.end();
+		profiler.end(); // root.render
+		
+		batch.end();
 	}
 	
 	// ----------Entity rendering----------
@@ -255,17 +252,24 @@ public class WorldRenderer implements Renderer {
 	 * @param e The big fireball entity.
 	 */
 	public void renderBigFireball(EntityBigFireball e) {
-		// TODO: for now the fireball and big fireball code is the same, and the repetition is hence inelegant
-		
-		texFireball.x = (float) (e.x * scale + offsetX);
-		texFireball.y = (float) (e.y * scale + offsetY);
-		texFireball.rotation = (float) Math.toDegrees(((EntityProjectile)e).rotation);
-		if(e.facingRight && texFireball.getFlipped())
-			texFireball.setPivot(texFireball.getTextureWidth() * 3 / 4, texFireball.getTextureHeight() / 2);
-		else if(!e.facingRight && !texFireball.getFlipped())
-			texFireball.setPivot(texFireball.getTextureWidth() * 1 / 4, texFireball.getTextureHeight() / 2);
-		texFireball.setFlipped(!e.facingRight);
-		texFireball.draw();
+		batch.draw(
+				texFireball, // texture
+				(float)e.x + offsetX, // x
+				(float)e.y + offsetY, // y
+				0.75f, // originX - may need to be 0.25 if flipped
+				0.25f, // originY
+				1f, // width
+				0.5f, // height
+				1f, // scaleX
+				1f, // scaleY
+				(float)Math.toDegrees(e.rotation), // rotation
+				0, // srcX
+				0, // srcY
+				texFireball.getWidth(), // srcWidth
+				texFireball.getHeight(), // srcHeight
+				!e.facingRight, // flipX
+				false // flipY
+		);
 	}
 	
 	/**
@@ -276,19 +280,32 @@ public class WorldRenderer implements Renderer {
 	public void renderEnemy(EntityEnemy e) {
 		if(e.hasTint) {
 			if(e.dead) {
-				texEnemy.tint(Colour.RED, e.tintStrength);
-				//mobSprite.setAlpha(m.tintStrength);
+				//texEnemy.tint(Color.RED, e.tintStrength);
 			} else {
-				texEnemy.tint(Colour.WHITE, e.tintStrength);
+				//texEnemy.tint(Color.WHITE, e.tintStrength);
 			}
 		} else {
-			texEnemy.removeTint();
-			//mobSprite.setAlpha(1.0f);
+			//texEnemy.removeTint();
 		}
-		texEnemy.x = (float) (e.x * scale + offsetX);
-		texEnemy.y = (float) (e.y * scale + offsetY);
-		texEnemy.setFlipped(!e.facingRight);
-		texEnemy.draw();
+		
+		batch.draw(
+				texEnemy, // texture
+				(float)e.x + offsetX, // x
+				(float)e.y + offsetY, // y
+				0.5f, // originX
+				0f, // originY
+				1f, // width
+				2f, // height
+				1f, // scaleX
+				1f, // scaleY
+				0f, // rotation
+				0, // srcX
+				0, // srcY
+				texEnemy.getWidth(), // srcWidth
+				texEnemy.getHeight(), // srcHeight
+				!e.facingRight, // flipX
+				false // flipY
+		);
 	}
 	
 	/**
@@ -297,17 +314,24 @@ public class WorldRenderer implements Renderer {
 	 * @param e The fireball entity.
 	 */
 	public void renderFireball(EntityFireball e) {
-		// TODO: for now the fireball and big fireball code is the same, and the repetition is hence inelegant
-		
-		texFireball.x = (float) (e.x * scale + offsetX);
-		texFireball.y = (float) (e.y * scale + offsetY);
-		texFireball.rotation = (float) Math.toDegrees(((EntityProjectile)e).rotation);
-		if(e.facingRight && texFireball.getFlipped())
-			texFireball.setPivot(texFireball.getTextureWidth() * 3 / 4, texFireball.getTextureHeight() / 2);
-		else if(!e.facingRight && !texFireball.getFlipped())
-			texFireball.setPivot(texFireball.getTextureWidth() * 1 / 4, texFireball.getTextureHeight() / 2);
-		texFireball.setFlipped(!e.facingRight);
-		texFireball.draw();
+		batch.draw(
+				texFireball, // texture
+				(float)e.x + offsetX, // x
+				(float)e.y + offsetY, // y
+				0.75f, // originX - may need to be 0.25 if flipped
+				0.25f, // originY
+				1f, // width
+				0.5f, // height
+				1f, // scaleX
+				1f, // scaleY
+				(float)Math.toDegrees(e.rotation), // rotation
+				0, // srcX
+				0, // srcY
+				texFireball.getWidth(), // srcWidth
+				texFireball.getHeight(), // srcHeight
+				!e.facingRight, // flipX
+				false // flipY
+		);
 	}
 	
 	/**
@@ -316,11 +340,19 @@ public class WorldRenderer implements Renderer {
 	 * @param e The item entity.
 	 */
 	public void renderItem(EntityItem e) {
-		/*
-		itemSprites.drawSprite(e.stack.getItem().getID() - 1,
-				(int) ((e.x - 0.5f) * scale + offsetX),
-				(int) (e.y * scale + offsetY));
-		//*/
+		batch.draw(
+				shtItems.getRegion(e.stack.getItem().getID() - 1), // region
+				(float)e.x + offsetX, // x
+				(float)e.y + offsetY, // y
+				0.5f, // originX
+				0f, // originY
+				1f, // width
+				1f, // height
+				1f, // scaleX
+				1f, // scaleY
+				0f, // rotation
+				false // clockwise
+		);
 	}
 	
 	/**
@@ -331,7 +363,7 @@ public class WorldRenderer implements Renderer {
 	public void renderPerson(EntityPerson e) {
 		personModel.setFlipped(!e.facingRight);
 		personModel.setState(e.getState(), e.stateTicks);
-		personModel.render((int)Math.round(e.x * scale + offsetX), (int)Math.round(e.y * scale + offsetY));
+		personModel.render(batch, MathsUtil.round(e.x + offsetX), MathsUtil.round(e.y + offsetY));
 	}
 	
 	// ----------Particle rendering----------
@@ -342,7 +374,8 @@ public class WorldRenderer implements Renderer {
 	 * @param p The damage indicator particle.
 	 */
 	public void renderDamageIndicator(ParticleDamageIndicator p) {
-		font.drawLine(p.text, (int)(p.x * scale) + offsetX, (int)(p.y * scale) + offsetY, p.getFontStyle());
+		// TODO
+		//font.drawLine(p.text, (int)(p.x * scale) + offsetX, (int)(p.y * scale) + offsetY, p.getFontStyle());
 	}
 	
 	/**
@@ -351,11 +384,25 @@ public class WorldRenderer implements Renderer {
 	 * @param p The explosion particle.
 	 */
 	public void renderExplosion(ParticleExplosion p) {
-		texExplosion.tint(p.colour);
-		texExplosion.setAlpha(p.alpha);
-		int size = (int)(p.radius * scale);
-		texExplosion.setScaledDimensions(size, size);
-		texExplosion.drawSprite((int)(p.x * scale + offsetX), (int)(p.y * scale + offsetY));
+		// TODO: tint & alpha
+		batch.draw(
+				texEnemy, // texture
+				(float)p.x + offsetX, // x
+				(float)p.y + offsetY, // y
+				0.5f, // originX
+				0.5f, // originY
+				1f, // width
+				1f, // height
+				p.radius, // scaleX
+				p.radius, // scaleY
+				0f, // rotation
+				0, // srcX
+				0, // srcY
+				texEnemy.getWidth(), // srcWidth
+				texEnemy.getHeight(), // srcHeight
+				false, // flipX
+				false // flipY
+		);
 	}
 	
 	/**
@@ -364,9 +411,20 @@ public class WorldRenderer implements Renderer {
 	 * @param p The flame particle.
 	 */
 	public void renderFlame(ParticleFlame p) {
-		texParticles.setAlpha(p.opacity);
-		texParticles.drawSprite(2, 0, (int)(p.x * scale + offsetX - texParticles.getScaledSpriteWidth() / 2), (int)(p.y * scale + offsetY));
-		texParticles.setAlpha(1.0f);
+		// TODO: alpha
+		batch.draw(
+				shtParticles.getRegion(2), // region
+				(float)p.x + offsetX, // x
+				(float)p.y + offsetY, // y
+				0.25f, // originX
+				0.25f, // originY
+				0.25f, // width
+				0.25f, // height
+				1f, // scaleX
+				1f, // scaleY
+				0f, // rotation
+				false // clockwise
+		);
 	}
 	
 	/**
@@ -375,48 +433,19 @@ public class WorldRenderer implements Renderer {
 	 * @param p The smoke particle.
 	 */
 	public void renderSmoke(ParticleSmoke p) {
-		texParticles.drawSprite(0, 0, (int)(p.x * scale + offsetX - texParticles.getScaledSpriteWidth() / 2), (int)(p.y * scale + offsetY));
-	}
-	
-	/**
-	 * Gets the scale of the world renderer.
-	 * 
-	 * @return The scale.
-	 */
-	public float getScale() {
-		return scale;
-	}
-	
-	/**
-	 * Sets the scale of the renderer.
-	 * 
-	 * @param scale The new scale.
-	 */
-	public void setScale(float scale) {
-		if(scale <= 0)
-			return;
-		
-		this.scale = scale;
-		
-		personModel.rescale(scale);
-		texEnemy.setScale(scale / texEnemy.getTextureWidth());
-		//arrowSprite.setScale(scale / arrowSprite.getTextureWidth());
-		texFireball.setScale(scale / texFireball.getTextureWidth());
-		texItems.setScale(scale / texItems.getSpriteWidth());
-		texParticles.setScale(scale * 0.25f / texParticles.getSpriteWidth());
-		tileRenderer.tiles.setScale(scale / tileRenderer.tiles.getSpriteWidth());
-		
-		recalculateTiles();
-	}
-	
-	/**
-	 * Recalculates the number of tiles which may fit on the screen.
-	 */
-	private void recalculateTiles() {
-		//tilesHorizontal = (int)(screen.getCentreX() / scale) + 1;
-		//tilesVertical = (int)(screen.getCentreY() / scale) + 1;
-		slicesHorizontal = (int)Math.ceil((float)tilesHorizontal / Slice.SLICE_SIZE);
-		slicesVertical = (int)Math.ceil((float)tilesVertical / Slice.SLICE_SIZE);
+		batch.draw(
+				shtParticles.getRegion(0), // region
+				(float)p.x + offsetX, // x
+				(float)p.y + offsetY, // y
+				0.25f, // originX
+				0.25f, // originY
+				0.25f, // width
+				0.25f, // height
+				1f, // scaleX
+				1f, // scaleY
+				0f, // rotation
+				false // clockwise
+		);
 	}
 	
 }

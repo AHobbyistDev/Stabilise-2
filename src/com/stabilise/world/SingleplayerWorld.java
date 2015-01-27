@@ -41,6 +41,9 @@ public class SingleplayerWorld extends HostWorld implements IClientWorld {
 			data.newToWorld = false;
 			saveCharacterData(data);
 		}
+		mob.x = data.lastX;
+		mob.y = data.lastY;
+		sliceMap = new SliceMap(this, mob);
 	}
 	
 	@Override
@@ -54,9 +57,9 @@ public class SingleplayerWorld extends HostWorld implements IClientWorld {
 	public void update() {
 		super.update();
 		
-		profiler.start("sliceMap");
+		profiler.start("sliceMap"); // root.update.game.world.sliceMap
 		sliceMap.update();
-		profiler.end();
+		profiler.end(); // root.update.game.world
 	}
 	
 	@Override

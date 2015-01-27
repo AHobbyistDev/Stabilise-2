@@ -46,12 +46,14 @@ public class SliceMap {
 	 * 
 	 * @param world The world to base the slice map on.
 	 * @param target The entity around which to load slices.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
 	 */
 	public SliceMap(HostWorld world, GameObject target) {
 		if(world == null)
-			throw new IllegalArgumentException("world is null!");
+			throw new NullPointerException("world is null!");
 		if(target == null)
-			throw new IllegalArgumentException("target is null!");
+			throw new NullPointerException("target is null!");
 		
 		this.world = world;
 		this.target = target;

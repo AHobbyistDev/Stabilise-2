@@ -129,11 +129,6 @@ public class HUDRenderer implements Renderer {
 	
 	@Override
 	public void update() {
-		/*
-		if(screen.wasResized())
-			resize();
-		*/
-		
 		if(player.healthChanged)
 			healthBar.setWidth((HEALTH_BAR_WIDTH * player.health) / player.maxHealth);
 		if(player.staminaChanged)
@@ -280,10 +275,8 @@ public class HUDRenderer implements Renderer {
 		resize();
 	}
 	
-	/**
-	 * Resizes the HUD elements.
-	 */
-	private void resize() {
+	@Override
+	public void resize(int width, int height) {
 		//statusOrigin.setLocation(screen.getCentreX() - STATUS_PANEL_WIDTH / 2, STATUS_PANEL_VERTICAL_OFFSET);
 		
 		statusPanel.x = statusOrigin.x;

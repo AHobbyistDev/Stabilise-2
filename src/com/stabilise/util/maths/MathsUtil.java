@@ -42,6 +42,7 @@ public class MathsUtil {
 	 * @param div The divisor.
 	 * 
 	 * @return The wrapped remainder of {@code num % div}.
+	 * @throws ArithmeticException if {@code div == 0}.
 	 */
 	public static int wrappedRem(int num, int div) {
 		num %= div;
@@ -56,6 +57,7 @@ public class MathsUtil {
 	 * @param div The divisor.
 	 * 
 	 * @return The wrapped remainder of {@code num % div}.
+	 * @throws ArithmeticException if {@code div == 0}.
 	 */
 	public static long wrappedRem(long num, long div) {
 		num %= div;
@@ -70,7 +72,7 @@ public class MathsUtil {
 	 * @param div The divisor.
 	 * 
 	 * @return The wrapped remainder of {@code num % div}.
-	 * @throws ArithmeticException Thrown if {@code div == 0}.
+	 * @throws ArithmeticException if {@code div == 0}.
 	 */
 	public static double wrappedRem(double num, double div) {
 		num %= div;
@@ -98,9 +100,7 @@ public class MathsUtil {
 		// decrementing a Po2 results in a consistent set of 1s to the right
 		// of the single 1 in div
 		return num & (div - 1);
-		// Equivalently (I'm yet to perform speed comparison tests but I don't
-		// think something this small should matter + I'm willing to bet
-		// something like this may vary with different JVM implementations)
+		// Equivalently (though with what looks like one more instruction):
 		//return num & -(~div);
 	}
 	

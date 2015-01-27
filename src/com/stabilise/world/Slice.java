@@ -23,13 +23,8 @@ public class Slice {
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
-	/** A reference to the slice's parent region. */
-	public final Region region;
-	
-	/** The slice's x-coordinate, in slice-lengths. */
-	public final int x;
-	/** The slice's y-coordinate, in slice-lengths. */
-	public final int y;
+	/** The slice's coordinates, in slice-lengths. */
+	public final int x, y;
 	
 	/** The tiles within the slice.
 	 * <p>Note that tiles are indexed in the form [y][x]. */
@@ -47,10 +42,9 @@ public class Slice {
 	 * 
 	 * @param x The x-coordinate of the slice, in slice-lengths.
 	 * @param y The y-coordinate of the slice, in slice-lengths.
-	 * @param region The slice's parent region.
 	 */
-	public Slice(int x, int y, Region region) {
-		this(x, y, region, null);
+	public Slice(int x, int y) {
+		this(x, y, null);
 	}
 	
 	/**
@@ -58,32 +52,29 @@ public class Slice {
 	 * 
 	 * @param x The x-coordinate of the slice, in slice-lengths.
 	 * @param y The y-coordinate of the slice, in slice-lengths.
-	 * @param region The slice's parent region.
 	 * @param tiles The slice's tiles.
 	 */
-	public Slice(int x, int y, Region region, int[][] tiles) {
+	public Slice(int x, int y, int[][] tiles) {
 		this.x = x;
 		this.y = y;
-		this.region = region;
 		this.tiles = tiles;
 		
 		tileEntities = new TileEntity[SLICE_SIZE][SLICE_SIZE];
 	}
 	
 	/**
-	 * Gets a tile from the specified coordinates.
+	 * Gets a tile from the specified coordinates relative to this slice.
 	 * 
-	 * @param x The x-coordinate of the tile relative to the slice, in
+	 * @param x The x-coordinate of the tile relative to this slice, in
 	 * tile-lengths.
-	 * @param y The y-coordinate of the tile relative to the slice, in
+	 * @param y The y-coordinate of the tile relative to this slice, in
 	 * tile-lengths.
 	 * 
 	 * @return The tile at the specified coordinates.
-	 * @throws ArrayIndexOutOfBoundsException Thrown if either x or y is
-	 * negative or greater than 15.
+	 * @throws ArrayIndexOutOfBoundsException if either x or y is negative or
+	 * greater than 15.
 	 */
 	public Tile getTileAt(int x, int y) {
-		//System.out.println("Getting tile: " + x + "," + y + " from slice " + this.x + "," + this.y);
 		return Tile.getTile(tiles[y][x]);
 	}
 	
@@ -100,7 +91,6 @@ public class Slice {
 	 */
 	public void setTileAt(int x, int y, int tileID) {
 		tiles[y][x] = tileID;
-		region.unsavedChanges = true;
 	}
 	
 	/**
@@ -142,7 +132,6 @@ public class Slice {
 			numTileEntities++;
 		}
 		tileEntities[y][x] = tileEntity;
-		region.unsavedChanges = true;
 	}
 	
 	/**

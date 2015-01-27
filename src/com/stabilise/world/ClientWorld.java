@@ -48,7 +48,7 @@ public class ClientWorld<T extends BaseWorld & IClientWorld>
 		this.player = mob;
 		camera = new GameCamera(this, player);
 		world.setClientPlayer(data, mob);
-		addEntity(mob, data.lastX, data.lastY);
+		addEntity(mob);
 		setPlayer(mob);
 	}
 	
@@ -61,13 +61,13 @@ public class ClientWorld<T extends BaseWorld & IClientWorld>
 	public void update() {
 		super.update();
 		
-		world.profiler.start("particles");
+		world.profiler.start("particles"); // root.update.game.world.particles
 		updateObjects(getParticles());
 		
-		world.profiler.next("camera");
+		world.profiler.next("camera"); // root.update.game.world.camera
 		camera.update();
 		
-		world.profiler.end();
+		world.profiler.end(); // root.update.game.world
 	}
 	
 	@Override

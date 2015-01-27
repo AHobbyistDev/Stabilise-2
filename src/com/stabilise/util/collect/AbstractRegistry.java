@@ -52,7 +52,7 @@ abstract class AbstractRegistry<E> implements Iterable<E> {
 	 */
 	public void lock() {
 		locked = true;
-		log.postDebug("Locked!");
+		log.postFineDebug("Locked!");
 	}
 	
 	/**

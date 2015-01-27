@@ -148,9 +148,14 @@ public abstract class HostWorld extends BaseWorld {
 	@Override
 	public boolean isLoaded() {
 		for(Region r : regions.values()) {
-			if(!r.loaded || !r.isGenerated())
+			if(!r.loaded || !r.isGenerated()) {
+				//log.postInfo("Not all regions loaded (" + r + ": "
+				//		+ r.loaded + ", " + r.isGenerated() + "(" + r.generated + ", "
+				//		+ r.hasQueuedSchematics + "))");
 				return false;
+			}
 		}
+		//log.postInfo("All regions loaded!");
 		return true;
 	}
 	
@@ -160,20 +165,20 @@ public abstract class HostWorld extends BaseWorld {
 		
 		info.age++; // our precious world is one tick older
 		
-		profiler.next("region");
+		profiler.start("region"); // root.update.game.world.region
 		Iterator<Region> i = regions.values().iterator();
 		while(i.hasNext()) {
 			Region r = i.next();
-			profiler.start("update");
+			profiler.start("update"); // root.update.game.world.region.update
 			r.update();
-			profiler.next("unload");
+			profiler.next("unload"); // root.update.game.world.region.unload
 			if(r.unload) {
 				unloadRegion(r);
 				i.remove();
 			}
-			profiler.end();
+			profiler.end(); // root.update.game.world.region
 		}
-		profiler.end();
+		profiler.end(); // root.update.game.world
 	}
 	
 	/**
@@ -347,7 +352,15 @@ public abstract class HostWorld extends BaseWorld {
 	
 	@Override
 	public void setTileAt(int x, int y, int id) {
-		Slice slice = getSliceAtTile(x, y);
+		// We're duplicating code from getSliceAtTile() so that we can maintain
+		// a reference to the slice's parent region.
+		Region r = getRegionAt(regionCoordFromTileCoord(x), regionCoordFromTileCoord(y));
+		if(r == null)
+			return;
+		Slice slice = r.getSliceAt(
+				sliceCoordRelativeToRegionFromTileCoord(x),
+				sliceCoordRelativeToRegionFromTileCoord(y)
+		);
 		
 		if(slice != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
@@ -357,6 +370,7 @@ public abstract class HostWorld extends BaseWorld {
 			slice.getTileAt(tileX, tileY).handleRemove(this, x, y);
 			
 			slice.setTileAt(tileX, tileY, id);
+			r.unsavedChanges = true;
 			
 			Tile.getTile(id).handlePlace(this, x, y);
 		}
@@ -364,8 +378,14 @@ public abstract class HostWorld extends BaseWorld {
 	
 	@Override
 	public void breakTileAt(int x, int y) {
-		Slice slice = getSliceAtTile(x, y);
-		
+		// Ditto in that we're duping getSliceAtTile();
+		Region r = getRegionAt(regionCoordFromTileCoord(x), regionCoordFromTileCoord(y));
+		if(r == null)
+			return;
+		Slice slice = r.getSliceAt(
+				sliceCoordRelativeToRegionFromTileCoord(x),
+				sliceCoordRelativeToRegionFromTileCoord(y)
+		);
 		if(slice != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
 			int tileY = tileCoordRelativeToSliceFromTileCoord(y);
@@ -373,12 +393,20 @@ public abstract class HostWorld extends BaseWorld {
 			slice.getTileAt(tileX, tileY).handleBreak(this, x, y);
 			
 			slice.setTileAt(tileX, tileY, 0);
+			r.unsavedChanges = true;
 		}
 	}
 	
 	@Override
 	public void setTileEntityAt(int x, int y, TileEntity t) {
-		Slice slice = getSliceAtTile(x, y);
+		// Ditto in that we're duping getSliceAtTile() code
+		Region r = getRegionAt(regionCoordFromTileCoord(x), regionCoordFromTileCoord(y));
+		if(r == null)
+			return;
+		Slice slice = r.getSliceAt(
+				sliceCoordRelativeToRegionFromTileCoord(x),
+				sliceCoordRelativeToRegionFromTileCoord(y)
+		);
 			
 		if(slice != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
@@ -391,6 +419,7 @@ public abstract class HostWorld extends BaseWorld {
 			}
 			
 			slice.setTileEntityAt(tileX, tileY, t);
+			r.unsavedChanges = true;
 			
 			addTileEntity(t);
 		}
@@ -398,7 +427,14 @@ public abstract class HostWorld extends BaseWorld {
 	
 	@Override
 	public void removeTileEntityAt(int x, int y) {
-		Slice slice = getSliceAtTile(x, y);
+		// Ditto in that we're duping getSliceAtTile()
+		Region r = getRegionAt(regionCoordFromTileCoord(x), regionCoordFromTileCoord(y));
+		if(r == null)
+			return;
+		Slice slice = r.getSliceAt(
+				sliceCoordRelativeToRegionFromTileCoord(x),
+				sliceCoordRelativeToRegionFromTileCoord(y)
+		);
 		
 		if(slice != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
@@ -411,12 +447,20 @@ public abstract class HostWorld extends BaseWorld {
 			}
 			
 			slice.setTileEntityAt(tileX, tileY, null);
+			r.unsavedChanges = true;
 		}
 	}
 	
 	@Override
 	public void blowUpTile(int x, int y, float explosionPower) {
-		Slice slice = getSliceAtTile(x, y);
+		// Ditto in that we're duping getSliceAtTile()
+		Region r = getRegionAt(regionCoordFromTileCoord(x), regionCoordFromTileCoord(y));
+		if(r == null)
+			return;
+		Slice slice = r.getSliceAt(
+				sliceCoordRelativeToRegionFromTileCoord(x),
+				sliceCoordRelativeToRegionFromTileCoord(y)
+		);
 		
 		if(slice != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
@@ -426,6 +470,7 @@ public abstract class HostWorld extends BaseWorld {
 				slice.getTileAt(tileX, tileY).handleRemove(this, x, y);
 				
 				slice.setTileAt(tileX, tileY, 0);
+				r.unsavedChanges = true;
 				
 				//Tile.air.handlePlace(this, x, y);
 			}
@@ -441,8 +486,7 @@ public abstract class HostWorld extends BaseWorld {
 	 * @throws NullPointerException if {@code character} is {@code null}.
 	 */
 	void loadCharacterData(CharacterData character) {
-		new PlayerDataFile(character);
-		character.dataFile.load();
+		new PlayerDataFile(character).load();
 	}
 	
 	/**

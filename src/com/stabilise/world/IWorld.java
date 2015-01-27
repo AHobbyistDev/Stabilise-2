@@ -476,7 +476,8 @@ public interface IWorld {
 			try {
 				worlds.get(validWorlds).load();
 			} catch(IOException e) {
-				Log.get().postWarning("Could not load world info for world \"" + worldDirs[i].name() + "\"!", e);
+				Log.get().postWarning("Could not load world info for world \"" + worldDirs[i].name() + "\"!"
+						+ ": " + e.getClass().getSimpleName() + ": " + e.getMessage());
 				worlds.remove(validWorlds);
 				continue;
 			}

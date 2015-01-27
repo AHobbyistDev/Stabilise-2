@@ -98,30 +98,30 @@ public abstract class BaseWorld extends AbstractWorld {
 	@Override
 	@UserThread("MainThread")
 	public void update() {
-		profiler.start("entity"); // "entity"
+		profiler.start("entity"); // root.update.game.world.entity
 		updateObjects(getEntities());
-		profiler.next("hitbox"); // "hitbox"
+		profiler.next("hitbox"); // root.update.game.world.hitbox
 		updateObjects(getHitboxes());
-		profiler.next("tileEntity"); // "tileEntity"
+		profiler.next("tileEntity"); // root.update.game.world.tileEntity
 		updateObjects(getTileEntities());
 		
 		// Now, add and remove all queued entities
-		profiler.next("entity"); // "entity"
-		profiler.start("add"); // "entity.add"
+		profiler.next("entity"); // root.update.game.world.entity
+		profiler.start("add"); // root.update.game.world.entity.add
 		
 		if(!entitiesToAdd.isEmpty()) {
 			for(Entity e : entitiesToAdd)
 				entities.put(e.id, e);
 		}
 		
-		profiler.next("remove"); // "entity.remove"
+		profiler.next("remove"); // root.update.game.world.entity.remove
 		if(entitiesToRemove.size() != 0) {
 			for(Integer id : entitiesToRemove)
 				entities.remove(id);
 		}
-		profiler.end(); // "entity"
+		profiler.end(); // root.update.game.world.entity
 		
-		profiler.end();
+		profiler.end(); // root.update.game.world
 	}
 	
 	@Override

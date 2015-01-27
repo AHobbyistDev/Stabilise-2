@@ -125,9 +125,9 @@ public class Controller implements InputProcessor {
 	/** The focus of the controller. */
 	private Controllable focus;
 	
+	
 	/**
-	 * Creates a new Controller. This will set itself as the focus of the
-	 * InputManager.
+	 * Creates a new Controller. It must be manually set as an input processor.
 	 */
 	public Controller(Controllable focus) {
 		this.focus = focus;

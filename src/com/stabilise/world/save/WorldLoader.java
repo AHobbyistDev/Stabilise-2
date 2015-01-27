@@ -124,9 +124,8 @@ public abstract class WorldLoader {
 		if(region.loaded) {
 			world.generator.generate(region);
 		} else {
-			if(!obtainRegionForLoad(region))
-				return;
-			executor.execute(new RegionLoader(region, true));
+			if(obtainRegionForLoad(region))
+				executor.execute(new RegionLoader(region, true));
 		}
 	}
 	
@@ -274,6 +273,8 @@ public abstract class WorldLoader {
 			
 			r.notifyOfLoaded();
 			r.loading = false;
+			
+			//log.postFineDebug("Finished loading " + r);
 		}
 		
 	}

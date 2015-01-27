@@ -77,10 +77,14 @@ public class Log {
 		/** A debug message - often granular and specific. Setting the log's
 		 * output level to this means severe, warning, info and debug messages
 		 * will be printed. */
-		DEBUG(4, false, "[DEBUG] - "),
+		DEBUG(4, false, "[DEBUG1] - "),
+		/** A fine debug message - granular and specific. Setting the log's
+		 * output level to this means severe, warning, info, debug and fine
+		 * debug messages will be printed. */
+		FINE_DEBUG(5, false, "[DEBUG2] - "),
 		/** Not valid as a message type. Setting the log's output level to this
 		 * means all messages will be printed. */
-		ALL(5, true, null);
+		ALL(6, true, null);
 		
 		/** This level's value; used for comparison. */
 		private final int value;
@@ -289,6 +293,26 @@ public class Log {
 	 */
 	public void postDebug(String msg, Throwable t) {
 		post(Level.DEBUG, msg, t);
+	}
+	
+	/**
+	 * Posts a fine debug message to the log, as per {@link
+	 * #post(Level, String) post(Level.FINE_DEBUG, msg)}.
+	 * 
+	 * @throws NullPointerException if {@code msg} is {@code null}.
+	 */
+	public void postFineDebug(String msg) {
+		post(Level.FINE_DEBUG, msg);
+	}
+	
+	/**
+	 * Posts a fine debug message accompanied by a throwable to the log, as per
+	 * {@link #post(Level, String, Throwable) post(Level.FINE_DEBUG, msg, t)}.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 */
+	public void postFineDebug(String msg, Throwable t) {
+		post(Level.FINE_DEBUG, msg, t);
 	}
 	
 	//--------------------==========--------------------

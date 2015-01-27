@@ -2,7 +2,6 @@ package com.stabilise.world;
 
 import static com.stabilise.core.Constants.REGION_UNLOAD_TICK_BUFFER;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.badlogic.gdx.files.FileHandle;
@@ -102,9 +101,9 @@ public class Region {
 	 * itself.
 	 * <p>For world generator use only.
 	 * <p><i>Design specifications:</i> This is a ClearOnIterateLinkedList;
-	 * add() is O(1) and toArray() is O(n). */
-	public final List<QueuedSchematic> queuedSchematics =
-			new ClearOnIterateLinkedList<QueuedSchematic>();
+	 * add() is O(1) and toArray() is O(n) and clears the list. */
+	public final ClearOnIterateLinkedList<QueuedSchematic> queuedSchematics =
+			new ClearOnIterateLinkedList<>();
 	
 	/** The object to use for locking purposes restricted to the WorldGenerator
 	 * and WorldLoader. */

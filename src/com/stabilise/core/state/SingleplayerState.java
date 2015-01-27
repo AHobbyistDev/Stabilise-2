@@ -1,5 +1,7 @@
 package com.stabilise.core.state;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.stabilise.core.Application;
 import com.stabilise.core.Game;
 import com.stabilise.opengl.render.WorldRenderer;
@@ -38,53 +40,31 @@ public class SingleplayerState implements State {
 	}
 	
 	@Override
-	public void resize(int width, int height) {
-		// meh
-	}
-
-	@Override
-	public void update() {
-		profiler.start("game");
-		game.update();
-		
-		// Safety net to prevent an NPE from the renderer if the game shuts
-		// down this tick
-		if(!game.running) {
-			profiler.end();
-			return;
-		}
-		
-		profiler.next("renderer");
-		renderer.update();
-		profiler.end();
-	}
-	
-	@Override
-	public void render(float delta) {
-		renderer.render();
-		game.render();
-	}
-	
-	@Override
 	public void start() {
-		profiler.enable();
+		InputMultiplexer input = new InputMultiplexer();
+		input.addProcessor(game);
+		Gdx.input.setInputProcessor(input);
+		
 		renderer = new WorldRenderer(game, game.getWorld());
-		game.hudRenderer = renderer.hudRenderer;
+		//game.hudRenderer = renderer.hudRenderer;
+		
+		profiler.enable();
 	}
 	
 	@Override
-	public void pause() {
-		if(game.menu == null)
-			game.openPauseMenu();
+	public void resize(int width, int height) {
+		renderer.resize(width, height);
 	}
 	
 	@Override
-	public void resume() {
-		// nothing to see here, move along
+	public void predispose() {
+		
 	}
 	
 	@Override
 	public void dispose() {
+		//((InputMultiplexer)Gdx.input).removeProcessor(game);
+		
 		game.close();
 		renderer.unloadResources();
 		renderer = null;
@@ -95,11 +75,45 @@ public class SingleplayerState implements State {
 		//game = null;		// <-- No-can-do, crashes in update() at if(!game.running)
 		System.gc();
 	}
-
+	
 	@Override
-	public void predispose() {
-		// TODO Auto-generated method stub
-		
+	public void pause() {
+		//if(game.menu == null)
+		//	game.openPauseMenu();
 	}
-
+	
+	@Override
+	public void resume() {
+		// nothing to see here, move along
+	}
+	
+	@Override
+	public void update() {
+		profiler.verify(2, "root.update");
+		
+		profiler.start("game"); // root.update.game
+		game.update();
+		
+		profiler.verify(3, "root.update.game");
+		
+		// Safety net to prevent an NPE from the renderer if the game shuts
+		// down this tick
+		if(!game.running) {
+			profiler.end(); // root.update
+			return;
+		}
+		
+		profiler.next("renderer"); // root.update.renderer
+		renderer.update();
+		profiler.end(); // root.update
+		
+		profiler.verify(2, "root.update");
+	}
+	
+	@Override
+	public void render(float delta) {
+		renderer.render();
+		game.render();
+	}
+	
 }

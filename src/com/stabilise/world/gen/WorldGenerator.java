@@ -232,8 +232,7 @@ public abstract class WorldGenerator {
 					for(int x = 0; x < REGION_SIZE; x++) {
 						r.slices[y][x] = new Slice(
 								x + r.loc.x * REGION_SIZE,
-								y + r.loc.x * REGION_SIZE,
-								r,
+								y + r.loc.y * REGION_SIZE,
 								new int[SLICE_SIZE][SLICE_SIZE]
 						);
 					}
