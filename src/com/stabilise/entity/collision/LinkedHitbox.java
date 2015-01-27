@@ -46,7 +46,7 @@ public class LinkedHitbox extends Hitbox {
 	@Override
 	public void destroy() {
 		super.destroy();
-		linkedEntity.destroy();
+		//linkedEntity.destroy(); // TODO
 	}
 	
 }

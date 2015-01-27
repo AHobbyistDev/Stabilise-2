@@ -175,14 +175,14 @@ public class EntityPerson extends EntityMob {
 		maxMana = 500;
 		mana = 500;
 		
-		jumpVelocity = 0.5f;
+		jumpVelocity = 2f;
 		jumpCrouchDuration = 8;
 		//jump = PhysicsUtil.jumpHeightToInitialJumpVelocity(4, gravity);
 		swimAcceleration = 0.08f;
-		acceleration = 0.15f;
+		acceleration = 2f;
 		//airAcceleration = acceleration * 0.15f;
 		airAcceleration = acceleration;
-		maxDx = 0.25f;
+		maxDx = 5f;
 		
 		state = State.IDLE;
 	}
@@ -489,7 +489,7 @@ public class EntityPerson extends EntityMob {
 			double px = facingRight ? x + originPoint.x : x - originPoint.x;
 			for(int i = 0; i < max; i++) {
 				double angle = (world.getRnd().nextFloat() * 0.47f + 0.03f) * Math.PI;
-				float velocity = 0.5f + world.getRnd().nextFloat() * 0.2f;
+				float velocity = 12.5f + world.getRnd().nextFloat() * 2.5f;
 				boolean right = world.getRnd().nextBoolean();
 				EntityProjectile e = new EntityFireball(world, this, world.getRnd().nextInt(3) + 5);
 				e.dx = (float) (right ? Math.cos(angle) * velocity : -Math.cos(angle) * velocity);

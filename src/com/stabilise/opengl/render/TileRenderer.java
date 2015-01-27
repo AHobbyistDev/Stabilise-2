@@ -22,6 +22,8 @@ public class TileRenderer implements Renderer {
 	
 	public TextureSheet tiles;
 	
+	int slicesRendered = 0;
+	
 	
 	/**
 	 * Creates a new TileRenderer.
@@ -57,9 +59,11 @@ public class TileRenderer implements Renderer {
 
 	@Override
 	public void render() {
+		slicesRendered = 0;
 		for(int c = world.camera.sliceX - worldRenderer.slicesHorizontal; c <= world.camera.sliceX + worldRenderer.slicesHorizontal; c++)
 			for(int r = world.camera.sliceY - worldRenderer.slicesVertical; r <= world.camera.sliceY + worldRenderer.slicesVertical; r++)
 				renderSlice(c, r);
+		//System.out.println(slicesRendered + " slices rendered");
 	}
 	
 	/**
@@ -74,16 +78,18 @@ public class TileRenderer implements Renderer {
 		if(slice == null)
 			return;
 		
-		final float tileXInit = worldRenderer.offsetX + (x * Slice.SLICE_SIZE);
+		slicesRendered++;
+		
+		final float tileXInit = x * Slice.SLICE_SIZE;
 		float tileX;
-		float tileY = worldRenderer.offsetY + (y * Slice.SLICE_SIZE);
+		float tileY = y * Slice.SLICE_SIZE;
 		
 		for(int r = 0; r < Slice.SLICE_SIZE; r++) {
 			tileX = tileXInit;
 			for(int c = 0; c < Slice.SLICE_SIZE; c++) {
 				// Offset of +8 due to tile breaking animations; offset of -1
 				// because air has no texture: sums to +7
-				int id = slice.getTileAt(c, r).getID() + 7;
+				int id = slice.getTileIDAt(c, r) + 7;
 				
 				if(id != 7) // not air
 					worldRenderer.batch.draw(tiles.getRegion(id), tileX, tileY, 1f, 1f);

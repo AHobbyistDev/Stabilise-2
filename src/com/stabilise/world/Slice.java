@@ -79,6 +79,23 @@ public class Slice {
 	}
 	
 	/**
+	 * Gets the ID of the tile from the specified coordinates relative to this
+	 * slice.
+	 * 
+	 * @param x The x-coordinate of the tile relative to this slice, in
+	 * tile-lengths.
+	 * @param y The y-coordinate of the tile relative to this slice, in
+	 * tile-lengths.
+	 * 
+	 * @return The ID of the tile at the specified coordinates.
+	 * @throws ArrayIndexOutOfBoundsException if either x or y is negative or
+	 * greater than 15.
+	 */
+	public int getTileIDAt(int x, int y) {
+		return tiles[y][x];
+	}
+	
+	/**
 	 * Sets a tile in the slice.
 	 * 
 	 * @param x The x-coordinate of the tile relative to the slice, in

@@ -119,6 +119,24 @@ public class TextureSheet implements Disposable {
 		return new TextureSheetMultidimensional(texture, cols, rows);
 	}
 	
+	/**
+	 * Creates and returns a TextureSheet for which a new TextureRegion is not
+	 * instantiated on every invocation of {@link #getRegion(int)} and {@link
+	 * #getRegion(int, int)}; rather, a cached TextureRegion simply has its
+	 * region modified.
+	 * 
+	 * @param texture The texture upon which to construct this sheet.
+	 * @param cols The number of columns in this sheet.
+	 * @param rows The number of rows in this sheet.
+	 * 
+	 * @throws NullPointerException if {@code texture} is {@code null}.
+	 * @throws IllegalArgumentException if either {@code cols} or {@code rows}
+	 * are {@code null}.
+	 */
+	public static TextureSheet cached(Texture texture, int cols, int rows) {
+		return new TextureSheetCached(texture, cols, rows);
+	}
+	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------
 	//--------------------==========--------------------
@@ -173,6 +191,28 @@ public class TextureSheet implements Disposable {
 		@Override
 		public TextureRegion getRegion(int x, int y) {
 			return regions[x][y];
+		}
+		
+	}
+	
+	private static class TextureSheetCached extends TextureSheet {
+		
+		private final TextureRegion cell;
+		
+		private TextureSheetCached(Texture texture, int cols, int rows) {
+			super(texture, cols, rows);
+			cell = new TextureRegion(texture);
+		}
+		
+		@Override
+		public TextureRegion getRegion(int x, int y) {
+			cell.setRegion(
+					cellWidth * x,
+					cellHeight * y,
+					cellWidth,
+					cellHeight
+			);
+			return cell;
 		}
 		
 	}

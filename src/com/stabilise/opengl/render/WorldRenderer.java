@@ -3,6 +3,7 @@ package com.stabilise.opengl.render;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -57,6 +58,7 @@ public class WorldRenderer implements Renderer {
 	int slicesHorizontal, slicesVertical;
 	
 	SpriteBatch batch;
+	OrthographicCamera camera;
 	ScreenViewport viewport;
 	
 	BitmapFont font;
@@ -69,9 +71,6 @@ public class WorldRenderer implements Renderer {
 	TextureSheet shtParticles;
 	
 	ModelPlayer personModel;
-	
-	/** The coordinate offsets of everything due to the camera. */
-	public int offsetX, offsetY;
 	
 	private final Profiler profiler = Application.get().profiler;
 	
@@ -95,7 +94,8 @@ public class WorldRenderer implements Renderer {
 	
 	@Override
 	public void loadResources() {
-		viewport = new ScreenViewport();
+		camera = new OrthographicCamera();
+		viewport = new ScreenViewport(camera);
 		batch = new SpriteBatch();
 		
 		FreeTypeFontParameter param = new FreeTypeFontParameter();
@@ -164,6 +164,10 @@ public class WorldRenderer implements Renderer {
 			resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
+	public float getPixelsPerTile() {
+		return pixelsPerTile;
+	}
+	
 	@Override
 	public void resize(int width, int height) {
 		viewport.update(width, height);
@@ -188,8 +192,9 @@ public class WorldRenderer implements Renderer {
 	
 	@Override
 	public void render() {
-		offsetX = (int)-world.camera.x;
-		offsetY = (int)-world.camera.y;
+		camera.position.set((float)world.camera.x, (float)world.camera.y, 0f);
+		camera.update();
+		batch.setProjectionMatrix(viewport.getCamera().combined);
 		
 		profiler.start("background"); // root.render.background
 		Color bCol = new Color(0x92D1E4FF); // RGBA is annoying in this case: ARGB > RGBA
@@ -254,8 +259,8 @@ public class WorldRenderer implements Renderer {
 	public void renderBigFireball(EntityBigFireball e) {
 		batch.draw(
 				texFireball, // texture
-				(float)e.x + offsetX, // x
-				(float)e.y + offsetY, // y
+				(float)e.x, // x
+				(float)e.y, // y
 				0.75f, // originX - may need to be 0.25 if flipped
 				0.25f, // originY
 				1f, // width
@@ -290,8 +295,8 @@ public class WorldRenderer implements Renderer {
 		
 		batch.draw(
 				texEnemy, // texture
-				(float)e.x + offsetX, // x
-				(float)e.y + offsetY, // y
+				(float)e.x, // x
+				(float)e.y, // y
 				0.5f, // originX
 				0f, // originY
 				1f, // width
@@ -316,8 +321,8 @@ public class WorldRenderer implements Renderer {
 	public void renderFireball(EntityFireball e) {
 		batch.draw(
 				texFireball, // texture
-				(float)e.x + offsetX, // x
-				(float)e.y + offsetY, // y
+				(float)e.x, // x
+				(float)e.y, // y
 				0.75f, // originX - may need to be 0.25 if flipped
 				0.25f, // originY
 				1f, // width
@@ -342,8 +347,8 @@ public class WorldRenderer implements Renderer {
 	public void renderItem(EntityItem e) {
 		batch.draw(
 				shtItems.getRegion(e.stack.getItem().getID() - 1), // region
-				(float)e.x + offsetX, // x
-				(float)e.y + offsetY, // y
+				(float)e.x, // x
+				(float)e.y, // y
 				0.5f, // originX
 				0f, // originY
 				1f, // width
@@ -363,7 +368,7 @@ public class WorldRenderer implements Renderer {
 	public void renderPerson(EntityPerson e) {
 		personModel.setFlipped(!e.facingRight);
 		personModel.setState(e.getState(), e.stateTicks);
-		personModel.render(batch, MathsUtil.round(e.x + offsetX), MathsUtil.round(e.y + offsetY));
+		personModel.render(batch, (float)e.x, (float)e.y);
 	}
 	
 	// ----------Particle rendering----------
@@ -387,8 +392,8 @@ public class WorldRenderer implements Renderer {
 		// TODO: tint & alpha
 		batch.draw(
 				texEnemy, // texture
-				(float)p.x + offsetX, // x
-				(float)p.y + offsetY, // y
+				(float)p.x, // x
+				(float)p.y, // y
 				0.5f, // originX
 				0.5f, // originY
 				1f, // width
@@ -411,11 +416,11 @@ public class WorldRenderer implements Renderer {
 	 * @param p The flame particle.
 	 */
 	public void renderFlame(ParticleFlame p) {
-		// TODO: alpha
+		batch.setColor(1f, 1f, 1f, p.opacity);
 		batch.draw(
 				shtParticles.getRegion(2), // region
-				(float)p.x + offsetX, // x
-				(float)p.y + offsetY, // y
+				(float)p.x, // x
+				(float)p.y, // y
 				0.25f, // originX
 				0.25f, // originY
 				0.25f, // width
@@ -425,6 +430,7 @@ public class WorldRenderer implements Renderer {
 				0f, // rotation
 				false // clockwise
 		);
+		batch.setColor(1f, 1f, 1f, 1f);
 	}
 	
 	/**
@@ -435,8 +441,8 @@ public class WorldRenderer implements Renderer {
 	public void renderSmoke(ParticleSmoke p) {
 		batch.draw(
 				shtParticles.getRegion(0), // region
-				(float)p.x + offsetX, // x
-				(float)p.y + offsetY, // y
+				(float)p.x, // x
+				(float)p.y, // y
 				0.25f, // originX
 				0.25f, // originY
 				0.25f, // width

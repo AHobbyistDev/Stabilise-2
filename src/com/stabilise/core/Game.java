@@ -41,7 +41,7 @@ public class Game implements Controllable, InputProcessor {
 	public boolean debug = false;
 	
 	/** The game profiler. */
-	public Profiler profiler = new Profiler();
+	public Profiler profiler = Application.get().profiler;
 	/** The game's logging agent. */
 	private final Log log = Log.getAgent("GAME");
 	
@@ -94,7 +94,7 @@ public class Game implements Controllable, InputProcessor {
 				Application a = Application.get();
 				a.produceCrashLog();
 				//close();			// Simply calling close() makes the game freeze
-				a.setState(new MainMenuState());
+				//----a.setState(new MainMenuState());
 				return;
 			}
 		}

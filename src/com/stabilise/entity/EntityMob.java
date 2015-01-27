@@ -300,6 +300,7 @@ public abstract class EntityMob extends Entity {
 			dx = 0;
 	}
 	
+	/*
 	@Override
 	protected float getXFriction() {
 		if(moving)
@@ -307,6 +308,7 @@ public abstract class EntityMob extends Entity {
 		else
 			return super.getXFriction();
 	}
+	*/
 	
 	@Override
 	protected void onVerticalCollision() {
@@ -352,13 +354,17 @@ public abstract class EntityMob extends Entity {
 		if(direction.hasHorizontalComponent()) {
 			float ddx = onGround ? acceleration : airAcceleration;
 			
-			// TODO: modulate based on max dx better
-			ddx *= (maxDx - Math.abs(dx));
-			
 			if(direction.hasRight())
 				dx += ddx;
 			else
 				dx -= ddx;
+			
+			// TODO: modulate based on max dx better
+			//ddx *= (maxDx - Math.abs(dx));
+			if(dx > maxDx)
+				dx = maxDx;
+			else if(dx < -maxDx)
+				dx = -maxDx;
 			
 			setFacingRight(direction.hasRight());
 		}

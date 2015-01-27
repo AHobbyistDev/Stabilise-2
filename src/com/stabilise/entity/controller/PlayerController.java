@@ -32,6 +32,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 	/** The ID of the tile currently selected. */
 	private int tileID = 1;
 	
+	
 	/**
 	 * Creates a new PlayerController.
 	 * 
@@ -68,13 +69,13 @@ public class PlayerController extends MobController implements Controllable, Inp
 		
 		//if(Constants.DEV_VERSION) {
 		if(controller.isControlPressed(Control.FLYRIGHT))
-			mob.dx += 0.2f;
+			mob.dx += 1f;
 		if(controller.isControlPressed(Control.FLYLEFT))
-			mob.dx -= 0.2f;
+			mob.dx -= 1f;
 		if(controller.isControlPressed(Control.FLYUP))
-			mob.dy += 0.2f;
+			mob.dy += 1f;
 		if(controller.isControlPressed(Control.FLYDOWN))
-			mob.dy -= 0.2f;
+			mob.dy -= 1f;
 		//}
 		
 		if(worldRenderer == null) {
@@ -96,7 +97,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 	 * tile-lengths.
 	 */
 	private int mouseXToWorldSpace(int x) {
-		return MathsUtil.floor(((x - worldRenderer.offsetX) / worldRenderer.getScale()));
+		return MathsUtil.floor(((x + worldRenderer.world.camera.x) / worldRenderer.getPixelsPerTile()));
 	}
 	
 	/**
@@ -109,7 +110,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 	 * tile-lengths.
 	 */
 	private int mouseYToWorldSpace(int y) {
-		return MathsUtil.floor(((y - worldRenderer.offsetY) / worldRenderer.getScale()));
+		return MathsUtil.floor(((y + worldRenderer.world.camera.y) / worldRenderer.getPixelsPerTile()));
 	}
 	
 	@Override
@@ -185,13 +186,13 @@ public class PlayerController extends MobController implements Controllable, Inp
 			case ZOOM_IN:
 				{
 					SingleplayerState state = (SingleplayerState)Application.get().getState();
-					state.renderer.setScale(state.renderer.getScale() * 2f);
+					state.renderer.setPixelsPerTile(state.renderer.getPixelsPerTile() * 2f, true);
 				}
 				break;
 			case ZOOM_OUT:
 				{
 					SingleplayerState state = (SingleplayerState)Application.get().getState();
-					state.renderer.setScale(state.renderer.getScale() / 2);
+					state.renderer.setPixelsPerTile(state.renderer.getPixelsPerTile() / 2, true);
 				}
 				break;
 			case INTERACT:

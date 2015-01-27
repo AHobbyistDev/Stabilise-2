@@ -9,7 +9,6 @@ import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.world.BaseWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.tile.Tile;
-import com.stabilise.world.tile.TileFluid;
 
 /**
  * An entity is an object which exists in the world that is subject to
@@ -61,6 +60,9 @@ public abstract class Entity extends FreeGameObject {
 	
 	/** The entity's velocity values, in tiles per second. */
 	public float dx = 0, dy = 0;
+	/** dx, dy integral. The entity's velocity values, in tiles per 60th of a
+	 * second. */
+	private float dxi = 0, dyi = 0;
 	
 	/** True if dx and dy are positive; false otherwise (n.b. dxp = "dx
 	 * positive") */
@@ -129,23 +131,20 @@ public abstract class Entity extends FreeGameObject {
 			// y_next = y_old + dy_old*t + 2ndOrderGravityValue
 			// dy_next = dy_old + gravity*t
 			
-			// dy integral
-			float dyi = dy * world.getTimeIncrement() + world.getGravity2ndOrder();
+			dxi = dx * world.getTimeIncrement();
+			dyi = dy * world.getTimeIncrement() + world.getGravity2ndOrder();
 			
-			dxp = dx > 0;
+			dxp = dxi > 0;
 			dyp = dyi > 0;
-			
-			dx *= (1-getXFriction());
-			dyi *= (1-getYFriction());
 			
 			onGround = false;
 			
-			if(dx > 1.0f || dx < -1.0f || dyi > 1.0f || dyi < -1.0f) {
+			if(dxi > 1.0f || dxi < -1.0f || dyi > 1.0f || dyi < -1.0f) {
 				// TODO: vertical wall offsetting for higher velocities
 				// That is, currently this is pretty screwy and glitches out
 				
-				float divisor = Math.abs(dx) > Math.abs(dyi) ? Math.abs(dx) : Math.abs(dyi);
-				float xInc = dx / divisor;		// x increments
+				float divisor = Math.abs(dxi) > Math.abs(dyi) ? Math.abs(dxi) : Math.abs(dyi);
+				float xInc = dxi / divisor;		// x increments
 				float yInc = dyi / divisor;		// y increments
 				double px = x + xInc;		// projected x
 				double py = y + yInc;		// projected y
@@ -164,7 +163,7 @@ public abstract class Entity extends FreeGameObject {
 				//double xp = x + dx + (dx > 0 ? boundingBox.p11.x : boundingBox.p00.x);		// projected x
 				//double yp = y + dy + (dy > 0 ? boundingBox.p11.y : boundingBox.p00.y);		// projected y
 				
-				double px = x + dx;		// projected x
+				double px = x + dxi;		// projected x
 				double py = y + dyi;		// projected y
 				
 				verticalCollisions(px, py);
@@ -176,10 +175,13 @@ public abstract class Entity extends FreeGameObject {
 				horizontalCollisions(px, y + dyi);
 			}
 			
-			x += dx * world.getTimeIncrement();
+			x += dxi;
 			y += dyi;
 			
 			dy += world.getGravityIncrement(); // apply after updating y
+			
+			dx *= getXFriction();
+			dy *= getYFriction();
 		}
 	}
 	
@@ -189,6 +191,8 @@ public abstract class Entity extends FreeGameObject {
 	 * @return The frictive force.
 	 */
 	protected float getXFriction() {
+		return 0.98f;
+		/*
 		// TODO: may be overlapping with multiple tiles
 		Tile tileIn = world.getTileAt(x, y);
 		
@@ -197,6 +201,7 @@ public abstract class Entity extends FreeGameObject {
 		} else {
 			return getAirFriction() + getTileFriction();
 		}
+		*/
 	}
 	
 	/**
@@ -205,7 +210,7 @@ public abstract class Entity extends FreeGameObject {
 	 * @return The frictive force.
 	 */
 	protected float getYFriction() {
-		return 0;
+		return 1f;
 	}
 	
 	/**
@@ -279,7 +284,7 @@ public abstract class Entity extends FreeGameObject {
 	 * @return {@code true} if a collision is detected.
 	 */
 	private boolean verticalCollisions(double xp, double yp) {
-		if(dy == 0.0f) return false;
+		if(dyi == 0.0f) return false;
 		
 		float leadingEdge = dyp ? boundingBox.getV11().y : boundingBox.getV00().y;
 		
@@ -363,7 +368,7 @@ public abstract class Entity extends FreeGameObject {
 		onHorizontalCollision();
 		impact(dx, true);
 		
-		dx = 0;
+		dx = dxi = 0;
 		
 		if(direction == Direction.RIGHT) {
 			x = Math.floor(xp) - boundingBox.getV11().x;
@@ -383,12 +388,13 @@ public abstract class Entity extends FreeGameObject {
 		onVerticalCollision();
 		impact(dy, true);
 		
-		dy = 0;
+		dy = dyi = 0;
 		
 		if(direction == Direction.UP) {
 			y = Math.floor(yp) - boundingBox.getV11().y;
 		} else {
 			y = Math.ceil(yp) - boundingBox.getV00().y;
+			
 			// TODO: Find a better way of doing this
 			int tx = MathsUtil.floor(x);
 			int ty = MathsUtil.floor(y - 0.001D);

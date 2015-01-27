@@ -19,7 +19,7 @@ public class ParticleDamageIndicator extends Particle {
 	/** The colour used for damage indicator text. */
 	private static final Color INDICATOR_COLOUR = Color.RED;
 	/** The font style to use for damage indicator text. */
-	private static final FontStyle STYLE_INDICATOR = new FontStyle(INDICATOR_TEXT_SIZE, INDICATOR_COLOUR, FontStyle.Alignment.CENTRE, 1, 0);
+	//private static final FontStyle STYLE_INDICATOR = new FontStyle(INDICATOR_TEXT_SIZE, INDICATOR_COLOUR, FontStyle.Alignment.CENTRE, 1, 0);
 	
 	/** The duration for which a damage indicator should last, in ticks. */
 	private static final int INDICATOR_DURATION = 80;
@@ -111,6 +111,7 @@ public class ParticleDamageIndicator extends Particle {
 	 * 
 	 * @return The font style.
 	 */
+	/*
 	public FontStyle getFontStyle() {
 		// A sneaky way of getting the text's alpha to change appropriately
 		// Abusing the mutability of the Colour class to circumvent the
@@ -120,5 +121,6 @@ public class ParticleDamageIndicator extends Particle {
 		
 		return STYLE_INDICATOR;
 	}
+	*/
 	
 }

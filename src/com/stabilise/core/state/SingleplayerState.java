@@ -43,6 +43,7 @@ public class SingleplayerState implements State {
 	public void start() {
 		InputMultiplexer input = new InputMultiplexer();
 		input.addProcessor(game);
+		input.addProcessor(game.controller);
 		Gdx.input.setInputProcessor(input);
 		
 		renderer = new WorldRenderer(game, game.getWorld());
@@ -89,12 +90,8 @@ public class SingleplayerState implements State {
 	
 	@Override
 	public void update() {
-		profiler.verify(2, "root.update");
-		
 		profiler.start("game"); // root.update.game
 		game.update();
-		
-		profiler.verify(3, "root.update.game");
 		
 		// Safety net to prevent an NPE from the renderer if the game shuts
 		// down this tick
@@ -106,8 +103,6 @@ public class SingleplayerState implements State {
 		profiler.next("renderer"); // root.update.renderer
 		renderer.update();
 		profiler.end(); // root.update
-		
-		profiler.verify(2, "root.update");
 	}
 	
 	@Override

@@ -226,6 +226,8 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 07/01/14	
 	- Added InstantiationRegistry to create entities, tile entities, packets, etc.
 10/01/14
-	- Porting World architecture over to something more extensive and usable for old world types
+	- Porting World architecture over to something more extensive and usable for all world types (e.g. singleplayer, server, client to a server)
+27/01/14
+	- The game is now runnable to an extent. Menu architecture is still broken, rendering is crude and incomplete, and only one sample world can be run.
 
 	
