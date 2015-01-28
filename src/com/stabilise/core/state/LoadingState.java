@@ -20,7 +20,6 @@ import com.stabilise.character.CharacterData;
 import com.stabilise.core.Application;
 import com.stabilise.core.Resources;
 import com.stabilise.core.main.Stabilise;
-import com.stabilise.entity.EntityPlayer;
 import com.stabilise.util.Log;
 import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.concurrent.TaskThread;
@@ -103,14 +102,14 @@ public class LoadingState implements State {
 				world = new ClientWorld<>(
 						new SingleplayerWorld(
 								worldList[0], Application.get().profiler, Log.getAgent("world")
-						)
+						),
+						CharacterData.defaultCharacter()
 				);
 				
 				tracker.increment();
 				tracker.setName("Loading world");
 				
 				world.prepare();
-				world.setClientPlayer(CharacterData.defaultCharacter(), new EntityPlayer(world));
 				
 				while(!world.isLoaded())
 					Thread.sleep(1000L);

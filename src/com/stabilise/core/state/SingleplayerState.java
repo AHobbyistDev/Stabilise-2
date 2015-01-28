@@ -44,6 +44,7 @@ public class SingleplayerState implements State {
 		InputMultiplexer input = new InputMultiplexer();
 		input.addProcessor(game);
 		input.addProcessor(game.controller);
+		input.addProcessor(game.playerController);
 		Gdx.input.setInputProcessor(input);
 		
 		renderer = new WorldRenderer(game, game.getWorld());

@@ -39,7 +39,8 @@ public interface IWorld {
 	
 	/**
 	 * Prepares the world by performing any necessary preemptive loading
-	 * operations, such as preparing the spawn regions, etc.
+	 * operations, such as preparing the spawn regions, etc. Polling {@link
+	 * #isLoaded()} allows one to check the status of this operation.
 	 * 
 	 * @throws IllegalStateException if the world has already been prepared.
 	 */

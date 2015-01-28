@@ -64,10 +64,7 @@ public abstract class EntityProjectile extends Entity {
 	 */
 	@SuppressWarnings("unchecked")
 	protected void rotate() {
-		if(dx == 0)
-			rotation = dy > 0 ? (float)(-Math.PI / 2D) : (float)(Math.PI / 2D);
-		else
-			rotation = (float)Math.atan(dy / dx);
+		rotation = (float)Math.atan2(dy, dx);
 		
 		if(hitbox != null)
 			((RotatableShape<Shape>)hitbox.boundingBox).setRotation(rotation);

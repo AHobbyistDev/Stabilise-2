@@ -131,7 +131,7 @@ public class GameWorld extends HostWorld {
 	 * 
 	 * @param character The data of the player to add.
 	 */
-	public void addPlayer(CharacterData character) {
+	public EntityMob addPlayer(CharacterData character) {
 		this.playerChar = character;
 		
 		EntityPlayer p = new EntityPlayer(this);
@@ -153,6 +153,8 @@ public class GameWorld extends HostWorld {
 		sliceMap = new SliceMap(this, p);
 		
 		player = p;
+		
+		return p;
 	}
 	
 	/**

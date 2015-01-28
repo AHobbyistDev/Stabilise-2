@@ -20,7 +20,7 @@ public class ClientWorld<T extends BaseWorld & IClientWorld>
 		extends WrappedWorld<T> implements IClientWorld {
 	
 	/** The player's character data. */
-	private CharacterData playerData;
+	private final CharacterData playerData;
 	/** Holds a direct reference to the player controlled by the client. */
 	public EntityMob player;
 	/** The camera which follows the client's player. */
@@ -37,24 +37,23 @@ public class ClientWorld<T extends BaseWorld & IClientWorld>
 	 * Creates a new ClientWorld.
 	 * 
 	 * @param world The underlying world intended for the client.
+	 * @param playerData The data of the player using this world.
 	 */
-	public ClientWorld(T world) {
+	public ClientWorld(T world, CharacterData playerData) {
 		super(world);
+		this.playerData = playerData;
 	}
 	
 	@Override
-	public void setClientPlayer(CharacterData data, EntityMob mob) {
-		this.playerData = data;
-		this.player = mob;
-		camera = new GameCamera(this, player);
-		world.setClientPlayer(data, mob);
-		addEntity(mob);
-		setPlayer(mob);
-	}
-	
-	@Override
-	public void saveClientPlayer(CharacterData data, EntityMob mob) {
-		world.saveClientPlayer(playerData, player);
+	public void prepare() {
+		// TODO: deal with the multiplayer client case
+		if(world instanceof HostWorld) {
+			HostWorld host = (HostWorld)world;
+			player = host.addPlayer(playerData, this);
+			camera = new GameCamera(this, player);
+		}
+		
+		super.prepare();
 	}
 	
 	@Override

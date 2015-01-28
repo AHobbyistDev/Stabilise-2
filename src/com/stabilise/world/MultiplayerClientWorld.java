@@ -33,12 +33,10 @@ public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
 		// TODO
 	}
 	
-	@Override
-	public void setClientPlayer(CharacterData data, EntityMob mob) {
+	public void addClientPlayer(CharacterData data, EntityMob mob) {
 		// TODO
 	}
 	
-	@Override
 	public void saveClientPlayer(CharacterData data, EntityMob mob) {
 		// don't really do anything if we're the client...
 	}

@@ -42,8 +42,8 @@ public class ModelPlayer extends Model {
 	
 	/** The origin point for each sprite. */
 	private static final Vector2 ORIGIN = new Vector2( //58,23
-			125 / PIXELS_PER_TILE,
-			56 / PIXELS_PER_TILE
+			105f / PIXELS_PER_TILE, // 125
+			49f / PIXELS_PER_TILE // 56
 	);		
 	
 	private static final Point

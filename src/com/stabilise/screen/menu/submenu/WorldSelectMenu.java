@@ -683,7 +683,7 @@ public class WorldSelectMenu extends SubMenu {
 						timer.start();
 						
 						world.prepare();
-						world.setClientPlayer(CharacterData.defaultCharacter(), new EntityPlayer(world));
+						world.addClientPlayer(CharacterData.defaultCharacter(), new EntityPlayer(world));
 						
 						tracker.increment();
 						

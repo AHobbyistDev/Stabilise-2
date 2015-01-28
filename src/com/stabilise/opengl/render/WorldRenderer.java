@@ -39,6 +39,8 @@ public class WorldRenderer implements Renderer {
 	/** The font style used for the loading screen. */
 	//private static final FontStyle STYLE_LOADING_SCREEN = new FontStyle(36, Colour.BLACK, FontStyle.Alignment.CENTRE, 4, 0);
 	
+	private static final float COL_WHITE = Color.WHITE.toFloatBits();
+	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
@@ -117,7 +119,7 @@ public class WorldRenderer implements Renderer {
 		//texFireball.setPivot(texFireball.getTextureWidth(), texFireball.getTextureHeight() / 2);
 		
 		texExplosion = Resources.texture("explosion");
-		texExplosion.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+		texExplosion.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		//texExplosion.setPivot(texExplosion.getTextureWidth()/2, texExplosion.getTextureHeight()/2);
 		
 		shtItems = TextureSheet.sequentiallyOptimised(Resources.texture("sheets/items"), 8, 8);
@@ -194,7 +196,7 @@ public class WorldRenderer implements Renderer {
 	public void render() {
 		camera.position.set((float)world.camera.x, (float)world.camera.y, 0f);
 		camera.update();
-		batch.setProjectionMatrix(viewport.getCamera().combined);
+		batch.setProjectionMatrix(camera.combined);
 		
 		profiler.start("background"); // root.render.background
 		Color bCol = new Color(0x92D1E4FF); // RGBA is annoying in this case: ARGB > RGBA
@@ -257,24 +259,7 @@ public class WorldRenderer implements Renderer {
 	 * @param e The big fireball entity.
 	 */
 	public void renderBigFireball(EntityBigFireball e) {
-		batch.draw(
-				texFireball, // texture
-				(float)e.x, // x
-				(float)e.y, // y
-				0.75f, // originX - may need to be 0.25 if flipped
-				0.25f, // originY
-				1f, // width
-				0.5f, // height
-				1f, // scaleX
-				1f, // scaleY
-				(float)Math.toDegrees(e.rotation), // rotation
-				0, // srcX
-				0, // srcY
-				texFireball.getWidth(), // srcWidth
-				texFireball.getHeight(), // srcHeight
-				!e.facingRight, // flipX
-				false // flipY
-		);
+		renderFireball(e);
 	}
 	
 	/**
@@ -318,13 +303,13 @@ public class WorldRenderer implements Renderer {
 	 * 
 	 * @param e The fireball entity.
 	 */
-	public void renderFireball(EntityFireball e) {
+	public void renderFireball(EntityProjectile e) {
 		batch.draw(
 				texFireball, // texture
 				(float)e.x, // x
 				(float)e.y, // y
-				0.75f, // originX - may need to be 0.25 if flipped
-				0.25f, // originY
+				0.75f, // originX
+				0.5f, // originY
 				1f, // width
 				0.5f, // height
 				1f, // scaleX
@@ -334,7 +319,7 @@ public class WorldRenderer implements Renderer {
 				0, // srcY
 				texFireball.getWidth(), // srcWidth
 				texFireball.getHeight(), // srcHeight
-				!e.facingRight, // flipX
+				false,//!e.facingRight, // flipX
 				false // flipY
 		);
 	}
@@ -389,9 +374,9 @@ public class WorldRenderer implements Renderer {
 	 * @param p The explosion particle.
 	 */
 	public void renderExplosion(ParticleExplosion p) {
-		// TODO: tint & alpha
+		batch.setColor(p.colour);
 		batch.draw(
-				texEnemy, // texture
+				texExplosion, // texture
 				(float)p.x, // x
 				(float)p.y, // y
 				0.5f, // originX
@@ -403,11 +388,12 @@ public class WorldRenderer implements Renderer {
 				0f, // rotation
 				0, // srcX
 				0, // srcY
-				texEnemy.getWidth(), // srcWidth
-				texEnemy.getHeight(), // srcHeight
+				texExplosion.getWidth(), // srcWidth
+				texExplosion.getHeight(), // srcHeight
 				false, // flipX
 				false // flipY
 		);
+		batch.setColor(COL_WHITE);
 	}
 	
 	/**
@@ -427,10 +413,9 @@ public class WorldRenderer implements Renderer {
 				0.25f, // height
 				1f, // scaleX
 				1f, // scaleY
-				0f, // rotation
-				false // clockwise
+				0f // rotation
 		);
-		batch.setColor(1f, 1f, 1f, 1f);
+		batch.setColor(COL_WHITE);
 	}
 	
 	/**
@@ -449,8 +434,7 @@ public class WorldRenderer implements Renderer {
 				0.25f, // height
 				1f, // scaleX
 				1f, // scaleY
-				0f, // rotation
-				false // clockwise
+				0f // rotation
 		);
 	}
 	

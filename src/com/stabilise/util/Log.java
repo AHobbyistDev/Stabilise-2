@@ -38,7 +38,7 @@ public class Log {
 	private static final int LOG_CAPACITY = 256;
 	
 	/** Stores the log entries. Access to this list should be synchronised. */
-	private static List<String> entries = new LightweightLinkedList<String>();
+	private static final List<String> entries = new LightweightLinkedList<String>();
 	
 	/** A cache of the untagged logging agent to save on processor time. */
 	private static final Log defaultAgent = new Log("");

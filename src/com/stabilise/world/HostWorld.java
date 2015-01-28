@@ -1,7 +1,9 @@
 package com.stabilise.world;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -9,6 +11,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.google.common.base.Preconditions;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
@@ -42,6 +45,10 @@ public abstract class HostWorld extends BaseWorld {
 	public final WorldLoader loader;
 	/** The world generator. */
 	public final WorldGenerator generator;
+	
+	/** Data for players in the world. Integer key is the character's entity
+	 * ID. */
+	protected Map<Integer, PlayerDataFile> characters = new HashMap<>(1);
 	
 	/** The map of all loaded regions. This is concurrent as to prevent
 	 * problems when relevant methods are accessed by the world loader. */
@@ -101,17 +108,15 @@ public abstract class HostWorld extends BaseWorld {
 	/**
 	 * Adds a player to the world.
 	 * 
-	 * <p>This can be performed on a loader thread if the world is not
-	 * currently running - i.e. being set up initially (thus making this
-	 * unsuitable for multiple characters in multiplayer (so beware of a direct
-	 * port to WorldServer).
-	 * 
 	 * @param character The data of the player to add.
+	 * @param world The world to treat as the player's parent world (may not
+	 * necessarily be this HostWorld object).
+	 * 
+	 * @return The added player entity.
+	 * @throws NullPointerException if {@code character} is {@code null}.
 	 */
-	public void addPlayer(CharacterData character) {
-		//this.playerChar = character;
-		
-		EntityPlayer p = new EntityPlayer(this);
+	public EntityMob addPlayer(CharacterData character, IWorld world) {
+		EntityPlayer p = new EntityPlayer(world);
 		loadCharacterData(character);
 		if(character.newToWorld) {
 			// TODO: For now I'm placing the character at (0,0) of the spawn
@@ -125,6 +130,8 @@ public abstract class HostWorld extends BaseWorld {
 		}
 		addEntity(p, character.lastX, character.lastY);
 		setPlayer(p);
+		characters.put(p.id, character.dataFile);
+		return p;
 	}
 	
 	/**
@@ -136,7 +143,7 @@ public abstract class HostWorld extends BaseWorld {
 	 * @return {@code true} if the area is loaded; {@code false} otherwise.
 	 */
 	public boolean spawnAreaLoaded(CharacterData character) {
-		return true;
+		return true; // TODO
 	}
 	
 	/**
@@ -518,10 +525,23 @@ public abstract class HostWorld extends BaseWorld {
 			log.postSevere("Could not save world info!");
 		}
 		
-		//savePlayers(); // TODO
+		savePlayers();
 		
 		for(Region r : regions.values())
 			saveRegion(r);
+	}
+	
+	/**
+	 * Saves player data.
+	 */
+	private void savePlayers() {
+		for(Integer i : players.keySet()) {
+			EntityMob player = players.get(i);
+			PlayerDataFile dataFile = characters.get(i);
+			dataFile.character.lastX = player.x;
+			dataFile.character.lastY = player.y;
+			saveCharacterData(dataFile.character);
+		}
 	}
 	
 	@Override

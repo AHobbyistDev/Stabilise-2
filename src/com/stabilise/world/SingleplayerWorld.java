@@ -29,28 +29,10 @@ public class SingleplayerWorld extends HostWorld implements IClientWorld {
 	}
 	
 	@Override
-	public void setClientPlayer(CharacterData data, EntityMob mob) {
-		loadCharacterData(data);
-		if(data.newToWorld) {
-			// TODO: For now I'm placing the character at (0,0) of the spawn
-			// slice. In practice, we'll need to check to see whether or not
-			// this location is valid, and keep searching until a valid
-			// location is found.
-			data.lastX = tileCoordFromSliceCoord(info.spawnSliceX);
-			data.lastY = tileCoordFromSliceCoord(info.spawnSliceY);
-			data.newToWorld = false;
-			saveCharacterData(data);
-		}
-		mob.x = data.lastX;
-		mob.y = data.lastY;
-		sliceMap = new SliceMap(this, mob);
-	}
-	
-	@Override
-	public void saveClientPlayer(CharacterData data, EntityMob mob) {
-		data.lastX = mob.x;
-		data.lastY = mob.y;
-		saveCharacterData(data);
+	public EntityMob addPlayer(CharacterData data, IWorld world) {
+		EntityMob player = super.addPlayer(data, world);
+		sliceMap = new SliceMap(this, player);
+		return player;
 	}
 	
 	@Override

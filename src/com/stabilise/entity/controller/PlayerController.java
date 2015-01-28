@@ -1,6 +1,7 @@
 package com.stabilise.entity.controller;
 
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Input.Keys;
 import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Game;
@@ -199,8 +200,8 @@ public class PlayerController extends MobController implements Controllable, Inp
 				mob.world.getTileAt(mob.x, mob.y-1).handleInteract(mob.world, MathsUtil.floor(mob.x), MathsUtil.floor(mob.y-1), mob);
 				break;
 			case TEST_RANDOM_THING:
-				//mob.x = 0;
-				//mob.y = 0;
+				mob.x = 0;
+				mob.y = 0;
 				//game.getWorld().camera.snapToFocus();
 				//Log.message(Texture.texturesToString());
 				break;
@@ -217,6 +218,10 @@ public class PlayerController extends MobController implements Controllable, Inp
 	
 	@Override
 	public boolean keyDown(int keycode) {
+		if(keycode == Keys.LEFT_BRACKET)
+			mob.world.setTimeDelta(mob.world.getTimeDelta() * 0.5f);
+		else if(keycode == Keys.RIGHT_BRACKET)
+			mob.world.setTimeDelta(mob.world.getTimeDelta() * 2f);
 		return false;
 	}
 

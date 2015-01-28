@@ -26,10 +26,6 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  */
 public abstract class BaseWorld extends AbstractWorld {
 	
-	//--------------------==========--------------------
-	//------------=====Member Variables=====------------
-	//--------------------==========--------------------
-	
 	/** All players in the world. */
 	protected Map<Integer, EntityMob> players = new HashMap<>(1);
 	/** The map of loaded entities in the world. This is a LinkedHashMap as to
@@ -69,7 +65,7 @@ public abstract class BaseWorld extends AbstractWorld {
 	
 	private float timeDelta = 1f;
 	private float timeIncrement = timeDelta / Constants.TICKS_PER_SECOND;
-	private final float gravity = -9.8f;
+	private final float gravity = -3 * 9.8f;
 	private float gravityIncrement = gravity * timeIncrement;
 	private float gravity2ndOrder = gravity * timeIncrement * timeIncrement / 2;
 	

@@ -1,7 +1,5 @@
 package com.stabilise.world;
 
-import com.stabilise.character.CharacterData;
-import com.stabilise.entity.EntityMob;
 
 /**
  * Defines methods required for a client world to function.
@@ -14,7 +12,7 @@ interface IClientWorld extends IWorld {
 	 * @param data The client's character data.
 	 * @param mob The player mob.
 	 */
-	void setClientPlayer(CharacterData data, EntityMob mob);
+	//void addClientPlayer(CharacterData data, EntityMob mob);
 	
 	/**
 	 * Saves the data for the client player.
@@ -25,6 +23,6 @@ interface IClientWorld extends IWorld {
 	 * @param data The client's character data.
 	 * @param mob The player mob.
 	 */
-	void saveClientPlayer(CharacterData data, EntityMob mob);
+	//void saveClientPlayer(CharacterData data, EntityMob mob);
 	
 }

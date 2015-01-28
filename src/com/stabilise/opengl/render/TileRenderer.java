@@ -1,5 +1,6 @@
 package com.stabilise.opengl.render;
 
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.stabilise.core.Resources;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.world.ClientWorld;
@@ -40,6 +41,7 @@ public class TileRenderer implements Renderer {
 	@Override
 	public void loadResources() {
 		tiles = TextureSheet.sequentiallyOptimised(Resources.texture("sheets/tiles"), 8, 8);
+		tiles.texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
 	}
 	
 	@Override
@@ -80,9 +82,9 @@ public class TileRenderer implements Renderer {
 		
 		slicesRendered++;
 		
-		final float tileXInit = x * Slice.SLICE_SIZE;
-		float tileX;
-		float tileY = y * Slice.SLICE_SIZE;
+		final int tileXInit = x * Slice.SLICE_SIZE;
+		int tileX;
+		int tileY = y * Slice.SLICE_SIZE;
 		
 		for(int r = 0; r < Slice.SLICE_SIZE; r++) {
 			tileX = tileXInit;
@@ -91,13 +93,13 @@ public class TileRenderer implements Renderer {
 				// because air has no texture: sums to +7
 				int id = slice.getTileIDAt(c, r) + 7;
 				
-				if(id != 7) // not air
+				if(id != 7) // i.e. not air
 					worldRenderer.batch.draw(tiles.getRegion(id), tileX, tileY, 1f, 1f);
 				
-				tileX++; // formerly + worldRenderer.pixelsPerTile
+				tileX++;
 			}
 			
-			tileY++; // formerly + worldRenderer.pixelsPerTile
+			tileY++;
 		}
 	}
 	

@@ -3,7 +3,6 @@ package com.stabilise.core;
 import static com.badlogic.gdx.Input.Keys;
 
 import com.badlogic.gdx.InputProcessor;
-import com.stabilise.core.state.MainMenuState;
 import com.stabilise.entity.controller.PlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
@@ -191,8 +190,6 @@ public class Game implements Controllable, InputProcessor {
 	
 	@Override
 	public boolean keyDown(int keycode) {
-		if(keycode == Keys.NUM_0)
-			System.out.println(profiler.getData().toString());
 		//hudRenderer.setProfilerSection(keyValue(keycode));
 		return false;
 	}

@@ -15,12 +15,12 @@ public class ParticleExplosion extends Particle {
 	//--------------------==========--------------------
 	
 	/** The number of ticks after which an explosion particle despawns. */
-	private static final int DESPAWN_TICKS = 10;
+	private static final int DESPAWN_TICKS = 12;
 	
 	/** The initial colour of the explosion. */
 	private static final Color COLOUR_INIT = new Color(0xFFFFFFFF);
 	/** The final colour of the explosion. */
-	private static final Color COLOUR_FINAL = new Color(0xAAFFA200);
+	private static final Color COLOUR_FINAL = new Color(0xFF660000); //0xAAFFA200
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -28,8 +28,6 @@ public class ParticleExplosion extends Particle {
 	
 	/** The colour of the explosion. */
 	public Color colour;
-	/** The alpha of the explosion. */
-	public float alpha;
 	
 	/** The initial radius of the explosion, in tile-lengths. */
 	private float radiusInit;
@@ -54,7 +52,6 @@ public class ParticleExplosion extends Particle {
 		radiusFinal = finalRadius;
 		
 		colour = new Color(COLOUR_INIT);
-		alpha = COLOUR_INIT.a;
 		radius = radiusInit;
 	}
 	
@@ -67,10 +64,9 @@ public class ParticleExplosion extends Particle {
 		colour.r = Interpolation.lerp(COLOUR_INIT.r, COLOUR_FINAL.r, ratio);
 		colour.g = Interpolation.lerp(COLOUR_INIT.g, COLOUR_FINAL.g, ratio);
 		colour.b = Interpolation.lerp(COLOUR_INIT.b, COLOUR_FINAL.b, ratio);
+		colour.a = Interpolation.lerp(COLOUR_INIT.a, COLOUR_FINAL.a, ratio);
 		
-		alpha = Interpolation.lerp(COLOUR_INIT.a, COLOUR_FINAL.a, ratio);
-		
-		radius = colour.r = Interpolation.lerp(radiusInit, radiusFinal, ratio);
+		radius = Interpolation.lerp(radiusInit, radiusFinal, ratio);
 		
 		if(age == DESPAWN_TICKS)
 			destroy();

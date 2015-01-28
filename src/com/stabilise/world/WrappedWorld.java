@@ -22,7 +22,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 public class WrappedWorld<T extends BaseWorld> extends AbstractWorld {
 	
 	/** The world being wrapped. */
-	public T world;
+	public final T world;
 	
 	
 	public WrappedWorld(T world) {
