@@ -533,6 +533,7 @@ public abstract class WorldGenerator {
 		List<Region> cRegions = localCachedRegions.get();
 		
 		// If the region is already cached by this thread, use it
+		
 		for(Region r : cRegions) {
 			if(r.loc.equals(x, y));
 				return r;
@@ -543,12 +544,14 @@ public abstract class WorldGenerator {
 		
 		// Otherwise, if the region is already cached by the world generator,
 		// use it.
+		
 		// Synchronised to make this atomic.
 		synchronized(cachedRegions) {
 			cachedRegion = cachedRegions.get(Region.getKey(x, y));
 			// If the region is not cached by the world generator, get it from
 			// the world
 			if(cachedRegion == null) {
+				wasUncached = true;
 				// Synchronise on the public lock to make this atomic. See
 				// HostWorld.loadRegion()
 				synchronized(lock) {
@@ -558,11 +561,11 @@ public abstract class WorldGenerator {
 					cachedRegion = new CachedRegion(region);
 					cachedRegions.put(region.loc, cachedRegion);
 				}
-				wasUncached = true;
 			}
+			
+			cachedRegion.increment();
 		}
 		
-		cachedRegion.increment();
 		cRegions.add(cachedRegion.region);
 		
 		// No guarantees are made as to whether or not the region is loaded, so

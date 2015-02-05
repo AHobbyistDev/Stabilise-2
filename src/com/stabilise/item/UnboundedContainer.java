@@ -30,11 +30,6 @@ public class UnboundedContainer extends Container {
 		return items.size();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws IndexOutOfBoundsException if {@code slot < 0}.
-	 */
 	@Override
 	public ItemStack getStack(int slot) {
 		if(slot >= items.size())
@@ -72,10 +67,10 @@ public class UnboundedContainer extends Container {
 		// Create new slots if more items are yet to be added
 		if(quantity > 0) {
 			while(quantity > item.getMaxStackSize()) {
-				items.add(new ItemStack(item, item.getMaxStackSize()));
+				items.add(item.stackOf(item.getMaxStackSize()));
 				quantity -= item.getMaxStackSize();
 			}
-			items.add(new ItemStack(item, quantity));
+			items.add(item.stackOf(quantity));
 		}
 		return 0;
 	}

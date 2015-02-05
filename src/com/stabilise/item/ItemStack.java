@@ -27,30 +27,18 @@ public class ItemStack {
 	
 	
 	/**
-	 * Creates a new ItemStack with 1 item in the stack, as if by:
-	 * <pre>{@link #ItemStack(Item, int) new ItemStack(item, 1)}</pre>
-	 * 
-	 * @param item The stack's underlying item.
-	 */
-	public ItemStack(Item item) {
-		this(item, 1);
-	}
-	
-	/**
 	 * Creates a new ItemStack.
 	 * 
 	 * <p>Note that quantities above the item's max stack size are technically
 	 * permitted, as are negative quantities.
 	 * 
+	 * <p>This constructor should be used exclusively by {@link
+	 * Item#stackOf(int)}.
+	 * 
 	 * @param item The stack's underlying item.
 	 * @param quantity The number of items in the stack.
-	 * 
-	 * @throws NullPointerException if {@code item} is {@code null}.
 	 */
-	public ItemStack(Item item, int quantity) {
-		if(item == null)
-			throw new NullPointerException("item is null");
-		
+	ItemStack(Item item, int quantity) {
 		this.item = item;
 		this.quantity = quantity;
 	}
@@ -224,7 +212,7 @@ public class ItemStack {
 		if(item == Item.NO_ITEM)
 			return NO_STACK;
 		int quantity = tag.getInt("count");
-		return new ItemStack(item, quantity);
+		return item.stackOf(quantity);
 	}
 	
 	//--------------------==========--------------------

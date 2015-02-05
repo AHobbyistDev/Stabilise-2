@@ -24,7 +24,12 @@ public class Item {
 	 * an item, in preference to using a null pointer.
 	 * <p>The name and max stack size are arbitrary, and the ID is 0, the
 	 * 'default' ID.  */
-	public static final Item NO_ITEM = new Item(0, "", Integer.MAX_VALUE);
+	public static final Item NO_ITEM = new Item(0, "", 1) {
+		@Override
+		public ItemStack stackOf(int quantity) {
+			return ItemStack.NO_STACK;
+		}
+	};
 	
 	/** Flag which is set to true when items are registered. */
 	private static boolean registered = false;
@@ -111,6 +116,38 @@ public class Item {
 		return maxStackSize;
 	}
 	
+	/**
+	 * Creates a new ItemStack with a quantity of 1 encapsulating this Item.
+	 */
+	public ItemStack stackOf() {
+		return stackOf(1);
+	}
+	
+	/**
+	 * Creates a new ItemStack encapsulating this Item.
+	 * 
+	 * <p>Note that quantities above the item's max stack size are technically
+	 * permitted, as are negative quantities. To constrain the stack size to
+	 * this item's max stack size, use {@link #stackOfConstrained(int)}.
+	 * 
+	 * @param quantity The number of items in the stack.
+	 */
+	public ItemStack stackOf(int quantity) {
+		return new ItemStack(this, quantity);
+	}
+	
+	/**
+	 * Creates a new ItemStack encapsulating this Item. The provided quantity
+	 * is clamped to this Item's {@link #getMaxStackSize() max stack size}.
+	 * 
+	 * <p>Note that negative quantities are technically permitted.
+	 * 
+	 * @param quantity The number of items in the stack.
+	 */
+	public ItemStack stackOfConstrained(int quantity) {
+		return stackOf(quantity >= getMaxStackSize() ? getMaxStackSize() : quantity);
+	}
+	
 	@Override
 	public boolean equals(Object o) {
 		return o == this;
@@ -126,15 +163,24 @@ public class Item {
 	//--------------------==========--------------------
 	
 	/**
-	 * Gets an Item object with the given ID.
+	 * Gets the Item with the specified ID.
 	 * 
-	 * @param id The requested item's ID.
-	 * 
-	 * @return The item with the given ID, or {@link #NO_ITEM} if no such item
-	 * exists.
+	 * @return The item with the specified ID, or {@link #NO_ITEM} if no such
+	 * item exists.
 	 */
 	public static Item getItem(int id) {
 		Item item = ITEMS.get(id);
+		return item == null ? NO_ITEM : item;
+	}
+	
+	/**
+	 * Gets the Item with the specified name.
+	 * 
+	 * @return The item with the specified name, or {@link #NO_ITEM} if no such
+	 * item exists.
+	 */
+	public static Item getItem(String name) {
+		Item item = ITEMS.get(name);
 		return item == null ? NO_ITEM : item;
 	}
 	

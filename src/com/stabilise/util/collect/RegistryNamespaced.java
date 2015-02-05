@@ -12,7 +12,7 @@ import com.google.common.collect.HashBiMap;
  * format: <tt>namespace:objectname</tt>.
  * 
  * <p>A namespaced registry also provides bi-directional integer-object
- * mappings. As such, it it recommended to register entries through {@link
+ * mappings. As such, one should register entries through {@link
  * #register(int, String, Object)} instead of {@link
  * #register(Object, Object)}.
  * 

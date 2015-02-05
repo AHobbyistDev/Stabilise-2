@@ -118,10 +118,7 @@ public abstract class Container implements Iterable<ItemStack> {
 		// them if possible.
 		addToMatchingStacks:
 		do {
-			ItemStack stack = new ItemStack(
-					item, // NPE gets thrown here
-					quantity >= item.getMaxStackSize() ? item.getMaxStackSize() : quantity
-			);
+			ItemStack stack = item.stackOfConstrained(quantity);
 			quantity -= stack.getQuantity();
 			
 			for(int i = lowestMatching; i < size(); i++) {
@@ -147,10 +144,7 @@ public abstract class Container implements Iterable<ItemStack> {
 		// Next, add the item(s) to empty slots
 		addToEmptySlots:
 		while(quantity > 0) {
-			ItemStack stack = new ItemStack(
-					item,
-					quantity >= item.getMaxStackSize() ? item.getMaxStackSize() : quantity
-			);
+			ItemStack stack = item.stackOfConstrained(quantity);
 			quantity -= stack.getQuantity();
 			
 			for(int i = lowestEmpty; i < size(); i++) {
@@ -180,12 +174,12 @@ public abstract class Container implements Iterable<ItemStack> {
 		// If the desired quantity is larger than the max stack size, partition
 		// into multiple ItemStacks.
 		while(quantity > item.getMaxStackSize()) { // throws the NPE here
-			ItemStack stack = new ItemStack(item, item.getMaxStackSize());
+			ItemStack stack = item.stackOf(item.getMaxStackSize());
 			quantity -= item.getMaxStackSize();
 			if(!addStack(stack))
 				return quantity + stack.getQuantity();
 		}
-		ItemStack stack = new ItemStack(item, quantity);
+		ItemStack stack = item.stackOf(quantity);
 		addStack(stack);
 		
 		return stack.getQuantity();
@@ -211,10 +205,7 @@ public abstract class Container implements Iterable<ItemStack> {
 		if(quantity <= 0)
 			throw new IllegalArgumentException("quantity <= 0: " + quantity);
 		
-		ItemStack stack = new ItemStack(
-				item, // NPE gets thrown here
-				quantity >= item.getMaxStackSize() ? item.getMaxStackSize() : quantity
-		);
+		ItemStack stack = item.stackOfConstrained(quantity);
 		quantity -= stack.getQuantity();
 		addStack(stack, slot);
 		return quantity + stack.getQuantity();
@@ -370,13 +361,13 @@ public abstract class Container implements Iterable<ItemStack> {
 		
 		for(int i = 0; i < size(); i++) {
 			ItemStack s = getStack(i);
-			if(s == null)
+			if(s == ItemStack.NO_STACK)
 				continue;
 			
 			sb.append("\n\t[");
 			sb.append(i);
 			sb.append("] ");
-			sb.append(s.toString());
+			sb.append(s);
 		}
 		
 		sb.append("\n}");
@@ -426,17 +417,53 @@ public abstract class Container implements Iterable<ItemStack> {
 		*/
 	}
 	
-	@Override
-	public Iterator<ItemStack> iterator() {
-		return new ContainerIterator();
-	}
-	
 	/**
 	 * Sorts the contents of the Container.
 	 * 
 	 * @param comparator The comparator to use when sorting.
 	 */
 	public abstract void sort(Comparator<ItemStack> comparator);
+	
+	/**
+	 * compresses matching adjacent stacks into one stack if possible
+	 * 
+	 * TODO: finish
+	 */
+	@SuppressWarnings("unused")
+	private void compact() {
+		if(size() == 0)
+			return;
+		
+		// if stacks are removed due to having their contents dumped into
+		// another stack, slots are vacated and we need to keep track of where
+		// each following stack should be shifted to
+		int firstEmpty = 0;
+		ItemStack lastStack = getStack(0); // should never be NO_STACK if sorted
+		
+		for(int i = 1; i < size(); i++) {
+			ItemStack next = getStack(i);
+			if(lastStack.holds(next.getItem())) { // items match; try to dump
+				if(lastStack.add(next)) { // next has been emptied; vacate its slot
+					firstEmpty = i;
+				} else { // next is still there; is there a vacant slot to shift it to?
+					if(firstEmpty != i)
+						
+					lastStack = next;
+				}
+			} else { // items do not match; reset the stack to dump into and move up
+				firstEmpty++;
+				lastStack = next;
+			}
+		}
+		
+		if(!isBounded())
+			; // clean up excess unbounded slots
+	}
+	
+	@Override
+	public Iterator<ItemStack> iterator() {
+		return new ContainerIterator();
+	}
 	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------
@@ -482,10 +509,9 @@ public abstract class Container implements Iterable<ItemStack> {
 			// invoked after hasNext().
 			if(cursor != nextLoc)
 				return nextLoc;
-			while(++nextLoc < size()) {
+			while(++nextLoc < size())
 				if(!isSlotEmpty(nextLoc))
 					return nextLoc;
-			}
 			nextLoc = -1;
 			return nextLoc;
 		}
@@ -500,18 +526,49 @@ public abstract class Container implements Iterable<ItemStack> {
 	 * <p>Note that even after being sorted in this manner, a container may
 	 * hold adjacent stacks which may be merged.
 	 */
-	public static class IDComparator implements Comparator<ItemStack> {
+	public static final Comparator<ItemStack> COMPARATOR_ID = new Comparator<ItemStack>() {
 		@Override
 		public int compare(ItemStack s1, ItemStack s2) {
-			if(s1 == null && s2 == null) return 0;
-			if(s1 == null) return 1;
-			if(s2 == null) return -1;
-			if(s1.getItem().getID() > s2.getItem().getID()) return -1;
-			if(s1.getItem().getID() < s2.getItem().getID()) return 1;
+			// ItemStacks in a container should NEVER be null
+			//if(s1 == null && s2 == null) return 0;
+			//if(s1 == null) return 1;
+			//if(s2 == null) return -1;
+			
+			if(s1 == ItemStack.NO_STACK && s2 == ItemStack.NO_STACK) return 0;
+			if(s1 == ItemStack.NO_STACK) return 1;
+			if(s2 == ItemStack.NO_STACK) return -1;
+			if(s1.getItem().getID() > s2.getItem().getID()) return 1;
+			if(s1.getItem().getID() < s2.getItem().getID()) return -1;
 			if(s1.getQuantity() > s2.getQuantity()) return -1;
 			if(s1.getQuantity() < s2.getQuantity()) return 1;
 			return 0;
 		}
-	}
+	};
+	
+	/**
+	 * A comparator which sorts a Container's contents in alphabetical order
+	 * for its first order, then descending stack size for its second order.
+	 * 
+	 * <p>Note that even after being sorted in this manner, a container may
+	 * hold adjacent stacks which may be merged.
+	 */
+	public static final Comparator<ItemStack> COMPARATOR_NAME = new Comparator<ItemStack>() {
+		@Override
+		public int compare(ItemStack s1, ItemStack s2) {
+			// ItemStacks in a container should NEVER be null
+			//if(s1 == null && s2 == null) return 0;
+			//if(s1 == null) return 1;
+			//if(s2 == null) return -1;
+			
+			if(s1 == ItemStack.NO_STACK && s2 == ItemStack.NO_STACK) return 0;
+			if(s1 == ItemStack.NO_STACK) return 1;
+			if(s2 == ItemStack.NO_STACK) return -1;
+			int r = s1.getItem().getName().compareToIgnoreCase(s2.getItem().getName());
+			if(r != 0) return r;
+			if(s1.getQuantity() > s2.getQuantity()) return -1;
+			if(s1.getQuantity() < s2.getQuantity()) return 1;
+			return 0;
+		}
+	};
 	
 }

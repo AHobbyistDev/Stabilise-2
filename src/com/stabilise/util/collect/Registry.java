@@ -76,7 +76,8 @@ public class Registry<K, V> extends AbstractRegistry<V> {
 	
 	/**
 	 * Registers an object. If the specified key is already mapped to an
-	 * object, the old mapping will be overwritten.
+	 * object, the old mapping will be overwritten if this registry uses the
+	 * {@link DuplicatePolicy#OVERRIDE OVERRIDE} duplicate policy.
 	 * 
 	 * @param key The object's key.
 	 * @param object The object.

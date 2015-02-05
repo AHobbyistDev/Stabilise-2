@@ -7,7 +7,6 @@ import com.stabilise.entity.effect.Effect;
 import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.item.Item;
-import com.stabilise.item.ItemStack;
 import com.stabilise.util.Direction;
 import com.stabilise.world.IWorld;
 
@@ -491,7 +490,7 @@ public abstract class EntityMob extends Entity {
 	protected void dropItem(int id, int count, float chance) {
 		if(world.getRnd().nextFloat() > chance)
 			return;
-		EntityItem e = new EntityItem(world, new ItemStack(Item.getItem(id), count));
+		EntityItem e = new EntityItem(world, Item.getItem(id).stackOf(count));
 		e.dx = world.getRnd().nextFloat() * 0.4f - 0.2f;
 		e.dy = 0.1f + world.getRnd().nextFloat() * 0.2f;
 		world.addEntity(e, x, y);

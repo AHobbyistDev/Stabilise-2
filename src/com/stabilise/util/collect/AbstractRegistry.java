@@ -33,6 +33,7 @@ abstract class AbstractRegistry<E> implements Iterable<E> {
 			throw new NullPointerException("name is null");
 		if(dupePolicy == null)
 			throw new NullPointerException("dupePolicy is null");
+		
 		this.name = name;
 		this.dupePolicy = dupePolicy;
 		
