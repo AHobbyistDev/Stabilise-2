@@ -1,12 +1,13 @@
 package com.stabilise.world;
 
-import java.util.concurrent.BlockingQueue;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.stabilise.util.Log;
 import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 
 /**
@@ -34,15 +35,15 @@ public class WorldData {
 		this.world = world;
 		this.info = info;
 		
-		final int coreThreads = 2; // Don't want to have any threads running if we can avoid it
+		final int coreThreads = 2; // region loading typically happens in pairs
 		final int maxThreads = Math.max(coreThreads, Runtime.getRuntime().availableProcessors());
-		final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
 		
-		BoundedThreadPoolExecutor tpe = new BoundedThreadPoolExecutor(coreThreads, maxThreads,
+		BoundedThreadPoolExecutor tpe = new BoundedThreadPoolExecutor(
+				coreThreads, maxThreads,
 				30L, TimeUnit.SECONDS,
-				queue,
-				new WorldThreadFactory());
-		//ThreadPoolExecutor tpe = (ThreadPoolExecutor)Executors.newCachedThreadPool();
+				new LinkedBlockingQueue<Runnable>(),
+				new WorldThreadFactory()
+		);
 		tpe.setRejectedExecutionHandler(new BoundedThreadPoolExecutor.CallerRunsPolicy());
 		executor = tpe;
 	}
@@ -56,10 +57,12 @@ public class WorldData {
 		/** The number of threads created with this factory. */
 		private final AtomicInteger threadNumber = new AtomicInteger(1);
 		
-		/**
-		 * Creates a new WorldThreadFactory.
-		 */
-		private WorldThreadFactory() {}
+		private final UncaughtExceptionHandler ripWorkerThread = new UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread t, Throwable e) {
+				Log.get().postSevere("Worker thread \"" + t.toString() + "\" died!", e);
+			}
+		};
 		
 		@Override
 		public Thread newThread(Runnable r) {
@@ -68,6 +71,7 @@ public class WorldData {
 				t.setDaemon(false);
 			if(t.getPriority() != Thread.NORM_PRIORITY)
 				t.setPriority(Thread.NORM_PRIORITY);
+			t.setUncaughtExceptionHandler(ripWorkerThread);
 			return t;
 		}
 	}

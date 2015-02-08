@@ -314,7 +314,7 @@ public class GameWorld extends HostWorld {
 		// If it is not loaded directly, try getting it from the world
 		// generator's cache.
 		// Synchronised to make this atomic. See WorldGenerator.cacheRegion()
-		synchronized(generator.lock) {
+		synchronized(generator.getLock(loc)) {
 			r = generator.getCachedRegion(loc);
 			if(r == null) // if it's not cached, create it
 				r = new Region(this, loc);

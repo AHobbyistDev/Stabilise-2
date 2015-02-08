@@ -59,7 +59,11 @@ public abstract class Application {
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
-	private final InternalAppDriver driver;
+	/** The AppDriver driving this application. Protected as to allow
+	 * subclasses to configure auxiliary behaviour (e.g. profiler flushes). Do
+	 * not abuse access to this. Note that {@link #profiler} is simply this
+	 * driver's profiler. */
+	protected final AppDriver driver;
 	
 	/** The listener which delegates to this Application. */
 	private final InternalAppListener listener;

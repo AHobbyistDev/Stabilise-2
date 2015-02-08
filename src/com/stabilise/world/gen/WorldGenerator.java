@@ -105,9 +105,10 @@ public abstract class WorldGenerator {
 	 * region's {@link Region#loc loc} member should be used as its key.*/
 	private final ConcurrentHashMap<HashPoint, CachedRegion> cachedRegions =
 			new ConcurrentHashMap<HashPoint, CachedRegion>();
-	/** The object to synchronise on to ensure region storage operations in the
-	 * world and WorldGenerator remain atomic. */
-	public final Object lock = new Object();
+	
+	/** Locks used for lock striping when managing cached regions. */
+	private final Object[] locks;
+	private final int numLocks = 4; // Do not modify this without first checking getLock()
 	
 	/** Regions which have been cached by the current worker thread. The list
 	 * member is a {@link ClearOnIterateLinkedList}. */
@@ -136,6 +137,10 @@ public abstract class WorldGenerator {
 		this.executor = data.executor;
 		
 		seed = info.seed;
+		
+		locks = new Object[numLocks];
+		for(int i = 0; i < numLocks; i++)
+			locks[i] = new Object();
 	}
 	
 	/**
@@ -533,7 +538,6 @@ public abstract class WorldGenerator {
 		List<Region> cRegions = localCachedRegions.get();
 		
 		// If the region is already cached by this thread, use it
-		
 		for(Region r : cRegions) {
 			if(r.loc.equals(x, y));
 				return r;
@@ -545,21 +549,23 @@ public abstract class WorldGenerator {
 		// Otherwise, if the region is already cached by the world generator,
 		// use it.
 		
+		HashPoint loc = Region.getKey(x, y);
+		
 		// Synchronised to make this atomic.
 		synchronized(cachedRegions) {
-			cachedRegion = cachedRegions.get(Region.getKey(x, y));
+			cachedRegion = cachedRegions.get(loc);
 			// If the region is not cached by the world generator, get it from
 			// the world
 			if(cachedRegion == null) {
 				wasUncached = true;
-				// Synchronise on the public lock to make this atomic. See
+				// Synchronise on a public lock to make this atomic. See
 				// HostWorld.loadRegion()
-				synchronized(lock) {
-					Region region = world.getRegionAt(x, y);
+				synchronized(getLock(loc)) {
+					Region region = world.getRegionAt(loc);
 					if(region == null)
-						region = new Region(world, x, y);
+						region = new Region(world, loc);
 					cachedRegion = new CachedRegion(region);
-					cachedRegions.put(region.loc, cachedRegion);
+					cachedRegions.put(loc, cachedRegion);
 				}
 			}
 			
@@ -606,7 +612,8 @@ public abstract class WorldGenerator {
 	
 	/**
 	 * Gets a region cached by the world generator. This should be accessed
-	 * within a synchronised block which holds the monitor on {@link #lock}.
+	 * within a synchronised block which holds the monitor on the lock returned
+	 * by {@link #getLock(HashPoint) getLock(loc)}.
 	 * 
 	 * @param loc The region's location, whose coordinates are in region-
 	 * lengths.
@@ -617,6 +624,29 @@ public abstract class WorldGenerator {
 	public Region getCachedRegion(HashPoint loc) {
 		CachedRegion cachedRegion = cachedRegions.get(loc);
 		return cachedRegion == null ? null : cachedRegion.region;
+	}
+	
+	/**
+	 * Gets the lock upon which to synchronise when atomically accessing a
+	 * region cached by the world generator.
+	 * 
+	 * @param loc The region's location, whose coordinates are in region-
+	 * lengths.
+	 * 
+	 * @return The object lock.
+	 */
+	public Object getLock(HashPoint loc) {
+		//assert numLocks = 4;
+		
+		// We use the lowest two bits holding whether or not x and y are odd
+		// or even numbers. This creates a repeating 2x2 grid such that
+		// adjacent regions do not use the same lock. This can be made
+		// explicit:
+		// locks[0] (00) if x is even and y is even
+		// locks[1] (01) if x is even and y is odd
+		// locks[2] (10) if x is odd and y is even
+		// locks[3] (11) if x is odd and y is odd
+		return locks[((loc.x & 1) << 1) + (loc.y & 1)];
 	}
 	
 	/**

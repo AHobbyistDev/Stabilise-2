@@ -121,12 +121,10 @@ public abstract class WorldLoader {
 	 */
 	@UserThread("MainThread")
 	public final void loadAndGenerateRegion(Region region) {
-		if(region.loaded) {
+		if(region.loaded)
 			world.generator.generate(region);
-		} else {
-			if(obtainRegionForLoad(region))
+		else if(obtainRegionForLoad(region))
 				executor.execute(new RegionLoader(region, true));
-		}
 	}
 	
 	/**

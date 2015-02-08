@@ -222,6 +222,10 @@ public class PlayerController extends MobController implements Controllable, Inp
 			mob.world.setTimeDelta(mob.world.getTimeDelta() * 0.5f);
 		else if(keycode == Keys.RIGHT_BRACKET)
 			mob.world.setTimeDelta(mob.world.getTimeDelta() * 2f);
+		else if(keycode == Keys.P)
+			System.out.println(game.profiler.getData().toString());
+		else if(keycode == Keys.O)
+			game.profiler.reset();
 		return false;
 	}
 

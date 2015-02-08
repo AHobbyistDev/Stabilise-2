@@ -33,6 +33,9 @@ import com.stabilise.util.collect.LightweightLinkedList;
  *     > end()   
  * > end()</pre>
  * 
+ * <p>Note that profiling can cause some overhead and it is as such advised to
+ * disable a profiler when profiling is not required.
+ * 
  * <p>A Profiler is not thread-safe.
  */
 public class Profiler {
@@ -55,35 +58,9 @@ public class Profiler {
 	/** Whether or not profiling should be treated as enabled. */
 	private boolean effectivelyEnabled;
 	
+	/** {@code true} if the root section should be reset on flush. */
+	private boolean resetOnFlush;
 	
-	/**
-	 * Creates a new Profiler which is enabled by default, and for which the 
-	 * root section is named "root".
-	 */
-	public Profiler() {
-		this(true, "root");
-	}
-	
-	/**
-	 * Creates a new Profiler with the root section named "root".
-	 * 
-	 * @param enabled The default 'enabled' status. This may be later changed
-	 * via {@link #enable()} and {@link #disable()}.
-	 */
-	public Profiler(boolean enabled) {
-		this(enabled, "root");
-	}
-	
-	/**
-	 * Creates a new Profiler, which is enabled by default.
-	 * 
-	 * @param rootName The name of the root section.
-	 * 
-	 * @throws NullPointerException if {@code rootName} is {@code null}.
-	 */
-	public Profiler(String rootName) {
-		this(true, rootName);
-	}
 	
 	/**
 	 * Creates a new Profiler.
@@ -91,15 +68,18 @@ public class Profiler {
 	 * @param enabled The default 'enabled' status. This may be later changed
 	 * via {@link #enable()} and {@link #disable()}.
 	 * @param rootName The name of the root section.
+	 * @param resetOnFlush Whether or not all profiling sections should be
+	 * reset on an invocation of {@link #flush()}.
 	 * 
 	 * @throws NullPointerException if {@code rootName} is {@code null}.
 	 */
-	public Profiler(boolean enabled, String rootName) {
+	public Profiler(boolean enabled, String rootName, boolean resetOnFlush) {
 		if(rootName == null)
 			throw new NullPointerException("rootName is null");
 		
 		this.enabled = enabled;
 		effectivelyEnabled = enabled;
+		this.resetOnFlush = resetOnFlush;
 		
 		root = new Section(rootName);
 		if(enabled) {
@@ -163,10 +143,8 @@ public class Profiler {
 	 * {@code 1}). If this happens, remove the rogue call!
 	 */
 	public void end() {
-		if(effectivelyEnabled) {
-			if(stack.removeLast().end() == root)
-				throw new IllegalStateException();
-		}
+		if(effectivelyEnabled && stack.removeLast().end() == root)
+			throw new IllegalStateException();
 	}
 	
 	/**
@@ -211,12 +189,33 @@ public class Profiler {
 			effectivelyEnabled = true;
 			root.end();
 			lastRoot = root;
-			lastData = null;
 			stack.clear();
-			root = new Section(lastRoot.name);
+			if(resetOnFlush) {
+				root = new Section(lastRoot.name);
+				lastData = null;
+			} else {
+				lastData = root.getData();
+			}
 			stack.add(root);
 			root.start();
 		}
+	}
+	
+	/**
+	 * Wipes all stored profiling data. This method is typically only useful if
+	 * {@link #setResetOnFlush(boolean) this profiler does not reset when
+	 * flushed}, for which older profiling data may be minimising the
+	 * visibility of newer data.
+	 */
+	public void reset() {
+		// We're using disable() then enable() for convenience since doing so
+		// wipes the sections, which is basically what this method is designed
+		// to do. However, retain lastData since the profiler isn't actually
+		// out of commission.
+		SectionData last = lastData;
+		disable();
+		enable();
+		lastData = last;
 	}
 	
 	/**
@@ -274,6 +273,25 @@ public class Profiler {
 	 */
 	public boolean isEnabled() {
 		return effectivelyEnabled;
+	}
+	
+	/**
+	 * Sets the flushing behaviour of this profiler.
+	 * 
+	 * <ul>
+	 * <li>If {@code resetOnFlush} is {@code true}, profiling will start afresh
+	 *     after an invocation of {@link #flush()}; profiling performed between
+	 *     successive invocations of {@code flush()} thus occur independently.
+	 * <li>If {@code resetOnFlush} is {@code false}, profiling between
+	 *     successive invocations of {@link #flush()} is summed, which may
+	 *     produce smoother and more averaged-out profiling information. This
+	 *     comes at the cost of some overhead when {@code flush()} is invoked,
+	 *     however, as profiling data (see {@link #getData()}) will be
+	 *     generated upon each invocation, which can be timely.
+	 * </ul>
+	 */
+	public void setResetOnFlush(boolean resetOnFlush) {
+		this.resetOnFlush = resetOnFlush;
 	}
 	
 	/**

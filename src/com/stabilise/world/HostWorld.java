@@ -53,9 +53,6 @@ public abstract class HostWorld extends BaseWorld {
 	/** The map of all loaded regions. This is concurrent as to prevent
 	 * problems when relevant methods are accessed by the world loader. */
 	public final ConcurrentHashMap<HashPoint, Region> regions;
-	/** The region most recently returned by {@link #getRegionAt(int, int)},
-	 * for experimental optimisation purposes. May never be {@code null}. */
-	//private Region lastRegion = Region.DUMMY_REGION;
 	
 	/** Whether or not the world has been {@link #prepare() prepared}. */
 	private boolean prepared = false;
@@ -212,12 +209,20 @@ public abstract class HostWorld extends BaseWorld {
 	@UserThread({"MainThread", "WorkerThread"})
 	public Region getRegionAt(int x, int y) {
 		return regions.get(Region.getKey(x, y));
-		/*  // won't work since this is invoked by worldgen threads too L/
-		if(lastRegion.loc.equals(x, y))
-			return lastRegion;
-		Region r = regions.get(Region.getKey(x, y));
-		return r == null ? null : (lastRegion = r);
-		*/
+	}
+	
+	/**
+	 * Gets a region at the given location.
+	 * 
+	 * @param loc The region's location, whose coordinates are in
+	 * region-lengths.
+	 * 
+	 * @return The region at the given location, or {@code null} if no such
+	 * region exists.
+	 */
+	@UserThread({"WorldGenThread"})
+	public Region getRegionAt(HashPoint loc) {
+		return regions.get(loc);
 	}
 	
 	/**
@@ -264,7 +269,7 @@ public abstract class HostWorld extends BaseWorld {
 		// If it is not loaded directly, try getting it from the world
 		// generator's cache.
 		// Synchronised to make this atomic. See WorldGenerator.cacheRegion()
-		synchronized(generator.lock) {
+		synchronized(generator.getLock(loc)) {
 			r = generator.getCachedRegion(loc);
 			if(r == null) // if it's not cached, create it
 				r = new Region(this, loc);
