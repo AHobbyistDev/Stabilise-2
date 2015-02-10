@@ -17,7 +17,7 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.collect.LightweightLinkedList;
 import com.stabilise.util.maths.HashPoint;
-import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -278,10 +278,10 @@ public abstract class BaseWorld extends AbstractWorld {
 		if(!inRange)
 			return;
 		
-		int minX = MathsUtil.floor(x + mob.boundingBox.getV00().x);
-		int maxX = MathsUtil.ceil(minX + mob.boundingBox.width);
-		int minY = MathsUtil.floor(y + mob.boundingBox.getV00().y);
-		int maxY = MathsUtil.ceil(minY + mob.boundingBox.height);
+		int minX = Maths.floor(x + mob.boundingBox.getV00().x);
+		int maxX = Maths.ceil(minX + mob.boundingBox.width);
+		int minY = Maths.floor(y + mob.boundingBox.getV00().y);
+		int maxY = Maths.ceil(minY + mob.boundingBox.height);
 		
 		// Check to see if the mob would be spawning in any tiles
 		for(int tileX = minX; tileX < maxX; tileX++) {

@@ -54,9 +54,6 @@ public abstract class Task implements Runnable {
 	 * Task(TaskTracker)}. */
 	protected final TaskTracker tracker;
 	
-	/** The lock used for waiting on the task for completion. */
-	private final Object lock = new Object();
-	
 	
 	/**
 	 * Creates a new Task.
@@ -91,12 +88,10 @@ public abstract class Task implements Runnable {
 			execute();
 		} catch(Throwable t) {
 			throwable = t;
-			state = TaskState.STOPPED;
-			wakeWaitingThreads();
+			ceaseRunning(TaskState.STOPPED);
 			return;
 		}
-		state = TaskState.COMPLETED;
-		wakeWaitingThreads();
+		ceaseRunning(TaskState.COMPLETED);
 	}
 	
 	/**
@@ -108,13 +103,13 @@ public abstract class Task implements Runnable {
 	protected abstract void execute() throws Exception;
 	
 	/**
-	 * Wakes up any threads which are waiting for this task to complete, as per
-	 * {@link #waitUntilStopped()} or {@link #waitUninterruptibly()}.
+	 * Sets the state of this task and wakes up any threads which are waiting
+	 * for this task to complete, as per {@link #waitUntilStopped()} or {@link
+	 * #waitUninterruptibly()}.
 	 */
-	private void wakeWaitingThreads() {
-		synchronized(lock) {
-			lock.notifyAll();
-		}
+	private synchronized void ceaseRunning(TaskState newState) {
+		state = newState;
+		notifyAll();
 	}
 	
 	/**
@@ -237,10 +232,9 @@ public abstract class Task implements Runnable {
 	 */
 	public final void waitUntilStopped() throws InterruptedException, ExecutionException {
 		if(canWait()) {
-			if(state.equals(TaskState.RUNNING)) {
-				synchronized(lock) {
-					lock.wait(); // Awoken by wakeWaitingThreads()
-				}
+			synchronized(this) {
+				while(state.equals(TaskState.RUNNING))
+					wait(); // Awoken by ceaseRunning()
 			}
 			throwExcecutionException();
 		}
@@ -250,9 +244,10 @@ public abstract class Task implements Runnable {
 	 * Waits for the task to either complete or abort, if it is currently being
 	 * executed. The current thread will block until the task has stopped
 	 * (beware of potential deadlocks). Note that when this method returns the
-	 * task may not necessarily have been completed successfully. However, all
-	 * actions performed by the task will be synchronised when this method
-	 * returns.
+	 * task may not necessarily have been completed successfully.
+	 * 
+	 * <p>If the current thread received an interrupt while waiting, the
+	 * interrupt flag will be set when this method returns.
 	 * 
 	 * <p>Memory consistency effects: actions by the thread executing this task
 	 * happen-before actions in the current thread when this method returns.
@@ -262,18 +257,19 @@ public abstract class Task implements Runnable {
 	 */
 	public final void waitUninterruptibly() throws ExecutionException {
 		if(canWait()) {
-			try {
+			boolean interrupted = false;
+			synchronized(this) {
 				while(state.equals(TaskState.RUNNING)) {
-					synchronized(lock) {
-						try {
-							lock.wait(); // Awoken by wakeWaitingThreads()
-							return;
-						} catch(InterruptedException ignored) {}
+					try {
+						wait(); // Awoken by ceaseRunning()
+					} catch(InterruptedException retry) {
+						interrupted = true;
 					}
 				}
-			} finally {
-				throwExcecutionException();
 			}
+			if(interrupted)
+				Thread.currentThread().interrupt();
+			throwExcecutionException();
 		}
 	}
 	

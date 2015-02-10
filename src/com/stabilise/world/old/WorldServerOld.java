@@ -13,7 +13,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.GameServer;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
-import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.world.BaseWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.Region;
@@ -161,7 +161,7 @@ public class WorldServerOld extends BaseWorld {
 		//region.anchorSlice(x, y);
 		region.anchorSlice();
 		if(region.generated) {
-			return region.getSliceAt(MathsUtil.wrappedRem(x, REGION_SIZE), MathsUtil.wrappedRem(y, REGION_SIZE));
+			return region.getSliceAt(Maths.wrappedRem(x, REGION_SIZE), Maths.wrappedRem(y, REGION_SIZE));
 		} else {
 			//----region.queueSlice(owner, MathUtil.calcWrappedRemainder(x, REGION_SIZE), MathUtil.calcWrappedRemainder(y, REGION_SIZE));
 			//if(!region.generating) generator.generate(region);
@@ -187,15 +187,15 @@ public class WorldServerOld extends BaseWorld {
 	@Override
 	public Slice getSliceAt(int x, int y) {
 		return getRegionAt((int)Math.floor((float)x / REGION_SIZE), (int)Math.floor((float)y / REGION_SIZE), false).getSliceAt(
-				MathsUtil.wrappedRem(x, REGION_SIZE),
-				MathsUtil.wrappedRem(y, REGION_SIZE));
+				Maths.wrappedRem(x, REGION_SIZE),
+				Maths.wrappedRem(y, REGION_SIZE));
 	}
 	
 	@Override
 	public Tile getTileAt(int x, int y) {
 		return getSliceAt(x, y).getTileAt(
-				(int)Math.floor(MathsUtil.wrappedRem(x, SLICE_SIZE)),
-				(int)Math.floor(MathsUtil.wrappedRem(y, SLICE_SIZE))
+				(int)Math.floor(Maths.wrappedRem(x, SLICE_SIZE)),
+				(int)Math.floor(Maths.wrappedRem(y, SLICE_SIZE))
 		);
 	}
 	

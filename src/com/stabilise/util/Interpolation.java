@@ -1,6 +1,6 @@
 package com.stabilise.util;
 
-import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.Maths;
 
 /**
  * This class provides a variety of functions for achieving three modes of
@@ -286,13 +286,13 @@ public abstract class Interpolation {
 		@Override
 		public float easeInTransform(float x) {
 			// f(x) = 1 - cos(x*pi/2)
-			return 1 - (float)Math.cos(x * MathsUtil.PI_OVER_2);
+			return 1 - (float)Math.cos(x * Maths.PI_OVER_2);
 		}
 		
 		@Override
 		public float easeOutTransform(float x) {
 			// f(x) = sin(x*pi/2)
-			return (float)Math.sin(x * MathsUtil.PI_OVER_2);
+			return (float)Math.sin(x * Maths.PI_OVER_2);
 		}
 		
 		@Override

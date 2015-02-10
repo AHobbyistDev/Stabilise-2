@@ -4,7 +4,7 @@ import static com.stabilise.util.collect.DuplicatePolicy.THROW_EXCEPTION;
 
 import com.stabilise.util.Direction;
 import com.stabilise.util.collect.InstantiationRegistry;
-import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.world.BaseWorld;
 import com.stabilise.world.IWorld;
@@ -327,7 +327,7 @@ public abstract class Entity extends FreeGameObject {
 	private boolean columnValid(double x, double y) {
 		// Only check as many tiles above or below the tile in question that
 		// the height of the entity's bounding box would require.
-		int max = MathsUtil.ceil(boundingBox.height);
+		int max = Maths.ceil(boundingBox.height);
 		for(int i = 1; i <= max; i++) {
 			if(world.getTileAt(x, y + (dyp ? -i : i)).isSolid())
 				return false;
@@ -349,7 +349,7 @@ public abstract class Entity extends FreeGameObject {
 	private boolean rowValid(double x, double y) {
 		// Only check as many tiles to the left or right of the tile in
 		// question that the width of the entity's bounding box would require.
-		int max = MathsUtil.ceil(boundingBox.width);
+		int max = Maths.ceil(boundingBox.width);
 		for(int i = 1; i <= max; i++) {
 			if(world.getTileAt(x + (dxp ? -i : i), y).isSolid())
 				return false;
@@ -396,8 +396,8 @@ public abstract class Entity extends FreeGameObject {
 			y = Math.ceil(yp) - boundingBox.getV00().y;
 			
 			// TODO: Find a better way of doing this
-			int tx = MathsUtil.floor(x);
-			int ty = MathsUtil.floor(y - 0.001D);
+			int tx = Maths.floor(x);
+			int ty = Maths.floor(y - 0.001D);
 			Tile t = world.getTileAt(tx, ty);
 			t.handleStep(world, tx, ty, this);
 			floorTile = t.getID();

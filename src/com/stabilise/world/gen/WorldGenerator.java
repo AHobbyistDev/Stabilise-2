@@ -18,7 +18,7 @@ import com.stabilise.util.TaskTimer;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.maths.HashPoint;
-import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Schematic;
@@ -431,7 +431,7 @@ public abstract class WorldGenerator {
 		// skip to the first part of the schematic that is within the region
 		if(initialX >= 0) {
 			tileX = (initialX % REGION_SIZE_IN_TILES) % SLICE_SIZE;
-			sliceX = MathsUtil.floor(((initialX / SLICE_SIZE)) % REGION_SIZE);
+			sliceX = Maths.floor(((initialX / SLICE_SIZE)) % REGION_SIZE);
 			x = 0;
 		} else {
 			tileX = 0;
@@ -441,7 +441,7 @@ public abstract class WorldGenerator {
 		
 		if(initialY >= 0) {
 			tileY = (initialY % REGION_SIZE_IN_TILES) % SLICE_SIZE;
-			sliceY = MathsUtil.floor(((initialY / SLICE_SIZE)) % REGION_SIZE);
+			sliceY = Maths.floor(((initialY / SLICE_SIZE)) % REGION_SIZE);
 			y = 0;
 		} else {
 			tileY = 0;
@@ -551,7 +551,7 @@ public abstract class WorldGenerator {
 		
 		HashPoint loc = Region.getKey(x, y);
 		
-		// Synchronised to make this atomic.
+		// Synchronised to make the put-if-absent atomic
 		synchronized(cachedRegions) {
 			cachedRegion = cachedRegions.get(loc);
 			// If the region is not cached by the world generator, get it from
@@ -654,6 +654,7 @@ public abstract class WorldGenerator {
 	 * 
 	 * @return {@code true} if the region is being generated; {@code false}
 	 * otherwise.
+	 * @throws NullPointerException if {@code r} is {@code null}.
 	 */
 	private boolean isGenerating(Region r) {
 		RegionLock l = regionLocks.get(r.loc);
@@ -931,12 +932,13 @@ public abstract class WorldGenerator {
 		 * otherwise.
 		 */
 		private boolean tryLock() {
-			boolean result = semaphore.tryAcquire();
-			if(result)
+			if(semaphore.tryAcquire()) {
 				onLockSuccess();
-			else
+				return true;
+			} else {
 				onLockFailure();
-			return result;
+				return false;
+			}
 		}
 		
 		private void onLockSuccess() {

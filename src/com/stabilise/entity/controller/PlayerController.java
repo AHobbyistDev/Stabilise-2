@@ -15,7 +15,7 @@ import com.stabilise.input.Controller.Control;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
-import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.Maths;
 
 /**
  * A PlayerController is a MobController which is managed by player input.
@@ -98,7 +98,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 	 * tile-lengths.
 	 */
 	private int mouseXToWorldSpace(int x) {
-		return MathsUtil.floor(((x + worldRenderer.world.camera.x) / worldRenderer.getPixelsPerTile()));
+		return Maths.floor(((x + worldRenderer.world.camera.x) / worldRenderer.getPixelsPerTile()));
 	}
 	
 	/**
@@ -111,7 +111,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 	 * tile-lengths.
 	 */
 	private int mouseYToWorldSpace(int y) {
-		return MathsUtil.floor(((y + worldRenderer.world.camera.y) / worldRenderer.getPixelsPerTile()));
+		return Maths.floor(((y + worldRenderer.world.camera.y) / worldRenderer.getPixelsPerTile()));
 	}
 	
 	@Override
@@ -197,7 +197,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 				}
 				break;
 			case INTERACT:
-				mob.world.getTileAt(mob.x, mob.y-1).handleInteract(mob.world, MathsUtil.floor(mob.x), MathsUtil.floor(mob.y-1), mob);
+				mob.world.getTileAt(mob.x, mob.y-1).handleInteract(mob.world, Maths.floor(mob.x), Maths.floor(mob.y-1), mob);
 				break;
 			case TEST_RANDOM_THING:
 				mob.x = 0;
@@ -270,7 +270,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 
 	@Override
 	public boolean scrolled(int amount) {
-		tileID = MathsUtil.wrappedRem(tileID - amount, 20);
+		tileID = Maths.wrappedRem(tileID - amount, 20);
 		return true;
 	}
 	

@@ -7,7 +7,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.GameObject;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
-import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -63,7 +63,7 @@ public abstract class AbstractWorld implements IWorld {
 	
 	@Override
 	public Tile getTileAt(double x, double y) {
-		return getTileAt(MathsUtil.floor(x), MathsUtil.floor(y));
+		return getTileAt(Maths.floor(x), Maths.floor(y));
 	}
 	
 	@Override
@@ -160,7 +160,7 @@ public abstract class AbstractWorld implements IWorld {
 	 * slice-lengths.
 	 */
 	public static int sliceCoordFromTileCoord(double c) {
-		return MathsUtil.floor(c / Slice.SLICE_SIZE);
+		return Maths.floor(c / Slice.SLICE_SIZE);
 	}
 	
 	/**

@@ -62,10 +62,10 @@ public class PerlinNoise1D {
 	 */
 	public double noise(float x) {
 		x /= wavelength;
-		int flooredX = MathsUtil.floor(x);
+		int flooredX = Maths.floor(x);
 		
 		// Note: this implementation is technically that of value noise instead of perlin noise
-		return MathsUtil.interpolateSinusoidal(genValue(flooredX), genValue(flooredX + 1), x - flooredX);
+		return Maths.interpolateSinusoidal(genValue(flooredX), genValue(flooredX + 1), x - flooredX);
 	}
 	
 	/**

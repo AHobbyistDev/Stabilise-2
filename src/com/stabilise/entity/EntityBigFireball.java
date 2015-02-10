@@ -9,7 +9,7 @@ import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Rectangle;
 import com.stabilise.world.IWorld;
@@ -115,7 +115,7 @@ public class EntityBigFireball extends EntityProjectile {
 			ParticleFlame p = new ParticleFlame(world);
 			p.x = x;
 			p.y = y;
-			ParticleGenerator.directParticle(p, 0.02f, 0.05f, 0, MathsUtil.TAU);
+			ParticleGenerator.directParticle(p, 0.02f, 0.05f, 0, Maths.TAU);
 			world.addParticle(p);
 		}
 	}

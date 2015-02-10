@@ -6,10 +6,10 @@ import com.badlogic.gdx.math.Vector2;
  * This class provides some utility methods and fields with mathematical
  * purpose.
  */
-public class MathsUtil {
+public class Maths {
 	
 	// non-instantiable
-	private MathsUtil() {}
+	private Maths() {}
 	
 	/** Holds the value given by Math.sqrt(2). */
 	public static final double SQRT_2 = Math.sqrt(2);
@@ -25,13 +25,14 @@ public class MathsUtil {
 	
 	
 	/**
-	 * Calculates whether or not a number is a power of two.
+	 * Calculates whether or not a number is a power of two. Note that this
+	 * method will erroneously report {@code 0} as a power of two.
 	 * 
 	 * @return {@code true} if {@code n} is a power of two; {@code false}
 	 * otherwise.
 	 */
 	public static boolean isPowerOfTwo(int n) {
-		return (n & -n) == n;
+		return (n & -n) == n; // alternatively, return (n & (n-1)) == 0;
 	}
 	
 	/**
@@ -248,6 +249,28 @@ public class MathsUtil {
 		// I haven't quite figured out how this works yet. Taken from hacker's
 		// delight
 		return (a | b) - ((a ^ b) >> 1);
+	}
+	
+	/**
+	 * Returns the lesser of the two provided numbers.
+	 * 
+	 * <p>Unlike {@link Math#min(float, float)}, this method does not perform
+	 * any 'unnecessary' computation (refer to Math.min() source to determine
+	 * which is preferable).
+	 */
+	public static float min(float a, float b) {
+		return a < b ? a : b;
+	}
+	
+	/**
+	 * Returns the greater of the two provided numbers.
+	 * 
+	 * <p>Unlike {@link Math#max(float, float)}, this method does not perform
+	 * any 'unnecessary' computation (refer to Math.max() source to determine
+	 * which is preferable).
+	 */
+	public static float max(float a, float b) {
+		return a > b ? a : b;
 	}
 	
 	/*

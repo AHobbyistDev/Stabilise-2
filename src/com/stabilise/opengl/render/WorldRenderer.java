@@ -22,7 +22,7 @@ import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
 import com.stabilise.util.Profiler;
-import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.world.ClientWorld;
 import com.stabilise.world.Slice;
 
@@ -177,8 +177,8 @@ public class WorldRenderer implements Renderer {
 		
 		tilesHorizontal = (int)((width/2) / pixelsPerTile) + 1;
 		tilesVertical = (int)((height/2) / pixelsPerTile) + 1;
-		slicesHorizontal = MathsUtil.ceil((float)tilesHorizontal / Slice.SLICE_SIZE);
-		slicesVertical = MathsUtil.ceil((float)tilesVertical / Slice.SLICE_SIZE);
+		slicesHorizontal = Maths.ceil((float)tilesHorizontal / Slice.SLICE_SIZE);
+		slicesVertical = Maths.ceil((float)tilesVertical / Slice.SLICE_SIZE);
 	}
 	
 	@Override

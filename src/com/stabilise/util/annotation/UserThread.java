@@ -9,15 +9,14 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates the thread which is intended to invoke the target method. The
- * presence of this annotation may imply that the operations performed by the
- * annotated block are only thread-safe when executed on the specified thread,
- * or may otherwise lead to unwanted behaviour such as deadlocking if performed
- * on another thread.
+ * presence of this annotation may serve to remind maintainers of the
+ * concurrent conditions under which the annotated block may be executed, to
+ * help ensure maintenance and optimisation is performed properly.
  */
 @Documented
 @Inherited
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
+@Target({ElementType.METHOD})
 public @interface UserThread {
 	String[] value();
 }

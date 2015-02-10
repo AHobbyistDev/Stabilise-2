@@ -234,6 +234,7 @@ public class Region {
 	 * 
 	 * <p>This method is thread-safe.
 	 */
+	@UserThread({"MainThread", "WorldGenThread"})
 	public void anchorSlice() {
 		anchoredSlices.getAndIncrement();
 	}

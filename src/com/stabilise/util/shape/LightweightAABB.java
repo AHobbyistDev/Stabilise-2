@@ -1,7 +1,7 @@
 package com.stabilise.util.shape;
 
 import com.badlogic.gdx.math.Vector2;
-import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Matrix2;
 
 /**
@@ -136,7 +136,24 @@ public class LightweightAABB extends AbstractPolygon implements AABB {
 	
 	@Override
 	protected Vector2[] generateAxes() {
-		return MathsUtil.UNIT_VECTORS;
+		return Maths.UNIT_VECTORS;
+	}
+	
+	@Override
+	protected ShapeProjection getProjection(Vector2 axis) {
+		// This method of computation is preferable to the default impl.,
+		// which invokes getVertices(). This way avoids unnecessary object
+		// construction.
+		
+		float p0 = axis.dot(v00);
+		float p1 = axis.dot(v11);
+		float p2 = axis.dot(v00.x, v11.y);
+		float p3 = axis.dot(v11.x, v00.y);
+		
+		return new ShapeProjection(
+				Maths.min(Maths.min(p0, p1), Maths.min(p2, p3)),
+				Maths.max(Maths.max(p0, p1), Maths.max(p2, p3))
+		);
 	}
 	
 	@Override

@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.math.Vector2;
 import com.stabilise.util.TaskTimer;
-import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.util.shape.LightweightAABB;
 import com.stabilise.util.shape.Polygon;
@@ -63,7 +63,7 @@ public class ShapeTest {
 			throw new IllegalArgumentException();
 		Vector2[] verts = new Vector2[vertices];
 		verts[0] = Vector2.X;
-		double increments = MathsUtil.TAU / vertices;
+		double increments = Maths.TAU / vertices;
 		double angle = 0D;
 		for(int i = 1; i < vertices; i++) {
 			angle += increments;

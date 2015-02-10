@@ -18,7 +18,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.StringUtil;
 import com.stabilise.util.maths.HashPoint;
-import com.stabilise.util.maths.MathsUtil;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.SimplexNoise;
 
 /**
@@ -131,7 +131,7 @@ public class RandomTests {
 	}
 	
 	/**
-	 * Compares fastFloor, fastCeil and fastRound in {@link MathsUtil} to their
+	 * Compares fastFloor, fastCeil and fastRound in {@link Maths} to their
 	 * standard counterparts.
 	 */
 	@SuppressWarnings("unused")
@@ -155,7 +155,7 @@ public class RandomTests {
 		c1.stop();
 		c2.start();
 		for(double d : nums) {
-			dump = MathsUtil.floor(d);
+			dump = Maths.floor(d);
 		}
 		c2.stop();
 		
@@ -171,7 +171,7 @@ public class RandomTests {
 		c1.stop();
 		c2.start();
 		for(double d : nums) {
-			dump = MathsUtil.ceil(d);
+			dump = Maths.ceil(d);
 		}
 		c2.stop();
 		
@@ -187,7 +187,7 @@ public class RandomTests {
 		c1.stop();
 		c2.start();
 		for(double d : nums) {
-			dump = MathsUtil.round(d);
+			dump = Maths.round(d);
 		}
 		c2.stop();
 		
@@ -443,12 +443,12 @@ public class RandomTests {
 		
 		c1.start();
 		for(int i = 0; i < elements; i++) {
-			dump = MathsUtil.wrappedRem(nums[i], divs[i]);
+			dump = Maths.wrappedRem(nums[i], divs[i]);
 		}
 		c1.stop();
 		c2.start();
 		for(int i = 0; i < elements; i++) {
-			dump = MathsUtil.wrappedRem2(nums[i], divs[i]);
+			dump = Maths.wrappedRem2(nums[i], divs[i]);
 		}
 		c2.stop();
 		
@@ -457,8 +457,8 @@ public class RandomTests {
 		c1.printComparison(c2);
 		
 		for(int i = 0; i < elements; i++) {
-			if(MathsUtil.wrappedRem(nums[i], divs[i]) != MathsUtil.wrappedRem2(nums[i], divs[i]))
-				System.out.println(nums[i] + "/" + divs[i] + ": " + MathsUtil.wrappedRem(nums[i], divs[i]) + "||" + MathsUtil.wrappedRem2(nums[i], divs[i]));
+			if(Maths.wrappedRem(nums[i], divs[i]) != Maths.wrappedRem2(nums[i], divs[i]))
+				System.out.println(nums[i] + "/" + divs[i] + ": " + Maths.wrappedRem(nums[i], divs[i]) + "||" + Maths.wrappedRem2(nums[i], divs[i]));
 		}
 	}
 	
@@ -562,7 +562,7 @@ public class RandomTests {
 		System.out.println("Populating elements...");
 		for(int i = 0; i < elements; i++) {
 			nums[i] = rnd.nextInt(numDiff) - numMin;
-			divs[i] = divs[MathsUtil.wrappedRem2(i, 32)];
+			divs[i] = divs[Maths.wrappedRem2(i, 32)];
 		}
 		
 		final Runnable modulus = new Runnable() {
@@ -580,7 +580,7 @@ public class RandomTests {
 				@SuppressWarnings("unused")
 				int dump;
 				for(int i = 0; i < elements; i++) {
-					dump = MathsUtil.wrappedRem(nums[i], divs[i]);
+					dump = Maths.wrappedRem(nums[i], divs[i]);
 				}
 			}
 		};
@@ -590,7 +590,7 @@ public class RandomTests {
 				@SuppressWarnings("unused")
 				int dump;
 				for(int i = 0; i < elements; i++) {
-					dump = MathsUtil.wrappedRem2(nums[i], divs[i]);
+					dump = Maths.wrappedRem2(nums[i], divs[i]);
 				}
 			}
 		};
