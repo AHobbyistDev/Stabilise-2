@@ -57,6 +57,29 @@ public abstract class TileEntity extends FixedGameObject {
 		this.y = y;
 	}
 	
+	/**
+	 * @return {@code true} if this tile entity requires updates; {@code false}
+	 * otherwise.
+	 */
+	public abstract boolean isUpdated();
+	
+	/**
+	 * Updates this TileEntity, and then returns {@link #isDestroyed()}.
+	 * 
+	 * <p>{@code update()} is not invoked if {@code isDestroyed()} already
+	 * returns {@code true}. This is due to the fact that tile entities are
+	 * stored in a List rather than a Map by the world for updating; it is
+	 * vastly more efficient to remove a TileEntity while iterating than when
+	 * not.
+	 */
+	@Override
+	public boolean updateAndCheck() {
+		if(isDestroyed())
+			return true;
+		update();
+		return isDestroyed();
+	}
+	
 	@Override
 	public void render(WorldRenderer renderer) {
 		// nothing in the default implementation

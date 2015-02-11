@@ -61,11 +61,6 @@ public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
 	}
 	
 	@Override
-	public void removeParticle(Particle p) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
 	public Collection<Particle> getParticles() throws UnsupportedOperationException {
 		throw new UnsupportedOperationException();
 	}

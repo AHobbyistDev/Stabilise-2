@@ -10,7 +10,7 @@ import com.stabilise.input.Controller.Control;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.ClientWorld;
-import com.stabilise.world.SingleplayerWorld;
+import com.stabilise.world.HostWorld;
 
 /**
  * The game itself.
@@ -23,7 +23,7 @@ public class Game implements Controllable, InputProcessor {
 	public boolean paused = false;
 	
 	/** The game's world instance. */
-	private final ClientWorld<SingleplayerWorld> world;
+	private final ClientWorld<HostWorld> world;
 	
 	/** The controller. */
 	public Controller controller;
@@ -50,7 +50,7 @@ public class Game implements Controllable, InputProcessor {
 	 * 
 	 * @param world The world to run.
 	 */
-	public Game(ClientWorld<SingleplayerWorld> world) {
+	public Game(ClientWorld<HostWorld> world) {
 		this.world = world;
 		
 		log.postInfo("Initiating game...");
@@ -124,7 +124,7 @@ public class Game implements Controllable, InputProcessor {
 	 * 
 	 * @return The game world.
 	 */
-	public ClientWorld<SingleplayerWorld> getWorld() {
+	public ClientWorld<HostWorld> getWorld() {
 		return world;
 	}
 	

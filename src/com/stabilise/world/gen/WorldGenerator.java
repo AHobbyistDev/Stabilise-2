@@ -99,12 +99,12 @@ public abstract class WorldGenerator {
 	/** A map of region points to each region's lock. A region's {@link
 	 * Region#loc loc} member should be used as its key. */
 	private final ConcurrentHashMap<HashPoint, RegionLock> regionLocks =
-			new ConcurrentHashMap<HashPoint, RegionLock>();
+			new ConcurrentHashMap<>();
 	
 	/** A map of regions which have been cached by the world generator. A
 	 * region's {@link Region#loc loc} member should be used as its key.*/
 	private final ConcurrentHashMap<HashPoint, CachedRegion> cachedRegions =
-			new ConcurrentHashMap<HashPoint, CachedRegion>();
+			new ConcurrentHashMap<>();
 	
 	/** Locks used for lock striping when managing cached regions. */
 	private final Object[] locks;
@@ -120,7 +120,7 @@ public abstract class WorldGenerator {
 	};
 	
 	/** The cache of schematics in use. */
-	private final Map<String, Schematic> schematics = new ConcurrentHashMap<String, Schematic>(5);
+	private final Map<String, Schematic> schematics = new ConcurrentHashMap<>(5);
 	
 	/** The generator's log. */
 	protected final Log log = Log.getAgent("GENERATOR");
@@ -262,14 +262,19 @@ public abstract class WorldGenerator {
 			synchronized(r.queuedSchematics) {
 				if(r.hasQueuedSchematics) {
 					r.hasQueuedSchematics = false;
-					rSchematics = r.queuedSchematics.toArray(rSchematics);
+					rSchematics = r.queuedSchematics.toArray(rSchematics); // wipes r.queuedSchematics
 					changes = true;
 				}
 			}
 			
 			// Now add the schematics
 			for(Region.QueuedSchematic s : rSchematics)
-				addSchematicAt(r, s.schematicName, s.sliceX, s.sliceY, s.tileX, s.tileY, SchematicParams.scheduledGenParams(s.offsetX, s.offsetY));
+				addSchematicAt(
+						r, s.schematicName,
+						s.sliceX, s.sliceY,
+						s.tileX, s.tileY,
+						SchematicParams.scheduledGenParams(s.offsetX, s.offsetY)
+				);
 			
 			timer.stop();
 			log.postDebug(timer.getResult(TimeUnit.MILLISECONDS));

@@ -637,10 +637,4 @@ public class GameWorld extends HostWorld {
 		return false;
 	}
 
-	@Override
-	public void removeParticle(Particle p) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 }

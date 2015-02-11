@@ -48,8 +48,11 @@ public abstract class GameObject {
 	 * <pre>
 	 * update();
 	 * return isDestroyed();</pre>
+	 * 
+	 * @return {@code true} if this GameObject is considered destroyed and
+	 * should be removed from the world ASAP; {@code false} otherwise.
 	 */
-	public final boolean updateAndCheck() {
+	public boolean updateAndCheck() {
 		update();
 		return isDestroyed();
 	}

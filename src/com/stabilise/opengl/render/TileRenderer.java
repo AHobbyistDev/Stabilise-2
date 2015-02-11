@@ -23,6 +23,7 @@ public class TileRenderer implements Renderer {
 	
 	public TextureSheet tiles;
 	
+	/** Number of slices rendered on each render step. */
 	int slicesRendered = 0;
 	
 	
@@ -62,8 +63,12 @@ public class TileRenderer implements Renderer {
 	@Override
 	public void render() {
 		slicesRendered = 0;
-		for(int c = world.camera.sliceX - worldRenderer.slicesHorizontal; c <= world.camera.sliceX + worldRenderer.slicesHorizontal; c++)
-			for(int r = world.camera.sliceY - worldRenderer.slicesVertical; r <= world.camera.sliceY + worldRenderer.slicesVertical; r++)
+		for(int c = worldRenderer.playerCamera.sliceX - worldRenderer.slicesHorizontal;
+				c <= worldRenderer.playerCamera.sliceX + worldRenderer.slicesHorizontal;
+				c++)
+			for(int r = worldRenderer.playerCamera.sliceY - worldRenderer.slicesVertical;
+					r <= worldRenderer.playerCamera.sliceY + worldRenderer.slicesVertical;
+					r++)
 				renderSlice(c, r);
 		//System.out.println(slicesRendered + " slices rendered");
 	}

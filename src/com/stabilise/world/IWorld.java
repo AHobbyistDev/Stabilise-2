@@ -163,18 +163,12 @@ public interface IWorld {
 	 */
 	void addParticle(Particle p);
 	
-	/**
-	 * Removes a particle from the world.
-	 */
-	void removeParticle(Particle p);
-	
 	// ==========Collection getters==========
 	
 	/**
-	 * @return The collection of all players in the world. Note that a player
-	 * is also treated as an entity and as such every element in the returned
-	 * collection is also a member of the one returned by {@link
-	 * #getEntityIterator()}.
+	 * @return The collection of all players in the world. Note that as a
+	 * player is an entity, every element in the returned collection is also
+	 * a member of the one returned by {@link #getEntities()}.
 	 */
 	Collection<EntityMob> getPlayers();
 	
@@ -329,7 +323,7 @@ public interface IWorld {
 	 * with respect to time. This should be added to every non-grounded
 	 * entity's y-coordinate each tick.
 	 * 
-	 * @return {@code gt<sup><font size=-1>2</font></sup>/2}, where {@code g
+	 * @return <tt>gt<sup><font size=-1>2</font></sup>/2</tt>, where {@code g
 	 * == }{@link #getGravity()} and {@code t == }{@link #getTimeIncrement()}.
 	 */
 	float getGravity2ndOrder();

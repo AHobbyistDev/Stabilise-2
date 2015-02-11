@@ -27,7 +27,7 @@ import java.util.Map;
  * }
  * 
  * public static final InstantiationRegistry{@code <MyClass>} registry =
- *     new InstantiationRegistry{@code <MyClass>}(2, DuplicatePolicy.THROW_EXCEPTION, MyClass.class);
+ *     new InstantiationRegistry{@code <>}(2, DuplicatePolicy.THROW_EXCEPTION, MyClass.class);
  * 
  * static {
  *     registry.register(0, MyOtherClass.class, Integer.TYPE, Integer.TYPE);
@@ -125,7 +125,7 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 * @param args The desired constructor's arguments.
 	 * 
 	 * @throws RuntimeException if the specified class does not have a
-	 * constructor accepting arguments of the specified type.
+	 * constructor accepting the specified parameter types.
 	 * @throws IllegalStateException if this registry is {@link #lock()
 	 * locked}.
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
@@ -230,9 +230,9 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	}
 	
 	/**
-	 * A ReflectiveFactory utilises reflection to instantiate its objects.
+	 * A Factory which utilises reflection to instantiate its objects.
 	 */
-	private static class ReflectiveFactory<T> implements Factory<T> {
+	public static class ReflectiveFactory<T> implements Factory<T> {
 		
 		/** The object constructor. */
 		private final Constructor<? extends T> constructor;
@@ -246,9 +246,9 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 		 * 
 		 * @throws NullPointerException if {@code objClass} is {@code null}.
 		 * @throws RuntimeException if the specified class does not have a
-		 * constructor accepting only two integer parameters.
+		 * constructor accepting the specified parameter types.
 		 */
-		private ReflectiveFactory(Class<? extends T> objClass, Class<?>... args) {
+		public ReflectiveFactory(Class<? extends T> objClass, Class<?>... args) {
 			try {
 				constructor = objClass.getConstructor(args);
 			} catch(Exception e) {

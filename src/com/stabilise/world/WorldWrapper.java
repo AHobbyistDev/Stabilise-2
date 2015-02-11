@@ -12,20 +12,27 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 
 
 /**
- * A WrappedWorld wraps another world and delegates all implemented methods.
+ * A WorldWrapper wraps another world and delegates all implemented methods.
  * 
  * <p>This class is intended to allow worlds of different types have unified
  * functionality under the same wrapper.
  * 
  * @param <T> The type of world to wrap.
  */
-public class WrappedWorld<T extends BaseWorld> extends AbstractWorld {
+public class WorldWrapper<T extends BaseWorld> extends AbstractWorld {
 	
 	/** The world being wrapped. */
 	public final T world;
 	
 	
-	public WrappedWorld(T world) {
+	/**
+	 * @param world The world being wrapped.
+	 * 
+	 * @throws NullPointerException if {@code world} is {@code null}.
+	 */
+	public WorldWrapper(T world) {
+		if(world == null)
+			throw new NullPointerException("world is null");
 		this.world = world;
 	}
 	
@@ -77,11 +84,6 @@ public class WrappedWorld<T extends BaseWorld> extends AbstractWorld {
 	@Override
 	public void addParticle(Particle p) {
 		world.addParticle(p);
-	}
-	
-	@Override
-	public void removeParticle(Particle p) {
-		world.removeParticle(p);
 	}
 	
 	@Override

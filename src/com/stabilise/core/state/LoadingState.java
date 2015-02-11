@@ -25,6 +25,7 @@ import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.concurrent.TaskThread;
 import com.stabilise.util.concurrent.TaskTracker;
 import com.stabilise.world.ClientWorld;
+import com.stabilise.world.HostWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.SingleplayerWorld;
 import com.stabilise.world.WorldInfo;
@@ -54,7 +55,7 @@ public class LoadingState implements State {
 	private TaskThread taskThread;
 	
 	//////////////////temp stuff
-	private ClientWorld<SingleplayerWorld> world;
+	private ClientWorld<HostWorld> world;
 	//////////////////end temp stuff
 	
 	
@@ -99,8 +100,8 @@ public class LoadingState implements State {
 				tracker.increment();
 				tracker.setName("Constructing world");
 				
-				world = new ClientWorld<>(
-						new SingleplayerWorld(
+				world = new SingleplayerWorld(
+						new HostWorld(
 								worldList[0], Application.get().profiler, Log.getAgent("world")
 						),
 						CharacterData.defaultCharacter()

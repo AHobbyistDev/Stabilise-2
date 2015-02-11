@@ -53,9 +53,12 @@ public class TileEntityChest extends TileEntity {
 	}
 	
 	@Override
-	public void update() {
-		// nothing to see here, move along
+	public boolean isUpdated() {
+		return false;
 	}
+	
+	@Override
+	public void update() {}
 	
 	@Override
 	public void handleAdd(IWorld world, int x, int y) {

@@ -98,7 +98,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 	 * tile-lengths.
 	 */
 	private int mouseXToWorldSpace(int x) {
-		return Maths.floor(((x + worldRenderer.world.camera.x) / worldRenderer.getPixelsPerTile()));
+		return Maths.floor(((x + worldRenderer.playerCamera.x) / worldRenderer.getPixelsPerTile()));
 	}
 	
 	/**
@@ -111,7 +111,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 	 * tile-lengths.
 	 */
 	private int mouseYToWorldSpace(int y) {
-		return Maths.floor(((y + worldRenderer.world.camera.y) / worldRenderer.getPixelsPerTile()));
+		return Maths.floor(((y + worldRenderer.playerCamera.y) / worldRenderer.getPixelsPerTile()));
 	}
 	
 	@Override

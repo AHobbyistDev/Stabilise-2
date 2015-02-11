@@ -21,7 +21,7 @@ public class StringUtil {
 	 * @return The date string.
 	 */
 	public static String getDateWithoutTimeZone(String date) {
-		return date.subSequence(0, 20) + date.substring(24,28);
+		return date.substring(0, 20) + date.substring(24,28);
 	}
 	
 	/**

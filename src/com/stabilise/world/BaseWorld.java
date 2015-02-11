@@ -16,7 +16,6 @@ import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.collect.LightweightLinkedList;
-import com.stabilise.util.maths.HashPoint;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
@@ -154,20 +153,29 @@ public abstract class BaseWorld extends AbstractWorld {
 	
 	/**
 	 * Adds a tile entity to the list of tile entities, so that it may be
-	 * updated.
+	 * updated. Note that it will only be added if {@link
+	 * TileEntity#isUpdated() t.isUpdated()} returns {@code true}.
 	 * 
 	 * @param t The tile entity.
+	 * 
+	 * @throws NullPointerException if {@code t} is {@code null}.
 	 */
 	protected void addTileEntity(TileEntity t) {
-		tileEntities.add(t); // TODO
+		if(t.isUpdated())
+			tileEntities.add(t);
 	}
 	
 	/**
 	 * Removes a tile entity from the list of tile entities. It will no longer
 	 * be updated.
+	 * 
+	 * @throws NullPointerException if {@code t} is {@code null}.
 	 */
 	protected void removeTileEntity(TileEntity t) {
-		tileEntities.remove(t); // TODO inefficient removing from a linkedlist
+		// Since it is expensive to directly remove an object from a
+		// LinkedList, simply set its destroyed flag to true and have it remove
+		// itself upon the next iteration.
+		t.destroy();
 	}
 	
 	/**
@@ -178,7 +186,9 @@ public abstract class BaseWorld extends AbstractWorld {
 	 * @param y The y-coordinate of the tile entity, in tile-lengths.
 	 */
 	protected void removeTileEntity(int x, int y) {
-		tileEntities.remove(new HashPoint(x, y)); // TODO this isn't a map anymore
+		TileEntity t = getTileEntityAt(x, y);
+		if(t != null)
+			removeTileEntity(t);
 	}
 	
 	// ==========Collection getters==========

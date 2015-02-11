@@ -120,6 +120,7 @@ public abstract class AppDriver implements Runnable {
 				Thread.sleep(sleepTime);
 			} catch(InterruptedException e) {
 				log.postWarning("Interrupted while sleeping until next tick!");
+				Thread.currentThread().interrupt();
 			}
 		}
 	}

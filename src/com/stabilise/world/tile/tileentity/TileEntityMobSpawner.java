@@ -56,6 +56,11 @@ public class TileEntityMobSpawner extends TileEntity {
 	}
 	
 	@Override
+	public boolean isUpdated() {
+		return true;
+	}
+	
+	@Override
 	public void update() {
 		if(playerInRange()) {
 			if(--ticksUntilNextSpawn == 0) {

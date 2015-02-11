@@ -49,8 +49,11 @@ public class WorldRenderer implements Renderer {
 	
 	/** Holds a reference to the world. */
 	public final ClientWorld<?> world;
+	/** The camera. */
+	public final GameCamera playerCamera;
 	
 	//public final HUDRenderer hudRenderer;
+	
 	public TileRenderer tileRenderer;
 	/** The number of tiles which may fit horizontally and vertically within
 	 * half of the screen. */
@@ -87,6 +90,8 @@ public class WorldRenderer implements Renderer {
 		super();
 		
 		this.world = world;
+		
+		playerCamera = new GameCamera(world, world.player);
 		
 		tileRenderer = new TileRenderer(this);
 		//hudRenderer = new HUDRenderer(game, this);
@@ -187,17 +192,21 @@ public class WorldRenderer implements Renderer {
 		
 		profiler.start("hud"); // root.update.renderer.hud
 		//hudRenderer.update();
+		
 		profiler.next("tileRenderer"); // root.update.renderer.tileRenderer
 		tileRenderer.update();
-		profiler.end(); // // root.update.renderer
+		
+		profiler.next("camera"); // root.update.renderer.camera
+		playerCamera.update();
+		camera.position.set((float)playerCamera.x, (float)playerCamera.y, 0f);
+		camera.update();
+		batch.setProjectionMatrix(camera.combined);
+		
+		profiler.end(); // root.update.renderer
 	}
 	
 	@Override
 	public void render() {
-		camera.position.set((float)world.camera.x, (float)world.camera.y, 0f);
-		camera.update();
-		batch.setProjectionMatrix(camera.combined);
-		
 		profiler.start("background"); // root.render.background
 		Color bCol = new Color(0x92D1E4FF); // RGBA is annoying in this case: ARGB > RGBA
 		Gdx.gl.glClearColor(bCol.r, bCol.g, bCol.b, 1);

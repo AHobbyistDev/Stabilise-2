@@ -1,7 +1,6 @@
 package com.stabilise.world;
 
 import java.io.IOException;
-import java.util.Date;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.nbt.NBTIO;
@@ -40,12 +39,9 @@ public class WorldInfo implements Comparable<WorldInfo> {
 	 * the world from an older format to a current one. */
 	public int sliceFormatVersion = 0;
 	
-	/** The x-coordinate of the slice in which players should initially spawn,
+	/** The coordinates of the slice in which players should initially spawn,
 	 * in slice-lengths. */
-	public int spawnSliceX = 0;
-	/** The y-coordinate of the slice in which players should initially spawn,
-	 * in slice-lengths. */
-	public int spawnSliceY = 0;
+	public int spawnSliceX = 0, spawnSliceY = 0;
 	
 	
 	/**
@@ -91,11 +87,10 @@ public class WorldInfo implements Comparable<WorldInfo> {
 	/**
 	 * Saves the world info.
 	 * 
-	 * @throws IOException Thrown if there is an I/O exception when saving the
-	 * info file.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	public void save() throws IOException {
-		lastPlayedDate = new Date().getTime();
+		lastPlayedDate = System.currentTimeMillis();
 		
 		NBTTagCompound infoTag = new NBTTagCompound();
 		

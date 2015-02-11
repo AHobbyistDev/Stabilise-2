@@ -1,6 +1,7 @@
 package com.stabilise.world;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -13,6 +14,7 @@ import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
+import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.UserThread;
@@ -34,7 +36,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * and the world generator
  * -->
  */
-public abstract class HostWorld extends BaseWorld {
+public class HostWorld extends BaseWorld {
 	
 	/** The world's information. */
 	public final WorldInfo info;
@@ -52,7 +54,8 @@ public abstract class HostWorld extends BaseWorld {
 	
 	/** The map of all loaded regions. This is concurrent as to prevent
 	 * problems when relevant methods are accessed by the world loader. */
-	public final ConcurrentHashMap<HashPoint, Region> regions;
+	public final ConcurrentHashMap<HashPoint, Region> regions =
+			new ConcurrentHashMap<>();
 	
 	/** Whether or not the world has been {@link #prepare() prepared}. */
 	private boolean prepared = false;
@@ -74,8 +77,6 @@ public abstract class HostWorld extends BaseWorld {
 		
 		spawnSliceX = info.spawnSliceX;
 		spawnSliceY = info.spawnSliceY;
-		
-		regions = new ConcurrentHashMap<HashPoint, Region>();
 		
 		config = new WorldData(this, info);
 		loader = WorldLoader.getLoader(config);
@@ -167,7 +168,7 @@ public abstract class HostWorld extends BaseWorld {
 	public void update() {
 		super.update();
 		
-		info.age++; // our precious world is one tick older
+		info.age++;
 		
 		profiler.start("region"); // root.update.game.world.region
 		Iterator<Region> i = regions.values().iterator();
@@ -183,6 +184,16 @@ public abstract class HostWorld extends BaseWorld {
 			profiler.end(); // root.update.game.world.region
 		}
 		profiler.end(); // root.update.game.world
+	}
+	
+	@Override
+	public void addParticle(Particle p) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public Collection<Particle> getParticles() throws UnsupportedOperationException {
+		throw new UnsupportedOperationException();
 	}
 	
 	/**
@@ -206,7 +217,7 @@ public abstract class HostWorld extends BaseWorld {
 	 * @return The region at the given coordinates, or {@code null} if no such
 	 * region exists.
 	 */
-	@UserThread({"MainThread", "WorkerThread"})
+	@UserThread({"MainThread", "WorldGenThread"})
 	public Region getRegionAt(int x, int y) {
 		return regions.get(Region.getKey(x, y));
 	}

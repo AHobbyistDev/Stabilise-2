@@ -163,11 +163,6 @@ public class WorldClientOld extends BaseWorld {
 	}
 	
 	@Override
-	public void removeParticle(Particle p) {
-		// TODO Auto-generated method stub
-	}
-	
-	@Override
 	public boolean isLoaded() {
 		// TODO Auto-generated method stub
 		return false;
