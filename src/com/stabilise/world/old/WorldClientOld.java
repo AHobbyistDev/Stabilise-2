@@ -7,7 +7,6 @@ import com.stabilise.core.GameClient;
 import com.stabilise.entity.EntityPlayer;
 import com.stabilise.entity.GameCamera;
 import com.stabilise.entity.particle.Particle;
-import com.stabilise.util.Log;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.BaseWorld;
 import com.stabilise.world.Slice;
@@ -46,7 +45,7 @@ public class WorldClientOld extends BaseWorld {
 	 * @param client The client object to link the world to.
 	 */
 	public WorldClientOld(GameClient client) {
-		super(null, null, Log.getAgent("CLIENT"));
+		super(null, null);
 		
 		this.client = client;
 		

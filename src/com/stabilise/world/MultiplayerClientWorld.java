@@ -5,10 +5,9 @@ import java.util.Collection;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.Particle;
-import com.stabilise.util.Log;
-import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.world.multidimensioned.Dimension;
+import com.stabilise.world.multidimensioned.WorldProvider;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -25,8 +24,8 @@ public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
 	public final SliceMapClient slices = new SliceMapClient();
 	
 	
-	public MultiplayerClientWorld(Dimension dimension, Profiler profiler, Log log) {
-		super(dimension, profiler, log);
+	public MultiplayerClientWorld(WorldProvider provider, Dimension dimension) {
+		super(provider, dimension);
 	}
 	
 	@Override

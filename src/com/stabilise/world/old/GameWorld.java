@@ -81,7 +81,7 @@ public class GameWorld extends HostWorld {
 	 * @param info The world's info.
 	 */
 	public GameWorld(WorldInfo info) {
-		super(null, info, null, Log.getAgent("world"));
+		super(null, null, info);
 		
 		this.info = null;
 		

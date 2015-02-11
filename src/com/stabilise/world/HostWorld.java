@@ -15,14 +15,13 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
 import com.stabilise.entity.particle.Particle;
-import com.stabilise.util.Log;
-import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.multidimensioned.Dimension;
+import com.stabilise.world.multidimensioned.WorldProvider;
 import com.stabilise.world.save.WorldLoader;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -65,15 +64,14 @@ public class HostWorld extends BaseWorld {
 	/**
 	 * Creates a new HostWorld.
 	 * 
+	 * @param provider This world's provider.
 	 * @param dimension The dimension of this world.
 	 * @param info The world's info.
-	 * @param profiler The profiler to use for profiling the world.
-	 * @param log The log to use for the world.
 	 * 
 	 * @throws NullPointerException if any argument is {@code null}.
 	 */
-	public HostWorld(Dimension dimension, WorldInfo info, Profiler profiler, Log log) {
-		super(dimension, profiler, log);
+	public HostWorld(WorldProvider provider, Dimension dimension, WorldInfo info) {
+		super(provider, dimension);
 		
 		this.info = Preconditions.checkNotNull(info);
 		

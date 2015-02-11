@@ -18,6 +18,7 @@ import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.collect.LightweightLinkedList;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.multidimensioned.Dimension;
+import com.stabilise.world.multidimensioned.WorldProvider;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -26,6 +27,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  */
 public abstract class BaseWorld extends AbstractWorld {
 	
+	public final WorldProvider provider;
 	/** This world's dimension. */
 	public final Dimension dimension;
 	
@@ -84,16 +86,17 @@ public abstract class BaseWorld extends AbstractWorld {
 	/**
 	 * Creates a new BaseWorld.
 	 * 
+	 * @param provider This world's provider.
 	 * @param dimension The dimension of this world.
-	 * @param profiler The profiler to use for profiling the world.
-	 * @param log The log to use for the world.
 	 * 
-	 * @throws NullPointerException if any argument is {@code null}.
+	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public BaseWorld(Dimension dimension, Profiler profiler, Log log) {
+	public BaseWorld(WorldProvider provider, Dimension dimension) {
+		this.provider = Preconditions.checkNotNull(provider);
 		this.dimension = Preconditions.checkNotNull(dimension);
-		this.profiler = Preconditions.checkNotNull(profiler);
-		this.log = Preconditions.checkNotNull(log);
+		
+		profiler = provider.profiler;
+		log = Log.getAgent("World_" + dimension.getName());
 	}
 	
 	@Override

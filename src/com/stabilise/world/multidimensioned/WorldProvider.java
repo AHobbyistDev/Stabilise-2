@@ -20,12 +20,14 @@ import com.stabilise.world.WorldInfo;
 public class WorldProvider {
 	
 	private final WorldInfo info;
+	/** Maps dimension names -> dimensions. */
 	private final Map<String, HostWorld> dimensions = new HashMap<>(2);
 	
 	/** The ExecutorService to use for delegating loader and generator threads. */
 	public final ExecutorService executor;
 	
-	private final Profiler profiler;
+	/** Profile any world's operation with this. */
+	public final Profiler profiler;
 	
 	
 	/**
@@ -88,7 +90,7 @@ public class WorldProvider {
 		
 		// TODO: Load dimension data
 		
-		return dim.createHost(info, profiler, Log.getAgent("World" + name));
+		return dim.createHost(this, info);
 	}
 	
 	public void close() {

@@ -1,11 +1,7 @@
 package com.stabilise.world.multidimensioned;
 
-import java.util.Map;
+import static com.stabilise.util.collect.InstantiationRegistry.*;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.stabilise.util.Log;
-import com.stabilise.util.Profiler;
 import com.stabilise.util.collect.DuplicatePolicy;
 import com.stabilise.util.collect.Registry;
 import com.stabilise.world.HostWorld;
@@ -20,8 +16,8 @@ public class Dimension {
 	//--------------------==========--------------------
 	
 	/** Registry of dimensions. */
-	public static BiRegistry<String, Class<? extends Dimension>> DIMENSIONS =
-			new BiRegistry<>("Dimensions", 4, DuplicatePolicy.THROW_EXCEPTION);
+	public static Registry<String, Class<? extends Dimension>> DIMENSIONS =
+			new Registry<>("Dimensions", 2, DuplicatePolicy.THROW_EXCEPTION);
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -31,10 +27,10 @@ public class Dimension {
 	
 	
 	/**
-	 * Every subclass of Dimension should have a blank constructor.
+	 * Every subclass of Dimension should have this constructor.
 	 */
-	public Dimension() {
-		name = DIMENSIONS.getKey(getClass());
+	public Dimension(String name) {
+		this.name = name;
 	}
 	
 	/**
@@ -42,14 +38,13 @@ public class Dimension {
 	 * Subclasses may override this to return a custom implementation of
 	 * HostWorld to implement dimension-specific logic.
 	 * 
+	 * @param provider The world provider.
 	 * @param info The world's info.
-	 * @param profiler The profiler to use for profiling the world.
-	 * @param log The log to use for the world.
 	 * 
-	 * @throws NullPointerException if any argument is {@code null}.
+	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public HostWorld createHost(WorldInfo info, Profiler profiler, Log log) {
-		return new HostWorld(this, info, profiler, log);
+	public HostWorld createHost(WorldProvider provider, WorldInfo info) {
+		return new HostWorld(provider, this, info);
 	}
 	
 	/**
@@ -77,12 +72,8 @@ public class Dimension {
 		Class<? extends Dimension> dimClass = DIMENSIONS.get(name);
 		if(dimClass == null)
 			return null;
-		try {
-			return dimClass.newInstance();
-		} catch(Exception e) {
-			throw new RuntimeException("Could not instantiate Dimension object " +
-					"for dimension \"" + name + "\"", e);
-		}
+		Factory<Dimension> factory = new ReflectiveFactory<>(dimClass, String.class);
+		return factory.create(name);
 	}
 	
 	/**
@@ -107,42 +98,6 @@ public class Dimension {
 	 */
 	private static void registerDimension(String name, Class<? extends Dimension> dimClass) {
 		DIMENSIONS.register(name, dimClass);
-	}
-	
-	//--------------------==========--------------------
-	//-------------=====Nested Classes=====-------------
-	//--------------------==========--------------------
-	
-	/**
-	 * A Registry which provides value-key {@code get} operations in addition
-	 * to key-value {@code get} operations.
-	 */
-	private static class BiRegistry<K, V> extends Registry<K, V> {
-		
-		private final Map<V, K> keyMap;
-		
-		/**
-		 * @see Registry#Registry(String, int, DuplicatePolicy)
-		 */
-		public BiRegistry(String name, int capacity, DuplicatePolicy dupePolicy) {
-			super(name, capacity, dupePolicy);
-			
-			keyMap = ((BiMap<K, V>)objects).inverse();
-		}
-		
-		@Override
-		protected Map<K, V> createUnderlyingMap(int capacity) {
-			return HashBiMap.create(capacity);
-		}
-		
-		/**
-		 * @return The key mapped to the specified object, or {@code null} if
-		 * there is no such mapping.
-		 */
-		public K getKey(V object) {
-			return keyMap.get(object);
-		}
-		
 	}
 	
 }
