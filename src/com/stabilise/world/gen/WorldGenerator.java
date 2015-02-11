@@ -23,8 +23,7 @@ import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Schematic;
 import com.stabilise.world.Slice;
-import com.stabilise.world.WorldData;
-import com.stabilise.world.WorldInfo;
+import com.stabilise.world.multidimensioned.WorldProvider;
 
 /**
  * The {@code WorldGenerator} class provides the mechanism for generating the
@@ -84,10 +83,10 @@ import com.stabilise.world.WorldInfo;
  */
 public abstract class WorldGenerator {
 	
+	/** The world provider. */
+	private final WorldProvider prov;
 	/** The world for which the generator is generating. */
 	private final HostWorld world;
-	/** The info of the world for which the generator is generating. */
-	protected final WorldInfo info;
 	/** The seed to use for world generation. */
 	protected final long seed;
 	
@@ -129,14 +128,15 @@ public abstract class WorldGenerator {
 	/**
 	 * Creates a new WorldGenerator.
 	 * 
-	 * @param data The world's data object.
+	 * @param worldProv The world provider.
+	 * @param world The world.
 	 */
-	protected WorldGenerator(WorldData data) {
-		this.world = data.world;
-		this.info = data.info;
-		this.executor = data.executor;
+	protected WorldGenerator(WorldProvider worldProv, HostWorld world) {
+		this.prov = worldProv;
+		this.world = world;
+		this.executor = prov.executor;
 		
-		seed = info.seed;
+		seed = prov.info.seed;
 		
 		locks = new Object[numLocks];
 		for(int i = 0; i < numLocks; i++)
@@ -291,7 +291,7 @@ public abstract class WorldGenerator {
 		// Save the region once it's done generating, but don't burden the
 		// world loader if nothing was changed
 		if(changes || cached)
-			world.loader.saveRegion(r);
+			prov.loader.saveRegion(world, r);
 		if(cached)
 			uncacheRegion(r);
 		
@@ -321,13 +321,13 @@ public abstract class WorldGenerator {
 						if(obtainRegion(cRegion))
 							genRegion(cRegion, true);
 						else // game being shut down; save what we can
-							world.loader.saveRegion(r);
+							prov.loader.saveRegion(world, r);
 					}
 				});
 			} else {
 				// Save the region here since the current implementation of
 				// HostWorld prevents it from saving non-generated regions
-				world.loader.saveRegion(cRegion);
+				prov.loader.saveRegion(world, cRegion);
 				uncacheRegion(cRegion);
 			}
 		}
@@ -582,7 +582,7 @@ public abstract class WorldGenerator {
 		// No guarantees are made as to whether or not the region is loaded, so
 		// perform a loading operation here.
 		if(wasUncached) {
-			world.loader.loadRegionSynchronously(cachedRegion.region);
+			prov.loader.loadRegionSynchronously(world, cachedRegion.region);
 			// In case it is being loaded due to another thread's actions..
 			cachedRegion.region.waitUntilLoaded(); 
 		}
@@ -612,7 +612,7 @@ public abstract class WorldGenerator {
 			else
 				return;	
 		}
-		world.loader.saveRegionSynchronously(region);
+		prov.loader.saveRegionSynchronously(world, region);
 	}
 	
 	/**
@@ -756,22 +756,6 @@ public abstract class WorldGenerator {
 	@UserThread("MainThread")
 	public final void shutdown() {
 		isShutdown = true;
-	}
-	
-	
-	//--------------------==========--------------------
-	//------------=====Static Functions=====------------
-	//--------------------==========--------------------
-	
-	/**
-	 * Gets the generator to use for world generation.
-	 * 
-	 * @param data The world's data object.
-	 * 
-	 * @return The generator to use for world generation.
-	 */
-	public static WorldGenerator getGenerator(WorldData data) {
-		return new PerlinNoiseGenerator(data);
 	}
 	
 	//--------------------==========--------------------

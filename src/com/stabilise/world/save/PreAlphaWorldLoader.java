@@ -12,7 +12,7 @@ import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
 import com.stabilise.world.Region.QueuedSchematic;
 import com.stabilise.world.BaseWorld;
-import com.stabilise.world.WorldData;
+import com.stabilise.world.multidimensioned.WorldProvider;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -23,10 +23,10 @@ public class PreAlphaWorldLoader extends WorldLoader {
 	/**
 	 * Creates a new PreAlphaWorldLoader.
 	 * 
-	 * @param data The world's data object.
+	 * @param provider The world provider.
 	 */
-	public PreAlphaWorldLoader(WorldData data) {
-		super(data);
+	public PreAlphaWorldLoader(WorldProvider provider) {
+		super(provider);
 	}
 	
 	@Override

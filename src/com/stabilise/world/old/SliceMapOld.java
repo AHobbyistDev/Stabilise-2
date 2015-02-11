@@ -2,6 +2,7 @@ package com.stabilise.world.old;
 
 import java.util.HashMap;
 
+import com.stabilise.world.HostWorld;
 import com.stabilise.world.Slice;
 
 import static com.stabilise.core.Constants.LOADED_SLICE_RADIUS;
@@ -18,7 +19,7 @@ public class SliceMapOld {
 	protected HashMap<Integer, Slice> slices = new HashMap<Integer, Slice>();
 	
 	/** A reference to the world object. */
-	protected GameWorld world;
+	protected HostWorld world;
 	
 	/** The x-coordinate of the slice the player is in. TODO: Refactor / is this necessary? */
 	protected int playerSliceX;
@@ -39,7 +40,7 @@ public class SliceMapOld {
 	 * 
 	 * @param world The world to base the slice map on.
 	 */
-	public SliceMapOld(GameWorld world) {
+	public SliceMapOld(HostWorld world) {
 		this.world = world;
 	}
 	
@@ -49,8 +50,8 @@ public class SliceMapOld {
 	public void init() {
 		if(initialised) return;
 		
-		playerSliceX = (int)Math.floor(world.player.x / SLICE_SIZE);
-		playerSliceY = (int)Math.floor(world.player.y / SLICE_SIZE);
+		//----playerSliceX = (int)Math.floor(world.player.x / SLICE_SIZE);
+		//----playerSliceY = (int)Math.floor(world.player.y / SLICE_SIZE);
 		
 		minSliceXLoaded = playerSliceX - LOADED_SLICE_RADIUS;
 		maxSliceXLoaded = playerSliceX + LOADED_SLICE_RADIUS;
@@ -75,8 +76,8 @@ public class SliceMapOld {
 		if(!initialised)
 			return;
 		
-		playerSliceX = (int)Math.floor(world.player.x / SLICE_SIZE);
-		playerSliceY = (int)Math.floor(world.player.y / SLICE_SIZE);
+		//----playerSliceX = (int)Math.floor(world.player.x / SLICE_SIZE);
+		//----playerSliceY = (int)Math.floor(world.player.y / SLICE_SIZE);
 		
 		int oldMinX = minSliceXLoaded;
 		int oldMaxX = maxSliceXLoaded;

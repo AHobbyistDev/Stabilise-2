@@ -2,8 +2,8 @@ package com.stabilise.world.old;
 
 import static com.stabilise.core.Constants.BUFFER_LENGTH;
 import static com.stabilise.core.Constants.LOADED_SLICE_RADIUS;
-import static com.stabilise.world.Slice.SLICE_SIZE;
 
+import com.stabilise.world.HostWorld;
 import com.stabilise.world.Slice;
 
 /**
@@ -19,14 +19,14 @@ public class BufferedSliceMap extends SliceMapOld {
 	 * Creates a new SliceMap instance.
 	 * @param world The world to base the slice map on.
 	 */
-	public BufferedSliceMap(GameWorld world) {
+	public BufferedSliceMap(HostWorld world) {
 		super(world);
 	}
 	
 	@Override
 	public void update() {
-		playerSliceX = (int)Math.floor(world.player.x / SLICE_SIZE);
-		playerSliceY = (int)Math.floor(world.player.y / SLICE_SIZE);
+		//----playerSliceX = (int)Math.floor(world.player.x / SLICE_SIZE);
+		//----playerSliceY = (int)Math.floor(world.player.y / SLICE_SIZE);
 		
 		int oldMinX = minSliceXLoaded;
 		int oldMaxX = maxSliceXLoaded;

@@ -7,9 +7,10 @@ import java.util.Random;
 import com.stabilise.item.Items;
 import com.stabilise.util.maths.PerlinNoise1D;
 import com.stabilise.util.maths.SimplexNoise;
+import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
-import com.stabilise.world.WorldData;
+import com.stabilise.world.multidimensioned.WorldProvider;
 import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntityChest;
 
@@ -25,10 +26,11 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 	/**
 	 * Creates a new PerlinNoiseGenerator.
 	 * 
-	 * @param data The world's data object.
+	 * @param worldProv The world provider.
+	 * @param world The world.
 	 */
-	public PerlinNoiseGenerator(WorldData data) {
-		super(data);
+	public PerlinNoiseGenerator(WorldProvider worldProv, HostWorld world) {
+		super(worldProv, world);
 	}
 	
 	@Override

@@ -5,9 +5,10 @@ import static com.stabilise.world.Slice.SLICE_SIZE;
 
 import java.util.Random;
 
+import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
-import com.stabilise.world.WorldData;
+import com.stabilise.world.multidimensioned.WorldProvider;
 
 /**
  * The flatland generator generates a flat land.
@@ -17,10 +18,11 @@ public class FlatlandGeneratorII extends WorldGenerator {
 	/**
 	 * Creates a flatland generator.
 	 * 
-	 * @param data The world's data object.
+	 * @param worldProv The world provider.
+	 * @param world The world.
 	 */
-	FlatlandGeneratorII(WorldData data) {
-		super(data);
+	FlatlandGeneratorII(WorldProvider worldProv, HostWorld world) {
+		super(worldProv, world);
 	}
 	
 	@Override

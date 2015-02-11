@@ -6,10 +6,11 @@ import com.stabilise.util.collect.DuplicatePolicy;
 import com.stabilise.util.collect.Registry;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.WorldInfo;
+import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.multidimensioned.dimension.DimOverworld;
 
 
-public class Dimension {
+public abstract class Dimension {
 	
 	//--------------------==========--------------------
 	//-----=====Static Constants and Variables=====-----
@@ -23,7 +24,7 @@ public class Dimension {
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
-	private final String name;
+	public final String name;
 	
 	
 	/**
@@ -48,11 +49,15 @@ public class Dimension {
 	}
 	
 	/**
-	 * @return The name of this dimension.
+	 * Creates the world generator to use for generating this dimension.
+	 * 
+	 * @param provider The world provider.
+	 * @param world This dimension's host world.
+	 * 
+	 * @return The world generator.
+	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public String getName() {
-		return name;
-	}
+	public abstract WorldGenerator createWorldGenerator(WorldProvider provider, HostWorld world);
 	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------

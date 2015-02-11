@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.google.common.base.Preconditions;
@@ -22,7 +21,6 @@ import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.multidimensioned.Dimension;
 import com.stabilise.world.multidimensioned.WorldProvider;
-import com.stabilise.world.save.WorldLoader;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
@@ -41,10 +39,6 @@ public class HostWorld extends BaseWorld {
 	/** The world's information. */
 	public final WorldInfo info;
 	
-	/** The world's configuration object. */
-	private final WorldData config;
-	/** The world loader. */
-	public final WorldLoader loader;
 	/** The world generator. */
 	public final WorldGenerator generator;
 	
@@ -78,9 +72,7 @@ public class HostWorld extends BaseWorld {
 		spawnSliceX = info.spawnSliceX;
 		spawnSliceY = info.spawnSliceY;
 		
-		config = new WorldData(this, info);
-		loader = WorldLoader.getLoader(config);
-		generator = WorldGenerator.getGenerator(config);
+		generator = dimension.createWorldGenerator(provider, this);
 	}
 	
 	@Override
@@ -289,9 +281,9 @@ public class HostWorld extends BaseWorld {
 		
 		// Now, we load the region appropriately
 		if(generate)
-			loader.loadAndGenerateRegion(r);
+			provider.loader.loadAndGenerateRegion(this, r);
 		else
-			loader.loadRegion(r);
+			provider.loader.loadRegion(this, r);
 		
 		return r;
 	}
@@ -333,7 +325,7 @@ public class HostWorld extends BaseWorld {
 	 */
 	public void saveRegion(Region r) {
 		if(r.generated)
-			loader.saveRegion(r);
+			provider.loader.saveRegion(this, r);
 	}
 	
 	/**
@@ -563,41 +555,22 @@ public class HostWorld extends BaseWorld {
 	@Override
 	public void close() {
 		save();
-		
-		loader.shutdown();
 		generator.shutdown();
-		
-		// This is done due to the fact that despite save() being invoked
-		// before executor.shutdown(), due to the nature of the Executor being
-		// used, tasks submitted before shutdown() is invoked may still be
-		// rejected. This ensures that all regions manage to save.
-		while(!regionSavesDone()) {
-			try {
-				Thread.sleep(0L);
-			} catch(InterruptedException ignored) {}
-		}
-		
-		config.executor.shutdown();
-		try {
-			if(!config.executor.awaitTermination(10, TimeUnit.SECONDS))
-				log.postWarning("The world's worker threads took more than 10 seconds to shut down!");
-		} catch(InterruptedException e) {
-			log.postWarning("Interrupted while waiting for the worker threads to finish!", e);
-		}
 	}
 	
 	/**
-	 * Checks for whether or not all region save operations have completed.
-	 * 
-	 * @return {@code true} if all region save operations have completed;
-	 * {@code false} otherwise.
+	 * Blocks the current thread until this world has closed.
 	 */
-	private boolean regionSavesDone() {
+	public void blockUntilClosed() {
 		for(Region r : regions.values()) {
-			if(r.pendingSave || r.saving)
-				return false;
+			if(r.pendingSave || r.saving) {
+				try {
+					Thread.sleep(50L);
+				} catch(InterruptedException ignored) {
+					Thread.currentThread().interrupt();
+				}
+			}
 		}
-		return true;
 	}
 	
 	//--------------------==========--------------------

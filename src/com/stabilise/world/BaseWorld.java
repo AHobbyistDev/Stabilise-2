@@ -96,7 +96,7 @@ public abstract class BaseWorld extends AbstractWorld {
 		this.dimension = Preconditions.checkNotNull(dimension);
 		
 		profiler = provider.profiler;
-		log = Log.getAgent("World_" + dimension.getName());
+		log = Log.getAgent("World_" + dimension.name);
 	}
 	
 	@Override

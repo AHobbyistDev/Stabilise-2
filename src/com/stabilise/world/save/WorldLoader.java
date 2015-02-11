@@ -2,11 +2,12 @@ package com.stabilise.world.save;
 
 import java.util.concurrent.ExecutorService;
 
+import com.google.common.base.Preconditions;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
-import com.stabilise.world.WorldData;
+import com.stabilise.world.multidimensioned.WorldProvider;
 
 /**
  * A {@code WorldLoader} instance manages the loading and saving of regions for
@@ -36,8 +37,8 @@ import com.stabilise.world.WorldData;
  */
 public abstract class WorldLoader {
 	
-	/** The world for which the loader is loading. */
-	protected final HostWorld world;
+	/** The world provider for which the loader is loading. */
+	protected final WorldProvider provider;
 	
 	/** The executor which delegates threads for loading. */
 	private final ExecutorService executor;
@@ -53,17 +54,13 @@ public abstract class WorldLoader {
 	/**
 	 * Creates a new WorldLoader.
 	 * 
-	 * @param data The world's data object.
+	 * @param provider The world provider.
 	 * 
-	 * @throws IllegalArgumentException Thrown if {@code config} is
-	 * {@code null}.
+	 * @throws NullPointerException if {@code provider} is {@code null}.
 	 */
-	public WorldLoader(WorldData data) {
-		if(data == null)
-			throw new IllegalArgumentException("config is null");
-		
-		world = data.world;
-		executor = data.executor;
+	public WorldLoader(WorldProvider provider) {
+		this.provider = Preconditions.checkNotNull(provider);
+		executor = provider.executor;
 	}
 	
 	/**
@@ -74,17 +71,18 @@ public abstract class WorldLoader {
 	 * loading the region to indicate it is safe to access the region's
 	 * members.
 	 * 
+	 * @param world The region's parent world.
 	 * @param region The region to load.
 	 */
 	@UserThread("MainThread")
-	public final void loadRegion(Region region) {
+	public final void loadRegion(HostWorld world, Region region) {
 		if(region.loaded)
 			return;
 		
 		if(!obtainRegionForLoad(region))
 			return;
 		
-		executor.execute(new RegionLoader(region, false));
+		executor.execute(new RegionLoader(world, region, false));
 	}
 	
 	/**
@@ -95,16 +93,17 @@ public abstract class WorldLoader {
 	 * 
 	 * <p>This method exists for the use of the WorldGenerator.
 	 * 
+	 * @param world The region's parent world.
 	 * @param region The region to load.
 	 */
-	public final void loadRegionSynchronously(Region region) {
+	public final void loadRegionSynchronously(HostWorld world, Region region) {
 		if(region.loaded)
 			return;
 		
 		if(!obtainRegionForLoad(region))
 			return;
 		
-		new RegionLoader(region, false).run();
+		new RegionLoader(world, region, false).run();
 	}
 	
 	/**
@@ -117,14 +116,15 @@ public abstract class WorldLoader {
 	 * loading the region to indicate it is safe to access the region's
 	 * members.
 	 * 
+	 * @param world The region's parent world.
 	 * @param region The region to load.
 	 */
 	@UserThread("MainThread")
-	public final void loadAndGenerateRegion(Region region) {
+	public final void loadAndGenerateRegion(HostWorld world, Region region) {
 		if(region.loaded)
 			world.generator.generate(region);
 		else if(obtainRegionForLoad(region))
-				executor.execute(new RegionLoader(region, true));
+				executor.execute(new RegionLoader(world, region, true));
 	}
 	
 	/**
@@ -132,15 +132,16 @@ public abstract class WorldLoader {
 	 * 
 	 * <p>The request will be ignored if the region has not been loaded.
 	 * 
+	 * @param world The region's parent world.
 	 * @param region The region to save.
 	 */
 	@UserThread({"MainThread", "WorkerThread"})
-	public final void saveRegion(Region region) {
+	public final void saveRegion(HostWorld world, Region region) {
 		if(!region.loaded)
 			return;
 		
 		region.pendingSave = true;
-		executor.execute(new RegionSaver(region));
+		executor.execute(new RegionSaver(world, region));
 		region.unsavedChanges = false;
 		region.lastSaved = world.info.age;
 	}
@@ -150,12 +151,13 @@ public abstract class WorldLoader {
 	 * 
 	 * <p>This method exists for the use of the WorldGenerator.
 	 * 
+	 * @param world The region's parent world.
 	 * @param region The region to save.
 	 */
 	@UserThread("WorkerThread")
-	public final void saveRegionSynchronously(Region region) {
+	public final void saveRegionSynchronously(HostWorld world, Region region) {
 		region.pendingSave = true;
-		new RegionSaver(region).run();
+		new RegionSaver(world, region).run();
 		region.unsavedChanges = false;
 		region.lastSaved = world.info.age;
 	}
@@ -223,15 +225,11 @@ public abstract class WorldLoader {
 	 */
 	private abstract class RegionIO implements Runnable {
 		
-		/** The region. */
+		protected final HostWorld world;
 		protected final Region r;
 		
-		/**
-		 * Creates a new RegionIO.
-		 * 
-		 * @param r The region.
-		 */
-		protected RegionIO(Region r) {
+		protected RegionIO(HostWorld world, Region r) {
+			this.world = world;
 			this.r = r;
 		}
 		
@@ -249,12 +247,13 @@ public abstract class WorldLoader {
 		/**
 		 * Creates a new RegionLoader.
 		 * 
+		 * @param world The region's parent world.
 		 * @param region The region to load.
 		 * @param generate Whether or not the region should be generated after
 		 * being loaded, if it is not already.
 		 */
-		public RegionLoader(Region region, boolean generate) {
-			super(region);
+		public RegionLoader(HostWorld world, Region region, boolean generate) {
+			super(world, region);
 			this.generate = generate;
 		}
 		
@@ -286,10 +285,11 @@ public abstract class WorldLoader {
 		/**
 		 * Creates a new RegionSaver.
 		 * 
+		 * @param world The region's parent world.
 		 * @param region The region to save.
 		 */
-		public RegionSaver(Region region) {
-			super(region);
+		public RegionSaver(HostWorld world, Region region) {
+			super(world, region);
 		}
 		
 		@Override
@@ -315,12 +315,12 @@ public abstract class WorldLoader {
 	/**
 	 * Gets the loader to use for world loading.
 	 * 
-	 * @param data The world's data object.
+	 * @param provider The world provider.
 	 * 
 	 * @return The loader to use for world loading.
 	 */
-	public static WorldLoader getLoader(WorldData data) {
-		return new PreAlphaWorldLoader(data);
+	public static WorldLoader getLoader(WorldProvider provider) {
+		return new PreAlphaWorldLoader(provider);
 	}
 	
 }

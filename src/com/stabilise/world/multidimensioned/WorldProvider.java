@@ -15,16 +15,18 @@ import com.stabilise.util.Profiler;
 import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.WorldInfo;
+import com.stabilise.world.save.WorldLoader;
 
 
 public class WorldProvider {
 	
-	private final WorldInfo info;
+	public final WorldInfo info;
 	/** Maps dimension names -> dimensions. */
 	private final Map<String, HostWorld> dimensions = new HashMap<>(2);
 	
 	/** The ExecutorService to use for delegating loader and generator threads. */
 	public final ExecutorService executor;
+	public final WorldLoader loader;
 	
 	/** Profile any world's operation with this. */
 	public final Profiler profiler;
@@ -55,6 +57,9 @@ public class WorldProvider {
 		);
 		tpe.setRejectedExecutionHandler(new BoundedThreadPoolExecutor.CallerRunsPolicy());
 		executor = tpe;
+		
+		// Start up the world loader
+		loader = WorldLoader.getLoader(this);
 	}
 	
 	public void update() {
@@ -94,8 +99,15 @@ public class WorldProvider {
 	}
 	
 	public void close() {
+		loader.shutdown();
+		
 		for(HostWorld dim : dimensions.values())
 			dim.close();
+		
+		for(HostWorld dim : dimensions.values())
+			dim.blockUntilClosed();
+		
+		executor.shutdown();
 	}
 	
 	//--------------------==========--------------------
