@@ -46,7 +46,7 @@ public class WorldClientOld extends BaseWorld {
 	 * @param client The client object to link the world to.
 	 */
 	public WorldClientOld(GameClient client) {
-		super(null, Log.getAgent("CLIENT"));
+		super(null, null, Log.getAgent("CLIENT"));
 		
 		this.client = client;
 		

@@ -29,6 +29,7 @@ import com.stabilise.world.HostWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.SingleplayerWorld;
 import com.stabilise.world.WorldInfo;
+import com.stabilise.world.multidimensioned.Dimension;
 
 /**
  * A LoadingState is the state which runs as the game loads all preparatory
@@ -102,7 +103,10 @@ public class LoadingState implements State {
 				
 				world = new SingleplayerWorld(
 						new HostWorld(
-								worldList[0], Application.get().profiler, Log.getAgent("world")
+								Dimension.getDimension("overworld"),
+								worldList[0],
+								Application.get().profiler,
+								Log.getAgent("world")
 						),
 						CharacterData.defaultCharacter()
 				);
@@ -113,7 +117,7 @@ public class LoadingState implements State {
 				world.prepare();
 				
 				while(!world.isLoaded())
-					Thread.sleep(1000L);
+					Thread.sleep(250L);
 				
 				tracker.increment();
 				tracker.setName("All is done!");

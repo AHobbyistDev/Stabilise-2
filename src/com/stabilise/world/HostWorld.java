@@ -22,6 +22,7 @@ import com.stabilise.util.maths.HashPoint;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.gen.WorldGenerator;
+import com.stabilise.world.multidimensioned.Dimension;
 import com.stabilise.world.save.WorldLoader;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -64,14 +65,15 @@ public class HostWorld extends BaseWorld {
 	/**
 	 * Creates a new HostWorld.
 	 * 
+	 * @param dimension The dimension of this world.
 	 * @param info The world's info.
 	 * @param profiler The profiler to use for profiling the world.
 	 * @param log The log to use for the world.
 	 * 
 	 * @throws NullPointerException if any argument is {@code null}.
 	 */
-	public HostWorld(WorldInfo info, Profiler profiler, Log log) {
-		super(profiler, log);
+	public HostWorld(Dimension dimension, WorldInfo info, Profiler profiler, Log log) {
+		super(dimension, profiler, log);
 		
 		this.info = Preconditions.checkNotNull(info);
 		

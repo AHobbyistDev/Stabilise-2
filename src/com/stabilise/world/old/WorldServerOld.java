@@ -52,7 +52,7 @@ public class WorldServerOld extends BaseWorld {
 	 * @param info The WorldInfo object to base the world on.
 	 */
 	public WorldServerOld(GameServer server, WorldInfo info) {
-		super(null, Log.getAgent("SERVER"));
+		super(null, null, Log.getAgent("SERVER"));
 		this.server = server;
 		this.info = info;
 		//generator = WorldGenerator.getGenerator(this, info.seed);

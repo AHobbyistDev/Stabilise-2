@@ -8,6 +8,7 @@ import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.Incomplete;
+import com.stabilise.world.multidimensioned.Dimension;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -24,8 +25,8 @@ public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
 	public final SliceMapClient slices = new SliceMapClient();
 	
 	
-	public MultiplayerClientWorld(Profiler profiler, Log log) {
-		super(profiler, log);
+	public MultiplayerClientWorld(Dimension dimension, Profiler profiler, Log log) {
+		super(dimension, profiler, log);
 	}
 	
 	@Override

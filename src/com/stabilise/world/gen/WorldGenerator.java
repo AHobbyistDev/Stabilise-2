@@ -119,7 +119,7 @@ public abstract class WorldGenerator {
 		}
 	};
 	
-	/** The cache of schematics in use. */
+	/** The cache of schematics in use. TODO: this system is outdated */
 	private final Map<String, Schematic> schematics = new ConcurrentHashMap<>(5);
 	
 	/** The generator's log. */

@@ -10,6 +10,7 @@ import com.stabilise.input.Controller;
 import com.stabilise.item.Item;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.world.multidimensioned.Dimension;
 import com.stabilise.world.tile.Tile;
 
 /**
@@ -101,6 +102,7 @@ public class Stabilise extends Application {
 				
 				Tile.registerTiles();
 				Item.registerItems();
+				Dimension.registerDimensions();
 				
 				Settings.initialise();
 				Controller.poke();

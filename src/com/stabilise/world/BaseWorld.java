@@ -17,6 +17,7 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.collect.LightweightLinkedList;
 import com.stabilise.util.maths.Maths;
+import com.stabilise.world.multidimensioned.Dimension;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -25,10 +26,13 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  */
 public abstract class BaseWorld extends AbstractWorld {
 	
-	/** All players in the world. */
+	/** This world's dimension. */
+	public final Dimension dimension;
+	
+	/** All players in the world. Mappings are IDs to EntityMobs. */
 	protected Map<Integer, EntityMob> players = new HashMap<>(1);
-	/** The map of loaded entities in the world. This is a LinkedHashMap as to
-	 * allow for consistent iteration. */
+	/** The map of loaded entities in the world. Mappings are IDs to Entities.
+	 * This is a LinkedHashMap as to allow for consistent iteration. */
 	protected Map<Integer, Entity> entities = new LinkedHashMap<>(64);
 	/** The total number of entities which have existed during the lifetime of
 	 * the world. When a new entity is created this is incremented and set as
@@ -78,14 +82,16 @@ public abstract class BaseWorld extends AbstractWorld {
 	
 	
 	/**
-	 * Creates a new AbstractWorld.
+	 * Creates a new BaseWorld.
 	 * 
+	 * @param dimension The dimension of this world.
 	 * @param profiler The profiler to use for profiling the world.
 	 * @param log The log to use for the world.
 	 * 
-	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws NullPointerException if any argument is {@code null}.
 	 */
-	public BaseWorld(Profiler profiler, Log log) {
+	public BaseWorld(Dimension dimension, Profiler profiler, Log log) {
+		this.dimension = Preconditions.checkNotNull(dimension);
 		this.profiler = Preconditions.checkNotNull(profiler);
 		this.log = Preconditions.checkNotNull(log);
 	}
