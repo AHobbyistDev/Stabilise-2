@@ -241,6 +241,9 @@ public abstract class BaseWorld extends AbstractWorld {
 	
 	@Override
 	public void setTimeDelta(float delta) {
+		if(delta <= 0f)
+			throw new IllegalArgumentException("delta <= 0: " + delta);
+		
 		timeDelta = delta;
 		
 		timeIncrement = delta / Constants.TICKS_PER_SECOND;

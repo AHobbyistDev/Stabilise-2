@@ -3,6 +3,7 @@ package com.stabilise.world;
 import java.util.Collection;
 
 import com.stabilise.character.CharacterData;
+import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.annotation.Incomplete;
@@ -118,6 +119,12 @@ public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
 	@Override
 	public void close() {
 		// just let the GC do stuff
+	}
+
+	@Override
+	public void sendToDimension(String dimension, Entity e, double x, double y) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

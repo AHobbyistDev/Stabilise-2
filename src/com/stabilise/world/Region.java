@@ -265,10 +265,10 @@ public class Region {
 	}
 	
 	/**
-	 * Gets this region's file.
+	 * @return This region's file.
 	 */
 	public FileHandle getFile() {
-		return world.getDir().child(BaseWorld.DIR_REGIONS + "r_" + loc.x + "_" + loc.y + ".region");
+		return world.dimension.info.getDimensionDir().child("r_" + loc.x + "_" + loc.y + ".region");
 	}
 	
 	/**

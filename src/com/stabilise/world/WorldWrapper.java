@@ -157,6 +157,11 @@ public class WorldWrapper<T extends BaseWorld> extends AbstractWorld {
 	}
 	
 	@Override
+	public void sendToDimension(String dimension, Entity e, double x, double y) {
+		world.sendToDimension(dimension, e, x, y);
+	}
+	
+	@Override
 	public float getGravity() {
 		return world.getGravity();
 	}

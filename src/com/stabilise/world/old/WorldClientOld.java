@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.stabilise.core.Constants;
 import com.stabilise.core.GameClient;
+import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityPlayer;
 import com.stabilise.entity.GameCamera;
 import com.stabilise.entity.particle.Particle;
@@ -180,6 +181,13 @@ public class WorldClientOld extends BaseWorld {
 	@Override
 	public void close() {
 		// TODO Auto-generated method stub
+	}
+
+
+	@Override
+	public void sendToDimension(String dimension, Entity e, double x, double y) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

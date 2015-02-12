@@ -27,9 +27,7 @@ public interface IWorld {
 	public static final String FILE_INFO = "info";
 	/** The name of the directory relative to the world dir in which dimension
 	 * data is stored. */
-	public static final String DIR_DIMENSIONS = "dim/";
-	/** The name of the directory in which world regions are to be stored. */
-	public static final String DIR_REGIONS = "regions/";
+	public static final String DIR_DIMENSIONS = "dimensions/";
 	/** The name of the directory in which data about individual players is to
 	 * be stored. */
 	public static final String DIR_PLAYERS = "players/";
@@ -305,7 +303,21 @@ public interface IWorld {
 	 */
 	void blowUpTile(int x, int y, float explosionPower);
 	
-	// ========== Insert category name here ==========
+	// ========== Dimensional stuff ==========
+	
+	/**
+	 * Sends an entity to the specified dimension.
+	 * 
+	 * @param dimension The name of the dimension to which to send the entity.
+	 * @param e The entity.
+	 * @param x The x-coordinate at which to place the entity, in tile-lengths.
+	 * @param y The y-coordinate at which to place the entity, in tile-lengths.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 */
+	void sendToDimension(String dimension, Entity e, double x, double y);
+	
+	// ========== Time delta stuff ==========
 	
 	/**
 	 * Returns the gravity of the world, in ts<sup><font size=-1>-2</font>
@@ -338,6 +350,8 @@ public interface IWorld {
 	 * <p>For example, passing {@code 2} to this method will in general cause
 	 * the world to update twice as quickly, and passing {@code 0.5} will cause
 	 * everything to slow down to half as quickly.
+	 * 
+	 * @throws IllegalArgumentException if {@code delta <= 0}.
 	 */
 	void setTimeDelta(float delta);
 	

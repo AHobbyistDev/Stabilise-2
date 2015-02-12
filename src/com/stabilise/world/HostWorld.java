@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
@@ -49,6 +50,10 @@ public class HostWorld extends BaseWorld {
 	 * problems when relevant methods are accessed by the world loader. */
 	public final ConcurrentHashMap<HashPoint, Region> regions =
 			new ConcurrentHashMap<>();
+	/** Tracks the number of loaded regions, in preference to invoking
+	 * regions.size(), which has somewhat imprecise semantics. Also, size
+	 * checking with an AtomicInteger is a constant-time operation. */
+	private final AtomicInteger numRegions = new AtomicInteger(0);
 	
 	/** Whether or not the world has been {@link #prepare() prepared}. */
 	private boolean prepared = false;
@@ -79,15 +84,18 @@ public class HostWorld extends BaseWorld {
 		if(prepared)
 			throw new IllegalStateException("World has already been prepared!");
 		
-		// Ensure the 'spawn regions' are generated, and anchor them such that
-		// they're always loaded
-		// For now, the spawn regions extend for -256 <= x,y <= 256
-		for(int x = -1; x < 1; x++) {
-			for(int y = -1; y < 1; y++) {
-				// This will induce a permanent anchorage imbalance which
-				// should never be rectified; the region will remain
-				// perpetually loaded
-				loadRegion(x, y).anchorSlice();
+		// Load the spawn regions if this is the default region
+		if(dimension.info.name.equals(Dimension.defaultDimension())) {
+			// Ensure the 'spawn regions' are generated, and anchor them such that
+			// they're always loaded
+			// The spawn regions extend for -256 <= x,y <= 256 (this is arbitrary)
+			for(int x = -1; x < 1; x++) {
+				for(int y = -1; y < 1; y++) {
+					// This will induce a permanent anchorage imbalance which
+					// should never be rectified; the region will remain
+					// perpetually loaded
+					loadRegion(x, y).anchorSlice();
+				}
 			}
 		}
 		
@@ -159,7 +167,7 @@ public class HostWorld extends BaseWorld {
 	public void update() {
 		super.update();
 		
-		info.age++;
+		dimension.info.age++;
 		
 		profiler.start("region"); // root.update.game.world.region
 		Iterator<Region> i = regions.values().iterator();
@@ -175,6 +183,18 @@ public class HostWorld extends BaseWorld {
 			profiler.end(); // root.update.game.world.region
 		}
 		profiler.end(); // root.update.game.world
+	}
+	
+	/**
+	 * Updates this world as per {@link #update()}, then checks for whether or
+	 * not it has fallen out of use.
+	 * 
+	 * @return {@code true} if there are no regions loaded in this world;
+	 * {@code false} if it is still in use.
+	 */
+	public boolean updateAndCheck() {
+		update();
+		return numRegions.get() == 0;
 	}
 	
 	@Override
@@ -278,6 +298,8 @@ public class HostWorld extends BaseWorld {
 			regions.put(loc, r);
 		}
 		
+		numRegions.getAndIncrement();
+		
 		// Now, we load the region appropriately
 		if(generate)
 			provider.loader.loadAndGenerateRegion(this, r);
@@ -291,6 +313,9 @@ public class HostWorld extends BaseWorld {
 	 * Saves a region at the specified coordinates, then unloads it. Entities
 	 * within the region are removed from the world. The region will, however,
 	 * not be removed from the map of regions in the world.
+	 * 
+	 * <p>It is expected that the region will be removed from the map of
+	 * regions immediately after this method returns.
 	 * 
 	 * @param r The region.
 	 */
@@ -313,6 +338,8 @@ public class HostWorld extends BaseWorld {
 					&& e.y + e.boundingBox.getV00().y <= maxY)
 				removeEntity(e);
 		}
+		
+		numRegions.getAndDecrement();
 		
 		//log.logMessage("Unloaded region " + r.x + "," + r.y);
 	}
@@ -491,6 +518,13 @@ public class HostWorld extends BaseWorld {
 		}
 	}
 	
+	@Override
+	public void sendToDimension(String dimension, Entity e, double x, double y) {
+		// TODO: Migrate all player stuff over if we're sending a player
+		removeEntity(e);
+		provider.loadDimension(dimension).addEntity(e, x, y);
+	}
+	
 	/**
 	 * Loads the character's world-specific data, (i.e. their coordinates,
 	 * current health, etc.)
@@ -519,17 +553,17 @@ public class HostWorld extends BaseWorld {
 	 * Gets the world's directory.
 	 */
 	public FileHandle getDir() {
-		return IWorld.getWorldDir(info.fileSystemName);
+		return info.getWorldDir();
 	}
 	
 	@Override
 	public void save() {
-		log.postInfo("Saving world...");
+		log.postInfo("Saving dimension...");
 		
 		try {
-			info.save();
+			dimension.saveData();
 		} catch(IOException e) {
-			log.postSevere("Could not save world info!");
+			log.postSevere("Could not save dimension info!");
 		}
 		
 		savePlayers();

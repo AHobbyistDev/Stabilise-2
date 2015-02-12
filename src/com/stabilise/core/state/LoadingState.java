@@ -30,7 +30,6 @@ import com.stabilise.world.IWorld;
 import com.stabilise.world.SingleplayerWorld;
 import com.stabilise.world.WorldInfo;
 import com.stabilise.world.multidimensioned.Dimension;
-import com.stabilise.world.multidimensioned.DimensionInfo;
 import com.stabilise.world.multidimensioned.WorldProvider;
 
 /**
@@ -108,7 +107,7 @@ public class LoadingState implements State {
 						Application.get().profiler
 				);
 				
-				DimensionInfo dimInfo = new DimensionInfo(worldList[0], Dimension.defaultDimension());
+				Dimension.Info dimInfo = new Dimension.Info(worldList[0], Dimension.defaultDimension());
 				
 				world = new SingleplayerWorld(
 						new HostWorld(
@@ -124,12 +123,10 @@ public class LoadingState implements State {
 				world.prepare();
 				
 				while(!world.isLoaded())
-					Thread.sleep(250L);
+					Thread.sleep(50L);
 				
 				tracker.increment();
 				tracker.setName("All is done!");
-				
-				Thread.sleep(250L);
 			}
 		};
 		//task.loadTextures(new String[] {"mainbg", "mainbgtile", "stickfigure", "sheets/cloak", "head", "button", "sheets/font1"});

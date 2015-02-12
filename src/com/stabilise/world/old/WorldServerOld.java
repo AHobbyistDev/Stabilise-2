@@ -11,6 +11,7 @@ import static com.stabilise.world.Slice.SLICE_SIZE;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.GameServer;
+import com.stabilise.entity.Entity;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.maths.Maths;
@@ -305,6 +306,12 @@ public class WorldServerOld extends BaseWorld {
 	@Override
 	public void prepare() {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void sendToDimension(String dimension, Entity e, double x, double y) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
