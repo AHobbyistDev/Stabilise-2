@@ -413,14 +413,12 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 		
 		/** The element preceding {@link #lastReturned}. */
 		Node<E> prev;
-		/** Equivalent to indexOf(lastReturned)+1 */
-		int nextIndex;
+		boolean removed = false;
 		
 		
 		@Override
 		protected void reset() {
 			super.reset();
-			nextIndex = 0;
 		}
 		
 		@Override
@@ -429,24 +427,22 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 				throw new NoSuchElementException();
 			prev = lastReturned;
 			lastReturned = prev.next;
-			nextIndex++;
+			removed = false;
 			return lastReturned.e;
 		}
 		
 		@Override
 		public void remove() {
+			if(removed)
+				throw new IllegalStateException();
+			removed = true;
 			size--;
-			nextIndex--;
-			if(nextIndex == 0) { // lastReturned was head
-				head = lastReturned.next;
-				if(size == 0)
-					tail = null;
-				lastReturned.wipe();
-			} else {
+			if(lastReturned == head)
+				head = head.next;
+			else
 				prev.next = lastReturned.next;
-				if(prev.next == null)
-					tail = prev;
-			}
+			if(lastReturned == tail)
+				tail = prev;
 		}
 		
 	}

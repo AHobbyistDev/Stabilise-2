@@ -30,6 +30,7 @@ import com.stabilise.world.IWorld;
 import com.stabilise.world.SingleplayerWorld;
 import com.stabilise.world.WorldInfo;
 import com.stabilise.world.multidimensioned.Dimension;
+import com.stabilise.world.multidimensioned.DimensionInfo;
 import com.stabilise.world.multidimensioned.WorldProvider;
 
 /**
@@ -107,11 +108,12 @@ public class LoadingState implements State {
 						Application.get().profiler
 				);
 				
+				DimensionInfo dimInfo = new DimensionInfo(worldList[0], Dimension.defaultDimension());
+				
 				world = new SingleplayerWorld(
 						new HostWorld(
 								worldProv,
-								Dimension.getDimension("overworld"),
-								worldList[0]
+								Dimension.getDimension(dimInfo)
 						),
 						CharacterData.defaultCharacter()
 				);

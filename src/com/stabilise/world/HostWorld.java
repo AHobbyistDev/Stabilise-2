@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.google.common.base.Preconditions;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
@@ -62,15 +61,15 @@ public class HostWorld extends BaseWorld {
 	 * @param dimension The dimension of this world.
 	 * @param info The world's info.
 	 * 
-	 * @throws NullPointerException if any argument is {@code null}.
+	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public HostWorld(WorldProvider provider, Dimension dimension, WorldInfo info) {
+	public HostWorld(WorldProvider provider, Dimension dimension) {
 		super(provider, dimension);
 		
-		this.info = Preconditions.checkNotNull(info);
+		this.info = provider.info;
 		
-		spawnSliceX = info.spawnSliceX;
-		spawnSliceY = info.spawnSliceY;
+		spawnSliceX = dimension.info.spawnSliceX;
+		spawnSliceY = dimension.info.spawnSliceY;
 		
 		generator = dimension.createWorldGenerator(provider, this);
 	}
@@ -113,8 +112,8 @@ public class HostWorld extends BaseWorld {
 			// slice. In practice, we'll need to check to see whether or not
 			// this location is valid, and keep searching until a valid
 			// location is found.
-			character.lastX = tileCoordFromSliceCoord(info.spawnSliceX);
-			character.lastY = tileCoordFromSliceCoord(info.spawnSliceY);
+			character.lastX = tileCoordFromSliceCoord(dimension.info.spawnSliceX);
+			character.lastY = tileCoordFromSliceCoord(dimension.info.spawnSliceY);
 			character.newToWorld = false;
 			saveCharacterData(character);
 		}
@@ -562,15 +561,21 @@ public class HostWorld extends BaseWorld {
 	 * Blocks the current thread until this world has closed.
 	 */
 	public void blockUntilClosed() {
-		for(Region r : regions.values()) {
-			if(r.pendingSave || r.saving) {
-				try {
-					Thread.sleep(50L);
-				} catch(InterruptedException ignored) {
-					Thread.currentThread().interrupt();
-				}
+		while(!allRegionsSaved()) {
+			try {
+				Thread.sleep(50L);
+			} catch(InterruptedException ignored) {
+				log.postWarning("Interrupted while blocking until world is closed");
 			}
 		}
+	}
+	
+	private boolean allRegionsSaved() {
+		for(Region r : regions.values()) {
+			if(r.pendingSave || r.saving)
+				return false;
+		}
+		return true;
 	}
 	
 	//--------------------==========--------------------

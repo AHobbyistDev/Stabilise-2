@@ -7,7 +7,7 @@ import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 
 /**
- * A WorldInfo object is used to contain the critical information of a world.
+ * Contains important information about a world, common to all dimensions.
  */
 public class WorldInfo implements Comparable<WorldInfo> {
 	
@@ -27,9 +27,6 @@ public class WorldInfo implements Comparable<WorldInfo> {
 	/** The date the world was last accessed at. */
 	public long lastPlayedDate = 0L;
 	
-	/** Whether or not to use the flatland world generator. */
-	public boolean flatland = false;
-	
 	/** The version of the format in which the world has been saved.
 	 * This is used to determine whether or not the game will need to convert the 
 	 * world data from an older format a current one. */
@@ -38,10 +35,6 @@ public class WorldInfo implements Comparable<WorldInfo> {
 	 * This will be used to determine whether or not the game will need to convert
 	 * the world from an older format to a current one. */
 	public int sliceFormatVersion = 0;
-	
-	/** The coordinates of the slice in which players should initially spawn,
-	 * in slice-lengths. */
-	public int spawnSliceX = 0, spawnSliceY = 0;
 	
 	
 	/**
@@ -63,11 +56,7 @@ public class WorldInfo implements Comparable<WorldInfo> {
 	 * otherwise occurs.
 	 */
 	public void load() throws IOException {
-		FileHandle file = getFile();
-		if(!file.exists())
-			throw new IOException("Info file does not exist!");
-		
-		NBTTagCompound infoTag = NBTIO.readCompressed(file);
+		NBTTagCompound infoTag = NBTIO.readCompressed(getFile());
 		
 		name = infoTag.getStringUnsafe("worldName");
 		seed = infoTag.getLongUnsafe("seed");
@@ -76,12 +65,8 @@ public class WorldInfo implements Comparable<WorldInfo> {
 		creationDate = infoTag.getLongUnsafe("creationDate");
 		lastPlayedDate = infoTag.getLongUnsafe("lastPlayed");
 		
-		flatland = infoTag.getBooleanUnsafe("flatland");
 		worldFormatVersion = infoTag.getIntUnsafe("formatVersion");
 		sliceFormatVersion = infoTag.getIntUnsafe("sliceFormatVersion");
-		
-		spawnSliceX = infoTag.getIntUnsafe("spawnX");
-		spawnSliceY = infoTag.getIntUnsafe("spawnY");
 	}
 	
 	/**
@@ -101,21 +86,24 @@ public class WorldInfo implements Comparable<WorldInfo> {
 		infoTag.addLong("creationDate", creationDate);
 		infoTag.addLong("lastPlayed", lastPlayedDate);
 		
-		infoTag.addBoolean("flatland", flatland);
 		infoTag.addInt("formatVersion", worldFormatVersion);
 		infoTag.addInt("sliceFormatVersion", sliceFormatVersion);
-		
-		infoTag.addInt("spawnX", spawnSliceX);
-		infoTag.addInt("spawnY", spawnSliceY);
 		
 		NBTIO.safeWriteCompressed(getFile(), infoTag);
 	}
 	
 	/**
-	 * Gets this WorldInfo filesystem location.
+	 * @return This world's filesystem directory.
 	 */
-	private FileHandle getFile() {
-		return IWorld.getWorldDir(fileSystemName).child(IWorld.FILE_INFO);
+	public FileHandle getWorldDir() {
+		return IWorld.getWorldDir(fileSystemName);
+	}
+	
+	/**
+	 * Gets this WorldInfo's filesystem location.
+	 */
+	public FileHandle getFile() {
+		return getWorldDir().child(IWorld.FILE_INFO);
 	}
 	
 	/*

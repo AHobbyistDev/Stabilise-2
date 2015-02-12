@@ -25,6 +25,9 @@ public interface IWorld {
 	
 	/** The file name of the world info file. */
 	public static final String FILE_INFO = "info";
+	/** The name of the directory relative to the world dir in which dimension
+	 * data is stored. */
+	public static final String DIR_DIMENSIONS = "dim/";
 	/** The name of the directory in which world regions are to be stored. */
 	public static final String DIR_REGIONS = "regions/";
 	/** The name of the directory in which data about individual players is to
@@ -413,9 +416,6 @@ public interface IWorld {
 		info.name = originalWorldName;
 		info.age = 0;
 		info.seed = worldSeed;
-		info.spawnSliceX = 0;					// TODO: temporary value
-		info.spawnSliceY = 0;					// TODO: temporary value
-		info.flatland = info.seed < 0;
 		info.worldFormatVersion = -1;			// TODO: temporary value
 		info.sliceFormatVersion = -1;			// TODO: temporary value
 		info.creationDate = System.currentTimeMillis();//new Date().getTime();

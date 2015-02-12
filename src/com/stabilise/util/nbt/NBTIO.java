@@ -12,6 +12,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.stabilise.util.IOUtil;
 
 /**
@@ -50,14 +51,19 @@ public class NBTIO {
 	 * 
 	 * @return The compound tag constituting the file.
 	 * @throws NullPointerException if {@code file} is {@code null}.
-	 * @throws IOException if an I/O error occurs.
+	 * @throws IOException if {@code file} represents a directory, does not
+	 * exist, or an I/O error occurs.
 	 */
 	public static NBTTagCompound read(FileHandle file) throws IOException {
-		InputStream is = file.read(); // usually a FileInputStream
+		InputStream is = null;
 		try {
+			is = file.read(); // usually a FileInputStream
 			return read(is);
+		} catch(GdxRuntimeException e) {
+			throw new IOException(e);
 		} finally {
-			is.close();
+			if(is != null)
+				is.close();
 		}
 	}
 	
@@ -90,14 +96,19 @@ public class NBTIO {
 	 * 
 	 * @return The compound tag constituting the file.
 	 * @throws NullPointerException if {@code file} is {@code null}.
-	 * @throws IOException if an I/O error occurs.
+	 * @throws IOException if {@code file} represents a directory, does not
+	 * exist, or an I/O error occurs.
 	 */
 	public static NBTTagCompound readCompressed(FileHandle file) throws IOException {
-		GZIPInputStream gis = new GZIPInputStream(file.read());
+		GZIPInputStream gis = null;
 		try {
+			gis = new GZIPInputStream(file.read());
 			return read(gis);
+		} catch(GdxRuntimeException e) {
+			throw new IOException(e);
 		} finally {
-			gis.close();
+			if(gis != null)
+				gis.close();
 		}
 	}
 	
@@ -153,16 +164,21 @@ public class NBTIO {
 	 * @param tag The tag to write.
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
-	 * @throws IOException if an I/O error occurs.
+	 * @throws IOException if {@code file} represents a directory, is an
+	 * invalid type (classpath or internal), or an I/O error occurs.
 	 */
 	public static void write(FileHandle file, NBTTagCompound tag) throws IOException {
 		if(file.exists())
 			file.delete();
-		OutputStream out = file.write(false); // usually a FileOutputStream
+		OutputStream out = null;
 		try {
+			out = file.write(false); // usually a FileOutputStream
 			write(out, tag);
+		} catch(GdxRuntimeException e) {
+			throw new IOException(e);
 		} finally {
-			out.close();
+			if(out != null)
+				out.close();
 		}
 	}
 	
@@ -194,16 +210,21 @@ public class NBTIO {
 	 * @param tag The tag to write.
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
-	 * @throws IOException if an I/O error occurs.
+	 * @throws IOException if {@code file} represents a directory, is an
+	 * invalid type (classpath or internal), or an I/O error occurs.
 	 */
 	public static void writeCompressed(FileHandle file, NBTTagCompound tag) throws IOException {
 		if(file.exists())
 			file.delete();
-		GZIPOutputStream gos = new GZIPOutputStream(file.write(false));
+		GZIPOutputStream gos = null;
 		try {
+			gos = new GZIPOutputStream(file.write(false));
 			write(gos, tag);
+		} catch(GdxRuntimeException e) {
+			throw new IOException(e);
 		} finally {
-			gos.close();
+			if(gos != null)
+				gos.close();
 		}
 	}
 	

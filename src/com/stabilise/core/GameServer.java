@@ -208,13 +208,13 @@ public class GameServer implements Runnable {
 		
 		log.postInfo("Player \"" + packet.playerName + "\" logged in!");
 		
-		int id = world.addPlayer(packet.playerName, world.info.spawnSliceX, world.info.spawnSliceY);
+		int id = 0;//----world.addPlayer(packet.playerName, world.info.spawnSliceX, world.info.spawnSliceY);
 		
 		c.playerName = packet.playerName;
 		c.id = id;
 		
 		// Allow the client to log in by sending it the 'clear to join' packet
-		c.queuePacket(getPacketLoginInfo(id, world.info.spawnSliceX, world.info.spawnSliceY));
+		//----c.queuePacket(getPacketLoginInfo(id, world.info.spawnSliceX, world.info.spawnSliceY));
 		
 		c.loggedIn = true;
 		
@@ -314,8 +314,10 @@ public class GameServer implements Runnable {
 	 * 
 	 * @return The login info packet.
 	 */
+	@SuppressWarnings("unused")
 	private Packet003LoginInfo getPacketLoginInfo(int id, double spawnX, double spawnY) {
-		return new Packet003LoginInfo(id, world.info.spawnSliceX, world.info.spawnSliceY);
+		//----return new Packet003LoginInfo(id, world.info.spawnSliceX, world.info.spawnSliceY);
+		return null;
 	}
 	
 	/**

@@ -89,13 +89,15 @@ public class WorldProvider {
 		if(world != null)
 			return world;
 		
-		Dimension dim = Dimension.getDimension(name);
+		DimensionInfo dimInfo = new DimensionInfo(info, name);
+		
+		Dimension dim = Dimension.getDimension(dimInfo);
 		if(dim == null)
 			return null; // note: perhaps an exception might be more in order?
 		
 		// TODO: Load dimension data
 		
-		return dim.createHost(this, info);
+		return dim.createHost(this);
 	}
 	
 	public void close() {
@@ -108,6 +110,13 @@ public class WorldProvider {
 			dim.blockUntilClosed();
 		
 		executor.shutdown();
+		
+		try {
+			if(!executor.awaitTermination(10, TimeUnit.SECONDS))
+				Log.get().postWarning("World executor took longer than 10 seconds to shutdown!");
+		} catch(InterruptedException e) {
+			Log.get().postWarning("Interrupted while waiting for world executor to terminate!");
+		}
 	}
 	
 	//--------------------==========--------------------
