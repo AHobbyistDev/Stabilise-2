@@ -146,9 +146,9 @@ public class NBTIO {
 			return new NBTTagCompoundEnd();
 		} else {
 			String name = in.readUTF();
-			NBTTag tag = NBTTag.createTag(id, name);
-			tag.load(in);		// May throw an IOException
-			return tag;
+			NBTTag tag = NBTTag.createTag(id, name); // should never be null
+			tag.load(in);		// May throw an IOException (or an NPE if
+			return tag;			// something went really wrong)
 		}
 	}
 	

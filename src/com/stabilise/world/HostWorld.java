@@ -2,9 +2,7 @@ package com.stabilise.world;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,8 +14,6 @@ import com.stabilise.entity.EntityPlayer;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.maths.HashPoint;
-import com.stabilise.util.nbt.NBTIO;
-import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.multidimensioned.Dimension;
 import com.stabilise.world.multidimensioned.WorldProvider;
@@ -41,10 +37,6 @@ public class HostWorld extends BaseWorld {
 	
 	/** The world generator. */
 	public final WorldGenerator generator;
-	
-	/** Data for players in the world. Integer key is the character's entity
-	 * ID. */
-	protected Map<Integer, PlayerDataFile> characters = new HashMap<>(1);
 	
 	/** The map of all loaded regions. This is concurrent as to prevent
 	 * problems when relevant methods are accessed by the world loader. */
@@ -105,15 +97,19 @@ public class HostWorld extends BaseWorld {
 	/**
 	 * Adds a player to the world.
 	 * 
-	 * @param character The data of the player to add.
 	 * @param world The world to treat as the player's parent world (may not
-	 * necessarily be this HostWorld object).
+	 * necessarily be this HostWorld object, as this may be wrapped in a
+	 * WorldWrapper).
+	 * @param character The data of the player to add.
+	 * @param x The x-coordinate at which to add the player, in tile-lengths.
+	 * @param y The y-coordinate at which to add the player, in tile-lengths.
 	 * 
 	 * @return The added player entity.
 	 * @throws NullPointerException if {@code character} is {@code null}.
 	 */
-	public EntityMob addPlayer(CharacterData character, IWorld world) {
+	public EntityMob addPlayer(IWorld world, CharacterData character, double x, double y) {
 		EntityPlayer p = new EntityPlayer(world);
+		/*
 		loadCharacterData(character);
 		if(character.newToWorld) {
 			// TODO: For now I'm placing the character at (0,0) of the spawn
@@ -125,9 +121,10 @@ public class HostWorld extends BaseWorld {
 			character.newToWorld = false;
 			saveCharacterData(character);
 		}
-		addEntity(p, character.lastX, character.lastY);
-		setPlayer(p);
 		characters.put(p.id, character.dataFile);
+		*/
+		addEntity(p, x, y);
+		setPlayer(p);
 		return p;
 	}
 	
@@ -526,30 +523,6 @@ public class HostWorld extends BaseWorld {
 	}
 	
 	/**
-	 * Loads the character's world-specific data, (i.e. their coordinates,
-	 * current health, etc.)
-	 * 
-	 * @param character The character data for which to load the info.
-	 * 
-	 * @throws NullPointerException if {@code character} is {@code null}.
-	 */
-	void loadCharacterData(CharacterData character) {
-		new PlayerDataFile(character).load();
-	}
-	
-	/**
-	 * Saves the character's world-specific data.
-	 * 
-	 * @param character The character data for which to save the info.
-	 * 
-	 * @throws NullPointerException if {@code character} or {@code
-	 * character.dataFile} is {@code null}.
-	 */
-	void saveCharacterData(CharacterData character) {
-		character.dataFile.save();
-	}
-	
-	/**
 	 * Gets the world's directory.
 	 */
 	public FileHandle getDir() {
@@ -566,7 +539,7 @@ public class HostWorld extends BaseWorld {
 			log.postSevere("Could not save dimension info!");
 		}
 		
-		savePlayers();
+		//savePlayers();
 		
 		for(Region r : regions.values())
 			saveRegion(r);
@@ -575,6 +548,7 @@ public class HostWorld extends BaseWorld {
 	/**
 	 * Saves player data.
 	 */
+	/*
 	private void savePlayers() {
 		for(Integer i : players.keySet()) {
 			EntityMob player = players.get(i);
@@ -584,6 +558,7 @@ public class HostWorld extends BaseWorld {
 			saveCharacterData(dataFile.character);
 		}
 	}
+	*/
 	
 	@Override
 	public void close() {
@@ -640,118 +615,5 @@ public class HostWorld extends BaseWorld {
 		return null;
 	}
 	*/
-	
-	//--------------------==========--------------------
-	//-------------=====Nested Classes=====-------------
-	//--------------------==========--------------------
-	
-	/**
-	 * A way of easily working with a world's data file for each
-	 * player/character.
-	 */
-	public class PlayerDataFile {
-		
-		/** The file. */
-		private FileHandle file;
-		/** Whether or not the file has been initially loaded in. */
-		private boolean loaded;
-		/** The root compound tag of the player's data file. */
-		private NBTTagCompound nbt;
-		/** The compound representing the character's tag compound, with a name
-		 * which is that of the character's hash. */
-		private NBTTagCompound tag;
-		/** Whether or not the character's tag exists within the file and was
-		 * loaded. */
-		private boolean tagLoaded;
-		/** The character data. */
-		private CharacterData character;
-		
-		
-		/**
-		 * Creates a new player data file.
-		 * 
-		 * @param character The player data upon which to base the data file.
-		 */
-		private PlayerDataFile(CharacterData character) {
-			this.character = character;
-			character.dataFile = this;
-			
-			file = getFile();
-			nbt = null;
-			loaded = !file.exists();
-			tagLoaded = false;
-		}
-		
-		/**
-		 * Loads the file's contents into the character data.
-		 */
-		private void load() {
-			loadNBT();
-			
-			if(tagLoaded) {
-				try {
-					character.lastX = tag.getDoubleUnsafe("x");
-					character.lastY = tag.getDoubleUnsafe("y");
-					character.newToWorld = false;
-					return;
-				} catch(IOException ignored) {}
-			}
-			
-			character.newToWorld = true;
-		}
-		
-		/**
-		 * Loads the NBT file.
-		 */
-		private void loadNBT() {
-			if(file.exists()) {
-				try {
-					nbt = NBTIO.readCompressed(file);
-					tag = nbt.getCompound(character.hash);
-					if(tag.isEmpty())
-						nbt.addCompound(tag.getName(), tag);
-					else
-						tagLoaded = true;
-					loaded = true;
-				} catch(IOException e) {
-					log.postSevere("Could not load character data file for character " + character.name, e);
-				}
-			} else {
-				nbt = new NBTTagCompound("");
-				tag = new NBTTagCompound(character.hash);
-				nbt.addCompound(tag.getName(), tag);
-				loaded = true;
-			}
-		}
-		
-		/**
-		 * Saves the character's data into the file.
-		 */
-		private void save() {
-			// In case there are other characters with the same name but a
-			// different hash, we don't want to completely overwrite their data
-			// in the file, so load in the file's content if possible
-			if(!loaded)
-				loadNBT();
-			
-			tag.addDouble("x", character.lastX);
-			tag.addDouble("y", character.lastY);
-			
-			try {
-				NBTIO.writeCompressed(file, nbt);
-			} catch(IOException e) {
-				log.postSevere("Could not save character data file for character " + character.name, e);
-			}
-		}
-		
-		/**
-		 * Gets the data file's file reference.
-		 * 
-		 * @return The world's local character file.
-		 */
-		private FileHandle getFile() {
-			return getDir().child(DIR_PLAYERS + character.name + EXTENSION_PLAYERS);
-		}
-	}
 	
 }

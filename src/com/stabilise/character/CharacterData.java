@@ -19,7 +19,6 @@ import com.stabilise.util.IOUtil;
 import com.stabilise.util.Log;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
-import com.stabilise.world.HostWorld;
 
 /**
  * Data about a character.
@@ -66,13 +65,6 @@ public class CharacterData {
 	
 	/** The character's inventory. */
 	public Container inventory;
-	
-	// For in-game use - not saved with the character
-	public HostWorld.PlayerDataFile dataFile;
-	/** Whether or not the character is new to the world. */
-	public boolean newToWorld;
-	/** The coordinates of the player's last known location, in tile-lengths. */
-	public double lastX, lastY;
 	
 	
 	/**
@@ -169,6 +161,17 @@ public class CharacterData {
 		tag.addList("inventory", inventory.toNBT());
 		
 		NBTIO.safeWriteCompressed(getCharacterDir(fileSystemName).child(FILE_DATA), tag);
+	}
+	
+	@Override
+	public int hashCode() {
+		return hash != null ? hash.hashCode() : 0;
+	}
+	
+	public String toString() {
+		return (name != null && hash != null) ?
+				"CharacterData[\"" + name + "\"," + hash + "]" :
+				"UnitialisedCharacterData";
 	}
 	
 	//--------------------==========--------------------

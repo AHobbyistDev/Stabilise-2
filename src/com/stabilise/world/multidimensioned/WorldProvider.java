@@ -19,7 +19,10 @@ import com.stabilise.util.Profiler;
 import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.util.nbt.export.ExportToNBT;
+import com.stabilise.util.nbt.export.NBTExporter;
 import com.stabilise.world.HostWorld;
+import com.stabilise.world.IWorld;
 import com.stabilise.world.WorldInfo;
 import com.stabilise.world.save.WorldLoader;
 
@@ -41,7 +44,7 @@ public class WorldProvider {
 	/** Maps dimension names -> dimensions. */
 	private final Map<String, HostWorld> dimensions = new HashMap<>(2);
 	/** Maps player names -> PlayerDataFiles. */
-	private final Map<String, PlayerDataFile> players = new HashMap<>(2);
+	private final Map<String, PlayerDataFile> players = new HashMap<>(1);
 	
 	/** The ExecutorService to use for delegating loader and generator threads. */
 	public final ExecutorService executor;
@@ -205,112 +208,163 @@ public class WorldProvider {
 	}
 	
 	/**
-	 * A way of easily working with a world's data file for each
-	 * player/character.
+	 * A world maintains data of each player to visit it so that it may place
+	 * each player in the same location of the same dimension they were in when
+	 * they last played (as well as load any additional data and such).
+	 * 
+	 * <p>Player data files are saved with the name of the player they're
+	 * representing (e.g. a player named "Steve" would have a "Steve.player"
+	 * file located in a world's player directory). However, if multiple player
+	 * characters have the same name, both characters have their data saved in
+	 * the same player data file, and they would be distinguished by their
+	 * {@link CharacterData#hash hash} (if two players have the same hash, gg).
+	 * 
+	 * <p>The data for individual players is represented by the {@link
+	 * PlayerData} class, but each {@code PlayerData} object answers to an 
+	 * instance of this class to which to save its data.
 	 */
 	public static class PlayerDataFile {
 		
+		/** The name of the player(s) held by this data file. */
+		private final String name;
 		/** The file. */
-		private FileHandle file;
-		/** Whether or not the file has been initially loaded in. */
-		private boolean loaded;
+		private final FileHandle file;
 		/** The root compound tag of the player's data file. */
-		private NBTTagCompound nbt;
-		/** The compound representing the character's tag compound, with a name
-		 * which is that of the character's hash. */
-		private NBTTagCompound tag;
-		/** Whether or not the character's tag exists within the file and was
-		 * loaded. */
-		private boolean tagLoaded;
-		/** The character data. */
-		private CharacterData character;
+		private final NBTTagCompound nbt;
 		
 		
 		/**
-		 * Creates a new player data file.
+		 * Creates a new player data file. This method may block while this
+		 * file's NBT data is loaded.
 		 * 
-		 * @param character The player data upon which to base the data file.
+		 * @param The name of the player(s).
+		 * @param provider The world provider.
+		 * 
+		 * @throws IOException if an I/O error occurs while loading the file.
 		 */
-		private PlayerDataFile(CharacterData character) {
-			this.character = character;
-			character.dataFile = this;
+		private PlayerDataFile(String name, WorldProvider provider) throws IOException {
+			this.name = name;
+			file = provider.info.getWorldDir().child(IWorld.DIR_PLAYERS + name + IWorld.EXTENSION_PLAYERS);
 			
-			file = getFile();
-			nbt = null;
-			loaded = !file.exists();
-			tagLoaded = false;
+			if(file.exists())
+				nbt = NBTIO.readCompressed(file);
+			else
+				nbt = new NBTTagCompound();
 		}
 		
 		/**
-		 * Loads the file's contents into the character data.
+		 * Gets the player data for 
+		 * 
+		 * @param player
+		 * @return
 		 */
-		private void load() {
-			loadNBT();
-			
-			if(tagLoaded) {
-				try {
-					character.lastX = tag.getDoubleUnsafe("x");
-					character.lastY = tag.getDoubleUnsafe("y");
-					character.newToWorld = false;
-					return;
-				} catch(IOException ignored) {}
-			}
-			
-			character.newToWorld = true;
+		public PlayerData getData(CharacterData player) {
+			NBTTagCompound tag = nbt.getCompound(player.hash);
+			if(tag == null)
+				return new PlayerData(this, player);
+			else
+				return new PlayerData(this, player, tag);
 		}
 		
 		/**
-		 * Loads the NBT file.
+		 * Updates this PlayerDataFile's save of the specified player data, and
+		 * then {@link #save() saves} this player data file.
 		 */
-		private void loadNBT() {
-			if(file.exists()) {
-				try {
-					nbt = NBTIO.readCompressed(file);
-					tag = nbt.getCompound(character.hash);
-					if(tag.isEmpty())
-						nbt.addCompound(tag.getName(), tag);
-					else
-						tagLoaded = true;
-					loaded = true;
-				} catch(IOException e) {
-					log.postSevere("Could not load character data file for character " + character.name, e);
-				}
-			} else {
-				nbt = new NBTTagCompound("");
-				tag = new NBTTagCompound(character.hash);
-				nbt.addCompound(tag.getName(), tag);
-				loaded = true;
-			}
+		public void putData(PlayerData data) {
+			nbt.addCompound(data.data.hash, data.toNBT());
+			save();
 		}
 		
 		/**
-		 * Saves the character's data into the file.
+		 * Saves the player data into the file.
 		 */
 		private void save() {
-			// In case there are other characters with the same name but a
-			// different hash, we don't want to completely overwrite their data
-			// in the file, so load in the file's content if possible
-			if(!loaded)
-				loadNBT();
-			
-			tag.addDouble("x", character.lastX);
-			tag.addDouble("y", character.lastY);
-			
 			try {
-				NBTIO.writeCompressed(file, nbt);
+				NBTIO.safeWriteCompressed(file, nbt);
 			} catch(IOException e) {
-				log.postSevere("Could not save character data file for character " + character.name, e);
+				Log.get().postSevere("Could not save the world's player data file for " + name, e);
 			}
 		}
 		
+	}
+	
+	/**
+	 * Stores the world-local data of a player.
+	 */
+	public static class PlayerData {
+		
+		/** The world-local player data file. */
+		private final PlayerDataFile file;
+		/** The player's global data. */
+		private final CharacterData data;
+		
+		/** Whether or not the character is new to the world. */
+		public boolean newToWorld;
+		/** The dimension the player is in. */
+		@ExportToNBT
+		public String dimension;
+		/** The coordinates of the player's last known location, in
+		 * tile-lengths. */
+		@ExportToNBT
+		public double lastX, lastY;
+		
+		
 		/**
-		 * Gets the data file's file reference.
-		 * 
-		 * @return The world's local character file.
+		 * Creates a PlayerData object initialised to the default values.
 		 */
-		private FileHandle getFile() {
-			return getDir().child(DIR_PLAYERS + character.name + EXTENSION_PLAYERS);
+		private PlayerData(PlayerDataFile file, CharacterData data) {
+			this.file = file;
+			this.data = data;
+			defaultData();
 		}
+		
+		/**
+		 * Creates a new PlayerData object and imports into it the data from
+		 * the given NBT compound tag.
+		 */
+		private PlayerData(PlayerDataFile file, CharacterData data, NBTTagCompound tag) {
+			this.file = file;
+			this.data = data;
+			fromNBT(tag);
+		}
+		
+		/**
+		 * Initialises the player data to the default values.
+		 */
+		private void defaultData() {
+			newToWorld = true;
+			dimension = Dimension.defaultDimension();
+			lastX = lastY = 0D; // TODO: let the default dimension intialise this
+		}
+		
+		/**
+		 * Exports this PlayerData object to an NBT compound tag and returns
+		 * it.
+		 * 
+		 * @throws RuntimeException if something went wrong.
+		 */
+		private NBTTagCompound toNBT() {
+			NBTTagCompound tag = NBTExporter.exportObj(this);
+			return tag;
+		}
+		
+		/**
+		 * Imports this PlayerData from an NBT compound tag.
+		 * 
+		 * @throws RuntimeException if something went wrong.
+		 */
+		private void fromNBT(NBTTagCompound tag) {
+			NBTExporter.importObj(this, tag);
+			newToWorld = false;
+		}
+		
+		/**
+		 * Saves this PlayerData.
+		 */
+		public void save() {
+			file.putData(this);
+		}
+		
 	}
 	
 }

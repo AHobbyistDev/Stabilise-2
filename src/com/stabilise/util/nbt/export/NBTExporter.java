@@ -1,5 +1,6 @@
 package com.stabilise.util.nbt.export;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -170,6 +171,67 @@ public class NBTExporter {
 				}
 			} catch(Exception e) {
 				throw new RuntimeException("Could not import object!", e);
+			}
+		}
+	}
+	
+	/**
+	 * As with {@link #importObj(Object, NBTTagCompound)}, but uses the unsafe
+	 * getter variants of {@code NBTTagCompound} (e.g. {@link
+	 * NBTTagCompound#getIntUnsafe(String) getIntUnsafe()} instead of {@link
+	 * NBTTagCompound#getInt(String) getInt()}).
+	 * 
+	 * @param o The object.
+	 * @param tag The tag from which to read the object's fields.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IOException if any of the object's fields are not present in
+	 * {@code tag}, or present in incorrect data formats.
+	 * @throws RuntimeException if the object could not be properly imported.
+	 * @see #importObj(Object, NBTTagCompound)
+	 */
+	public static void importObjUnsafe(Object o, NBTTagCompound tag) throws IOException {
+		for(Field f : o.getClass().getDeclaredFields()) {
+			try {
+				if(f.getAnnotation(ExportToNBT.class) != null) {
+					if(Modifier.isFinal(f.getModifiers()))
+						continue; // we can't set final fields, so ignore this field
+					Class<?> c = f.getType();
+					String n = f.getName();
+					f.setAccessible(true);
+					// See comments for exportObj()
+					if(c.equals(Integer.TYPE)) f.setInt(o, tag.getIntUnsafe(n));
+					else if(c.equals(Long.TYPE)) f.setLong(o, tag.getLongUnsafe(n));
+					else if(c.equals(Float.TYPE)) f.setFloat(o, tag.getFloatUnsafe(n));
+					else if(c.equals(Double.TYPE)) f.setDouble(o, tag.getDoubleUnsafe(n));
+					else if(c.equals(String.class)) f.set(o, tag.getStringUnsafe(n));
+					else if(c.isArray()) {
+						Class<?> t = c.getComponentType();
+						if(t.equals(Integer.TYPE)) f.set(o, tag.getIntArrayUnsafe(n));
+						else if(t.equals(Byte.TYPE)) f.set(o, tag.getByteArrayUnsafe(n));
+						else if(t.getAnnotation(Exportable.class) != null) {
+							Object[] arr = (Object[])f.get(o);
+							if(arr != null) {
+								NBTTagList list = tag.getListUnsafe(n);
+								for(int i = 0; i < Math.min(arr.length, list.size()); i++)
+									importObj(arr[i], (NBTTagCompound)list.getTagAt(i));
+							}
+						}
+					} else if(c.getAnnotation(Exportable.class) != null) {
+						Object obj = f.get(o);
+						if(obj != null)
+							importObj(obj, tag.getCompoundUnsafe(n));
+					} else if(c.equals(Byte.TYPE)) f.setByte(o, tag.getByteUnsafe(n));
+					else if(c.equals(Short.TYPE)) f.setShort(o, tag.getShortUnsafe(n));
+					else
+						LOG_IMP.postWarning("Invalid field type " + f.getType().getSimpleName() +
+								" of field \"" + n + "\"");
+				}
+			} catch(Exception e) {
+				if(e instanceof IOException)
+					throw (IOException)e;
+				else
+					throw new RuntimeException("Could not import object!", e);
 			}
 		}
 	}

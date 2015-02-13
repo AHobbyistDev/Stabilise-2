@@ -55,7 +55,7 @@ public class ClientWorld<W extends BaseWorld>
 	}
 	
 	protected void addPlayerAsHost(HostWorld world) {
-		player = world.addPlayer(playerData, this);
+		player = world.addPlayer(this, playerData, 0D, 0D);
 	}
 	
 	protected void addPlayerAsClient(MultiplayerClientWorld world) {
