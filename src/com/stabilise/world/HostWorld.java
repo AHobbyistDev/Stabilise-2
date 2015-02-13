@@ -12,6 +12,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
 import com.stabilise.entity.particle.Particle;
+import com.stabilise.util.Checkable;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.world.gen.WorldGenerator;
@@ -30,7 +31,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * and the world generator
  * -->
  */
-public class HostWorld extends BaseWorld {
+public class HostWorld extends BaseWorld implements Checkable {
 	
 	/** The world's information. */
 	public final WorldInfo info;

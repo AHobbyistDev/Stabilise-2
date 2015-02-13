@@ -2,6 +2,8 @@ package com.stabilise.util.concurrent;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.stabilise.util.annotation.ThreadSafe;
+
 /**
  * A TaskTracker is designed to provide a means of communication between
  * threads as to the progress towards completion of a task. In a typical
@@ -10,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 
  * <p>As is implied, this class is thread-safe.
  */
+@ThreadSafe
 public class TaskTracker {
 	
 	/** Task name. */

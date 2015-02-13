@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.stabilise.util.annotation.NotThreadSafe;
+
 /**
  * A registry allows for objects of a certain type to be registered and
  * allocated keys.
@@ -13,6 +15,7 @@ import java.util.Set;
  * <p>This class is based on a similar one from the decompiled Minecraft 1.7.10
  * source.
  */
+@NotThreadSafe
 public class Registry<K, V> extends AbstractRegistry<V> {
 	
 	/** The map of objects registered in the registry. */

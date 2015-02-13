@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.stabilise.util.annotation.NotThreadSafe;
+
 /**
  * A registry which provides instantiation facilities for registered classes.
  * 
@@ -52,6 +54,7 @@ import java.util.Map;
  * 
  * @param <E> The type of object to instantiate.
  */
+@NotThreadSafe
 public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E>> {
 	
 	private final BiObjectIntMap<Factory<? extends E>> factoryMap;

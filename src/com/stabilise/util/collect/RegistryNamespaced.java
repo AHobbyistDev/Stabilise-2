@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
  * The namespaced registry extends upon a standard registry to also include
@@ -19,6 +20,7 @@ import com.google.common.collect.HashBiMap;
  * <p>This class is based on a similar one from the decompiled Minecraft 1.7.10
  * source.
  */
+@NotThreadSafe
 public class RegistryNamespaced<V> extends Registry<String, V> {
 	
 	/** The default namespace. */

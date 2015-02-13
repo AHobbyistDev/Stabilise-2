@@ -1,6 +1,7 @@
 package com.stabilise.util.maths;
 
 import com.badlogic.gdx.math.Vector2;
+import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
  * A 2x2 row-major matrix. Such a matrix takes the form:
@@ -12,6 +13,7 @@ import com.badlogic.gdx.math.Vector2;
  * <p>These entries are stored in an array of the form <tt>{m00, m01, m10,
  * m11}</tt>.
  */
+@NotThreadSafe
 public class Matrix2 {
 	
 	/** The top-left entry - use this to reference entry array indices. */

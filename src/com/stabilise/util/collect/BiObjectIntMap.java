@@ -2,6 +2,7 @@ package com.stabilise.util.collect;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterators;
+import com.stabilise.util.annotation.NotThreadSafe;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -26,6 +27,7 @@ import java.util.Iterator;
  * 
  * @param V The type of object to store.
  */
+@NotThreadSafe
 public class BiObjectIntMap<V> implements Iterable<V> {
 	
 	/** The value-to-key map. */

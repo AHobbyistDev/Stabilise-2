@@ -1,7 +1,5 @@
 package com.stabilise.world.save;
 
-import java.util.concurrent.ExecutorService;
-
 import com.google.common.base.Preconditions;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
@@ -40,9 +38,6 @@ public abstract class WorldLoader {
 	/** The world provider for which the loader is loading. */
 	protected final WorldProvider provider;
 	
-	/** The executor which delegates threads for loading. */
-	private final ExecutorService executor;
-	
 	/** Whether or not loading operations should be cancelled due to the loader
 	 * having been shut down. This is volatile. */
 	private volatile boolean cancelLoadOperations = false;
@@ -60,7 +55,6 @@ public abstract class WorldLoader {
 	 */
 	public WorldLoader(WorldProvider provider) {
 		this.provider = Preconditions.checkNotNull(provider);
-		executor = provider.executor;
 	}
 	
 	/**
@@ -82,7 +76,7 @@ public abstract class WorldLoader {
 		if(!obtainRegionForLoad(region))
 			return;
 		
-		executor.execute(new RegionLoader(world, region, false));
+		provider.executor.execute(new RegionLoader(world, region, false));
 	}
 	
 	/**
@@ -124,7 +118,7 @@ public abstract class WorldLoader {
 		if(region.loaded)
 			world.generator.generate(region);
 		else if(obtainRegionForLoad(region))
-				executor.execute(new RegionLoader(world, region, true));
+				provider.executor.execute(new RegionLoader(world, region, true));
 	}
 	
 	/**
@@ -141,7 +135,7 @@ public abstract class WorldLoader {
 			return;
 		
 		region.pendingSave = true;
-		executor.execute(new RegionSaver(world, region));
+		provider.executor.execute(new RegionSaver(world, region));
 		region.unsavedChanges = false;
 		region.lastSaved = world.info.age;
 	}

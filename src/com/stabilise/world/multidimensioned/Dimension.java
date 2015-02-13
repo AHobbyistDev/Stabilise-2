@@ -149,7 +149,9 @@ public abstract class Dimension {
 	}
 	
 	/**
-	 * @return The name of the default dimension.
+	 * @return The name of the default dimension, or {@code null} if the
+	 * the dimensions have not yet been {@link #registerDimensions()
+	 * registered}.
 	 */
 	public static String defaultDimension() {
 		return defaultDim;

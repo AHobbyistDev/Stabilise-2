@@ -1,5 +1,7 @@
 package com.stabilise.util.maths;
 
+import com.stabilise.util.annotation.Immutable;
+
 /**
  * A HashPoint is an immutable point with a decently distributed precomputed
  * hashcode which may as such be used to compress two integers into a single
@@ -7,6 +9,7 @@ package com.stabilise.util.maths;
  * 
  * @see Point
  */
+@Immutable
 public class HashPoint {
 	
 	public final int x, y;

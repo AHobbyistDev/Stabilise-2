@@ -1,6 +1,5 @@
 package com.stabilise.util.nbt.export;
 
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -16,7 +15,6 @@ import com.stabilise.util.nbt.NBTTagCompound;
  * @see Exportable
  * @see NBTExporter
  */
-@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
 public @interface ExportToNBT {

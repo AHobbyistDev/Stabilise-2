@@ -3,13 +3,12 @@ package com.stabilise.util.maths;
 import java.util.Random;
 
 import com.badlogic.gdx.math.Vector2;
+import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
  * A utility class which generates 2-dimensional perlin noise.
- * 
- * <p>Instances of this class are not thread-safe, and invocations of
- * {@link #noise(double, double)} must be synchronised externally.
  */
+@NotThreadSafe
 public class PerlinNoise2D {
 	
 	/** The pseudorandom number generator. */

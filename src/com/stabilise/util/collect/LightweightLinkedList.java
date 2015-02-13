@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
+import com.stabilise.util.annotation.NotThreadSafe;
+
 /**
  * A lightweight linked list implementation which doesn't include the bulk of
  * features that {@link java.util.LinkedList LinkedList} possesses, since in
@@ -24,6 +26,7 @@ import java.util.NoSuchElementException;
  * <p>Refer to the documentation of a method before using it, as many methods
  * of this class will throw an {@code UnsupportedOperationException}.
  */
+@NotThreadSafe
 public class LightweightLinkedList<E> extends AbstractCollection<E> implements List<E> {
 	
 	protected int size = 0;

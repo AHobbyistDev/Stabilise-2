@@ -1,5 +1,7 @@
 package com.stabilise.util.collect;
 
+import com.stabilise.util.annotation.NotThreadSafe;
+
 /**
  * This class allows for the creation of a namespaced registry which returns a
  * specified default value if no other value could be found.
@@ -7,6 +9,7 @@ package com.stabilise.util.collect;
  * <p>This class has been reconstructed from the decompiled Minecraft 1.7.10
  * source.
  */
+@NotThreadSafe
 public class RegistryNamespacedDefaulted<V> extends RegistryNamespaced<V> {
 	
 	/** The name mapped to the default value. */

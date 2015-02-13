@@ -32,7 +32,7 @@ public interface IWorld {
 	 * be stored. */
 	public static final String DIR_PLAYERS = "players/";
 	/** The file extension for player data files. */
-	public static final String EXTENSION_PLAYERS = ".player";
+	public static final String EXT_PLAYERS = ".player";
 	
 	/** The maximum number of hostile mobs which may spawn. */
 	public static final int HOSTILE_MOB_CAP = 100;

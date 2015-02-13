@@ -2,6 +2,8 @@ package com.stabilise.util.concurrent;
 
 import java.util.concurrent.ExecutionException;
 
+import com.stabilise.util.annotation.ThreadSafe;
+
 /**
  * A Task is a wrapper for a {@code Runnable} with some additional facilities.
  * 
@@ -14,6 +16,7 @@ import java.util.concurrent.ExecutionException;
  * requirements apply for implemented code, as they would for any {@code
  * Runnable}.
  */
+@ThreadSafe
 public abstract class Task implements Runnable {
 	
 	//--------------------==========--------------------

@@ -3,6 +3,8 @@ package com.stabilise.util.collect;
 import java.lang.reflect.Array;
 import java.util.NoSuchElementException;
 
+import com.stabilise.util.annotation.NotThreadSafe;
+
 /**
  * An implementation of {@link LightweightLinkedList} which automatically clears
  * itself when it is iterated over, either through a for...each loop, or when
@@ -12,6 +14,7 @@ import java.util.NoSuchElementException;
  * <p>Furthermore, invoking {@link #toArray()} or {@link #toArray(Object[])}
  * also clears the list.
  */
+@NotThreadSafe
 public class ClearOnIterateLinkedList<E> extends LightweightLinkedList<E> {
 	
 	@Override

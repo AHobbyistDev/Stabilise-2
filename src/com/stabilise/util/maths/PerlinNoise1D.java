@@ -2,12 +2,12 @@ package com.stabilise.util.maths;
 
 import java.util.Random;
 
+import com.stabilise.util.annotation.NotThreadSafe;
+
 /**
  * A utility class which generates 1-dimensional perlin noise.
- * 
- * <p>Instances of this class are not thread-safe, and invocations of
- * {@link #noise(float)} must be synchronised externally.
  */
+@NotThreadSafe
 public class PerlinNoise1D {
 	
 	/** The pseudorandom number generator. */

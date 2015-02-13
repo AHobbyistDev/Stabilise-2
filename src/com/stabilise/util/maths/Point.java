@@ -1,8 +1,11 @@
 package com.stabilise.util.maths;
 
+import com.stabilise.util.annotation.NotThreadSafe;
+
 /**
  * A mutable 2-dimensional point with integer components.
  */
+@NotThreadSafe
 public class Point {
 	
 	public int x, y;
