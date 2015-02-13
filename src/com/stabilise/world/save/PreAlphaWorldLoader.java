@@ -10,9 +10,9 @@ import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.util.nbt.NBTTagList;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
+import com.stabilise.world.WorldProvider;
 import com.stabilise.world.Region.QueuedSchematic;
 import com.stabilise.world.BaseWorld;
-import com.stabilise.world.multidimensioned.WorldProvider;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**

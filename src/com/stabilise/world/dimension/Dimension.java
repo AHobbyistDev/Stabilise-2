@@ -1,4 +1,4 @@
-package com.stabilise.world.multidimensioned;
+package com.stabilise.world.dimension;
 
 import static com.stabilise.util.collect.InstantiationRegistry.*;
 
@@ -13,8 +13,8 @@ import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.WorldInfo;
+import com.stabilise.world.WorldProvider;
 import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.multidimensioned.dimension.DimOverworld;
 
 /**
  * A Dimension is a distinct 'world' within the game. Each world provider may
@@ -211,7 +211,7 @@ public abstract class Dimension {
 		/** The name of the dimension. */
 		public final String name;
 		/** The age of this dimension. This is volatile. */
-		public volatile long age = 0L;
+		public long age = 0L;
 		
 		/** The coordinates of the slice in which players should initially spawn,
 		 * in slice-lengths. */

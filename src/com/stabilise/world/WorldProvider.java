@@ -1,4 +1,4 @@
-package com.stabilise.world.multidimensioned;
+package com.stabilise.world;
 
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -17,15 +17,14 @@ import com.stabilise.character.CharacterData;
 import com.stabilise.util.Checkable;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.util.nbt.export.ExportToNBT;
 import com.stabilise.util.nbt.export.NBTExporter;
-import com.stabilise.world.HostWorld;
-import com.stabilise.world.IWorld;
-import com.stabilise.world.WorldInfo;
+import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.save.WorldLoader;
 
 /**
@@ -40,21 +39,25 @@ import com.stabilise.world.save.WorldLoader;
  * member through which they interact with the dimension they are in) for both
  * legacy and aesthetic purposes.
  */
+@Incomplete
 public class WorldProvider {
 	
+	/** Dimensions should treat this as read-only. */
 	public final WorldInfo info;
-	/** Maps dimension names -> dimensions. */
-	private final Map<String, HostWorld> dimensions = new HashMap<>(2);
-	/** Maps player names -> PlayerDataFiles. */
-	private final Map<String, PlayerDataFile> players = new HashMap<>(1);
 	
 	/** The ExecutorService to use for delegating loader and generator threads. */
 	public final ExecutorService executor;
 	/** The global WorldLoader to use for loading regions. */
 	public final WorldLoader loader;
 	
+	/** Maps dimension names -> dimensions. */
+	private final Map<String, HostWorld> dimensions = new HashMap<>(2);
+	/** Maps player names -> PlayerDataFiles. */
+	private final Map<String, PlayerDataFile> players = new HashMap<>(1);
+	
 	/** Profile any world's operation with this. */
 	public final Profiler profiler;
+	private final Log log = Log.getAgent("WorldProvider");
 	
 	
 	/**
@@ -89,7 +92,6 @@ public class WorldProvider {
 	
 	public void update() {
 		info.age++;
-		
 		Checkable.updateCheckables(dimensions.values());
 	}
 	
@@ -123,13 +125,11 @@ public class WorldProvider {
 		if(dim == null)
 			throw new IllegalArgumentException("Invalid dimension \"" + name + "\"");
 		
-		// If the info file exists, this implies the dimension has already been
-		// created.
 		if(dim.info.fileExists()) {
 			try {
 				dim.loadData();
 			} catch(IOException e) {
-				Log.getAgent("WorldProvider").postSevere("Could not load dimension info! (dim: " + name + ")", e);
+				throw new RuntimeException("Could not load dimension info! (dim: " + name + ")", e);
 			}
 		}
 		
@@ -143,12 +143,14 @@ public class WorldProvider {
 	
 	/**
 	 * Saves the worlds.
+	 * 
+	 * @throws RuntimeException if an I/O error occurred while saving.
 	 */
 	public void save() {
 		try {
 			info.save();
 		} catch(IOException e) {
-			Log.getAgent("WorldProvider").postSevere("Could not save world info", e);
+			throw new RuntimeException("Could not save world info!", e);
 		}
 		
 		for(HostWorld dim : dimensions.values())
@@ -158,12 +160,22 @@ public class WorldProvider {
 	/**
 	 * Closes this world provider down. This method will block the current
 	 * thread until shutdown procedures have completed.
+	 * 
+	 * @throws RuntimeException if an I/O error occurred while saving.
 	 */
 	public void close() {
 		loader.shutdown();
 		
 		for(HostWorld dim : dimensions.values())
 			dim.close();
+		
+		for(PlayerDataFile p : players.values()) {
+			try {
+				p.dispose();
+			} catch(IOException e) {
+				throw new RuntimeException("Could not save " + p, e);
+			}
+		}
 		
 		for(HostWorld dim : dimensions.values())
 			dim.blockUntilClosed();
@@ -172,9 +184,9 @@ public class WorldProvider {
 		
 		try {
 			if(!executor.awaitTermination(10, TimeUnit.SECONDS))
-				Log.get().postWarning("World executor took longer than 10 seconds to shutdown!");
+				log.postWarning("World executor took longer than 10 seconds to shutdown!");
 		} catch(InterruptedException e) {
-			Log.get().postWarning("Interrupted while waiting for world executor to terminate!");
+			log.postWarning("Interrupted while waiting for world executor to terminate!");
 		}
 	}
 	
@@ -186,7 +198,7 @@ public class WorldProvider {
 	 * Thread factory implementation for world loader and world generator
 	 * threads.
 	 */
-	private static class WorldThreadFactory implements ThreadFactory {
+	private class WorldThreadFactory implements ThreadFactory {
 		
 		/** The number of threads created with this factory. */
 		private final AtomicInteger threadNumber = new AtomicInteger(1);
@@ -194,7 +206,7 @@ public class WorldProvider {
 		private final UncaughtExceptionHandler ripWorkerThread = new UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
-				Log.get().postSevere("Worker thread \"" + t.toString() + "\" died!", e);
+				log.postSevere("Worker thread \"" + t.toString() + "\" died!", e);
 			}
 		};
 		
@@ -249,6 +261,7 @@ public class WorldProvider {
 	@NotThreadSafe
 	private static class PlayerDataFile {
 		
+		private final String name;
 		private final FileHandle file;
 		private final Array<PlayerData> chars = new Array<>(false, 2, PlayerData.class);
 		
@@ -261,6 +274,7 @@ public class WorldProvider {
 		 * @param provider The world provider.
 		 */
 		public PlayerDataFile(String name, WorldProvider provider) {
+			this.name = name;
 			file = provider.info.getWorldDir().child(IWorld.DIR_PLAYERS + name + IWorld.EXT_PLAYERS);
 		}
 		
@@ -329,6 +343,11 @@ public class WorldProvider {
 				nbt.addCompound(p.data.hash, p.toNBT());
 			chars.clear();
 			saveData(nbt);
+		}
+		
+		@Override
+		public String toString() {
+			return "PlayerDataFile[" + name + "]";
 		}
 		
 	}

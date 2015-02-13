@@ -29,8 +29,8 @@ import com.stabilise.world.HostWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.SingleplayerWorld;
 import com.stabilise.world.WorldInfo;
-import com.stabilise.world.multidimensioned.Dimension;
-import com.stabilise.world.multidimensioned.WorldProvider;
+import com.stabilise.world.WorldProvider;
+import com.stabilise.world.dimension.Dimension;
 
 /**
  * A LoadingState is the state which runs as the game loads all preparatory

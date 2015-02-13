@@ -10,7 +10,7 @@ import com.stabilise.input.Controller;
 import com.stabilise.item.Item;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.world.multidimensioned.Dimension;
+import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.tile.Tile;
 
 /**

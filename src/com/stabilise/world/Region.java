@@ -156,7 +156,7 @@ public class Region {
 		offsetX = loc.x * REGION_SIZE;
 		offsetY = loc.y * REGION_SIZE;
 		
-		lastSaved = world.info.age;
+		lastSaved = world.worldInfo.age;
 	}
 	
 	/**
@@ -190,7 +190,7 @@ public class Region {
 			// rests on the brink of triggering a save, which may possibly be
 			// problematic if something causes at least one tile in each region to
 			// be updated simultaneously
-			if(unsavedChanges && world.info.age - lastSaved > 1800)
+			if(unsavedChanges && world.worldInfo.age - lastSaved > 1800)
 				world.saveRegion(this);
 		}
 	}

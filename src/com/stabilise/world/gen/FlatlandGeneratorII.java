@@ -8,7 +8,7 @@ import java.util.Random;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
-import com.stabilise.world.multidimensioned.WorldProvider;
+import com.stabilise.world.WorldProvider;
 
 /**
  * The flatland generator generates a flat land.

@@ -371,7 +371,7 @@ public class Maths {
 	
 	/**
 	 * Compacts two integer values into one, as if by:
-	 * <pre>((x & 0xFFFF) << 16) + (y & 0xFFFF)</pre>
+	 * <pre>(x << 16) | (y & 0xFFFF)</pre>
 	 * 
 	 * <p>The returned value is susceptible to collisions for any values 
 	 * {@code x0}, {@code y0} and {@code x1}, {@code y1} of {@code x} and
@@ -387,12 +387,12 @@ public class Maths {
 	 * @return The compacted value.
 	 */
 	public static int compactInt(int x, int y) {
-		return (x << 16) + (y & 0xFFFF);
+		return (x << 16) | (y & 0xFFFF);
 	}
 	
 	/**
 	 * Compacts two integer values into a long, as if by:
-	 * <pre>(x << 32) & y</pre>
+	 * <pre>(x << 32) | y</pre>
 	 * 
 	 * @param x The first value.
 	 * @param y The second value.
@@ -400,7 +400,7 @@ public class Maths {
 	 * @return The compacted value.
 	 */
 	public static long compactLong(int x, int y) {
-		return ((long)x << 32) & (long)y;
+		return ((long)x << 32) | (long)y;
 	}
 	
 }

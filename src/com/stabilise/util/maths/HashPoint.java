@@ -31,12 +31,18 @@ public class HashPoint {
 		
 		// This has too many basic collisions
 		//hash = x ^ y;
-		// This loses information
-		//hash = ((x & 0xFFFF) << 16) + (y & 0xFFFF);
 		
 		// Collisions are nicely distributed this way (though there's collision
 		// clumping nearby (0,0) as there's more or less mirroring about (0,0))
-		hash = x ^ (y << 16) ^ (y >>> 16); // Cyclicly shift y by 16 bits
+		//hash = x ^ (y << 16) ^ (y >>> 16); // Cyclicly shift y by 16 bits
+		
+		// This eliminates higher-order bits, and as such is susceptible to
+		// collisions between two points (x0, y0) and (x1, y1) when:
+		// Maths.wrappedRem(x0, 65536) == Maths.wrappedRem(x1, 65536) &&
+		// Maths.wrappedRem(y0, 65536) == Maths.wrappedRem(y1, 65536)
+		// I feel this is the best option for collision distribution since
+		// nearby regions shouldn't have hash collisions at all.
+		hash = (x << 16) | (y & 0xFFFF);
 	}
 	
 	@Override

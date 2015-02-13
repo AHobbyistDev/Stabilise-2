@@ -7,8 +7,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.annotation.Incomplete;
-import com.stabilise.world.multidimensioned.Dimension;
-import com.stabilise.world.multidimensioned.WorldProvider;
+import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**

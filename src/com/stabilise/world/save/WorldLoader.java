@@ -5,7 +5,7 @@ import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
-import com.stabilise.world.multidimensioned.WorldProvider;
+import com.stabilise.world.WorldProvider;
 
 /**
  * A {@code WorldLoader} instance manages the loading and saving of regions for
@@ -137,7 +137,7 @@ public abstract class WorldLoader {
 		region.pendingSave = true;
 		provider.executor.execute(new RegionSaver(world, region));
 		region.unsavedChanges = false;
-		region.lastSaved = world.info.age;
+		region.lastSaved = world.worldInfo.age;
 	}
 	
 	/**
@@ -153,7 +153,7 @@ public abstract class WorldLoader {
 		region.pendingSave = true;
 		new RegionSaver(world, region).run();
 		region.unsavedChanges = false;
-		region.lastSaved = world.info.age;
+		region.lastSaved = world.worldInfo.age;
 	}
 	
 	/**

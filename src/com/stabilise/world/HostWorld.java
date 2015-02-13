@@ -15,9 +15,8 @@ import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Checkable;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.maths.HashPoint;
+import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.multidimensioned.Dimension;
-import com.stabilise.world.multidimensioned.WorldProvider;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
@@ -33,8 +32,8 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  */
 public class HostWorld extends BaseWorld implements Checkable {
 	
-	/** The world's information. */
-	public final WorldInfo info;
+	/** The world's information. This should be treated as read-only. */
+	public final WorldInfo worldInfo;
 	
 	/** The world generator. */
 	public final WorldGenerator generator;
@@ -44,8 +43,7 @@ public class HostWorld extends BaseWorld implements Checkable {
 	public final ConcurrentHashMap<HashPoint, Region> regions =
 			new ConcurrentHashMap<>();
 	/** Tracks the number of loaded regions, in preference to invoking
-	 * regions.size(), which has somewhat imprecise semantics. Also, size
-	 * checking with an AtomicInteger is a constant-time operation. */
+	 * regions.size(), which is not a constant-time operation. */
 	private final AtomicInteger numRegions = new AtomicInteger(0);
 	
 	/** Whether or not the world has been {@link #prepare() prepared}. */
@@ -57,14 +55,14 @@ public class HostWorld extends BaseWorld implements Checkable {
 	 * 
 	 * @param provider This world's provider.
 	 * @param dimension The dimension of this world.
-	 * @param info The world's info.
+	 * @param worldInfo The world's info.
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
 	public HostWorld(WorldProvider provider, Dimension dimension) {
 		super(provider, dimension);
 		
-		this.info = provider.info;
+		this.worldInfo = provider.info;
 		
 		spawnSliceX = dimension.info.spawnSliceX;
 		spawnSliceY = dimension.info.spawnSliceY;
@@ -77,7 +75,7 @@ public class HostWorld extends BaseWorld implements Checkable {
 		if(prepared)
 			throw new IllegalStateException("World has already been prepared!");
 		
-		// Load the spawn regions if this is the default region
+		// Load the spawn regions if this is the default dimension
 		if(dimension.info.name.equals(Dimension.defaultDimension())) {
 			// Ensure the 'spawn regions' are generated, and anchor them such that
 			// they're always loaded
@@ -158,7 +156,7 @@ public class HostWorld extends BaseWorld implements Checkable {
 			}
 		}
 		//log.postInfo("All regions loaded!");
-		return true;
+		return prepared;
 	}
 	
 	@Override
@@ -527,40 +525,35 @@ public class HostWorld extends BaseWorld implements Checkable {
 	 * Gets the world's directory.
 	 */
 	public FileHandle getDir() {
-		return info.getWorldDir();
+		return worldInfo.getWorldDir();
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @throws RuntimeException if an I/O error occurred while saving.
+	 */
 	@Override
 	public void save() {
 		log.postInfo("Saving dimension...");
 		
+		for(Region r : regions.values())
+			saveRegion(r);
+		
 		try {
 			dimension.saveData();
 		} catch(IOException e) {
-			log.postSevere("Could not save dimension info!");
+			throw new RuntimeException("Could not save dimension info!", e);
 		}
 		
 		//savePlayers();
-		
-		for(Region r : regions.values())
-			saveRegion(r);
 	}
 	
 	/**
-	 * Saves player data.
+	 * {@inheritDoc}
+	 * 
+	 * @throws RuntimeException if an I/O error occurred while saving.
 	 */
-	/*
-	private void savePlayers() {
-		for(Integer i : players.keySet()) {
-			EntityMob player = players.get(i);
-			PlayerDataFile dataFile = characters.get(i);
-			dataFile.character.lastX = player.x;
-			dataFile.character.lastY = player.y;
-			saveCharacterData(dataFile.character);
-		}
-	}
-	*/
-	
 	@Override
 	public void close() {
 		save();

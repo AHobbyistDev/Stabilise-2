@@ -10,7 +10,7 @@ import com.stabilise.util.maths.SimplexNoise;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
-import com.stabilise.world.multidimensioned.WorldProvider;
+import com.stabilise.world.WorldProvider;
 import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntityChest;
 

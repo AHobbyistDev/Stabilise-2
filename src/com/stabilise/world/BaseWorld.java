@@ -17,8 +17,7 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.collect.LightweightLinkedList;
 import com.stabilise.util.maths.Maths;
-import com.stabilise.world.multidimensioned.Dimension;
-import com.stabilise.world.multidimensioned.WorldProvider;
+import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**

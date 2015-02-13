@@ -23,7 +23,7 @@ import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Schematic;
 import com.stabilise.world.Slice;
-import com.stabilise.world.multidimensioned.WorldProvider;
+import com.stabilise.world.WorldProvider;
 
 /**
  * The {@code WorldGenerator} class provides the mechanism for generating the

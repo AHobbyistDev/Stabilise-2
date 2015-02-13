@@ -1,10 +1,9 @@
-package com.stabilise.world.multidimensioned.dimension;
+package com.stabilise.world.dimension;
 
 import com.stabilise.world.HostWorld;
+import com.stabilise.world.WorldProvider;
 import com.stabilise.world.gen.PerlinNoiseGenerator;
 import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.multidimensioned.Dimension;
-import com.stabilise.world.multidimensioned.WorldProvider;
 
 /**
  * The Overworld is the default world dimension.
