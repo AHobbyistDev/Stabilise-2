@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<accessrules>
+			<accessrule kind="accessible" pattern="sun/misc/**"/>
+		</accessrules>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Adam/.gradle/caches/modules-2/files-2.1/com.badlogicgames.gdx/gdx/1.5.0/e4272f711228f3cd214802949f18124e2eef1cbc/gdx-1.5.0.jar" sourcepath="C:/Users/Adam/.gradle/caches/modules-2/files-2.1/com.badlogicgames.gdx/gdx/1.5.0/84a10383c3baf2d9cecdd0891e14cc580d24a555/gdx-1.5.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Adam/.gradle/caches/modules-2/files-2.1/com.badlogicgames.gdx/gdx-freetype/1.5.0/69b7592d64aeccb21cad51f89544df8770a81f7c/gdx-freetype-1.5.0.jar" sourcepath="C:/Users/Adam/.gradle/caches/modules-2/files-2.1/com.badlogicgames.gdx/gdx-freetype/1.5.0/68a05f14c3f8b41c098e9b5aa5ed463935315710/gdx-freetype-1.5.0-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jars/guava-17.0.jar" sourcepath="lib/jars/guava-libraries-654bc1eb3c3a/guava/src"/>
+	<classpathentry kind="lib" path="lib/jars/commons-collections4-4.0.jar" sourcepath="lib/jars/commons-collections4-4.0-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jars/commons-io-2.4.jar" sourcepath="lib/jars/commons-io-2.4-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jars/commons-lang3-3.2.1.jar" sourcepath="lib/jars/commons-lang3-3.2.1-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Adam/Documents/Java/gson-2.3.1.jar" sourcepath="C:/Users/Adam/Documents/Java/gson-2.3.1-sources.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

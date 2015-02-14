@@ -45,9 +45,6 @@ public class Region {
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
-	/** The world to which this region belongs. */
-	private final HostWorld world;
-	
 	/** The number of ticks until this region should be unloaded. {@code -1}
 	 * indicates that this region is still considered anchored and the unload
 	 * countdown is not active. */
@@ -118,7 +115,6 @@ public class Region {
 	 * Private since this creates an ordinarily-invalid region.
 	 */
 	private Region() {
-		world = null;
 		loc = new HashPoint() {
 			public boolean equals(Object o) { return false; }
 			public boolean equals(int x, int y) { return false; }
@@ -130,39 +126,40 @@ public class Region {
 	/**
 	 * Creates a new region.
 	 * 
-	 * @param world A reference to the world to which the region belongs.
 	 * @param x The region's x-coordinate, in region lengths.
 	 * @param y The region's y-coordinate, in region lengths.
+	 * @param worldAge The age of the world.
 	 * 
 	 * @throws NullPointerException if {@code world} is {@code null}.
 	 */
-	public Region(HostWorld world, int x, int y) {
-		this(world, getKey(x, y));
+	public Region(int x, int y, long worldAge) {
+		this(getKey(x, y), worldAge);
 	}
 	
 	/**
 	 * Creates a new region.
 	 * 
-	 * @param world A reference to the world to which the region belongs.
 	 * @param loc The region's location, whose coordinates are in
 	 * region-lengths.
+	 * @param worldAge The age of the world.
 	 * 
-	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws NullPointerException if {@code loc} is {@code null}.
 	 */
-	public Region(HostWorld world, HashPoint loc) {
-		this.world = world;
+	public Region(HashPoint loc, long worldAge) {
 		this.loc = loc;
 		
 		offsetX = loc.x * REGION_SIZE;
 		offsetY = loc.y * REGION_SIZE;
 		
-		lastSaved = world.worldInfo.age;
+		lastSaved = worldAge;
 	}
 	
 	/**
 	 * Updates the region.
+	 * 
+	 * @param world This region's parent world.
 	 */
-	public void update() {
+	public void update(HostWorld world) {
 		// If the region is not generated ignore updates
 		if(!loaded)
 			return;
@@ -178,10 +175,10 @@ public class Region {
 			ticksToUnload = -1;
 			
 			// Tick any number of random tiles in the region each tick
-			tickTile();
-			//tickTile();
-			//tickTile();
-			//tickTile();
+			tickTile(world);
+			//tickTile(world);
+			//tickTile(world);
+			//tickTile(world);
 			
 			// Save at 30 second intervals if possible
 			// TODO: Potential future problems in the fact that regions which have
@@ -201,7 +198,7 @@ public class Region {
 	 * <p>Given there are 65536 tiles in a region, a tile will, on average, be
 	 * updated once every 18 minutes if this is invoked once per tick.
 	 */
-	private void tickTile() {
+	private void tickTile(HostWorld world) {
 		int sx = world.rng.nextInt(REGION_SIZE);
 		int sy = world.rng.nextInt(REGION_SIZE);
 		int tx = world.rng.nextInt(Slice.SLICE_SIZE);
@@ -265,20 +262,24 @@ public class Region {
 	}
 	
 	/**
+	 * @param world This region's parent world.
+	 * 
 	 * @return This region's file.
 	 */
-	public FileHandle getFile() {
+	public FileHandle getFile(HostWorld world) {
 		return world.dimension.info.getDimensionDir().child("r_" + loc.x + "_" + loc.y + ".region");
 	}
 	
 	/**
 	 * Checks for whether or not this region's file exists.
 	 * 
+	 * @param world This region's parent world.
+	 * 
 	 * @return {@code true} if this region has a saved file; {@code false}
 	 * otherwise.
 	 */
-	public boolean fileExists() {
-		return getFile().exists();
+	public boolean fileExists(HostWorld world) {
+		return getFile(world).exists();
 	}
 	
 	/**
@@ -336,7 +337,7 @@ public class Region {
 	 * 
 	 * <p>Unused.
 	 */
-	public void addContainedEntitiesToWorld() {
+	public void addContainedEntitiesToWorld(HostWorld world) {
 		for(int r = 0; r < REGION_SIZE; r++) {
 			for(int c = 0; c < REGION_SIZE; c++) {
 				slices[r][c].addContainedEntitiesToWorld(world);

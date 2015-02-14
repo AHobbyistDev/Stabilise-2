@@ -12,7 +12,6 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
 import com.stabilise.entity.particle.Particle;
-import com.stabilise.util.Checkable;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.world.dimension.Dimension;
@@ -30,7 +29,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * and the world generator
  * -->
  */
-public class HostWorld extends BaseWorld implements Checkable {
+public class HostWorld extends BaseWorld {
 	
 	/** The world's information. This should be treated as read-only. */
 	public final WorldInfo worldInfo;
@@ -170,7 +169,7 @@ public class HostWorld extends BaseWorld implements Checkable {
 		while(i.hasNext()) {
 			Region r = i.next();
 			profiler.start("update"); // root.update.game.world.region.update
-			r.update();
+			r.update(this);
 			profiler.next("unload"); // root.update.game.world.region.unload
 			if(r.unload) {
 				unloadRegion(r);
@@ -290,7 +289,7 @@ public class HostWorld extends BaseWorld implements Checkable {
 		synchronized(generator.getLock(loc)) {
 			r = generator.getCachedRegion(loc);
 			if(r == null) // if it's not cached, create it
-				r = new Region(this, loc);
+				r = new Region(loc, provider.info.age);
 			regions.put(loc, r);
 		}
 		

@@ -79,7 +79,7 @@ public abstract class Dimension {
 	 * @throws IOException if the info file does not exist or an I/O error
 	 * otherwise occurs.
 	 */
-	public void loadData() throws IOException {
+	public final void loadData() throws IOException {
 		loadExtraData(info.load());
 	}
 	
@@ -101,7 +101,7 @@ public abstract class Dimension {
 	 * 
 	 * @throws IOException if an I/O error occurs.
 	 */
-	public void saveData() throws IOException {
+	public final void saveData() throws IOException {
 		NBTTagCompound tag = new NBTTagCompound();
 		saveExtraData(tag);
 		info.save(tag);
@@ -175,6 +175,8 @@ public abstract class Dimension {
 	 * Registers a dimension. Note that it is legal to map multiple dimension
 	 * names to the same class if all such dimensions are to have the same
 	 * functionality.
+	 * 
+	 * <p>This should only be invoked from {@link #registerDimensions()}.
 	 * 
 	 * @param isDefault Whether or not this is the default dimension.
 	 * @param name The name of the dimension.

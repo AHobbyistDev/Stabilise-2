@@ -36,6 +36,7 @@ public class NBTExporter {
 	
 	private NBTExporter() {}
 	
+	
 	/**
 	 * Exports an object to an NBT compound tag.
 	 * 
@@ -54,7 +55,28 @@ public class NBTExporter {
 	 * @see Exportable
 	 */
 	public static NBTTagCompound exportObj(Object o) {
-		NBTTagCompound tag = new NBTTagCompound();
+		return exportObj(o, new NBTTagCompound());
+	}
+	
+	/**
+	 * Exports an object to an NBT compound tag.
+	 * 
+	 * <p>Fields of the provided object annotated with {@link ExportToNBT}
+	 * will be exported to the compound if they're of an exportable type.
+	 * Object fields will only be exported if the declared type of said fields
+	 * have the {@link Exportable} annotation.
+	 * 
+	 * @param o The object.
+	 * @param tag The tag into which to export the object.
+	 * 
+	 * @return {@code tag}, for chaining operations.
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws RuntimeException if the object could not be properly exported.
+	 * @see #importObj(Object, NBTTagCompound)
+	 * @see ExportToNBT
+	 * @see Exportable
+	 */
+	public static NBTTagCompound exportObj(Object o, NBTTagCompound tag) {
 		for(Field f : o.getClass().getDeclaredFields()) {
 			try {
 				if(f.getAnnotation(ExportToNBT.class) != null) {

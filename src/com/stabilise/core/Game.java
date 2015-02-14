@@ -3,6 +3,7 @@ package com.stabilise.core;
 import static com.badlogic.gdx.Input.Keys;
 
 import com.badlogic.gdx.InputProcessor;
+import com.stabilise.character.CharacterData;
 import com.stabilise.entity.controller.PlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
@@ -11,6 +12,9 @@ import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.ClientWorld;
 import com.stabilise.world.HostWorld;
+import com.stabilise.world.SingleplayerWorld;
+import com.stabilise.world.WorldProvider;
+import com.stabilise.world.dimension.Dimension;
 
 /**
  * The game itself.
@@ -22,6 +26,7 @@ public class Game implements Controllable, InputProcessor {
 	/** Whether or not the game is currently paused. */
 	public boolean paused = false;
 	
+	private final WorldProvider provider;
 	/** The game's world instance. */
 	private final ClientWorld<HostWorld> world;
 	
@@ -50,8 +55,12 @@ public class Game implements Controllable, InputProcessor {
 	 * 
 	 * @param world The world to run.
 	 */
-	public Game(ClientWorld<HostWorld> world) {
-		this.world = world;
+	public Game(WorldProvider world) {
+		this.provider = world;
+		this.world = new SingleplayerWorld(
+				provider.getDimension(Dimension.defaultDimension()),
+				CharacterData.defaultCharacter()
+		);
 		
 		log.postInfo("Initiating game...");
 		
@@ -62,7 +71,7 @@ public class Game implements Controllable, InputProcessor {
 		controller = new Controller(this);
 		
 		// TODO: Hardcoding this is poor design and should be changed in the future
-		playerController = new PlayerController(world.player, controller, this);
+		playerController = new PlayerController(this.world.player, controller, this);
 	}
 	
 	/**

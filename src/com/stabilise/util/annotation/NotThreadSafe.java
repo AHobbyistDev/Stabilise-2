@@ -8,6 +8,10 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates the the target class or method is <i>not</i> thread-safe.
+ * 
+ * <p>Though the lack of the presence of the {@link ThreadSafe} annotation is
+ * typically sufficient to indicate that a class or method is not thread-safe,
+ * this annotation should serve as a a strong reminder of this.
  */
 @Documented
 @Retention(RetentionPolicy.SOURCE)

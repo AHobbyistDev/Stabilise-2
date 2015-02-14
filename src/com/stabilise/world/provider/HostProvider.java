@@ -1,226 +1,73 @@
-package com.stabilise.world;
+package com.stabilise.world.provider;
 
 import java.io.IOException;
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.google.common.base.Preconditions;
 import com.stabilise.character.CharacterData;
-import com.stabilise.util.Checkable;
-import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
-import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.annotation.NotThreadSafe;
-import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.util.nbt.export.ExportToNBT;
 import com.stabilise.util.nbt.export.NBTExporter;
+import com.stabilise.world.HostWorld;
+import com.stabilise.world.IWorld;
+import com.stabilise.world.WorldInfo;
 import com.stabilise.world.dimension.Dimension;
-import com.stabilise.world.save.WorldLoader;
+
 
 /**
- * A WorldProvider manages and 'provides' all the dimensions/worlds of a
- * world.<sup><font size=-1>1</font></sup>
+ * A HostProvider is a provider of a world for the host of that world. There
+ * are three types of hosts:
  * 
- * <p>{@code 1.} The terminology is somewhat confusing here. From the user's
- * perspective, a <i>WorldProvider</i> is actually a <i>world</i>, and
- * different <i>Worlds</i> (e.g. {@code HostWorld}, etc.) are
- * <i>dimensions</i> of that world/WorldProvider. We largely refer to
- * 'dimensions' as 'worlds' in the code (e.g. GameObjects have a {@code world}
- * member through which they interact with the dimension they are in) for both
- * legacy and aesthetic purposes.
+ * <ul>
+ * <li><b>Singleplayer</b>: This is the simplest case.
+ * <li><b>Multiplayer</b>: Hosts the world via internet to multiple clients.
+ * <li><b>Multiplayer with Integrated Player</b>: A combination of the above
+ *     two; the world is hosted to multiple clients, but there is also an
+ *     integrated player who does not require a connection.
+ * </ul>
  */
-@Incomplete
-public class WorldProvider {
+public class HostProvider extends WorldProvider<HostWorld> {
 	
 	/** Dimensions should treat this as read-only. */
 	public final WorldInfo info;
 	
-	/** The ExecutorService to use for delegating loader and generator threads. */
-	public final ExecutorService executor;
-	/** The global WorldLoader to use for loading regions. */
-	public final WorldLoader loader;
-	
-	/** Maps dimension names -> dimensions. */
-	private final Map<String, HostWorld> dimensions = new HashMap<>(2);
-	/** Maps player names -> PlayerDataFiles. */
-	private final Map<String, PlayerDataFile> players = new HashMap<>(1);
-	
-	/** Profile any world's operation with this. */
-	public final Profiler profiler;
-	private final Log log = Log.getAgent("WorldProvider");
-	
 	
 	/**
-	 * Creates a new WorldProvider.
+	 * Creates a new HostProvider.
 	 * 
 	 * @param info The world info.
 	 * @param profiler The profiler to use to profile the world.
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public WorldProvider(WorldInfo info, Profiler profiler) {
+	public HostProvider(WorldInfo info, Profiler profiler) {
+		super(profiler);
+		
 		this.info = Preconditions.checkNotNull(info);
-		this.profiler = Preconditions.checkNotNull(profiler);
-		
-		// Start up the executor
-		
-		final int coreThreads = 2; // region loading typically happens in pairs
-		final int maxThreads = Math.max(coreThreads, Runtime.getRuntime().availableProcessors());
-		
-		BoundedThreadPoolExecutor tpe = new BoundedThreadPoolExecutor(
-				coreThreads, maxThreads,
-				30L, TimeUnit.SECONDS,
-				new LinkedBlockingQueue<Runnable>(),
-				new WorldThreadFactory()
-		);
-		executor = tpe;
-		
-		// Start up the world loader
-		loader = WorldLoader.getLoader(this);
 	}
-	
-	public void update() {
-		info.age++;
-		Checkable.updateCheckables(dimensions.values());
-	}
-	
-	/**
-	 * @param name The name of the dimension.
-	 * 
-	 * @return The dimension, or {@code null} if the specified dimension is not
-	 * loaded.
-	 */
-	public HostWorld getDimension(String name) {
-		return dimensions.get(name);
-	}
-	
-	/**
-	 * Loads a dimension into memory.
-	 * 
-	 * @param name The name of the dimension.
-	 * 
-	 * @return The dimension, or {@code null} if no such dimension has been
-	 * registered.
-	 * @throws RuntimeException if the dimension could not be prepared.
-	 * @throws IllegalArgumentException if {@code name} is not the name of a
-	 * valid dimension.
-	 */
+
+	@Override
 	public HostWorld loadDimension(String name) {
-		HostWorld world = getDimension(name);
-		if(world != null)
-			return world;
-		
-		Dimension dim = Dimension.getDimension(new Dimension.Info(info, name));
-		if(dim == null)
-			throw new IllegalArgumentException("Invalid dimension \"" + name + "\"");
-		
-		if(dim.info.fileExists()) {
-			try {
-				dim.loadData();
-			} catch(IOException e) {
-				throw new RuntimeException("Could not load dimension info! (dim: " +
-						name + ") (" + e.getMessage() + ")" , e);
-			}
-		}
-		
-		world = dim.createHost(this);
-		world.prepare();
-		
-		dimensions.put(name, world);
-		
-		return world;
+		return null;
 	}
 	
-	/**
-	 * Saves the worlds.
-	 * 
-	 * @throws RuntimeException if an I/O error occurred while saving.
-	 */
+	@Override
 	public void save() {
-		try {
-			info.save();
-		} catch(IOException e) {
-			throw new RuntimeException("Could not save world info!", e);
-		}
 		
-		for(HostWorld dim : dimensions.values())
-			dim.save();
 	}
 	
-	/**
-	 * Closes this world provider down. This method will block the current
-	 * thread until shutdown procedures have completed.
-	 * 
-	 * @throws RuntimeException if an I/O error occurred while saving.
-	 */
-	public void close() {
-		loader.shutdown();
+	@Override
+	protected void doClose() {
 		
-		for(HostWorld dim : dimensions.values())
-			dim.close();
-		
-		for(PlayerDataFile p : players.values()) {
-			try {
-				p.dispose();
-			} catch(IOException e) {
-				throw new RuntimeException("Could not save " + p, e);
-			}
-		}
-		
-		for(HostWorld dim : dimensions.values())
-			dim.blockUntilClosed();
-		
-		executor.shutdown();
-		
-		try {
-			if(!executor.awaitTermination(10, TimeUnit.SECONDS))
-				log.postWarning("World executor took longer than 10 seconds to shutdown!");
-		} catch(InterruptedException e) {
-			log.postWarning("Interrupted while waiting for world executor to terminate!");
-		}
 	}
 	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------
 	//--------------------==========--------------------
-	
-	/**
-	 * Thread factory implementation for world loader and world generator
-	 * threads.
-	 */
-	private class WorldThreadFactory implements ThreadFactory {
-		
-		/** The number of threads created with this factory. */
-		private final AtomicInteger threadNumber = new AtomicInteger(1);
-		
-		private final UncaughtExceptionHandler ripWorkerThread = new UncaughtExceptionHandler() {
-			@Override
-			public void uncaughtException(Thread t, Throwable e) {
-				log.postSevere("Worker thread \"" + t.toString() + "\" died!", e);
-			}
-		};
-		
-		@Override
-		public Thread newThread(Runnable r) {
-			Thread t = new Thread(r, "WorldThread" + threadNumber.getAndIncrement());
-			if(t.isDaemon())
-				t.setDaemon(false);
-			if(t.getPriority() != Thread.NORM_PRIORITY)
-				t.setPriority(Thread.NORM_PRIORITY);
-			t.setUncaughtExceptionHandler(ripWorkerThread);
-			return t;
-		}
-	}
 	
 	/**
 	 * A world maintains data of each player to visit it so that it may place
@@ -255,11 +102,11 @@ public class WorldProvider {
 	 * <!-- TODO: A caching strategy may be preferable if PlayerDataFiles:
 	 * a) are saved frequently
 	 * b) become large in size (though this adds to data redundancy)
-	 * c) contain lots (e.g. 5, 10+) characters, however unlikely
+	 * c) contain lots (e.g. 5+, or 10+) of characters, however unlikely
 	 * -->
 	 */
 	@NotThreadSafe
-	private static class PlayerDataFile {
+	private class PlayerDataFile {
 		
 		private final String name;
 		private final FileHandle file;
@@ -273,9 +120,9 @@ public class WorldProvider {
 		 * @param The name of the player(s).
 		 * @param provider The world provider.
 		 */
-		public PlayerDataFile(String name, WorldProvider provider) {
+		public PlayerDataFile(String name) {
 			this.name = name;
-			file = provider.info.getWorldDir().child(IWorld.DIR_PLAYERS + name + IWorld.EXT_PLAYERS);
+			file = info.getWorldDir().child(IWorld.DIR_PLAYERS + name + IWorld.EXT_PLAYERS);
 		}
 		
 		/**

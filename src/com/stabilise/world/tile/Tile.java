@@ -317,5 +317,5 @@ public class Tile {
 	static boolean isRegistered() {
 		return registered;
 	}
-
+	
 }

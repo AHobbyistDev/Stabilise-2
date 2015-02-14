@@ -1,11 +1,12 @@
 package com.stabilise.world.save;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.google.common.base.Preconditions;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
-import com.stabilise.world.WorldProvider;
+import com.stabilise.world.provider.WorldProvider;
 
 /**
  * A {@code WorldLoader} instance manages the loading and saving of regions for
@@ -36,7 +37,7 @@ import com.stabilise.world.WorldProvider;
 public abstract class WorldLoader {
 	
 	/** The world provider for which the loader is loading. */
-	protected final WorldProvider provider;
+	protected final WorldProvider<?> provider;
 	
 	/** Whether or not loading operations should be cancelled due to the loader
 	 * having been shut down. This is volatile. */
@@ -53,7 +54,7 @@ public abstract class WorldLoader {
 	 * 
 	 * @throws NullPointerException if {@code provider} is {@code null}.
 	 */
-	public WorldLoader(WorldProvider provider) {
+	public WorldLoader(WorldProvider<?> provider) {
 		this.provider = Preconditions.checkNotNull(provider);
 	}
 	
@@ -160,17 +161,19 @@ public abstract class WorldLoader {
 	 * Loads a region.
 	 * 
 	 * @param r The region to load.
+	 * @param file The region's file.
 	 */
 	@UserThread("WorkerThread")
-	protected abstract void load(Region r);
+	protected abstract void load(Region r, FileHandle file);
 	
 	/**
 	 * Saves a region.
 	 * 
 	 * @param r The region to save.
+	 * @param file The region's file.
 	 */
 	@UserThread("WorkerThread")
-	protected abstract void save(Region r);
+	protected abstract void save(Region r, FileHandle file);
 	
 	/**
 	 * Attempts to obtain a permit to load the given region. If this method
@@ -256,8 +259,8 @@ public abstract class WorldLoader {
 			if(cancelLoadOperations)
 				return;
 			
-			if(r.fileExists())
-				load(r);
+			if(r.fileExists(world))
+				load(r, r.getFile(world));
 			
 			if(generate)
 				world.generator.generateSynchronously(r);
@@ -296,7 +299,7 @@ public abstract class WorldLoader {
 				r.saving = true;
 			}
 			r.pendingSave = false;
-			save(r);
+			save(r, r.getFile(world));
 			r.saving = false;
 		}
 		
@@ -313,7 +316,7 @@ public abstract class WorldLoader {
 	 * 
 	 * @return The loader to use for world loading.
 	 */
-	public static WorldLoader getLoader(WorldProvider provider) {
+	public static WorldLoader getLoader(WorldProvider<?> provider) {
 		return new PreAlphaWorldLoader(provider);
 	}
 	

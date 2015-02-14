@@ -4,15 +4,16 @@ import static com.stabilise.world.Region.REGION_SIZE;
 
 import java.io.IOException;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTag;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.util.nbt.NBTTagList;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
-import com.stabilise.world.WorldProvider;
 import com.stabilise.world.Region.QueuedSchematic;
 import com.stabilise.world.BaseWorld;
+import com.stabilise.world.provider.WorldProvider;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -25,15 +26,15 @@ public class PreAlphaWorldLoader extends WorldLoader {
 	 * 
 	 * @param provider The world provider.
 	 */
-	public PreAlphaWorldLoader(WorldProvider provider) {
+	public PreAlphaWorldLoader(WorldProvider<?> provider) {
 		super(provider);
 	}
 	
 	@Override
-	protected void load(Region r) {
+	protected void load(Region r, FileHandle file) {
 		NBTTagCompound regionTag;
 		try {
-			regionTag = NBTIO.readCompressed(r.getFile());
+			regionTag = NBTIO.readCompressed(file);
 		} catch(IOException e) {
 			log.postSevere("Could not load the NBT data for region " + r.loc.x + "," + r.loc.y + "!", e);
 			return;
@@ -90,7 +91,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 	}
 	
 	@Override
-	protected void save(Region r) {
+	protected void save(Region r, FileHandle file) {
 		NBTTagCompound regionTag = new NBTTagCompound();
 		
 		regionTag.addBoolean("generated", r.generated);
@@ -146,7 +147,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 		}
 		
 		try {
-			NBTIO.safeWriteCompressed(r.getFile(), regionTag);
+			NBTIO.safeWriteCompressed(file, regionTag);
 		} catch(IOException e) {
 			log.postSevere("Could not save " + r + "!", e);
 		}

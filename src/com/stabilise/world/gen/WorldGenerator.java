@@ -568,7 +568,7 @@ public abstract class WorldGenerator {
 				synchronized(getLock(loc)) {
 					Region region = world.getRegionAt(loc);
 					if(region == null)
-						region = new Region(world, loc);
+						region = new Region(loc, world.provider.info.age);
 					cachedRegion = new CachedRegion(region);
 					cachedRegions.put(loc, cachedRegion);
 				}

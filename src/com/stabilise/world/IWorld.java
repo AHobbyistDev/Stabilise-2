@@ -13,6 +13,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
+import com.stabilise.util.Checkable;
 import com.stabilise.util.IOUtil;
 import com.stabilise.util.Log;
 import com.stabilise.world.tile.Tile;
@@ -21,7 +22,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 /**
  * Defines methods which summarise a world implementation.
  */
-public interface IWorld {
+public interface IWorld extends Checkable {
 	
 	/** The file name of the world info file. */
 	public static final String FILE_INFO = "info";

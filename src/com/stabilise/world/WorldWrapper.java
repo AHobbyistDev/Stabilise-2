@@ -22,7 +22,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 public class WorldWrapper<T extends BaseWorld> extends AbstractWorld {
 	
 	/** The world being wrapped. */
-	public final T world;
+	protected T world;
 	
 	
 	/**
@@ -49,6 +49,11 @@ public class WorldWrapper<T extends BaseWorld> extends AbstractWorld {
 	@Override
 	public void update() {
 		world.update();
+	}
+	
+	@Override
+	public boolean updateAndCheck() {
+		return world.updateAndCheck();
 	}
 	
 	@Override

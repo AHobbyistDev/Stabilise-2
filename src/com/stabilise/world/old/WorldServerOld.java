@@ -74,7 +74,7 @@ public class WorldServerOld extends BaseWorld {
 				// TODO: r.unload();
 				i.remove();
 			else
-				r.update();			// TODO: Still update for unloading purposes even when the game is paused, but do not perform tile updates
+				;//r.update();			// TODO: Still update for unloading purposes even when the game is paused, but do not perform tile updates
 		}
 	}
 	
@@ -117,7 +117,6 @@ public class WorldServerOld extends BaseWorld {
 	 * 
 	 * @return The region at the given coordinates.
 	 */
-	@SuppressWarnings("null")
 	public Region getRegionAt(int x, int y, boolean generate) {
 		//x = (int)Math.floor((float)x / REGION_SIZE);
 		//y = (int)Math.floor((float)y / REGION_SIZE);
@@ -126,8 +125,8 @@ public class WorldServerOld extends BaseWorld {
 			return regions.get(key);
 		} else {
 			Region region = null;// = new Region(this, x, y);
+			/*----
 			if(region.fileExists()) {
-				/*----
 				try {
 					// TODO: This could potentially cause a delay for server
 					// processing
@@ -135,8 +134,8 @@ public class WorldServerOld extends BaseWorld {
 				} catch (IOException e) {
 					log.logCritical("Could not load region!", e);
 				}
-				*/
 			}
+			*/
 			if(generate) {
 				//if(!region.generated)			// No need - checked within generator.generate()
 				generator.generate(region);
@@ -312,6 +311,12 @@ public class WorldServerOld extends BaseWorld {
 	public void sendToDimension(String dimension, Entity e, double x, double y) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public boolean updateAndCheck() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 }

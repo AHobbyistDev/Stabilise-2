@@ -16,7 +16,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.stabilise.character.CharacterData;
 import com.stabilise.core.Application;
 import com.stabilise.core.Resources;
 import com.stabilise.core.main.Stabilise;
@@ -24,10 +23,7 @@ import com.stabilise.util.Log;
 import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.concurrent.TaskThread;
 import com.stabilise.util.concurrent.TaskTracker;
-import com.stabilise.world.ClientWorld;
-import com.stabilise.world.HostWorld;
 import com.stabilise.world.IWorld;
-import com.stabilise.world.SingleplayerWorld;
 import com.stabilise.world.WorldInfo;
 import com.stabilise.world.WorldProvider;
 import com.stabilise.world.dimension.Dimension;
@@ -57,7 +53,7 @@ public class LoadingState implements State {
 	private TaskThread taskThread;
 	
 	//////////////////temp stuff
-	private ClientWorld<HostWorld> world;
+	private WorldProvider world;
 	//////////////////end temp stuff
 	
 	
@@ -102,13 +98,14 @@ public class LoadingState implements State {
 				tracker.increment();
 				tracker.setName("Constructing world");
 				
-				WorldProvider worldProv = new WorldProvider(
+				world = new WorldProvider(
 						worldList[0],
 						Application.get().profiler
 				);
 				
-				Dimension.Info dimInfo = new Dimension.Info(worldList[0], Dimension.defaultDimension());
+				world.loadDimension(Dimension.defaultDimension());
 				
+				/*
 				world = new SingleplayerWorld(
 						new HostWorld(
 								worldProv,
@@ -116,13 +113,12 @@ public class LoadingState implements State {
 						),
 						CharacterData.defaultCharacter()
 				);
+				*/
 				
 				tracker.increment();
 				tracker.setName("Loading world");
 				
-				world.prepare();
-				
-				while(!world.isLoaded())
+				while(!world.getDimension(Dimension.defaultDimension()).isLoaded())
 					Thread.sleep(50L);
 				
 				tracker.increment();

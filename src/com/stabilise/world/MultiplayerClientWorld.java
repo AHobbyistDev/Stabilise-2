@@ -125,5 +125,11 @@ public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public boolean updateAndCheck() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 }

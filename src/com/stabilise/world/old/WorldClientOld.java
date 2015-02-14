@@ -189,5 +189,12 @@ public class WorldClientOld extends BaseWorld {
 		// TODO Auto-generated method stub
 		
 	}
+
+
+	@Override
+	public boolean updateAndCheck() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 }
