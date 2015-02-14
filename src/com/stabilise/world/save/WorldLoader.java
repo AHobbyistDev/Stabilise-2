@@ -1,5 +1,7 @@
 package com.stabilise.world.save;
 
+import java.util.concurrent.Executor;
+
 import com.badlogic.gdx.files.FileHandle;
 import com.google.common.base.Preconditions;
 import com.stabilise.util.Log;
@@ -38,6 +40,7 @@ public abstract class WorldLoader {
 	
 	/** The world provider for which the loader is loading. */
 	protected final WorldProvider<?> provider;
+	private final Executor executor;
 	
 	/** Whether or not loading operations should be cancelled due to the loader
 	 * having been shut down. This is volatile. */
@@ -56,6 +59,7 @@ public abstract class WorldLoader {
 	 */
 	public WorldLoader(WorldProvider<?> provider) {
 		this.provider = Preconditions.checkNotNull(provider);
+		executor = provider.getExecutor();
 	}
 	
 	/**
@@ -77,7 +81,7 @@ public abstract class WorldLoader {
 		if(!obtainRegionForLoad(region))
 			return;
 		
-		provider.executor.execute(new RegionLoader(world, region, false));
+		executor.execute(new RegionLoader(world, region, false));
 	}
 	
 	/**
@@ -119,7 +123,7 @@ public abstract class WorldLoader {
 		if(region.loaded)
 			world.generator.generate(region);
 		else if(obtainRegionForLoad(region))
-				provider.executor.execute(new RegionLoader(world, region, true));
+				executor.execute(new RegionLoader(world, region, true));
 	}
 	
 	/**
@@ -136,9 +140,9 @@ public abstract class WorldLoader {
 			return;
 		
 		region.pendingSave = true;
-		provider.executor.execute(new RegionSaver(world, region));
+		executor.execute(new RegionSaver(world, region));
 		region.unsavedChanges = false;
-		region.lastSaved = world.worldInfo.age;
+		region.lastSaved = world.getAge();
 	}
 	
 	/**
@@ -154,7 +158,7 @@ public abstract class WorldLoader {
 		region.pendingSave = true;
 		new RegionSaver(world, region).run();
 		region.unsavedChanges = false;
-		region.lastSaved = world.worldInfo.age;
+		region.lastSaved = world.getAge();
 	}
 	
 	/**

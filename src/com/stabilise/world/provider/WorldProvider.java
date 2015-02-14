@@ -3,6 +3,7 @@ package com.stabilise.world.provider;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -64,11 +65,11 @@ public abstract class WorldProvider<W extends IWorld> {
 	 */
 	
 	/** The ExecutorService to use for delegating loader and generator threads. */
-	public final ExecutorService executor;
+	private final ExecutorService executor;
 	/** The global WorldLoader to use for loading regions. */
 	public final WorldLoader loader;
 	
-	/** Stores all dimensions. Mappings are dimension names -> dimensions. */
+	/** Stores all dimensions. Maps dimension names -> dimensions. */
 	protected final Map<String, W> dimensions = new HashMap<>(2);
 	
 	/** Profile any world's operation with this. */
@@ -134,6 +135,17 @@ public abstract class WorldProvider<W extends IWorld> {
 		oldDim.removeEntity(e);
 		loadDimension(dimension).addEntity(e, x, y);
 	}
+	
+	public final Executor getExecutor() {
+		return executor;
+	}
+	
+	/**
+	 * Gets the seed of the world encapsulated by this WorldProvider.
+	 * 
+	 * <p>If this is not a {@code HostProvider}, a dummy seed is returned.
+	 */
+	public abstract long getSeed();
 	
 	/**
 	 * Saves the worlds.

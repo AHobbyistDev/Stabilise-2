@@ -187,7 +187,7 @@ public class Region {
 			// rests on the brink of triggering a save, which may possibly be
 			// problematic if something causes at least one tile in each region to
 			// be updated simultaneously
-			if(unsavedChanges && world.worldInfo.age - lastSaved > 1800)
+			if(unsavedChanges && world.dimension.info.age - lastSaved > 1800)
 				world.saveRegion(this);
 		}
 	}

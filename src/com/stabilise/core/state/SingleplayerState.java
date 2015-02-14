@@ -6,7 +6,7 @@ import com.stabilise.core.Application;
 import com.stabilise.core.Game;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Profiler;
-import com.stabilise.world.WorldProvider;
+import com.stabilise.world.WorldProviderOld;
 
 /**
  * The SingleplayerState is the state which will run while singleplayer
@@ -32,7 +32,7 @@ public class SingleplayerState implements State {
 	 * 
 	 * @param world The world on which to play.
 	 */
-	public SingleplayerState(WorldProvider world) {
+	public SingleplayerState(WorldProviderOld world) {
 		super();
 		
 		game = new Game(world);

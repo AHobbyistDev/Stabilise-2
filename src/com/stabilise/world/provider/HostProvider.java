@@ -1,6 +1,8 @@
 package com.stabilise.world.provider;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
@@ -35,6 +37,9 @@ public class HostProvider extends WorldProvider<HostWorld> {
 	/** Dimensions should treat this as read-only. */
 	public final WorldInfo info;
 	
+	/** Stores players using this world. Maps player names -> PlayerDataFiles. */
+	private final Map<String, PlayerDataFile> players = new HashMap<>(1);
+	
 	
 	/**
 	 * Creates a new HostProvider.
@@ -49,10 +54,43 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		
 		this.info = Preconditions.checkNotNull(info);
 	}
+	
+	@Override
+	public void update() {
+		info.age++;
+		super.update();
+	}
 
 	@Override
 	public HostWorld loadDimension(String name) {
-		return null;
+		HostWorld world = getDimension(name);
+		if(world != null)
+			return world;
+		
+		Dimension dim = Dimension.getDimension(new Dimension.Info(info, name));
+		if(dim == null)
+			throw new IllegalArgumentException("Invalid dimension \"" + name + "\"");
+		
+		if(dim.info.fileExists()) {
+			try {
+				dim.loadData();
+			} catch(IOException e) {
+				throw new RuntimeException("Could not load dimension info! (dim: " +
+						name + ") (" + e.getMessage() + ")" , e);
+			}
+		}
+		
+		world = dim.createHost(this);
+		world.prepare();
+		
+		dimensions.put(name, world);
+		
+		return world;
+	}
+	
+	@Override
+	public long getSeed() {
+		return info.seed;
 	}
 	
 	@Override

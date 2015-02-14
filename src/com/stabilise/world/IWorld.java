@@ -366,6 +366,11 @@ public interface IWorld extends Checkable {
 	 */
 	float getTimeIncrement();
 	
+	/**
+	 * @return The age of this world, in ticks.
+	 */
+	long getAge();
+	
 	// ========== Utility Methods ==========
 	
 	/**

@@ -196,5 +196,12 @@ public class WorldClientOld extends BaseWorld {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+
+	@Override
+	public long getAge() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 	
 }

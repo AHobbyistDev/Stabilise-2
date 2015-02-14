@@ -25,7 +25,7 @@ import com.stabilise.util.concurrent.TaskThread;
 import com.stabilise.util.concurrent.TaskTracker;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.WorldInfo;
-import com.stabilise.world.WorldProvider;
+import com.stabilise.world.WorldProviderOld;
 import com.stabilise.world.dimension.Dimension;
 
 /**
@@ -53,7 +53,7 @@ public class LoadingState implements State {
 	private TaskThread taskThread;
 	
 	//////////////////temp stuff
-	private WorldProvider world;
+	private WorldProviderOld world;
 	//////////////////end temp stuff
 	
 	
@@ -98,7 +98,7 @@ public class LoadingState implements State {
 				tracker.increment();
 				tracker.setName("Constructing world");
 				
-				world = new WorldProvider(
+				world = new WorldProviderOld(
 						worldList[0],
 						Application.get().profiler
 				);

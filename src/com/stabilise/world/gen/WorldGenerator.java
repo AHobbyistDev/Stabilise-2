@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,7 +23,7 @@ import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Schematic;
 import com.stabilise.world.Slice;
-import com.stabilise.world.WorldProvider;
+import com.stabilise.world.provider.WorldProvider;
 
 /**
  * The {@code WorldGenerator} class provides the mechanism for generating the
@@ -91,7 +91,7 @@ public abstract class WorldGenerator {
 	protected final long seed;
 	
 	/** The executor which delegates threads. */
-	private final ExecutorService executor;
+	private final Executor executor;
 	/** Whether or not the generator has been shut down. This is volatile. */
 	private volatile boolean isShutdown = false;
 	
@@ -134,9 +134,9 @@ public abstract class WorldGenerator {
 	protected WorldGenerator(WorldProvider worldProv, HostWorld world) {
 		this.prov = worldProv;
 		this.world = world;
-		this.executor = prov.executor;
+		this.executor = prov.getExecutor();
 		
-		seed = prov.info.seed;
+		seed = prov.getSeed();
 		
 		locks = new Object[numLocks];
 		for(int i = 0; i < numLocks; i++)
@@ -568,7 +568,7 @@ public abstract class WorldGenerator {
 				synchronized(getLock(loc)) {
 					Region region = world.getRegionAt(loc);
 					if(region == null)
-						region = new Region(loc, world.provider.info.age);
+						region = new Region(loc, world.getAge());
 					cachedRegion = new CachedRegion(region);
 					cachedRegions.put(loc, cachedRegion);
 				}

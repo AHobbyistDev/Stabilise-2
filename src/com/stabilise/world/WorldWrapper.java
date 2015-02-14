@@ -197,6 +197,11 @@ public class WorldWrapper<T extends BaseWorld> extends AbstractWorld {
 	}
 	
 	@Override
+	public long getAge() {
+		return world.getAge();
+	}
+	
+	@Override
 	public Random getRnd() {
 		return world.getRnd();
 	}

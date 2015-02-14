@@ -13,7 +13,7 @@ import com.stabilise.util.Profiler;
 import com.stabilise.world.ClientWorld;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.SingleplayerWorld;
-import com.stabilise.world.WorldProvider;
+import com.stabilise.world.WorldProviderOld;
 import com.stabilise.world.dimension.Dimension;
 
 /**
@@ -26,7 +26,7 @@ public class Game implements Controllable, InputProcessor {
 	/** Whether or not the game is currently paused. */
 	public boolean paused = false;
 	
-	private final WorldProvider provider;
+	private final WorldProviderOld provider;
 	/** The game's world instance. */
 	private final ClientWorld<HostWorld> world;
 	
@@ -55,7 +55,7 @@ public class Game implements Controllable, InputProcessor {
 	 * 
 	 * @param world The world to run.
 	 */
-	public Game(WorldProvider world) {
+	public Game(WorldProviderOld world) {
 		this.provider = world;
 		this.world = new SingleplayerWorld(
 				provider.getDimension(Dimension.defaultDimension()),

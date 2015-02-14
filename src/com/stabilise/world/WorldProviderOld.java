@@ -40,7 +40,7 @@ import com.stabilise.world.save.WorldLoader;
  * legacy and aesthetic purposes.
  */
 @Incomplete
-public class WorldProvider {
+public class WorldProviderOld {
 	
 	/** Dimensions should treat this as read-only. */
 	public final WorldInfo info;
@@ -68,7 +68,7 @@ public class WorldProvider {
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public WorldProvider(WorldInfo info, Profiler profiler) {
+	public WorldProviderOld(WorldInfo info, Profiler profiler) {
 		this.info = Preconditions.checkNotNull(info);
 		this.profiler = Preconditions.checkNotNull(profiler);
 		
@@ -273,7 +273,7 @@ public class WorldProvider {
 		 * @param The name of the player(s).
 		 * @param provider The world provider.
 		 */
-		public PlayerDataFile(String name, WorldProvider provider) {
+		public PlayerDataFile(String name, WorldProviderOld provider) {
 			this.name = name;
 			file = provider.info.getWorldDir().child(IWorld.DIR_PLAYERS + name + IWorld.EXT_PLAYERS);
 		}

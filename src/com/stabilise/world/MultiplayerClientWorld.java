@@ -8,6 +8,7 @@ import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.world.dimension.Dimension;
+import com.stabilise.world.provider.WorldProvider;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -130,6 +131,12 @@ public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
 	public boolean updateAndCheck() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public long getAge() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 }

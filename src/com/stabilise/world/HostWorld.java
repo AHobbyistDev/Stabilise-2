@@ -16,6 +16,7 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.gen.WorldGenerator;
+import com.stabilise.world.provider.WorldProvider;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
@@ -30,9 +31,6 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * -->
  */
 public class HostWorld extends BaseWorld {
-	
-	/** The world's information. This should be treated as read-only. */
-	public final WorldInfo worldInfo;
 	
 	/** The world generator. */
 	public final WorldGenerator generator;
@@ -54,14 +52,11 @@ public class HostWorld extends BaseWorld {
 	 * 
 	 * @param provider This world's provider.
 	 * @param dimension The dimension of this world.
-	 * @param worldInfo The world's info.
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
 	public HostWorld(WorldProvider provider, Dimension dimension) {
 		super(provider, dimension);
-		
-		this.worldInfo = provider.info;
 		
 		spawnSliceX = dimension.info.spawnSliceX;
 		spawnSliceY = dimension.info.spawnSliceY;
@@ -289,7 +284,7 @@ public class HostWorld extends BaseWorld {
 		synchronized(generator.getLock(loc)) {
 			r = generator.getCachedRegion(loc);
 			if(r == null) // if it's not cached, create it
-				r = new Region(loc, provider.info.age);
+				r = new Region(loc, dimension.info.age);
 			regions.put(loc, r);
 		}
 		
@@ -520,11 +515,9 @@ public class HostWorld extends BaseWorld {
 		provider.loadDimension(dimension).addEntity(e, x, y);
 	}
 	
-	/**
-	 * Gets the world's directory.
-	 */
-	public FileHandle getDir() {
-		return worldInfo.getWorldDir();
+	@Override
+	public long getAge() {
+		return dimension.info.age;
 	}
 	
 	/**
