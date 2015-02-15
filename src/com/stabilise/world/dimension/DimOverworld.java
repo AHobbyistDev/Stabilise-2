@@ -10,12 +10,12 @@ import com.stabilise.world.provider.WorldProvider;
  */
 public class DimOverworld extends Dimension {
 	
-	public DimOverworld(Info info) {
+	DimOverworld(Info info) {
 		super(info);
 	}
 	
 	@Override
-	public WorldGenerator createWorldGenerator(WorldProvider provider, HostWorld world) {
+	public WorldGenerator createWorldGenerator(WorldProvider<?> provider, HostWorld world) {
 		return new PerlinNoiseGenerator(provider, world);
 	}
 	

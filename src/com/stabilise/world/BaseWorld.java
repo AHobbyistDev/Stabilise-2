@@ -27,7 +27,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  */
 public abstract class BaseWorld extends AbstractWorld {
 	
-	public final WorldProvider provider;
+	public final WorldProvider<?> provider;
 	/** This world's dimension. */
 	public final Dimension dimension;
 	
@@ -91,7 +91,7 @@ public abstract class BaseWorld extends AbstractWorld {
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public BaseWorld(WorldProvider provider, Dimension dimension) {
+	public BaseWorld(WorldProvider<?> provider, Dimension dimension) {
 		this.provider = Preconditions.checkNotNull(provider);
 		this.dimension = Preconditions.checkNotNull(dimension);
 		

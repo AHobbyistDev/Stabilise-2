@@ -62,6 +62,7 @@ public class HostProvider extends WorldProvider<HostWorld> {
 	}
 
 	@Override
+	@NotThreadSafe
 	public HostWorld loadDimension(String name) {
 		HostWorld world = getDimension(name);
 		if(world != null)
@@ -93,14 +94,35 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		return info.seed;
 	}
 	
+	/**
+	 * Saves the worlds.
+	 * 
+	 * @throws RuntimeException if an I/O error occurred while saving.
+	 */
 	@Override
 	public void save() {
+		try {
+			info.save();
+		} catch(IOException e) {
+			throw new RuntimeException("Could not save world info!", e);
+		}
 		
+		for(HostWorld dim : dimensions.values())
+			dim.save();
 	}
 	
 	@Override
-	protected void doClose() {
+	protected void closeExtra() {
+		for(PlayerDataFile p : players.values()) {
+			try {
+				p.dispose();
+			} catch(IOException e) {
+				throw new RuntimeException("Could not save " + p, e);
+			}
+		}
 		
+		for(HostWorld dim : dimensions.values())
+			dim.blockUntilClosed();
 	}
 	
 	//--------------------==========--------------------

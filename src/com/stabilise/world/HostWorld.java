@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
@@ -55,7 +54,7 @@ public class HostWorld extends BaseWorld {
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public HostWorld(WorldProvider provider, Dimension dimension) {
+	public HostWorld(WorldProvider<?> provider, Dimension dimension) {
 		super(provider, dimension);
 		
 		spawnSliceX = dimension.info.spawnSliceX;

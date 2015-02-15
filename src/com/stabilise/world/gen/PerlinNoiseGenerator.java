@@ -29,7 +29,7 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 	 * @param worldProv The world provider.
 	 * @param world The world.
 	 */
-	public PerlinNoiseGenerator(WorldProvider worldProv, HostWorld world) {
+	public PerlinNoiseGenerator(WorldProvider<?> worldProv, HostWorld world) {
 		super(worldProv, world);
 	}
 	

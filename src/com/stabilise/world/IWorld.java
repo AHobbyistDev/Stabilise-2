@@ -378,6 +378,12 @@ public interface IWorld extends Checkable {
 	 */
 	Random getRnd();
 	
+	/**
+	 * Returns {@code true} if this world has particles; that is, if this is a
+	 * client world.
+	 */
+	//boolean hasParticles();
+	
 	// ========== Lifecycle Methods ==========
 	
 	/**

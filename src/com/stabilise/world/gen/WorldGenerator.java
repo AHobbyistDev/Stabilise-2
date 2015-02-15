@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.stabilise.util.Log;
 import com.stabilise.util.TaskTimer;
+import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.maths.HashPoint;
@@ -81,10 +82,11 @@ import com.stabilise.world.provider.WorldProvider;
  * <p>Generators are advised to keep the landform within the range
  * {@code -256 < y < 256} at and around {@code x = 0} for spawning purposes.
  */
+@ThreadSafe
 public abstract class WorldGenerator {
 	
 	/** The world provider. */
-	private final WorldProvider prov;
+	private final WorldProvider<?> prov;
 	/** The world for which the generator is generating. */
 	private final HostWorld world;
 	/** The seed to use for world generation. */
@@ -128,10 +130,11 @@ public abstract class WorldGenerator {
 	/**
 	 * Creates a new WorldGenerator.
 	 * 
-	 * @param worldProv The world provider.
+	 * @param worldProv The world provider. This should be a {@code
+	 * HostProvider} for all but a {@code PrivateDimensionGenerator}.
 	 * @param world The world.
 	 */
-	protected WorldGenerator(WorldProvider worldProv, HostWorld world) {
+	protected WorldGenerator(WorldProvider<?> worldProv, HostWorld world) {
 		this.prov = worldProv;
 		this.world = world;
 		this.executor = prov.getExecutor();
@@ -641,8 +644,6 @@ public abstract class WorldGenerator {
 	 * @return The object lock.
 	 */
 	public Object getLock(HashPoint loc) {
-		//assert numLocks = 4;
-		
 		// We use the lowest two bits holding whether or not x and y are odd
 		// or even numbers. This creates a repeating 2x2 grid such that
 		// adjacent regions do not use the same lock. This can be made
@@ -651,7 +652,7 @@ public abstract class WorldGenerator {
 		// locks[1] (01) if x is even and y is odd
 		// locks[2] (10) if x is odd and y is even
 		// locks[3] (11) if x is odd and y is odd
-		return locks[((loc.x & 1) << 1) + (loc.y & 1)];
+		return locks[((loc.x & 1) << 1) | (loc.y & 1)];
 	}
 	
 	/**

@@ -21,7 +21,7 @@ public class FlatlandGeneratorII extends WorldGenerator {
 	 * @param worldProv The world provider.
 	 * @param world The world.
 	 */
-	FlatlandGeneratorII(WorldProvider worldProv, HostWorld world) {
+	FlatlandGeneratorII(WorldProvider<?> worldProv, HostWorld world) {
 		super(worldProv, world);
 	}
 	

@@ -58,7 +58,7 @@ public abstract class Dimension {
 	 * 
 	 * @throws NullPointerException if {@code provider} is {@code null}.
 	 */
-	public HostWorld createHost(WorldProvider provider) {
+	public HostWorld createHost(WorldProvider<?> provider) {
 		return new HostWorld(provider, this);
 	}
 	
@@ -71,7 +71,7 @@ public abstract class Dimension {
 	 * @return The world generator.
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public abstract WorldGenerator createWorldGenerator(WorldProvider provider, HostWorld world);
+	public abstract WorldGenerator createWorldGenerator(WorldProvider<?> provider, HostWorld world);
 	
 	/**
 	 * Loads this dimension's info.

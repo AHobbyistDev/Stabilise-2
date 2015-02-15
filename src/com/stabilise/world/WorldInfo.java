@@ -20,7 +20,7 @@ public class WorldInfo implements Comparable<WorldInfo> {
 	public long seed = 0L;
 	
 	/** The age of the world in ticks. */
-	public volatile long age = 0L; // see WorldLoader.saveRegion() as to why this is volatile
+	public long age = 0L;
 	
 	/** The date the world was created at. */
 	public long creationDate = 0L;

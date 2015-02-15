@@ -104,6 +104,9 @@ public abstract class WorldProvider<W extends IWorld> {
 		loader = WorldLoader.getLoader(this);
 	}
 	
+	/**
+	 * Updates all worlds.
+	 */
 	public void update() {
 		Checkable.updateCheckables(dimensions.values());
 	}
@@ -131,11 +134,18 @@ public abstract class WorldProvider<W extends IWorld> {
 	 */
 	public abstract W loadDimension(String name);
 	
+	// This is a WorldProvider method so we can catch client players being sent
+	// and shift the worldview
 	public void sendToDimension(W oldDim, String dimension, Entity e, double x, double y) {
 		oldDim.removeEntity(e);
-		loadDimension(dimension).addEntity(e, x, y);
+		W dim = loadDimension(dimension);
+		dim.addEntity(e, x, y);
+		e.world = dim;
 	}
 	
+	/**
+	 * Gets the executor with which to run concurrent tasks.
+	 */
 	public final Executor getExecutor() {
 		return executor;
 	}
@@ -166,7 +176,7 @@ public abstract class WorldProvider<W extends IWorld> {
 		for(W dim : dimensions.values())
 			dim.close();
 		
-		doClose();
+		closeExtra();
 		
 		executor.shutdown();
 		
@@ -178,7 +188,12 @@ public abstract class WorldProvider<W extends IWorld> {
 		}
 	}
 	
-	protected abstract void doClose();
+	/**
+	 * Performs any closing procedures which may be done in-between {@link
+	 * IWorld#close()} being invoked on every world, and the executor being
+	 * shutdown.
+	 */
+	protected abstract void closeExtra();
 	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------

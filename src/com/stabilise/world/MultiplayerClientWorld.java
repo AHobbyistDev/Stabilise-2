@@ -25,7 +25,7 @@ public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
 	public final SliceMapClient slices = new SliceMapClient();
 	
 	
-	public MultiplayerClientWorld(WorldProvider provider, Dimension dimension) {
+	public MultiplayerClientWorld(WorldProvider<?> provider, Dimension dimension) {
 		super(provider, dimension);
 	}
 	

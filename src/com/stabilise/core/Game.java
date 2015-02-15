@@ -13,8 +13,8 @@ import com.stabilise.util.Profiler;
 import com.stabilise.world.ClientWorld;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.SingleplayerWorld;
-import com.stabilise.world.WorldProviderOld;
 import com.stabilise.world.dimension.Dimension;
+import com.stabilise.world.provider.HostProvider;
 
 /**
  * The game itself.
@@ -26,7 +26,7 @@ public class Game implements Controllable, InputProcessor {
 	/** Whether or not the game is currently paused. */
 	public boolean paused = false;
 	
-	private final WorldProviderOld provider;
+	private final HostProvider provider;
 	/** The game's world instance. */
 	private final ClientWorld<HostWorld> world;
 	
@@ -53,10 +53,10 @@ public class Game implements Controllable, InputProcessor {
 	/**
 	 * Creates a new Game instance.
 	 * 
-	 * @param world The world to run.
+	 * @param provider The world to run.
 	 */
-	public Game(WorldProviderOld world) {
-		this.provider = world;
+	public Game(HostProvider provider) {
+		this.provider = provider;
 		this.world = new SingleplayerWorld(
 				provider.getDimension(Dimension.defaultDimension()),
 				CharacterData.defaultCharacter()
@@ -94,7 +94,7 @@ public class Game implements Controllable, InputProcessor {
 				//	menu.update();
 				profiler.next("world"); // root.update.game.world
 				if(!paused)
-					world.update();
+					provider.update();
 				profiler.end(); // root.update.game
 			} catch(Exception e) {
 				log.postSevere("Game encountered error!", e);
@@ -125,7 +125,7 @@ public class Game implements Controllable, InputProcessor {
 		running = false;
 		//if(menu != null)
 		//	menu.unloadResources();
-		world.close();
+		provider.close();
 	}
 	
 	/**
@@ -174,7 +174,7 @@ public class Game implements Controllable, InputProcessor {
 	 */
 	public void openPauseMenu() {
 		//setMenu(new PauseMenu(this), true);
-		world.save();
+		provider.save();
 	}
 	
 	@Override
