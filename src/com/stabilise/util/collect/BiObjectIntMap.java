@@ -116,7 +116,7 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 	 * operation is most suitable when it is known no more entries will be
 	 * added to this map.
 	 */
-	void trim() {
+	public void trim() {
 		list.trimToSize();
 	}
 	

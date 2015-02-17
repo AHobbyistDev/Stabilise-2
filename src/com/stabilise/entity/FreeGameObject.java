@@ -1,6 +1,6 @@
 package com.stabilise.entity;
 
-import com.stabilise.world.BaseWorld;
+import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.IWorld;
 
 /**
@@ -31,12 +31,12 @@ public abstract class FreeGameObject extends GameObject {
 	
 	@Override
 	public final int getSliceX() {
-		return BaseWorld.sliceCoordFromTileCoord(x);
+		return AbstractWorld.sliceCoordFromTileCoord(x);
 	}
 	
 	@Override
 	public final int getSliceY() {
-		return BaseWorld.sliceCoordFromTileCoord(y);
+		return AbstractWorld.sliceCoordFromTileCoord(y);
 	}
 
 }

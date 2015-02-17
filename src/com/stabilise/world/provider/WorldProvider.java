@@ -16,6 +16,7 @@ import com.stabilise.util.Checkable;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
+import com.stabilise.world.BaseWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.save.WorldLoader;
 
@@ -31,7 +32,7 @@ import com.stabilise.world.save.WorldLoader;
  * member through which they interact with the dimension they are in) for both
  * legacy and aesthetic purposes.
  */
-public abstract class WorldProvider<W extends IWorld> {
+public abstract class WorldProvider<W extends BaseWorld> {
 	
 	/*
 	 * TYPES OF WORLDPROVIDER

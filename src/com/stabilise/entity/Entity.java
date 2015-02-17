@@ -457,18 +457,6 @@ public abstract class Entity extends FreeGameObject {
 		// subclasses are to implement this functionality
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p>This Entity is removed from the world as per an invocation of {@link
-	 * BaseWorld#removeEntity(Entity)}.
-	 */
-	@Override
-	public void destroy() {
-		super.destroy();
-		world.removeEntity(id);
-	}
-	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------

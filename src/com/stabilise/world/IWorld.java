@@ -35,44 +35,10 @@ public interface IWorld extends Checkable {
 	/** The file extension for player data files. */
 	public static final String EXT_PLAYERS = ".player";
 	
-	/** The maximum number of hostile mobs which may spawn. */
+	/** The maximum number of hostile mobs which may spawn.
+	 * <p>TODO: Arbitrary, and probably temporary. */
 	public static final int HOSTILE_MOB_CAP = 100;
 	
-	
-	/**
-	 * Prepares the world by performing any necessary preemptive loading
-	 * operations, such as preparing the spawn regions, etc. Polling {@link
-	 * #isLoaded()} allows one to check the status of this operation.
-	 * 
-	 * @throws IllegalStateException if the world has already been prepared.
-	 */
-	void prepare();
-	
-	/**
-	 * Polls the loaded status of the world.
-	 * 
-	 * @return {@code true} if the world is loaded; {@code false} otherwise.
-	 */
-	boolean isLoaded();
-	
-	/**
-	 * Updates the world by executing a single tick of game logic. In general,
-	 * all GameObjects in the world will be updated (i.e. entities, hitboxes,
-	 * tile entities, etc).
-	 */
-	void update();
-	
-	/**
-	 * Sets a mob as a player. The mob will be treated as if the player is
-	 * controlling it thereafter.
-	 */
-	void setPlayer(EntityMob m);
-	
-	/**
-	 * Removes the status of player from a mob. The mob will no longer be
-	 * treated as if controlled by a player thereafter.
-	 */
-	void unsetPlayer(EntityMob m);
 	
 	/**
 	 * Adds an entity to the world. The entity's ID is assigned automatically.
@@ -102,6 +68,17 @@ public interface IWorld extends Checkable {
 	void addEntity(Entity e);
 	
 	/**
+	 * Gets the entity with the specified ID.
+	 * 
+	 * @return The entity with the specified ID, or {@code null} if there is no
+	 * such entity in the world.
+	 */
+	Entity getEntity(int id);
+	
+	/**
+	 * Invokes {@link Entity#destroy() e.destroy()}.
+	 * 
+	 * <!--
 	 * Removes an entity from the world.
 	 * 
 	 * <p>The entity is not removed from the map of entities immediately;
@@ -109,12 +86,17 @@ public interface IWorld extends Checkable {
 	 * as to prevent a {@code ConcurrentModificationException} from being
 	 * thrown if the entity is removed while the map of entities is being
 	 * iterated over.
+	 * -->
 	 * 
 	 * @param e The entity.
 	 */
 	void removeEntity(Entity e);
 	
 	/**
+	 * Invokes {@link Entity#destroy() destroy()} on the entity with the
+	 * specified ID, if it exists.
+	 * 
+	 * <!--
 	 * Removes an entity from the world.
 	 * 
 	 * <p>The entity is not removed from the map of entities immediately;
@@ -122,6 +104,7 @@ public interface IWorld extends Checkable {
 	 * as to prevent a {@code ConcurrentModificationException} from being
 	 * thrown if the entity is removed while the map of entities is being
 	 * iterated over.
+	 * -->
 	 * 
 	 * @param id The ID of the entity.
 	 */
@@ -129,12 +112,6 @@ public interface IWorld extends Checkable {
 	
 	/**
 	 * Adds a hitbox to the world. The hitbox's ID is assigned automatically.
-	 * 
-	 * <p>The hitbox is not added to the map of hitboxes immediately; rather,
-	 * it is added mid tick; after the entities have been updated, but before
-	 * the hitboxes have been updated. This is intended as to prevent a
-	 * {@code ConcurrentModificationException} from being thrown if the hitbox
-	 * is added while the map of hitboxes is being iterated over.
 	 * 
 	 * @param h The hitbox.
 	 * @param x The x-coordinate at which to place the hitbox, in tile-lengths.
@@ -384,19 +361,6 @@ public interface IWorld extends Checkable {
 	 */
 	//boolean hasParticles();
 	
-	// ========== Lifecycle Methods ==========
-	
-	/**
-	 * Saves the world.
-	 */
-	void save();
-	
-	/**
-	 * Closes the world. This method may block for a prolonged period while the
-	 * the world is closed if this is a HostWorld.
-	 */
-	void close();
-	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------
@@ -485,24 +449,21 @@ public interface IWorld extends Checkable {
 		IOUtil.createDir(Resources.WORLDS_DIR);
 		FileHandle[] worldDirs = Resources.WORLDS_DIR.list();
 		
-		// Initially store as an ArrayList because of its dynamic length
-		List<WorldInfo> worlds = new ArrayList<WorldInfo>();
+		List<WorldInfo> worlds = new ArrayList<>(worldDirs.length);
 		
-		int validWorlds = 0;		// The number of valid worlds (all worlds in the worldDirs might not be valid)
-		
-		// Cycle over all the folders in the worlds directory and determine their
-		// validity as worlds.
+		// Cycle over all the folders in the worlds directory and determine
+		// their validity as worlds.
 		for(int i = 0; i < worldDirs.length; i++) {
-			worlds.add(validWorlds, new WorldInfo(worldDirs[i].name()));
 			try {
-				worlds.get(validWorlds).load();
+				WorldInfo info = new WorldInfo(worldDirs[i].name());
+				info.load(); // throws IOE
+				worlds.add(info);
 			} catch(IOException e) {
-				Log.get().postWarning("Could not load world info for world \"" + worldDirs[i].name() + "\"!"
-						+ ": " + e.getClass().getSimpleName() + ": " + e.getMessage());
-				worlds.remove(validWorlds);
+				Log.get().postWarning("Could not load world info for world \""
+						+ worldDirs[i].name() + "\"!" + ": "
+						+ e.getClass().getSimpleName() + ": " + e.getMessage());
 				continue;
 			}
-			validWorlds++;
 		}
 		
 		// Now, we convert the ArrayList to a conventional array

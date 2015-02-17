@@ -36,9 +36,4 @@ public class SingleplayerWorld extends ClientWorld<HostWorld> {
 		world.profiler.end(); // root.update.game.world
 	}
 	
-	@Override
-	public void save() {
-		super.save();
-	}
-	
 }

@@ -67,6 +67,10 @@ public abstract class GameObject implements Checkable {
 	/**
 	 * Destroys this GameObject.
 	 * 
+	 * <p>Invoking this method guarantees that this GameObject will be removed
+	 * from the world ASAP (either during the current update tick, or during
+	 * the next one).
+	 * 
 	 * <p>In the default implementation, this sets the {@link #destroyed} flag
 	 * to {@code true}, and {@link #isDestroyed()} will return {@code true}
 	 * henceforth.

@@ -37,33 +37,8 @@ public class WorldWrapper<T extends BaseWorld> extends AbstractWorld {
 	}
 	
 	@Override
-	public void prepare() {
-		world.prepare();
-	}
-	
-	@Override
-	public boolean isLoaded() {
-		return world.isLoaded();
-	}
-	
-	@Override
-	public void update() {
-		world.update();
-	}
-	
-	@Override
 	public boolean updateAndCheck() {
 		return world.updateAndCheck();
-	}
-	
-	@Override
-	public void setPlayer(EntityMob m) {
-		world.setPlayer(m);
-	}
-	
-	@Override
-	public void unsetPlayer(EntityMob m) {
-		world.unsetPlayer(m);
 	}
 	
 	@Override
@@ -204,16 +179,6 @@ public class WorldWrapper<T extends BaseWorld> extends AbstractWorld {
 	@Override
 	public Random getRnd() {
 		return world.getRnd();
-	}
-	
-	@Override
-	public void save() {
-		world.save();
-	}
-	
-	@Override
-	public void close() {
-		world.close();
 	}
 	
 }

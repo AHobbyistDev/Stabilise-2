@@ -116,7 +116,7 @@ public class Profiler {
 			// Somewhat inefficient, but check to see if such a section already
 			// exists.
 			for(Section s : curConstituents) {
-				if(s.name == section) {
+				if(s.name.equals(section)) {
 					stack.add(s);
 					s.start();
 					return;

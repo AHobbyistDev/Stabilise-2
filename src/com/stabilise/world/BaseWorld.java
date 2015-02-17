@@ -11,6 +11,7 @@ import com.stabilise.core.Constants;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.collision.Hitbox;
+import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.UserThread;
@@ -31,35 +32,40 @@ public abstract class BaseWorld extends AbstractWorld {
 	/** This world's dimension. */
 	public final Dimension dimension;
 	
-	/** All players in the world. Mappings are IDs to EntityMobs. */
-	protected Map<Integer, EntityMob> players = new HashMap<>(1);
+	/** All players in the world. Maps IDs -> players' EntityMobs. */
+	protected final Map<Integer, EntityMob> players = new HashMap<>(1);
 	/** The map of loaded entities in the world. Mappings are IDs to Entities.
 	 * This is a LinkedHashMap as to allow for consistent iteration. */
-	protected Map<Integer, Entity> entities = new LinkedHashMap<>(64);
+	protected final Map<Integer, Entity> entities = new LinkedHashMap<>(64);
 	/** The total number of entities which have existed during the lifetime of
 	 * the world. When a new entity is created this is incremented and set as
 	 * its ID. */
 	protected int entityCount = 0;
 	/** Entities queued to be added to the world at the end of the tick. */
-	private ClearOnIterateLinkedList<Entity> entitiesToAdd =
-			new ClearOnIterateLinkedList<>();
-	/** The IDs of entities queued to be removed from the world at the end of
-	 * the tick.  */
-	private ClearOnIterateLinkedList<Integer> entitiesToRemove =
+	private final ClearOnIterateLinkedList<Entity> entitiesToAdd =
 			new ClearOnIterateLinkedList<>();
 	/** The number of hostile mobs in the world. */
 	protected int hostileMobCount = 0;
 	
-	/** Stores tile entities for iteration and updating. */
-	protected LightweightLinkedList<TileEntity> tileEntities =
+	/** Stores tile entities for iteration and updating. A loaded tile entity
+	 * need not exist in this list if it does not require updates. */
+	protected final LightweightLinkedList<TileEntity> tileEntities =
 			new LightweightLinkedList<>();
 	
 	/** The list of hitboxes in the world. */
-	protected LightweightLinkedList<Hitbox> hitboxes =
+	protected final LightweightLinkedList<Hitbox> hitboxes =
 			new LightweightLinkedList<>();
 	/** The total number of hitboxes which have existed during the lifetime of
 	 * the world. */
 	protected int hitboxCount = 0;
+	
+	/** Stores all particles in the world. This should remain empty if this is
+	 * a server world. */
+	protected final LightweightLinkedList<Particle> particles =
+			new LightweightLinkedList<Particle>();
+	/** The total number of particles which have existed during the lifetime of
+	 * the world. */
+	protected int particleCount = 0;
 	
 	/** The x-coordinate the slice in which players initially spawn, in
 	 * slice-lengths. */
@@ -70,7 +76,7 @@ public abstract class BaseWorld extends AbstractWorld {
 	
 	private float timeDelta = 1f;
 	private float timeIncrement = timeDelta / Constants.TICKS_PER_SECOND;
-	private final float gravity = -3 * 9.8f;
+	private final float gravity = -3 * 9.8f; // arbitrary, but just 9.8 is too boring :P
 	private float gravityIncrement = gravity * timeIncrement;
 	private float gravity2ndOrder = gravity * timeIncrement * timeIncrement / 2;
 	
@@ -99,7 +105,27 @@ public abstract class BaseWorld extends AbstractWorld {
 		log = Log.getAgent("World_" + dimension.info.name);
 	}
 	
-	@Override
+	/**
+	 * Prepares the world by performing any necessary preemptive loading
+	 * operations, such as preparing the spawn regions, etc. Polling {@link
+	 * #isLoaded()} allows one to check the status of this operation.
+	 * 
+	 * @throws IllegalStateException if the world has already been prepared.
+	 */
+	public abstract void prepare();
+	
+	/**
+	 * Polls the loaded status of the world.
+	 * 
+	 * @return {@code true} if the world is loaded; {@code false} otherwise.
+	 */
+	public abstract boolean isLoaded();
+	
+	/**
+	 * Updates the world by executing a single tick of game logic. In general,
+	 * all GameObjects in the world will be updated (i.e. entities, hitboxes,
+	 * tile entities, etc).
+	 */
 	@UserThread("MainThread")
 	public void update() {
 		profiler.start("entity"); // root.update.game.world.entity
@@ -108,32 +134,33 @@ public abstract class BaseWorld extends AbstractWorld {
 		updateObjects(getHitboxes());
 		profiler.next("tileEntity"); // root.update.game.world.tileEntity
 		updateObjects(getTileEntities());
+		profiler.next("particle"); // root.update.game.world.particle
+		updateObjects(getParticles());
 		
-		// Now, add and remove all queued entities
+		// Now, add all queued entities
 		profiler.next("entity"); // root.update.game.world.entity
 		profiler.start("add"); // root.update.game.world.entity.add
 		
-		if(!entitiesToAdd.isEmpty()) {
+		if(!entitiesToAdd.isEmpty())
 			for(Entity e : entitiesToAdd)
 				entities.put(e.id, e);
-		}
 		
-		profiler.next("remove"); // root.update.game.world.entity.remove
-		if(entitiesToRemove.size() != 0) {
-			for(Integer id : entitiesToRemove)
-				entities.remove(id);
-		}
 		profiler.end(); // root.update.game.world.entity
-		
 		profiler.end(); // root.update.game.world
 	}
 	
-	@Override
+	/**
+	 * Sets a mob as a player. The mob will be treated as if the player is
+	 * controlling it thereafter.
+	 */
 	public void setPlayer(EntityMob m) {
 		players.put(m.id, m);
 	}
 	
-	@Override
+	/**
+	 * Removes the status of player from a mob. The mob will no longer be
+	 * treated as if controlled by a player thereafter.
+	 */
 	public void unsetPlayer(EntityMob m) {
 		players.remove(m.id);
 	}
@@ -146,18 +173,27 @@ public abstract class BaseWorld extends AbstractWorld {
 	}
 	
 	@Override
-	public void removeEntity(Entity e) {
-		removeEntity(e.id);
+	public Entity getEntity(int id) {
+		return entities.get(id);
 	}
 	
 	@Override
 	public void removeEntity(int id) {
-		entitiesToRemove.add(id);
+		Entity e = getEntity(id);
+		if(e != null)
+			e.destroy();
 	}
 	
 	@Override
 	public void addHitbox(Hitbox h) {
+		hitboxCount++;
 		hitboxes.add(h);
+	}
+	
+	@Override
+	public void addParticle(Particle p) {
+		particleCount++;
+		particles.add(p);
 	}
 	
 	/**
@@ -222,6 +258,11 @@ public abstract class BaseWorld extends AbstractWorld {
 		return tileEntities;
 	}
 	
+	@Override
+	public Collection<Particle> getParticles() {
+		return particles;
+	}
+	
 	// ========== Stuff ==========
 	
 	@Override
@@ -267,6 +308,19 @@ public abstract class BaseWorld extends AbstractWorld {
 	public Random getRnd() {
 		return rng;
 	}
+	
+	// ========== Lifecycle Methods ==========
+	
+	/**
+	 * Saves the world.
+	 */
+	public abstract void save();
+	
+	/**
+	 * Closes the world. This method may block for a prolonged period while the
+	 * the world is closed if this is a HostWorld.
+	 */
+	public abstract void close();
 	
 	// ========== Misc ==========
 	

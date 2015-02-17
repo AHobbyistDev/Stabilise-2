@@ -190,8 +190,7 @@ public class CharacterData {
 		IOUtil.createDir(Resources.CHARACTERS_DIR);
 		FileHandle[] characterDirs = Resources.CHARACTERS_DIR.list();
 		
-		// Initially store as a List because of its dynamic length
-		List<CharacterData> characters = new ArrayList<CharacterData>();
+		List<CharacterData> characters = new ArrayList<>(characterDirs.length);
 		
 		// Cycle over all the folders in the characters directory and determine
 		// their validity.
@@ -201,8 +200,8 @@ public class CharacterData {
 				character.load();
 				characters.add(character);
 			} catch(IOException e) {
-				Log.get().postSevere("Could not load character data for character \"" + charDir.name() + "\"!");
-				continue;
+				Log.get().postSevere("Could not load character data for character \""
+						+ charDir.name() + "\"!");
 			}
 		}
 		

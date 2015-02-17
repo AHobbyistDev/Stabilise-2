@@ -38,6 +38,11 @@ public abstract class AbstractWorld implements IWorld {
 	}
 	
 	@Override
+	public void removeEntity(Entity e) {
+		e.destroy();
+	}
+	
+	@Override
 	public void addHitbox(Hitbox h, double x, double y) {
 		h.x = x;
 		h.y = y;
