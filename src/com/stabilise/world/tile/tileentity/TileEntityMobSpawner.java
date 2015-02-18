@@ -36,18 +36,6 @@ public class TileEntityMobSpawner extends TileEntity {
 	}
 	
 	/**
-	 * Creates a new mob spawner tile entity.
-	 * 
-	 * @param world The world in which the tile entity is to be placed.
-	 * @param x The x-coordinate of the tile entity, in tile-lengths.
-	 * @param y The y-coordinate of the tile entity, in tile-lengths.
-	 */
-	public TileEntityMobSpawner(IWorld world, int x, int y) {
-		super(world, x, y);
-		init();
-	}
-	
-	/**
 	 * Sets up the mob spawner.
 	 */
 	private void init() {
@@ -61,18 +49,18 @@ public class TileEntityMobSpawner extends TileEntity {
 	}
 	
 	@Override
-	public void update() {
-		if(playerInRange()) {
+	public void update(IWorld world) {
+		if(playerInRange(world)) {
 			if(--ticksUntilNextSpawn == 0) {
 				ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS;
 				
 				int spawns = MIN_SPAWNS + world.getRnd().nextInt(1 + MAX_SPAWNS - MIN_SPAWNS);
 				while(spawns-- > 0)
-					trySpawn();
+					trySpawn(world);
 			}
 			
 			if(world.getRnd().nextInt(5) == 0)
-			spawnParticle();
+				spawnParticle(world);
 		}
 	}
 	
@@ -81,7 +69,7 @@ public class TileEntityMobSpawner extends TileEntity {
 	 * 
 	 * @return {@code true} if a player is in range; {@code false} otherwise.
 	 */
-	private boolean playerInRange() {
+	private boolean playerInRange(IWorld world) {
 		for(EntityMob p : world.getPlayers()) {
 			double dx = xPos - p.x;
 			double dy = yPos - p.y;
@@ -97,13 +85,13 @@ public class TileEntityMobSpawner extends TileEntity {
 	 * @return {@code true} if the spawn was successful; {@code false}
 	 * otherwise.
 	 */
-	private boolean trySpawn() {
-		EntityEnemy e = new EntityEnemy(world);
+	private boolean trySpawn(IWorld world) {
+		EntityEnemy e = new EntityEnemy();
 		world.addEntity(e, xPos, yPos+1);
 		
 		for(int i = 0; i < 10; i++) {
-			spawnParticle();
-			spawnParticleOnMob(e);
+			spawnParticle(world);
+			spawnParticleOnMob(world, e);
 		}
 		
 		return true;
@@ -112,8 +100,8 @@ public class TileEntityMobSpawner extends TileEntity {
 	/**
 	 * Spawns a flame particle on the spawner.
 	 */
-	private void spawnParticle() {
-		ParticleFlame p = new ParticleFlame(world);
+	private void spawnParticle(IWorld world) {
+		ParticleFlame p = new ParticleFlame();
 		p.x = x + world.getRnd().nextFloat();
 		p.y = y + world.getRnd().nextFloat();
 		
@@ -127,8 +115,8 @@ public class TileEntityMobSpawner extends TileEntity {
 	 * 
 	 * @param e The mob.
 	 */
-	private void spawnParticleOnMob(EntityMob e) {
-		ParticleSmoke p = new ParticleSmoke(world);
+	private void spawnParticleOnMob(IWorld world, EntityMob e) {
+		ParticleSmoke p = new ParticleSmoke();
 		p.x = e.x + e.boundingBox.getV00().x + world.getRnd().nextFloat() * e.boundingBox.width;
 		p.y = e.y + e.boundingBox.getV11().y + world.getRnd().nextFloat() * e.boundingBox.height;
 		

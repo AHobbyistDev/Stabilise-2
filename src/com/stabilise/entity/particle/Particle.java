@@ -14,16 +14,13 @@ public abstract class Particle extends FreeGameObject {
 	
 	/**
 	 * Creates a new Particle.
-	 * 
-	 * @param world The world in which the Particle will be placed.
 	 */
-	public Particle(IWorld world) {
+	public Particle() {
 		super();
-		this.world = world;
 	}
 	
 	@Override
-	public void update() {
+	public void update(IWorld world) {
 		age++;
 	}
 	

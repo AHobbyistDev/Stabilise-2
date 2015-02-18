@@ -1,7 +1,7 @@
 package com.stabilise.entity;
 
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.world.ClientWorld;
+import com.stabilise.world.IWorld;
 
 /**
  * The GameCamera controls the player's perspective, and hence which parts of
@@ -32,13 +32,12 @@ public class GameCamera extends FreeGameObject {
 	 * @param world The game world.
 	 * @param focus The entity upon which to focus the camera.
 	 */
-	public GameCamera(ClientWorld<?> world, Entity focus) {
-		super(world);
+	public GameCamera(Entity focus) {
 		setFocus(focus);
 	}
 	
 	@Override
-	public void update() {
+	public void update(IWorld world) {
 		//x = focus.x;
 		//y = focus.y;
 		

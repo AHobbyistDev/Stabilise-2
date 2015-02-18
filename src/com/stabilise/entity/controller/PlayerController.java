@@ -141,21 +141,21 @@ public class PlayerController extends MobController implements Controllable, Inp
 				break;
 			case SUMMON:
 				{	// Bracing because I don't like using the variable names 'e1', 'e2' that much
-					EntityEnemy e = new EntityEnemy(mob.world);
+					EntityEnemy e = new EntityEnemy();
 					e.x = mob.x + (mob.facingRight ? 5 : -5);
 					e.y = mob.y;
-					mob.world.addEntity(e);
+					game.world.addEntity(e);
 				}
 				//}
 				break;
 			case SUMMON_SWARM:
 				{
-					int max = 50 + mob.world.getRnd().nextInt(25);
+					int max = 50 + game.world.getRnd().nextInt(25);
 					for(int i = 0; i < max; i++) {
-						EntityEnemy e = new EntityEnemy(mob.world);
-						e.x = mob.x - 10 + mob.world.getRnd().nextFloat() * 20;
-						e.y = mob.y + mob.world.getRnd().nextFloat() * 10;
-						mob.world.addEntity(e);
+						EntityEnemy e = new EntityEnemy();
+						e.x = mob.x - 10 + game.world.getRnd().nextFloat() * 20;
+						e.y = mob.y + game.world.getRnd().nextFloat() * 10;
+						game.world.addEntity(e);
 					}
 				}
 				//}
@@ -179,8 +179,8 @@ public class PlayerController extends MobController implements Controllable, Inp
 						double xDiff = mob.x - tx;
 						double yDiff = mob.y - ty;
 						if(xDiff*xDiff + yDiff*yDiff <= radiusSquared)
-							mob.world.setTileAt(tx, ty, 0);
-							//mob.world.blowUpTile(tx, ty, 12);
+							game.world.setTileAt(tx, ty, 0);
+							//game.world.blowUpTile(tx, ty, 12);
 					}
 				}
 				break;
@@ -197,7 +197,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 				}
 				break;
 			case INTERACT:
-				mob.world.getTileAt(mob.x, mob.y-1).handleInteract(mob.world, Maths.floor(mob.x), Maths.floor(mob.y-1), mob);
+				game.world.getTileAt(mob.x, mob.y-1).handleInteract(game.world, Maths.floor(mob.x), Maths.floor(mob.y-1), mob);
 				break;
 			case TEST_RANDOM_THING:
 				mob.x = 0;
@@ -219,9 +219,9 @@ public class PlayerController extends MobController implements Controllable, Inp
 	@Override
 	public boolean keyDown(int keycode) {
 		if(keycode == Keys.LEFT_BRACKET)
-			mob.world.setTimeDelta(mob.world.getTimeDelta() * 0.5f);
+			game.world.setTimeDelta(game.world.getTimeDelta() * 0.5f);
 		else if(keycode == Keys.RIGHT_BRACKET)
-			mob.world.setTimeDelta(mob.world.getTimeDelta() * 2f);
+			game.world.setTimeDelta(game.world.getTimeDelta() * 2f);
 		else if(keycode == Keys.P)
 			System.out.println(game.profiler.getData().toString());
 		else if(keycode == Keys.O)

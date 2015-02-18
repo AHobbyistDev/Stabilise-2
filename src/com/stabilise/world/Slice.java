@@ -188,7 +188,6 @@ public class Slice {
 		for(int r = 0; r < SLICE_SIZE; r++) {
 			for(int c = 0; c < SLICE_SIZE; c++) {
 				if((t = tileEntities[r][c]) != null) {
-					t.world = world;
 					world.addTileEntity(t);
 				}
 			}

@@ -9,6 +9,7 @@ import com.stabilise.core.state.State;
 import com.stabilise.util.AppDriver;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
+import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
  * An {@code Application} is designed to form the basis of any program which
@@ -46,6 +47,7 @@ import com.stabilise.util.Profiler;
  * the main thread (i.e. the one through which the Application itself invokes
  * the current state's methods).
  */
+@NotThreadSafe
 public abstract class Application {
 	
 	//--------------------==========--------------------
@@ -399,6 +401,7 @@ public abstract class Application {
 	 */
 	private class InternalAppDriver extends AppDriver {
 		
+		/** @see {@link AppDriver#AppDriver(int, int, Log)} */
 		public InternalAppDriver(int tps, int fps, Log log) {
 			super(tps, fps, log);
 		}

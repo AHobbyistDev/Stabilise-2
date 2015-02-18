@@ -27,15 +27,6 @@ public class EntityEnemy extends EntityMob {
 	private EnumAction action = EnumAction.IDLE;
 	
 	
-	/**
-	 * Creates a new generic test enemy.
-	 * 
-	 * @param world The world in which the generic test enemy is to be placed.
-	 */
-	public EntityEnemy(IWorld world) {
-		super(world);
-	}
-	
 	@Override
 	protected AxisAlignedBoundingBox getAABB() {
 		return ENEMY_AABB;
@@ -66,7 +57,7 @@ public class EntityEnemy extends EntityMob {
 	}
 	
 	@Override
-	public void update() {
+	public void update(IWorld world) {
 		if(!dead) {
 			if(--actionTimeout == 0) {
 				float rnd = world.getRnd().nextFloat();
@@ -96,7 +87,7 @@ public class EntityEnemy extends EntityMob {
 			}
 		}
 		
-		super.update();
+		super.update(world);
 	}
 	
 	/**

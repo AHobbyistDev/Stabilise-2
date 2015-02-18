@@ -11,18 +11,9 @@ public class EntityPlayer extends EntityPerson {
 	public String name;
 	
 	
-	/**
-	 * Creates a new Player.
-	 * 
-	 * @param world The world in which the player will be placed.
-	 */
-	public EntityPlayer(IWorld world) {
-		super(world);
-	}
-	
 	@Override
-	public void update() {
-		super.update();
+	public void update(IWorld world) {
+		super.update(world);
 	}
 	
 	@Override

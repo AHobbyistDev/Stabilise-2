@@ -1,4 +1,4 @@
-package com.stabilise.world;
+package com.stabilise.world.old;
 
 import java.util.Collection;
 
@@ -7,6 +7,9 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.annotation.Incomplete;
+import com.stabilise.world.BaseWorld;
+import com.stabilise.world.Slice;
+import com.stabilise.world.SliceMapClient;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.provider.WorldProvider;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -19,13 +22,13 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * <p>TODO: This entire class in general
  */
 @Incomplete
-public class MultiplayerClientWorld extends BaseWorld implements IClientWorld {
+public class MultiplayerClientWorld extends BaseWorld {
 	
 	/** Holds slices provided by the server. */
 	public final SliceMapClient slices = new SliceMapClient();
 	
 	
-	public MultiplayerClientWorld(WorldProvider<?> provider, Dimension dimension) {
+	public MultiplayerClientWorld(WorldProvider<BaseWorld> provider, Dimension dimension) {
 		super(provider, dimension);
 	}
 	

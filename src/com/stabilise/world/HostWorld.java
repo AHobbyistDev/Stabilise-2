@@ -54,7 +54,7 @@ public class HostWorld extends BaseWorld {
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public HostWorld(WorldProvider<?> provider, Dimension dimension) {
+	public HostWorld(WorldProvider<? extends BaseWorld> provider, Dimension dimension) {
 		super(provider, dimension);
 		
 		spawnSliceX = dimension.info.spawnSliceX;
@@ -100,7 +100,7 @@ public class HostWorld extends BaseWorld {
 	 * @throws NullPointerException if {@code character} is {@code null}.
 	 */
 	public EntityMob addPlayer(IWorld world, CharacterData character, double x, double y) {
-		EntityPlayer p = new EntityPlayer(world);
+		EntityPlayer p = new EntityPlayer();
 		/*
 		loadCharacterData(character);
 		if(character.newToWorld) {
@@ -509,9 +509,7 @@ public class HostWorld extends BaseWorld {
 	
 	@Override
 	public void sendToDimension(String dimension, Entity e, double x, double y) {
-		// TODO: Migrate all player stuff over if we're sending a player
-		removeEntity(e);
-		provider.loadDimension(dimension).addEntity(e, x, y);
+		provider.sendToDimension(this, dimension, e, x, y);
 	}
 	
 	@Override

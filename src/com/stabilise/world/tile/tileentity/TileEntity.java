@@ -41,18 +41,6 @@ public abstract class TileEntity extends FixedGameObject {
 	 * @param y The y-coordinate of the tile entity, in tile-lengths.
 	 */
 	protected TileEntity(int x, int y) {
-		this(null, x, y);
-	}
-	
-	/**
-	 * Creates a new tile entity.
-	 * 
-	 * @param world The world in which the tile entity is to be placed.
-	 * @param x The x-coordinate of the tile entity, in tile-lengths.
-	 * @param y The y-coordinate of the tile entity, in tile-lengths.
-	 */
-	protected TileEntity(IWorld world, int x, int y) {
-		super(world);
 		this.x = x;
 		this.y = y;
 	}
@@ -73,10 +61,10 @@ public abstract class TileEntity extends FixedGameObject {
 	 * not.
 	 */
 	@Override
-	public boolean updateAndCheck() {
+	public boolean updateAndCheck(IWorld world) {
 		if(isDestroyed())
 			return true;
-		update();
+		update(world);
 		return isDestroyed();
 	}
 	

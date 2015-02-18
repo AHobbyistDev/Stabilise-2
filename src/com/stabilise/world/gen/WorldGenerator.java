@@ -587,7 +587,7 @@ public abstract class WorldGenerator {
 		if(wasUncached) {
 			prov.loader.loadRegionSynchronously(world, cachedRegion.region);
 			// In case it is being loaded due to another thread's actions..
-			cachedRegion.region.waitUntilLoaded(); 
+			cachedRegion.region.waitUntilLoaded();
 		}
 		
 		return cachedRegion.region;

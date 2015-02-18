@@ -2,7 +2,7 @@ package com.stabilise.world.provider;
 
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.Incomplete;
-import com.stabilise.world.MultiplayerClientWorld;
+import com.stabilise.world.old.MultiplayerClientWorld;
 
 @Incomplete
 public class ClientProvider extends WorldProvider<MultiplayerClientWorld> {

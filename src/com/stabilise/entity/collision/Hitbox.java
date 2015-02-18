@@ -48,14 +48,12 @@ public class Hitbox extends FreeGameObject {
 	/**
 	 * Creates a new Hitbox.
 	 * 
-	 * @param world The world in which the Hitbox will be placed.
 	 * @param owner The Hitbox's owner.
 	 * @param boundingBox The Hitbox's bounding box.
 	 * @param damage The damage the hitbox deals.
 	 */
-	public Hitbox(IWorld world, Entity owner, Shape boundingBox, int damage) {
-		super(world);
-		
+	public Hitbox(Entity owner, Shape boundingBox, int damage) {
+		super();
 		this.owner = owner;
 		this.boundingBox = boundingBox;
 		this.damage = damage;
@@ -69,7 +67,7 @@ public class Hitbox extends FreeGameObject {
 	 * applicable and resolving the collision appropriately.
 	 */
 	@Override
-	public void update() {
+	public void update(IWorld world) {
 		if(isDestroyed())
 			return;
 		
@@ -83,7 +81,7 @@ public class Hitbox extends FreeGameObject {
 			distX = (float) (x - e.x);
 			distY = (float) (y - e.y);
 			if(boundingBox.translate(distX, distY).intersects(e.boundingBox)) {
-				hit(e);
+				hit(world, e);
 				if(hits == 0)
 					break;
 			}
@@ -108,13 +106,13 @@ public class Hitbox extends FreeGameObject {
 	 * 
 	 * @return {@code true} if a collision was made; {@code false} if not.
 	 */
-	protected boolean hit(Entity e) {
+	protected boolean hit(IWorld world, Entity e) {
 		// TODO: current implementation of collision resolution is crude and temporary
 		if(e instanceof EntityMob) {
 			EntityMob m = (EntityMob)e;
 			if(m.dead)
 				return false;
-			m.damage(damage, owner.id, fx * force, fy * force);
+			m.damage(world, damage, owner.id, fx * force, fy * force);
 			if(effect != null)
 				m.applyEffect(effect.clone());
 			onHit();

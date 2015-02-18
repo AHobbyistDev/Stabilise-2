@@ -39,26 +39,13 @@ public class TileEntityChest extends TileEntity {
 		items = new BoundedContainer(CAPACITY);
 	}
 	
-	/**
-	 * Creates a new chest tile entity.
-	 * 
-	 * @param world The world in which the tile entity is to be placed.
-	 * @param x The x-coordinate of the tile entity, in tile-lengths.
-	 * @param y The y-coordinate of the tile entity, in tile-lengths.
-	 */
-	public TileEntityChest(IWorld world, int x, int y) {
-		super(world, x, y);
-		
-		items = new BoundedContainer(CAPACITY);
-	}
-	
 	@Override
 	public boolean isUpdated() {
 		return false;
 	}
 	
 	@Override
-	public void update() {}
+	public void update(IWorld world) {}
 	
 	@Override
 	public void handleAdd(IWorld world, int x, int y) {
@@ -68,7 +55,7 @@ public class TileEntityChest extends TileEntity {
 	@Override
 	public void handleRemove(IWorld world, int x, int y) {
 		for(ItemStack s : items) {
-			EntityItem e = new EntityItem(world, s);
+			EntityItem e = new EntityItem(s);
 			e.dx = world.getRnd().nextFloat() * 0.4f - 0.2f;
 			e.dy = 0.1f + world.getRnd().nextFloat() * 0.2f;
 			world.addEntity(e, x + 0.5f, y + 0.5f);

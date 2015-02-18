@@ -2,7 +2,6 @@ package com.stabilise.entity.collision;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.util.shape.Shape;
-import com.stabilise.world.IWorld;
 
 /**
  * A LinkedHitbox is a hitbox which is linked to a specific entity other than
@@ -18,13 +17,12 @@ public class LinkedHitbox extends Hitbox {
 	/**
 	 * Creates a new Hitbox.
 	 * 
-	 * @param world The world in which the Hitbox will be placed.
 	 * @param owner The Hitbox's owner.
 	 * @param boundingBox The Hitbox's bounding box.
 	 * @param damage The damage the hitbox deals.
 	 */
-	public LinkedHitbox(IWorld world, Entity owner, Shape boundingBox, int damage) {
-		super(world, owner, boundingBox, damage);
+	public LinkedHitbox(Entity owner, Shape boundingBox, int damage) {
+		super(owner, boundingBox, damage);
 		
 		// It is worth noting that ideally the linked Entity would be an extra
 		// parameter for this constructor, such that for things like arrows, it

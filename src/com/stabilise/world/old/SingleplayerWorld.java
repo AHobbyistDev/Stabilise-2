@@ -1,6 +1,8 @@
-package com.stabilise.world;
+package com.stabilise.world.old;
 
 import com.stabilise.character.CharacterData;
+import com.stabilise.world.HostWorld;
+import com.stabilise.world.SliceMap;
 
 
 public class SingleplayerWorld extends ClientWorld<HostWorld> {
@@ -27,13 +29,8 @@ public class SingleplayerWorld extends ClientWorld<HostWorld> {
 		sliceMap = new SliceMap(world, player);
 	}
 	
-	@Override
 	public void update() {
-		super.update();
-		
-		world.profiler.start("sliceMap"); // root.update.game.world.sliceMap
 		sliceMap.update();
-		world.profiler.end(); // root.update.game.world
 	}
 	
 }

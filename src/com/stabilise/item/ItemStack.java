@@ -4,6 +4,9 @@ import com.stabilise.util.nbt.NBTTagCompound;
 
 /**
  * This class represents a stack of identical items.
+ * 
+ * <p>To instantiate an {@code ItemStack}, refer to {@link Item#stackOf()} or
+ * {@link Item#stackOf(int)}.
  */
 public class ItemStack {
 	

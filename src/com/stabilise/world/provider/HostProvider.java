@@ -51,7 +51,6 @@ public class HostProvider extends WorldProvider<HostWorld> {
 	 */
 	public HostProvider(WorldInfo info, Profiler profiler) {
 		super(profiler);
-		
 		this.info = Preconditions.checkNotNull(info);
 	}
 	

@@ -10,6 +10,7 @@ import com.stabilise.util.collect.DuplicatePolicy;
 import com.stabilise.util.collect.Registry;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.world.BaseWorld;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.WorldInfo;
@@ -58,7 +59,7 @@ public abstract class Dimension {
 	 * 
 	 * @throws NullPointerException if {@code provider} is {@code null}.
 	 */
-	public HostWorld createHost(WorldProvider<?> provider) {
+	public HostWorld createHost(WorldProvider<? extends BaseWorld> provider) {
 		return new HostWorld(provider, this);
 	}
 	

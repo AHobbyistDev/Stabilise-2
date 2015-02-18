@@ -1,4 +1,4 @@
-package com.stabilise.world;
+package com.stabilise.world.old;
 
 import java.util.Collection;
 import java.util.Random;
@@ -7,6 +7,9 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
+import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.BaseWorld;
+import com.stabilise.world.Slice;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
@@ -179,6 +182,12 @@ public class WorldWrapper<T extends BaseWorld> extends AbstractWorld {
 	@Override
 	public Random getRnd() {
 		return world.getRnd();
+	}
+
+	@Override
+	public Entity getEntity(int id) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

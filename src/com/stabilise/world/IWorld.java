@@ -76,35 +76,26 @@ public interface IWorld extends Checkable {
 	Entity getEntity(int id);
 	
 	/**
-	 * Invokes {@link Entity#destroy() e.destroy()}.
-	 * 
-	 * <!--
 	 * Removes an entity from the world.
 	 * 
 	 * <p>The entity is not removed from the map of entities immediately;
-	 * rather, it is removed at the end of the current tick. This is intended
-	 * as to prevent a {@code ConcurrentModificationException} from being
-	 * thrown if the entity is removed while the map of entities is being
-	 * iterated over.
-	 * -->
+	 * rather, it is removed at the end of the current tick.
+	 * 
+	 * <p>Note that it is normally preferable to invoke {@link Entity#destroy()
+	 * destroy()} on an entity to remove it from the world.
 	 * 
 	 * @param e The entity.
 	 */
 	void removeEntity(Entity e);
 	
 	/**
-	 * Invokes {@link Entity#destroy() destroy()} on the entity with the
-	 * specified ID, if it exists.
-	 * 
-	 * <!--
 	 * Removes an entity from the world.
 	 * 
 	 * <p>The entity is not removed from the map of entities immediately;
-	 * rather, it is removed at the end of the current tick. This is intended
-	 * as to prevent a {@code ConcurrentModificationException} from being
-	 * thrown if the entity is removed while the map of entities is being
-	 * iterated over.
-	 * -->
+	 * rather, it is removed at the end of the current tick.
+	 * 
+	 * <p>Note that it is normally preferable to invoke {@link Entity#destroy()
+	 * destroy()} on an entity to remove it from the world.
 	 * 
 	 * @param id The ID of the entity.
 	 */

@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.base.Preconditions;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.EntityMob;
 import com.stabilise.util.Checkable;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
@@ -77,6 +78,13 @@ public abstract class WorldProvider<W extends BaseWorld> {
 	public final Profiler profiler;
 	private final Log log = Log.getAgent("WorldProvider");
 	
+	// Integrated player stuff
+	/** {@code true} if we're providing for an integrated client. */
+	protected boolean integratedClient = false;
+	/** The integrated client's player. {@code null} if there is no integrated
+	 * client. */
+	protected EntityMob integratedPlayer = null;
+	
 	
 	/**
 	 * Creates a new WorldProvider.
@@ -137,11 +145,10 @@ public abstract class WorldProvider<W extends BaseWorld> {
 	
 	// This is a WorldProvider method so we can catch client players being sent
 	// and shift the worldview
-	public void sendToDimension(W oldDim, String dimension, Entity e, double x, double y) {
+	public void sendToDimension(BaseWorld oldDim, String dimension, Entity e, double x, double y) {
 		oldDim.removeEntity(e);
 		W dim = loadDimension(dimension);
 		dim.addEntity(e, x, y);
-		e.world = dim;
 	}
 	
 	/**

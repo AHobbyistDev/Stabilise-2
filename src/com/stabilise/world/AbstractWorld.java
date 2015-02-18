@@ -1,12 +1,12 @@
 package com.stabilise.world;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.GameObject;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
-import com.stabilise.util.Checkable;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
@@ -23,11 +23,12 @@ public abstract class AbstractWorld implements IWorld {
 	 * GameObject#updateAndCheck()}. GameObjects are removed from the
 	 * collection by the iterator if {@code updateAndCheck()} returns {@code
 	 * true}.
-	 * 
-	 * @see Checkable#updateCheckables(Collection)
 	 */
 	protected <E extends GameObject> void updateObjects(Collection<E> objects) {
-		Checkable.updateCheckables(objects);
+		Iterator<E> i = objects.iterator();
+		while(i.hasNext())
+			if(i.next().updateAndCheck(this))
+				i.remove();
 	}
 	
 	@Override
@@ -35,11 +36,6 @@ public abstract class AbstractWorld implements IWorld {
 		e.x = x;
 		e.y = y;
 		addEntity(e);
-	}
-	
-	@Override
-	public void removeEntity(Entity e) {
-		e.destroy();
 	}
 	
 	@Override

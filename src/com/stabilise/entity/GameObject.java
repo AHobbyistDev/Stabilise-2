@@ -1,7 +1,6 @@
 package com.stabilise.entity;
 
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.util.Checkable;
 import com.stabilise.world.IWorld;
 
 /**
@@ -11,10 +10,7 @@ import com.stabilise.world.IWorld;
  * <p>A GameObject also possesses x and y coordinates; for these, see {@link
  * FixedGameObject} and {@link FreeGameObject}.
  */
-public abstract class GameObject implements Checkable {
-	
-	/** A reference to the world the GameObject is in. */
-	public IWorld world;
+public abstract class GameObject {
 	
 	/** If {@code true}, this GameObject should be removed from the world ASAP. */
 	protected boolean destroyed = false;
@@ -28,18 +24,11 @@ public abstract class GameObject implements Checkable {
 	}
 	
 	/**
-	 * Creates a new GameObject.
+	 * Updates this GameObject.
 	 * 
 	 * @param world The world.
 	 */
-	public GameObject(IWorld world) {
-		this.world = world;
-	}
-	
-	/**
-	 * Updates this GameObject.
-	 */
-	public abstract void update();
+	public abstract void update(IWorld world);
 	
 	/**
 	 * Updates this GameObject, and then returns {@link #isDestroyed()}.
@@ -47,15 +36,16 @@ public abstract class GameObject implements Checkable {
 	 * <p>This method performs as if by:
 	 * 
 	 * <pre>
-	 * update();
+	 * update(world);
 	 * return isDestroyed();</pre>
+	 * 
+	 * @param world The world.
 	 * 
 	 * @return {@code true} if this GameObject is considered destroyed and
 	 * should be removed from the world ASAP; {@code false} otherwise.
 	 */
-	@Override
-	public boolean updateAndCheck() {
-		update();
+	public boolean updateAndCheck(IWorld world) {
+		update(world);
 		return isDestroyed();
 	}
 	

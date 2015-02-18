@@ -5,6 +5,7 @@ import com.stabilise.core.Settings;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleGenerator;
+import com.stabilise.world.IWorld;
 
 /**
  * The effect a Mob has when it is on fire.
@@ -24,16 +25,16 @@ public class EffectFire extends Effect {
 	}
 	
 	@Override
-	public void update(EntityMob target) {
-		super.update(target);
+	public void update(IWorld world, EntityMob target) {
+		super.update(world, target);
 		
 		if(Settings.settingParticlesAll())
-			createFireParticle(target);
+			createFireParticle(world, target);
 		else if(Settings.settingParticlesReduced() && age % 3 == 0)
-			createFireParticle(target);
+			createFireParticle(world, target);
 		
 		if(age % Constants.TICKS_PER_SECOND == 0)
-			target.damage(2, -1, 0, 0);
+			target.damage(world, 2, -1, 0, 0);
 	}
 	
 	/**
@@ -41,14 +42,14 @@ public class EffectFire extends Effect {
 	 * 
 	 * @param target The target of the effect.
 	 */
-	private void createFireParticle(EntityMob target) {
-		ParticleFlame p = new ParticleFlame(target.world);
-		p.x = target.x + target.boundingBox.getV00().x + target.world.getRnd().nextFloat() * target.boundingBox.width;
-		p.y = target.y + target.boundingBox.getV11().y + target.world.getRnd().nextFloat() * target.boundingBox.height;
+	private void createFireParticle(IWorld world, EntityMob target) {
+		ParticleFlame p = new ParticleFlame();
+		p.x = target.x + target.boundingBox.getV00().x + world.getRnd().nextFloat() * target.boundingBox.width;
+		p.y = target.y + target.boundingBox.getV11().y + world.getRnd().nextFloat() * target.boundingBox.height;
 		
 		ParticleGenerator.directParticle(p, 0.02f, 0.07f, Math.PI / 6.0D, Math.PI * 5.0D / 6.0D);
 		
-		target.world.addParticle(p);
+		world.addParticle(p);
 	}
 	
 	@Override

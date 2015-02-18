@@ -23,8 +23,8 @@ import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.maths.Maths;
-import com.stabilise.world.ClientWorld;
 import com.stabilise.world.Slice;
+import com.stabilise.world.old.ClientWorld;
 
 /**
  * The WorldRenderer class handles the rendering of a world and its
@@ -91,7 +91,7 @@ public class WorldRenderer implements Renderer {
 		
 		this.world = world;
 		
-		playerCamera = new GameCamera(world, world.player);
+		playerCamera = new GameCamera(world.player);
 		
 		tileRenderer = new TileRenderer(this);
 		//hudRenderer = new HUDRenderer(game, this);
@@ -197,7 +197,7 @@ public class WorldRenderer implements Renderer {
 		tileRenderer.update();
 		
 		profiler.next("camera"); // root.update.renderer.camera
-		playerCamera.update();
+		playerCamera.update(world);
 		camera.position.set((float)playerCamera.x, (float)playerCamera.y, 0f);
 		camera.update();
 		batch.setProjectionMatrix(camera.combined);

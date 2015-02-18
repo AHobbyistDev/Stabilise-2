@@ -1,6 +1,5 @@
 package com.stabilise.entity;
 
-import com.stabilise.core.Settings;
 import com.stabilise.entity.controller.MobController;
 import com.stabilise.entity.controller.PlayerController;
 import com.stabilise.entity.effect.Effect;
@@ -213,12 +212,8 @@ public abstract class EntityMob extends Entity {
 	
 	/**
 	 * Creates a new Mob.
-	 * 
-	 * @param world The world in which the Mob will be placed.
 	 */
-	public EntityMob(IWorld world) {
-		super(world);
-		
+	public EntityMob() {
 		initProperties();
 	}
 	
@@ -229,7 +224,7 @@ public abstract class EntityMob extends Entity {
 	protected abstract void initProperties();
 	
 	@Override
-	public void update() {
+	public void update(IWorld world) {
 		moving = false;
 		
 		controller.update();
@@ -253,7 +248,7 @@ public abstract class EntityMob extends Entity {
 		}
 		
 		if(effect != null) {
-			effect.update(this);
+			effect.update(world, this);
 			if(effect.destroyed)
 				effect = null;
 		}
@@ -267,7 +262,7 @@ public abstract class EntityMob extends Entity {
 				hasTint = false;
 		}
 		
-		super.update();
+		super.update(world);
 		
 		wasOnGround = onGround;
 		
@@ -407,12 +402,13 @@ public abstract class EntityMob extends Entity {
 	/**
 	 * Damages the mob.
 	 * 
+	 * @param world
 	 * @param damage The damage dealt to the mob.
 	 * @param damagerID The ID of the entity to have caused the damage.
 	 * @param fx The x component of the force applied to the mob by the impact.
 	 * @param fy The y component of the force applied to the mob by the impact.
 	 */
-	public void damage(int damage, int damagerID, float fx, float fy) {
+	public void damage(IWorld world, int damage, int damagerID, float fx, float fy) {
 		if(invulnerable || dead)
 			return;
 		
@@ -455,12 +451,14 @@ public abstract class EntityMob extends Entity {
 	public void destroy() {
 		super.destroy();
 		
+		/*
 		if(health == 0) {
 			if(Settings.settingParticlesAll())
 				spawnSmokeParticles(10);
 			else if(Settings.settingParticlesReduced())
 				spawnSmokeParticles(5);
 		}
+		*/
 	}
 	
 	/**
@@ -468,9 +466,10 @@ public abstract class EntityMob extends Entity {
 	 * 
 	 * @param quantity The quantity of smoke particles to spawn.
 	 */
-	private void spawnSmokeParticles(int quantity) {
+	@SuppressWarnings("unused")
+	private void spawnSmokeParticles(IWorld world, int quantity) {
 		while(quantity-- != 0) {
-			ParticleSmoke p = new ParticleSmoke(world);
+			ParticleSmoke p = new ParticleSmoke();
 			p.x = x;
 			p.y = y;
 			//ParticleGenerator.directParticle(p, 0.01f, 0.25f, 0D, Math.PI);
@@ -483,14 +482,15 @@ public abstract class EntityMob extends Entity {
 	/**
 	 * Drops an item as a result of being killed.
 	 * 
+	 * @param world
 	 * @param id The ID of the item.
 	 * @param count The quantity of the item.
 	 * @param chance The chance of dropping the item, from 0.0 to 1.0.
 	 */
-	protected void dropItem(int id, int count, float chance) {
+	protected void dropItem(IWorld world, int id, int count, float chance) {
 		if(world.getRnd().nextFloat() > chance)
 			return;
-		EntityItem e = new EntityItem(world, Item.getItem(id).stackOf(count));
+		EntityItem e = new EntityItem(Item.getItem(id).stackOf(count));
 		e.dx = world.getRnd().nextFloat() * 0.4f - 0.2f;
 		e.dy = 0.1f + world.getRnd().nextFloat() * 0.2f;
 		world.addEntity(e, x, y);

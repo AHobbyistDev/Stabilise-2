@@ -14,18 +14,9 @@ public abstract class ParticlePhysical extends Particle {
 	public float dy;
 	
 	
-	/**
-	 * Creates a new Particle.
-	 * 
-	 * @param world The world in which the Particle will be placed.
-	 */
-	public ParticlePhysical(IWorld world) {
-		super(world);
-	}
-	
 	@Override
-	public void update() {
-		super.update();
+	public void update(IWorld world) {
+		super.update(world);
 		
 		x += dx;
 		y += dy;

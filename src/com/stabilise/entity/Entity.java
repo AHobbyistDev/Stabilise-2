@@ -82,12 +82,8 @@ public abstract class Entity extends FreeGameObject {
 	
 	/**
 	 * Creates a new Entity.
-	 * 
-	 * @param world The world.
 	 */
-	public Entity(IWorld world) {
-		super(world);
-		
+	public Entity() {
 		// temporary initialisation of variables
 		mass = 20;
 		
@@ -115,7 +111,7 @@ public abstract class Entity extends FreeGameObject {
 	}
 	
 	@Override
-	public void update() {
+	public void update(IWorld world) {
 		age++;
 		
 		if(physicsEnabled) {
@@ -153,9 +149,9 @@ public abstract class Entity extends FreeGameObject {
 				
 				for(int i = 0; i < Math.ceil(divisor); i++) {
 					if(!yCollided)
-						yCollided = verticalCollisions(px, py);
+						yCollided = verticalCollisions(world, px, py);
 					if(!xCollided)
-						xCollided = horizontalCollisions(px, py);
+						xCollided = horizontalCollisions(world, px, py);
 					px += xInc;
 					py += yInc;
 				}
@@ -166,13 +162,13 @@ public abstract class Entity extends FreeGameObject {
 				double px = x + dxi;		// projected x
 				double py = y + dyi;		// projected y
 				
-				verticalCollisions(px, py);
+				verticalCollisions(world, px, py);
 				//collideHorizontal(xp, yp);
 				
 				// TODO: This is broken now that I use dyi instead of dy
 				// The following is necessary because otherwise gravity will offset the vertical
 				// wall being checked for sideways collisions slightly when on the ground.
-				horizontalCollisions(px, y + dyi);
+				horizontalCollisions(world, px, y + dyi);
 			}
 			
 			x += dxi;
@@ -244,7 +240,7 @@ public abstract class Entity extends FreeGameObject {
 	 * 
 	 * @return {@code true} if a collision is detected.
 	 */
-	private boolean horizontalCollisions(double xp, double yp) {
+	private boolean horizontalCollisions(IWorld world, double xp, double yp) {
 		if(dx == 0) return false;
 		
 		float leadingEdge = dxp ? boundingBox.getV11().x : boundingBox.getV00().x;
@@ -263,12 +259,12 @@ public abstract class Entity extends FreeGameObject {
 		
 		// TODO: < vs <= - watch out for this, it may cause problems in the future
 		for(double v = yp + boundingBox.getV00().y; v < max; v++) {
-			if(world.getTileAt(xp, v).isSolid() && rowValid(xp, v)) {
+			if(world.getTileAt(xp, v).isSolid() && rowValid(world, xp, v)) {
 				//x = dxp ? Math.floor(xp) - boundingBox.p11.x : Math.ceil(xp) - boundingBox.p00.x;
 				// Alternatively... (doesn't really matter though)
 				//x = dxp ? Math.floor(xp) - leadingEdge : Math.ceil(xp) - leadingEdge;
 				//dx = 0;
-				collideHorizontal(xp, dxp ? Direction.RIGHT : Direction.LEFT);
+				collideHorizontal(world, xp, dxp ? Direction.RIGHT : Direction.LEFT);
 				return true;
 			}
 		}
@@ -283,7 +279,7 @@ public abstract class Entity extends FreeGameObject {
 	 * 
 	 * @return {@code true} if a collision is detected.
 	 */
-	private boolean verticalCollisions(double xp, double yp) {
+	private boolean verticalCollisions(IWorld world, double xp, double yp) {
 		if(dyi == 0.0f) return false;
 		
 		float leadingEdge = dyp ? boundingBox.getV11().y : boundingBox.getV00().y;
@@ -302,11 +298,11 @@ public abstract class Entity extends FreeGameObject {
 		
 		// TODO: < vs <= - watch out for this, it may cause problems in the future
 		for(double h = xp + boundingBox.getV00().x; h < max; h++) {
-			if(world.getTileAt(h, yp).isSolid() && columnValid(h, yp)) {
+			if(world.getTileAt(h, yp).isSolid() && columnValid(world, h, yp)) {
 				//y = dyp ? Math.floor(yp) - boundingBox.p11.y : Math.ceil(yp) - boundingBox.p00.y;
 				//onGround = dy < 0;
 				//dy = 0;
-				collideVertical(yp, dyp ? Direction.UP : Direction.DOWN);
+				collideVertical(world, yp, dyp ? Direction.UP : Direction.DOWN);
 				return true;
 			}
 		}
@@ -324,7 +320,7 @@ public abstract class Entity extends FreeGameObject {
 	 * @return {@code true} if and only if the entity is able to move into the
 	 * column.
 	 */
-	private boolean columnValid(double x, double y) {
+	private boolean columnValid(IWorld world, double x, double y) {
 		// Only check as many tiles above or below the tile in question that
 		// the height of the entity's bounding box would require.
 		int max = Maths.ceil(boundingBox.height);
@@ -346,7 +342,7 @@ public abstract class Entity extends FreeGameObject {
 	 * @return {@code true} if and only if the entity is able to move into the
 	 * row.
 	 */
-	private boolean rowValid(double x, double y) {
+	private boolean rowValid(IWorld world, double x, double y) {
 		// Only check as many tiles to the left or right of the tile in
 		// question that the width of the entity's bounding box would require.
 		int max = Maths.ceil(boundingBox.width);
@@ -364,9 +360,9 @@ public abstract class Entity extends FreeGameObject {
 	 * @param direction The direction relative to the entity that the tile the
 	 * entity has collided with is located.
 	 */
-	private void collideHorizontal(double xp, Direction direction) {
+	private void collideHorizontal(IWorld world, double xp, Direction direction) {
 		onHorizontalCollision();
-		impact(dx, true);
+		impact(world, dx, true);
 		
 		dx = dxi = 0;
 		
@@ -384,9 +380,9 @@ public abstract class Entity extends FreeGameObject {
 	 * @param direction The direction relative to the entity that the tile the
 	 * entity has collided with is located.
 	 */
-	private void collideVertical(double yp, Direction direction) {
+	private void collideVertical(IWorld world, double yp, Direction direction) {
 		onVerticalCollision();
-		impact(dy, true);
+		impact(world, dy, true);
 		
 		dy = dyi = 0;
 		
@@ -422,10 +418,11 @@ public abstract class Entity extends FreeGameObject {
 	/**
 	 * Resolves an impact (a sudden change in velocity).
 	 * 
+	 * @param world the world
 	 * @param dv The change in the entity's velocity.
 	 * @param tileCollision Whether or not the impact is from a tile collision.
 	 */
-	protected void impact(float dv, boolean tileCollision) {
+	protected void impact(IWorld world, float dv, boolean tileCollision) {
 		// TODO
 	}
 	

@@ -37,7 +37,6 @@ public class TileChest extends Tile {
 	public void handlePlace(IWorld world, int x, int y) {
 		super.handlePlace(world, x, y);
 		TileEntityChest t = createTileEntity(x, y);
-		t.world = world;
 		world.setTileEntityAt(x, y, t);
 	}
 	

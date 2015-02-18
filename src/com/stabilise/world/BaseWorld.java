@@ -28,7 +28,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  */
 public abstract class BaseWorld extends AbstractWorld {
 	
-	public final WorldProvider<?> provider;
+	public final WorldProvider<? extends BaseWorld> provider;
 	/** This world's dimension. */
 	public final Dimension dimension;
 	
@@ -43,6 +43,14 @@ public abstract class BaseWorld extends AbstractWorld {
 	protected int entityCount = 0;
 	/** Entities queued to be added to the world at the end of the tick. */
 	private final ClearOnIterateLinkedList<Entity> entitiesToAdd =
+			new ClearOnIterateLinkedList<>();
+	/** Entities queued to be removed from the world at the end of the tick.
+	 * <p>Implementation detail: Though it would be cleaner to invoke {@code
+	 * destroy()} on entities and let them self-remove while being iterated
+	 * over, this does not work when moving an entity to another dimension: if
+	 * {@code destroy} is invoked, this would also invalidate its position in
+	 * the dimension it is being moved to. */
+	private final ClearOnIterateLinkedList<Integer> entitiesToRemove =
 			new ClearOnIterateLinkedList<>();
 	/** The number of hostile mobs in the world. */
 	protected int hostileMobCount = 0;
@@ -97,7 +105,7 @@ public abstract class BaseWorld extends AbstractWorld {
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public BaseWorld(WorldProvider<?> provider, Dimension dimension) {
+	public BaseWorld(WorldProvider<? extends BaseWorld> provider, Dimension dimension) {
 		this.provider = Preconditions.checkNotNull(provider);
 		this.dimension = Preconditions.checkNotNull(dimension);
 		
@@ -145,6 +153,12 @@ public abstract class BaseWorld extends AbstractWorld {
 			for(Entity e : entitiesToAdd)
 				entities.put(e.id, e);
 		
+		profiler.start("remove"); // root.update.game.world.entity.remove
+		
+		if(!entitiesToRemove.isEmpty())
+			for(Integer id : entitiesToRemove)
+				entities.remove(id);
+		
 		profiler.end(); // root.update.game.world.entity
 		profiler.end(); // root.update.game.world
 	}
@@ -178,10 +192,13 @@ public abstract class BaseWorld extends AbstractWorld {
 	}
 	
 	@Override
+	public void removeEntity(Entity e) {
+		removeEntity(e.id);
+	}
+	
+	@Override
 	public void removeEntity(int id) {
-		Entity e = getEntity(id);
-		if(e != null)
-			e.destroy();
+		entitiesToRemove.add(id);
 	}
 	
 	@Override

@@ -39,23 +39,19 @@ public class ParticleDamageIndicator extends Particle {
 	/**
 	 * Creates a new ParticleDamageIndicator.
 	 * 
-	 * @param world The world in which the ParticleDamageIndicator will be
-	 * placed.
 	 * @param value The indicator's display value.
 	 */
-	public ParticleDamageIndicator(IWorld world, int value) {
-		this(world, String.valueOf(value));
+	public ParticleDamageIndicator(int value) {
+		this(String.valueOf(value));
 	}
 	
 	/**
 	 * Creates a new ParticleDamageIndicator.
 	 * 
-	 * @param world The world in which the ParticleDamageIndicator will be
-	 * placed.
 	 * @param text The indicator's display text.
 	 */
-	public ParticleDamageIndicator(IWorld world, String text) {
-		super(world);
+	public ParticleDamageIndicator(String text) {
+		super();
 		
 		this.text = text;
 	}
@@ -69,27 +65,25 @@ public class ParticleDamageIndicator extends Particle {
 	 * @param e The mob above which to place the damage indicator.
 	 */
 	public ParticleDamageIndicator(IWorld world, int value, EntityMob e) {
-		this(world, String.valueOf(value), e);
+		this(String.valueOf(value), e);
 	}
 	
 	/**
 	 * Creates a new ParticleDamageIndicator.
 	 * 
-	 * @param world The world in which the ParticleDamageIndicator will be
-	 * placed.
 	 * @param text The indicator's display text.
 	 * @param e The mob above which to place the damage indicator.
 	 */
-	public ParticleDamageIndicator(IWorld world, String text, EntityMob e) {
-		this(world, text);
+	public ParticleDamageIndicator(String text, EntityMob e) {
+		this(text);
 		
 		x = e.x;
 		y = e.y + e.boundingBox.height;
 	}
 	
 	@Override
-	public void update() {
-		super.update();
+	public void update(IWorld world) {
+		super.update(world);
 		
 		y += 0.05f;			// TODO: arbitrary lift rate
 		

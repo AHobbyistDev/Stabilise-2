@@ -10,6 +10,10 @@ import com.stabilise.world.IWorld;
  */
 public abstract class EntityProjectile extends Entity {
 	
+	/** TODO: Temporary means of referencing a world so we can add particles
+	 * to the world in destroy(). FIND A BETTER WAY TO DO THIS */
+	protected IWorld world;
+	
 	/** The projectile's owner. */
 	public Entity owner;
 	/** The projectile's hitbox. */
@@ -19,10 +23,6 @@ public abstract class EntityProjectile extends Entity {
 	public float rotation = 0;			// TODO: Is this necessary for /all/ projectile types?
 	
 	
-	public EntityProjectile(IWorld world) {
-		super(world);
-	}
-	
 	/**
 	 * Creates a new projectile entity.
 	 * 
@@ -31,7 +31,7 @@ public abstract class EntityProjectile extends Entity {
 	 * @param hitbox The projectile's hitbox.
 	 */
 	public EntityProjectile(IWorld world, Entity owner, Hitbox hitbox) {
-		super(world);
+		super();
 		
 		this.owner = owner;
 		this.hitbox = hitbox;
@@ -45,16 +45,18 @@ public abstract class EntityProjectile extends Entity {
 		hitbox.persistent = true;
 		
 		world.addHitbox(hitbox, x, y);
+		
+		this.world = world;
 	}
 	
 	@Override
-	public void update() {
+	public void update(IWorld world) {
 		if(destroyed) {
 			hitbox.destroy();
 			return;
 		}
 		
-		super.update();
+		super.update(world);
 		
 		rotate();
 	}

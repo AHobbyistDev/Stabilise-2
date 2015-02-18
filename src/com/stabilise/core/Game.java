@@ -10,10 +10,10 @@ import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
-import com.stabilise.world.ClientWorld;
 import com.stabilise.world.HostWorld;
-import com.stabilise.world.SingleplayerWorld;
 import com.stabilise.world.dimension.Dimension;
+import com.stabilise.world.old.ClientWorld;
+import com.stabilise.world.old.SingleplayerWorld;
 import com.stabilise.world.provider.HostProvider;
 
 /**
@@ -28,7 +28,7 @@ public class Game implements Controllable, InputProcessor {
 	
 	private final HostProvider provider;
 	/** The game's world instance. */
-	private final ClientWorld<HostWorld> world;
+	public final ClientWorld<HostWorld> world;
 	
 	/** The controller. */
 	public Controller controller;

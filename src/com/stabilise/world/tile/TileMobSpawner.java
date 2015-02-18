@@ -19,7 +19,6 @@ public class TileMobSpawner extends Tile {
 	public void handlePlace(IWorld world, int x, int y) {
 		super.handlePlace(world, x, y);
 		TileEntityMobSpawner t = createTileEntity(x, y);
-		t.world = world;
 		world.setTileEntityAt(x, y, t);
 	}
 	

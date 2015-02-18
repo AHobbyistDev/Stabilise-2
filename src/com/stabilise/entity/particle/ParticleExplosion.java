@@ -40,13 +40,12 @@ public class ParticleExplosion extends Particle {
 	/**
 	 * Creates a new explosion particle.
 	 * 
-	 * @param world The world in which the particle will be placed.
 	 * @param initialRadius The initial radius of the explosion, in
 	 * tile-lengths.
 	 * @param finalRadius The final radius of the explosion, in tile-lengths.
 	 */
-	public ParticleExplosion(IWorld world, float initialRadius, float finalRadius) {
-		super(world);
+	public ParticleExplosion(float initialRadius, float finalRadius) {
+		super();
 		
 		radiusInit = initialRadius;
 		radiusFinal = finalRadius;
@@ -56,8 +55,8 @@ public class ParticleExplosion extends Particle {
 	}
 	
 	@Override
-	public void update() {
-		super.update();
+	public void update(IWorld world) {
+		super.update(world);
 		
 		float ratio = (float)age/DESPAWN_TICKS;
 		

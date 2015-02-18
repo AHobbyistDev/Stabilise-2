@@ -4,7 +4,7 @@ import com.stabilise.entity.collision.LinkedHitbox;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.util.shape.Rectangle;
-import com.stabilise.world.BaseWorld;
+import com.stabilise.world.IWorld;
 
 /**
  * A basic projectile.
@@ -40,7 +40,7 @@ public class EntityArrow extends EntityProjectile {
 	 * @param world The world in which the arrow will be placed.
 	 * @param owner The arrow's owner.
 	 */
-	public EntityArrow(BaseWorld world, Entity owner) {
+	public EntityArrow(IWorld world, Entity owner) {
 		this(world, owner, DEFAULT_ARROW_DAMAGE);
 	}
 	
@@ -51,8 +51,8 @@ public class EntityArrow extends EntityProjectile {
 	 * @param owner The arrow's owner.
 	 * @param damage The arrow's damage.
 	 */
-	public EntityArrow(BaseWorld world, Entity owner, int damage) {
-		super(world, owner, new LinkedHitbox(world, owner, ARROW_BOUNDING_BOX, damage));
+	public EntityArrow(IWorld world, Entity owner, int damage) {
+		super(world, owner, new LinkedHitbox(owner, ARROW_BOUNDING_BOX, damage));
 		((LinkedHitbox)hitbox).linkedEntity = this;
 		hitbox.force = 0.3f;
 	}
@@ -63,14 +63,14 @@ public class EntityArrow extends EntityProjectile {
 	}
 	
 	@Override
-	public void update() {
+	public void update(IWorld world) {
 		if(removeHitbox && hitbox != null) {
 			hitbox.destroy();
 			hitbox = null;
 			removeHitbox = false;
 		}
 		
-		super.update();
+		super.update(world);
 		
 		if(flying) {
 			float div = Math.abs(dx) + Math.abs(dy);
@@ -101,7 +101,7 @@ public class EntityArrow extends EntityProjectile {
 	}
 	
 	@Override
-	protected void impact(float dv, boolean tileCollision) {
+	protected void impact(IWorld world, float dv, boolean tileCollision) {
 		flying = false;
 		// If an arrow hits an entity in the same tick it collides with a tile,
 		// removing the hitbox is postponed a tick so that it may first damage

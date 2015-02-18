@@ -21,11 +21,9 @@ public class ParticleSmoke extends ParticlePhysical {
 	
 	/**
 	 * Creates a new smoke particle.
-	 * 
-	 * @param world The world in which the particle will be placed.
 	 */
-	public ParticleSmoke(IWorld world) {
-		super(world);
+	public ParticleSmoke() {
+		super();
 		
 		/*
 		double angle = (0.16666667f + world.rng.nextFloat() / 3) * Math.PI;
@@ -43,8 +41,8 @@ public class ParticleSmoke extends ParticlePhysical {
 	}
 	
 	@Override
-	public void update() {
-		super.update();
+	public void update(IWorld world) {
+		super.update(world);
 		
 		dx *= DX_MULT;
 		//dy *= DX_MULT;

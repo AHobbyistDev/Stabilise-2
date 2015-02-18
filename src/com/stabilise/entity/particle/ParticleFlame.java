@@ -23,18 +23,8 @@ public class ParticleFlame extends ParticlePhysical {
 	public float opacity = 1.0f;
 	
 	
-	/**
-	 * Creates a name flame particle.
-	 * 
-	 * @param world The world in which the particle is to be placed.
-	 */
-	public ParticleFlame(IWorld world) {
-		super(world);
-	}
-	
-	@Override
-	public void update() {
-		super.update();
+	public void update(IWorld world) {
+		super.update(world);
 		
 		dy += -0.02f / 32f; //world.gravity / 32f;
 		

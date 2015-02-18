@@ -27,13 +27,6 @@ public class EntityFireball extends EntityProjectile {
 	/** The number of ticks after which a fireball despawns. */
 	private static final int DESPAWN_TICKS = 300;
 	
-	//--------------------==========--------------------
-	//-------------=====Member Variables=====-----------
-	//--------------------==========--------------------
-	
-	public EntityFireball(IWorld world) {
-		super(world);
-	}
 	
 	/**
 	 * Creates a new fireball entity.
@@ -53,15 +46,15 @@ public class EntityFireball extends EntityProjectile {
 	 * @param damage The fireball's damage.
 	 */
 	public EntityFireball(IWorld world, Entity owner, int damage) {
-		super(world, owner, new LinkedHitbox(world, owner, FIREBALL_BOUNDING_BOX, damage));
+		super(world, owner, new LinkedHitbox(owner, FIREBALL_BOUNDING_BOX, damage));
 		((LinkedHitbox)hitbox).linkedEntity = this;
 		hitbox.force = 0.3f;
 		hitbox.effect = new EffectFire(300);
 	}
 	
 	@Override
-	public void update() {
-		super.update();
+	public void update(IWorld world) {
+		super.update(world);
 		
 		float div = Math.abs(dx) + Math.abs(dy);
 		if(div != 0) {
@@ -70,29 +63,29 @@ public class EntityFireball extends EntityProjectile {
 		}
 		
 		if(Settings.settingParticlesAll())
-			addFlightParticles(8);
+			addFlightParticles(world, 8);
 		else if(Settings.settingParticlesReduced())
-			addFlightParticles(4);
+			addFlightParticles(world, 4);
 		
 		if(age == DESPAWN_TICKS)
 			destroy();
 	}
 	
 	@Override
-	protected void impact(float dv, boolean tileCollision) {
+	protected void impact(IWorld world, float dv, boolean tileCollision) {
 		destroy();
 		
 		if(tileCollision) {		// Since it removes itself with an entity collision
 			if(Settings.settingParticlesAll())
-				addImpactParticles(15);
+				addImpactParticles(world, 15);
 			else if(Settings.settingParticlesReduced())
-				addImpactParticles(8);
+				addImpactParticles(world, 8);
 		}
 	}
 	
-	private void addFlightParticles(int particles) {
+	private void addFlightParticles(IWorld world, int particles) {
 		for(int i = 0; i < particles; i++) {
-			ParticleFlame p = new ParticleFlame(world);
+			ParticleFlame p = new ParticleFlame();
 			p.x = x;
 			p.y = y;
 			ParticleGenerator.directParticle(p, 0.02f, 0.05f, 0, Maths.TAU);
@@ -105,11 +98,11 @@ public class EntityFireball extends EntityProjectile {
 	 * 
 	 * @param particles The number of particles to create.
 	 */
-	private void addImpactParticles(int particles) {
+	private void addImpactParticles(IWorld world, int particles) {
 		//float velocity = (float)Math.sqrt(dx*dx + dy*dy) / 4;
 		//double angle = Math.atan2(dy, dx);
 		for(int i = 0; i < particles; i++) {
-			ParticleFlame p = new ParticleFlame(world);
+			ParticleFlame p = new ParticleFlame();
 			p.x = x;
 			p.y = y;
 			//ParticleGenerator.directParticle(p, velocity - 0.05f, velocity + 0.15f, angle - Math.PI / 6, angle + Math.PI / 6);

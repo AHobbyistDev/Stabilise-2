@@ -1,4 +1,4 @@
-package com.stabilise.world;
+package com.stabilise.world.old;
 
 import java.util.Collection;
 import java.util.List;
@@ -7,6 +7,8 @@ import com.stabilise.character.CharacterData;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.collect.LightweightLinkedList;
+import com.stabilise.world.BaseWorld;
+import com.stabilise.world.HostWorld;
 
 /**
  * The world as viewed by a client.
@@ -14,8 +16,7 @@ import com.stabilise.util.collect.LightweightLinkedList;
  * @param <W> Use {@link HostWorld} for singleplayer, and {@link
  * MultiplayerClientWorld} for a multiplayer client.
  */
-public class ClientWorld<W extends BaseWorld>
-		extends WorldWrapper<W> implements IClientWorld {
+public class ClientWorld<W extends BaseWorld> extends WorldWrapper<W> {
 	
 	/** The player's character data. */
 	private final CharacterData playerData;
@@ -44,14 +45,12 @@ public class ClientWorld<W extends BaseWorld>
 		this.playerData = playerData;
 	}
 	
-	@Override
+	
 	public void prepare() {
 		if(world instanceof HostWorld)
 			addPlayerAsHost((HostWorld)world);
 		else if(world instanceof MultiplayerClientWorld)
 			addPlayerAsClient((MultiplayerClientWorld)world);
-		
-		super.prepare();
 	}
 	
 	protected void addPlayerAsHost(HostWorld world) {
@@ -60,16 +59,6 @@ public class ClientWorld<W extends BaseWorld>
 	
 	protected void addPlayerAsClient(MultiplayerClientWorld world) {
 		// TODO
-	}
-	
-	@Override
-	public void update() {
-		super.update();
-		
-		world.profiler.start("particles"); // root.update.game.world.particles
-		updateObjects(getParticles());
-		
-		world.profiler.end(); // root.update.game.world
 	}
 	
 	@Override

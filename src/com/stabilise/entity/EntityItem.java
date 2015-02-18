@@ -40,25 +40,22 @@ public class EntityItem extends Entity {
 	public int count;
 	
 	
-	public EntityItem(IWorld world) {
-		super(world);
+	public EntityItem() {
+		
 	}
 	
 	/**
 	 * Creates a new item entity.
 	 * 
-	 * @param world The world in which the entity will be placed.
 	 * @param stack The item the entity represents.
 	 */
-	public EntityItem(IWorld world, ItemStack stack) {
-		super(world);
-		
+	public EntityItem(ItemStack stack) {
 		this.stack = stack;
 	}
 	
 	@Override
-	public void update() {
-		super.update();
+	public void update(IWorld world) {
+		super.update(world);
 		
 		if(age == DESPAWN_TICKS)
 			destroy();
