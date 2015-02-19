@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.base.Preconditions;
+import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.util.Checkable;
@@ -81,6 +82,9 @@ public abstract class WorldProvider<W extends BaseWorld> {
 	// Integrated player stuff
 	/** {@code true} if we're providing for an integrated client. */
 	protected boolean integratedClient = false;
+	/** The integrated client's character data. {@code null} if there is no
+	 * integrated client. */
+	protected CharacterData integratedCharacter = null;
 	/** The integrated client's player. {@code null} if there is no integrated
 	 * client. */
 	protected EntityMob integratedPlayer = null;

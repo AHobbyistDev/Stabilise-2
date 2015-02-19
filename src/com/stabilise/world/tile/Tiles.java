@@ -25,25 +25,26 @@ public class Tiles {
 			);
 	}
 	
-	public static final Tile AIR = Tile.TILES.get("air");
-	public static final Tile STONE = Tile.TILES.get("stone");
-	public static final Tile DIRT = Tile.TILES.get("dirt");
-	public static final Tile GRASS = Tile.TILES.get("grass");
-	public static final Tile WOOD = Tile.TILES.get("wood");
-	public static final Tile LEAVES = Tile.TILES.get("leaves");
-	public static final Tile PLANKS = Tile.TILES.get("planks");
-	public static final Tile WATER = Tile.TILES.get("water");
-	public static final Tile LAVA = Tile.TILES.get("lava");
-	public static final Tile BEDROCK = Tile.TILES.get("bedrock");
-	public static final Tile BEDROCK_INVISIBLE = Tile.TILES.get("invisibleBedrock");
-	public static final Tile ICE = Tile.TILES.get("ice");
-	public static final Tile BRICK_STONE = Tile.TILES.get("stoneBrick");
-	public static final Tile ORE_IRON = Tile.TILES.get("oreIron");
-	public static final Tile ORE_COPPER = Tile.TILES.get("oreCopper");
-	public static final Tile ORE_GOLD = Tile.TILES.get("oreGold");
-	public static final Tile ORE_SILVER = Tile.TILES.get("oreSilver");
-	public static final Tile ORE_DIAMOND = Tile.TILES.get("oreDiamond");
-	public static final TileChest CHEST = (TileChest)Tile.TILES.get("chest");
-	public static final Tile MOB_SPAWNER = Tile.TILES.get("mobSpawner");
+	public static final Tile AIR = Tile.getTile("air");
+	public static final Tile VOID = Tile.getTile("void");
+	public static final Tile BEDROCK = Tile.getTile("bedrock");
+	public static final Tile BEDROCK_INVISIBLE = Tile.getTile("invisibleBedrock");
+	public static final Tile STONE = Tile.getTile("stone");
+	public static final Tile DIRT = Tile.getTile("dirt");
+	public static final Tile GRASS = Tile.getTile("grass");
+	public static final Tile WOOD = Tile.getTile("wood");
+	public static final Tile LEAVES = Tile.getTile("leaves");
+	public static final Tile PLANKS = Tile.getTile("planks");
+	public static final Tile WATER = Tile.getTile("water");
+	public static final Tile LAVA = Tile.getTile("lava");
+	public static final Tile ICE = Tile.getTile("ice");
+	public static final Tile BRICK_STONE = Tile.getTile("stoneBrick");
+	public static final Tile ORE_IRON = Tile.getTile("oreIron");
+	public static final Tile ORE_COPPER = Tile.getTile("oreCopper");
+	public static final Tile ORE_GOLD = Tile.getTile("oreGold");
+	public static final Tile ORE_SILVER = Tile.getTile("oreSilver");
+	public static final Tile ORE_DIAMOND = Tile.getTile("oreDiamond");
+	public static final TileChest CHEST = (TileChest)Tile.getTile("chest");
+	public static final Tile MOB_SPAWNER = Tile.getTile("mobSpawner");
 	
 }

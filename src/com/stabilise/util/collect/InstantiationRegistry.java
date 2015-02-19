@@ -255,8 +255,11 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 			try {
 				constructor = objClass.getConstructor(args);
 			} catch(Exception e) {
-				throw new RuntimeException("Constructor for " + objClass.getCanonicalName() +
-						" with requested arguments does not exist! (" + e.getMessage() + ")");
+				String className = objClass.getCanonicalName();
+				if(className == null)
+					className = "[null]";
+				throw new RuntimeException("Constructor for " + className
+						+ " with requested arguments does not exist! (" + e.getMessage() + ")");
 			}
 		}
 		

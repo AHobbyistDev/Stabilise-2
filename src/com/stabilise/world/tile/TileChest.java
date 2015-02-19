@@ -17,7 +17,7 @@ public class TileChest extends Tile {
 	TileChest() {
 		super();
 		
-		setHardness(Tile.HARDNESS_WOOD);
+		setHardness(Tile.H_WOOD);
 	}
 	
 	@Override

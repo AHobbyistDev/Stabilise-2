@@ -5,6 +5,7 @@ import static com.stabilise.core.Constants.REGION_UNLOAD_TICK_BUFFER;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearOnIterateLinkedList;
 import com.stabilise.util.maths.HashPoint;
@@ -93,10 +94,6 @@ public class Region {
 	/** The slices to send to clients once the region has finished generating. */
 	//private List<QueuedSlice> queuedSlices;
 	
-	/** Whether or not the region has schematics queued to be added. This is
-	 * volatile.
-	 * <p>For world generator use only. */
-	public volatile boolean hasQueuedSchematics = false;
 	/** The structures queued to be added to the region. This is a final
 	 * ArrayList. Access to this is usually performed while synchronised on
 	 * itself.
@@ -187,7 +184,7 @@ public class Region {
 			// rests on the brink of triggering a save, which may possibly be
 			// problematic if something causes at least one tile in each region to
 			// be updated simultaneously
-			if(unsavedChanges && world.dimension.info.age - lastSaved > 1800)
+			if(unsavedChanges && world.getAge() - lastSaved > 1800)
 				world.saveRegion(this);
 		}
 	}
@@ -267,7 +264,7 @@ public class Region {
 	 * @return This region's file.
 	 */
 	public FileHandle getFile(HostWorld world) {
-		return world.dimension.info.getDimensionDir().child("r_" + loc.x + "_" + loc.y + ".region");
+		return world.getWorldDir().child("r_" + loc.x + "_" + loc.y + ".region");
 	}
 	
 	/**
@@ -316,9 +313,18 @@ public class Region {
 	 * @param offsetX The x-offset of the schematic, in region-lengths.
 	 * @param offsetY The y-offset of the schematic, in region-lengths.
 	 */
+	@NotThreadSafe
 	public void queueSchematic(String schematicName, int sliceX, int sliceY, int tileX, int tileY, int offsetX, int offsetY) {
 		queuedSchematics.add(new QueuedSchematic(schematicName, sliceX, sliceY, tileX, tileY, offsetX, offsetY));
-		hasQueuedSchematics = true;
+	}
+	
+	/**
+	 * Returns {@code true} if this region has queued schematics; {@code false}
+	 * otherwise.
+	 */
+	@NotThreadSafe
+	public boolean hasQueuedSchematics() {
+		return queuedSchematics.size() != 0;
 	}
 	
 	/**
@@ -328,7 +334,7 @@ public class Region {
 	 * {@code false} if it does.
 	 */
 	public boolean isGenerated() {
-		return generated && !hasQueuedSchematics;
+		return generated && !hasQueuedSchematics();
 	}
 	
 	/**
@@ -338,11 +344,9 @@ public class Region {
 	 * <p>Unused.
 	 */
 	public void addContainedEntitiesToWorld(HostWorld world) {
-		for(int r = 0; r < REGION_SIZE; r++) {
-			for(int c = 0; c < REGION_SIZE; c++) {
+		for(int r = 0; r < REGION_SIZE; r++)
+			for(int c = 0; c < REGION_SIZE; c++)
 				slices[r][c].addContainedEntitiesToWorld(world);
-			}
-		}
 	}
 	
 	/**

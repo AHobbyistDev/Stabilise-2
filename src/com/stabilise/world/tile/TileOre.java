@@ -11,7 +11,7 @@ public class TileOre extends Tile {
 	TileOre() {
 		super();
 		
-		setHardness(Tile.HARDNESS_STONE);
+		setHardness(Tile.H_STONE);
 	}
 	
 }

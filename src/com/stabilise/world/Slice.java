@@ -102,9 +102,24 @@ public class Slice {
 	 * tile-lengths.
 	 * @param y The y-coordinate of the tile relative to the slice, in
 	 * tile-lengths.
+	 * @param tile The tile.
+	 * 
+	 * @throws IllegalArgumentException if either x or y are < 0 or > 15.
+	 */
+	public void setTileAt(int x, int y, Tile tile) {
+		tiles[y][x] = tile.getID();
+	}
+	
+	/**
+	 * Sets a tile in the slice.
+	 * 
+	 * @param x The x-coordinate of the tile relative to the slice, in
+	 * tile-lengths.
+	 * @param y The y-coordinate of the tile relative to the slice, in
+	 * tile-lengths.
 	 * @param tileID The ID of the tile.
 	 * 
-	 * @throws IllegalArgumentException Thrown if x or y are < 0 or > 15.
+	 * @throws IllegalArgumentException if either x or y are < 0 or > 15.
 	 */
 	public void setTileAt(int x, int y, int tileID) {
 		tiles[y][x] = tileID;

@@ -20,7 +20,7 @@ public abstract class AbstractWorld implements IWorld {
 	
 	/**
 	 * Iterates over the specified collection of GameObjects as per {@link
-	 * GameObject#updateAndCheck()}. GameObjects are removed from the
+	 * GameObject#updateAndCheck(IWorld)}. GameObjects are removed from the
 	 * collection by the iterator if {@code updateAndCheck()} returns {@code
 	 * true}.
 	 */

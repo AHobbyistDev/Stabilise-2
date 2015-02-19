@@ -12,7 +12,7 @@ public class TileMobSpawner extends Tile {
 	
 	public TileMobSpawner() {
 		super();
-		setHardness(Tile.HARDNESS_STONE);
+		setHardness(Tile.H_STONE);
 	}
 	
 	@Override

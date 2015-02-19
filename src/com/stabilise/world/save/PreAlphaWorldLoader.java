@@ -84,8 +84,6 @@ public class PreAlphaWorldLoader extends WorldLoader {
 				r.queuedSchematics.add(s);
 			}
 			
-			r.hasQueuedSchematics = true;
-			
 			//log.postDebug("Loaded " + schematics.size() + " schematics into " + r);
 		}
 	}

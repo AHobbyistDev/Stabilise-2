@@ -1,5 +1,7 @@
 package com.stabilise.world.gen;
 
+import static com.stabilise.world.tile.Tiles.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -11,7 +13,6 @@ import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
 import com.stabilise.world.provider.WorldProvider;
-import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntityChest;
 
 import static com.stabilise.world.Region.REGION_SIZE;
@@ -35,7 +36,7 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 	
 	@Override
 	protected void generateRegion(Region r) {
-		new PerlinRegionGenerator(this).generateRegion(r);
+		new PerlinRegionGenerator().generateRegion(r);
 	}
 	
 	/**
@@ -44,10 +45,8 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 	 * should be much less than the synchronisation overhead if more than one
 	 * region is to be generated simultaneously.
 	 */
-	private static class PerlinRegionGenerator {
-		private WorldGenerator generator;
-		private long seed;
-		private List<Region.QueuedSchematic> schematics = new ArrayList<Region.QueuedSchematic>();
+	private class PerlinRegionGenerator {
+		private List<Region.QueuedSchematic> schematics = new ArrayList<>();
 		
 		// Landform 							WAVELENGTH	AMPLITUDE
 		private PerlinNoise1D noise1D_1;	//	128			64
@@ -65,10 +64,7 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 		
 		private SimplexNoise simplex512;	// 512			1
 		
-		private PerlinRegionGenerator(WorldGenerator generator) {
-			this.generator = generator;
-			seed = generator.seed;
-			
+		private PerlinRegionGenerator() {
 			noise1D_1 = new PerlinNoise1D(seed, 128f);
 			noise1D_2 = new PerlinNoise1D(seed, 64f);
 			noise1D_3 = new PerlinNoise1D(seed, 32f);
@@ -117,22 +113,22 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 					
 					//if((y < -200 && caveNoise > 0.8D) || (y < -180 && caveNoise > (0.8 - 0.2 * (180+y)/20f)))
 					if(y < -200 && caveNoise > 0.8D)
-						s.setTileAt(tileX, tileY, 8);		// Lava
+						s.setTileAt(tileX, tileY, LAVA);
 					//else if(noise <= 0 || (caveNoise > 0.45D && caveNoise < 0.55D))
 					else if(noise <= 0 || (caveNoise > caveMask - 0.05D && caveNoise < caveMask + 0.05D))
 					//else if(noise <= 0 || caveNoise > 0.8D)
-						s.setTileAt(tileX, tileY, 0);		// Air
+						s.setTileAt(tileX, tileY, AIR);
 					else if(noise <= 1) {
-						s.setTileAt(tileX, tileY, 3);		// Grass
+						s.setTileAt(tileX, tileY, GRASS);
 						if(rnd.nextInt(10) == 0)
 							addSchematic("tree_1", s.x, s.y, tileX, tileY);
 					} else if(noise <= 5.75D)
-						s.setTileAt(tileX, tileY, 2);		// Dirt
+						s.setTileAt(tileX, tileY, DIRT);
 					else {
 						if(rnd.nextInt(30) == 0)
-							s.setTileAt(tileX, tileY, Tiles.BRICK_STONE.getID());
+							s.setTileAt(tileX, tileY, BRICK_STONE);
 						else
-							s.setTileAt(tileX, tileY, 1);		// Stone
+							s.setTileAt(tileX, tileY, STONE);
 					}
 					
 					noise++;
@@ -167,10 +163,10 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 					s = r.getSliceAt(x, y);
 					tileX = rnd.nextInt(SLICE_SIZE);
 					tileY = rnd.nextInt(SLICE_SIZE-1);
-					if(s.getTileAt(tileX, tileY).getID() == Tiles.STONE.getID() &&
+					if(s.getTileAt(tileX, tileY).getID() == STONE.getID() &&
 							s.getTileAt(tileX, tileY+1).getID() == 0) {
-						s.tiles[tileY+1][tileX] = Tiles.CHEST.getID();
-						TileEntityChest chest = Tiles.CHEST.createTileEntity(offsetX + x*SLICE_SIZE + tileX, offsetY + y*SLICE_SIZE + tileY + 1);
+						s.tiles[tileY+1][tileX] = CHEST.getID();
+						TileEntityChest chest = CHEST.createTileEntity(offsetX + x*SLICE_SIZE + tileX, offsetY + y*SLICE_SIZE + tileY + 1);
 						chest.items.addItem(Items.APPLE, rnd.nextInt(7)+1);
 						chest.items.addItem(Items.SWORD, rnd.nextInt(7)+1);
 						chest.items.addItem(Items.ARROW, rnd.nextInt(7)+1);
@@ -266,9 +262,8 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 		}
 		
 		private void addSchematics(Region r) {
-			for(Region.QueuedSchematic s : schematics) {
-				generator.addSchematicAt(r, s.schematicName, s.sliceX, s.sliceY, s.tileX, s.tileY, SchematicParams.defaultParams());
-			}
+			for(Region.QueuedSchematic s : schematics)
+				addSchematicAt(r, s.schematicName, s.sliceX, s.sliceY, s.tileX, s.tileY, SchematicParams.defaultParams());
 			schematics.clear();
 		}
 	}

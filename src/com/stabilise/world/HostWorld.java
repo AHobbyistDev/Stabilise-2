@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
@@ -69,7 +70,7 @@ public class HostWorld extends BaseWorld {
 			throw new IllegalStateException("World has already been prepared!");
 		
 		// Load the spawn regions if this is the default dimension
-		if(dimension.info.name.equals(Dimension.defaultDimension())) {
+		if(dimension.info.name.equals(Dimension.defaultDimensionName())) {
 			// Ensure the 'spawn regions' are generated, and anchor them such that
 			// they're always loaded
 			// The spawn regions extend for -256 <= x,y <= 256 (this is arbitrary)
@@ -283,7 +284,7 @@ public class HostWorld extends BaseWorld {
 		synchronized(generator.getLock(loc)) {
 			r = generator.getCachedRegion(loc);
 			if(r == null) // if it's not cached, create it
-				r = new Region(loc, dimension.info.age);
+				r = new Region(loc, getAge());
 			regions.put(loc, r);
 		}
 		
@@ -515,6 +516,14 @@ public class HostWorld extends BaseWorld {
 	@Override
 	public long getAge() {
 		return dimension.info.age;
+	}
+	
+	/**
+	 * Gets this world's filesystem directory. Equivalent to invoking:
+	 * <pre>dimension.info.getDimensionDir();</pre>
+	 */
+	public FileHandle getWorldDir() {
+		return dimension.info.getDimensionDir();
 	}
 	
 	/**

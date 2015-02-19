@@ -67,7 +67,7 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		if(world != null)
 			return world;
 		
-		Dimension dim = Dimension.getDimension(new Dimension.Info(info, name));
+		Dimension dim = Dimension.getDimension(info, name);
 		if(dim == null)
 			throw new IllegalArgumentException("Invalid dimension \"" + name + "\"");
 		
@@ -307,7 +307,7 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		 */
 		private void defaultData() {
 			newToWorld = true;
-			dimension = Dimension.defaultDimension();
+			dimension = Dimension.defaultDimensionName();
 			lastX = lastY = 0D; // TODO: let the default dimension intialise this
 		}
 		

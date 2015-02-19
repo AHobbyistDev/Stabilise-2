@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.google.common.base.Charsets;
@@ -31,6 +32,8 @@ public class CharacterData {
 	
 	/** The file name of the character data file. */
 	public static final String FILE_DATA = "data";
+	/** The name of the directory holding a player's private world. */
+	public static final String DIR_PRIVATE_WORLD = "privatedimension/";
 	
 	//--------------------==========--------------------
 	//------------=====Member Variables=====------------
@@ -104,8 +107,9 @@ public class CharacterData {
 		       .putString(System.getProperty("os.name"), Charsets.UTF_8)
 		       .putString(System.getProperty("os.version"), Charsets.UTF_8)
 		       .putString(System.getProperty("user.name"), Charsets.UTF_8)
-		       .hash();
-		
+		       .putLong(new Random().nextLong())// In Java 8, constructing new Random is sensitive to prior
+		       .hash();							// constructions, so we allow the hash to be influenced by
+												// earlier actions by the user in this sense.
 		hash = hc.toString();
 	}
 	
@@ -116,7 +120,7 @@ public class CharacterData {
 	 * to load the character data.
 	 */
 	public void load() throws IOException {
-		NBTTagCompound tag = NBTIO.readCompressed(getCharacterDir(fileSystemName).child(FILE_DATA));
+		NBTTagCompound tag = NBTIO.readCompressed(getFile());
 		
 		// TODO: For now only the hash and name are configured to throw
 		// IOExceptions, as they're the only important details
@@ -160,7 +164,28 @@ public class CharacterData {
 		
 		tag.addList("inventory", inventory.toNBT());
 		
-		NBTIO.safeWriteCompressed(getCharacterDir(fileSystemName).child(FILE_DATA), tag);
+		NBTIO.safeWriteCompressed(getFile(), tag);
+	}
+	
+	/**
+	 * Gets this character's filesystem directory.
+	 */
+	public FileHandle getDir() {
+		return getCharacterDir(fileSystemName);
+	}
+	
+	/**
+	 * Gets this character data's filesystem handle.
+	 */
+	public FileHandle getFile() {
+		return getDir().child(FILE_DATA);
+	}
+	
+	/**
+	 * Gets this character's private dimension's filesystem directory.
+	 */
+	public FileHandle getDimensionDir() {
+		return getDir().child(DIR_PRIVATE_WORLD);
 	}
 	
 	@Override

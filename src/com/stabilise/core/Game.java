@@ -58,7 +58,7 @@ public class Game implements Controllable, InputProcessor {
 	public Game(HostProvider provider) {
 		this.provider = provider;
 		this.world = new SingleplayerWorld(
-				provider.getDimension(Dimension.defaultDimension()),
+				provider.getDimension(Dimension.defaultDimensionName()),
 				CharacterData.defaultCharacter()
 		);
 		

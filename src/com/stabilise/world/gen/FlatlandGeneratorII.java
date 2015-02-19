@@ -2,6 +2,7 @@ package com.stabilise.world.gen;
 
 import static com.stabilise.world.Region.REGION_SIZE;
 import static com.stabilise.world.Slice.SLICE_SIZE;
+import static com.stabilise.world.tile.Tiles.*;
 
 import java.util.Random;
 
@@ -66,17 +67,17 @@ public class FlatlandGeneratorII extends WorldGenerator {
 		for(int c = 0; c < SLICE_SIZE; c++) {
 			for(int r = 0; r < SLICE_SIZE; r++) {
 				if(s.y >= 0)
-					s.setTileAt(c, r, 0);		// Air
+					s.setTileAt(c, r, AIR);
 				//else if(s.y <= -8)
-				//	s.setTileAt(c, r, 8);		// Lava
+				//	s.setTileAt(c, r, LAVA);
 				else {
 					int rnd = rng.nextInt(5);
 					if(rnd < 2)
-						s.setTileAt(c, r, 1);		// Stone
+						s.setTileAt(c, r, STONE);
 					else if(rnd < 4)
-						s.setTileAt(c, r, 12);		// Stone Brick
+						s.setTileAt(c, r, BRICK_STONE);
 					else
-						s.setTileAt(c, r, 11);		// Ice
+						s.setTileAt(c, r, ICE);
 				}
 			}
 		}

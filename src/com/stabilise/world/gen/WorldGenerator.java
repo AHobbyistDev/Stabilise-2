@@ -25,6 +25,7 @@ import com.stabilise.world.Region;
 import com.stabilise.world.Schematic;
 import com.stabilise.world.Slice;
 import com.stabilise.world.provider.WorldProvider;
+import com.stabilise.world.tile.Tiles;
 
 /**
  * The {@code WorldGenerator} class provides the mechanism for generating the
@@ -241,7 +242,7 @@ public abstract class WorldGenerator {
 						r.slices[y][x] = new Slice(
 								x + r.loc.x * REGION_SIZE,
 								y + r.loc.y * REGION_SIZE,
-								new int[SLICE_SIZE][SLICE_SIZE]
+								new int[SLICE_SIZE][SLICE_SIZE] // all values are 0 == Tiles.AIR
 						);
 					}
 				}
@@ -255,20 +256,18 @@ public abstract class WorldGenerator {
 			// After normal generation processes have been completed, add any
 			// queued schematics.
 			
-			// Make a defensive copy of schematics while we have the lock
-			Region.QueuedSchematic[] rSchematics = new Region.QueuedSchematic[0];
-			
 			// Notifies other gen threads that this region is now beyond the
 			// point where schematics can be queued and still generated.
 			l.schematicsPlaced = true;
 			
+			// Make a defensive copy of schematics while we have the lock
+			Region.QueuedSchematic[] rSchematics = new Region.QueuedSchematic[0];
 			synchronized(r.queuedSchematics) {
-				if(r.hasQueuedSchematics) {
-					r.hasQueuedSchematics = false;
+				if(r.hasQueuedSchematics())
 					rSchematics = r.queuedSchematics.toArray(rSchematics); // wipes r.queuedSchematics
-					changes = true;
-				}
 			}
+			
+			changes |= rSchematics.length > 0;
 			
 			// Now add the schematics
 			for(Region.QueuedSchematic s : rSchematics)
@@ -317,7 +316,7 @@ public abstract class WorldGenerator {
 			// atomic.
 			boolean generated = cRegion.generated || (cLock != null && cLock.schematicsPlaced);
 			
-			if(generated && cRegion.hasQueuedSchematics) {
+			if(generated && cRegion.hasQueuedSchematics()) {
 				executor.execute(new Runnable() {
 					@Override
 					public void run() {
@@ -340,16 +339,15 @@ public abstract class WorldGenerator {
 	/**
 	 * Generates a region.
 	 * 
-	 * <p>Critically, subclasses of WorldGenerator should note that this method
-	 * may be invoked by various worker threads concurrently, and it is hence
-	 * the responsibility of said subclasses to ensure correct thread safety
-	 * procedures are observed.
+	 * <p>The general contract of this method is that it may modify the
+	 * contents of any slice in the given region - namely, it may set tiles and
+	 * tile entities, and add schematics. Leaving this method blank is
+	 * equivalent to setting every tile in the region to {@link Tiles#AIR}.
 	 * 
-	 * <p>Subclasses of WorldGenerator should also note that all slices of the
-	 * region will have already been instantiated.
-	 * 
-	 * <p>Furthermore, this method should never allow an exception or error to
-	 * propagate up the stack.
+	 * <p>Subclasses of WorldGenerator should note that this method may be
+	 * invoked by various worker threads concurrently, and it is hence the
+	 * responsibility of implementors to ensure correct thread safety
+	 * techniques are observed.
 	 * 
 	 * @param r The region to generate.
 	 */

@@ -103,7 +103,7 @@ public class LoadingState implements State {
 						Application.get().profiler
 				);
 				
-				world.loadDimension(Dimension.defaultDimension());
+				world.loadDimension(Dimension.defaultDimensionName());
 				
 				/*
 				world = new SingleplayerWorld(
@@ -118,7 +118,7 @@ public class LoadingState implements State {
 				tracker.increment();
 				tracker.setName("Loading world");
 				
-				while(!world.getDimension(Dimension.defaultDimension()).isLoaded())
+				while(!world.getDimension(Dimension.defaultDimensionName()).isLoaded())
 					Thread.sleep(50L);
 				
 				tracker.increment();

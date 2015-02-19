@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.google.common.base.Preconditions;
+import com.stabilise.character.CharacterData;
 import com.stabilise.util.collect.DuplicatePolicy;
 import com.stabilise.util.collect.Registry;
 import com.stabilise.util.nbt.NBTIO;
@@ -34,6 +35,9 @@ public abstract class Dimension {
 	/** The default dimension name. This is {@code null} until set by {@link
 	 * #registerDimensions()}. */
 	private static String defaultDim = null;
+	/** The internal name for the private dimension. This is {@code null} until
+	 * set by {@link #registerDimensions()}. */
+	private static String privateDim = null;
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -128,17 +132,35 @@ public abstract class Dimension {
 	/**
 	 * Gets an instance of a Dimension.
 	 * 
+	 * @param worldInfo The WorldInfo object of the dimension's parent world.
+	 * @param dimName The name of the dimension.
+	 * 
+	 * @return The Dimension, or {@code null} if there is no such dimension
+	 * with the specified name.
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IllegalStateException if the dimensions have not yet been
+	 * {@link #registerDimensions() registered}.
+	 * @throws RuntimeException if the Dimension object could not be
+	 * instantiated.
+	 */
+	public static Dimension getDimension(WorldInfo worldInfo, String dimName) {
+		return getDimension(new Info(worldInfo, dimName));
+	}
+	
+	/**
+	 * Gets an instance of a Dimension.
+	 * 
 	 * @param info The dimension info.
 	 * 
 	 * @return The Dimension, or {@code null} if there is no such dimension
 	 * with the specified name.
+	 * @throws NullPointerException if either argument is {@code null}.
 	 * @throws IllegalStateException if the dimensions have not yet been
 	 * {@link #registerDimensions() registered}.
-	 * @throws NullPointerException if {@code info} is {@code null}.
 	 * @throws RuntimeException if the Dimension object could not be
 	 * instantiated.
 	 */
-	public static Dimension getDimension(Info info) {
+	private static Dimension getDimension(Info info) {
 		if(defaultDim == null) // equivalent to a fictitious !dimsHaveBeenRegistered() call
 			throw new IllegalStateException("Dimensions have not yet been registered!");
 		Class<? extends Dimension> dimClass = DIMENSIONS.get(info.name);
@@ -150,11 +172,27 @@ public abstract class Dimension {
 	}
 	
 	/**
+	 * Gets an instance of the private Dimension.
+	 * 
+	 * @param character The character data of the character's dimension.
+	 * 
+	 * @return The Dimension.
+	 * @throws NullPointerException if {@code character} is {@code null}.
+	 * @throws IllegalStateException if the dimensions have not yet been
+	 * {@link #registerDimensions() registered}.
+	 * @throws RuntimeException if the Dimension object could not be
+	 * instantiated.
+	 */
+	public static Dimension getPrivateDimension(CharacterData character) {
+		return getDimension(new Info(character)); // should never be null
+	}
+	
+	/**
 	 * @return The name of the default dimension, or {@code null} if the
 	 * the dimensions have not yet been {@link #registerDimensions()
 	 * registered}.
 	 */
-	public static String defaultDimension() {
+	public static String defaultDimensionName() {
 		return defaultDim;
 	}
 	
@@ -166,10 +204,13 @@ public abstract class Dimension {
 	 */
 	public static void registerDimensions() {
 		registerDimension(true, "overworld", DimOverworld.class);
+		registerPrivateDimension("privateDim", DimPrivate.class);
 		
 		DIMENSIONS.lock();
 		if(defaultDim == null)
 			throw new Error("A default dimension must be set!");
+		if(privateDim == null)
+			throw new Error("The private dimension must be set!");
 	}
 	
 	/**
@@ -197,6 +238,26 @@ public abstract class Dimension {
 		DIMENSIONS.register(name, dimClass);
 	}
 	
+	/**
+	 * Registers the private dimension.
+	 * 
+	 * <p>This should only be invoked from {@link #registerDimensions()}.
+	 * 
+	 * @param name The name of the dimension.
+	 * @param dimClass The dimension's class.
+	 * 
+	 * @throws IllegalStateException if the private dimension has already been
+	 * set.
+	 * @throws RuntimeException see {@link Registry#register(Object, Object)}.
+	 */
+	private static void registerPrivateDimension(String name, Class<? extends Dimension> dimClass) {
+		if(privateDim != null)
+			throw new IllegalStateException("Private dimension had already been set!");
+		else
+			privateDim = name;
+		DIMENSIONS.register(name, dimClass);
+	}
+	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------
 	//--------------------==========--------------------
@@ -206,10 +267,13 @@ public abstract class Dimension {
 	 */
 	public static class Info {
 		
-		/** The info of the world this dimension belongs to. */
-		public final WorldInfo info;
 		/** This dimension's directory. */
 		private final FileHandle dir;
+		
+		/** {@code true} if this dimension is a player-local client-only
+		 * private dimension; {@code false} otherwise. For all standard
+		 * dimensions this is {@code false}. */
+		public final boolean privateDimension;
 		
 		/** The name of the dimension. */
 		public final String name;
@@ -221,19 +285,16 @@ public abstract class Dimension {
 		public int spawnSliceX = 0, spawnSliceY = 0;
 		
 		
-		/**
-		 * Creates a new DimensionInfo.
-		 * 
-		 * @param worldInfo The WorldInfo object of this dimension's parent world.
-		 * @param name The name of the dimension.
-		 * 
-		 * @throws NullPointerException if either argument is {@code null}.
-		 */
-		public Info(WorldInfo worldInfo, String name) {
-			this.info = Preconditions.checkNotNull(worldInfo);
+		private Info(WorldInfo worldInfo, String name) {
 			this.name = Preconditions.checkNotNull(name);
-			
-			dir = info.getWorldDir().child(IWorld.DIR_DIMENSIONS).child(name + "/");
+			privateDimension = false;
+			dir = worldInfo.getWorldDir().child(IWorld.DIR_DIMENSIONS).child(name + "/");
+		}
+		
+		private Info(CharacterData character) {
+			name = privateDim;
+			privateDimension = true;
+			dir = character.getDimensionDir();
 		}
 		
 		/**

@@ -16,22 +16,19 @@ public class Tile {
 	
 	/** The registry of all tiles in the game. The default tile is the air
 	 * tile. */
-	public static final RegistryNamespacedDefaulted<Tile> TILES =
+	private static final RegistryNamespacedDefaulted<Tile> TILES =
 			new RegistryNamespacedDefaulted<>("TileRegistry", "stabilise", "air", 32);
 	
+	/** Flag which is set to true when the tiles are registered. */
+	private static boolean registered = false;
 	
 	// Template values for hardness
-	/** The hardness for dirt-like tiles. */
-	protected static final float HARDNESS_DIRT = 1.0f;
-	/** The hardness for stone-like tiles. */
-	protected static final float HARDNESS_STONE = 10.0f;
-	/** The hardness for wood-like tiles. */
-	protected static final float HARDNESS_WOOD = 3.0f;
-	/** The hardness for invulnerable tiles. */
-	protected static final float HARDNESS_INVULNERABLE = 1000000;
-	
-	/** Flag which is set to true when tiles are registered. */
-	private static boolean registered = false;
+	/** Template hardness values for different tile types. */
+	protected static final float
+			H_DIRT = 1.0f,
+			H_STONE = 10.0f,
+			H_WOOD = 3.0f,
+			H_INVULNERABLE = Float.MAX_VALUE;
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -45,9 +42,9 @@ public class Tile {
 	/** Whether or not the tile is solid. */
 	protected boolean solid = true;
 	/** The tile's hardness. */
-	protected float hardness = HARDNESS_STONE;
+	protected float hardness = H_STONE;
 	/** The tile's frictive force, from 0 to 1. */
-	protected float friction = 0.15f;			// arbitrary default friction value
+	protected float friction = 0.15f;			// TODO arbitrary default friction value
 	
 	
 	/**
@@ -183,45 +180,37 @@ public class Tile {
 	
 	
 	/**
-	 * Gets the tile's ID.
-	 * 
-	 * @return The tile's ID.
+	 * Gets this tile's ID.
 	 */
 	public int getID() {
 		return id;
 	}
 	
 	/** 
-	 * Gets the tile's name.
-	 * 
-	 * @return The tile's name.
+	 * Gets this tile's name.
 	 */
 	public String getName() {
 		return name;
 	}
 	
 	/**
-	 * Checks for whether or not the tile is solid.
-	 * 
-	 * @return Whether or not the tile is solid.
+	 * Returns {@code true} if this tile is solid; {@code false} otherwise.
 	 */
 	public boolean isSolid() {
 		return solid;
 	}
 	
 	/**
-	 * Gets the tile's frictive value.
+	 * Gets this tile's frictive value.
 	 * 
-	 * @return The tile's frictive value.
+	 * <p>TODO: define 'frictive value'.
 	 */
 	public float getFriction() {
 		return friction;
 	}
 	
 	/**
-	 * Gets the tile's hardness.
-	 * 
-	 * @return The tile's hardness.
+	 * Gets this tile's hardness.
 	 */
 	public float getHardness() {
 		return hardness;
@@ -237,31 +226,23 @@ public class Tile {
 	//--------------------==========--------------------
 	
 	/**
-	 * Gets the Tile with the specified ID.
-	 * 
-	 * @param id The requested tile's ID.
-	 * 
-	 * @return The requested Tile object, or {@link Tiles#AIR} if no such tile
-	 * exists.
+	 * Returns the tile with the specified ID, or {@link Tiles#AIR} if no such
+	 * tile exists.
 	 */
 	public static Tile getTile(int id) {
 		return TILES.get(id);
 	}
 	
 	/**
-	 * Gets the Tile with the specified name.
-	 * 
-	 * @param name The requested tile's name.
-	 * 
-	 * @return The requested Tile object, or {@link Tiles#AIR} if no such tile
-	 * exists.
+	 * Returns the tile with the specified name, or {@link Tiles#AIR} if no
+	 * such tile exists.
 	 */
 	public static Tile getTile(String name) {
 		return TILES.get(name);
 	}
 	
 	/**
-	 * Registers all tiles, and then loads the {@link Tiles} class into memory.
+	 * Registers all tiles.
 	 * 
 	 * @throws IllegalStateException if this method has already been invoked.
 	 */
@@ -270,30 +251,29 @@ public class Tile {
 			throw new IllegalStateException("Tiles have already been registered!");
 		
 		registerTile(0, "air", new TileAir());
-		registerTile(1, "stone", (new Tile()).setHardness(HARDNESS_STONE));
-		registerTile(2, "dirt", (new Tile()).setHardness(HARDNESS_DIRT));
-		registerTile(3, "grass", (new TileGrass()).setHardness(HARDNESS_DIRT));
-		registerTile(4, "wood", (new Tile()).setHardness(HARDNESS_WOOD));
-		registerTile(5, "leaves", (new Tile()).setHardness(HARDNESS_DIRT));
-		registerTile(6, "planks", (new Tile()).setHardness(HARDNESS_WOOD));
-		registerTile(7, "water", (new TileFluid()).setViscosity(0.12f));
-		registerTile(8, "lava", (new TileFluid()).setViscosity(0.8f));
-		registerTile(9, "bedrock", (new Tile()).setHardness(HARDNESS_INVULNERABLE));
-		registerTile(10, "invisibleBedrock", (new Tile()).setHardness(HARDNESS_INVULNERABLE));
-		registerTile(11, "ice", (new Tile()).setHardness(HARDNESS_DIRT).setFriction(0.008f));
-		registerTile(12, "stoneBrick", (new Tile()).setHardness(HARDNESS_STONE));
-		registerTile(13, "oreIron", (new TileOre()).setHardness(HARDNESS_STONE));
-		registerTile(14, "oreCopper", (new TileOre()).setHardness(HARDNESS_STONE));
-		registerTile(15, "oreGold", (new TileOre()).setHardness(HARDNESS_STONE));
-		registerTile(16, "oreSilver", (new TileOre()).setHardness(HARDNESS_STONE));
-		registerTile(17, "oreDiamond", (new TileOre()).setHardness(HARDNESS_STONE));
-		registerTile(18, "chest", (new TileChest()).setHardness(HARDNESS_WOOD));
-		registerTile(19, "mobSpawner", new TileMobSpawner());
+		registerTile(1, "void", new Tile().setHardness(H_INVULNERABLE));
+		registerTile(2, "bedrock", new Tile().setHardness(H_INVULNERABLE));
+		registerTile(3, "invisibleBedrock", new Tile().setHardness(H_INVULNERABLE));
+		registerTile(4, "stone", new Tile().setHardness(H_STONE));
+		registerTile(5, "dirt", new Tile().setHardness(H_DIRT));
+		registerTile(6, "grass", new TileGrass().setHardness(H_DIRT));
+		registerTile(7, "wood", new Tile().setHardness(H_WOOD));
+		registerTile(8, "leaves", new Tile().setHardness(H_DIRT));
+		registerTile(9, "planks", new Tile().setHardness(H_WOOD));
+		registerTile(10, "water", new TileFluid().setViscosity(0.12f));
+		registerTile(11, "lava", new TileFluid().setViscosity(0.8f));
+		registerTile(12, "ice", new Tile().setHardness(H_DIRT).setFriction(0.008f));
+		registerTile(13, "stoneBrick", new Tile().setHardness(H_STONE));
+		registerTile(14, "oreIron", new TileOre().setHardness(H_STONE));
+		registerTile(15, "oreCopper", new TileOre().setHardness(H_STONE));
+		registerTile(16, "oreGold", new TileOre().setHardness(H_STONE));
+		registerTile(17, "oreSilver", new TileOre().setHardness(H_STONE));
+		registerTile(18, "oreDiamond", new TileOre().setHardness(H_STONE));
+		registerTile(19, "chest", new TileChest().setHardness(H_WOOD));
+		registerTile(20, "mobSpawner", new TileMobSpawner());
 		
 		TILES.lock();
 		registered = true;
-		
-		Tiles.poke();
 	}
 	
 	/**

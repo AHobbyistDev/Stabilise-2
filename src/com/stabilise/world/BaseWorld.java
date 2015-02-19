@@ -29,7 +29,9 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 public abstract class BaseWorld extends AbstractWorld {
 	
 	public final WorldProvider<? extends BaseWorld> provider;
-	/** This world's dimension. */
+	/** This world's dimension.
+	 * <p>Though doing so is permitted for convenience purposes, it is
+	 * ill-advised to interact with this object directly. */
 	public final Dimension dimension;
 	
 	/** All players in the world. Maps IDs -> players' EntityMobs. */
