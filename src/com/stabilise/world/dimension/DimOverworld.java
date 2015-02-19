@@ -10,7 +10,7 @@ import com.stabilise.world.provider.WorldProvider;
  */
 public class DimOverworld extends Dimension {
 	
-	DimOverworld(Info info) {
+	public DimOverworld(Info info) {
 		super(info);
 	}
 	

@@ -156,8 +156,8 @@ public abstract class WorldGenerator {
 	 * <ul>
 	 * <li>it has not been loaded (i.e. {@link Region#loaded region.loaded}
 	 *     is {@code false}).
-	 * <li>it has already been generated (i.e.
-	 *     {@link Region#isGenerated() region.isGenerated()} is {@code true}).
+	 * <li>it has already been generated (i.e. {@link
+	 *     Region#isGenerated() region.isGenerated()} is {@code true}).
 	 * <li>it is being generated concurrently.
 	 * </ul>
 	 * 

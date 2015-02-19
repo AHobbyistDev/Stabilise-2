@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.stabilise.character.CharacterData;
 import com.stabilise.core.Application;
 import com.stabilise.core.Resources;
 import com.stabilise.core.main.Stabilise;
@@ -23,10 +24,11 @@ import com.stabilise.util.Log;
 import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.concurrent.TaskThread;
 import com.stabilise.util.concurrent.TaskTracker;
+import com.stabilise.world.HostWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.WorldInfo;
-import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.provider.HostProvider;
+import com.stabilise.world.provider.HostProvider.PlayerBundle;
 
 /**
  * A LoadingState is the state which runs as the game loads all preparatory
@@ -54,6 +56,7 @@ public class LoadingState implements State {
 	
 	//////////////////temp stuff
 	private HostProvider world;
+	private PlayerBundle player;
 	//////////////////end temp stuff
 	
 	
@@ -103,22 +106,13 @@ public class LoadingState implements State {
 						Application.get().profiler
 				);
 				
-				world.loadDimension(Dimension.defaultDimensionName());
-				
-				/*
-				world = new SingleplayerWorld(
-						new HostWorld(
-								worldProv,
-								Dimension.getDimension(dimInfo)
-						),
-						CharacterData.defaultCharacter()
-				);
-				*/
+				player = world.addPlayer(CharacterData.defaultCharacter(), true);
+				HostWorld dim = player.world;
 				
 				tracker.increment();
-				tracker.setName("Loading world");
+				tracker.setName("Loading dimension \"" + dim.getDimensionName() + "\"");
 				
-				while(!world.getDimension(Dimension.defaultDimensionName()).isLoaded())
+				while(!dim.isLoaded())
 					Thread.sleep(50L);
 				
 				tracker.increment();
@@ -180,7 +174,7 @@ public class LoadingState implements State {
 			if(!taskThread.completed())
 				Application.crashApplication(t != null ? t : new AssertionError("Bootstrap failed!"));
 			//application.setState(new MenuTestState());
-			application.setState(new SingleplayerState(world));
+			application.setState(new SingleplayerState(world, player));
 		}
 	}
 	

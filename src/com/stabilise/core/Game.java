@@ -3,7 +3,6 @@ package com.stabilise.core;
 import static com.badlogic.gdx.Input.Keys;
 
 import com.badlogic.gdx.InputProcessor;
-import com.stabilise.character.CharacterData;
 import com.stabilise.entity.controller.PlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
@@ -11,10 +10,8 @@ import com.stabilise.input.Controller.Control;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.HostWorld;
-import com.stabilise.world.dimension.Dimension;
-import com.stabilise.world.old.ClientWorld;
-import com.stabilise.world.old.SingleplayerWorld;
 import com.stabilise.world.provider.HostProvider;
+import com.stabilise.world.provider.HostProvider.PlayerBundle;
 
 /**
  * The game itself.
@@ -28,7 +25,8 @@ public class Game implements Controllable, InputProcessor {
 	
 	private final HostProvider provider;
 	/** The game's world instance. */
-	public final ClientWorld<HostWorld> world;
+	public final HostWorld world;
+	public final PlayerBundle player;
 	
 	/** The controller. */
 	public Controller controller;
@@ -54,24 +52,19 @@ public class Game implements Controllable, InputProcessor {
 	 * Creates a new Game instance.
 	 * 
 	 * @param provider The world to run.
+	 * @param player The integrated player.
 	 */
-	public Game(HostProvider provider) {
+	public Game(HostProvider provider, PlayerBundle player) {
 		this.provider = provider;
-		this.world = new SingleplayerWorld(
-				provider.getDimension(Dimension.defaultDimensionName()),
-				CharacterData.defaultCharacter()
-		);
+		this.player = player;
+		this.world = player.world;
 		
 		log.postInfo("Initiating game...");
-		
-		// Handled by a separate thread in the main menu now
-		//world.prepare();
-		//world.addPlayer(CharacterData.defaultCharacter());
 		
 		controller = new Controller(this);
 		
 		// TODO: Hardcoding this is poor design and should be changed in the future
-		playerController = new PlayerController(this.world.player, controller, this);
+		playerController = new PlayerController(player.playerEntity, controller, this);
 	}
 	
 	/**
@@ -130,10 +123,8 @@ public class Game implements Controllable, InputProcessor {
 	
 	/**
 	 * Gets the game world.
-	 * 
-	 * @return The game world.
 	 */
-	public ClientWorld<HostWorld> getWorld() {
+	public HostWorld getWorld() {
 		return world;
 	}
 	

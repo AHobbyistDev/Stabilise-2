@@ -77,10 +77,11 @@ public abstract class WorldProvider<W extends BaseWorld> {
 	
 	/** Profile any world's operation with this. */
 	public final Profiler profiler;
-	private final Log log = Log.getAgent("WorldProvider");
+	protected final Log log = Log.getAgent("WorldProvider");
 	
 	// Integrated player stuff
-	/** {@code true} if we're providing for an integrated client. */
+	/** {@code true} if we're providing for an integrated client. {@code false}
+	 * by default. */
 	protected boolean integratedClient = false;
 	/** The integrated client's character data. {@code null} if there is no
 	 * integrated client. */
@@ -139,11 +140,10 @@ public abstract class WorldProvider<W extends BaseWorld> {
 	 * 
 	 * @param name The name of the dimension.
 	 * 
-	 * @return The dimension, or {@code null} if no such dimension has been
-	 * registered.
-	 * @throws RuntimeException if the dimension could not be prepared.
+	 * @return The dimension.
 	 * @throws IllegalArgumentException if {@code name} is not the name of a
 	 * valid dimension.
+	 * @throws RuntimeException if the dimension could not be prepared.
 	 */
 	public abstract W loadDimension(String name);
 	

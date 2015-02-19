@@ -28,6 +28,11 @@ public class EntityFireball extends EntityProjectile {
 	private static final int DESPAWN_TICKS = 300;
 	
 	
+	/** TODO: temporary */
+	public EntityFireball() {
+		super(null, null, null);
+	}
+	
 	/**
 	 * Creates a new fireball entity.
 	 * 

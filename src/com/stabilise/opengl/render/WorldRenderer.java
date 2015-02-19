@@ -23,8 +23,8 @@ import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.maths.Maths;
+import com.stabilise.world.IWorld;
 import com.stabilise.world.Slice;
-import com.stabilise.world.old.ClientWorld;
 
 /**
  * The WorldRenderer class handles the rendering of a world and its
@@ -48,7 +48,7 @@ public class WorldRenderer implements Renderer {
 	float pixelsPerTile = 32;
 	
 	/** Holds a reference to the world. */
-	public final ClientWorld<?> world;
+	public final IWorld world;
 	/** The camera. */
 	public final GameCamera playerCamera;
 	
@@ -85,13 +85,14 @@ public class WorldRenderer implements Renderer {
 	 * 
 	 * @param game The game.
 	 * @param world The game world.
+	 * @param player The player entity.
 	 */
-	public WorldRenderer(Game game, ClientWorld<?> world) {
+	public WorldRenderer(Game game, IWorld world, EntityMob player) {
 		super();
 		
 		this.world = world;
 		
-		playerCamera = new GameCamera(world.player);
+		playerCamera = new GameCamera(player);
 		
 		tileRenderer = new TileRenderer(this);
 		//hudRenderer = new HUDRenderer(game, this);

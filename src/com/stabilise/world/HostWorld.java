@@ -1,21 +1,21 @@
 package com.stabilise.world;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
-import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.collect.LightweightLinkedList;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.gen.WorldGenerator;
+import com.stabilise.world.provider.HostProvider.PlayerData;
 import com.stabilise.world.provider.WorldProvider;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -42,6 +42,9 @@ public class HostWorld extends BaseWorld {
 	/** Tracks the number of loaded regions, in preference to invoking
 	 * regions.size(), which is not a constant-time operation. */
 	private final AtomicInteger numRegions = new AtomicInteger(0);
+	
+	/** Holds all player slice maps. */
+	private final List<SliceMap> sliceMaps = new LightweightLinkedList<>();
 	
 	/** Whether or not the world has been {@link #prepare() prepared}. */
 	private boolean prepared = false;
@@ -90,48 +93,41 @@ public class HostWorld extends BaseWorld {
 	/**
 	 * Adds a player to the world.
 	 * 
-	 * @param world The world to treat as the player's parent world (may not
-	 * necessarily be this HostWorld object, as this may be wrapped in a
-	 * WorldWrapper).
-	 * @param character The data of the player to add.
-	 * @param x The x-coordinate at which to add the player, in tile-lengths.
-	 * @param y The y-coordinate at which to add the player, in tile-lengths.
+	 * @param data The data of the player to add.
 	 * 
 	 * @return The added player entity.
-	 * @throws NullPointerException if {@code character} is {@code null}.
+	 * @throws NullPointerException if {@code data} is {@code null}.
 	 */
-	public EntityMob addPlayer(IWorld world, CharacterData character, double x, double y) {
+	public EntityMob addPlayer(PlayerData data) {
 		EntityPlayer p = new EntityPlayer();
-		/*
-		loadCharacterData(character);
-		if(character.newToWorld) {
+		if(data.newToWorld) {
+			data.newToWorld = false;
 			// TODO: For now I'm placing the character at (0,0) of the spawn
 			// slice. In practice, we'll need to check to see whether or not
 			// this location is valid, and keep searching until a valid
 			// location is found.
-			character.lastX = tileCoordFromSliceCoord(dimension.info.spawnSliceX);
-			character.lastY = tileCoordFromSliceCoord(dimension.info.spawnSliceY);
-			character.newToWorld = false;
-			saveCharacterData(character);
+			data.lastX = tileCoordFromSliceCoord(dimension.info.spawnSliceX);
+			data.lastY = tileCoordFromSliceCoord(dimension.info.spawnSliceY);
 		}
-		characters.put(p.id, character.dataFile);
-		*/
-		addEntity(p, x, y);
+		addEntity(p, data.lastX, data.lastY);
 		setPlayer(p);
+		sliceMaps.add(new SliceMap(this, p));
 		return p;
 	}
 	
 	/**
-	 * Checks for whether or not the spawn area about a character has been
+	 * Checks for whether or not the spawn area about a player has been
 	 * loaded.
 	 * 
-	 * @param character The character.
+	 * @param player The player.
 	 * 
 	 * @return {@code true} if the area is loaded; {@code false} otherwise.
 	 */
-	public boolean spawnAreaLoaded(CharacterData character) {
+	/*
+	public boolean spawnAreaLoaded(EntityMob player) {
 		return true; // TODO
 	}
+	*/
 	
 	/**
 	 * {@inheritDoc}
@@ -159,7 +155,11 @@ public class HostWorld extends BaseWorld {
 		
 		dimension.info.age++;
 		
-		profiler.start("region"); // root.update.game.world.region
+		profiler.start("sliceMap"); // root.update.game.world.sliceMap
+		for(SliceMap m : sliceMaps)
+			m.update();
+		
+		profiler.next("region"); // root.update.game.world.region
 		Iterator<Region> i = regions.values().iterator();
 		while(i.hasNext()) {
 			Region r = i.next();
@@ -185,16 +185,6 @@ public class HostWorld extends BaseWorld {
 	public boolean updateAndCheck() {
 		update();
 		return numRegions.get() == 0;
-	}
-	
-	@Override
-	public void addParticle(Particle p) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public Collection<Particle> getParticles() throws UnsupportedOperationException {
-		throw new UnsupportedOperationException();
 	}
 	
 	/**

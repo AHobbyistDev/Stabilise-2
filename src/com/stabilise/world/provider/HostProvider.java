@@ -8,6 +8,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.google.common.base.Preconditions;
 import com.stabilise.character.CharacterData;
+import com.stabilise.entity.EntityMob;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.nbt.NBTIO;
@@ -71,13 +72,11 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		if(dim == null)
 			throw new IllegalArgumentException("Invalid dimension \"" + name + "\"");
 		
-		if(dim.info.fileExists()) {
-			try {
-				dim.loadData();
-			} catch(IOException e) {
-				throw new RuntimeException("Could not load dimension info! (dim: " +
-						name + ") (" + e.getMessage() + ")" , e);
-			}
+		try {
+			dim.loadData();
+		} catch(IOException e) {
+			throw new RuntimeException("Could not load dimension info! (dim: " +
+					name + ") (" + e.getMessage() + ")" , e);
 		}
 		
 		world = dim.createHost(this);
@@ -86,6 +85,51 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		dimensions.put(name, world);
 		
 		return world;
+	}
+	
+	/**
+	 * Adds a player to a world.
+	 * 
+	 * @param player The CharacterData for the player to add.
+	 * @param integrated {@code true} if this player should become that of the
+	 * integrated client.
+	 * 
+	 * @return The PlayerBundle holding the player entity, data, and world the
+	 * player was added to, or {@code null} if the player data could not be
+	 * loaded, or the world could not be loaded.
+	 * @throws NullPointerException if {@code player} is {@code null}.
+	 */
+	@NotThreadSafe
+	public PlayerBundle addPlayer(CharacterData player, boolean integrated) {
+		PlayerDataFile file = players.get(player.name);
+		if(file == null)
+			file = new PlayerDataFile(player.name);
+		PlayerData data = null;
+		try {
+			data = file.getData(player);
+		} catch(IOException e) {
+			log.postSevere("Could not load data for " + player + "!");
+			return null;
+		}
+		players.putIfAbsent(player.name, file);
+		HostWorld world = loadDimension(data.dimension);
+		if(world == null)
+			return null;
+		EntityMob playerEntity = world.addPlayer(data);
+		if(integrated) {
+			integratedClient = true;
+			integratedCharacter = player;
+			integratedPlayer = playerEntity;
+		}
+		return new PlayerBundle(world, playerEntity, data);
+	}
+	
+	/**
+	 * doesn't do anything yet
+	 * @param player
+	 */
+	public void removePlayer(CharacterData player) {
+		// TODO
 	}
 	
 	@Override
@@ -152,7 +196,7 @@ public class HostProvider extends WorldProvider<HostWorld> {
 	 *     PlayerDataFile#getData(CharacterData) getData()}, the file is loaded
 	 *     on the spot and the necessary data extracted; the rest is discarded.
 	 * <li>When a PlayerData object is saved via {@link
-	 *     PlayerDataFile#saveData(PlayerData) putData()}, the file is loaded,
+	 *     PlayerDataFile#save(PlayerData) putData()}, the file is loaded,
 	 *     the PlayerData's data is added to the NBT, and the file is saved.
 	 * </ul>
 	 * 
@@ -210,7 +254,7 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		public PlayerData getData(CharacterData player) throws IOException {
 			NBTTagCompound tag = loadData().getCompound(player.hash);
 			PlayerData p;
-			if(tag == null)
+			if(tag.isEmpty())
 				p = new PlayerData(this, player);
 			else
 				p = new PlayerData(this, player, tag);
@@ -222,7 +266,7 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		 * Updates this PlayerDataFile's save of the specified player data, and
 		 * then {@link #save() saves} this player data file.
 		 */
-		public void saveData(PlayerData data) throws IOException {
+		public void save(PlayerData data) throws IOException {
 			NBTTagCompound nbt = loadData();
 			nbt.addCompound(data.data.hash, data.toNBT());
 			saveData(nbt);
@@ -338,7 +382,7 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		 * @throws IOException if an I/O error occurred.
 		 */
 		public void save() throws IOException {
-			file.saveData(this);
+			file.save(this);
 		}
 		
 		/**
@@ -349,6 +393,27 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		public void dispose() throws IOException {
 			save();
 			file.disposeData(this);
+		}
+		
+	}
+	
+	/**
+	 * A convenience class which bundles the objects to be returned when a
+	 * player is added to the world.
+	 */
+	public static class PlayerBundle {
+		
+		/** The world the player has been added to. */
+		public final HostWorld world;
+		/** The player entity. */
+		public final EntityMob playerEntity;
+		/** The player's data. */
+		public final PlayerData playerData;
+		
+		private PlayerBundle(HostWorld world, EntityMob mob, PlayerData data) {
+			this.world = world;
+			this.playerEntity = mob;
+			this.playerData = data;
 		}
 		
 	}

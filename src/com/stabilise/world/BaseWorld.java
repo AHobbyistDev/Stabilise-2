@@ -155,7 +155,7 @@ public abstract class BaseWorld extends AbstractWorld {
 			for(Entity e : entitiesToAdd)
 				entities.put(e.id, e);
 		
-		profiler.start("remove"); // root.update.game.world.entity.remove
+		profiler.next("remove"); // root.update.game.world.entity.remove
 		
 		if(!entitiesToRemove.isEmpty())
 			for(Integer id : entitiesToRemove)
@@ -232,6 +232,9 @@ public abstract class BaseWorld extends AbstractWorld {
 	/**
 	 * Removes a tile entity from the list of tile entities. It will no longer
 	 * be updated.
+	 * 
+	 * <p>If the tile entity is not present in the list of tile entities, this
+	 * method does nothing asides from invoking {@link TileEntity#destroy()}.
 	 * 
 	 * @throws NullPointerException if {@code t} is {@code null}.
 	 */
@@ -326,6 +329,13 @@ public abstract class BaseWorld extends AbstractWorld {
 	@Override
 	public Random getRnd() {
 		return rng;
+	}
+	
+	/**
+	 * The name of this world's dimension.
+	 */
+	public String getDimensionName() {
+		return dimension.info.name;
 	}
 	
 	// ========== Lifecycle Methods ==========

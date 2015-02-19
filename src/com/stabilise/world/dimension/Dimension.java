@@ -79,13 +79,13 @@ public abstract class Dimension {
 	public abstract WorldGenerator createWorldGenerator(WorldProvider<?> provider, HostWorld world);
 	
 	/**
-	 * Loads this dimension's info.
+	 * Loads this dimension's info, if it exists on the filesystem.
 	 * 
-	 * @throws IOException if the info file does not exist or an I/O error
-	 * otherwise occurs.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	public final void loadData() throws IOException {
-		loadExtraData(info.load());
+		if(info.getFile().exists())
+			loadExtraData(info.load());
 	}
 	
 	/**
@@ -306,8 +306,9 @@ public abstract class Dimension {
 		private NBTTagCompound load() throws IOException {
 			NBTTagCompound tag = NBTIO.readCompressed(getFile());
 			
-			if(name != tag.getString("dimName"))
-				throw new IOException("Dimension name does not match stored name!");
+			if(!name.equals(tag.getString("dimName")))
+				throw new IOException("Dimension name does not match stored name \""
+						+ tag.getString("dimName") + "\"");
 			
 			age = tag.getLongUnsafe("age");
 			

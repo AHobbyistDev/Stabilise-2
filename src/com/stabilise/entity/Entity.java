@@ -6,7 +6,6 @@ import com.stabilise.util.Direction;
 import com.stabilise.util.collect.InstantiationRegistry;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
-import com.stabilise.world.BaseWorld;
 import com.stabilise.world.IWorld;
 import com.stabilise.world.tile.Tile;
 
@@ -25,16 +24,15 @@ public abstract class Entity extends FreeGameObject {
 	
 	/** The entity registry. */
 	private static final InstantiationRegistry<Entity> ENTITIES =
-			new InstantiationRegistry<Entity>(8, THROW_EXCEPTION, Entity.class,
-					IWorld.class);
+			new InstantiationRegistry<Entity>(8, THROW_EXCEPTION, Entity.class);
 	
 	// Register all entity types.
 	static {
-		ENTITIES.registerDefaultArgs(0, EntityItem.class);
-		ENTITIES.registerDefaultArgs(1, EntityFireball.class);
-		ENTITIES.registerDefaultArgs(2, EntityBigFireball.class);
-		ENTITIES.registerDefaultArgs(3, EntityEnemy.class);
-		ENTITIES.registerDefaultArgs(4, EntityPerson.class);
+		ENTITIES.register(0, EntityItem.class);
+		ENTITIES.register(1, EntityFireball.class);
+		ENTITIES.register(2, EntityBigFireball.class);
+		ENTITIES.register(3, EntityEnemy.class);
+		ENTITIES.register(4, EntityPerson.class);
 		
 		ENTITIES.lock();
 	}
@@ -461,19 +459,17 @@ public abstract class Entity extends FreeGameObject {
 	/**
 	 * Creates an Entity object.
 	 * 
-	 * @param id The ID of the tile entity, as would be given by its
-	 * {@link #getID()} method. 
-	 * @param x The x-coordinate of the tile entity, in tile-lengths.
-	 * @param y The y-coordinate of the tile entity, in tile-lengths.
+	 * @param id The ID of the entity, as would be given by its
+	 * {@link #getID()} method.
 	 * 
-	 * @return A TileEntity object of class determined by the {@code id}
+	 * @return An Entity object of class determined by the {@code id}
 	 * parameter, or {@code null} if the {@code id} parameter is invalid or
-	 * the tile entity could not be constructed for whatever reason.
-	 * @throws RuntimeException if the tile entity corresponding to the ID was
+	 * the entity could not be constructed for whatever reason.
+	 * @throws RuntimeException if the entity corresponding to the ID was
 	 * registered incorrectly.
 	 */
-	public static Entity createEntity(int id, BaseWorld world) {
-		return ENTITIES.instantiate(id, world);
+	public static Entity createEntity(int id) {
+		return ENTITIES.instantiate(id);
 	}
 	
 	/**

@@ -19,6 +19,7 @@ import com.stabilise.world.HostWorld;
 public class ClientWorld<W extends BaseWorld> extends WorldWrapper<W> {
 	
 	/** The player's character data. */
+	@SuppressWarnings("unused")
 	private final CharacterData playerData;
 	/** Holds a direct reference to the player controlled by the client. */
 	public EntityMob player;
@@ -54,7 +55,7 @@ public class ClientWorld<W extends BaseWorld> extends WorldWrapper<W> {
 	}
 	
 	protected void addPlayerAsHost(HostWorld world) {
-		player = world.addPlayer(this, playerData, 0D, 0D);
+		//player = world.addPlayer(this, playerData, 0D, 0D);
 	}
 	
 	protected void addPlayerAsClient(MultiplayerClientWorld world) {
