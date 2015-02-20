@@ -184,9 +184,7 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 */
 	public E instantiate(int id, Object... args) {
 		Factory<? extends E> factory = factoryMap.getObject(id);
-		if(factory != null)
-			return factory.create(args);
-		return null;
+		return factory == null ? null : factory.create(args);
 	}
 	
 	/**
@@ -254,6 +252,7 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 		public ReflectiveFactory(Class<? extends T> objClass, Class<?>... args) {
 			try {
 				constructor = objClass.getConstructor(args);
+				constructor.setAccessible(true);
 			} catch(Exception e) {
 				String className = objClass.getCanonicalName();
 				if(className == null)

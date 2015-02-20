@@ -102,9 +102,9 @@ public class LoadingState implements State {
 				tracker.setName("Constructing world");
 				
 				world = new HostProvider(
-						worldList[0],
-						Application.get().profiler
+						worldList[0]
 				);
+				world.setProfiler(Application.get().profiler);
 				
 				player = world.addPlayer(CharacterData.defaultCharacter(), true);
 				HostWorld dim = player.world;

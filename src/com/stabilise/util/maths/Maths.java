@@ -23,6 +23,10 @@ public class Maths {
 	/** An array containing the unit vectors. */
 	public static final Vector2[] UNIT_VECTORS = new Vector2[] { Vector2.X, Vector2.Y };
 	
+	/** The maximum value which can be held by an unsigned short
+	 * (<tt>2<sup><font size=-1>16</font></sup>-1</tt>). */
+	public static final int USHORT_MAX_VALUE = 0xFFFF;
+	
 	
 	/**
 	 * Calculates whether or not a number is a power of two. Note that this

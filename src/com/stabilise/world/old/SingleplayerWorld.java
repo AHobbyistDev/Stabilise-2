@@ -4,7 +4,7 @@ import com.stabilise.character.CharacterData;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.SliceMap;
 
-
+@Deprecated
 public class SingleplayerWorld extends ClientWorld<HostWorld> {
 	
 	/** Manages slices 'loaded' about the player. */

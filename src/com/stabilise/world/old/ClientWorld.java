@@ -16,6 +16,7 @@ import com.stabilise.world.HostWorld;
  * @param <W> Use {@link HostWorld} for singleplayer, and {@link
  * MultiplayerClientWorld} for a multiplayer client.
  */
+@Deprecated
 public class ClientWorld<W extends BaseWorld> extends WorldWrapper<W> {
 	
 	/** The player's character data. */

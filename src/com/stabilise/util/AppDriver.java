@@ -1,5 +1,8 @@
 package com.stabilise.util;
 
+import com.google.common.base.Preconditions;
+import com.stabilise.util.annotation.NotThreadSafe;
+
 /**
  * An instance of this class may be used to provide a main loop which can be
  * utilised by implementing {@link #update()} and {@link #render()}.
@@ -8,8 +11,13 @@ package com.stabilise.util;
  * an AppDriver can be hooked onto any sort of other loop by invoking {@link
  * #tick()} from within that loop.
  * 
- * <p>This class is not thread-safe.
+ * <p>In the same way that a {@code Thread} may be passed a {@code Runnable} to
+ * run instead of being overridden to implement {@code run()}, {@link
+ * #getDriverFor(Drivable, int, int, Log) getDriverFor()} may be used to create
+ * an AppDriver which delegates to a {@link Drivable} in preference to
+ * overriding this class to implement {@code update} and {@code render}.
  */
+@NotThreadSafe
 public abstract class AppDriver implements Runnable {
 	
 	/** Update ticks per second. */
@@ -136,7 +144,7 @@ public abstract class AppDriver implements Runnable {
 	 * 
 	 * @return The number of milliseconds to wait until this should be invoked
 	 * again to ensure this is invoked as many times per second as specified by
-	 * {@code fps} in the constructor. This is used by {@link #run()} and
+	 * {@code fps} in the constructor. This is used by {@link #run()} but
 	 * should generally be ignored.
 	 * @throws IllegalStateException if this is invoked while a tick is in
 	 * progress, or if client code has been improperly using the profiler.
@@ -279,6 +287,109 @@ public abstract class AppDriver implements Runnable {
 		if(ticksPerFlush < 1)
 			throw new IllegalArgumentException("ticksPerFlush < 1");
 		this.ticksPerFlush = ticksPerFlush;
+	}
+	
+	//--------------------==========--------------------
+	//------------=====Static Functions=====------------
+	//--------------------==========--------------------
+	
+	/**
+	 * Gets an AppDriver which delegates to the specified {@code Drivable} and
+	 * for which the {@link #profiler} flushes every 1 second.
+	 * 
+	 * @param drivable The drivable to delagate update and render invocations
+	 * to.
+	 * @param tps The number of update ticks per second.
+	 * @param fps The maximum number of frames per second if this is run via
+	 * {@link #run()}. A value of {@code 0} indicates no maximum; a value of
+	 * {@code -1} indicates not to render (note this case will apply even if
+	 * {@code run()} isn't used).
+	 * @param log The log for this driver to use.
+	 * 
+	 * @return The AppDriver.
+	 * @throws IllegalArgumentException if either {@code tps < 1} or {@code fps
+	 * < -1}.
+	 * @throws NullPointerException if either {@code drivable} or {@code log}
+	 * are {@code null}.
+	 */
+	public static AppDriver getDriverFor(Drivable drivable, int tps, int fps, Log log) {
+		return new DelegatedDriver(drivable, tps, fps, log);
+	}
+	
+	/**
+	 * Gets an AppDriver which delegates to the specified {@code Drivable}.
+	 * 
+	 * @param drivable The drivable to delagate update and render invocations
+	 * to.
+	 * @param tps The number of update ticks per second.
+	 * @param fps The maximum number of frames per second if this is run via
+	 * {@link #run()}. A value of {@code 0} indicates no maximum; a value of
+	 * {@code -1} indicates not to render (note this case will apply even if
+	 * {@code run()} isn't used).
+	 * @param log The log for this driver to use.
+	 * @param ticksPerFlush The number of update ticks between successive
+	 * profiler flushes.
+	 * 
+	 * @throws IllegalArgumentException if either {@code tps < 1}, {@code
+	 * ticksPerFlush < 1}, or {@code fps < -1}.
+	 * @throws NullPointerException if either {@code drivable} or {@code log}
+	 * are {@code null}.
+	 */
+	public static AppDriver getDriverFor(Drivable drivable, int tps, int fps, Log log, int ticksPerFlush) {
+		return new DelegatedDriver(drivable, tps, fps, log, ticksPerFlush);
+	}
+	
+	//--------------------==========--------------------
+	//-------------=====Nested Classes=====-------------
+	//--------------------==========--------------------
+	
+	/**
+	 * Defines the methods {@code update} and {@code render}, which are invoked
+	 * by an AppDriver created by {@link
+	 * AppDriver#getDriverFor(Drivable, int, int, Log) getDriverFor()}.
+	 */
+	public static interface Drivable {
+		
+		/**
+		 * Performs an update tick.
+		 * 
+		 * @see AppDriver#tick()
+		 */
+		void update();
+		
+		/**
+		 * Performs any rendering.
+		 * 
+		 * @see AppDriver#tick()
+		 */
+		void render();
+		
+	}
+	
+	private static class DelegatedDriver extends AppDriver {
+		
+		private final Drivable drivable;
+		
+		public DelegatedDriver(Drivable drivable, int tps, int fps, Log log) {
+			super(tps, fps, log);
+			this.drivable = Preconditions.checkNotNull(drivable);
+		}
+		
+		public DelegatedDriver(Drivable drivable, int tps, int fps, Log log, int ticksPerFlush) {
+			super(tps, fps, log, ticksPerFlush);
+			this.drivable = Preconditions.checkNotNull(drivable);
+		}
+		
+		@Override
+		protected void update() {
+			drivable.update();
+		}
+		
+		@Override
+		protected void render() {
+			drivable.render();
+		}
+		
 	}
 	
 }

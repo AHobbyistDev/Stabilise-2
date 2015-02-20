@@ -1,10 +1,11 @@
-package com.stabilise.core;
+package com.stabilise.core.old;
 
 import java.io.*;
 import java.net.*;
 
 import static com.stabilise.core.Constants.DEFAULT_PORT;
 
+import com.stabilise.core.Constants;
 import com.stabilise.network.TCPConnection;
 import com.stabilise.network.packet.*;
 import com.stabilise.util.Log;
@@ -16,7 +17,7 @@ import com.stabilise.world.old.WorldClientOld;
  * 
  * @deprecated Due to the removal of networking architecture.
  */
-public class GameClient {
+public class GameClientOld {
 	
 	/** The socket through which the client will communicate with the server. */
 	private Socket socket;
@@ -39,7 +40,7 @@ public class GameClient {
 	 * Creates a new GameClient instance.
 	 * Note this should ideally be created <i>after</i> the server.
 	 */
-	public GameClient() {
+	public GameClientOld() {
 		try {
 			log.postInfo("Initiating client...");
 			socket = new Socket(InetAddress.getLocalHost(), DEFAULT_PORT);
@@ -50,10 +51,12 @@ public class GameClient {
 			// obtained.
 			// If the server is running a different game version, the client
 			// will abort.
+			/*
 			if(!handlePacketServerInfo((Packet001ServerInfo)connection.getPacketWithBlock())) {
 				close();
 				return;
 			}
+			*/
 			
 			log.postDebug("Got server data!");
 		} catch (IOException e) {
@@ -205,6 +208,7 @@ public class GameClient {
 	 * @return Returns true if the client and server are running compatible
 	 * versions. (Note that for now, compatible implies same versions.)
 	 */
+	@SuppressWarnings("unused")
 	private boolean handlePacketServerInfo(Packet001ServerInfo packet) {
 		boolean serverOutdated = false;
 		boolean clientOutdated = false;

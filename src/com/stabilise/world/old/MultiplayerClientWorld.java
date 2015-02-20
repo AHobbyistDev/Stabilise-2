@@ -22,6 +22,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * <p>TODO: This entire class in general
  */
 @Incomplete
+@Deprecated
 public class MultiplayerClientWorld extends BaseWorld {
 	
 	/** Holds slices provided by the server. */

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.stabilise.core.GameServer;
+import com.stabilise.core.old.GameServerOld;
 
 /**
  * The ClientListenerThread class is used by the game server to wait for
@@ -14,12 +14,12 @@ import com.stabilise.core.GameServer;
 public final class ClientListenerThread extends Thread {
 	
 	/** The GameServer for which the client is listening. */
-	private GameServer server;
+	private GameServerOld server;
 	/** The ServerSocket the thread is to listen for connections through. */
 	private ServerSocket serverSocket;
 	
 	
-	public ClientListenerThread(GameServer server, ServerSocket serverSocket) {
+	public ClientListenerThread(GameServerOld server, ServerSocket serverSocket) {
 		super("ClientListenerThread");
 		
 		this.server = server;

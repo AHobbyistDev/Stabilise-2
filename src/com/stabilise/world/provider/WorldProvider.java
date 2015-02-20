@@ -10,7 +10,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.common.base.Preconditions;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
@@ -76,7 +75,7 @@ public abstract class WorldProvider<W extends BaseWorld> {
 	protected final Map<String, W> dimensions = new HashMap<>(2);
 	
 	/** Profile any world's operation with this. */
-	public final Profiler profiler;
+	public Profiler profiler;
 	protected final Log log = Log.getAgent("WorldProvider");
 	
 	// Integrated player stuff
@@ -93,14 +92,8 @@ public abstract class WorldProvider<W extends BaseWorld> {
 	
 	/**
 	 * Creates a new WorldProvider.
-	 * 
-	 * @param profiler The profiler to use to profile the world.
-	 * 
-	 * @throws NullPointerException if {@code profiler} is {@code null}.
 	 */
-	public WorldProvider(Profiler profiler) {
-		this.profiler = Preconditions.checkNotNull(profiler);
-		
+	public WorldProvider() {
 		// Start up the executor
 		
 		final int coreThreads = 2; // region loading typically happens in pairs
@@ -168,6 +161,18 @@ public abstract class WorldProvider<W extends BaseWorld> {
 	 * <p>If this is not a {@code HostProvider}, a dummy seed is returned.
 	 */
 	public abstract long getSeed();
+	
+	/**
+	 * Sets the profiler with which to profile the operation of this
+	 * WorldProvider. If the given profiler is {@code null}, a disabled
+	 * profiler will instead be set.
+	 */
+	public void setProfiler(Profiler profiler) {
+		if(profiler == null)
+			this.profiler = new Profiler(false, "", false);
+		else
+			this.profiler = profiler;
+	}
 	
 	/**
 	 * Saves the worlds.

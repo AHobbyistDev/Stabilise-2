@@ -22,6 +22,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * 
  * @param <T> The type of world to wrap.
  */
+@Deprecated
 public class WorldWrapper<T extends BaseWorld> extends AbstractWorld {
 	
 	/** The world being wrapped. */

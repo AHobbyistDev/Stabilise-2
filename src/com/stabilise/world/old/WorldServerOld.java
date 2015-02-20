@@ -10,7 +10,7 @@ import static com.stabilise.world.Region.REGION_SIZE;
 import static com.stabilise.world.Slice.SLICE_SIZE;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.stabilise.core.GameServer;
+import com.stabilise.core.old.GameServerOld;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
@@ -32,7 +32,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 public class WorldServerOld extends BaseWorld {
 	
 	/** The game server to which the world belongs. */
-	public GameServer server;
+	public GameServerOld server;
 	
 	/** The world's information. */
 	public WorldInfo info;
@@ -52,7 +52,7 @@ public class WorldServerOld extends BaseWorld {
 	 * 
 	 * @param info The WorldInfo object to base the world on.
 	 */
-	public WorldServerOld(GameServer server, WorldInfo info) {
+	public WorldServerOld(GameServerOld server, WorldInfo info) {
 		super(null, null);
 		this.server = server;
 		this.info = info;
@@ -249,7 +249,7 @@ public class WorldServerOld extends BaseWorld {
 	 * @return The WorldServer instance, or null if the world could not be
 	 * loaded.
 	 */
-	public static WorldServerOld loadWorld(GameServer server, String worldName) {
+	public static WorldServerOld loadWorld(GameServerOld server, String worldName) {
 		WorldInfo info = WorldInfo.loadInfo(worldName);
 		
 		if(info != null)

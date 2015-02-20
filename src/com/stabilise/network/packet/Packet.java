@@ -7,9 +7,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import com.stabilise.network.Sendable;
-import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.InstantiationRegistry;
+import com.stabilise.util.maths.Maths;
 
 /**
  * Packets are modular chunks of data which may be sent over a network as a
@@ -62,8 +62,8 @@ public abstract class Packet implements Sendable {
 	 * @throws IOException
 	 */
 	protected static String readString(DataInputStream in) throws IOException {
-		short length = in.readShort();
-		StringBuilder sb = new StringBuilder();
+		int length = (int)in.readShort();
+		StringBuilder sb = new StringBuilder(length);
 		while(length-- > 0)
 			sb.append(in.readChar());
 		return sb.toString();
@@ -73,12 +73,12 @@ public abstract class Packet implements Sendable {
 	 * Writes a string to the provided output stream.
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
-	 * @throws IllegalArgumentException if {@code string} exceeds 32767
+	 * @throws IllegalArgumentException if {@code string} exceeds 65535
 	 * characters.
 	 * @throws IOException
 	 */
 	protected static void writeString(String string, DataOutputStream out) throws IOException {
-		if(string.length() > Short.MAX_VALUE)
+		if(string.length() > Maths.USHORT_MAX_VALUE)
 			throw new IllegalArgumentException("The given string is too large!");
 		out.writeShort(string.length());
 		out.writeChars(string);
@@ -87,40 +87,36 @@ public abstract class Packet implements Sendable {
 	/**
 	 * Instantiates an instance of a packet with the specified ID.
 	 * 
-	 * @return The packet, or {@code null} if it could not be created, either
-	 * due to {@code id} lacking a mapping or instantiation outright failing.
+	 * @return The packet.
+	 * @throws FaultyPacketRegistrationException if the packet could not be
+	 * created, either due to {@code id} lacking a mapping or instantiation
+	 * outright failing.
 	 */
 	@UserThread("ReadThread")
-	public static Packet createPacket(int id) {
+	private static Packet createPacket(int id) {
 		try {
 			return PACKETS.instantiate(id);
 		} catch(RuntimeException e) {
-			Log.get().postWarning("Packet of ID " + id + " could not be instantiated!", e);
+			throw new FaultyPacketRegistrationException("Packet of ID " + id
+					+ " could not be instantiated! (" + e.getMessage() + ")");
 		}
-		return null;
 	}
 	
 	/**
 	 * Reads the next packet from the provided input stream.
 	 * 
-	 * @return The packet, or {@code null} if a packet could not be read, or
-	 * there doesn't appear to be any available bytes in the stream.
+	 * @return The packet.
 	 * @throws NullPointerException if {@code in} is {@code null}.
-	 * @throws IOException if an I/O error occurs.
+	 * @throws FaultyPacketRegistrationException if the packet was registered
+	 * incorrectly (in this case the error lies in the registration code).
+	 * @throws IOException if an I/O error occurs, or the stream has ended.
 	 */
 	@UserThread("ReadThread")
 	public static Packet readPacket(DataInputStream in) throws IOException {
-		// Abort if nothing can be read, to give the read thread a chance to
-		// refresh.
-		if(in.available() == 0)
-			return null;
-		
 		int id = in.read(); // ID is always first byte
-		if(id == -1) // usually this doesn't happen
-			return null;
+		if(id == -1) // end of stream; abort!
+			throw new IOException("End of stream reached");
 		Packet packet = createPacket(id);
-		if(packet == null) // usually this doesn't happen
-			return null;
 		packet.readData(in);
 		return packet;
 	}
@@ -166,6 +162,21 @@ public abstract class Packet implements Sendable {
 		registerPacket(255, Packet255RequestPacket.class, 	true, 	true);
 		
 		PACKETS.lock();
+	}
+	
+	//--------------------==========--------------------
+	//-------------=====Nested Classes=====-------------
+	//--------------------==========--------------------
+	
+	/**
+	 * An exception type which indicates that a packet type was registered
+	 * incorrectly.
+	 */
+	public static class FaultyPacketRegistrationException extends RuntimeException {
+		private static final long serialVersionUID = -5809914071064815896L;
+		private FaultyPacketRegistrationException(String msg) {
+			super(msg);
+		}
 	}
 	
 }

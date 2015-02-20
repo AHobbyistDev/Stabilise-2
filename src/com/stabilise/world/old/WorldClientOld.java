@@ -3,7 +3,7 @@ package com.stabilise.world.old;
 import java.util.Collection;
 
 import com.stabilise.core.Constants;
-import com.stabilise.core.GameClient;
+import com.stabilise.core.old.GameClientOld;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityPlayer;
 import com.stabilise.entity.GameCamera;
@@ -23,7 +23,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 public class WorldClientOld extends BaseWorld {
 	
 	/** A reference to the client running the game. */
-	public GameClient client;
+	public GameClientOld client;
 	
 	/** The client's camera. */
 	public GameCamera camera;
@@ -45,7 +45,7 @@ public class WorldClientOld extends BaseWorld {
 	 * 
 	 * @param client The client object to link the world to.
 	 */
-	public WorldClientOld(GameClient client) {
+	public WorldClientOld(GameClientOld client) {
 		super(null, null);
 		
 		this.client = client;

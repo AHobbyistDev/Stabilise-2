@@ -1,7 +1,7 @@
 package com.stabilise.core.state;
 
-import com.stabilise.core.GameClient;
-import com.stabilise.core.GameServer;
+import com.stabilise.core.old.GameClientOld;
+import com.stabilise.core.old.GameServerOld;
 import com.stabilise.opengl.render.WorldRenderer;
 //import com.stabilise.screen.menu.GameMenu;
 //import com.stabilise.util.MathUtil;
@@ -18,9 +18,9 @@ public class ServerSingleplayerState implements State {
 	public String worldName;
 	
 	/** The game server. */
-	public GameServer server;
+	public GameServerOld server;
 	/** The game client. */
-	public GameClient client;
+	public GameClientOld client;
 	
 	/** The renderer to use for rendering the world. */
 	public WorldRenderer renderer;
@@ -111,8 +111,8 @@ public class ServerSingleplayerState implements State {
 	public void start() {
 		//menu = new GameMenu();
 		
-		server = new GameServer(worldName, true, 8);
-		client = new GameClient();
+		server = new GameServerOld(worldName, true, 8);
+		client = new GameClientOld();
 		client.joinServer();
 		
 		//renderer = new WorldRenderer(screen, client.getWorld());

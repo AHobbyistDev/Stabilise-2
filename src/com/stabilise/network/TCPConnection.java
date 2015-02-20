@@ -2,10 +2,12 @@ package com.stabilise.network;
 
 import java.io.*;
 import java.net.*;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.stabilise.network.packet.Packet;
+import com.stabilise.network.packet.Packet.FaultyPacketRegistrationException;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 
@@ -15,27 +17,51 @@ import com.stabilise.util.annotation.UserThread;
  */
 public class TCPConnection {
 	
+	//--------------------==========--------------------
+	//-----=====Static Constants and Variables=====-----
+	//--------------------==========--------------------
+	
+	/** State values.
+	 * 
+	 * <p>{@code STARTING} is an intermediate state used only while a
+	 * TCPConnection object is being constructed.
+	 * <p>{@code ACTIVE} indicates that a connection is active.
+	 * <p>{@code CLOSE_REQUESTED} indicates that either the read or write
+	 * thread encountered an exception and shut down.
+	 * <p>{@code SHUTDOWN} indicates that a connection is shutting down.
+	 * <p>{@code TERMINATED} indicates that a connection has been terminated. */
+	private static final int
+			STATE_STARTING = 0,
+			STATE_ACTIVE = 1,
+			STATE_CLOSE_REQUESTED = 2,
+			STATE_SHUTDOWN = 4,
+			STATE_TERMINATED = 8;
+	
+	private static final AtomicInteger CONNECTIONS_SERVER = new AtomicInteger(0);
+	private static final AtomicInteger CONNECTIONS_CLIENT = new AtomicInteger(0);
+	
+	//--------------------==========--------------------
+	//-------------=====Member Variables=====-----------
+	//--------------------==========--------------------
+	
+	/** {@code true} if this is a server-side connection. */
+	private final boolean server;
+	
+	private final AtomicInteger state = new AtomicInteger(STATE_STARTING);
+	
 	protected final Socket socket;
 	
 	private final DataInputStream in;
 	private final DataOutputStream out;
 	
-	private final Queue<Packet> packetQueueIn = new ConcurrentLinkedQueue<Packet>();
-	private final Queue<Packet> packetQueueOut = new ConcurrentLinkedQueue<Packet>();
+	private final BlockingQueue<Packet> packetQueueIn = new LinkedBlockingQueue<>();
+	private final BlockingQueue<Packet> packetQueueOut = new LinkedBlockingQueue<>();
 	
-	/** {@code true} if this is a server-side connection. */
-	private final boolean server;
+	private final TCPReadThread readThread;
+	private final TCPWriteThread writeThread;
 	
-	/** {@code true} if this connection is active. This is volatile. */
-	private volatile boolean running = true;
-	/** {@code true} if the connection has been terminated. This is volatile. */
-	private volatile boolean terminated = false;
-	
-	private TCPReadThread readThread;
-	private TCPWriteThread writeThread;
-	
-	private int totalPacketsSent = 0;
-	private int totalPacketsReceived = 0;
+	private int packetsSent = 0;
+	private int packetsReceived = 0;
 	
 	private Log log;
 	
@@ -52,13 +78,19 @@ public class TCPConnection {
 		this.socket = socket;
 		this.server = server;
 		
-		log = Log.getAgent(server ? "SERVER" : "CLIENT");
+		int id = server
+				? CONNECTIONS_SERVER.getAndIncrement()
+				: CONNECTIONS_CLIENT.getAndIncrement();
 		
-		in = new DataInputStream(socket.getInputStream());
-		out = new DataOutputStream(socket.getOutputStream());
+		log = Log.getAgent((server ? "SERVER" : "CLIENT") + id);
 		
-		readThread = new TCPReadThread(this, server ? "ServerSocket" : "ClientSocket");
-		writeThread = new TCPWriteThread(this, server ? "ServerSocket" : "ClientSocket");
+		in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+		out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+		
+		readThread = new TCPReadThread((server ? "ServerReader" : "ClientReader") + id);
+		writeThread = new TCPWriteThread((server ? "ServerWriter" : "ClientWriter") + id);
+		
+		state.set(STATE_ACTIVE);
 		
 		readThread.start();
 		writeThread.start();
@@ -82,7 +114,7 @@ public class TCPConnection {
 	/**
 	 * Polls the input packet queue for the next packet.
 	 * 
-	 * @return The oldest queued packet, or null if the queue is empty.
+	 * @return The oldest queued packet, or {@code null} if the queue is empty.
 	 */
 	@UserThread("MainThread")
 	public Packet getPacket() {
@@ -90,130 +122,114 @@ public class TCPConnection {
 	}
 	
 	/**
-	 * Blocks the current thread until a packet is received, or this thead is
-	 * interrupted.
-	 * 
-	 * @return The oldest queued packet, or the first packet to be added if the
-	 * queue is empty.
-	 */
-	public Packet getPacketWithBlock() {
-		Packet packet;
-		while((packet = getPacket()) == null) {
-			try {
-				synchronized(this) {
-					wait(); // wait until the read thread invokes notifyAll
-				}
-			} catch(InterruptedException e) {
-				log.postWarning("Interrupted while waiting for packet");
-			}
-		}
-		return packet;
-	}
-	
-	/**
 	 * Reads a packet from the socket's input stream. A return value of {@code
 	 * false} indicates either an I/O exception or the end of the stream having
 	 * been reached.
 	 * 
-	 * @return {@code true} if a packet was successfully read; {@code false}
-	 * otherwise.
+	 * @throws IOException if an I/O error occurs, or the stream has ended.
+	 * @throws FaultyPacketRegistrationException if the packet was registered
+	 * incorrectly (in this case the error lies in the registration code).
 	 */
 	@UserThread("ReadThread")
-	public boolean readPacket() {
-		if(terminated)
-			return false;
-		try {
-			Packet packet = Packet.readPacket(in);
-			if(packet == null)
-				return false;
-			packetQueueIn.offer(packet);
-			totalPacketsReceived++;
-			return true;
-		} catch(IOException e) {
-			log.postSevere("Exception while reading packet", e);
-		}
-		return false;
+	private void readPacket() throws IOException {
+		Packet packet = Packet.readPacket(in);
+		packetQueueIn.offer(packet);
+		packetsReceived++;
 	}
 	
 	/**
-	 * Writes a packet to the socket's output stream.
+	 * Writes a packet to the socket's output stream. A return value of {@code
+	 * false} indicates that the packet queue was empty (though note this may
+	 * no longer be the case when this method returns).
 	 * 
 	 * @return {@code true} if the packet was sent; {@code false} otherwise.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	@UserThread("WriteThread")
-	public boolean writePacket() {
+	private boolean writePacket() throws IOException {
 		Packet packet = packetQueueOut.poll();
 		if(packet == null)
 			return false;
-		try {
-			Packet.writePacket(out, packet);
-			totalPacketsSent++;
-			return true;
-		} catch(IOException e) {
-			log.postSevere("Exception while writing packet", e);
-		}
-		return false;
+		doWritePacket(packet);
+		return true;
+	}
+	
+	/**
+	 * Writes a packet to the socket's output stream, blocking if necessary
+	 * until a packet is available to send.
+	 * 
+	 * @throws InterruptedException if the current thread is interrupted while
+	 * waiting for a packet.
+	 * @throws IOException if an I/O error occurs.
+	 */
+	@UserThread("WriteThread")
+	private void writePacketWithBlock() throws InterruptedException, IOException {
+		doWritePacket(packetQueueOut.take());
+	}
+	
+	@UserThread("WriteThread")
+	private void doWritePacket(Packet packet) throws IOException {
+		Packet.writePacket(out, packet);
+		packetsSent++;
+	}
+	
+	/**
+	 * Requests for this connection to close, if an error occurs.
+	 */
+	@UserThread({"ReadThread", "WriteThread"})
+	private void requestClose() {
+		state.compareAndSet(STATE_ACTIVE, STATE_CLOSE_REQUESTED);
+	}
+	
+	/**
+	 * Returns {@code true} if closing this connection has been requested by
+	 * either the reader thread or the writer thread due to encountering an
+	 * exception.
+	 * 
+	 * <p>If {@code true} is returned, this means that this TCPConnection is
+	 * no longer functioning, and should be properly closed via {@link
+	 * #closeConnection()}.
+	 */
+	public boolean closeRequested() {
+		return state.get() == STATE_CLOSE_REQUESTED;
 	}
 	
 	/**
 	 * Closes the connection and releases any resources held by it.
 	 */
 	public void closeConnection() {
-		if(terminated) {
-			log.postWarning("Connection already closed!");
+		if(!state.compareAndSet(STATE_ACTIVE, STATE_SHUTDOWN) &&
+				!state.compareAndSet(STATE_CLOSE_REQUESTED, STATE_SHUTDOWN)) {
+			log.postWarning("Attempting to close while inactive!");
 			return;
 		}
 		
-		terminated = true;
-		
 		log.postInfo("Closing connection...");
-		
-		int written = out.size();
-		
-		try {
-			in.close();
-		} catch(IOException e) {
-			log.postSevere("Could not close input stream!");
-		}
-		
-		try {
-			out.close();
-		} catch(IOException e) {
-			log.postSevere("Could not close output stream!");
-		}
-		
-		running =  false;
-		
-		// This needs to go before the thread-removing because only the closing
-		// of the socket will wake the read thread from its constant blocking
-		// from the read() method of the DataInputStream class.
-		try {
-			socket.close();
-		} catch (IOException e) {
-			log.postSevere("Connection socket could not close!");
-		}
 		
 		readThread.interrupt();
 		writeThread.interrupt();
 		
-		try {
-			readThread.join();
-		} catch (InterruptedException e) {
-			log.postWarning("Interrupted while waiting for read thread to join!");
-		}
+		close(socket, "socket");
+		close(in, "input stream");
+		close(out, "output stream");
 		
-		try {
-			writeThread.join();
-		} catch (InterruptedException e) {
-			log.postWarning("Interrupted while waiting for write thread to join!");
-		}
-		
-		readThread = null;
-		writeThread = null;
+		readThread.doJoin();
+		writeThread.doJoin();
 		
 		log.postInfo("Connection closed; "
-				+ totalPacketsSent + " packet(s) sent (" + written + " bytes), "
-				+ totalPacketsReceived + " packet(s) received .");
+				+ packetsSent + " packet(s) sent (" + out.size() + " bytes), "
+				+ packetsReceived + " packet(s) received .");
+	}
+	
+	/**
+	 * Closes a Closeable and logs an IOException, if it is thrown.
+	 */
+	private void close(Closeable closeable, String identifier) {
+		try {
+			closeable.close();
+		} catch(IOException e) {
+			log.postWarning("IOException while closing " + identifier + " (" + e.getMessage() + ")");
+		}
 	}
 	
 	//--------------------==========--------------------
@@ -221,18 +237,139 @@ public class TCPConnection {
 	//--------------------==========--------------------
 	
 	/**
-	 * @return This connection's output stream.
+	 * @return {@code true} if this connection is active; {@code false}
+	 * otherwise.
 	 */
-	public DataOutputStream getOutputStream() {
-		return out;
+	public boolean isActive() {
+		return state.get() == STATE_ACTIVE;
 	}
 	
 	/**
-	 * @return {@code true} if the connection is active; {@code false}
+	 * @return {@code true} if this connection is terminated; {@code false}
 	 * otherwise.
 	 */
-	public boolean isRunning() {
-		return running;
+	public boolean isTerminated() {
+		return state.get() == STATE_TERMINATED;
+	}
+	
+	//--------------------==========--------------------
+	//-------------=====Nested Classes=====-------------
+	//--------------------==========--------------------
+	
+	/**
+	 * Base implementation for TCP read/write threads. Provides an uncaught
+	 * exception handler which invokes {@link TCPConnection#requestClose()},
+	 * and the {@link #doJoin()} method.
+	 */
+	private abstract class TCPThread extends Thread {
+		
+		public TCPThread(String threadName) {
+			super(threadName);
+			
+			setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+				@Override
+				public void uncaughtException(Thread t, Throwable e) {
+					log.postSevere("Uncaught exception " + e.getClass().getSimpleName()
+							+ " in " + t.getName(), e);
+					requestClose();
+				}
+			});
+		}
+		
+		/**
+		 * Invokes join() on this thread and silently ignores an
+		 * InterruptedException if it is thrown.
+		 */
+		public void doJoin() {
+			try {
+				join();
+			} catch(InterruptedException e) {
+				log.postWarning("Interrupted while waiting for " + getName() + " to die!");
+			}
+		}
+	}
+	
+	/**
+	 * The TCPWriteThread class handles the reading operations from a
+	 * TCPConnection's input stream.
+	 */
+	private class TCPReadThread extends TCPThread {
+		
+		public TCPReadThread(String threadName) {
+			super(threadName);
+		}
+		
+		@Override
+		public void run() {
+			try {
+				while(isActive())
+					readPacket();
+			} catch(IOException e) {
+				// An IOException being thrown is a standard part of the
+				// shutdown procedure (as shutting down the socket will cause
+				// any in-progress IO operation to fail). However, if an
+				// IOException is thrown outside of shutdown procedures,
+				// something has gone wrong.
+				if(isActive()) {
+					log.postSevere("IOException thrown in read thread before connection shutdown!", e);
+					requestClose();
+				} else
+					log.postInfo("Read thread shutting down (exception caught)...");
+				return;
+			}
+			log.postInfo("Read thread shutting down...");
+		}
+		
+	}
+	
+	/**
+	 * The TCPWriteThread class handles the writing operations to a TCPConnection's
+	 * output stream.
+	 */
+	private class TCPWriteThread extends TCPThread {
+		
+		public TCPWriteThread(String threadName) {
+			super(threadName);
+		}
+		
+		@Override
+		public void run() {
+			/*
+			 * The writing strategy is simple:
+			 * 1. Block until we receive a packet, and write it.
+			 * 2. Keep writing packets until the queue is emptied.
+			 * 3. Flush the output stream.
+			 * 4. Repeat.
+			 * 
+			 * This strategy has some nice advantages:
+			 * a) We only wait when we've caught up to the packet producer
+			 *    thread, and thus keep up with demand.
+			 * b) Packets are (hopefully) batched nicely enough that we don't
+			 *    flush too often.
+			 */
+			try {
+				while(isActive()) {
+					writePacketWithBlock();	// wait for a packet
+					while(writePacket());	// empty the queue
+					out.flush();			// flush the batch of packets
+				}
+			} catch(InterruptedException | IOException e) {
+				// An IOException being thrown is a standard part of the
+				// shutdown procedure (as shutting down the socket will cause
+				// any in-progress IO operation to fail). However, if an
+				// IOException is thrown outside of shutdown procedures,
+				// something has gone wrong. Ditto with InterruptedException.
+				if(isActive()) {
+					log.postSevere(e.getClass().getSimpleName() + " thrown in write "
+							+ "thread before connection shutdown!");
+					requestClose();
+				} else
+					log.postInfo("Write thread shutting down (exception caught)...");
+				return;
+			}
+			log.postInfo("Write thread shutting down...");
+		}
+		
 	}
 	
 }

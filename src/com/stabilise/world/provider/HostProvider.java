@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.Array;
 import com.google.common.base.Preconditions;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.EntityMob;
-import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
@@ -46,12 +45,11 @@ public class HostProvider extends WorldProvider<HostWorld> {
 	 * Creates a new HostProvider.
 	 * 
 	 * @param info The world info.
-	 * @param profiler The profiler to use to profile the world.
 	 * 
-	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws NullPointerException if {@code info} is {@code null}.
 	 */
-	public HostProvider(WorldInfo info, Profiler profiler) {
-		super(profiler);
+	public HostProvider(WorldInfo info) {
+		super();
 		this.info = Preconditions.checkNotNull(info);
 	}
 	
