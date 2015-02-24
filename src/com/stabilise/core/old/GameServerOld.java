@@ -194,7 +194,7 @@ public class GameServerOld implements Runnable {
 		}
 		
 		// Give the client the server's information
-		connection.queuePacket(getPacketServerInfo());
+		connection.sendPacket(getPacketServerInfo());
 		
 		log.postInfo("Server-client connection successfully created.");
 	}
@@ -246,7 +246,7 @@ public class GameServerOld implements Runnable {
 			log.postWarning("The client to send the slice to has disappeared!");
 			return;
 		}
-		client.queuePacket(new Packet004Slice(slice));
+		client.sendPacket(new Packet004Slice(slice));
 	}
 	
 	/**

@@ -69,7 +69,8 @@ public class GameServer implements Runnable, Drivable {
 	}
 	
 	/**
-	 * Runs the server.
+	 * Runs the server on the current thread. This method will not return until
+	 * the server has shut donw.
 	 * 
 	 * @throws IllegalStateException if the server is already running.
 	 */
@@ -102,9 +103,11 @@ public class GameServer implements Runnable, Drivable {
 		world.update();
 		
 		Packet p;
-		for(ServerTCPConnection con : connections)
-			while((p = con.getPacket()) != null)
-				handlePacket(p, con);
+		synchronized(connections) {
+			for(ServerTCPConnection con : connections)
+				while((p = con.getPacket()) != null)
+					handlePacket(p, con);
+		}
 		
 		// TODO: send packets back to the clients
 	}
@@ -119,7 +122,23 @@ public class GameServer implements Runnable, Drivable {
 	}
 	
 	private void addConnection(Socket socket) {
+		ServerTCPConnection con;
 		
+		try {
+			con = new ServerTCPConnection(socket);
+		} catch(IOException e) {
+			log.postSevere("Error creating connection (" + e.getMessage() + ")");
+			try {
+				socket.close();
+			} catch(IOException e1) {
+				log.postWarning("Failed to close client socket (" + e.getMessage() + ")");
+			}
+			return;
+		}
+		
+		connections.add(con);
+		
+		log.postInfo("Connected to client");
 	}
 	
 	private void handlePacket(Packet packet, ServerTCPConnection con) {

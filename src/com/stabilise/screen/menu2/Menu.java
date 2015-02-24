@@ -13,7 +13,7 @@ import com.stabilise.screen.menu.component.Button;
 import com.stabilise.screen.menu.component.ComponentGrid;
 import com.stabilise.screen.menu.component.MenuItem;
 import com.stabilise.screen.menu.component.TextBox;
-import com.stabilise.util.collect.LightweightLinkedList;
+import com.stabilise.util.collect.LightLinkedList;
 
 /**
  * This class is the base for all menus.
@@ -45,7 +45,7 @@ public abstract class Menu implements InputProcessor {
 	//private boolean itemHoveredOver = false;
 	
 	/** The scheduled events. */
-	private List<ScheduledEvent> scheduledEvents = new LightweightLinkedList<ScheduledEvent>();
+	private List<ScheduledEvent> scheduledEvents = new LightLinkedList<ScheduledEvent>();
 	
 	
 	/** Whether or not the menu is to be closed; this is {@code false} by

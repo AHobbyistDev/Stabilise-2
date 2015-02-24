@@ -85,7 +85,7 @@ public class GameClientOld {
 	 */
 	public void joinServer() {
 		// Queue the login packet
-		connection.queuePacket(new Packet002Login("Player"));
+		connection.sendPacket(new Packet002Login("Player"));
 		
 		// Time to initialise everything...
 		world = new WorldClientOld(this);
@@ -108,7 +108,7 @@ public class GameClientOld {
 				if(!paused)
 					world.update();
 				
-				connection.queuePacket(getPacketPlayerPosition());
+				connection.sendPacket(getPacketPlayerPosition());
 				
 				// TODO: Send packets and whatnot
 				
@@ -145,7 +145,7 @@ public class GameClientOld {
 	 */
 	public void togglePause() {
 		paused = !paused;
-		connection.queuePacket(getPacketPause());
+		connection.sendPacket(getPacketPause());
 	}
 	
 	//--------------------==========--------------------

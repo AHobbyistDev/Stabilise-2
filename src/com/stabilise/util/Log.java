@@ -9,7 +9,7 @@ import java.util.List;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Resources;
-import com.stabilise.util.collect.LightweightLinkedList;
+import com.stabilise.util.collect.LightLinkedList;
 
 /**
  * The Log class allows for the logging and more streamlined management of
@@ -38,7 +38,7 @@ public class Log {
 	private static final int LOG_CAPACITY = 256;
 	
 	/** Stores the log entries. Access to this list should be synchronised. */
-	private static final List<String> entries = new LightweightLinkedList<String>();
+	private static final List<String> entries = new LightLinkedList<String>();
 	
 	/** A cache of the untagged logging agent to save on processor time. */
 	private static final Log defaultAgent = new Log("");

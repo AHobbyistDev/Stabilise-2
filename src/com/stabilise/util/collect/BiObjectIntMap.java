@@ -1,16 +1,13 @@
 package com.stabilise.util.collect;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.Iterators;
 import com.stabilise.util.annotation.NotThreadSafe;
 
-import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 
 /**
  * BiObjectIntMap provides a bi-directional integer to object mapping
- * implementation. This class internally uses an {@link ArrayList} for fast
+ * implementation. This class internally uses an array for constant-time
  * key-value retrieval, and an {@link IdentityHashMap} for object-key
  * retrieval.
  * 
@@ -30,10 +27,10 @@ import java.util.Iterator;
 @NotThreadSafe
 public class BiObjectIntMap<V> implements Iterable<V> {
 	
-	/** The value-to-key map. */
+	/** Maps Values -> Keys */
 	private IdentityHashMap<V, Integer> map;
-	/** The list, which provides constant-time key-to-value mappings. */
-	private ArrayList<V> list;
+	/** Maps Keys -> Values */
+	private Array<V> list;
 	
 	
 	/**
@@ -45,7 +42,7 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 	 */
 	public BiObjectIntMap(int capacity) {
 		map = new IdentityHashMap<>(capacity);
-		list = new ArrayList<>(capacity);
+		list = new Array<>(capacity);
 	}
 	
 	/**
@@ -64,16 +61,7 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 			throw new NullPointerException("value is null!");
 		
 		map.put(value, Integer.valueOf(key));
-		
-		// Expand the array if necessary - intermediate values are null
-		/*
-		if(list.size() <= key)
-			list.ensureCapacity(key + 1); // this is bugged - don't use it
-		*/
-		while(list.size() <= key)
-			list.add(null);
-		
-		list.set(key, value);
+		list.setWithExpand(key, value);
 	}
 	
 	/**
@@ -98,7 +86,7 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 	 * @throws IndexOutOfBoundsException if {@code key < 0}.
 	 */
 	public V getObject(int key) {
-		return key < list.size() ? list.get(key) : null;
+		return key < list.length() ? list.get(key) : null;
 	}
 	
 	/**
@@ -112,23 +100,12 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 	}
 	
 	/**
-	 * Trims the size of the backing ArrayList, to free up memory. This
-	 * operation is most suitable when it is known no more entries will be
-	 * added to this map.
-	 */
-	public void trim() {
-		list.trimToSize();
-	}
-	
-	/**
 	 * Gets the iterator for all the mapped objects. The returned iterator does
 	 * not support {@code remove()}.
 	 */
 	@Override
 	public Iterator<V> iterator() {
-		// As the ArrayList may be filled with null intermediates, filter the
-		// nulls out
-		return Iterators.filter(list.iterator(), Predicates.notNull());
+		return list.iteratorNullsFiltered();
 	}
 	
 }

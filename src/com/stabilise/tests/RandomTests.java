@@ -769,7 +769,7 @@ public class RandomTests {
 		//wrappedRemainder2();
 		//hashPointCollisions();
 		//hashPointCollisions2();
-		autoboxing();
+		//autoboxing();
 		
 		//String s = "abcxyzABCXYZ a()a_a-a*a/a\\a.a'a\"";
 		//System.out.println(s + "\n" + IOUtil.getLegalString(s));

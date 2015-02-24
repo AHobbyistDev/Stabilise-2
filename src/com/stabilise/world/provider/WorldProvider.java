@@ -228,7 +228,7 @@ public abstract class WorldProvider<W extends BaseWorld> {
 		private final UncaughtExceptionHandler ripWorkerThread = new UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
-				log.postSevere("Worker thread \"" + t.toString() + "\" died!", e);
+				log.postSevere("Worker thread \"" + t.getName() + "\" died!", e);
 			}
 		};
 		

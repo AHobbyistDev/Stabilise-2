@@ -100,7 +100,7 @@ public class TCPConnection {
 	 * Queues a packet for sending.
 	 */
 	@UserThread("MainThread")
-	public void queuePacket(Packet packet) {
+	public void sendPacket(Packet packet) {
 		if((!server && packet.isClientPacket()) || (server && packet.isServerPacket())) {
 			packetQueueOut.offer(packet);
 		} else {

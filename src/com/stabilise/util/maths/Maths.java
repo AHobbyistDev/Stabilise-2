@@ -23,9 +23,15 @@ public class Maths {
 	/** An array containing the unit vectors. */
 	public static final Vector2[] UNIT_VECTORS = new Vector2[] { Vector2.X, Vector2.Y };
 	
+	/** The maximum value which can be held by an unsigned byte
+	 * (<tt>2<sup><font size=-1>8</font></sup>-1</tt>). */
+	public static final int UBYTE_MAX_VALUE = 0xFF; //(1 << Byte.SIZE) - 1;
 	/** The maximum value which can be held by an unsigned short
 	 * (<tt>2<sup><font size=-1>16</font></sup>-1</tt>). */
-	public static final int USHORT_MAX_VALUE = 0xFFFF;
+	public static final int USHORT_MAX_VALUE = 0xFFFF; //(1 << Short.SIZE) - 1;
+	/** The maximum value which can be held by an unsigned int
+	 * (<tt>2<sup><font size=-1>16</font></sup>-1</tt>). */
+	public static final int UINT_MAX_VALUE = 0xFFFFFFFF; //(int)((1L << Integer.SIZE) - 1);
 	
 	
 	/**

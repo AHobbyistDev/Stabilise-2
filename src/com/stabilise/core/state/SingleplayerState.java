@@ -61,14 +61,13 @@ public class SingleplayerState implements State {
 	
 	@Override
 	public void predispose() {
-		
+		game.close();
 	}
 	
 	@Override
 	public void dispose() {
 		//((InputMultiplexer)Gdx.input).removeProcessor(game);
 		
-		game.close();
 		renderer.unloadResources();
 		renderer = null;
 		

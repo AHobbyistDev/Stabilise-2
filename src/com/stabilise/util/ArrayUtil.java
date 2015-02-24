@@ -1,5 +1,6 @@
 package com.stabilise.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -87,6 +88,17 @@ public class ArrayUtil {
 				i++;
 		}
 		return array;
+	}
+	
+	/**
+	 * Ensures that that size of the specified {@code ArrayList} is at least
+	 * that of the specified {@code size} parameter; expanding {@code list}
+	 * with {@code null} entries if necessary.
+	 */
+	public static void ensureSize(ArrayList<?> list, int size) {
+		list.ensureCapacity(size); // prevents excessive arraycopies
+		while(list.size() < size)
+			list.add(null);
 	}
 	
 }

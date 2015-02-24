@@ -57,7 +57,9 @@ import com.stabilise.util.annotation.NotThreadSafe;
 @NotThreadSafe
 public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E>> {
 	
-	private final BiObjectIntMap<Factory<? extends E>> factoryMap;
+	/** Maps ID -> Factory. */
+	private final Array<Factory<? extends E>> factoryMap;
+	/** Maps Class -> ID. */
 	private final Map<Class<? extends E>, Integer> idMap;
 	
 	/** The default constructor arguments. */
@@ -83,7 +85,7 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 			Class<?>... defaultArgs) {
 		super(baseClass.getSimpleName() + "InstRegistry", dupePolicy);
 		
-		factoryMap = new BiObjectIntMap<>(capacity);
+		factoryMap = new Array<Factory<? extends E>>(capacity);
 		idMap = new HashMap<>(capacity);
 		this.defaultArgs = defaultArgs != null ? defaultArgs : new Class<?>[0];
 		
@@ -112,9 +114,8 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
 	 * @throws IllegalArgumentException if either {@code id} is already mapped
-	 * to a factory or {@code objClass} has already been registered, and this
-	 * registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
-	 * THROW_EXCEPTION} duplicate policy.
+	 * to a factory and this registry uses the {@link
+	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
 	 */
 	public void registerDefaultArgs(int id, Class<? extends E> objClass) {
 		register(id, objClass, defaultArgs);
@@ -134,9 +135,8 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
 	 * @throws IllegalArgumentException if either {@code id} is already mapped
-	 * to a factory or {@code objClass} has already been registered, and this
-	 * registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
-	 * THROW_EXCEPTION} duplicate policy.
+	 * to a factory and this registry uses the {@link
+	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
 	 */
 	public <S extends E> void register(int id, Class<S> objClass, Class<?>... args) {
 		register(id, objClass, new ReflectiveFactory<S>(objClass, args));
@@ -156,17 +156,16 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
 	 * @throws IllegalArgumentException if either {@code id} is already mapped
-	 * to a factory or {@code objClass} has already been registered, and this
-	 * registry uses the {@link DuplicatePolicy#THROW_EXCEPTION
-	 * THROW_EXCEPTION} duplicate policy.
+	 * to a factory and this registry uses the {@link
+	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
 	 */
 	public <S extends E> void register(int id, Class<S> objClass, Factory<S> factory) {
 		checkLock();
-		if(factoryMap.containsKey(id) && dupePolicy.handle(log, "Duplicate id " + id))
+		if(factoryMap.get(id) != null && dupePolicy.handle(log, "Duplicate id " + id))
 			return;
 		if(idMap.containsKey(objClass) && dupePolicy.handle(log, "Duplicate class " + objClass.getSimpleName()))
 			return;
-		factoryMap.put(id, factory);
+		factoryMap.setWithExpand(id, factory);
 		idMap.put(objClass, Integer.valueOf(id));
 		size++;
 	}
@@ -183,7 +182,9 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 * @throws RuntimeException if object creation failed.
 	 */
 	public E instantiate(int id, Object... args) {
-		Factory<? extends E> factory = factoryMap.getObject(id);
+		Factory<? extends E> factory = id < factoryMap.length()
+				? factoryMap.get(id)
+				: null;
 		return factory == null ? null : factory.create(args);
 	}
 	
@@ -201,7 +202,6 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	@Override
 	public void lock() {
 		super.lock();
-		factoryMap.trim();
 	}
 	
 	@Override

@@ -11,7 +11,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.LightweightLinkedList;
+import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.gen.WorldGenerator;
@@ -44,7 +44,7 @@ public class HostWorld extends BaseWorld {
 	private final AtomicInteger numRegions = new AtomicInteger(0);
 	
 	/** Holds all player slice maps. */
-	private final List<SliceMap> sliceMaps = new LightweightLinkedList<>();
+	private final List<SliceMap> sliceMaps = new LightLinkedList<>();
 	
 	/** Whether or not the world has been {@link #prepare() prepared}. */
 	private boolean prepared = false;

@@ -27,7 +27,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * of this class will throw an {@code UnsupportedOperationException}.
  */
 @NotThreadSafe
-public class LightweightLinkedList<E> extends AbstractCollection<E> implements List<E> {
+public class LightLinkedList<E> extends AbstractCollection<E> implements List<E> {
 	
 	protected int size = 0;
 	protected Node<E> head = null;
@@ -39,7 +39,7 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 	/**
 	 * Creates a new LightLinkedList.
 	 */
-	public LightweightLinkedList() {
+	public LightLinkedList() {
 		iterator = getIterator();
 	}
 	
@@ -105,7 +105,7 @@ public class LightweightLinkedList<E> extends AbstractCollection<E> implements L
 	 * 
 	 * @throws NullPointerException if {@code list} is {@code null}.
 	 */
-	public void dumpInto(LightweightLinkedList<E> list) {
+	public void dumpInto(LightLinkedList<E> list) {
 		if(size == 0)
 			return;
 		

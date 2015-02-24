@@ -3,6 +3,7 @@ package com.stabilise.core;
 import static com.badlogic.gdx.Input.Keys;
 
 import com.badlogic.gdx.InputProcessor;
+import com.stabilise.core.state.LoadingState;
 import com.stabilise.entity.controller.PlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
@@ -95,7 +96,7 @@ public class Game implements Controllable, InputProcessor {
 				Application a = Application.get();
 				a.produceCrashLog();
 				//close();			// Simply calling close() makes the game freeze
-				//----a.setState(new MainMenuState());
+				a.setState(new LoadingState());
 				return;
 			}
 		}

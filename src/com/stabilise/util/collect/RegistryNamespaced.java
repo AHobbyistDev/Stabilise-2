@@ -201,12 +201,6 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 		return idMap.iterator();
 	}
 	
-	@Override
-	public void lock() {
-		super.lock();
-		idMap.trim();
-	}
-	
 	/**
 	 * Ensures that a name exists within a colon-delimited namespace,
 	 * prepending <tt><i>defaultNamespace</i>:</tt> if it lacks one (where

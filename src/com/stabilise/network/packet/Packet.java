@@ -49,6 +49,11 @@ public abstract class Packet implements Sendable {
 		return serverPackets[getID()];
 	}
 	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName();
+	}
+	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------

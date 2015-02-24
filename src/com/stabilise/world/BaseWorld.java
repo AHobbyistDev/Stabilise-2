@@ -16,7 +16,7 @@ import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearOnIterateLinkedList;
-import com.stabilise.util.collect.LightweightLinkedList;
+import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.provider.WorldProvider;
@@ -59,20 +59,20 @@ public abstract class BaseWorld extends AbstractWorld {
 	
 	/** Stores tile entities for iteration and updating. A loaded tile entity
 	 * need not exist in this list if it does not require updates. */
-	protected final LightweightLinkedList<TileEntity> tileEntities =
-			new LightweightLinkedList<>();
+	protected final LightLinkedList<TileEntity> tileEntities =
+			new LightLinkedList<>();
 	
 	/** The list of hitboxes in the world. */
-	protected final LightweightLinkedList<Hitbox> hitboxes =
-			new LightweightLinkedList<>();
+	protected final LightLinkedList<Hitbox> hitboxes =
+			new LightLinkedList<>();
 	/** The total number of hitboxes which have existed during the lifetime of
 	 * the world. */
 	protected int hitboxCount = 0;
 	
 	/** Stores all particles in the world. This should remain empty if this is
 	 * a server world. */
-	protected final LightweightLinkedList<Particle> particles =
-			new LightweightLinkedList<Particle>();
+	protected final LightLinkedList<Particle> particles =
+			new LightLinkedList<Particle>();
 	/** The total number of particles which have existed during the lifetime of
 	 * the world. */
 	protected int particleCount = 0;

@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
- * An implementation of {@link LightweightLinkedList} which automatically clears
+ * An implementation of {@link LightLinkedList} which automatically clears
  * itself when it is iterated over, either through a for...each loop, or when
  * {@link #iterator()} is invoked (though note the former case implies the
  * latter).
@@ -15,7 +15,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * also clears the list.
  */
 @NotThreadSafe
-public class ClearOnIterateLinkedList<E> extends LightweightLinkedList<E> {
+public class ClearOnIterateLinkedList<E> extends LightLinkedList<E> {
 	
 	@Override
 	protected AbstractItr getIterator() {

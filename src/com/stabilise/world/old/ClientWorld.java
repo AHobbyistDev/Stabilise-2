@@ -6,7 +6,7 @@ import java.util.List;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.Particle;
-import com.stabilise.util.collect.LightweightLinkedList;
+import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.world.BaseWorld;
 import com.stabilise.world.HostWorld;
 
@@ -26,7 +26,7 @@ public class ClientWorld<W extends BaseWorld> extends WorldWrapper<W> {
 	public EntityMob player;
 	
 	/** LightweightLinkedList of particles. */
-	public final List<Particle> particles = new LightweightLinkedList<Particle>();
+	public final List<Particle> particles = new LightLinkedList<Particle>();
 	/** The total number of particles which have existed during the lifetime of
 	 * the world. */
 	public int particleCount = 0;
