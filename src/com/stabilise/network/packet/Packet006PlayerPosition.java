@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.stabilise.network.Packet;
+
 /**
  * This packet is used to send a player's location and state.
  */

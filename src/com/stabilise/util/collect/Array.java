@@ -1,5 +1,6 @@
 package com.stabilise.util.collect;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -21,7 +22,8 @@ public class Array<E> implements Iterable<E> {
 	 * 
 	 * <p>Use of this constructor should be avoided if possible, as the runtime
 	 * type of the backing array will be {@code Object[]}, which creates the
-	 * possibility of typing errors.
+	 * possibility of typing errors unless this Array's generic type is {@code
+	 * Object}.
 	 */
 	public Array() {
 		this(16);
@@ -32,7 +34,8 @@ public class Array<E> implements Iterable<E> {
 	 * 
 	 * <p>Use of this constructor should be avoided if possible, as the runtime
 	 * type of the backing array will be {@code Object[]}, which creates the
-	 * possibility of typing errors.
+	 * possibility of typing errors unless this Array's generic type is {@code
+	 * Object}.
 	 * 
 	 * @param capacity The initial array length.
 	 * 
@@ -82,7 +85,9 @@ public class Array<E> implements Iterable<E> {
 	}
 	
 	/**
-	 * Returns this Array's backing array. Use this for iteration.
+	 * Returns this Array's backing array. Note that the returned array is not
+	 * guaranteed to maintain a consistent view of this Array, as the backing
+	 * array is replaced whenever this Array is resized.
 	 */
 	public E[] get() {
 		return data;
@@ -96,6 +101,20 @@ public class Array<E> implements Iterable<E> {
 	 */
 	public E get(int index) {
 		return data[index];
+	}
+	
+	/**
+	 * Safely gets the element at the specified index without throwing an
+	 * {@code ArrayIndexOutOfBoundsException} if {@code index} is invalid.
+	 * 
+	 * @return The element at {@code index} (which may be {@code null}), or
+	 * {@code null} if {@code index} is negative or greater than {@link
+	 * #length()}.
+	 */
+	public E getSafe(int index) {
+		return index >= 0 && index < data.length
+				? data[index]
+				: null;
 	}
 	
 	/**
@@ -120,12 +139,62 @@ public class Array<E> implements Iterable<E> {
 	}
 	
 	/**
+	 * Sets the element at the specified index, resizing the array if necessary
+	 * by multiplying the length by the specified scaling factor as per:
+	 * 
+	 * <pre>resize((int)(length() * scalingFactor) + 1);</pre>
+	 * 
+	 * <p>If, however, such a resize would still leave this Array at an
+	 * insufficient length, it is simply resized as per:
+	 * 
+	 * <pre>resize(index + 1);</pre>
+	 * 
+	 * <p>Note that a scaling factor of {@code 1.0} is permitted; in this case
+	 * this method behaves the same as {@link #setWithExpand(int, Object)}.
+	 * 
+	 * @throws IllegalArgumentException if {@code scalingFactor < 1.0f}.
+	 * @throws ArrayIndexOutOfBoundsException if {@code index} is negative.
+	 */
+	public void setWithExpand(int index, E value, float scalingFactor) {
+		if(data.length < index + 1) {
+			if(scalingFactor < 1.0f)
+				throw new IllegalArgumentException("Scaling factor must be >= 1.0!");
+			resize(Math.max(index, (int)(data.length * scalingFactor)) + 1);
+		}
+		set(index, value);
+	}
+	
+	/**
 	 * Adds a new element to the array, increasing its length by 1. Note that
 	 * this is an expensive operation as it requires a memory copy.
 	 */
 	public void add(E value) {
 		resize(data.length + 1);
 		data[data.length - 1] = value;
+	}
+	
+	/**
+	 * Adds a new element to the array, increasing its length by the specified
+	 * scaling factor as if by:
+	 * 
+	 * <pre>resize((int)(length() * scalingFactor) + 1);</pre>
+	 * 
+	 * <p>Invoking this method <i>always</i> causes a resize, and as such this
+	 * should not be used in the same way that {@link ArrayList#add(Object)
+	 * ArrayList.add()} is used, as this class does not keep track of
+	 * "effective array size", only the backing array's length.
+	 * 
+	 * <p>Note that a scaling factor of {@code 1.0} is permitted; in this case
+	 * this method behaves the same as {@link #add(Object)}.
+	 * 
+	 * @throws IllegalArgumentException if {@code scalingFactor < 1.0f}.
+	 */
+	public void add(E value, float scalingFactor) {
+		if(scalingFactor < 1.0f)
+			throw new IllegalArgumentException("Scaling factor must be >= 1.0!");
+		int oldLength = data.length;
+		resize((int)(data.length * scalingFactor) + 1);
+		set(oldLength, value);
 	}
 	
 	/**
@@ -148,30 +217,18 @@ public class Array<E> implements Iterable<E> {
 	 * Resizes the backing array.
 	 * 
 	 * @throws NegativeArraySizeException if {@code length} is negative.
+	 * @see Arrays#copyOf(Object[], int)
 	 */
 	public void resize(int length) {
-		E[] newArr = newArr(length);
-		System.arraycopy(data, 0, newArr, 0, Math.min(data.length, length));
-		data = newArr;
+		data = Arrays.copyOf(data, length);
 	}
 	
 	/**
 	 * Returns a copy of this Array's backing array. The elements themselves
-	 * are not copied.
+	 * are not copied or cloned in any way.
 	 */
 	public E[] copy() {
-		E[] copy = newArr(data.length);
-		System.arraycopy(data, 0, copy, 0, data.length);
-		return copy;
-	}
-	
-	/**
-	 * Returns a newly-constructed array with the specified length.
-	 */
-	private E[] newArr(int length) {
-		@SuppressWarnings("unchecked")
-		final E[] copy = (E[])createArr(data.getClass().getComponentType(), length);
-		return copy;
+		return data.clone();
 	}
 	
 	@Override
@@ -193,8 +250,15 @@ public class Array<E> implements Iterable<E> {
 	}
 	
 	@Override
+	public boolean equals(Object o) {
+		if(!(o instanceof Array)) return false;
+		return ((Array<?>)o).data == data;
+	}
+	
+	@Override
 	public String toString() {
-		return "Array[" + data.getClass().getComponentType().getSimpleName() + "," + data.length + "]";
+		return "Array: " + data.getClass().getComponentType().getSimpleName()
+				+ "[" + data.length + "]";
 	}
 	
 	//--------------------==========--------------------
@@ -203,13 +267,13 @@ public class Array<E> implements Iterable<E> {
 	
 	/**
 	 * Creates an Array of the specified component type with the specified
-	 * size.
+	 * length.
 	 * 
 	 * @see java.lang.reflect.Array#newInstance(Class, int)
 	 */
 	@SuppressWarnings("unchecked")
-	protected static <T> T[] createArr(Class<T> c, int size) {
-		return (T[])java.lang.reflect.Array.newInstance(c, size);
+	protected static <T> T[] createArr(Class<T> c, int length) {
+		return (T[])java.lang.reflect.Array.newInstance(c, length);
 	}
 	
 	//--------------------==========--------------------

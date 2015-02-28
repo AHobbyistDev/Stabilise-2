@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.stabilise.network.Packet;
+
 /**
  * This packet indicates a packet send request. e.g. This can be sent by the
  * client to request the server to resend the ServerInfo packet when the user

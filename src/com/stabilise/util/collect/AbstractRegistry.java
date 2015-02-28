@@ -14,6 +14,7 @@ import com.stabilise.util.Log;
  */
 abstract class AbstractRegistry<E> implements Iterable<E> {
 	
+	/** The name of this registry. */
 	public final String name;
 	protected final DuplicatePolicy dupePolicy;
 	protected final Log log;
@@ -50,10 +51,13 @@ abstract class AbstractRegistry<E> implements Iterable<E> {
 	/**
 	 * Locks this registry. Once this is done, attempting to register anything
 	 * else will result in an {@code IllegalStateException} being thrown.
+	 * Attempting to lock an already locked registry does nothing.
 	 */
 	public void lock() {
-		locked = true;
-		log.postFineDebug("Locked!");
+		if(!locked) {
+			locked = true;
+			log.postFineDebug("Locked!");
+		}
 	}
 	
 	/**

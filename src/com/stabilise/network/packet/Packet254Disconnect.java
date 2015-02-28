@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.stabilise.network.Packet;
+
 /**
  * This packet indicates that a client is disconnecting.
  * If it is sent by the server, the client will be kicked.

@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.stabilise.network.Packet;
+
 /**
  * The KeepAlive packet is a packet which is periodically sent by both the
  * client and the server to ensure the connection is still active.

@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.stabilise.network.Packet;
+
 /**
  * This packet is sent by the server to provide the client with all necessary
  * initial data to begin loading the world.

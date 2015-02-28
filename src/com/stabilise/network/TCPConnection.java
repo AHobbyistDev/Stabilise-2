@@ -6,8 +6,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.stabilise.network.packet.Packet;
-import com.stabilise.network.packet.Packet.FaultyPacketRegistrationException;
+import com.google.common.base.Preconditions;
+import com.stabilise.network.protocol.Protocol;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 
@@ -47,6 +47,7 @@ public class TCPConnection {
 	/** {@code true} if this is a server-side connection. */
 	private final boolean server;
 	
+	private Protocol protocol = Protocol.HANDSHAKE;
 	private final AtomicInteger state = new AtomicInteger(STATE_STARTING);
 	
 	protected final Socket socket;
@@ -97,18 +98,45 @@ public class TCPConnection {
 	}
 	
 	/**
+	 * Returns the protocol currently being used by this connection.
+	 */
+	public Protocol getProtocol() {
+		return protocol;
+	}
+	
+	/**
+	 * Sets this connection's protocol.
+	 * 
+	 * @throws NullPointerException if {@code protocol} is {@code null}.
+	 */
+	public void setPotocol(Protocol protocol) {
+		this.protocol = Preconditions.checkNotNull(protocol);
+	}
+	
+	/**
 	 * Queues a packet for sending.
+	 * 
+	 * @throws NullPointerException if {@code packet} is {@code null}.
+	 * @throws IllegalStateException if the packet queue is full. This should
+	 * never happen unless something is seriously wrong.
 	 */
 	@UserThread("MainThread")
 	public void sendPacket(Packet packet) {
-		if((!server && packet.isClientPacket()) || (server && packet.isServerPacket())) {
-			packetQueueOut.offer(packet);
+		if(server) {
+			if(!protocol.isServerPacket(packet)) {
+				log.postWarning("Attempting to send a non-server packet ("
+						+ packet.getClass().getSimpleName() + ")");
+				return;
+			}
 		} else {
-			if(server)
-				log.postWarning("Attempting to send a client-only packet!");
-			else
-				log.postWarning("Attempting to send a server-only packet!");
+			if(!protocol.isClientPacket(packet)) {
+				log.postWarning("Attempting to send a non-client packet ("
+						+ packet.getClass().getSimpleName() + ")");
+				return;
+			}
 		}
+		
+		packetQueueOut.add(packet); // may throw ISE
 	}
 	
 	/**
@@ -132,15 +160,14 @@ public class TCPConnection {
 	 */
 	@UserThread("ReadThread")
 	private void readPacket() throws IOException {
-		Packet packet = Packet.readPacket(in);
-		packetQueueIn.offer(packet);
+		Packet packet = protocol.readPacket(server, in);
+		packetQueueIn.add(packet);
 		packetsReceived++;
 	}
 	
 	/**
 	 * Writes a packet to the socket's output stream. A return value of {@code
-	 * false} indicates that the packet queue was empty (though note this may
-	 * no longer be the case when this method returns).
+	 * false} indicates that the packet queue was empty when polled.
 	 * 
 	 * @return {@code true} if the packet was sent; {@code false} otherwise.
 	 * @throws IOException if an I/O error occurs.
@@ -169,7 +196,7 @@ public class TCPConnection {
 	
 	@UserThread("WriteThread")
 	private void doWritePacket(Packet packet) throws IOException {
-		Packet.writePacket(out, packet);
+		protocol.writePacket(out, packet);
 		packetsSent++;
 	}
 	

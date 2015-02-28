@@ -38,11 +38,10 @@ public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
 	
 	@Override
 	void write(DataOutputStream out) throws IOException {
-		if(!data.isEmpty()) {
+		if(!data.isEmpty())
 			dataType = ((NBTTag)data.get(0)).getId();
-		} else {
+		else
 			dataType = NBTTag.BYTE;
-		}
 		
 		out.writeByte(dataType);
 		out.writeInt(data.size());

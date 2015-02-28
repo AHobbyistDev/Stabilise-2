@@ -1,0 +1,190 @@
+package com.stabilise.network.protocol;
+
+import static com.stabilise.util.collect.DuplicatePolicy.THROW_EXCEPTION;
+import static com.stabilise.util.maths.Maths.UBYTE_MAX_VALUE;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.IdentityHashMap;
+import java.util.Map;
+
+import com.stabilise.network.Packet;
+import com.stabilise.network.packet.Packet001ServerInfo;
+import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.collect.InstantiationRegistry;
+
+
+public enum Protocol {
+	
+	HANDSHAKE {
+		
+	},
+	LOGIN {{
+		registerServerPacket(0, Packet001ServerInfo.class);
+	}},
+	GAME {
+		
+	};
+	
+	/** Registry of packets sent by the server to the client (i.e. clientbound
+	 * packets). */
+	private final InstantiationRegistry<Packet> serverPackets =
+			new InstantiationRegistry<>(UBYTE_MAX_VALUE, THROW_EXCEPTION, Packet.class);
+	/** Registry of packets sent by the client to the server (i.e. serverbound
+	 * packets). */
+	private final InstantiationRegistry<Packet> clientPackets =
+			new InstantiationRegistry<>(UBYTE_MAX_VALUE, THROW_EXCEPTION, Packet.class);
+	
+	
+	/**
+	 * Registers a server (i.e. clientbound) packet.
+	 * 
+	 * @see InstantiationRegistry#register(int, Class, Class...)
+	 */
+	protected void registerServerPacket(int id, Class<? extends Packet> packetClass) {
+		serverPackets.register(id, packetClass);
+	}
+	
+	/**
+	 * Registers a client (i.e. serverbound) packet.
+	 * 
+	 * @see InstantiationRegistry#register(int, Class, Class...)
+	 */
+	protected void registerClientPacket(int id, Class<? extends Packet> packetClass) {
+		clientPackets.register(id, packetClass);
+	}
+	
+	/**
+	 * Instantiates an instance of a packet with the specified ID.
+	 * 
+	 * @param server {@code true} to request a server (i.e. clientbound)
+	 * packet; {@code false} to request a client (i.e. serverbound) packet.
+	 * @param id The ID of the packet.
+	 * 
+	 * @return The packet.
+	 * @throws FaultyPacketRegistrationException if the packet could not be
+	 * created, either due to {@code id} lacking a mapping or instantiation
+	 * outright failing.
+	 */
+	@UserThread("ReadThread")
+	private Packet createPacket(boolean server, int id) {
+		try {
+			return server
+					? serverPackets.instantiate(id)
+					: clientPackets.instantiate(id);
+		} catch(RuntimeException e) {
+			throw new FaultyPacketRegistrationException((server ? "Server" : "Client")
+					+ " packet of ID " + id
+					+ " could not be instantiated! (" + e.getMessage() + ")");
+		}
+	}
+	
+	/**
+	 * Reads the next packet from the provided input stream.
+	 * 
+	 * @param server {@code true} if the packet is to originate from a server
+	 * (i.e. we want a clientbound packet); {@code false} if we want a
+	 * serverbound packet.
+	 * @param in The input stream from which to read the packet.
+	 * 
+	 * @return The packet.
+	 * @throws NullPointerException if {@code in} is {@code null}.
+	 * @throws FaultyPacketRegistrationException if the packet was registered
+	 * incorrectly (in this case the error lies in the registration code).
+	 * @throws IOException if an I/O error occurs, or the stream has ended.
+	 */
+	@UserThread("ReadThread")
+	public Packet readPacket(boolean server, DataInputStream in) throws IOException {
+		int id = in.read(); // ID is always first byte
+		if(id == -1) // end of stream; abort!
+			throw new IOException("End of stream reached");
+		Packet packet = createPacket(server, id);
+		packet.readData(in);
+		return packet;
+	}
+	
+	/**
+	 * Writes a packet to the provided output stream.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IOException if an I/O error occurs.
+	 */
+	@UserThread("WriteThread")
+	public void writePacket(DataOutputStream out, Packet packet) throws IOException {
+		out.writeByte(packet.getID()); // ID is always first byte
+		packet.writeData(out);
+	}
+	
+	/**
+	 * @return {@code true} if the given packet is a server packet; {@code
+	 * false} otherwise.
+	 * @throws NullPointerException if {@code packet} is {@code null}.
+	 */
+	public boolean isServerPacket(Packet packet) {
+		return serverPackets.getID(packet.getClass()) != -1;
+	}
+	
+	/**
+	 * @return {@code true} if the given packet is a client packet; {@code
+	 * false} otherwise.
+	 * @throws NullPointerException if {@code packet} is {@code null}.
+	 */
+	public boolean isClientPacket(Packet packet) {
+		return clientPackets.getID(packet.getClass()) != -1;
+	}
+	
+	//--------------------==========--------------------
+	//--------------=====Static Stuff=====--------------
+	//--------------------==========--------------------
+	
+	/** Maps Packet Class -> Packet ID for all packets across all protocols. */
+	private static final Map<Class<? extends Packet>, Integer> PACKET_IDS =
+			new IdentityHashMap<>();
+	
+	static {
+		for(Protocol protocol : Protocol.values()) {
+			checkPackets(protocol, protocol.clientPackets);
+			checkPackets(protocol, protocol.serverPackets);
+		}
+	}
+	
+	private static void checkPackets(Protocol protocol, InstantiationRegistry<Packet> registry) {
+		registry.lock();
+		for(Class<? extends Packet> pClass : registry) {
+			if(PACKET_IDS.containsKey(pClass))
+				throw new RuntimeException("Packet \"" + pClass.getSimpleName()
+						+ "\" already registered; cannot reassign to protocol \""
+						+ protocol.toString() + "\"");
+			PACKET_IDS.put(pClass, registry.getID(pClass));
+		}
+	}
+	
+	/**
+	 * Gets the ID of a packet.
+	 * 
+	 * @return The packet's ID, or {@code -1} if the packet is of a type that
+	 * has not been assigned to any protocol.
+	 * @throws NullPointerException if {@code packet} is {@code null}.
+	 */
+	public static int getPacketID(Packet packet) {
+		Integer id = PACKET_IDS.get(packet.getClass());
+		return id == null ? -1 : id.intValue();
+	}
+	
+	//--------------------==========--------------------
+	//-------------=====Nested Classes=====-------------
+	//--------------------==========--------------------
+	
+	/**
+	 * An exception type which indicates that a packet type was registered
+	 * incorrectly.
+	 */
+	public static class FaultyPacketRegistrationException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+		private FaultyPacketRegistrationException(String msg) {
+			super(msg);
+		}
+	}
+	
+}

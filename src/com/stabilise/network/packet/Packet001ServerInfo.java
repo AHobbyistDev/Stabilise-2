@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import com.stabilise.core.Constants;
+import com.stabilise.network.Packet;
 
 /**
  * The ServerInfo packet is a packet which is sent by a server when a client

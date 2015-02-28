@@ -61,7 +61,7 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 			throw new NullPointerException("value is null!");
 		
 		map.put(value, Integer.valueOf(key));
-		list.setWithExpand(key, value);
+		list.setWithExpand(key, value, 1.25f);
 	}
 	
 	/**

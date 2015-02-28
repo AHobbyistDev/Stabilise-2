@@ -168,8 +168,6 @@ public class Slice {
 	
 	/**
 	 * Gets the slice's tiles in the form of a 1D integer array.
-	 * 
-	 * @return The slice's tiles in the form of a 1D integer array;
 	 */
 	public int[] getTilesAsIntArray() {
 		int[] tileArray = new int[SLICE_SIZE * SLICE_SIZE];
@@ -186,7 +184,6 @@ public class Slice {
 	 */
 	public void setTilesAsIntArray(int[] tileArray) {
 		tiles = new int[SLICE_SIZE][SLICE_SIZE];
-		
 		for(int r = 0; r < SLICE_SIZE; r++)
 			System.arraycopy(tileArray, r*SLICE_SIZE, tiles[r], 0, SLICE_SIZE);
 	}
@@ -199,14 +196,10 @@ public class Slice {
 	public void addContainedEntitiesToWorld(BaseWorld world) {
 		// TODO: A more efficient method of finding tile entities may be ideal
 		if(numTileEntities == 0) return;
-		TileEntity t;
-		for(int r = 0; r < SLICE_SIZE; r++) {
-			for(int c = 0; c < SLICE_SIZE; c++) {
-				if((t = tileEntities[r][c]) != null) {
-					world.addTileEntity(t);
-				}
-			}
-		}
+		for(int r = 0; r < SLICE_SIZE; r++)
+			for(int c = 0; c < SLICE_SIZE; c++)
+				if(tileEntities[r][c] != null)
+					world.addTileEntity(tileEntities[r][c]);
 	}
 	
 	@Override

@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.base.Preconditions;
+import com.stabilise.network.Packet;
 import com.stabilise.network.ServerTCPConnection;
-import com.stabilise.network.packet.Packet;
 import com.stabilise.util.AppDriver;
 import com.stabilise.util.Log;
 import com.stabilise.util.AppDriver.Drivable;

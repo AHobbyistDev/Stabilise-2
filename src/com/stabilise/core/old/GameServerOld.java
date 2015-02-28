@@ -11,6 +11,7 @@ import static com.stabilise.core.Constants.DEFAULT_PORT;
 
 import com.stabilise.core.Constants;
 import com.stabilise.network.ClientListenerThread;
+import com.stabilise.network.Packet;
 import com.stabilise.network.ServerTCPConnection;
 import com.stabilise.network.packet.*;
 import com.stabilise.util.AppDriver;

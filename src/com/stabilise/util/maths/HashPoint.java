@@ -52,7 +52,6 @@ public class HashPoint {
 	
 	@Override
 	public boolean equals(Object o) {
-		if(o == this) return true;
 		if(!(o instanceof HashPoint)) return false;
 		HashPoint p = (HashPoint)o;
 		return x == p.x && y == p.y;

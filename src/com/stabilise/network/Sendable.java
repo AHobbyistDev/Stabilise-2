@@ -6,8 +6,8 @@ import java.io.IOException;
 
 /**
  * Defines the two complementary methods {@code readData} and {@code writeData}
- * which allow an object to export its properties across a data stream, across
- * which it may be reconstructed.
+ * which allow an object to export its fields to a data stream, across which it
+ * may be reconstructed.
  * 
  * <p>As a general guideline, if {@code obj1} is an object whose data is
  * exported through {@code writeData}, and {@code obj2} is an object which

@@ -1,7 +1,7 @@
 package com.stabilise.util.collect;
 
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -16,16 +16,10 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * public static class MyClass {} // generic superclass
  * 
  * public static class MyOtherClass extends MyClass {
- *     public MyOtherClass(int x, int y) {
- *         super();
- *     }
+ *     public MyOtherClass(int x, int y) {}
  * }
  * public static class YetAnotherClass extends MyClass {
- *     {@code // Note that this constructor is private (this means reflection would}
- *     {@code // fail at instantiating it).}
- *     private YetAnotherClass(String name) {
- *         super();
- *     }
+ *     public YetAnotherClass(String foo) {}
  * }
  * 
  * public static final InstantiationRegistry{@code <MyClass>} registry =
@@ -58,7 +52,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
 public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E>> {
 	
 	/** Maps ID -> Factory. */
-	private final Array<Factory<? extends E>> factoryMap;
+	private final Array<Factory<? extends E>> factoryArr;
 	/** Maps Class -> ID. */
 	private final Map<Class<? extends E>, Integer> idMap;
 	
@@ -85,8 +79,8 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 			Class<?>... defaultArgs) {
 		super(baseClass.getSimpleName() + "InstRegistry", dupePolicy);
 		
-		factoryMap = new Array<Factory<? extends E>>(capacity);
-		idMap = new HashMap<>(capacity);
+		factoryArr = new Array<Factory<? extends E>>(capacity);
+		idMap = new IdentityHashMap<>(capacity);
 		this.defaultArgs = defaultArgs != null ? defaultArgs : new Class<?>[0];
 		
 		for(Class<?> c : this.defaultArgs)
@@ -161,11 +155,11 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 */
 	public <S extends E> void register(int id, Class<S> objClass, Factory<S> factory) {
 		checkLock();
-		if(factoryMap.get(id) != null && dupePolicy.handle(log, "Duplicate id " + id))
+		if(factoryArr.get(id) != null && dupePolicy.handle(log, "Duplicate id " + id))
 			return;
 		if(idMap.containsKey(objClass) && dupePolicy.handle(log, "Duplicate class " + objClass.getSimpleName()))
 			return;
-		factoryMap.setWithExpand(id, factory);
+		factoryArr.setWithExpand(id, factory, 1.25f);
 		idMap.put(objClass, Integer.valueOf(id));
 		size++;
 	}
@@ -182,8 +176,8 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 * @throws RuntimeException if object creation failed.
 	 */
 	public E instantiate(int id, Object... args) {
-		Factory<? extends E> factory = id < factoryMap.length()
-				? factoryMap.get(id)
+		Factory<? extends E> factory = id < factoryArr.length()
+				? factoryArr.get(id)
 				: null;
 		return factory == null ? null : factory.create(args);
 	}
@@ -199,9 +193,15 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 		return i == null ? -1 : i.intValue();
 	}
 	
-	@Override
-	public void lock() {
-		super.lock();
+	/**
+	 * Checks for whether or not this registry contains a mapping for the
+	 * specified ID.
+	 * 
+	 * @return {@code true} if {@code id} has a mapping; {@code false}
+	 * otherwise.
+	 */
+	public boolean containsID(int id) {
+		return factoryArr.getSafe(id) != null;
 	}
 	
 	@Override
