@@ -11,15 +11,25 @@ import java.util.Map;
 
 import com.stabilise.network.Packet;
 import com.stabilise.network.packet.Packet001ServerInfo;
+import com.stabilise.network.protocol.handshake.C000VersionInfo;
+import com.stabilise.network.protocol.handshake.C001Disconnect;
+import com.stabilise.network.protocol.handshake.S000VersionInfo;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.InstantiationRegistry;
 
-
+/**
+ * Defines the set of protocols a client-server connection may occupy. Each
+ * protocol may define up to 256 client (i.e. packets to be sent by a client to
+ * a server, or <i>serverbound</i>) packets and 256 server (<i>clientbound</i>)
+ * packets, whose IDs range from {@code 0} to {@code 255}.
+ */
 public enum Protocol {
 	
-	HANDSHAKE {
-		
-	},
+	HANDSHAKE {{
+		registerClientPacket(0, C000VersionInfo.class);
+		registerClientPacket(1, C001Disconnect.class);
+		registerServerPacket(0, S000VersionInfo.class);
+	}},
 	LOGIN {{
 		registerServerPacket(0, Packet001ServerInfo.class);
 	}},

@@ -7,9 +7,9 @@ import java.io.IOException;
 import com.stabilise.network.Packet;
 
 
-public class C001Handshake extends Packet {
+public class C001Disconnect extends Packet {
 	
-	public C001Handshake() {}
+	public C001Disconnect() {}
 	
 	@Override
 	public void readData(DataInputStream in) throws IOException {

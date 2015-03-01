@@ -1,4 +1,4 @@
-package com.stabilise.core;
+package com.stabilise.tests.network;
 
 import static com.stabilise.core.Constants.DEFAULT_PORT;
 
@@ -11,17 +11,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.google.common.base.Preconditions;
+import com.stabilise.core.Constants;
 import com.stabilise.network.Packet;
 import com.stabilise.network.ServerTCPConnection;
+import com.stabilise.network.protocol.handshake.C000VersionInfo;
+import com.stabilise.network.protocol.handshake.C001Disconnect;
+import com.stabilise.network.protocol.handshake.S000VersionInfo;
 import com.stabilise.util.AppDriver;
 import com.stabilise.util.Log;
 import com.stabilise.util.AppDriver.Drivable;
-import com.stabilise.util.annotation.Incomplete;
-import com.stabilise.world.provider.HostProvider;
 
-@Incomplete
-public class GameServer implements Runnable, Drivable {
+public class Server implements Runnable, Drivable {
 	
 	/** The socket the server is being hosted on. */
 	private ServerSocket socket;
@@ -45,20 +45,11 @@ public class GameServer implements Runnable, Drivable {
 	 * singleplayer. */
 	public boolean paused = false;
 	
-	/** The world the server is running. */
-	private final HostProvider world;
-	
-	/** The maximum number of players that are allowed to join. */
-	private final int maxPlayers;
-	
 	private final Log log = Log.getAgent("SERVER");
 	
 	
 	
-	public GameServer(HostProvider world, int maxPlayers) {
-		this.world = Preconditions.checkNotNull(world);
-		Preconditions.checkArgument(maxPlayers > 0, "maxPlayers <= 0");
-		this.maxPlayers = maxPlayers;
+	public Server() {
 	}
 	
 	/**
@@ -70,7 +61,7 @@ public class GameServer implements Runnable, Drivable {
 	
 	/**
 	 * Runs the server on the current thread. This method will not return until
-	 * the server has shut down.
+	 * the server has shut donw.
 	 * 
 	 * @throws IllegalStateException if the server is already running.
 	 */
@@ -83,7 +74,7 @@ public class GameServer implements Runnable, Drivable {
 		
 		try {
 			log.postInfo("Starting server...");
-			socket = new ServerSocket(DEFAULT_PORT, maxPlayers, InetAddress.getLocalHost());
+			socket = new ServerSocket(DEFAULT_PORT, 4, InetAddress.getLocalHost());
 			log.postInfo("Game hosted on " + socket.getLocalSocketAddress());
 			
 			clientListenerThread = new ClientListenerThread();
@@ -100,8 +91,6 @@ public class GameServer implements Runnable, Drivable {
 	
 	@Override
 	public void update() {
-		world.update();
-		
 		Packet p;
 		synchronized(connections) {
 			for(ServerTCPConnection con : connections)
@@ -114,11 +103,37 @@ public class GameServer implements Runnable, Drivable {
 	
 	@Override
 	public void render() {
-		// nothing to see here; a server doesn't render
+		// Using synchronized guarantees to update the value of driver.running
+		// across threads
+		synchronized(driver) {
+			// Unimportant if() statement to prevent this from getting optimised
+			// away by a compiler
+			if(!driver.running)
+				System.out.println("not running");
+		}
 	}
 	
 	public void shutdown() {
-		
+		running.set(false);
+		synchronized(driver) {
+			driver.running = false;
+		}
+		synchronized(connections) {
+			for(ServerTCPConnection con : connections)
+				con.closeConnection();
+			connections.clear();
+		}
+		try {
+			socket.close();
+		} catch(IOException e) {
+			log.postWarning("Error closing socket", e);
+		}
+		try {
+			clientListenerThread.join();
+		} catch(InterruptedException e) {
+			log.postWarning("Client listener thread failed to join", e);
+		}
+		stopped = true;
 	}
 	
 	private void addConnection(Socket socket) {
@@ -142,7 +157,22 @@ public class GameServer implements Runnable, Drivable {
 	}
 	
 	private void handlePacket(Packet packet, ServerTCPConnection con) {
-		
+		if(packet.getClass() == C000VersionInfo.class)
+			handleClientInfo((C000VersionInfo)packet, con);
+		else if(packet.getClass() == C001Disconnect.class)
+			handleClientDisconnect((C001Disconnect)packet, con);
+		else
+			log.postWarning("Unrecognised packet " + packet);
+	}
+	
+	private void handleClientInfo(C000VersionInfo packet, ServerTCPConnection con) {
+		log.postInfo("Got info from client!");
+		con.sendPacket(new S000VersionInfo().setVersionInfo());
+	}
+	
+	private void handleClientDisconnect(C001Disconnect packet, ServerTCPConnection con) {
+		log.postInfo("Got disconnect request!");
+		shutdown();
 	}
 	
 	//--------------------==========--------------------

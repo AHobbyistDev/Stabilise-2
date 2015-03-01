@@ -47,6 +47,7 @@ public class TCPConnection {
 	/** {@code true} if this is a server-side connection. */
 	private final boolean server;
 	
+	/** The current connection protocol. Default is {@link Protocol#HANDSHAKE}. */
 	private Protocol protocol = Protocol.HANDSHAKE;
 	private final AtomicInteger state = new AtomicInteger(STATE_STARTING);
 	
@@ -160,7 +161,9 @@ public class TCPConnection {
 	 */
 	@UserThread("ReadThread")
 	private void readPacket() throws IOException {
+		log.postInfo("Reading packet...");
 		Packet packet = protocol.readPacket(server, in);
+		log.postInfo("Read packet " + packet);
 		packetQueueIn.add(packet);
 		packetsReceived++;
 	}
@@ -196,6 +199,7 @@ public class TCPConnection {
 	
 	@UserThread("WriteThread")
 	private void doWritePacket(Packet packet) throws IOException {
+		log.postInfo("Writing packet " + packet);
 		protocol.writePacket(out, packet);
 		packetsSent++;
 	}
