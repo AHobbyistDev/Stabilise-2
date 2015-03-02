@@ -1,6 +1,7 @@
 package com.stabilise.util.collect;
 
 import com.stabilise.util.Log;
+import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
  * This class provides a simple base for a registry to extend.
@@ -12,6 +13,7 @@ import com.stabilise.util.Log;
  * 
  * @param <E> The type of object to register.
  */
+@NotThreadSafe
 abstract class AbstractRegistry<E> implements Iterable<E> {
 	
 	/** The name of this registry. */

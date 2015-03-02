@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.stabilise.network.protocol.PacketHandler;
+
 /**
  * Sent by a server to a client upon receiving a {@link C000VersionInfo}
  * packet, to inform the client of the server's game version. Also includes
@@ -32,6 +34,11 @@ public class S000VersionInfo extends C000VersionInfo {
 	public void writeData(DataOutputStream out) throws IOException {
 		super.writeData(out);
 		out.writeBoolean(canLogin);
+	}
+	
+	@Override
+	public void handle(PacketHandler handler) {
+		((IClientHandshake)handler).handleVersionInfo(this);
 	}
 	
 }

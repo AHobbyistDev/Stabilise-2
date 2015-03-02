@@ -10,10 +10,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 import com.stabilise.network.Packet;
-import com.stabilise.network.packet.Packet001ServerInfo;
-import com.stabilise.network.protocol.handshake.C000VersionInfo;
-import com.stabilise.network.protocol.handshake.C001Disconnect;
-import com.stabilise.network.protocol.handshake.S000VersionInfo;
+import com.stabilise.network.protocol.handshake.*;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.InstantiationRegistry;
 
@@ -31,7 +28,7 @@ public enum Protocol {
 		registerServerPacket(0, S000VersionInfo.class);
 	}},
 	LOGIN {{
-		registerServerPacket(0, Packet001ServerInfo.class);
+		
 	}},
 	GAME {
 		
@@ -40,7 +37,7 @@ public enum Protocol {
 	/** Registry of packets sent by the server to the client (i.e. clientbound
 	 * packets). */
 	private final InstantiationRegistry<Packet> serverPackets =
-			new InstantiationRegistry<>(UBYTE_MAX_VALUE, THROW_EXCEPTION, Packet.class);
+			new InstantiationRegistry<Packet>(UBYTE_MAX_VALUE, THROW_EXCEPTION, Packet.class);
 	/** Registry of packets sent by the client to the server (i.e. serverbound
 	 * packets). */
 	private final InstantiationRegistry<Packet> clientPackets =

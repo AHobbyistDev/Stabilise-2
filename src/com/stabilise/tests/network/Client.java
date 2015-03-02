@@ -26,6 +26,7 @@ public class Client {
 			
 			connection = new TCPConnection(socket, false);
 			
+			log.postInfo("Connected to server on " + socket.getLocalSocketAddress());
 			log.postInfo("Sending version info...");
 			
 			connection.sendPacket(new C000VersionInfo().setVersionInfo());

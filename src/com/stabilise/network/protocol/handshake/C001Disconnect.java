@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import com.stabilise.network.Packet;
+import com.stabilise.network.protocol.PacketHandler;
 
 
 public class C001Disconnect extends Packet {
@@ -19,6 +20,11 @@ public class C001Disconnect extends Packet {
 	@Override
 	public void writeData(DataOutputStream out) throws IOException {
 		
+	}
+	
+	@Override
+	public void handle(PacketHandler handler) {
+		((IServerHandshake)handler).handleDisconnect(this);
 	}
 	
 }

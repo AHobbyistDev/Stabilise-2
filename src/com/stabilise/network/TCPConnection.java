@@ -161,7 +161,7 @@ public class TCPConnection {
 	 */
 	@UserThread("ReadThread")
 	private void readPacket() throws IOException {
-		log.postInfo("Reading packet...");
+		log.postInfo("Waiting for packet...");
 		Packet packet = protocol.readPacket(server, in);
 		log.postInfo("Read packet " + packet);
 		packetQueueIn.add(packet);
@@ -202,6 +202,7 @@ public class TCPConnection {
 		log.postInfo("Writing packet " + packet);
 		protocol.writePacket(out, packet);
 		packetsSent++;
+		log.postInfo("Packet sent");
 	}
 	
 	/**

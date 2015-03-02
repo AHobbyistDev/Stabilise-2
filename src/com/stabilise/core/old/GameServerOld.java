@@ -13,7 +13,6 @@ import com.stabilise.core.Constants;
 import com.stabilise.network.ClientListenerThread;
 import com.stabilise.network.Packet;
 import com.stabilise.network.ServerTCPConnection;
-import com.stabilise.network.packet.*;
 import com.stabilise.util.AppDriver;
 import com.stabilise.util.Log;
 import com.stabilise.world.Slice;
@@ -57,6 +56,7 @@ public class GameServerOld implements Runnable {
 	private boolean integrated;
 	/** False if the game is being played on singleplayer - this will prevent
 	 * other players from joining. TODO: Poor implementation. */
+	@SuppressWarnings("unused")
 	private boolean multiplayer;
 	/** The maximum number of players that are allowed to join. */
 	private int maxPlayers;
@@ -134,6 +134,7 @@ public class GameServerOld implements Runnable {
 			super(tps, fps, log);
 		}
 		
+		@SuppressWarnings("unused")
 		@Override
 		protected void update() {
 			Packet packet;
@@ -143,7 +144,7 @@ public class GameServerOld implements Runnable {
 				//	foo(i.next());
 				for(ServerTCPConnection connection : connections) {
 					while((packet = connection.getPacket()) != null) {
-						handlePacket(packet, connection);
+						//----handlePacket(packet, connection);
 					}
 				}
 			}
@@ -195,7 +196,7 @@ public class GameServerOld implements Runnable {
 		}
 		
 		// Give the client the server's information
-		connection.sendPacket(getPacketServerInfo());
+		//----connection.sendPacket(getPacketServerInfo());
 		
 		log.postInfo("Server-client connection successfully created.");
 	}
@@ -205,6 +206,7 @@ public class GameServerOld implements Runnable {
 	 * 
 	 * @param c The player's connection.
 	 */
+	/*
 	private void logInPlayer(ServerTCPConnection c, Packet002Login packet) {
 		// TODO: Check for banned IPs, etc.
 		
@@ -222,6 +224,7 @@ public class GameServerOld implements Runnable {
 		
 		onlineConnections.put(c.getHash(), c);
 	}
+	*/
 	
 	/**
 	 * Sends a slice to a client.
@@ -231,7 +234,7 @@ public class GameServerOld implements Runnable {
 	 */
 	public void sendSliceToClient(int clientHash, Slice slice) {
 		if(onlineConnections.containsKey(clientHash)) {
-			 sendSliceToClient(onlineConnections.get(clientHash), slice);
+			//----sendSliceToClient(onlineConnections.get(clientHash), slice);
 		}
 		// else do something maybe?
 	}
@@ -242,6 +245,7 @@ public class GameServerOld implements Runnable {
 	 * @param client The client to send the slice to.
 	 * @param slice The slice.
 	 */
+	/*
 	public void sendSliceToClient(ServerTCPConnection client, Slice slice) {
 		if(client == null) {
 			log.postWarning("The client to send the slice to has disappeared!");
@@ -249,6 +253,7 @@ public class GameServerOld implements Runnable {
 		}
 		client.sendPacket(new Packet004Slice(slice));
 	}
+	*/
 	
 	/**
 	 * Shuts down the server.
@@ -294,6 +299,7 @@ public class GameServerOld implements Runnable {
 	 * 
 	 * @return The server info packet.
 	 */
+	/*
 	private Packet getPacketServerInfo() {
 		Packet001ServerInfo packet = new Packet001ServerInfo();
 		packet.serverName = world.info.name;
@@ -305,6 +311,7 @@ public class GameServerOld implements Runnable {
 		
 		return packet;
 	}
+	*/
 	
 	/**
 	 * Generates the packet to inform a newly-connected client of their
@@ -316,11 +323,12 @@ public class GameServerOld implements Runnable {
 	 * 
 	 * @return The login info packet.
 	 */
-	@SuppressWarnings("unused")
+	/*
 	private Packet003LoginInfo getPacketLoginInfo(int id, double spawnX, double spawnY) {
 		//----return new Packet003LoginInfo(id, world.info.spawnSliceX, world.info.spawnSliceY);
 		return null;
 	}
+	*/
 	
 	/**
 	 * Generates a disconnect packet to 'kick' the client.
@@ -328,10 +336,11 @@ public class GameServerOld implements Runnable {
 	 * 
 	 * @param The disconnect packet.
 	 */
-	@SuppressWarnings("unused")
+	/*
 	private Packet254Disconnect getPacketDisconnect() {
 		return new Packet254Disconnect("[Insert reason here]!");
 	}
+	*/
 	
 	//--------------------==========--------------------
 	//------------=====Handling Packets=====------------
@@ -345,6 +354,7 @@ public class GameServerOld implements Runnable {
 	 * @param connection The ServerTCPConnection through which the packet
 	 * should be handled.
 	 */
+	/*
 	private void handlePacket(Packet packet, ServerTCPConnection connection) {
 		switch(packet.getID()) {
 			case 2:			// Packet002Login
@@ -369,6 +379,7 @@ public class GameServerOld implements Runnable {
 				break;
 		}
 	}
+	*/
 	
 	/**
 	 * Handles a login request packet from a client.
@@ -377,9 +388,11 @@ public class GameServerOld implements Runnable {
 	 * @param connection The connection through which the packet should be
 	 * handled.
 	 */
+	/*
 	private void handleLoginPacket(Packet002Login packet, ServerTCPConnection connection) {
 		logInPlayer(connection, packet);
 	}
+	*/
 	
 	/**
 	 * Handles a 'begin tick' packet from a client.
@@ -388,10 +401,12 @@ public class GameServerOld implements Runnable {
 	 * @param connection The connection through which the packet should be
 	 * handled.
 	 */
+	/*
 	private void handlePacketBeginTick(Packet005BeginTick packet, ServerTCPConnection connection) {
 		connection.tick = packet.tick;
 		// TODO: possibly catchup stuff if the client is significantly behind
 	}
+	*/
 	
 	/**
 	 * Handles a position update packet from a client.
@@ -400,9 +415,11 @@ public class GameServerOld implements Runnable {
 	 * @param connection The connection through which the packet should be
 	 * handled.
 	 */
+	/*
 	private void handlePacketPlayerPosition(Packet006PlayerPosition packet, ServerTCPConnection connection) {
 		// TODO: update player entity and inform other clients
 	}
+	*/
 	
 	/**
 	 * Handles a slice request packet from a client.
@@ -436,10 +453,12 @@ public class GameServerOld implements Runnable {
 	 * @param connection The connection through which the packet should be
 	 * handled.
 	 */
+	/*
 	private void handlePacketPause(Packet253Pause packet, ServerTCPConnection connection) {
 		if(integrated)
 			paused = packet.pause;
 	}
+	*/
 	
 	/**
 	 * Handles a disconnect packet from a client.
@@ -448,9 +467,11 @@ public class GameServerOld implements Runnable {
 	 * @param connection The connection through which the packet should be
 	 * handled.
 	 */
+	/*
 	private void handlePacketDisconnect(Packet254Disconnect packet, ServerTCPConnection connection) {
 		// TODO: disconnect the player, remove player entity, shutdown server if necessary, etc.
 		shutdown();		// Temporary
 	}
+	*/
 	
 }

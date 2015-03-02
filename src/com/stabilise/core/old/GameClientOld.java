@@ -5,12 +5,9 @@ import java.net.*;
 
 import static com.stabilise.core.Constants.DEFAULT_PORT;
 
-import com.stabilise.core.Constants;
 import com.stabilise.network.Packet;
 import com.stabilise.network.TCPConnection;
-import com.stabilise.network.packet.*;
 import com.stabilise.util.Log;
-import com.stabilise.world.Slice;
 import com.stabilise.world.old.WorldClientOld;
 
 /**
@@ -86,7 +83,7 @@ public class GameClientOld {
 	 */
 	public void joinServer() {
 		// Queue the login packet
-		connection.sendPacket(new Packet002Login("Player"));
+		//----connection.sendPacket(new Packet002Login("Player"));
 		
 		// Time to initialise everything...
 		world = new WorldClientOld(this);
@@ -98,18 +95,19 @@ public class GameClientOld {
 	 * The main client update method - this should be called by the main game
 	 * update loop.
 	 */
+	@SuppressWarnings("unused")
 	public void update() {
 		if(running) {
 			try {
 				Packet packet;
 				while((packet = connection.getPacket()) != null) {
-					handlePacket(packet);
+					//handlePacket(packet);
 				}
 				
 				if(!paused)
 					world.update();
 				
-				connection.sendPacket(getPacketPlayerPosition());
+				//----connection.sendPacket(getPacketPlayerPosition());
 				
 				// TODO: Send packets and whatnot
 				
@@ -146,7 +144,7 @@ public class GameClientOld {
 	 */
 	public void togglePause() {
 		paused = !paused;
-		connection.sendPacket(getPacketPause());
+		//----connection.sendPacket(getPacketPause());
 	}
 	
 	//--------------------==========--------------------
@@ -158,16 +156,20 @@ public class GameClientOld {
 	 * 
 	 * @return The player position packet.
 	 */
+	/*
 	private Packet006PlayerPosition getPacketPlayerPosition() {
 		return new Packet006PlayerPosition(world.player.x, world.player.y);
 	}
+	*/
 	
 	/**
 	 * Generates a new packet to inform the server of the client's pause state.
 	 */
+	/*
 	private Packet253Pause getPacketPause() {
 		return new Packet253Pause(paused);
 	}
+	*/
 	
 	//--------------------==========--------------------
 	//------------=====Handling Packets=====------------
@@ -179,6 +181,7 @@ public class GameClientOld {
 	 * 
 	 * @param packet The packet to handle.
 	 */
+	/*
 	private void handlePacket(Packet packet) {
 		switch(packet.getID()) {
 			//case 1:		// Packet001ServerInfo
@@ -199,6 +202,7 @@ public class GameClientOld {
 				break;
 		}
 	}
+	*/
 	
 	/**
 	 * Handles the info packet sent by a server once a connection is
@@ -209,7 +213,7 @@ public class GameClientOld {
 	 * @return Returns true if the client and server are running compatible
 	 * versions. (Note that for now, compatible implies same versions.)
 	 */
-	@SuppressWarnings("unused")
+	/*
 	private boolean handlePacketServerInfo(Packet001ServerInfo packet) {
 		boolean serverOutdated = false;
 		boolean clientOutdated = false;
@@ -243,12 +247,14 @@ public class GameClientOld {
 		
 		return true;
 	}
+	*/
 	
 	/**
 	 * Handles the login info packet sent by the server.
 	 * 
 	 * @param packet The login info packet.
 	 */
+	/*
 	private void handlePacketLoginInfo(Packet003LoginInfo packet) {
 		world.addPlayer(packet.id, packet.spawnX, packet.spawnY);
 		
@@ -256,36 +262,43 @@ public class GameClientOld {
 		// requesting slices.
 		world.slices.init();
 	}
+	*/
 	
 	/**
 	 * Handles a slice data packet sent by the server.
 	 * 
 	 * @param packet The slice packet.
 	 */
+	/*
 	private void handlePacketSlice(Packet004Slice packet) {
 		Slice slice = new Slice(packet.x, packet.y, null);
 		slice.setTilesAsIntArray(packet.tiles);
 		world.addSlice(slice);
 	}
+	*/
 	
 	/**
 	 * Handles a player position packet from the server.
 	 * 
 	 * @param packet The player position packet.
 	 */
+	/*
 	private void handlePacketPlayerPosition(Packet006PlayerPosition packet) {
 		// TODO: implement
 	}
+	*/
 	
 	/**
 	 * Handles a disconnection packet from the server.
 	 * 
 	 * @param packet The disconnect packet.
 	 */
+	/*
 	private void handlePacketDisconnect(Packet254Disconnect packet) {
 		log.postInfo("Was kicked for reason \"" + packet.reason + "\"");
 		close();
 	}
+	*/
 	
 	//--------------------==========--------------------
 	//------------------=====Misc=====------------------

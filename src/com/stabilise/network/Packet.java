@@ -4,14 +4,32 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.stabilise.network.protocol.PacketHandler;
 import com.stabilise.network.protocol.Protocol;
 import com.stabilise.util.maths.Maths;
 
 /**
  * Packets are modular chunks of data which may be sent over a network as a
  * means of transmitting information.
+ * 
+ * <p>All subclasses of {@code Packet} require a blank constructor so that they
+ * may be instantiated reflectively.
+ * 
+ * @param <V> The interface defining the method with which to handle this type
+ * of packet.
  */
 public abstract class Packet implements Sendable {
+	
+	/**
+	 * Handles this packet - that is, performs some action in response to
+	 * receiving this packet.
+	 * 
+	 * @param handler The handler with which to handle this packet.
+	 * 
+	 * @throws ClassCastException if the specified handler is not of the proper
+	 * type to handle this packet.
+	 */
+	public abstract void handle(PacketHandler handler);
 	
 	/**
 	 * Gets this packet's ID.

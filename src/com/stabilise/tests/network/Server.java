@@ -153,7 +153,7 @@ public class Server implements Runnable, Drivable {
 		
 		connections.add(con);
 		
-		log.postInfo("Connected to client");
+		log.postInfo("Connected to client on " + socket.getLocalSocketAddress());
 	}
 	
 	private void handlePacket(Packet packet, ServerTCPConnection con) {

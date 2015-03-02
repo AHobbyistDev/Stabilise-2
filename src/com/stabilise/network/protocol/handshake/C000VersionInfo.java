@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import com.stabilise.core.Constants;
 import com.stabilise.network.Packet;
+import com.stabilise.network.protocol.PacketHandler;
 
 /**
  * Sent by a client to a server upon establishing a connection to inform the
@@ -43,6 +44,11 @@ public class C000VersionInfo extends Packet {
 		patchMinor = Constants.PATCH_MINOR;
 		build = Constants.BUILD;
 		return this;
+	}
+	
+	@Override
+	public void handle(PacketHandler handler) {
+		((IServerHandshake)handler).handleVersionInfo(this);
 	}
 	
 }

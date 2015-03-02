@@ -14,7 +14,7 @@ public class UnsafeTests {
 			field.setAccessible(true);
 			unsafe = (Unsafe)field.get(null);
 		} catch(Exception e) {
-			throw new AssertionError(e);
+			throw new Error(e);
 		}
 	}
 	
