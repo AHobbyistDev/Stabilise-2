@@ -63,10 +63,12 @@ public enum Protocol {
 	}
 	
 	/**
-	 * Instantiates an instance of a packet with the specified ID.
+	 * Instantiates an instance of a packet with the specified ID. If {@code
+	 * server} is {@code true}, the created packet will be a serverbound/client
+	 * packet; otherwise, it will be a clientbound/server packet.
 	 * 
-	 * @param server {@code true} to request a server (i.e. clientbound)
-	 * packet; {@code false} to request a client (i.e. serverbound) packet.
+	 * @param server {@code true} if this is a server; {@code false} if this is
+	 * a client.
 	 * @param id The ID of the packet.
 	 * 
 	 * @return The packet.
@@ -78,10 +80,10 @@ public enum Protocol {
 	private Packet createPacket(boolean server, int id) {
 		try {
 			return server
-					? serverPackets.instantiate(id)
-					: clientPackets.instantiate(id);
+					? clientPackets.instantiate(id)
+					: serverPackets.instantiate(id);
 		} catch(RuntimeException e) {
-			throw new FaultyPacketRegistrationException((server ? "Server" : "Client")
+			throw new FaultyPacketRegistrationException((server ? "Serverbound" : "Clientbound")
 					+ " packet of ID " + id
 					+ " could not be instantiated! (" + e.getMessage() + ")");
 		}
@@ -95,17 +97,18 @@ public enum Protocol {
 	 * serverbound packet.
 	 * @param in The input stream from which to read the packet.
 	 * 
-	 * @return The packet.
+	 * @return The packet, or {@code null} if the end of stream has been
+	 * reached (i.e. the socket has closed).
 	 * @throws NullPointerException if {@code in} is {@code null}.
 	 * @throws FaultyPacketRegistrationException if the packet was registered
 	 * incorrectly (in this case the error lies in the registration code).
-	 * @throws IOException if an I/O error occurs, or the stream has ended.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	@UserThread("ReadThread")
 	public Packet readPacket(boolean server, DataInputStream in) throws IOException {
 		int id = in.read(); // ID is always first byte
 		if(id == -1) // end of stream; abort!
-			throw new IOException("End of stream reached");
+			return null;
 		Packet packet = createPacket(server, id);
 		packet.readData(in);
 		return packet;

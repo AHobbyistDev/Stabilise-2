@@ -1,4 +1,4 @@
-package com.stabilise.tests.network;
+package com.stabilise.network;
 
 import static com.stabilise.core.Constants.DEFAULT_PORT;
 
@@ -9,65 +9,94 @@ import java.net.Socket;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.stabilise.core.Constants;
-import com.stabilise.network.Packet;
-import com.stabilise.network.ServerTCPConnection;
+import com.stabilise.network.protocol.PacketHandler;
 import com.stabilise.network.protocol.handshake.C000VersionInfo;
 import com.stabilise.network.protocol.handshake.C001Disconnect;
 import com.stabilise.network.protocol.handshake.S000VersionInfo;
 import com.stabilise.util.AppDriver;
-import com.stabilise.util.Log;
 import com.stabilise.util.AppDriver.Drivable;
+import com.stabilise.util.Log;
 import com.stabilise.util.collect.LightArrayList;
+import com.stabilise.util.collect.LightLinkedList;
 
-public class Server implements Runnable, Drivable {
+
+public class ServerBase implements Runnable, Drivable, PacketHandler {
+	
+	//--------------------==========--------------------
+	//-----=====Static Constants and Variables=====-----
+	//--------------------==========--------------------
+	
+	/** State values.
+	 * 
+	 * <p>{@code UNSTARTED} indicates a server has not yet started.
+	 * <p>{@code BOOTING} indicates a server's thread is starting.
+	 * <p>{@code STARTING} indicates a server is in the process of starting.
+	 * <p>{@code ACTIVE} indicates that a server is active.
+	 * <p>{@code CLOSE_REQUESTED} indicates that a server has been requested
+	 * to close.
+	 * <p>{@code SHUTDOWN} indicates that a server is shutting down.
+	 * <p>{@code TERMINATED} indicates that a server has been terminated. */
+	private static final int
+			STATE_UNSTARTED = 0,
+			STATE_BOOTING = 1,
+			STATE_STARTING = 2,
+			STATE_ACTIVE = 3,
+			STATE_CLOSE_REQUESTED = 4,
+			STATE_SHUTDOWN = 5,
+			STATE_TERMINATED = 6;
+	
+	//--------------------==========--------------------
+	//-------------=====Member Variables=====-----------
+	//--------------------==========--------------------
 	
 	/** The socket the server is being hosted on. */
 	private ServerSocket socket;
 	/** The list of client connections. */
 	private final List<ServerTCPConnection> connections =
-			Collections.synchronizedList(LightArrayList.unordered(8, 2f));
+			Collections.synchronizedList(new LightLinkedList<>());
 	
 	/** The thread on which this server runs. */
-	@SuppressWarnings("unused")
 	private Thread serverThread;
 	/** The thread which will listen for client connections. */
 	private Thread clientListenerThread;
 	
 	private AppDriver driver;
 	
-	/** True if the server is running. */
-	public final AtomicBoolean running = new AtomicBoolean(false);
-	/** Used to indicate that the server has been stopped. */
-	public volatile boolean stopped;
-	/** Whether or not the server is paused. Note this is only for
-	 * singleplayer. */
-	public boolean paused = false;
+	private final AtomicInteger state = new AtomicInteger(STATE_UNSTARTED);
 	
 	private final Log log = Log.getAgent("SERVER");
 	
 	
 	
-	public Server() {
+	public ServerBase() {
+		
 	}
 	
 	/**
 	 * Instantiates a new thread and runs the server on that thread.
+	 * 
+	 * @throws IllegalStateException if the server is already running.
 	 */
 	public void runConcurrently() {
-		new Thread(this, "ServerThread").start();
+		if(state.compareAndSet(STATE_UNSTARTED, STATE_BOOTING))
+			new Thread(this, "ServerThread").start();
+		else
+			throw new IllegalArgumentException("Server is already running!");
 	}
 	
 	/**
 	 * Runs the server on the current thread. This method will not return until
-	 * the server has shut donw.
+	 * the server has shut down.
 	 * 
 	 * @throws IllegalStateException if the server is already running.
 	 */
 	@Override
 	public void run() {
-		if(!running.compareAndSet(false, true))
+		if(!state.compareAndSet(STATE_UNSTARTED, STATE_STARTING) &&
+				!state.compareAndSet(STATE_BOOTING, STATE_STARTING))
 			throw new IllegalStateException("Server is already running!");
 		
 		serverThread = Thread.currentThread();
@@ -87,6 +116,14 @@ public class Server implements Runnable, Drivable {
 			log.postSevere("Encountered error; shutting down server!", t);
 			shutdown();
 		}
+	}
+	
+	public void start() {
+		if(!state.compareAndSet(STATE_UNSTARTED, STATE_STARTING) &&
+				!state.compareAndSet(STATE_BOOTING, STATE_STARTING))
+			throw new IllegalStateException("Server is already running!");
+		
+		serverThread = Thread.currentThread();
 	}
 	
 	@Override
@@ -114,7 +151,7 @@ public class Server implements Runnable, Drivable {
 	}
 	
 	public void shutdown() {
-		running.set(false);
+		state.set(STATE_SHUTDOWN);
 		synchronized(driver) {
 			driver.running = false;
 		}

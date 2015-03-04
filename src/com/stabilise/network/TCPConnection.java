@@ -2,11 +2,11 @@ package com.stabilise.network;
 
 import java.io.*;
 import java.net.*;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.common.base.Preconditions;
 import com.stabilise.network.protocol.Protocol;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
@@ -34,8 +34,8 @@ public class TCPConnection {
 			STATE_STARTING = 0,
 			STATE_ACTIVE = 1,
 			STATE_CLOSE_REQUESTED = 2,
-			STATE_SHUTDOWN = 4,
-			STATE_TERMINATED = 8;
+			STATE_SHUTDOWN = 3,
+			STATE_TERMINATED = 4;
 	
 	private static final AtomicInteger CONNECTIONS_SERVER = new AtomicInteger(0);
 	private static final AtomicInteger CONNECTIONS_CLIENT = new AtomicInteger(0);
@@ -74,6 +74,7 @@ public class TCPConnection {
 	 * @param socket The socket upon which to base the connection.
 	 * @param server Whether or not this is a server-side connection.
 	 * 
+	 * @throws NullPointerException if {@code socket} is {@code null}.
 	 * @throws IOException if the connection could not be established.
 	 */
 	public TCPConnection(Socket socket, boolean server) throws IOException {
@@ -111,7 +112,7 @@ public class TCPConnection {
 	 * @throws NullPointerException if {@code protocol} is {@code null}.
 	 */
 	public void setPotocol(Protocol protocol) {
-		this.protocol = Preconditions.checkNotNull(protocol);
+		this.protocol = Objects.requireNonNull(protocol);
 	}
 	
 	/**
@@ -161,11 +162,13 @@ public class TCPConnection {
 	 */
 	@UserThread("ReadThread")
 	private void readPacket() throws IOException {
-		log.postInfo("Waiting for packet...");
 		Packet packet = protocol.readPacket(server, in);
-		log.postInfo("Read packet " + packet);
-		packetQueueIn.add(packet);
-		packetsReceived++;
+		if(packet == null)
+			requestClose();
+		else {
+			packetQueueIn.add(packet);
+			packetsReceived++;
+		}
 	}
 	
 	/**
@@ -199,10 +202,8 @@ public class TCPConnection {
 	
 	@UserThread("WriteThread")
 	private void doWritePacket(Packet packet) throws IOException {
-		log.postInfo("Writing packet " + packet);
 		protocol.writePacket(out, packet);
 		packetsSent++;
-		log.postInfo("Packet sent");
 	}
 	
 	/**
@@ -241,16 +242,20 @@ public class TCPConnection {
 		readThread.interrupt();
 		writeThread.interrupt();
 		
-		close(socket, "socket");
 		close(in, "input stream");
 		close(out, "output stream");
+		close(socket, "socket");
 		
 		readThread.doJoin();
 		writeThread.doJoin();
 		
+		state.set(STATE_TERMINATED);
+		
 		log.postInfo("Connection closed; "
-				+ packetsSent + " packet(s) sent (" + out.size() + " bytes), "
-				+ packetsReceived + " packet(s) received .");
+				+ packetsSent + (packetsSent == 1 ? " packet" : " packets")
+				+ " sent (" + out.size() + " bytes), "
+				+ packetsReceived + (packetsReceived == 1 ? " packet" : " packets")
+				+ " received.");
 	}
 	
 	/**
@@ -343,10 +348,11 @@ public class TCPConnection {
 				// IOException is thrown outside of shutdown procedures,
 				// something has gone wrong.
 				if(isActive()) {
-					log.postSevere("IOException thrown in read thread before connection shutdown!", e);
+					if(!socket.isClosed())
+						log.postSevere("IOException thrown in read thread before connection shutdown!", e);
 					requestClose();
 				} else
-					log.postInfo("Read thread shutting down (exception caught)...");
+					log.postDebug("Read thread shutting down (exception caught)...");
 				return;
 			}
 			log.postInfo("Read thread shutting down...");
@@ -392,11 +398,12 @@ public class TCPConnection {
 				// IOException is thrown outside of shutdown procedures,
 				// something has gone wrong. Ditto with InterruptedException.
 				if(isActive()) {
-					log.postSevere(e.getClass().getSimpleName() + " thrown in write "
-							+ "thread before connection shutdown!");
+					if(!socket.isClosed())
+						log.postSevere(e.getClass().getSimpleName() + " thrown in write "
+								+ "thread before connection shutdown!");
 					requestClose();
 				} else
-					log.postInfo("Write thread shutting down (exception caught)...");
+					log.postDebug("Write thread shutting down (exception caught)...");
 				return;
 			}
 			log.postInfo("Write thread shutting down...");

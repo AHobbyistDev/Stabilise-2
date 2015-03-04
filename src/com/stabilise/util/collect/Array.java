@@ -3,6 +3,7 @@ package com.stabilise.util.collect;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
@@ -14,7 +15,7 @@ import com.google.common.collect.Iterators;
  */
 public class Array<E> implements Iterable<E> {
 	
-	protected E[] data;
+	E[] data;
 	
 	
 	/**
@@ -291,7 +292,11 @@ public class Array<E> implements Iterable<E> {
 		
 		@Override
 		public E next() {
-			return data[cursor++];
+			try {
+				return data[cursor++];
+			} catch(ArrayIndexOutOfBoundsException e) {
+				throw new NoSuchElementException(e.getMessage());
+			}
 		}
 		
 		@Override
