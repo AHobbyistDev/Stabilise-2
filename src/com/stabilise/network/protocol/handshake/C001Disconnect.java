@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import com.stabilise.network.Packet;
+import com.stabilise.network.TCPConnection;
 import com.stabilise.network.protocol.PacketHandler;
 
 
@@ -23,8 +24,8 @@ public class C001Disconnect extends Packet {
 	}
 	
 	@Override
-	public void handle(PacketHandler handler) {
-		((IServerHandshake)handler).handleDisconnect(this);
+	public void handle(PacketHandler handler, TCPConnection con) {
+		((IServerHandshake)handler).handleDisconnect(this, con);
 	}
 	
 }

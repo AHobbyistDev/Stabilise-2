@@ -28,9 +28,9 @@ import java.util.Iterator;
 public class BiObjectIntMap<V> implements Iterable<V> {
 	
 	/** Maps Values -> Keys */
-	private IdentityHashMap<V, Integer> map;
+	IdentityHashMap<V, Integer> map;
 	/** Maps Keys -> Values */
-	private Array<V> list;
+	Array<V> list;
 	
 	
 	/**

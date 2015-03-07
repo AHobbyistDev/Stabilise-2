@@ -111,7 +111,7 @@ public class TCPConnection {
 	 * 
 	 * @throws NullPointerException if {@code protocol} is {@code null}.
 	 */
-	public void setPotocol(Protocol protocol) {
+	public void setProtocol(Protocol protocol) {
 		this.protocol = Objects.requireNonNull(protocol);
 	}
 	
@@ -351,11 +351,8 @@ public class TCPConnection {
 					if(!socket.isClosed())
 						log.postSevere("IOException thrown in read thread before connection shutdown!", e);
 					requestClose();
-				} else
-					log.postDebug("Read thread shutting down (exception caught)...");
-				return;
+				}
 			}
-			log.postInfo("Read thread shutting down...");
 		}
 		
 	}
@@ -402,11 +399,8 @@ public class TCPConnection {
 						log.postSevere(e.getClass().getSimpleName() + " thrown in write "
 								+ "thread before connection shutdown!");
 					requestClose();
-				} else
-					log.postDebug("Write thread shutting down (exception caught)...");
-				return;
+				}
 			}
-			log.postInfo("Write thread shutting down...");
 		}
 		
 	}

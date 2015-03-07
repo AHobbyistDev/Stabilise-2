@@ -28,6 +28,7 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	
 	/** The map of objects to their IDs and visa-versa. */
 	protected final BiObjectIntMap<V> idMap;
+	private int maxID = -1;
 	/** The map of objects to their names - the inverse of the standard
 	 * registry map. */
 	protected final Map<V, String> nameMap;
@@ -123,6 +124,8 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 		if(!super.register(ensureNamespaced(name), object))
 			return false;
 		idMap.put(id, object);
+		if(id > maxID)
+			maxID = id;
 		return true;
 	}
 	
@@ -194,6 +197,13 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
 	 */
 	public boolean containsID(int id) {
 		return idMap.containsKey(id);
+	}
+	
+	@Override
+	public void lock() {
+		if(!isLocked())
+			idMap.list.resize(maxID + 1);
+		super.lock();
 	}
 	
 	@Override

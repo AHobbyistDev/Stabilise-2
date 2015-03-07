@@ -53,6 +53,8 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	
 	/** Maps ID -> Factory. */
 	private final Array<Factory<? extends E>> factoryArr;
+	/** Max ID registered. -1 indicates nothing is registered. */
+	private int maxID = -1;
 	/** Maps Class -> ID. */
 	private final Map<Class<? extends E>, Integer> idMap;
 	
@@ -162,6 +164,8 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 		factoryArr.setWithExpand(id, factory, 1.25f);
 		idMap.put(objClass, Integer.valueOf(id));
 		size++;
+		if(id > maxID)
+			maxID = id;
 	}
 	
 	/**
@@ -202,6 +206,13 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 */
 	public boolean containsID(int id) {
 		return factoryArr.getSafe(id) != null;
+	}
+	
+	@Override
+	public void lock() {
+		if(!isLocked())
+			factoryArr.resize(maxID + 1);
+		super.lock();
 	}
 	
 	@Override

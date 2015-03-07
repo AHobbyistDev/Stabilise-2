@@ -1,6 +1,7 @@
 package com.stabilise.util;
 
-import com.google.common.base.Preconditions;
+import java.util.Objects;
+
 import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
@@ -94,13 +95,11 @@ public abstract class AppDriver implements Runnable {
 	public AppDriver(int tps, int fps, Log log, int ticksPerFlush) {
 		if(tps < 1)
 			throw new IllegalArgumentException("tps < 1");
-		if(log == null)
-			throw new NullPointerException("log is null");
 		
 		this.tps = tps;
 		nsPerTick = 1000000000L / tps;
 		setFPS(fps);
-		this.log = log;
+		this.log = Objects.requireNonNull(log);
 		setTicksPerProfilerFlush(ticksPerFlush);
 	}
 	
@@ -372,12 +371,12 @@ public abstract class AppDriver implements Runnable {
 		
 		public DelegatedDriver(Drivable drivable, int tps, int fps, Log log) {
 			super(tps, fps, log);
-			this.drivable = Preconditions.checkNotNull(drivable);
+			this.drivable = Objects.requireNonNull(drivable);
 		}
 		
 		public DelegatedDriver(Drivable drivable, int tps, int fps, Log log, int ticksPerFlush) {
 			super(tps, fps, log, ticksPerFlush);
-			this.drivable = Preconditions.checkNotNull(drivable);
+			this.drivable = Objects.requireNonNull(drivable);
 		}
 		
 		@Override

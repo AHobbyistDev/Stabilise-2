@@ -25,11 +25,13 @@ public abstract class Packet implements Sendable {
 	 * receiving this packet.
 	 * 
 	 * @param handler The handler with which to handle this packet.
+	 * @param con The {@code TCPConnection} object with which this packet is
+	 * associated.
 	 * 
 	 * @throws ClassCastException if the specified handler is not of the proper
 	 * type to handle this packet.
 	 */
-	public abstract void handle(PacketHandler handler);
+	public abstract void handle(PacketHandler handler, TCPConnection con);
 	
 	/**
 	 * Gets this packet's ID.

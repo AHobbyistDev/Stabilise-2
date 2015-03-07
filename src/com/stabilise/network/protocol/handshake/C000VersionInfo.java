@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import com.stabilise.core.Constants;
 import com.stabilise.network.Packet;
+import com.stabilise.network.TCPConnection;
 import com.stabilise.network.protocol.PacketHandler;
 
 /**
@@ -47,8 +48,8 @@ public class C000VersionInfo extends Packet {
 	}
 	
 	@Override
-	public void handle(PacketHandler handler) {
-		((IServerHandshake)handler).handleVersionInfo(this);
+	public void handle(PacketHandler handler, TCPConnection con) {
+		((IServerHandshake)handler).handleVersionInfo(this, con);
 	}
 	
 }

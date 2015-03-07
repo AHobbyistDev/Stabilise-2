@@ -28,10 +28,8 @@ public class NetworkTest implements Drivable {
 	@Override
 	public void update() {
 		client.update();
-		if(client.connection.isTerminated()) {
-			Log.get().postInfo("terminated");
+		if(client.connection.isTerminated())
 			driver.stop();
-		}
 	}
 	
 	@Override

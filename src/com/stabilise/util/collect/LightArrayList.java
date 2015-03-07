@@ -17,7 +17,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * An alternative ArrayList implementation with some design adjustments.
  * 
  * <p>This class permits list modification during iteration, and as such
- * iterators will not throw a {@code ConcurrentModificationException}.
+ * iterators will not throw {@code ConcurrentModificationExceptions}.
  * 
  * <p>An unordered list variant is available through {@link
  * #unordered(int, float)}, which avoids memory copies on element removal,
@@ -38,11 +38,11 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
 	
 	
 	/**
-	 * Creates a new LightArrayList with an initial capacity of 8 and a scaling
-	 * factor of {@code 1.25}.
+	 * Creates a new LightArrayList with an initial capacity of 16 and a scaling
+	 * factor of {@code 1.5}.
 	 */
 	public LightArrayList() {
-		this(8, 1.25f);
+		this(16, 1.5f);
 	}
 	
 	/**
@@ -77,6 +77,16 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 */
 	public void trimToSize() {
 		resize(size);
+	}
+	
+	/**
+	 * Resizes the backing array to {@code length} if it is smaller than {@code
+	 * length}. This method can be useful for preventing excessive array
+	 * expansions, which can be wasteful.
+	 */
+	public void ensureInternalLength(int length) {
+		if(data.length < length)
+			resize(length);
 	}
 	
 	@Override

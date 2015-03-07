@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.stabilise.network.TCPConnection;
 import com.stabilise.network.protocol.PacketHandler;
 
 /**
@@ -37,7 +38,7 @@ public class S000VersionInfo extends C000VersionInfo {
 	}
 	
 	@Override
-	public void handle(PacketHandler handler) {
+	public void handle(PacketHandler handler, TCPConnection con) {
 		((IClientHandshake)handler).handleVersionInfo(this);
 	}
 	

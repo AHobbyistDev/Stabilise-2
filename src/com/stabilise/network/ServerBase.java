@@ -1,29 +1,21 @@
 package com.stabilise.network;
 
-import static com.stabilise.core.Constants.DEFAULT_PORT;
-
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.stabilise.core.Constants;
 import com.stabilise.network.protocol.PacketHandler;
-import com.stabilise.network.protocol.handshake.C000VersionInfo;
-import com.stabilise.network.protocol.handshake.C001Disconnect;
-import com.stabilise.network.protocol.handshake.S000VersionInfo;
 import com.stabilise.util.AppDriver;
 import com.stabilise.util.AppDriver.Drivable;
 import com.stabilise.util.Log;
-import com.stabilise.util.collect.LightArrayList;
+import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.LightLinkedList;
 
 
-public class ServerBase implements Runnable, Drivable, PacketHandler {
+public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 	
 	//--------------------==========--------------------
 	//-----=====Static Constants and Variables=====-----
@@ -54,33 +46,59 @@ public class ServerBase implements Runnable, Drivable, PacketHandler {
 	
 	/** The socket the server is being hosted on. */
 	private ServerSocket socket;
-	/** The list of client connections. */
-	private final List<ServerTCPConnection> connections =
+	/** The list of client connections. Does not contain {@code null} elements.
+	 * This list should be manually synchronized on when being iterated over. */
+	protected final List<ServerTCPConnection> connections =
 			Collections.synchronizedList(new LightLinkedList<>());
 	
-	/** The thread on which this server runs. */
-	private Thread serverThread;
-	/** The thread which will listen for client connections. */
 	private Thread clientListenerThread;
 	
+	/** Optionally-used driver used to run this server, if {@link #run()} is
+	 * used instead of an external driver. This will be {@code null} if an
+	 * external driver is being used. */
 	private AppDriver driver;
+	/** > 1 if valid; -1 indicates this server must be driven externally. */
+	private final int tps;
 	
 	private final AtomicInteger state = new AtomicInteger(STATE_UNSTARTED);
 	
-	private final Log log = Log.getAgent("SERVER");
+	protected final Log log = Log.getAgent("SERVER");
 	
 	
-	
+	/**
+	 * Creates a new ServerBase.
+	 * 
+	 * <p>A server constructed with this method may <i>not</i> be run using
+	 * {@link #run()} or {@link #runConcurrently()}, as for this a {@code
+	 * ticksPerSecond} value must be specified. For this, refer to the other
+	 * constructor: {@link #ServerBase(int)}.
+	 */
 	public ServerBase() {
-		
+		tps = -1;
+	}
+	
+	/**
+	 * Creates a new ServerBase.
+	 * 
+	 * @param ticksPerSecond The number of update ticks per second to perform
+	 * while running as per {@link #run()} or {@link #runConcurrently()}.
+	 * 
+	 * @throws IllegalArgumentException if {@code ticksPerSecond < 1}.
+	 */
+	public ServerBase(int ticksPerSecond) {
+		if(ticksPerSecond < 1)
+			throw new IllegalArgumentException("ticksPerSecond < 1");
+		this.tps = ticksPerSecond;
 	}
 	
 	/**
 	 * Instantiates a new thread and runs the server on that thread.
 	 * 
-	 * @throws IllegalStateException if the server is already running.
+	 * @throws IllegalStateException if this server may not be internally
+	 * driven, or this server has already been started.
 	 */
-	public void runConcurrently() {
+	public final void runConcurrently() {
+		checkCanRun();
 		if(state.compareAndSet(STATE_UNSTARTED, STATE_BOOTING))
 			new Thread(this, "ServerThread").start();
 		else
@@ -91,88 +109,161 @@ public class ServerBase implements Runnable, Drivable, PacketHandler {
 	 * Runs the server on the current thread. This method will not return until
 	 * the server has shut down.
 	 * 
-	 * @throws IllegalStateException if the server is already running.
+	 * @throws IllegalStateException if this server may not be internally
+	 * driven, or this server has already been started.
 	 */
 	@Override
-	public void run() {
+	public final void run() {
+		checkCanRun();
+		if(start()) {
+			driver = AppDriver.getDriverFor(this, tps, tps, log);
+			try {
+				driver.run();
+			} catch(Throwable t) {
+				shutdown();
+				throw t;
+			}
+		}
+	}
+	
+	private void checkCanRun() {
+		if(tps == -1)
+			throw new IllegalStateException("Cannot run a server constructed " + 
+					" without a ticksPerSecond value defined!");
+	}
+	
+	/**
+	 * Attempts to start the server.
+	 * 
+	 * @return {@code true} if the server was successfully started; {@code
+	 * false} otherwise.
+	 * @throws IllegalStateException if this server has already been started.
+	 */
+	public boolean start() {
 		if(!state.compareAndSet(STATE_UNSTARTED, STATE_STARTING) &&
 				!state.compareAndSet(STATE_BOOTING, STATE_STARTING))
-			throw new IllegalStateException("Server is already running!");
-		
-		serverThread = Thread.currentThread();
+			throw new IllegalStateException("Server has already been started!");
 		
 		try {
-			log.postInfo("Starting server...");
-			socket = new ServerSocket(DEFAULT_PORT, 4, InetAddress.getLocalHost());
-			log.postInfo("Game hosted on " + socket.getLocalSocketAddress());
+			socket = createSocket();
+			log.postInfo("Server hosted on " + socket.getLocalSocketAddress());
 			
 			clientListenerThread = new ClientListenerThread();
 			clientListenerThread.start();
 			
-			int tps = Constants.TICKS_PER_SECOND;
-			driver = AppDriver.getDriverFor(this, tps, tps, log);
-			driver.run();
+			if(!state.compareAndSet(STATE_STARTING, STATE_ACTIVE))
+				throw new AssertionError();
+			
+			return true;
 		} catch(Throwable t) {
-			log.postSevere("Encountered error; shutting down server!", t);
+			log.postSevere("Encountered error while starting; shutting down server!", t);
 			shutdown();
+			return false;
 		}
 	}
 	
-	public void start() {
-		if(!state.compareAndSet(STATE_UNSTARTED, STATE_STARTING) &&
-				!state.compareAndSet(STATE_BOOTING, STATE_STARTING))
-			throw new IllegalStateException("Server is already running!");
-		
-		serverThread = Thread.currentThread();
-	}
+	/**
+	 * Creates and returns this server's {@code ServerSocket} instance.
+	 * 
+	 * @throws IOException if an I/O error occurs when opening the socket.
+	 */
+	protected abstract ServerSocket createSocket() throws IOException;
 	
 	@Override
 	public void update() {
+		// If we're caught within the update loop but should be shutting down,
+		// let's do so.
+		if(!isActive()) {
+			if(driver != null)
+				driver.stop();
+			shutdown();
+			return;
+		}
+		
 		Packet p;
 		synchronized(connections) {
 			for(ServerTCPConnection con : connections)
 				while((p = con.getPacket()) != null)
-					handlePacket(p, con);
+					p.handle(this, con);
 		}
-		
-		// TODO: send packets back to the clients
 	}
 	
 	@Override
 	public void render() {
-		// Using synchronized guarantees to update the value of driver.running
-		// across threads
-		synchronized(driver) {
-			// Unimportant if() statement to prevent this from getting optimised
-			// away by a compiler
-			if(!driver.running)
-				System.out.println("not running");
-		}
+		// nothing to see here, move along
 	}
 	
+	/**
+	 * Requests for the server to shut down through its execution thread.
+	 */
+	public void requestShutdown() {
+		state.compareAndSet(STATE_ACTIVE, STATE_CLOSE_REQUESTED);
+	}
+	
+	/**
+	 * Shuts the server down using the current thread.
+	 */
 	public void shutdown() {
-		state.set(STATE_SHUTDOWN);
-		synchronized(driver) {
-			driver.running = false;
-		}
+		if(!state.compareAndSet(STATE_ACTIVE, STATE_SHUTDOWN) &&
+				!state.compareAndSet(STATE_CLOSE_REQUESTED, STATE_SHUTDOWN))
+			return;
+		
+		clientListenerThread.interrupt();
+		
 		synchronized(connections) {
 			for(ServerTCPConnection con : connections)
 				con.closeConnection();
 			connections.clear();
 		}
+		
 		try {
 			socket.close();
 		} catch(IOException e) {
 			log.postWarning("Error closing socket", e);
 		}
+		
 		try {
 			clientListenerThread.join();
 		} catch(InterruptedException e) {
-			log.postWarning("Client listener thread failed to join", e);
+			log.postWarning("Interrupted while waiting for client listener "
+					+ "thread to join");
 		}
-		stopped = true;
+		
+		state.set(STATE_TERMINATED);
+		synchronized(state) {
+			state.notifyAll();
+		}
 	}
 	
+	/**
+	 * Returns {@code true} if this server is currently active.
+	 */
+	public boolean isActive() {
+		return state.get() == STATE_ACTIVE;
+	}
+	
+	/**
+	 * Returns {@code true} if this server has been terminated.
+	 */
+	public boolean isTerminated() {
+		return state.get() == STATE_TERMINATED;
+	}
+	
+	/**
+	 * Waits for this server to terminate.
+	 * 
+	 * @throws InterruptedException
+	 */
+	public void waitUntilTerminated() throws InterruptedException {
+		synchronized(state) {
+			while(!isTerminated())
+				state.wait();
+		}
+	}
+	
+	/**
+	 * Adds a client connection through the specified client socket.
+	 */
 	private void addConnection(Socket socket) {
 		ServerTCPConnection con;
 		
@@ -188,46 +279,38 @@ public class ServerBase implements Runnable, Drivable, PacketHandler {
 			return;
 		}
 		
+		onConnectionAdd(con);
 		connections.add(con);
 		
 		log.postInfo("Connected to client on " + socket.getLocalSocketAddress());
 	}
 	
-	private void handlePacket(Packet packet, ServerTCPConnection con) {
-		if(packet.getClass() == C000VersionInfo.class)
-			handleClientInfo((C000VersionInfo)packet, con);
-		else if(packet.getClass() == C001Disconnect.class)
-			handleClientDisconnect((C001Disconnect)packet, con);
-		else
-			log.postWarning("Unrecognised packet " + packet);
-	}
-	
-	private void handleClientInfo(C000VersionInfo packet, ServerTCPConnection con) {
-		log.postInfo("Got info from client!");
-		con.sendPacket(new S000VersionInfo().setVersionInfo());
-	}
-	
-	private void handleClientDisconnect(C001Disconnect packet, ServerTCPConnection con) {
-		log.postInfo("Got disconnect request!");
-		shutdown();
-	}
+	/**
+	 * This method is invoked by the client listener thread when it connects to
+	 * a new client, before the specified {@code ServerTCPConnection} is added
+	 * to {@link #connections the list of connections}.
+	 * 
+	 * <p>The default implementation does nothing.
+	 */
+	@UserThread("ClientListenerThread")
+	protected void onConnectionAdd(ServerTCPConnection con) {}
 	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------
 	//--------------------==========--------------------
 	
 	/**
-	 * A thread which listens for, and adds clients.
+	 * A thread which listens for - and adds - clients.
 	 */
 	private class ClientListenerThread extends Thread {
 		
 		@Override
 		public void run() {
-			while(running.get()) {
+			while(isActive()) {
 				try {
 					addConnection(socket.accept());
 				} catch(IOException e) {
-					if(running.get())
+					if(isActive())
 						log.postSevere("IOException thrown while waiting on the socket", e);
 				}
 			}

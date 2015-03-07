@@ -80,13 +80,16 @@ public enum Direction {
 	
 	/**
 	 * Checks for whether or not this direction composes a part of the given
-	 * direction. For example, {@code RIGHT.isPartOf(TOP_RIGHT)} returns {@code
-	 * true}, while {@code RIGHT.isPartOf(TOP_LEFT)} returns {@code false}.
+	 * direction. For example, {@code RIGHT.isPartOf(UP_RIGHT)} returns {@code
+	 * true}, while {@code RIGHT.isPartOf(UP_LEFT)} returns {@code false}.
 	 * 
 	 * @param d The direction to check.
 	 * 
 	 * @return {@code true} if this direction is a component of the given
 	 * direction; {@code false} otherwise.
+	 * 
+	 * @deprecated This method can return false-positives (e.g. {@code
+	 * LEFT.isPartOf(UP_RIGHT)} returns {@code true}).
 	 */
 	public boolean isPartOf(Direction d) {
 		return (bitmask & d.bitmask) == bitmask;

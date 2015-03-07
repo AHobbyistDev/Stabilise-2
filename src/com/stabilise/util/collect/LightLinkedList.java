@@ -30,18 +30,15 @@ import com.stabilise.util.annotation.NotThreadSafe;
 public class LightLinkedList<E> extends AbstractCollection<E> implements List<E> {
 	
 	protected int size = 0;
+	/** The head node (i.e. the one returned by get(0)). This is null iff size
+	 * is 0. */
 	protected Node<E> head = null;
+	/** The head node (i.e. the one returned by get(size - 1)). This is null
+	 * iff size is 0. */
 	protected Node<E> tail = null;
 	/** Maintain the iterator since it's wasteful to keep recreating it. */
-	protected final AbstractItr iterator;
+	protected final AbstractItr iterator = getIterator();
 	
-	
-	/**
-	 * Creates a new LightLinkedList.
-	 */
-	public LightLinkedList() {
-		iterator = getIterator();
-	}
 	
 	protected AbstractItr getIterator() {
 		return new Itr();
@@ -50,25 +47,6 @@ public class LightLinkedList<E> extends AbstractCollection<E> implements List<E>
 	@Override
 	public int size() {
 		return size;
-	}
-	
-	@Override
-	public boolean isEmpty() {
-		return size == 0;
-	}
-	
-	@Override
-	public boolean contains(Object o) {
-		if(o == null) {
-			for(E e : this)
-				if(e == null)
-					return true;
-		} else {
-			for(E e : this)
-				if(o.equals(e))
-					return true;
-		}
-		return false;
 	}
 	
 	@Override
