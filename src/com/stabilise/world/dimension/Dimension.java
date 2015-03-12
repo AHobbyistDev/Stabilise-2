@@ -3,9 +3,9 @@ package com.stabilise.world.dimension;
 import static com.stabilise.util.collect.InstantiationRegistry.*;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.google.common.base.Preconditions;
 import com.stabilise.character.CharacterData;
 import com.stabilise.util.collect.DuplicatePolicy;
 import com.stabilise.util.collect.Registry;
@@ -50,7 +50,7 @@ public abstract class Dimension {
 	/**
 	 * Every subclass of Dimension should have this constructor.
 	 */
-	public Dimension(Info info) {
+	protected Dimension(Info info) {
 		this.info = info;
 	}
 	
@@ -154,7 +154,7 @@ public abstract class Dimension {
 	 * 
 	 * @return The Dimension, or {@code null} if there is no such dimension
 	 * with the specified name.
-	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws NullPointerException if {@code info} is {@code null}.
 	 * @throws IllegalStateException if the dimensions have not yet been
 	 * {@link #registerDimensions() registered}.
 	 * @throws RuntimeException if the Dimension object could not be
@@ -285,12 +285,20 @@ public abstract class Dimension {
 		public int spawnSliceX = 0, spawnSliceY = 0;
 		
 		
+		/**
+		 * Dimension info for some dimension
+		 * @throws NullPointerException if either arg is null
+		 */
 		private Info(WorldInfo worldInfo, String name) {
-			this.name = Preconditions.checkNotNull(name);
+			this.name = Objects.requireNonNull(name);
 			privateDimension = false;
 			dir = worldInfo.getWorldDir().child(IWorld.DIR_DIMENSIONS).child(name + "/");
 		}
 		
+		/**
+		 * Dimension info for a character's private dimension
+		 * @throws NullPointerException if either arg is null
+		 */
 		private Info(CharacterData character) {
 			name = privateDim;
 			privateDimension = true;

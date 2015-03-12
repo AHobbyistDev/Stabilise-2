@@ -3,13 +3,13 @@ package com.stabilise.world.provider;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.Array;
-import com.google.common.base.Preconditions;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.collect.LightArrayList;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.util.nbt.export.ExportToNBT;
@@ -50,7 +50,7 @@ public class HostProvider extends WorldProvider<HostWorld> {
 	 */
 	public HostProvider(WorldInfo info) {
 		super();
-		this.info = Preconditions.checkNotNull(info);
+		this.info = Objects.requireNonNull(info);
 	}
 	
 	@Override
@@ -211,7 +211,8 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		
 		private final String name;
 		private final FileHandle file;
-		private final Array<PlayerData> chars = new Array<>(false, 2, PlayerData.class);
+		private final LightArrayList<PlayerData> chars =
+				LightArrayList.unordered(1, 1.0f); // def. cap 1, increase by 1
 		
 		
 		/**
@@ -231,10 +232,9 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		 * file does not exist.
 		 */
 		private NBTTagCompound loadData() throws IOException {
-			if(file.exists())
-				return NBTIO.readCompressed(file);
-			else
-				return new NBTTagCompound();
+			return file.exists()
+					? NBTIO.readCompressed(file)
+					: new NBTTagCompound();
 		}
 		
 		/**
@@ -274,7 +274,7 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		 * Treats {@code p} is disposed (removes it from the list).
 		 */
 		public void disposeData(PlayerData p) {
-			chars.removeValue(p, true);
+			chars.remove(p);
 		}
 		
 		/**

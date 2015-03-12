@@ -260,13 +260,7 @@ public abstract class WorldGenerator {
 			// point where schematics can be queued and still generated.
 			l.schematicsPlaced = true;
 			
-			// Make a defensive copy of schematics while we have the lock
-			Region.QueuedSchematic[] rSchematics = new Region.QueuedSchematic[0];
-			synchronized(r.queuedSchematics) {
-				if(r.hasQueuedSchematics())
-					rSchematics = r.queuedSchematics.toArray(rSchematics); // wipes r.queuedSchematics
-			}
-			
+			Region.QueuedSchematic[] rSchematics = r.portSchematics();
 			changes |= rSchematics.length > 0;
 			
 			// Now add the schematics
@@ -415,12 +409,8 @@ public abstract class WorldGenerator {
 						regionX++) {
 					if(regionY != r.loc.y || regionX != r.loc.x) {
 						Region cachedRegion = cacheRegion(regionX, regionY);
-						// Synchronise on the region's schematics in case they
-						// are being implanted on its gen thread
-						synchronized(cachedRegion.queuedSchematics) {
-							cachedRegion.queueSchematic(sc.name, sliceX, sliceY, tileX, tileY, r.loc.x - regionX, r.loc.y - regionY);
-							cachedRegion.unsavedChanges = true;
-						}
+						cachedRegion.queueSchematic(sc.name, sliceX, sliceY, tileX, tileY, r.loc.x - regionX, r.loc.y - regionY);
+						cachedRegion.unsavedChanges = true; // TODO: thread safety on this
 					}
 				}
 			}

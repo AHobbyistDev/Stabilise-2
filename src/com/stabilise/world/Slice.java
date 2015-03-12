@@ -104,7 +104,8 @@ public class Slice {
 	 * tile-lengths.
 	 * @param tile The tile.
 	 * 
-	 * @throws IllegalArgumentException if either x or y are < 0 or > 15.
+	 * @throws ArrayIndexOutOfBoundsException if either x or y are < 0 or > 15.
+	 * @throws NullPointerException if {@code tile} is {@code null}.
 	 */
 	public void setTileAt(int x, int y, Tile tile) {
 		tiles[y][x] = tile.getID();
@@ -119,7 +120,7 @@ public class Slice {
 	 * tile-lengths.
 	 * @param tileID The ID of the tile.
 	 * 
-	 * @throws IllegalArgumentException if either x or y are < 0 or > 15.
+	 * @throws ArrayIndexOutOfBoundsException if either x or y are < 0 or > 15.
 	 */
 	public void setTileAt(int x, int y, int tileID) {
 		tiles[y][x] = tileID;

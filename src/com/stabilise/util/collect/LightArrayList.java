@@ -108,7 +108,7 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
 	}
 	
 	@Override
-	public Object[] toArray() {
+	public E[] toArray() {
 		return Arrays.copyOf(data, size);
 	}
 	
@@ -160,13 +160,13 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
 	
 	@Override
 	public E get(int index) {
-		rangeCheck(index);
+		rangeCheckUpper(index);
 		return data[index];
 	}
 	
 	@Override
 	public E set(int index, E element) {
-		rangeCheck(index);
+		rangeCheckUpper(index);
 		E e = data[index];
 		data[index] = element;
 		return e;
@@ -181,10 +181,35 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
 	
 	@Override
 	public E remove(int index) {
-		rangeCheck(index);
 		E e = data[index];
 		shrinkAndShift(index, 1);
 		return e;
+	}
+	
+	/**
+	 * Removes the last element of this list and returns it.
+	 * 
+	 * @return The last element, or {@code null} if this list is empty.
+	 */
+	public E removeLast() {
+		if(size == 0) return null;
+		E e = data[--size];
+		data[size] = null;
+		return e;
+	}
+	
+	/**
+	 * Removes the last element of this list if it is equal to {@code e} by the
+	 * equality operator ({@code ==}).
+	 * 
+	 * @return {@code true} if the last element was removed; {@code false}
+	 * otherwise.
+	 */
+	public boolean removeLast(E e) {
+		if(size == 0) return false;
+		if(data[size-1] != e) return false;
+		data[--size] = null;
+		return true;
 	}
 	
 	/**
@@ -315,7 +340,12 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
 	
 	protected void rangeCheck(int index) {
 		if(index < 0 || index >= size)
-			throw new IndexOutOfBoundsException("Invalid index " + index);
+			throw new ArrayIndexOutOfBoundsException("Invalid index " + index);
+	}
+	
+	protected void rangeCheckUpper(int index) {
+		if(index >= size)
+			throw new ArrayIndexOutOfBoundsException("Invalid index " + index);
 	}
 	
 	//--------------------==========--------------------
@@ -436,7 +466,7 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
 		
 		@Override
 		public E remove(int index) {
-			rangeCheck(index);
+			rangeCheckUpper(index);
 			E e = data[index];
 			data[index] = data[--size];
 			data[size] = null;

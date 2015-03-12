@@ -9,8 +9,6 @@ import java.util.Comparator;
  */
 public class BoundedContainer extends Container {
 	
-	/** The container's capacity. */
-	private final int capacity;
 	/** The container's items. */
 	private ItemStack[] items;
 	
@@ -23,14 +21,13 @@ public class BoundedContainer extends Container {
 	 */
 	public BoundedContainer(int capacity) {
 		super();
-		this.capacity = capacity;
 		items = new ItemStack[capacity];
 		Arrays.fill(items, ItemStack.NO_STACK);
 	}
 	
 	@Override
 	public int size() {
-		return capacity;
+		return items.length;
 	}
 
 	/**

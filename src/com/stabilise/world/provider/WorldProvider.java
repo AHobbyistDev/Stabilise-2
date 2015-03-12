@@ -168,10 +168,9 @@ public abstract class WorldProvider<W extends BaseWorld> {
 	 * profiler will instead be set.
 	 */
 	public void setProfiler(Profiler profiler) {
-		if(profiler == null)
-			this.profiler = new Profiler(false, "", false);
-		else
-			this.profiler = profiler;
+		this.profiler = profiler != null
+				? profiler
+				: new Profiler(false, "root", false);
 	}
 	
 	/**

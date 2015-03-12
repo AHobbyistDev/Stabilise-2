@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.base.Preconditions;
@@ -56,7 +57,7 @@ public class GameServer implements Runnable, Drivable {
 	
 	
 	public GameServer(HostProvider world, int maxPlayers) {
-		this.world = Preconditions.checkNotNull(world);
+		this.world = Objects.requireNonNull(world);
 		Preconditions.checkArgument(maxPlayers > 0, "maxPlayers <= 0");
 		this.maxPlayers = maxPlayers;
 	}

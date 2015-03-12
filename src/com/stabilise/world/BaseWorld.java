@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
-import com.google.common.base.Preconditions;
 import com.stabilise.core.Constants;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
@@ -108,8 +108,8 @@ public abstract class BaseWorld extends AbstractWorld {
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
 	public BaseWorld(WorldProvider<? extends BaseWorld> provider, Dimension dimension) {
-		this.provider = Preconditions.checkNotNull(provider);
-		this.dimension = Preconditions.checkNotNull(dimension);
+		this.provider = Objects.requireNonNull(provider);
+		this.dimension = Objects.requireNonNull(dimension);
 		
 		profiler = provider.profiler;
 		log = Log.getAgent("World_" + dimension.info.name);

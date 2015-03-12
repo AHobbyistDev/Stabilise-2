@@ -6,6 +6,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import com.stabilise.util.collect.LightLinkedList;
 
@@ -74,14 +75,11 @@ public class Profiler {
 	 * @throws NullPointerException if {@code rootName} is {@code null}.
 	 */
 	public Profiler(boolean enabled, String rootName, boolean resetOnFlush) {
-		if(rootName == null)
-			throw new NullPointerException("rootName is null");
-		
 		this.enabled = enabled;
 		effectivelyEnabled = enabled;
 		this.resetOnFlush = resetOnFlush;
 		
-		root = new Section(rootName);
+		root = new Section(Objects.requireNonNull(rootName));
 		if(enabled) {
 			root.start();
 			flush();

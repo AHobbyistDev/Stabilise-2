@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterators;
 
@@ -82,7 +82,7 @@ public class Array<E> implements Iterable<E> {
 	 * @throws NullPointerException if {@code data} is {@code null}.
 	 */
 	public Array(E[] data) {
-		this.data = Preconditions.checkNotNull(data);
+		this.data = Objects.requireNonNull(data);
 	}
 	
 	/**

@@ -179,6 +179,13 @@ public class ItemStack {
 	}
 	
 	@Override
+	public boolean equals(Object o) {
+		if(!(o instanceof ItemStack)) return false;
+		ItemStack i = (ItemStack)o;
+		return quantity == i.quantity && item.equals(i.item);
+	}
+	
+	@Override
 	public String toString() {
 		return "Stack[\"" + item.getName() + "\", " + quantity + "]";
 	}
@@ -246,6 +253,11 @@ public class ItemStack {
 		@Override
 		public boolean add(ItemStack stack) {
 			return false;
+		}
+		
+		@Override
+		public boolean equals(Object o) {
+			return o == this;
 		}
 		
 	}

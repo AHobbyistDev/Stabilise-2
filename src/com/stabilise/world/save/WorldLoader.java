@@ -1,9 +1,9 @@
 package com.stabilise.world.save;
 
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.google.common.base.Preconditions;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.world.HostWorld;
@@ -58,7 +58,7 @@ public abstract class WorldLoader {
 	 * @throws NullPointerException if {@code provider} is {@code null}.
 	 */
 	public WorldLoader(WorldProvider<?> provider) {
-		this.provider = Preconditions.checkNotNull(provider);
+		this.provider = Objects.requireNonNull(provider);
 		executor = provider.getExecutor();
 	}
 	
@@ -75,12 +75,8 @@ public abstract class WorldLoader {
 	 */
 	@UserThread("MainThread")
 	public final void loadRegion(HostWorld world, Region region) {
-		if(region.loaded)
+		if(region.loaded || !obtainRegion(region))
 			return;
-		
-		if(!obtainRegionForLoad(region))
-			return;
-		
 		executor.execute(new RegionLoader(world, region, false));
 	}
 	
@@ -96,12 +92,8 @@ public abstract class WorldLoader {
 	 * @param region The region to load.
 	 */
 	public final void loadRegionSynchronously(HostWorld world, Region region) {
-		if(region.loaded)
+		if(region.loaded || !obtainRegion(region))
 			return;
-		
-		if(!obtainRegionForLoad(region))
-			return;
-		
 		new RegionLoader(world, region, false).run();
 	}
 	
@@ -122,8 +114,8 @@ public abstract class WorldLoader {
 	public final void loadAndGenerateRegion(HostWorld world, Region region) {
 		if(region.loaded)
 			world.generator.generate(region);
-		else if(obtainRegionForLoad(region))
-				executor.execute(new RegionLoader(world, region, true));
+		else if(obtainRegion(region))
+			executor.execute(new RegionLoader(world, region, true));
 	}
 	
 	/**
@@ -190,18 +182,8 @@ public abstract class WorldLoader {
 	 * @return {@code true} if the region may be loaded; {@code false}
 	 * otherwise.
 	 */
-	private boolean obtainRegionForLoad(Region r) {
-		// First perform a standard check to avoid synchronisation overhead +
-		// the potential of prolonged exclusion blocking
-		if(r.loading)
-			return false;
-		// Synchronised as to make this operation atomic
-		synchronized(r) {
-			if(r.loading)
-				return false;
-			r.loading = true;
-		}
-		return true;
+	private boolean obtainRegion(Region r) {
+		return r.loading.compareAndSet(false, true);
 	}
 	
 	/**
@@ -270,7 +252,7 @@ public abstract class WorldLoader {
 				world.generator.generateSynchronously(r);
 			
 			r.notifyOfLoaded();
-			r.loading = false;
+			r.loading.set(false);
 			
 			//log.postFineDebug("Finished loading " + r);
 		}

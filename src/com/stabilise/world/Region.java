@@ -2,12 +2,14 @@ package com.stabilise.world;
 
 import static com.stabilise.core.Constants.REGION_UNLOAD_TICK_BUFFER;
 
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.ClearOnIterateLinkedList;
+import com.stabilise.util.concurrent.ConcurrentClearingQueue;
 import com.stabilise.util.maths.HashPoint;
 
 /**
@@ -77,8 +79,8 @@ public class Region {
 	
 	/** Whether or not the region has been loaded. This is volatile. */
 	public volatile boolean loaded = false;
-	/** Whether or not the region is being loaded. This is volatile. */
-	public volatile boolean loading = false;
+	/** Whether or not the region is being loaded. */
+	public final AtomicBoolean loading = new AtomicBoolean(false);
 	
 	/** Whether or not the region has unsaved changes. */
 	public boolean unsavedChanges = false;
@@ -94,14 +96,9 @@ public class Region {
 	/** The slices to send to clients once the region has finished generating. */
 	//private List<QueuedSlice> queuedSlices;
 	
-	/** The structures queued to be added to the region. This is a final
-	 * ArrayList. Access to this is usually performed while synchronised on
-	 * itself.
-	 * <p>For world generator use only.
-	 * <p><i>Design specifications:</i> This is a ClearOnIterateLinkedList;
-	 * add() is O(1) and toArray() is O(n) and clears the list. */
-	public final ClearOnIterateLinkedList<QueuedSchematic> queuedSchematics =
-			new ClearOnIterateLinkedList<>();
+	/** The structures queued to be added to the region. */
+	private final ConcurrentClearingQueue<QueuedSchematic> queuedSchematics =
+			new ConcurrentClearingQueue<>();
 	
 	/** The object to use for locking purposes restricted to the WorldGenerator
 	 * and WorldLoader. */
@@ -158,7 +155,7 @@ public class Region {
 	 */
 	public void update(HostWorld world) {
 		// If the region is not generated ignore updates
-		if(!loaded)
+		if(!loaded || !generated)
 			return;
 		
 		if(anchoredSlices.get() == 0) {
@@ -313,18 +310,44 @@ public class Region {
 	 * @param offsetX The x-offset of the schematic, in region-lengths.
 	 * @param offsetY The y-offset of the schematic, in region-lengths.
 	 */
-	@NotThreadSafe
+	@ThreadSafe
 	public void queueSchematic(String schematicName, int sliceX, int sliceY, int tileX, int tileY, int offsetX, int offsetY) {
 		queuedSchematics.add(new QueuedSchematic(schematicName, sliceX, sliceY, tileX, tileY, offsetX, offsetY));
+	}
+	
+	/**
+	 * Queues a schematic for later generation.
+	 * 
+	 * @throws NullPointerException if {@code schematic} is {@code null}.
+	 */
+	@ThreadSafe
+	public void queueSchematic(QueuedSchematic schematic) {
+		queuedSchematics.add(Objects.requireNonNull(schematic));
 	}
 	
 	/**
 	 * Returns {@code true} if this region has queued schematics; {@code false}
 	 * otherwise.
 	 */
-	@NotThreadSafe
+	@ThreadSafe
 	public boolean hasQueuedSchematics() {
-		return queuedSchematics.size() != 0;
+		return !queuedSchematics.isEmpty();
+	}
+	
+	/**
+	 * Returns this region's queued schematics.
+	 */
+	@ThreadSafe
+	public QueuedSchematic[] getSchematics() {
+		return queuedSchematics.toArray();
+	}
+	
+	/**
+	 * Returns this region's queued schematics. Invoking this clears the list,
+	 * so invoking this a second time will return an empty array.
+	 */
+	public QueuedSchematic[] portSchematics() {
+		return queuedSchematics.toArrayWithClear();
 	}
 	
 	/**

@@ -81,7 +81,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 				s.tileY = schematic.getInt("tileY");
 				s.offsetX = schematic.getInt("offsetX");
 				s.offsetY = schematic.getInt("offsetY");
-				r.queuedSchematics.add(s);
+				r.queueSchematic(s);
 			}
 			
 			//log.postDebug("Loaded " + schematics.size() + " schematics into " + r);
@@ -124,10 +124,11 @@ public class PreAlphaWorldLoader extends WorldLoader {
 			}
 		}
 		
-		if(r.queuedSchematics != null) {
+		if(r.hasQueuedSchematics()) {
 			NBTTagList schematics = new NBTTagList();
+			QueuedSchematic[] qSchems = r.getSchematics();
 			
-			for(QueuedSchematic s : r.queuedSchematics) {
+			for(QueuedSchematic s : qSchems) {
 				NBTTagCompound schematic = new NBTTagCompound();
 				schematic.addString("schematicName", s.schematicName);
 				schematic.addInt("sliceX", s.sliceX);
