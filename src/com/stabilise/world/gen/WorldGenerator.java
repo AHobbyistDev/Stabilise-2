@@ -110,7 +110,7 @@ public abstract class WorldGenerator {
 	
 	/** Locks used for lock striping when managing cached regions. */
 	private final Object[] locks;
-	private final int numLocks = 4; // Do not modify this without first checking getLock()
+	private static final int LOCKS = 4; // Do not modify this without first checking getLock()
 	
 	/** Regions which have been cached by the current worker thread. The list
 	 * member is a {@link ClearOnIterateLinkedList}. */
@@ -142,8 +142,8 @@ public abstract class WorldGenerator {
 		
 		seed = prov.getSeed();
 		
-		locks = new Object[numLocks];
-		for(int i = 0; i < numLocks; i++)
+		locks = new Object[LOCKS];
+		for(int i = 0; i < LOCKS; i++)
 			locks[i] = new Object();
 	}
 	
@@ -630,6 +630,7 @@ public abstract class WorldGenerator {
 	 * lengths.
 	 * 
 	 * @return The object lock.
+	 * @throws NullPointerException if {@code loc} is {@code null}.
 	 */
 	public Object getLock(HashPoint loc) {
 		// We use the lowest two bits holding whether or not x and y are odd

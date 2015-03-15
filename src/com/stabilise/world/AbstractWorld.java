@@ -105,11 +105,7 @@ public abstract class AbstractWorld implements IWorld {
 	 * region-lengths.
 	 */
 	public static int regionCoordFromTileCoord(int c) {
-		//return MathsUtil.fastFloor((float)c / Region.REGION_SIZE_IN_TILES)
-		//return c < 0 ?								// Faster
-		//		(c+1) / Region.REGION_SIZE_IN_TILES - 1 :
-		//		c / Region.REGION_SIZE_IN_TILES;
-		return c >> Region.REGION_SIZE_IN_TILES_SHIFT;	// Even faster
+		return c >> Region.REGION_SIZE_IN_TILES_SHIFT;
 	}
 	
 	/**
@@ -124,11 +120,7 @@ public abstract class AbstractWorld implements IWorld {
 	 * region-lengths.
 	 */
 	public static int regionCoordFromSliceCoord(int c) {
-		//return MathsUtil.fastFloor((float)c / Region.REGION_SIZE)
-		//return c < 0 ?								// Faster
-		//		(c+1) / Region.REGION_SIZE - 1 :
-		//		c / Region.REGION_SIZE;
-		return c >> Region.REGION_SIZE_SHIFT;			// Even faster
+		return c >> Region.REGION_SIZE_SHIFT;
 	}
 	
 	/**
@@ -142,11 +134,7 @@ public abstract class AbstractWorld implements IWorld {
 	 * slice-lengths.
 	 */
 	public static int sliceCoordFromTileCoord(int c) {
-		//return MathsUtil.fastFloor((float)c / Slice.SLICE_SIZE)
-		//return c < 0 ?							// Faster
-		//		(c+1) / Slice.SLICE_SIZE - 1 :
-		//		c / Slice.SLICE_SIZE;
-		return c >> Slice.SLICE_SIZE_SHIFT;			// Even faster
+		return c >> Slice.SLICE_SIZE_SHIFT;
 	}
 	
 	/**
@@ -190,11 +178,8 @@ public abstract class AbstractWorld implements IWorld {
 	 * slice-lengths, relative to its parent region.
 	 */
 	public static int sliceCoordRelativeToRegionFromTileCoord(int c) {
-		//c = sliceCoordFromTileCoord(c);
 		//return MathsUtil.wrappedRem(c, Region.REGION_SIZE);
 		//return MathsUtil.wrappedRem2(c, Region.REGION_SIZE);				// Way faster
-		
-		// i.e. (c >> Slice.SLICE_SIZE_SHIFT) & Region.REGION_SIZE_MINUS_ONE
 		return sliceCoordFromTileCoord(c) & Region.REGION_SIZE_MINUS_ONE;	// One less instruction
 	}
 	

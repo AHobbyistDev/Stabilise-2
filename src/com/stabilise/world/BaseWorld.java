@@ -86,7 +86,7 @@ public abstract class BaseWorld extends AbstractWorld {
 	
 	private float timeDelta = 1f;
 	private float timeIncrement = timeDelta / Constants.TICKS_PER_SECOND;
-	private final float gravity = -3 * 9.8f; // arbitrary, but just 9.8 is too boring :P
+	private final float gravity = -3 * 9.8f; // arbitrary, but just 9.8 feels too sluggish :P
 	private float gravityIncrement = gravity * timeIncrement;
 	private float gravity2ndOrder = gravity * timeIncrement * timeIncrement / 2;
 	
@@ -389,12 +389,10 @@ public abstract class BaseWorld extends AbstractWorld {
 		int maxY = Maths.ceil(minY + mob.boundingBox.height);
 		
 		// Check to see if the mob would be spawning in any tiles
-		for(int tileX = minX; tileX < maxX; tileX++) {
-			for(int tileY = minY; tileY < maxY; tileY++) {
+		for(int tileX = minX; tileX < maxX; tileX++)
+			for(int tileY = minY; tileY < maxY; tileY++)
 				if(getTileAt(tileX, tileY).isSolid())
 					return;
-			}
-		}
 		addEntity(mob, x, y);
 	}
 	

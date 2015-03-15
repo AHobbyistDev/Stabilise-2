@@ -326,7 +326,7 @@ public class Profiler {
 	 */
 	public String getStackName() {
 		Iterator<Section> i = stack.iterator();
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(stack.size() * 8);
 		while(i.hasNext()) {
 			sb.append(i.next().name);
 			if(i.hasNext())

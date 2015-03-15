@@ -1,6 +1,7 @@
 package com.stabilise.util.concurrent;
 
 import java.lang.reflect.Array;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.stabilise.util.annotation.ThreadSafe;
@@ -12,10 +13,16 @@ import com.stabilise.util.annotation.ThreadSafe;
  * 
  * <p>This class does not utilise explicit locking, and instead offers high
  * concurrency through use of compare-and-swap instructions.
+ * 
+ * @see ConcurrentClearingList
  */
 @ThreadSafe
 public class ConcurrentClearingQueue<E> {
 	
+	/**
+	 * Node class. Its fields are published when the node itself is, so there
+	 * is no need to declare them volatile.
+	 */
 	private class Node {
 		/** The element held by this node. */
 		final E item;
@@ -26,7 +33,7 @@ public class ConcurrentClearingQueue<E> {
 		 * head node, 1 is the pos of the first real node. If this is the last
 		 * node, this value is the size of the list.
 		 * <p>Note this value is more or less unused unless this is the tail
-		 * node, but this is a tradeoff for atomicity guarantees.*/
+		 * node, but this is a tradeoff for atomicity guarantees. */
 		int pos;
 		
 		/** Creates a node holding the item. */
@@ -52,18 +59,18 @@ public class ConcurrentClearingQueue<E> {
 	/**
 	 * Adds an element to this queue.
 	 * 
-	 * @param e The element to add. {@code null} is allowed.
+	 * @param e The element to add.
+	 * 
+	 * @throws NullPointerException if {@code e} is {@code null}.
 	 */
 	public void add(E e) {
-		Node node = new Node(e);
-		Node oldTail;
+		Node node = new Node(Objects.requireNonNull(e));
 		do {
-			oldTail = tail.get();
-			node.prev = oldTail;
-			node.pos = oldTail.pos + 1;
+			node.prev = tail.get(); // node.prev == oldTail
+			node.pos = node.prev.pos + 1;
 			// We use the volatile semantics of AtomicReference to publish the
 			// fields of node, which have no inherent synchronisation.
-		} while(!tail.compareAndSet(oldTail, node));
+		} while(!tail.compareAndSet(node.prev, node));
 	}
 	
 	/**

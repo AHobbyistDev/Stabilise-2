@@ -181,6 +181,7 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
 	
 	@Override
 	public E remove(int index) {
+		rangeCheckUpper(index);
 		E e = data[index];
 		shrinkAndShift(index, 1);
 		return e;

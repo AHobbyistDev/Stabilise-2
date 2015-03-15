@@ -91,9 +91,11 @@ public enum Direction {
 	 * @deprecated This method can return false-positives (e.g. {@code
 	 * LEFT.isPartOf(UP_RIGHT)} returns {@code true}).
 	 */
+	/*
 	public boolean isPartOf(Direction d) {
 		return (bitmask & d.bitmask) == bitmask;
 	}
+	*/
 	
 	/**
 	 * Checks for whether or not the Direction has a vertical component.

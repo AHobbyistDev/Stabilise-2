@@ -3,8 +3,6 @@ package com.stabilise.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 /**
  * Array-related utility functions.
  */
@@ -51,10 +49,8 @@ public class ArrayUtil {
 	public static <T> T[] setMinArrayLength(T[] array, int minLength) {
 		if(array == null)
 			return null;
-		
 		if(array.length >= minLength)
 			return array;
-		
 		return (T[]) Arrays.copyOf(array, minLength);
 	}
 	
@@ -69,25 +65,6 @@ public class ArrayUtil {
 	 */
 	public static <T> int indexOf(T[] array, Object object) {
 		return Arrays.asList(array).indexOf(object);
-	}
-	
-	/**
-	 * Removes all instances of {@code null} from an array.
-	 * 
-	 * @param array The array.
-	 * 
-	 * @return The array, with no {@code null} elements.
-	 */
-	public static <T> T[] removeNulls(T[] array) {
-		// TODO: Inefficient as there may be multiple adjacent null elements,
-		// but it'll do for now.
-		for(int i = 0; i < array.length;) {
-			if(array[i] == null)
-				array = ArrayUtils.remove(array, i);
-			else
-				i++;
-		}
-		return array;
 	}
 	
 	/**
