@@ -109,8 +109,8 @@ public class Array<E> implements Iterable<E> {
 	 * {@code ArrayIndexOutOfBoundsException} if {@code index} is invalid.
 	 * 
 	 * @return The element at {@code index} (which may be {@code null}), or
-	 * {@code null} if {@code index} is negative or greater than {@link
-	 * #length()}.
+	 * {@code null} if {@code index} is negative or greater than or equal to
+	 * {@link #length()}.
 	 */
 	public E getSafe(int index) {
 		return index >= 0 && index < data.length
@@ -122,7 +122,7 @@ public class Array<E> implements Iterable<E> {
 	 * Sets the element at the specified index.
 	 * 
 	 * @throws ArrayIndexOutOfBoundsException if {@code index} is negative or
-	 * greater than {@link #length()}.
+	 * greater than or equal to {@link #length()}.
 	 */
 	public void set(int index, E value) {
 		data[index] = value;

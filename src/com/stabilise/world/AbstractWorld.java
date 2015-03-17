@@ -178,8 +178,8 @@ public abstract class AbstractWorld implements IWorld {
 	 * slice-lengths, relative to its parent region.
 	 */
 	public static int sliceCoordRelativeToRegionFromTileCoord(int c) {
-		//return MathsUtil.wrappedRem(c, Region.REGION_SIZE);
-		//return MathsUtil.wrappedRem2(c, Region.REGION_SIZE);				// Way faster
+		//return Maths.wrappedRem(c, Region.REGION_SIZE);
+		//return Maths.wrappedRem2(c, Region.REGION_SIZE);				// Way faster
 		return sliceCoordFromTileCoord(c) & Region.REGION_SIZE_MINUS_ONE;	// One less instruction
 	}
 	
@@ -196,9 +196,9 @@ public abstract class AbstractWorld implements IWorld {
 	 * parent region.
 	 */
 	public static int sliceCoordRelativeToRegionFromSliceCoord(int c) {
-		//return MathsUtil.wrappedRem(c, Region.REGION_SIZE);
-		//return MathsUtil.wrappedRem2(c, Region.REGION_SIZE);		// Way faster
-		return c & Region.REGION_SIZE_MINUS_ONE;					// One less instruction
+		//return Maths.wrappedRem(c, Region.REGION_SIZE);
+		//return Maths.wrappedRem2(c, Region.REGION_SIZE);		// Way faster
+		return c & Region.REGION_SIZE_MINUS_ONE;				// One less instruction
 	}
 	
 	/**
@@ -246,9 +246,9 @@ public abstract class AbstractWorld implements IWorld {
 	 * parent slice.
 	 */
 	public static int tileCoordRelativeToSliceFromTileCoord(int c) {
-		//return MathsUtil.wrappedRem(c, Slice.SLICE_SIZE);
-		//return MathsUtil.wrappedRem2(c, Slice.SLICE_SIZE);		// Way faster
-		return c & Slice.SLICE_SIZE_MINUS_ONE;						// One less instruction
+		//return Maths.wrappedRem(c, Slice.SLICE_SIZE);
+		//return Maths.wrappedRem2(c, Slice.SLICE_SIZE);		// Way faster
+		return c & Slice.SLICE_SIZE_MINUS_ONE;					// One less instruction
 	}
 	
 	/**
@@ -264,9 +264,9 @@ public abstract class AbstractWorld implements IWorld {
 	 * parent region.
 	 */
 	public static int tileCoordRelativeToRegionFromTileCoord(int c) {
-		//return MathsUtil.wrappedRem(c, Region.REGION_SIZE_IN_TILES);
-		//return MathsUtil.wrappedRem2(c, Region.REGION_SIZE_IN_TILES);		// Way faster
-		return c & Region.REGION_SIZE_IN_TILES_MINUS_ONE;					// One less instruction
+		//return Maths.wrappedRem(c, Region.REGION_SIZE_IN_TILES);
+		//return Maths.wrappedRem2(c, Region.REGION_SIZE_IN_TILES);		// Way faster
+		return c & Region.REGION_SIZE_IN_TILES_MINUS_ONE;				// One less instruction
 	}
 	
 }

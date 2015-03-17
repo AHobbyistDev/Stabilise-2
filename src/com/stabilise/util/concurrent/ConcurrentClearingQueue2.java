@@ -2,22 +2,16 @@ package com.stabilise.util.concurrent;
 
 import static com.stabilise.util.TheUnsafe.unsafe;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import com.stabilise.util.annotation.ThreadSafe;
-import com.stabilise.util.collect.ClearingQueue;
+import com.stabilise.util.annotation.Incomplete;
 
 /**
- * A {@link ClearingQueue} which does not utilise locking, and instead offers
- * high concurrency through compare-and-swap instructions.
- * 
- * @deprecated Use {@link SynchronizedClearingQueue} instead - this class
- * currently scales very poorly for multiple threads.
+ * Testing alternative algorithms.
  */
-@ThreadSafe
-public class ConcurrentClearingQueue<E> implements ClearingQueue<E> {
+@Incomplete
+class ConcurrentClearingQueue2<E> implements Iterable<E> {
 	
 	// Unsafe stuff -----------------------------------------------------------
 	
@@ -25,8 +19,8 @@ public class ConcurrentClearingQueue<E> implements ClearingQueue<E> {
 	
 	static {
 		try {
-			tailOffset = offsetFor(ConcurrentClearingQueue.class, "tail");
-			nextOffset = offsetFor(ConcurrentClearingQueue.Node.class, "next");
+			tailOffset = offsetFor(ConcurrentClearingQueue2.class, "tail");
+			nextOffset = offsetFor(ConcurrentClearingQueue2.Node.class, "next");
 		} catch(Exception e) { throw new Error(e); }
 	}
 	
@@ -60,6 +54,10 @@ public class ConcurrentClearingQueue<E> implements ClearingQueue<E> {
 			this.item = e;
 		}
 		
+		E getItem() {
+			return item;
+		}
+		
 		/** Attempts to CAS the next node. */
 		boolean casNext(Node exp, Node nxt) {
 			return unsafe.compareAndSwapObject(Node.this, nextOffset, exp, nxt);
@@ -88,15 +86,13 @@ public class ConcurrentClearingQueue<E> implements ClearingQueue<E> {
 	 * Invariants:
 	 * - Never null
 	 * Non-invariants:
-	 * - item is null if queue is empty
-	 * - head is the same as tail if queue is empty
-	 * - if next is null, the queue is in its normal state and can be appended
-	 *   to
+	 * - item is null if list is empty
+	 * - head is the same as tail if list is empty
+	 * - if next is null, the queue is considered 'idle' and can be appended to
 	 * - if next is not null, an element is currently in the process of being
 	 *   added, and tail will soon be replaced with the new tail node
-	 *   - next may temporary be set to itself (i.e. tail.next == tail) to
-	 *     abuse this protocol to lock this queue when extracting it to an
-	 *     iterator.
+	 *   - next may temporary be set to {@link #dummy} to abuse this protocol
+	 *     to lock this queue when extracting it to an iterator.
 	 */
 	private volatile Node tail = head;
 	
@@ -106,7 +102,10 @@ public class ConcurrentClearingQueue<E> implements ClearingQueue<E> {
 		return unsafe.compareAndSwapObject(this, tailOffset, exp, nxt);
 	}
 	
-	@Override
+	/**
+	 * Returns the size of this list. Note that this is not a constant-time
+	 * operation, as it traverses all the elements of the list.
+	 */
 	public int size() {
 		int size = 0;
 		Node n = head;
@@ -115,46 +114,99 @@ public class ConcurrentClearingQueue<E> implements ClearingQueue<E> {
 		return size;
 	}
 	
-	@Override
+	/**
+	 * Checks for whether this list is empty. This is a constant-time
+	 * operation.
+	 * 
+	 * @return {@code true} if this list is empty; {@code false} otherwise.
+	 */
 	public boolean isEmpty() {
-		// An alternative condition, which is however subject to lag while the
-		// queue is in the intermediate state:
-		// return head == tail;
 		return head.next == null;
 	}
 	
-	@Override
+	/**
+	 * Adds an element to this list.
+	 */
 	public void add(E e) {
+		/*
 		Node t, n = new Node(e);
 		// a successful CAS 'locks' the tail for this thread
 		while(!(t = tail).casNext(null, n)); // retry until this succeeds
 		casTail(t, n); // Allowed to fail if tail is wiped by iterator()
+		*/
+		
+		// From java.util.concurrent.ConcurrentLinkedQueue
+		final Node newNode = new Node(e);
+		for(Node t = tail, p = t, q;;) {
+			q = p.next;
+			if(q == null) {
+				// p is last node
+				if(p.casNext(null, newNode)) {
+					// Successful CAS is the linearization point for e to
+					// become an element of this queue, and for newNode to
+					// become "live".
+					if(p != t) // hop two nodes at a time
+						casTail(t, newNode); // Failure is OK.
+					return;
+				}
+				// Lost CAS race to another thread; re-read next
+			} else if(p == q)
+				// We have fallen off list. If tail is unchanged, it will also
+				// be off-list, in which case we need to jump to head, from
+				// which all live nodes are always reachable. Else the new tail
+				// is a better bet.
+				p = (t != (t = tail)) ? t : head;
+			else
+				// Check for tail updates after two hops.
+				p = (p != t && t != (t = tail)) ? t : q;
+		}
 	}
 	
+	/**
+	 * Returns an iterator over the elements in this list, and clears this
+	 * list. The returned iterator does not support remove(), as it is
+	 * meaningless. This method essentially ports the state of this list over
+	 * to the returned iterator, and as such additions to the list after
+	 * iterator creation are not seen by the iterator.
+	 */
 	@Override
 	public Iterator<E> iterator() {
+		Node h = head.swapNext(null);
+		for(Node t, n;;) {
+			t = tail;
+			n = t.next;
+			if(n == null) {
+				// The queue is in the quiescent state, and tail is the real
+				// tail. We invalidate tail by pointing tail.next to itself.
+				if(t.casNext(null, t))
+					break;
+				// We lost the CAS race; retry.
+			} else if(n.casNext(null, n))
+				break;
+		}
+		tail = head;
+		return new Itr(h);
+		
+		/*
 		// We'll use a form of the double-check idiom to prevent unnecessary
-		// CASing (if a thread is spin iterating, letting it attempt to CAS
-		// tail.next carelessly may lock out other threads indefinitely).
+		// CASing (if a thread is spin iterating, letting it CAS carelessly
+		// may lock out other threads indefinitely).
 		if(isEmpty())
-			return Collections.emptyIterator();
-		// We CAS-in tail recursion to 'plug' the tail up; other threads can't
-		// add anything to it while tail.next != null
-		while(!tail.casNext(null, tail));
-		// If the queue was cleared due to an iterator in another thread, then
-		// head == tail might be true, and so setting head.next to null will
-		// also set tail.next to null, which WILL result in an NPE being thrown
-		// in Itr.hasNext(). We'll do an extra check here to ensure this does
-		// not happen.
-		if(head == tail) // no race since we've got the queue 'locked'
-			return Collections.emptyIterator();
+			return new Itr(null);
+		// We CAS in the dummy node on to the tail to 'plug it up'; other
+		// threads can't add anything to it while tail.next != null
+		while(!tail.casNext(null, dummy));
 		// Now, we reset the head node and extract the queue proper
 		Node n = head.swapNext(null);
 		tail = head; // Reset the tail node; queue works from here on out
 		return new Itr(n);
+		*/
 	}
 	
-	@Override
+	/**
+	 * Returns an iterator over the elements in this list. The returned
+	 * iterator does not support remove().
+	 */
 	public Iterator<E> nonClearingIterator() {
 		return new Itr(head.next);
 	}
@@ -164,34 +216,24 @@ public class ConcurrentClearingQueue<E> implements ClearingQueue<E> {
 	private class Itr implements Iterator<E> {
 		
 		private Node next;
-		/** Testing next != next.next in hasNext() is insufficient as if next
-		 * is the tail node, this will return a false negative (remember,
-		 * tail.next = tail). So, we use a state value to make sure we ignore
-		 * the first negative result.
-		 * The first bit means we've encountered the tail.
-		 * The second bit means we've got the tail from next().
-		 * Using fancy bit-level operations, we basically make sure everything
-		 * works out nice and well.
-		 */
-		private int tailState = 0;
 		
-		/** first should never be null */
+		/** first may be null */
 		Itr(Node first) {
 			next = first;
 		}
 		
 		@Override
 		public boolean hasNext() {
-			return next != next.next || (tailState |= 1) == 1;
+			return next != null && next != next.next;
 		}
 		
 		@Override
 		public E next() {
-			if(tailState > 0 && (tailState ^ (tailState ^= 2)) == 0)
-				throw new NoSuchElementException();
-			final E e = next.item;
-			next = next.next;
-			return e;
+			try {
+				final E e = next.getItem();
+				next = next.next;
+				return e;
+			} catch(NullPointerException e) { throw new NoSuchElementException(); }
 		}
 		
 	}

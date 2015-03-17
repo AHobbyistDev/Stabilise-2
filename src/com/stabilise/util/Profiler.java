@@ -423,7 +423,7 @@ public class Profiler {
 			
 			SectionData data = new SectionDataNormal(name, parentName, duration, localPercent, totalPercent);
 			
-			List<SectionData> children = new ArrayList<SectionData>();
+			List<SectionData> children = new ArrayList<>(constituents.size() + 1);
 			
 			long unspecified = duration; // time not specified by any constituents
 			for(Section s : constituents) {

@@ -453,7 +453,7 @@ public abstract class Interpolation {
 	 * 
 	 * <p>The returned value is equivalent to:
 	 * <pre>{@link #lerp(float, float, float)
-	 * interpolateLinear(start, end, transform(x))}</pre>
+	 * lerp(start, end, transform(x))}</pre>
 	 * 
 	 * @param start The start value (i.e. when {@code x == 0}).
 	 * @param end The end value (i.e. when {@code x == 1}).

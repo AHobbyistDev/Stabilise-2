@@ -54,11 +54,12 @@ public class PreAlphaWorldLoader extends WorldLoader {
 					s.setTilesAsIntArray(sliceTag.getIntArray("tiles"));
 					
 					NBTTagList tileEntities = sliceTag.getList("tileEntities");
-					s.numTileEntities = tileEntities.size();
+					if(tileEntities.size() > 0)
+						s.initTileEntities();
 					for(NBTTag t : tileEntities) {
 						NBTTagCompound tc = (NBTTagCompound)t;
 						TileEntity te = TileEntity.createTileEntityFromNBT(tc);
-						s.tileEntities		// Poor syntax, but I want this to fit
+						s.tileEntities		// I just love really long method names!
 							[BaseWorld.tileCoordRelativeToSliceFromTileCoord(te.y)]
 							[BaseWorld.tileCoordRelativeToSliceFromTileCoord(te.x)] = te; 
 					}
@@ -102,7 +103,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 					sliceTag.addIntArray("tiles", s.getTilesAsIntArray());
 					regionTag.addCompound("slice" + x + "_" + y, sliceTag);
 					
-					if(s.numTileEntities > 0) {
+					if(s.tileEntities != null) {
 						NBTTagList tileEntities = new NBTTagList();
 						
 						TileEntity t;
@@ -126,9 +127,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 		
 		if(r.hasQueuedSchematics()) {
 			NBTTagList schematics = new NBTTagList();
-			QueuedSchematic[] qSchems = r.getSchematics();
-			
-			for(QueuedSchematic s : qSchems) {
+			for(QueuedSchematic s : r.getSchematics(false)) {
 				NBTTagCompound schematic = new NBTTagCompound();
 				schematic.addString("schematicName", s.schematicName);
 				schematic.addInt("sliceX", s.sliceX);

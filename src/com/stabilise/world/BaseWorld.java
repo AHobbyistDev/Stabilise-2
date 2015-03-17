@@ -16,7 +16,9 @@ import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearOnIterateLinkedList;
+import com.stabilise.util.collect.ClearingQueue;
 import com.stabilise.util.collect.LightLinkedList;
+import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.provider.WorldProvider;
@@ -43,9 +45,11 @@ public abstract class BaseWorld extends AbstractWorld {
 	 * the world. When a new entity is created this is incremented and set as
 	 * its ID. */
 	protected int entityCount = 0;
-	/** Entities queued to be added to the world at the end of the tick. */
-	private final ClearOnIterateLinkedList<Entity> entitiesToAdd =
-			new ClearOnIterateLinkedList<>();
+	/** Entities queued to be added to the world at the end of the tick.
+	 * <p>This is a ClearingQueue as entities may be added to a world from
+	 * from another dimension, which can be hosted on another thread. */
+	private final ClearingQueue<Entity> entitiesToAdd =
+			new SynchronizedClearingQueue<>();
 	/** Entities queued to be removed from the world at the end of the tick.
 	 * <p>Implementation detail: Though it would be cleaner to invoke {@code
 	 * destroy()} on entities and let them self-remove while being iterated
@@ -182,9 +186,11 @@ public abstract class BaseWorld extends AbstractWorld {
 	}
 	
 	@Override
+	@UserThread("AnyDimensionThread")
 	public void addEntity(Entity e) {
+		// TODO: concurrency for entityCount and onAdd()!!
 		e.id = ++entityCount;
-		e.onAdd();
+		e.onAdd(); 
 		entitiesToAdd.add(e);
 	}
 	

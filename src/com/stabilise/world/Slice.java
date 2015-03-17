@@ -27,13 +27,14 @@ public class Slice {
 	public final int x, y;
 	
 	/** The tiles within the slice.
-	 * <p>Note that tiles are indexed in the form [y][x]. */
+	 * <br>Tiles are indexed in the form [y][x].
+	 * <br>Note that this may be {@code null}. */
 	public int[][] tiles;
 	
-	/** The number of tile entities in the slice. */
-	public int numTileEntities = 0;
 	/** The tile entities within the slice.
-	 * <p>Note that they are indexed in the form [y][x].*/
+	 * <br>Tile entities are indexed in the form [y][x].
+	 * <br>This is lazily initialised - that is, {@code null} until a tile
+	 * entity is added to this slice to conserve memory. */
 	public TileEntity[][] tileEntities;
 	
 	
@@ -58,8 +59,6 @@ public class Slice {
 		this.x = x;
 		this.y = y;
 		this.tiles = tiles;
-		
-		tileEntities = new TileEntity[SLICE_SIZE][SLICE_SIZE];
 	}
 	
 	/**
@@ -140,13 +139,11 @@ public class Slice {
 	 * greater than 15.
 	 */
 	public TileEntity getTileEntityAt(int x, int y) {
-		return tileEntities[y][x];
+		return tileEntities == null ? null : tileEntities[y][x];
 	}
 	
 	/**
-	 * Sets a tile entity at the specified coordinates. A value of
-	 * {@code null} for the {@code tileEntity} parameter indicates that the
-	 * tile entity at the specified coordinates is to be removed.
+	 * Sets a tile entity at the specified coordinates.
 	 * 
 	 * @param x The x-coordinate of the tile relative to the slice, in
 	 * tile-lengths.
@@ -154,17 +151,36 @@ public class Slice {
 	 * tile-lengths.
 	 * @param tileEntity The tile entity.
 	 * 
+	 * @throws NullPointerException if {@code tileEntity} is {@code null}.
 	 * @throws ArrayIndexOutOfBoundsException if either x or y is negative or
 	 * greater than 15.
 	 */
 	public void setTileEntityAt(int x, int y, TileEntity tileEntity) {
-		if(tileEntities[y][x] != null) {
-			if(tileEntity == null)
-				numTileEntities--;
-		} else if(tileEntity != null) {
-			numTileEntities++;
-		}
+		if(tileEntity == null)
+			throw new NullPointerException();
+		initTileEntities();
 		tileEntities[y][x] = tileEntity;
+	}
+	
+	/**
+	 * Removes the tile entity at the specified coordinates.
+	 * 
+	 * @param x The x-coordinate of the tile relative to the slice, in
+	 * tile-lengths.
+	 * @param y The y-coordinate of the tile relative to the slice, in
+	 * tile-lengths.
+	 * 
+	 * @throws NullPointerException if there are no tile entities in this
+	 * slice. This should only be used to weed out programming bugs wherein
+	 * tile entities may be removed unnecessarily.
+	 * @throws ArrayIndexOutOfBoundsException if either x or y is negative or
+	 * greater than 15.
+	 */
+	public void removeTileEntityAt(int x, int y) {
+		// Even if this eliminates the last tile entity from this slice, we do
+		// not nullify tileEntities as to prevent a sequence of allocation and
+		// deallocation on tile entity addition and removal.
+		tileEntities[y][x] = null;
 	}
 	
 	/**
@@ -190,13 +206,22 @@ public class Slice {
 	}
 	
 	/**
+	 * Initialises {@link #tileEntities} if it is {@code null}.
+	 */
+	public void initTileEntities() {
+		if(tileEntities == null)
+			tileEntities = new TileEntity[SLICE_SIZE][SLICE_SIZE];
+	}
+	
+	/**
 	 * Adds any entities and tile entities contained by the slice to the world.
 	 * 
 	 * @param world The world.
 	 */
 	public void addContainedEntitiesToWorld(BaseWorld world) {
-		// TODO: A more efficient method of finding tile entities may be ideal
-		if(numTileEntities == 0) return;
+		if(tileEntities == null)
+			return;
+		// TODO: A more efficient method of finding tile entities may be preferable
 		for(int r = 0; r < SLICE_SIZE; r++)
 			for(int c = 0; c < SLICE_SIZE; c++)
 				if(tileEntities[r][c] != null)

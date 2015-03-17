@@ -1,5 +1,7 @@
 package com.stabilise.entity;
 
+import java.util.Objects;
+
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.world.IWorld;
 
@@ -12,15 +14,12 @@ public class GameCamera extends FreeGameObject {
 	/** The entity upon which to focus the camera. */
 	private Entity focus;
 	
-	/** The number of tiles to view horizontally. */
-	public int width;
-	/** The number of tiles to view vertically. */
-	public int height;
+	/** The number of tiles to view horizontally/vertically. */
+	public int width, height;
 	
-	/** The x-coordinate of the slice in which the camera is located, in slice-lengths. */
-	public int sliceX;
-	/** The y-coordinate of the slice in which the camera is located, in slice-lengths. */
-	public int sliceY;
+	/** The coordinates of the slice in which the camera is located, in
+	 * slice-lengths. These are cached values recalculated every tick. */
+	public int sliceX, sliceY;
 	
 	/** The strength with which the camera follows the focus. */
 	private float followStrength = 0.25f;
@@ -66,15 +65,10 @@ public class GameCamera extends FreeGameObject {
 	/**
 	 * Sets the entity upon which to focus the camera.
 	 * 
-	 * @param e The entity.
-	 * 
-	 * @throws IllegalArgumentException Thrown if {@code e} is {@code null}.
+	 * @throws NullPointerException if {@code e} is {@code null}.
 	 */
 	public void setFocus(Entity e) {
-		if(e == null)
-			throw new IllegalArgumentException("The game camera's focus must be non-null!");
-		
-		focus = e;
+		focus = Objects.requireNonNull(e);
 		x = focus.x;
 		y = focus.y + 1;
 		sliceX = focus.getSliceX();
@@ -92,7 +86,7 @@ public class GameCamera extends FreeGameObject {
 	 */
 	public void setFollowStrength(float followStrength) {
 		if(followStrength <= 0 || followStrength > 1)
-			throw new IllegalArgumentException("The follow strength must be between 0 (exclusive) and 1 (inclusive)!");
+			throw new IllegalArgumentException("The follow strength must be within (0,1]!");
 		this.followStrength = followStrength;
 	}
 	

@@ -11,23 +11,17 @@ public class TheUnsafe {
 	
 	private TheUnsafe() {}
 	
-	private static final Unsafe UNSAFE;
+	/** The Unsafe instance. */
+	public static final Unsafe unsafe;
 	
 	static {
 		try {
 			Field field = Unsafe.class.getDeclaredField("theUnsafe");
 			field.setAccessible(true);
-			UNSAFE = (Unsafe)field.get(null);
+			unsafe = (Unsafe)field.get(null);
 		} catch(Exception e) {
 			throw new Error(e);
 		}
-	}
-	
-	/**
-	 * Returns the unsafe instance.
-	 */
-	public static Unsafe get() {
-		return UNSAFE;
 	}
 	
 }

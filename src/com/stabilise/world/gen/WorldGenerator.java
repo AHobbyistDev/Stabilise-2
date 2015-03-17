@@ -260,17 +260,16 @@ public abstract class WorldGenerator {
 			// point where schematics can be queued and still generated.
 			l.schematicsPlaced = true;
 			
-			Region.QueuedSchematic[] rSchematics = r.portSchematics();
-			changes |= rSchematics.length > 0;
-			
 			// Now add the schematics
-			for(Region.QueuedSchematic s : rSchematics)
+			for(Region.QueuedSchematic s : r.getSchematics(true)) {
+				changes = true;
 				addSchematicAt(
 						r, s.schematicName,
 						s.sliceX, s.sliceY,
 						s.tileX, s.tileY,
 						SchematicParams.scheduledGenParams(s.offsetX, s.offsetY)
 				);
+			}
 			
 			timer.stop();
 			log.postDebug(timer.getResult(TimeUnit.MILLISECONDS));
@@ -285,7 +284,7 @@ public abstract class WorldGenerator {
 		}
 		
 		// Save the region once it's done generating, but don't burden the
-		// world loader if nothing was changed
+		// world loader if nothing was changed.
 		if(changes || cached)
 			prov.loader.saveRegion(world, r);
 		if(cached)
@@ -409,7 +408,11 @@ public abstract class WorldGenerator {
 						regionX++) {
 					if(regionY != r.loc.y || regionX != r.loc.x) {
 						Region cachedRegion = cacheRegion(regionX, regionY);
-						cachedRegion.queueSchematic(sc.name, sliceX, sliceY, tileX, tileY, r.loc.x - regionX, r.loc.y - regionY);
+						cachedRegion.queueSchematic(
+								new Region.QueuedSchematic(
+										sc.name, sliceX, sliceY, tileX, tileY, r.loc.x - regionX, r.loc.y - regionY
+								)
+						);
 						cachedRegion.unsavedChanges = true; // TODO: thread safety on this
 					}
 				}

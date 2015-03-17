@@ -15,8 +15,10 @@ public class ParticleDamageIndicator extends Particle {
 	//--------------------==========--------------------
 	
 	/** The height of the damage indicator text, in pixels. */
+	@SuppressWarnings("unused")
 	private static final int INDICATOR_TEXT_SIZE = 12;
 	/** The colour used for damage indicator text. */
+	@SuppressWarnings("unused")
 	private static final Color INDICATOR_COLOUR = Color.RED;
 	/** The font style to use for damage indicator text. */
 	//private static final FontStyle STYLE_INDICATOR = new FontStyle(INDICATOR_TEXT_SIZE, INDICATOR_COLOUR, FontStyle.Alignment.CENTRE, 1, 0);
@@ -33,6 +35,7 @@ public class ParticleDamageIndicator extends Particle {
 	/** The indicator's display text. */
 	public final String text;
 	/** The indicator's display text's alpha. */
+	@SuppressWarnings("unused")
 	private float alpha = 1.0f;
 	
 	

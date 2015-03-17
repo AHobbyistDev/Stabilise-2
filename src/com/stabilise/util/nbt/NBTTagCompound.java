@@ -377,7 +377,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagFloat)data.get(tagName)).data : 0.0F;
 		} catch(ClassCastException e) {
-			Log.get().postWarning("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading float \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return 0.0F;
 		}
 	}
@@ -394,7 +394,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagDouble)data.get(tagName)).data : 0.0D;
 		} catch(ClassCastException e) {
-			Log.get().postWarning("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading double \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return 0.0D;
 		}
 	}
@@ -411,7 +411,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagString)data.get(tagName)).data : "";
 		} catch(ClassCastException e) {
-			Log.get().postWarning("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading string \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return "";
 		}
 	}
@@ -428,7 +428,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagList)data.get(tagName)) : new NBTTagList(tagName);
 		} catch(ClassCastException e) {
-			Log.get().postWarning("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading list \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return new NBTTagList(tagName);
 		}
 	}
@@ -445,7 +445,7 @@ public class NBTTagCompound extends NBTTag {
 		try {
 			return hasTag(tagName) ? ((NBTTagCompound)data.get(tagName)) : new NBTTagCompound(tagName);
 		} catch(ClassCastException e) {
-			Log.get().postWarning("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
+			Log.get().postWarning("Error reading compound \"" + tagName + "\" from compound tag \"" + name + "\"!");
 			return new NBTTagCompound(tagName);
 		}
 	}

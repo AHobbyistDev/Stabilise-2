@@ -2,6 +2,7 @@ package com.stabilise.world;
 
 import static com.stabilise.core.Constants.REGION_UNLOAD_TICK_BUFFER;
 
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -9,7 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.concurrent.ConcurrentClearingQueue;
+import com.stabilise.util.collect.ClearingQueue;
+import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 import com.stabilise.util.maths.HashPoint;
 
 /**
@@ -97,8 +99,8 @@ public class Region {
 	//private List<QueuedSlice> queuedSlices;
 	
 	/** The structures queued to be added to the region. */
-	private final ConcurrentClearingQueue<QueuedSchematic> queuedSchematics =
-			new ConcurrentClearingQueue<>();
+	private final ClearingQueue<QueuedSchematic> queuedSchematics =
+			new SynchronizedClearingQueue<>();
 	
 	/** The object to use for locking purposes restricted to the WorldGenerator
 	 * and WorldLoader. */
@@ -298,26 +300,6 @@ public class Region {
 	/**
 	 * Queues a schematic for later generation.
 	 * 
-	 * @param schematicName The name of the schematic to queue.
-	 * @param sliceX The x-coordinate of the slice in which to place the
-	 * schematic, relative to the region, in slice-lengths.
-	 * @param sliceY The y-coordinate of the slice in which to place the
-	 * schematic, relative to the region, in slice-lengths.
-	 * @param tileX The x-coordinate of the tile in which to place the 
-	 * schematic, relative to the slice in which it is in, in tile-lengths.
-	 * @param tileY The y-coordinate of the tile in which to place the
-	 * schematic, relative to the slice in which it is in, in tile-lengths.
-	 * @param offsetX The x-offset of the schematic, in region-lengths.
-	 * @param offsetY The y-offset of the schematic, in region-lengths.
-	 */
-	@ThreadSafe
-	public void queueSchematic(String schematicName, int sliceX, int sliceY, int tileX, int tileY, int offsetX, int offsetY) {
-		queuedSchematics.add(new QueuedSchematic(schematicName, sliceX, sliceY, tileX, tileY, offsetX, offsetY));
-	}
-	
-	/**
-	 * Queues a schematic for later generation.
-	 * 
 	 * @throws NullPointerException if {@code schematic} is {@code null}.
 	 */
 	@ThreadSafe
@@ -336,18 +318,20 @@ public class Region {
 	
 	/**
 	 * Returns this region's queued schematics.
+	 * 
+	 * @param wipe {@code true} if the queued schematics should be wiped when
+	 * iterated over - or, in other words, whether or not the schematics should
+	 * be consumed by the returned iterable.
 	 */
 	@ThreadSafe
-	public QueuedSchematic[] getSchematics() {
-		return queuedSchematics.toArray();
-	}
-	
-	/**
-	 * Returns this region's queued schematics. Invoking this clears the list,
-	 * so invoking this a second time will return an empty array.
-	 */
-	public QueuedSchematic[] portSchematics() {
-		return queuedSchematics.toArrayWithClear();
+	public Iterable<QueuedSchematic> getSchematics(final boolean wipe) {
+		return new Iterable<QueuedSchematic>() {
+			public Iterator<QueuedSchematic> iterator() {
+				return wipe
+						? queuedSchematics.iterator()
+						: queuedSchematics.nonClearingIterator();
+			}
+		};
 	}
 	
 	/**
