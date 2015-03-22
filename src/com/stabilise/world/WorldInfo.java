@@ -96,14 +96,14 @@ public class WorldInfo implements Comparable<WorldInfo> {
 	 * @return This world's filesystem directory.
 	 */
 	public FileHandle getWorldDir() {
-		return IWorld.getWorldDir(fileSystemName);
+		return World.getWorldDir(fileSystemName);
 	}
 	
 	/**
 	 * Gets this WorldInfo's filesystem location.
 	 */
 	public FileHandle getFile() {
-		return getWorldDir().child(IWorld.FILE_INFO);
+		return getWorldDir().child(World.FILE_INFO);
 	}
 	
 	/*

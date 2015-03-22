@@ -12,7 +12,7 @@ import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Rectangle;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A flaming projectile which deals damage to mobs.
@@ -60,7 +60,7 @@ public class EntityBigFireball extends EntityProjectile {
 	 * @param world The world in which the fireball will be placed.
 	 * @param owner The fireball's owner.
 	 */
-	public EntityBigFireball(IWorld world, Entity owner) {
+	public EntityBigFireball(World world, Entity owner) {
 		this(world, owner, DEFAULT_FIREBALL_DAMAGE);
 	}
 	
@@ -71,7 +71,7 @@ public class EntityBigFireball extends EntityProjectile {
 	 * @param owner The fireball's owner.
 	 * @param damage The fireball's damage.
 	 */
-	public EntityBigFireball(IWorld world, Entity owner, int damage) {
+	public EntityBigFireball(World world, Entity owner, int damage) {
 		super(world, owner, new LinkedHitbox(owner, BIG_FIREBALL_BOUNDING_BOX, damage));
 		((LinkedHitbox)hitbox).linkedEntity = this;
 		hitbox.force = 0.5f;
@@ -81,7 +81,7 @@ public class EntityBigFireball extends EntityProjectile {
 	}
 	
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		super.update(world);
 		
 		float div = Math.abs(dx) + Math.abs(dy);
@@ -100,7 +100,7 @@ public class EntityBigFireball extends EntityProjectile {
 	}
 	
 	@Override
-	protected void impact(IWorld world, float dv, boolean tileCollision) {
+	protected void impact(World world, float dv, boolean tileCollision) {
 		destroy();
 		
 		if(tileCollision) {		// Since it removes itself with an entity collision
@@ -111,7 +111,7 @@ public class EntityBigFireball extends EntityProjectile {
 		}
 	}
 	
-	private void addFlightParticles(IWorld world, int particles) {
+	private void addFlightParticles(World world, int particles) {
 		for(int i = 0; i < particles; i++) {
 			ParticleFlame p = new ParticleFlame();
 			p.x = x;
@@ -126,7 +126,7 @@ public class EntityBigFireball extends EntityProjectile {
 	 * 
 	 * @param particles The number of particles to create.
 	 */
-	private void addImpactParticles(IWorld world, int particles) {
+	private void addImpactParticles(World world, int particles) {
 		for(int i = 0; i < particles; i++) {
 			ParticleFlame p = new ParticleFlame();
 			p.x = x;

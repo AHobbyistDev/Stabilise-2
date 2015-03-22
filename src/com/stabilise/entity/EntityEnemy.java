@@ -4,7 +4,7 @@ import com.stabilise.entity.controller.IdleController;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 import com.stabilise.world.tile.Tile;
 
 /**
@@ -57,7 +57,7 @@ public class EntityEnemy extends EntityMob {
 	}
 	
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		if(!dead) {
 			if(--actionTimeout == 0) {
 				float rnd = world.getRnd().nextFloat();

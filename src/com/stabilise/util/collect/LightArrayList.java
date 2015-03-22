@@ -108,7 +108,7 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
 	}
 	
 	@Override
-	public E[] toArray() {
+	public Object[] toArray() {
 		return Arrays.copyOf(data, size);
 	}
 	

@@ -17,7 +17,7 @@ import com.stabilise.util.Log;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.ClearOnIterateLinkedList;
+import com.stabilise.util.collect.ClearingLinkedList;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.HostWorld;
@@ -113,11 +113,11 @@ public abstract class WorldGenerator {
 	private static final int LOCKS = 4; // Do not modify this without first checking getLock()
 	
 	/** Regions which have been cached by the current worker thread. The list
-	 * member is a {@link ClearOnIterateLinkedList}. */
+	 * member is a {@link ClearingLinkedList}. */
 	private final ThreadLocal<List<Region>> localCachedRegions = new ThreadLocal<List<Region>>() {
 		@Override
 		protected List<Region> initialValue() {
-			return new ClearOnIterateLinkedList<Region>();
+			return new ClearingLinkedList<Region>();
 		}
 	};
 	

@@ -14,7 +14,8 @@ import com.stabilise.util.collect.ClearingQueue;
  * high concurrency through compare-and-swap instructions.
  * 
  * @deprecated Use {@link SynchronizedClearingQueue} instead - this class
- * currently scales very poorly for multiple threads.
+ * currently scales very poorly for multiple threads. TODO: Get a better
+ * algorithm for this class!
  */
 @ThreadSafe
 public class ConcurrentClearingQueue<E> implements ClearingQueue<E> {

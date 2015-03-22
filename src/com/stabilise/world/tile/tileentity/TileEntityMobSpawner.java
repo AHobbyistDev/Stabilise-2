@@ -7,13 +7,14 @@ import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.nbt.NBTTagCompound;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
+import com.stabilise.world.tile.tileentity.TileEntity.Updated;
 
 /**
  * The tile entity for mob spawners. For now I'm having this try to mimick
  * minecraft mob spawner behaviour to a fair extent.
  */
-public class TileEntityMobSpawner extends TileEntity {
+public class TileEntityMobSpawner extends TileEntity implements Updated {
 	
 	private static final int ACTIVATION_RANGE_SQUARED = 16*16;
 	private static final int TICKS_BETWEEN_SPAWNS = 180;
@@ -44,12 +45,7 @@ public class TileEntityMobSpawner extends TileEntity {
 	}
 	
 	@Override
-	public boolean isUpdated() {
-		return true;
-	}
-	
-	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		if(playerInRange(world)) {
 			if(--ticksUntilNextSpawn == 0) {
 				ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS;
@@ -69,7 +65,7 @@ public class TileEntityMobSpawner extends TileEntity {
 	 * 
 	 * @return {@code true} if a player is in range; {@code false} otherwise.
 	 */
-	private boolean playerInRange(IWorld world) {
+	private boolean playerInRange(World world) {
 		for(EntityMob p : world.getPlayers()) {
 			double dx = xPos - p.x;
 			double dy = yPos - p.y;
@@ -85,7 +81,7 @@ public class TileEntityMobSpawner extends TileEntity {
 	 * @return {@code true} if the spawn was successful; {@code false}
 	 * otherwise.
 	 */
-	private boolean trySpawn(IWorld world) {
+	private boolean trySpawn(World world) {
 		EntityEnemy e = new EntityEnemy();
 		world.addEntity(e, xPos, yPos+1);
 		
@@ -100,7 +96,7 @@ public class TileEntityMobSpawner extends TileEntity {
 	/**
 	 * Spawns a flame particle on the spawner.
 	 */
-	private void spawnParticle(IWorld world) {
+	private void spawnParticle(World world) {
 		ParticleFlame p = new ParticleFlame();
 		p.x = x + world.getRnd().nextFloat();
 		p.y = y + world.getRnd().nextFloat();
@@ -115,7 +111,7 @@ public class TileEntityMobSpawner extends TileEntity {
 	 * 
 	 * @param e The mob.
 	 */
-	private void spawnParticleOnMob(IWorld world, EntityMob e) {
+	private void spawnParticleOnMob(World world, EntityMob e) {
 		ParticleSmoke p = new ParticleSmoke();
 		p.x = e.x + e.boundingBox.getV00().x + world.getRnd().nextFloat() * e.boundingBox.width;
 		p.y = e.y + e.boundingBox.getV11().y + world.getRnd().nextFloat() * e.boundingBox.height;
@@ -127,12 +123,12 @@ public class TileEntityMobSpawner extends TileEntity {
 	}
 	
 	@Override
-	public void handleAdd(IWorld world, int x, int y) {
+	public void handleAdd(World world, int x, int y) {
 		
 	}
 	
 	@Override
-	public void handleRemove(IWorld world, int x, int y) {
+	public void handleRemove(World world, int x, int y) {
 		
 	}
 	

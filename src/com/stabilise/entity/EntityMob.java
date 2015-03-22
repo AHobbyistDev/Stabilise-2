@@ -7,7 +7,7 @@ import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.item.Item;
 import com.stabilise.util.Direction;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A mob is an entity capable of acting of its own agency.
@@ -224,7 +224,7 @@ public abstract class EntityMob extends Entity {
 	protected abstract void initProperties();
 	
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		moving = false;
 		
 		controller.update();
@@ -408,7 +408,7 @@ public abstract class EntityMob extends Entity {
 	 * @param fx The x component of the force applied to the mob by the impact.
 	 * @param fy The y component of the force applied to the mob by the impact.
 	 */
-	public void damage(IWorld world, int damage, int damagerID, float fx, float fy) {
+	public void damage(World world, int damage, int damagerID, float fx, float fy) {
 		if(invulnerable || dead)
 			return;
 		
@@ -467,7 +467,7 @@ public abstract class EntityMob extends Entity {
 	 * @param quantity The quantity of smoke particles to spawn.
 	 */
 	@SuppressWarnings("unused")
-	private void spawnSmokeParticles(IWorld world, int quantity) {
+	private void spawnSmokeParticles(World world, int quantity) {
 		while(quantity-- != 0) {
 			ParticleSmoke p = new ParticleSmoke();
 			p.x = x;
@@ -487,7 +487,7 @@ public abstract class EntityMob extends Entity {
 	 * @param count The quantity of the item.
 	 * @param chance The chance of dropping the item, from 0.0 to 1.0.
 	 */
-	protected void dropItem(IWorld world, int id, int count, float chance) {
+	protected void dropItem(World world, int id, int count, float chance) {
 		if(world.getRnd().nextFloat() > chance)
 			return;
 		EntityItem e = new EntityItem(Item.getItem(id).stackOf(count));

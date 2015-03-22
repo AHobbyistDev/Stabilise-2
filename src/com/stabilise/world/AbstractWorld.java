@@ -16,11 +16,11 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * Provides implementations of methods in World which can be defined in terms
  * of other methods.
  */
-public abstract class AbstractWorld implements IWorld {
+public abstract class AbstractWorld implements World {
 	
 	/**
 	 * Iterates over the specified collection of GameObjects as per {@link
-	 * GameObject#updateAndCheck(IWorld)}. GameObjects are removed from the
+	 * GameObject#updateAndCheck(World)}. GameObjects are removed from the
 	 * collection by the iterator if {@code updateAndCheck()} returns {@code
 	 * true}.
 	 */

@@ -15,7 +15,7 @@ import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.ClearOnIterateLinkedList;
+import com.stabilise.util.collect.ClearingLinkedList;
 import com.stabilise.util.collect.ClearingQueue;
 import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.concurrent.SynchronizedClearingQueue;
@@ -25,7 +25,7 @@ import com.stabilise.world.provider.WorldProvider;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
- * An implementation of IWorld which contains features common to all world
+ * An implementation of World which contains features common to all world
  * types.
  */
 public abstract class BaseWorld extends AbstractWorld {
@@ -38,7 +38,7 @@ public abstract class BaseWorld extends AbstractWorld {
 	
 	/** All players in the world. Maps IDs -> players' EntityMobs. */
 	protected final Map<Integer, EntityMob> players = new HashMap<>(1);
-	/** The map of loaded entities in the world. Mappings are IDs to Entities.
+	/** The map of loaded entities in the world. Maps IDs -> Entities.
 	 * This is a LinkedHashMap as to allow for consistent iteration. */
 	protected final Map<Integer, Entity> entities = new LinkedHashMap<>(64);
 	/** The total number of entities which have existed during the lifetime of
@@ -56,8 +56,8 @@ public abstract class BaseWorld extends AbstractWorld {
 	 * over, this does not work when moving an entity to another dimension: if
 	 * {@code destroy} is invoked, this would also invalidate its position in
 	 * the dimension it is being moved to. */
-	private final ClearOnIterateLinkedList<Integer> entitiesToRemove =
-			new ClearOnIterateLinkedList<>();
+	private final ClearingLinkedList<Integer> entitiesToRemove =
+			new ClearingLinkedList<>();
 	/** The number of hostile mobs in the world. */
 	protected int hostileMobCount = 0;
 	
@@ -155,9 +155,13 @@ public abstract class BaseWorld extends AbstractWorld {
 		profiler.next("entity"); // root.update.game.world.entity
 		profiler.start("add"); // root.update.game.world.entity.add
 		
-		if(!entitiesToAdd.isEmpty())
-			for(Entity e : entitiesToAdd)
+		if(!entitiesToAdd.isEmpty()) {
+			for(Entity e : entitiesToAdd) {
+				e.id = ++entityCount;
+				e.onAdd(); 
 				entities.put(e.id, e);
+			}
+		}
 		
 		profiler.next("remove"); // root.update.game.world.entity.remove
 		
@@ -188,9 +192,6 @@ public abstract class BaseWorld extends AbstractWorld {
 	@Override
 	@UserThread("AnyDimensionThread")
 	public void addEntity(Entity e) {
-		// TODO: concurrency for entityCount and onAdd()!!
-		e.id = ++entityCount;
-		e.onAdd(); 
 		entitiesToAdd.add(e);
 	}
 	
@@ -224,14 +225,14 @@ public abstract class BaseWorld extends AbstractWorld {
 	/**
 	 * Adds a tile entity to the list of tile entities, so that it may be
 	 * updated. Note that it will only be added if {@link
-	 * TileEntity#isUpdated() t.isUpdated()} returns {@code true}.
+	 * TileEntity#requiresUpdates() t.requiresUpdates()} returns {@code true}.
 	 * 
 	 * @param t The tile entity.
 	 * 
 	 * @throws NullPointerException if {@code t} is {@code null}.
 	 */
 	protected void addTileEntity(TileEntity t) {
-		if(t.isUpdated())
+		if(t.requiresUpdates())
 			tileEntities.add(t);
 	}
 	

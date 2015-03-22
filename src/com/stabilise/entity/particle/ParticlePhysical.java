@@ -1,6 +1,6 @@
 package com.stabilise.entity.particle;
 
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A physical particle (for want of a better name) is a particle with a dx and
@@ -15,7 +15,7 @@ public abstract class ParticlePhysical extends Particle {
 	
 	
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		super.update(world);
 		
 		x += dx;

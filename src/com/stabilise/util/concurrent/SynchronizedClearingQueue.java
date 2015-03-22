@@ -7,7 +7,10 @@ import java.util.NoSuchElementException;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.collect.ClearingQueue;
 
-
+/**
+ * A {@link ClearingQueue} which uses a single mutex lock to guard the entire
+ * state of the queue.
+ */
 @ThreadSafe
 public class SynchronizedClearingQueue<E> implements ClearingQueue<E> {
 	

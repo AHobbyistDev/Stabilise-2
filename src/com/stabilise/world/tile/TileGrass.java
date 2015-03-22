@@ -1,6 +1,6 @@
 package com.stabilise.world.tile;
 
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A grass tile.
@@ -15,7 +15,7 @@ public class TileGrass extends Tile {
 	}
 	
 	@Override
-	public void update(IWorld world, int x, int y) {
+	public void update(World world, int x, int y) {
 		if(world.getTileAt(x, y+1).isSolid()) {
 			world.setTileAt(x, y, Tiles.DIRT.getID());
 			return;

@@ -4,7 +4,7 @@ import com.stabilise.entity.collision.LinkedHitbox;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.util.shape.Rectangle;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A basic projectile.
@@ -40,7 +40,7 @@ public class EntityArrow extends EntityProjectile {
 	 * @param world The world in which the arrow will be placed.
 	 * @param owner The arrow's owner.
 	 */
-	public EntityArrow(IWorld world, Entity owner) {
+	public EntityArrow(World world, Entity owner) {
 		this(world, owner, DEFAULT_ARROW_DAMAGE);
 	}
 	
@@ -51,7 +51,7 @@ public class EntityArrow extends EntityProjectile {
 	 * @param owner The arrow's owner.
 	 * @param damage The arrow's damage.
 	 */
-	public EntityArrow(IWorld world, Entity owner, int damage) {
+	public EntityArrow(World world, Entity owner, int damage) {
 		super(world, owner, new LinkedHitbox(owner, ARROW_BOUNDING_BOX, damage));
 		((LinkedHitbox)hitbox).linkedEntity = this;
 		hitbox.force = 0.3f;
@@ -63,7 +63,7 @@ public class EntityArrow extends EntityProjectile {
 	}
 	
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		if(removeHitbox && hitbox != null) {
 			hitbox.destroy();
 			hitbox = null;
@@ -101,7 +101,7 @@ public class EntityArrow extends EntityProjectile {
 	}
 	
 	@Override
-	protected void impact(IWorld world, float dv, boolean tileCollision) {
+	protected void impact(World world, float dv, boolean tileCollision) {
 		flying = false;
 		// If an arrow hits an entity in the same tick it collides with a tile,
 		// removing the hitbox is postponed a tick so that it may first damage

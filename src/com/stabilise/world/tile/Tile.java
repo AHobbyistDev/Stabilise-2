@@ -3,7 +3,7 @@ package com.stabilise.world.tile;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.util.collect.RegistryNamespacedDefaulted;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * The fundamental building block of a world.
@@ -18,9 +18,6 @@ public class Tile {
 	 * tile. */
 	private static final RegistryNamespacedDefaulted<Tile> TILES =
 			new RegistryNamespacedDefaulted<>("TileRegistry", "stabilise", "air", 32);
-	
-	/** Flag which is set to true when the tiles are registered. */
-	private static boolean registered = false;
 	
 	// Template values for hardness
 	/** Template hardness values for different tile types. */
@@ -61,7 +58,7 @@ public class Tile {
 	 * @param x The x-coordinate of the tile, in tile-lengths.
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 */
-	public void update(IWorld world, int x, int y) {
+	public void update(World world, int x, int y) {
 		// nothing to see here in the default implementation
 	}
 	
@@ -72,7 +69,7 @@ public class Tile {
 	 * @param x The x-coordinate of the tile, in tile-lengths.
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 */
-	public void handlePlace(IWorld world, int x, int y) {
+	public void handlePlace(World world, int x, int y) {
 		// TODO
 	}
 	
@@ -83,19 +80,19 @@ public class Tile {
 	 * @param x The x-coordinate of the tile, in tile-lengths.
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 */
-	public void handleRemove(IWorld world, int x, int y) {
+	public void handleRemove(World world, int x, int y) {
 		// TODO
 	}
 	
 	/**
-	 * Handles being broken. {@link #handleRemove(IWorld, int, int)} is invoked
+	 * Handles being broken. {@link #handleRemove(World, int, int)} is invoked
 	 * in addition to any functionality here.
 	 * 
 	 * @param world The world.
 	 * @param x The x-coordinate of the tile, in tile-lengths.
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 */
-	public void handleBreak(IWorld world, int x, int y) {
+	public void handleBreak(World world, int x, int y) {
 		handleRemove(world, x, y);
 		
 		/*
@@ -114,7 +111,7 @@ public class Tile {
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 * @param e The entity which stepped on the tile.
 	 */
-	public void handleStep(IWorld world, int x, int y, Entity e) {
+	public void handleStep(World world, int x, int y, Entity e) {
 		// TODO
 	}
 	
@@ -126,7 +123,7 @@ public class Tile {
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 * @param e The entity which is overlapping the tile.
 	 */
-	public void handleOverlap(IWorld world, int x, int y, Entity e) {
+	public void handleOverlap(World world, int x, int y, Entity e) {
 		// TODO
 	}
 	
@@ -138,7 +135,7 @@ public class Tile {
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 * @param mob The mob to touch the tile.
 	 */
-	public void handleTouch(IWorld world, int x, int y, EntityMob mob) {
+	public void handleTouch(World world, int x, int y, EntityMob mob) {
 		// nothing in the default implementation
 	}
 	
@@ -150,7 +147,7 @@ public class Tile {
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 * @param mob The mob to interact with the tile.
 	 */
-	public void handleInteract(IWorld world, int x, int y, EntityMob mob) {
+	public void handleInteract(World world, int x, int y, EntityMob mob) {
 		// nothing in the default implementation
 	}
 	
@@ -247,9 +244,6 @@ public class Tile {
 	 * @throws IllegalStateException if this method has already been invoked.
 	 */
 	public static void registerTiles() {
-		if(registered)
-			throw new IllegalStateException("Tiles have already been registered!");
-		
 		registerTile(0, "air", new TileAir());
 		registerTile(1, "void", new Tile().setHardness(H_INVULNERABLE));
 		registerTile(2, "bedrock", new Tile().setHardness(H_INVULNERABLE));
@@ -273,7 +267,6 @@ public class Tile {
 		registerTile(20, "mobSpawner", new TileMobSpawner());
 		
 		TILES.lock();
-		registered = true;
 	}
 	
 	/**
@@ -283,6 +276,8 @@ public class Tile {
 	 * @param id The ID with which to register the tile.
 	 * @param name The name of the tile.
 	 * @param tile The tile.
+	 * 
+	 * @throws IllegalStateException if no more tiles may be registered.
 	 */
 	private static void registerTile(int id, String name, Tile tile) {
 		TILES.register(id, name, tile);
@@ -295,7 +290,7 @@ public class Tile {
 	 * otherwise.
 	 */
 	static boolean isRegistered() {
-		return registered;
+		return TILES.isLocked();
 	}
 	
 }

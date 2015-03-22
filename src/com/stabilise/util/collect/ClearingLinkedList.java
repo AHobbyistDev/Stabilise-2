@@ -15,7 +15,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * also clears the list.
  */
 @NotThreadSafe
-public class ClearOnIterateLinkedList<E> extends LightLinkedList<E> {
+public class ClearingLinkedList<E> extends LightLinkedList<E> {
 	
 	@Override
 	protected AbstractItr getIterator() {

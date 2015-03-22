@@ -18,7 +18,7 @@ import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 import com.stabilise.world.BaseWorld;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 import com.stabilise.world.save.WorldLoader;
 
 /**
@@ -206,7 +206,7 @@ public abstract class WorldProvider<W extends BaseWorld> {
 	
 	/**
 	 * Performs any closing procedures which may be done in-between {@link
-	 * IWorld#close()} being invoked on every world, and the executor being
+	 * World#close()} being invoked on every world, and the executor being
 	 * shutdown.
 	 */
 	protected abstract void closeExtra();

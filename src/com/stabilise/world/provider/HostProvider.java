@@ -15,7 +15,7 @@ import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.util.nbt.export.ExportToNBT;
 import com.stabilise.util.nbt.export.NBTExporter;
 import com.stabilise.world.HostWorld;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
 import com.stabilise.world.dimension.Dimension;
 
@@ -224,7 +224,7 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		 */
 		public PlayerDataFile(String name) {
 			this.name = name;
-			file = info.getWorldDir().child(IWorld.DIR_PLAYERS + name + IWorld.EXT_PLAYERS);
+			file = info.getWorldDir().child(World.DIR_PLAYERS + name + World.EXT_PLAYERS);
 		}
 		
 		/**

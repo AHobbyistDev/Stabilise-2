@@ -1,6 +1,6 @@
 package com.stabilise.world.tile;
 
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 import com.stabilise.world.tile.tileentity.TileEntityMobSpawner;
 
 /**
@@ -16,7 +16,7 @@ public class TileMobSpawner extends Tile {
 	}
 	
 	@Override
-	public void handlePlace(IWorld world, int x, int y) {
+	public void handlePlace(World world, int x, int y) {
 		super.handlePlace(world, x, y);
 		TileEntityMobSpawner t = createTileEntity(x, y);
 		world.setTileEntityAt(x, y, t);
@@ -36,7 +36,7 @@ public class TileMobSpawner extends Tile {
 	}
 	
 	@Override
-	public void handleRemove(IWorld world, int x, int y) {
+	public void handleRemove(World world, int x, int y) {
 		super.handleRemove(world, x, y);
 		world.removeTileEntityAt(x, y);
 	}

@@ -3,7 +3,7 @@ package com.stabilise.entity;
 import java.util.Objects;
 
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * The GameCamera controls the player's perspective, and hence which parts of
@@ -36,7 +36,7 @@ public class GameCamera extends FreeGameObject {
 	}
 	
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		//x = focus.x;
 		//y = focus.y;
 		

@@ -2,7 +2,7 @@ package com.stabilise.entity;
 
 import com.stabilise.item.ItemStack;
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * An item entity.
@@ -54,7 +54,7 @@ public class EntityItem extends Entity {
 	}
 	
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		super.update(world);
 		
 		if(age == DESPAWN_TICKS)

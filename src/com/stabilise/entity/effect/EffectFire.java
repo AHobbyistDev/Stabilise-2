@@ -5,7 +5,7 @@ import com.stabilise.core.Settings;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleGenerator;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * The effect a Mob has when it is on fire.
@@ -25,7 +25,7 @@ public class EffectFire extends Effect {
 	}
 	
 	@Override
-	public void update(IWorld world, EntityMob target) {
+	public void update(World world, EntityMob target) {
 		super.update(world, target);
 		
 		if(Settings.settingParticlesAll())
@@ -42,7 +42,7 @@ public class EffectFire extends Effect {
 	 * 
 	 * @param target The target of the effect.
 	 */
-	private void createFireParticle(IWorld world, EntityMob target) {
+	private void createFireParticle(World world, EntityMob target) {
 		ParticleFlame p = new ParticleFlame();
 		p.x = target.x + target.boundingBox.getV00().x + world.getRnd().nextFloat() * target.boundingBox.width;
 		p.y = target.y + target.boundingBox.getV11().y + world.getRnd().nextFloat() * target.boundingBox.height;

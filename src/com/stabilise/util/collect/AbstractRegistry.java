@@ -63,9 +63,9 @@ abstract class AbstractRegistry<E> implements Iterable<E> {
 	}
 	
 	/**
-	 * Returns {@code true} if this registry has been {@link #lock() locked}.
+	 * Returns {@code true} iff this registry has been {@link #lock() locked}.
 	 */
-	protected final boolean isLocked() {
+	public final boolean isLocked() {
 		return locked;
 	}
 	

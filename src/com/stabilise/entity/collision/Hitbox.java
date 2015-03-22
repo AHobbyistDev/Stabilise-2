@@ -6,7 +6,7 @@ import com.stabilise.entity.FreeGameObject;
 import com.stabilise.entity.effect.Effect;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.Shape;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A Hitbox is an object which, when overlapping with an entity, may damage or
@@ -67,7 +67,7 @@ public class Hitbox extends FreeGameObject {
 	 * applicable and resolving the collision appropriately.
 	 */
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		if(isDestroyed())
 			return;
 		
@@ -106,7 +106,7 @@ public class Hitbox extends FreeGameObject {
 	 * 
 	 * @return {@code true} if a collision was made; {@code false} if not.
 	 */
-	protected boolean hit(IWorld world, Entity e) {
+	protected boolean hit(World world, Entity e) {
 		// TODO: current implementation of collision resolution is crude and temporary
 		if(e instanceof EntityMob) {
 			EntityMob m = (EntityMob)e;

@@ -22,7 +22,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 /**
  * Defines methods which summarise a world implementation.
  */
-public interface IWorld extends Checkable {
+public interface World extends Checkable {
 	
 	/** The file name of the world info file. */
 	public static final String FILE_INFO = "info";
@@ -163,7 +163,7 @@ public interface IWorld extends Checkable {
 	 * this would be the case if this is a server's world, as particles are
 	 * purely aesthetic and a server doesn't concern itself with them).
 	 */
-	abstract Collection<Particle> getParticles();
+	Collection<Particle> getParticles();
 	
 	// ==========World component getters and setters==========
 	
@@ -342,7 +342,7 @@ public interface IWorld extends Checkable {
 	// ========== Utility Methods ==========
 	
 	/**
-	 * @return A {@code Random} instance held by this IWorld.
+	 * @return A {@code Random} instance held by this World.
 	 */
 	Random getRnd();
 	

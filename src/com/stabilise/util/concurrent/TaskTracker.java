@@ -101,7 +101,7 @@ public class TaskTracker {
 	 * 
 	 * <p>Memory consistency effects: actions in a thread prior to invoking
 	 * this method happen before actions in another thread which invokes {@link
-	 * #parts()}, {@link #percentComplete()} or {@link #completed()}.
+	 * #percentComplete()} or {@link #completed()}.
 	 */
 	public void increment() {
 		increment(1);
@@ -113,7 +113,7 @@ public class TaskTracker {
 	 * 
 	 * <p>Memory consistency effects: actions in a thread prior to invoking
 	 * this method happen before actions in another thread which invokes {@link
-	 * #parts()}, {@link #percentComplete()} or {@link #completed()}.
+	 * #percentComplete()} or {@link #completed()}.
 	 */
 	public void increment(int parts) {
 		numPartsCompleted.getAndAdd(parts);

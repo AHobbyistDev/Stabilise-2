@@ -3,7 +3,7 @@ package com.stabilise.entity.particle;
 import com.badlogic.gdx.graphics.Color;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Interpolation;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A flashy explosion particle.
@@ -55,7 +55,7 @@ public class ParticleExplosion extends Particle {
 	}
 	
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		super.update(world);
 		
 		float ratio = (float)age/DESPAWN_TICKS;

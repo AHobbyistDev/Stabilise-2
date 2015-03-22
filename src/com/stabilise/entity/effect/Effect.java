@@ -1,7 +1,7 @@
 package com.stabilise.entity.effect;
 
 import com.stabilise.entity.EntityMob;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * An Effect is a lingering condition which can affect a mob.
@@ -35,7 +35,7 @@ public abstract class Effect {
 	 * @param world The world.
 	 * @param target The target of the Effect.
 	 */
-	public void update(IWorld world, EntityMob target) {
+	public void update(World world, EntityMob target) {
 		if(++age == duration)
 			destroyed = true;
 	}

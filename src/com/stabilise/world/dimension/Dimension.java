@@ -13,7 +13,7 @@ import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.BaseWorld;
 import com.stabilise.world.HostWorld;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.provider.WorldProvider;
@@ -292,7 +292,7 @@ public abstract class Dimension {
 		private Info(WorldInfo worldInfo, String name) {
 			this.name = Objects.requireNonNull(name);
 			privateDimension = false;
-			dir = worldInfo.getWorldDir().child(IWorld.DIR_DIMENSIONS).child(name + "/");
+			dir = worldInfo.getWorldDir().child(World.DIR_DIMENSIONS).child(name + "/");
 		}
 		
 		/**
@@ -352,7 +352,7 @@ public abstract class Dimension {
 		 * @return This DimensionInfo's filesystem location.
 		 */
 		public FileHandle getFile() {
-			return dir.child(IWorld.FILE_INFO);
+			return dir.child(World.FILE_INFO);
 		}
 		
 		/**

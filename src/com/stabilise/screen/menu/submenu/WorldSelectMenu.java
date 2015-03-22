@@ -25,7 +25,7 @@ import com.stabilise.util.concurrent.TaskThread;
 import com.stabilise.util.concurrent.TaskTracker;
 import com.stabilise.util.maths.Point;
 import com.stabilise.world.BaseWorld;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
 import com.stabilise.world.old.ClientWorld;
 import com.stabilise.world.old.GameWorld;
@@ -704,7 +704,7 @@ public class WorldSelectMenu extends SubMenu {
 				setState(State.DELETE_CONFIRM, selectedWorld);
 				break;
 			case ACTION_DELETE_WORLD_YES:
-				IWorld.deleteWorld(worlds[selectedWorld].fileSystemName);
+				World.deleteWorld(worlds[selectedWorld].fileSystemName);
 				loadWorlds();
 				for(int i = 0; i < buttons.length; i++) {
 					buttons[i].setWorld(worlds[i]);
@@ -730,7 +730,7 @@ public class WorldSelectMenu extends SubMenu {
 					}
 				}
 				
-				if(IWorld.createWorld(worldName, seed) == null) {
+				if(World.createWorld(worldName, seed) == null) {
 					Log.get().postSevere("Could not create world \"" + worldName + "\"!");
 				} else {
 					loadWorlds();

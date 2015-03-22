@@ -3,7 +3,7 @@ package com.stabilise.entity.particle;
 import com.badlogic.gdx.graphics.Color;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A particle which indicates damage dealt to a mob.
@@ -67,7 +67,7 @@ public class ParticleDamageIndicator extends Particle {
 	 * @param value The indicator's display value.
 	 * @param e The mob above which to place the damage indicator.
 	 */
-	public ParticleDamageIndicator(IWorld world, int value, EntityMob e) {
+	public ParticleDamageIndicator(World world, int value, EntityMob e) {
 		this(String.valueOf(value), e);
 	}
 	
@@ -85,7 +85,7 @@ public class ParticleDamageIndicator extends Particle {
 	}
 	
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		super.update(world);
 		
 		y += 0.05f;			// TODO: arbitrary lift rate

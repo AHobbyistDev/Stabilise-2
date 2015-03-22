@@ -1,7 +1,7 @@
 package com.stabilise.entity.particle;
 
 import com.stabilise.entity.FreeGameObject;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A particle is a non-functional GameObject with solely aesthetic purposes.
@@ -20,7 +20,7 @@ public abstract class Particle extends FreeGameObject {
 	}
 	
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		age++;
 	}
 	

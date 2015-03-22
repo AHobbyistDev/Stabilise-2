@@ -36,6 +36,9 @@ public class Resources {
 	public static final FileHandle SOUND_DIR = IOUtil.createDir(RESOURCE_DIR.child("sound/"));
 	public static final FileHandle SCHEMATIC_DIR = IOUtil.createDir(RESOURCE_DIR.child("schematics/"));
 	
+	/** The file directory for mods. */
+	public static final FileHandle MODS_DIR = IOUtil.createDir(APP_DIR.child("mods/"));
+	
 	/** The directory in which console output logs should be saved. */
 	public static final FileHandle LOG_DIR = IOUtil.createDir(APP_DIR.child("log/"));
 	

@@ -6,7 +6,7 @@ import com.stabilise.entity.FixedGameObject;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.collect.InstantiationRegistry;
 import com.stabilise.util.nbt.NBTTagCompound;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A tile entity contains additional data associated with a tile, and in
@@ -45,11 +45,17 @@ public abstract class TileEntity extends FixedGameObject {
 		this.y = y;
 	}
 	
+	
 	/**
 	 * @return {@code true} if this tile entity requires updates; {@code false}
 	 * otherwise.
 	 */
-	public abstract boolean isUpdated();
+	public boolean requiresUpdates() {
+		return this instanceof Updated;
+	}
+	
+	/** Implement this to make {@link #requiresUpdates()} return true. */
+	static interface Updated {}
 	
 	/**
 	 * Updates this TileEntity, and then returns {@link #isDestroyed()}.
@@ -61,7 +67,7 @@ public abstract class TileEntity extends FixedGameObject {
 	 * not.
 	 */
 	@Override
-	public boolean updateAndCheck(IWorld world) {
+	public boolean updateAndCheck(World world) {
 		if(isDestroyed())
 			return true;
 		update(world);
@@ -80,7 +86,7 @@ public abstract class TileEntity extends FixedGameObject {
 	 * @param x The x-coordinate of the tile entity, in tile-lengths.
 	 * @param y The y-coordinate of the tile entity, in tile-lengths.
 	 */
-	public abstract void handleAdd(IWorld world, int x, int y);
+	public abstract void handleAdd(World world, int x, int y);
 	
 	/**
 	 * Handles being removed from the world.
@@ -89,7 +95,7 @@ public abstract class TileEntity extends FixedGameObject {
 	 * @param x The x-coordinate of the tile entity, in tile-lengths.
 	 * @param y The y-coordinate of the tile entity, in tile-lengths.
 	 */
-	public abstract void handleRemove(IWorld world, int x, int y);
+	public abstract void handleRemove(World world, int x, int y);
 	
 	/**
 	 * @return The ID of this tile entity's type.

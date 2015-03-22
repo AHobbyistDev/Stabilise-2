@@ -11,7 +11,7 @@ import com.stabilise.util.shape.AxisAlignedBoundingBox;
 import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Rectangle;
 import com.stabilise.util.shape.Shape;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A Person is a Mob intended to be like a human. The Player is a Person.
@@ -179,7 +179,7 @@ public class EntityPerson extends EntityMob {
 	}
 	
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		super.update(world);
 		
 		ticksSinceHealthLoss++;
@@ -474,7 +474,7 @@ public class EntityPerson extends EntityMob {
 	 * @param manaCost The mana cost of the storm.
 	 * @param originPoint The point from which the storm is to originate.
 	 */
-	private void fireballStorm(IWorld world, int manaCost, Vector2 originPoint) {
+	private void fireballStorm(World world, int manaCost, Vector2 originPoint) {
 		if(useMana(manaCost)) {
 			int max = 30 + world.getRnd().nextInt(11);
 			double px = facingRight ? x + originPoint.x : x - originPoint.x;

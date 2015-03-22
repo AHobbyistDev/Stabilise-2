@@ -3,7 +3,7 @@ package com.stabilise.opengl.render;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.stabilise.core.Resources;
 import com.stabilise.opengl.TextureSheet;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 import com.stabilise.world.Slice;
 
 /**
@@ -19,7 +19,7 @@ public class TileRenderer implements Renderer {
 	/** A reference to the world renderer. */
 	public final WorldRenderer worldRenderer;
 	/** A reference to the world. */
-	public final IWorld world;
+	public final World world;
 	
 	public TextureSheet tiles;
 	

@@ -37,6 +37,10 @@ public interface ClearingQueue<E> extends Iterable<E> {
 	
 	/**
 	 * Adds an element to this queue.
+	 * 
+	 * <p>Memory consistency effects: actions in a thread prior to adding an
+	 * element to this queue <i>happen-before</i> actions in a thread which
+	 * reads that element from an iterator.
 	 */
 	void add(E e);
 	
@@ -48,12 +52,20 @@ public interface ClearingQueue<E> extends Iterable<E> {
 	 * <p>This method essentially ports the state of this queue over to the
 	 * returned iterator, and as such additions to the queue after iterator
 	 * creation are not seen by the iterator.
+	 * 
+	 * <p>Memory consistency effects: actions in a thread prior to adding an
+	 * element to this queue <i>happen-before</i> actions in a thread which
+	 * reads that element from the returned iterator.
 	 */
 	Iterator<E> iterator();
 	
 	/**
 	 * Returns an iterator over the elements in this list. The returned
 	 * iterator does not support remove().
+	 * 
+	 * <p>Memory consistency effects: actions in a thread prior to adding an
+	 * element to this queue <i>happen-before</i> actions in a thread which
+	 * reads that element from the returned iterator.
 	 */
 	Iterator<E> nonClearingIterator();
 	

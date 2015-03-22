@@ -1,7 +1,7 @@
 package com.stabilise.entity;
 
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A GameObject is an object which exists within the game world. GameObjects
@@ -28,7 +28,7 @@ public abstract class GameObject {
 	 * 
 	 * @param world The world.
 	 */
-	public abstract void update(IWorld world);
+	public abstract void update(World world);
 	
 	/**
 	 * Updates this GameObject, and then returns {@link #isDestroyed()}.
@@ -44,7 +44,7 @@ public abstract class GameObject {
 	 * @return {@code true} if this GameObject is considered destroyed and
 	 * should be removed from the world ASAP; {@code false} otherwise.
 	 */
-	public boolean updateAndCheck(IWorld world) {
+	public boolean updateAndCheck(World world) {
 		update(world);
 		return isDestroyed();
 	}

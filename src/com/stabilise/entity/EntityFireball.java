@@ -8,7 +8,7 @@ import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.Rectangle;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A flaming projectile which deals damage to mobs.
@@ -39,7 +39,7 @@ public class EntityFireball extends EntityProjectile {
 	 * @param world The world in which the fireball will be placed.
 	 * @param owner The fireball's owner.
 	 */
-	public EntityFireball(IWorld world, Entity owner) {
+	public EntityFireball(World world, Entity owner) {
 		this(world, owner, DEFAULT_FIREBALL_DAMAGE);
 	}
 	
@@ -50,7 +50,7 @@ public class EntityFireball extends EntityProjectile {
 	 * @param owner The fireball's owner.
 	 * @param damage The fireball's damage.
 	 */
-	public EntityFireball(IWorld world, Entity owner, int damage) {
+	public EntityFireball(World world, Entity owner, int damage) {
 		super(world, owner, new LinkedHitbox(owner, FIREBALL_BOUNDING_BOX, damage));
 		((LinkedHitbox)hitbox).linkedEntity = this;
 		hitbox.force = 0.3f;
@@ -58,7 +58,7 @@ public class EntityFireball extends EntityProjectile {
 	}
 	
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		super.update(world);
 		
 		float div = Math.abs(dx) + Math.abs(dy);
@@ -77,7 +77,7 @@ public class EntityFireball extends EntityProjectile {
 	}
 	
 	@Override
-	protected void impact(IWorld world, float dv, boolean tileCollision) {
+	protected void impact(World world, float dv, boolean tileCollision) {
 		destroy();
 		
 		if(tileCollision) {		// Since it removes itself with an entity collision
@@ -88,7 +88,7 @@ public class EntityFireball extends EntityProjectile {
 		}
 	}
 	
-	private void addFlightParticles(IWorld world, int particles) {
+	private void addFlightParticles(World world, int particles) {
 		for(int i = 0; i < particles; i++) {
 			ParticleFlame p = new ParticleFlame();
 			p.x = x;
@@ -103,7 +103,7 @@ public class EntityFireball extends EntityProjectile {
 	 * 
 	 * @param particles The number of particles to create.
 	 */
-	private void addImpactParticles(IWorld world, int particles) {
+	private void addImpactParticles(World world, int particles) {
 		//float velocity = (float)Math.sqrt(dx*dx + dy*dy) / 4;
 		//double angle = Math.atan2(dy, dx);
 		for(int i = 0; i < particles; i++) {

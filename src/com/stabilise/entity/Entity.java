@@ -6,7 +6,7 @@ import com.stabilise.util.Direction;
 import com.stabilise.util.collect.InstantiationRegistry;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 import com.stabilise.world.tile.Tile;
 
 /**
@@ -109,7 +109,7 @@ public abstract class Entity extends FreeGameObject {
 	}
 	
 	@Override
-	public void update(IWorld world) {
+	public void update(World world) {
 		age++;
 		
 		if(physicsEnabled) {
@@ -238,7 +238,7 @@ public abstract class Entity extends FreeGameObject {
 	 * 
 	 * @return {@code true} if a collision is detected.
 	 */
-	private boolean horizontalCollisions(IWorld world, double xp, double yp) {
+	private boolean horizontalCollisions(World world, double xp, double yp) {
 		if(dx == 0) return false;
 		
 		float leadingEdge = dxp ? boundingBox.getV11().x : boundingBox.getV00().x;
@@ -277,7 +277,7 @@ public abstract class Entity extends FreeGameObject {
 	 * 
 	 * @return {@code true} if a collision is detected.
 	 */
-	private boolean verticalCollisions(IWorld world, double xp, double yp) {
+	private boolean verticalCollisions(World world, double xp, double yp) {
 		if(dyi == 0.0f) return false;
 		
 		float leadingEdge = dyp ? boundingBox.getV11().y : boundingBox.getV00().y;
@@ -318,7 +318,7 @@ public abstract class Entity extends FreeGameObject {
 	 * @return {@code true} if and only if the entity is able to move into the
 	 * column.
 	 */
-	private boolean columnValid(IWorld world, double x, double y) {
+	private boolean columnValid(World world, double x, double y) {
 		// Only check as many tiles above or below the tile in question that
 		// the height of the entity's bounding box would require.
 		int max = Maths.ceil(boundingBox.height);
@@ -340,7 +340,7 @@ public abstract class Entity extends FreeGameObject {
 	 * @return {@code true} if and only if the entity is able to move into the
 	 * row.
 	 */
-	private boolean rowValid(IWorld world, double x, double y) {
+	private boolean rowValid(World world, double x, double y) {
 		// Only check as many tiles to the left or right of the tile in
 		// question that the width of the entity's bounding box would require.
 		int max = Maths.ceil(boundingBox.width);
@@ -358,7 +358,7 @@ public abstract class Entity extends FreeGameObject {
 	 * @param direction The direction relative to the entity that the tile the
 	 * entity has collided with is located.
 	 */
-	private void collideHorizontal(IWorld world, double xp, Direction direction) {
+	private void collideHorizontal(World world, double xp, Direction direction) {
 		onHorizontalCollision();
 		impact(world, dx, true);
 		
@@ -378,7 +378,7 @@ public abstract class Entity extends FreeGameObject {
 	 * @param direction The direction relative to the entity that the tile the
 	 * entity has collided with is located.
 	 */
-	private void collideVertical(IWorld world, double yp, Direction direction) {
+	private void collideVertical(World world, double yp, Direction direction) {
 		onVerticalCollision();
 		impact(world, dy, true);
 		
@@ -420,7 +420,7 @@ public abstract class Entity extends FreeGameObject {
 	 * @param dv The change in the entity's velocity.
 	 * @param tileCollision Whether or not the impact is from a tile collision.
 	 */
-	protected void impact(IWorld world, float dv, boolean tileCollision) {
+	protected void impact(World world, float dv, boolean tileCollision) {
 		// TODO
 	}
 	
@@ -445,8 +445,9 @@ public abstract class Entity extends FreeGameObject {
 	}
 	
 	/**
-	 * Performs any logic to be executed when the Entity is added to the list
-	 * of entities to be added to the world.
+	 * This is invoked when an entity is added to a world - immediately before
+	 * it is added to the map of entities. The default implementation does
+	 * nothing.
 	 */
 	public void onAdd() {
 		// subclasses are to implement this functionality

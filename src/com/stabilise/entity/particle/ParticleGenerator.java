@@ -3,7 +3,7 @@ package com.stabilise.entity.particle;
 import java.util.Random;
 
 import com.stabilise.entity.FreeGameObject;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A utility class which handles the paramaterised generation of randomised
@@ -29,7 +29,7 @@ public class ParticleGenerator {
 	 * @param maxAngle The maximum angle at which to emit the particle, in
 	 * radians.
 	 */
-	public static void directParticle(IWorld world, ParticlePhysical p, FreeGameObject producer, float minVelocity, float maxVelocity, double minAngle, double maxAngle) {
+	public static void directParticle(World world, ParticlePhysical p, FreeGameObject producer, float minVelocity, float maxVelocity, double minAngle, double maxAngle) {
 		p.x = producer.x;
 		p.y = producer.y;
 		directParticle(p, minVelocity, maxVelocity, minAngle, maxAngle);

@@ -1,7 +1,7 @@
 package com.stabilise.entity.particle;
 
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.world.IWorld;
+import com.stabilise.world.World;
 
 /**
  * A tiny flame particle.
@@ -23,7 +23,7 @@ public class ParticleFlame extends ParticlePhysical {
 	public float opacity = 1.0f;
 	
 	
-	public void update(IWorld world) {
+	public void update(World world) {
 		super.update(world);
 		
 		dy += -0.02f / 32f; //world.gravity / 32f;
