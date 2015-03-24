@@ -86,7 +86,7 @@ public abstract class SubMenuBasedMenu extends Menu {
 			setSubMenu(c.newInstance(this));
 		//} catch(NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 		} catch(Exception e) {
-			Log.critical("Could not reflectively instantiate sub-menu!");
+			Log.get().postSevere("Could not reflectively instantiate sub-menu!");
 			throw new Exception(e);
 		}
 	}
@@ -107,7 +107,7 @@ public abstract class SubMenuBasedMenu extends Menu {
 			setSubMenu(c.newInstance(this, parameter));
 		//} catch(NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 		} catch(Exception e) {
-			Log.critical("Could not reflectively instantiate sub-menu!");
+			Log.get().postSevere("Could not reflectively instantiate sub-menu!");
 			throw new Exception(e);
 		}
 	}

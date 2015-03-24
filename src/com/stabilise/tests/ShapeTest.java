@@ -2,32 +2,34 @@ package com.stabilise.tests;
 
 import java.util.concurrent.TimeUnit;
 
-import com.badlogic.gdx.math.Vector2;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.maths.Maths;
+import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
-import com.stabilise.util.shape.LightweightAABB;
+import com.stabilise.util.shape.LightAABB;
 import com.stabilise.util.shape.Polygon;
 
 public class ShapeTest {
 	
+	private static boolean result = false;
+	
 	public ShapeTest(boolean print) {
 		final AxisAlignedBoundingBox b1 = new AxisAlignedBoundingBox(-0.5f, -0.5f, 1f, 1f);
-		final LightweightAABB b2 = new LightweightAABB(-0.5f, -0.5f, 1f, 1f);
-		final AxisAlignedBoundingBox b1Pre = b1.precomputed();
-		final LightweightAABB b2Pre = b2.precomputed();
+		final LightAABB b2 = new LightAABB(-0.5f, -0.5f, 1f, 1f);
+		final AxisAlignedBoundingBox b1Pre = b1;
+		final LightAABB b2Pre = b2;
 		
-		int collisions = 16384*1024;
+		int collisions = 16384*512;
 		
-		time(print, "AABB i FastAABB as AbstractPolygon", collisions, () -> b1.intersects(b2));
-		time(print, "AABB i FastAABB as AABB", collisions, () -> b1.intersectsAABB(b2));
-		time(print, "AABB i FastAABB as AbstractPolygon (Precomputed)", collisions, () -> b1Pre.intersects(b2Pre));
-		time(print, "AABB i FastAABB as AABB (Precomputed)", collisions, () -> b1Pre.intersectsAABB(b2Pre));
+		time(print, "AABB i FastAABB as AbstractPolygon", collisions, () -> result = b1.intersects(b2));
+		time(print, "AABB i FastAABB as AABB", collisions, () -> result = b1.intersectsAABB(b2));
+		time(print, "AABB i FastAABB as AbstractPolygon (Precomputed)", collisions, () -> result = b1Pre.intersects(b2Pre));
+		time(print, "AABB i FastAABB as AABB (Precomputed)", collisions, () -> result = b1Pre.intersectsAABB(b2Pre));
 		
-		time(print, "AABB c FastAABB as AbstractPolygon", collisions, () -> b1.contains(b2));
-		time(print, "AABB c FastAABB as AABB", collisions, () -> b1.containsAABB(b2));
-		time(print, "AABB c FastAABB as AbstractPolygon (Precomputed)", collisions, () -> b1Pre.contains(b2Pre));
-		time(print, "AABB c FastAABB as AABB (Precomputed)", collisions, () -> b1Pre.containsAABB(b2Pre));
+		time(print, "AABB c FastAABB as AbstractPolygon", collisions, () -> result = b1.contains(b2));
+		time(print, "AABB c FastAABB as AABB", collisions, () -> result = b1.containsAABB(b2));
+		time(print, "AABB c FastAABB as AbstractPolygon (Precomputed)", collisions, () -> result = b1Pre.contains(b2Pre));
+		time(print, "AABB c FastAABB as AABB (Precomputed)", collisions, () -> result = b1Pre.containsAABB(b2Pre));
 		
 		
 		/*
@@ -55,19 +57,19 @@ public class ShapeTest {
 			task.run();
 		t.stop();
 		if(print)
-			t.printResult(TimeUnit.MILLISECONDS);
+			System.out.println(t.getResult(TimeUnit.MILLISECONDS) + " (" + result + ")");
 	}
 	
 	protected Polygon circlePoly(int vertices) {
 		if(vertices < 3)
 			throw new IllegalArgumentException();
-		Vector2[] verts = new Vector2[vertices];
-		verts[0] = Vector2.X;
+		Vec2[] verts = new Vec2[vertices];
+		verts[0] = Maths.VEC_X;
 		double increments = Maths.TAU / vertices;
 		double angle = 0D;
 		for(int i = 1; i < vertices; i++) {
 			angle += increments;
-			verts[i] = new Vector2((float)Math.cos(angle), (float)Math.sin(angle));
+			verts[i] = new Vec2((float)Math.cos(angle), (float)Math.sin(angle));
 		}
 		return new Polygon(verts);
 	}
@@ -75,7 +77,7 @@ public class ShapeTest {
 	public static void main(String[] args) {
 		System.out.println("Starting warmup...\n----------\n");
 		// warmup
-		for(int i = 0; i < 10; i++) {
+		for(int i = 0; i < 5; i++) {
 			System.out.println("Doing warmup " + i);
 			new ShapeTest(false);
 		}

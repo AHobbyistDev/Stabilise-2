@@ -1,11 +1,6 @@
 package com.stabilise.screen.menu;
 
-import com.stabilise.opengl.Animation;
-import com.stabilise.opengl.Rectangle;
-import com.stabilise.opengl.Sprite;
-import com.stabilise.opengl.Texture;
 import com.stabilise.screen.menu.submenu.*;
-import com.stabilise.util.Colour;
 
 /**
  * The main game menu.
@@ -94,6 +89,7 @@ public class MainMenu extends SubMenuBasedMenu {
 			this.submenuClass = submenuClass;
 			this.sendParameter = sendParameter;
 		}
+		
 	}
 	
 	/** The width around which the main menu layout is designed. */

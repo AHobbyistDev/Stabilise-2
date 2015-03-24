@@ -1,21 +1,18 @@
 package com.stabilise.util.shape;
 
-import com.badlogic.gdx.math.Vector2;
 import com.stabilise.util.maths.Matrix2;
+import com.stabilise.util.maths.Vec2;
 
 /**
  * A shape is a 2D object usually consisting of a number of vertices, which may
  * be used to represent such things as collision areas.
  * 
- * <p>Most classes in the {@code Shape} hierarchy are designed to be treated as
- * immutable, even though they expose their mutable vertices. As such, client
- * code is strongly encouraged to <b>never modify</b> said vertices, and
- * instead create new Shapes if a modified shape is desired.
+ * <p>Classes in the {@code Shape} hierarchy are immutable, but may be {@link
+ * #transform(Matrix2) transformed} to generate a new shape.
  * 
- * <p>Classes in the {@code Shape} hierarchy tend to use the
- * <a href=http://en.wikipedia.org/wiki/Hyperplane_separation_theorem>
- * Separating Axis Theorem/Hyperplane Separation Theorem</a> for collision
- * detection.
+ * <p>These classes use the <a
+ * href=http://en.wikipedia.org/wiki/Hyperplane_separation_theorem> Separating
+ * Axis Theorem/Hyperplane Separation Theorem</a> for collision detection.
  */
 public abstract class Shape {
 	
@@ -61,43 +58,11 @@ public abstract class Shape {
 	 * 
 	 * @return The transformed vertices. 
 	 */
-	protected Vector2[] getTransformedVertices(Matrix2 matrix) {
-		Vector2[] vertices = getVertices();
-		for(int i = 0; i < vertices.length; i++)
-			vertices[i] = matrix.transform(vertices[i]);
-		return vertices;
-	}
-	
-	/**
-	 * Rotates a vertex anticlockwise about (0,0) by the specified angle. The
-	 * supplied vertex will not be modified.
-	 * 
-	 * @param vertex The vertex.
-	 * @param rotation The angle, in radians.
-	 * 
-	 * @return The rotated vertex.
-	 */
-	protected final Vector2 rotateVertex(Vector2 vertex, float rotation) {
-		return rotateVertex(vertex, (float)Math.cos(rotation), (float)Math.sin(rotation));
-	}
-	
-	/**
-	 * Rotates a vertex anticlockwise about (0,0) using the sine and cosine of
-	 * an angle. The supplied vertex will not be modified.
-	 * 
-	 * <p>This method is faster than {@link #rotateVertex(Vector2, float)}.
-	 * 
-	 * @param vertex The vertex.
-	 * @param cos The cosine of the angle.
-	 * @param sin The sine of the angle.
-	 * 
-	 * @return The rotated vertex.
-	 */
-	protected final Vector2 rotateVertex(Vector2 vertex, float cos, float sin) {
-		return new Vector2(
-				vertex.x * cos - vertex.y * sin,
-				vertex.x * sin + vertex.y * cos
-		);
+	protected Vec2[] getTransformedVertices(Matrix2 matrix) {
+		Vec2[] verts = getVertices();
+		for(int i = 0; i < verts.length; i++)
+			verts[i] = matrix.transform(verts[i]);
+		return verts;
 	}
 	
 	/**
@@ -117,42 +82,25 @@ public abstract class Shape {
 	/**
 	 * Gets a new shape object identical to this one, but translated.
 	 * 
-	 * <p>Implementation note: subclasses must ensure that the returned shape
-	 * is of the same class as itself.
-	 * 
-	 * @param x The amount by which to translate the new shape, along the x-axis.
-	 * @param y The amount by which to translate the new shape, along the y-axis.
+	 * @param x The translation along x-axis.
+	 * @param y The translation along the y-axis.
 	 * 
 	 * @return The new translated shape.
 	 */
 	public abstract Shape translate(float x, float y);
 	
 	/**
-	 * Clones the shape and reflects the clone about the y-axis.
+	 * Clones this shape and reflects the clone about the y-axis.
 	 * 
-	 * <p>Implementation note: subclasses must ensure that the returned shape
-	 * is of the same class as itself.
-	 * 
-	 * @return The reflected clone of the shape.
+	 * @return The reflected clone of this shape.
 	 */
 	public abstract Shape reflect();
 	
 	/**
-	 * Gets an array containing all of the shape's vertices.
-	 * 
-	 * <p>Implementation note: it is imperative that any subclass of Shape
-	 * returns the vertices <i>in the order they connect</i> (i.e. consecutive
-	 * vertices in the returned array are joined by edges).
-	 * 
-	 * @return The shape's vertices.
-	 */
-	protected abstract Vector2[] getVertices();
-	
-	/**
 	 * Calculates whether or not this shape intersects with another.
 	 * 
-	 * @return {@code true} if the two shapes intersect; {@code false}
-	 * otherwise.
+	 * @return {@code true} if this shape intersects with {@code s}; {@code
+	 * false} otherwise.
 	 * @throws NullPointerException if {@code s} is {@code null}.
 	 */
 	public abstract boolean intersects(Shape s);
@@ -167,26 +115,6 @@ public abstract class Shape {
 	public abstract boolean contains(Shape s);
 	
 	/**
-	 * Calculates whether or not the given point is within the bounds of the
-	 * shape.
-	 * 
-	 * @param x The x-coordinate of the point.
-	 * @param y The y-coordinate of the point.
-	 * 
-	 * @return {@code true} if the shape contains the point; {@code false}
-	 * otherwise.
-	 */
-	public boolean containsPoint(float x, float y) {
-		// Basic SAT implementation for polygons
-		Vector2[] axes = generateAxes();
-		for(Vector2 axis : axes) {
-			if(!getProjection(axis).containsPoint(axis.dot(x, y)))
-				return false;
-		}
-		return true;
-	}
-	
-	/**
 	 * Calculates whether or not a point is within the bounds of the shape.
 	 * 
 	 * <p>This method redirects to {@link #containsPoint(float, float)
@@ -197,40 +125,52 @@ public abstract class Shape {
 	 * @return {@code true} if the shape contains the point; {@code false}
 	 * otherwise.
 	 */
-	public boolean containsPoint(Vector2 p) {
+	/*
+	public final boolean containsPoint(Vec2 p) {
 		return containsPoint(p.x, p.y);
 	}
+	*/
+	
+	/**
+	 * Calculates whether or not the given point is within the bounds of this
+	 * shape.
+	 * 
+	 * @param x The x-coordinate of the point.
+	 * @param y The y-coordinate of the point.
+	 * 
+	 * @return {@code true} if this shape contains the point; {@code false}
+	 * otherwise.
+	 */
+	public abstract boolean containsPoint(float x, float y);
+	
+	/**
+	 * Gets this shape's vertices.
+	 * 
+	 * <p>The vertices are returned in the order they physically connect - that
+	 * is, consecutive vertices in the array (first and last are considered
+	 * consecutive) are joined by edges.
+	 */
+	protected abstract Vec2[] getVertices();
 	
 	/**
 	 * Gets the axes upon which to project the shape for collision detection.
-	 * These take the form of vectors perpendicular to each of the shape's
-	 * edges.
+	 * 
+	 * <p>A shape's projection axes are a set of vectors orthogonal to each of
+	 * its edges. This such such that projection of object (via dot product)
+	 * onto said axis allows for easy testing as to whether or not that object
+	 * appears to lie (however partially) within the shape from the viewpoint
+	 * of that axis.
 	 * 
 	 * @return The shape's projection axes.
 	 */
-	protected Vector2[] generateAxes() {
-		Vector2[] vertices = getVertices();
-		for(int i = 0; i < vertices.length; i++)
-			vertices[i] = getAxis(vertices[i], vertices[(i+1) == vertices.length ? 0 : i+1]);
-		return vertices;
-	}
-	
-	/**
-	 * Gets the projection axis for two adjacent vertices. This takes the form
-	 * of a vector perpendicular to the edge joining the vertices.
-	 * 
-	 * @param v1 The first vertex.
-	 * @param v2 The second vertex.
-	 * 
-	 * @return The projection axis.
-	 */
-	protected final Vector2 getAxis(Vector2 v1, Vector2 v2) {
-		// N.B. Normalising the vectors appears to be unnecessary
-		
-		// The following is how it's typically done:
-		//return MathsUtil.rotate90Degrees(MathUtil.sub(v1, v2));
-		// Faster, however, is:
-		return new Vector2(v2.y - v1.y, v1.x - v2.x);
+	protected Vec2[] getAxes() {
+		Vec2[] verts = getVertices();
+		// We need to remember v0 since it is overwritten first, but used to
+		// compute the last.
+		Vec2 v0 = verts[0];
+		for(int i = 0; i < verts.length; i++)
+			verts[i] = getAxis(verts[i], i+1 == verts.length ? v0 : verts[i+1]);
+		return verts;
 	}
 	
 	/**
@@ -239,9 +179,10 @@ public abstract class Shape {
 	 * @param axis The axis upon which to project the shape.
 	 * 
 	 * @return The shape's projection.
+	 * @throws NullPointerException if {@code axis} is {@code null}.
 	 */
-	protected ShapeProjection getProjection(Vector2 axis) {
-		Vector2[] vertices = getVertices();
+	protected ShapeProjection getProjection(Vec2 axis) {
+		Vec2[] vertices = getVertices();
 		
 		float min = axis.dot(vertices[0]);
 		float max = min;
@@ -258,21 +199,36 @@ public abstract class Shape {
 	}
 	
 	/**
+	 * Gets this shape's projection on its own i<font size="-1"><sup>th</sup>
+	 * </font> axis.
+	 * 
+	 * @param i The axis number.
+	 * 
+	 * @return The shape's projection.
+	 * @throws ArrayIndexOutOfBoundsException if {@code i} is negative or
+	 * greater than {@code n-1}, where {@code n} is the shape's number of
+	 * projection axes as returned by {@link #getAxes()} (that is, {@code n ==
+	 * getAxes().length}).
+	 */
+	protected ShapeProjection getProjection(int i) {
+		//System.out.println("WARNING: Using getProjection(int) without precomputation!");
+		return getProjection(getAxes()[i]);
+	}
+	
+	/**
 	 * Gets the horizontal projection for this shape.
 	 * 
 	 * <p>The returned ShapeProjection is equivalent to the one returned as if
 	 * by:
 	 * 
 	 * <pre>
-	 * {@link #getProjection(Vector2) getProjection(new Vector2(1f, 0f))}
+	 * {@link #getProjection(Vec2) getProjection(new Vec2(1f, 0f))}
 	 * </pre>
 	 * 
 	 * @return The horizontal projection.
-	 * @throws ArrayIndexOutOfBoundsException if this shape's vertices as
-	 * return by {@link #getVertices()} is of length 0.
 	 */
 	ShapeProjection getHorizontalProjection() {
-		Vector2[] vertices = getVertices();
+		Vec2[] vertices = getVertices();
 		
 		float min = vertices[0].x;
 		float max = min;
@@ -294,15 +250,13 @@ public abstract class Shape {
 	 * by:
 	 * 
 	 * <pre>
-	 * {@link #getProjection(Vector2) getProjection(new Vector2(0f, 1f))}
+	 * {@link #getProjection(Vec2) getProjection(new Vec2(0f, 1f))}
 	 * </pre>
 	 * 
 	 * @return The vertical projection.
-	 * @throws ArrayIndexOutOfBoundsException if this shape's vertices as
-	 * return by {@link #getVertices()} is of length 0.
 	 */
 	ShapeProjection getVerticalProjection() {
-		Vector2[] vertices = getVertices();
+		Vec2[] vertices = getVertices();
 		
 		float min = vertices[0].y;
 		float max = min;
@@ -318,14 +272,17 @@ public abstract class Shape {
 	}
 	
 	/**
-	 * Checks whether or not this Shape is an AABB.
-	 * 
 	 * @return {@code true} if this shape is an AABB; {@code false} otherwise.
 	 */
 	protected boolean isAABB() {
-		//return this instanceof AABB;
-		return false;
+		return this instanceof AABB;
 	}
+	
+	/**
+	 * Returns a new shape instance of the same class as this one, for
+	 * duplication in transformation purposes.
+	 */
+	protected abstract Shape newInstance();
 	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
@@ -346,6 +303,23 @@ public abstract class Shape {
 		return (T)shape.rotate(rotation);
 	}
 	
+	/**
+	 * Gets the projection axis for two adjacent vertices. This takes the form
+	 * of a vector perpendicular to the edge joining the vertices.
+	 * 
+	 * @param v1 The first vertex.
+	 * @param v2 The second vertex.
+	 * 
+	 * @return The projection axis.
+	 * @throws NullPointerException if either argument is {@code null}.
+	 */
+	protected static Vec2 getAxis(Vec2 v1, Vec2 v2) {
+		// This is what we're really doing:
+		//return v1.sub(v2).rotate90Degrees();
+		// However, if we simplify that algebraically, we get:
+		return new Vec2(v2.y - v1.y, v1.x - v2.x);
+	}
+	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------
 	//--------------------==========--------------------
@@ -356,11 +330,13 @@ public abstract class Shape {
 	private static final class NoShape extends Shape {
 		@Override public Shape transform(Matrix2 matrix) { return this; }
 		@Override public Shape translate(float x, float y) { return this; }
-		@Override protected Vector2[] getVertices() { return new Vector2[0]; }
+		@Override protected Vec2[] getVertices() { return new Vec2[0]; }
+		@Override protected Vec2[] getAxes() { return new Vec2[0]; }
 		@Override public boolean intersects(Shape s) { return false; }
 		@Override public boolean contains(Shape s) { return false; }
-		@Override public boolean containsPoint(Vector2 p) { return false; }
+		@Override public boolean containsPoint(float x, float y) { return false; }
 		@Override public Shape reflect() { return this; }
+		@Override protected Shape newInstance() { return this; }
 	}
 	
 }

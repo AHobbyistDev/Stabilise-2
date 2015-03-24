@@ -1,8 +1,5 @@
 package com.stabilise.screen.menu.component;
 
-import com.stabilise.opengl.Animation;
-import com.stabilise.opengl.Sprite;
-import com.stabilise.opengl.SpriteSheet;
 import com.stabilise.screen.menu.Menu;
 
 /**

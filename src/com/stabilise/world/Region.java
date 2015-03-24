@@ -102,10 +102,6 @@ public class Region {
 	private final ClearingQueue<QueuedSchematic> queuedSchematics =
 			new SynchronizedClearingQueue<>();
 	
-	/** The object to use for locking purposes restricted to the WorldGenerator
-	 * and WorldLoader. */
-	private final Object lock = new Object();
-	
 	
 	/**
 	 * Private since this creates an ordinarily-invalid region.
@@ -369,10 +365,10 @@ public class Region {
 			return;
 		boolean interrupted = false;
 		try {
-			synchronized(lock) {
+			synchronized(loading) {
 				while(!loaded) { // TODO: what if the world loader fails or aborts?
 					try {
-						lock.wait();
+						loading.wait();
 					} catch(InterruptedException e) {
 						interrupted = true;
 					}
@@ -392,9 +388,9 @@ public class Region {
 	 */
 	@UserThread("WorldLoaderThread")
 	public void notifyOfLoaded() {
-		synchronized(lock) {
+		synchronized(loading) {
 			loaded = true;
-			lock.notifyAll();
+			loading.notifyAll();
 		}
 	}
 	

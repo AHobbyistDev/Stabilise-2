@@ -12,13 +12,14 @@ import com.stabilise.world.tile.Tile;
  */
 public class EntityEnemy extends EntityMob {
 	
-	/** Actions for the AI. */
+	/** Actions for the current, incredibly simplistic, AI. */
 	private static enum EnumAction {
 		IDLE, MOVE;
 	};
 	
 	/** The AABB for enemy entities. */
-	private static final AxisAlignedBoundingBox ENEMY_AABB = new AxisAlignedBoundingBox.Precomputed(-0.5f, 0, 1, 2);
+	private static final AxisAlignedBoundingBox ENEMY_AABB =
+			new AxisAlignedBoundingBox(-0.5f, 0, 1, 2);
 	
 	/** The number of ticks for which the enemy is to continue its current
 	 * action.*/

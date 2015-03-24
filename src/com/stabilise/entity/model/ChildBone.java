@@ -11,6 +11,7 @@ public class ChildBone extends Bone {
 	/** This bone's parent bone. */
 	private final Bone parent;
 	/** This bone's position relative to its unrotated parent. */
+	@SuppressWarnings("unused")
 	private final Vector2 relativePos;
 	
 	
@@ -22,7 +23,7 @@ public class ChildBone extends Bone {
 	
 	@Override
 	void flush() {
-		parent.rotationMatrix.transform(relativePos, position.pos);
+		//----parent.rotationMatrix.transform(relativePos, position.pos);
 		position.pos.x += parent.position.pos.x;
 		position.pos.y += parent.position.pos.y;
 	}

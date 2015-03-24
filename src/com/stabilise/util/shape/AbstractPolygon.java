@@ -1,11 +1,14 @@
 package com.stabilise.util.shape;
 
-import com.badlogic.gdx.math.Vector2;
+import com.stabilise.util.maths.Vec2;
 
 /**
  * A polygon is a shape with any number of vertices.
+ * 
+ * <p>This class provides standard implementations of the SAT algorithm for
+ * collision detection.
  */
-abstract class AbstractPolygon extends PrecomputableShape {
+abstract class AbstractPolygon extends Shape {
 	
 	@Override
 	public boolean intersects(Shape s) {
@@ -14,7 +17,8 @@ abstract class AbstractPolygon extends PrecomputableShape {
 		if(s instanceof Circle)
 			return intersectsOnOwnAxes(s);
 		
-		// TODO: Could result in an infinite loop if the other shape does the same thing
+		// TODO: Could result in an infinite loop if the other shape does the
+		// same thing
 		return s.intersects(this);
 	}
 	
@@ -56,8 +60,9 @@ abstract class AbstractPolygon extends PrecomputableShape {
 	 * <p>Note that this may return a false positive if either of the shapes
 	 * are not convex.
 	 * 
-	 * <p>Precomputed variants of an AbstractPolygon should override this
-	 * method to delegate it to {@link #intersectsOnOwnAxesPrecomputed(Shape)}.
+	 * <p>Subclasses of AbstractPolygon which utilise precomputation should
+	 * override this method to delegate it to {@link
+	 * #intersectsOnOwnAxesPrecomputed(Shape)}.
 	 * 
 	 * @param s The shape with which to test intersection.
 	 * 
@@ -65,8 +70,8 @@ abstract class AbstractPolygon extends PrecomputableShape {
 	 * {@code false} if it does not.
 	 */
 	protected boolean intersectsOnOwnAxes(Shape s) {
-		Vector2[] axes = generateAxes();
-		for(Vector2 axis : axes) {
+		Vec2[] axes = getAxes();
+		for(Vec2 axis : axes) {
 			if(!getProjection(axis).intersects(s.getProjection(axis)))
 				return false;
 		}
@@ -74,7 +79,7 @@ abstract class AbstractPolygon extends PrecomputableShape {
 	}
 	
 	/**
-	 * As, {@link #intersectsOnOwnAxes(Shape)}, but optimised for
+	 * As {@link #intersectsOnOwnAxes(Shape)}, but optimised for
 	 * precomputation.
 	 * 
 	 * @param s The shape with which to test intersection.
@@ -82,9 +87,8 @@ abstract class AbstractPolygon extends PrecomputableShape {
 	 * @return {@code true} if this polygon 'intersects' with the given shape;
 	 * {@code false} if it does not.
 	 */
-	@ForPrecomputedVariant
 	protected boolean intersectsOnOwnAxesPrecomputed(Shape s) {
-		Vector2[] axes = getAxes();
+		Vec2[] axes = getAxes();
 		for(int i = 0; i < axes.length; i++) {
 			if(!getProjection(i).intersects(s.getProjection(axes[i])))
 				return false;
@@ -94,8 +98,8 @@ abstract class AbstractPolygon extends PrecomputableShape {
 	
 	@Override
 	public boolean contains(Shape s) {
-		Vector2[] axes = generateAxes();
-		for(Vector2 axis : axes) {
+		Vec2[] axes = getAxes();
+		for(Vec2 axis : axes) {
 			if(!getProjection(axis).contains(s.getProjection(axis)))
 				return false;
 		}
@@ -108,11 +112,36 @@ abstract class AbstractPolygon extends PrecomputableShape {
 	 * @return {@code true} if this polygon contains the given shape; {@code
 	 * false} otherwise.
 	 */
-	@ForPrecomputedVariant
 	protected boolean containsPrecomputed(Shape s) {
-		Vector2[] axes = getAxes();
+		Vec2[] axes = getAxes();
 		for(int i = 0; i < axes.length; i++) {
 			if(!getProjection(i).contains(s.getProjection(axes[i])))
+				return false;
+		}
+		return true;
+	}
+	
+	@Override
+	public boolean containsPoint(float x, float y) {
+		Vec2[] axes = getAxes();
+		for(Vec2 axis : axes) {
+			if(!getProjection(axis).containsPoint(axis.dot(x, y)))
+				return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * As with {@link #containsPoint(float, float)}, but optimised for a shape
+	 * which precomputes its projections.
+	 * 
+	 * <p>Subclasses should override {@link #containsPoint(float, float)} and
+	 * redirect it to this method if said subclass utilises precomputation.
+	 */
+	protected boolean containsPointPrecomputed(float x, float y) {
+		Vec2[] axes = getAxes();
+		for(int i = 0; i < axes.length; i++) {
+			if(!getProjection(i).containsPoint(axes[i].dot(x, y)))
 				return false;
 		}
 		return true;

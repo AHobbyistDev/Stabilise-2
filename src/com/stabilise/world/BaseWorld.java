@@ -213,13 +213,13 @@ public abstract class BaseWorld extends AbstractWorld {
 	@Override
 	public void addHitbox(Hitbox h) {
 		hitboxCount++;
-		hitboxes.add(h);
+		hitboxes.add(Objects.requireNonNull(h));
 	}
 	
 	@Override
 	public void addParticle(Particle p) {
 		particleCount++;
-		particles.add(p);
+		particles.add(Objects.requireNonNull(p));
 	}
 	
 	/**

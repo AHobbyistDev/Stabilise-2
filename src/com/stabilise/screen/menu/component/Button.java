@@ -1,10 +1,5 @@
 package com.stabilise.screen.menu.component;
 
-import org.lwjgl.util.Point;
-
-import com.stabilise.opengl.Font;
-import com.stabilise.opengl.FontStyle;
-import com.stabilise.opengl.Graphic;
 import com.stabilise.screen.menu.Menu;
 import com.stabilise.util.shape.AxisAlignedBoundingBox;
 

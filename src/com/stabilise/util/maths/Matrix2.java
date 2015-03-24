@@ -1,6 +1,5 @@
 package com.stabilise.util.maths;
 
-import com.badlogic.gdx.math.Vector2;
 import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
@@ -16,14 +15,8 @@ import com.stabilise.util.annotation.NotThreadSafe;
 @NotThreadSafe
 public class Matrix2 {
 	
-	/** The top-left entry - use this to reference entry array indices. */
-	public static final int M00 = 0;
-	/** The top-right entry - use this to reference entry array indices. */
-	public static final int M01 = 1;
-	/** The bottom-left entry - use this to reference entry array indices. */
-	public static final int M10 = 2;
-	/** The bottom-right entry - use this to reference entry array indices. */
-	public static final int M11 = 3;
+	/** Array indices for each matrix entry as stored in {@link #val}. */
+	public static final int M00 = 0, M01 = 1, M10 = 2, M11 = 3;
 	
 	
 	/** The matrix's entries. */
@@ -159,8 +152,8 @@ public class Matrix2 {
 	 * @return The resulting vector.
 	 * @throws NullPointerException if {@code vec} is {@code null}.
 	 */
-	public Vector2 transform(Vector2 vec) {
-		return new Vector2(
+	public Vec2 transform(Vec2 vec) {
+		return new Vec2(
 				val[M00]*vec.x + val[M01]*vec.y,
 				val[M10]*vec.x + val[M11]*vec.y
 		);
@@ -177,11 +170,13 @@ public class Matrix2 {
 	 * @throws NullPointerException if either {@code vec} or {@code dest} are
 	 * {@code null}.
 	 */
-	public Vector2 transform(Vector2 vec, Vector2 dest) {
+	/*
+	public Vec2 transform(Vec2 vec, Vec2 dest) {
 		float x = val[M00]*vec.x + val[M01]*vec.y;
 		float y = val[M10]*vec.x + val[M11]*vec.y;
 		return dest.set(x, y);
 	}
+	*/
 	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
@@ -195,12 +190,12 @@ public class Matrix2 {
 	 * @throws NullPointerException if any argument is {@code null}.
 	 */
 	public static Matrix2 multiply(Matrix2 left, Matrix2 right, Matrix2 dest) {
-		float m00 = left.val[M00]*right.val[M00] + left.val[M01]*right.val[M10];
-		float m01 = left.val[M00]*right.val[M01] + left.val[M01]*right.val[M11];
-		float m10 = left.val[M10]*right.val[M00] + left.val[M11]*right.val[M10];
-		float m11 = left.val[M10]*right.val[M01] + left.val[M11]*right.val[M11];
-		
-		return dest.set(m00, m01, m10, m11);
+		return dest.set(
+				left.val[M00]*right.val[M00] + left.val[M01]*right.val[M10],
+				left.val[M00]*right.val[M01] + left.val[M01]*right.val[M11],
+				left.val[M10]*right.val[M00] + left.val[M11]*right.val[M10],
+				left.val[M10]*right.val[M01] + left.val[M11]*right.val[M11]
+		);
 	}
 	
 }

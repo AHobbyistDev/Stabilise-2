@@ -1,7 +1,7 @@
 package com.stabilise.util.shape;
 
-import com.badlogic.gdx.math.Vector2;
 import com.stabilise.util.maths.Matrix2;
+import com.stabilise.util.maths.Vec2;
 
 /**
  * A rectangle is a quadrilateral with opposite sides parallel, and
@@ -35,8 +35,7 @@ public class Rectangle extends Polygon {
 	 * are {@code null}.
 	 * @throws IllegalArgumentException if {@code vertices.length != 4}.
 	 */
-	public Rectangle(Vector2[] vertices) {
-		super();
+	public Rectangle(Vec2... vertices) {
 		checkVerts(vertices);
 		this.vertices = vertices;
 	}
@@ -50,14 +49,9 @@ public class Rectangle extends Polygon {
 	 * @param v01 The top-left vertex.
 	 * @param v10 The bottom-right vertex.
 	 * @param v11 The top-right vertex.
-	 * 
-	 * @throws NullPointerException if {@code vertices} or any of its elements
-	 * are {@code null}.
-	 * @throws IllegalArgumentException if {@code vertices.length != 4}.
 	 */
-	public Rectangle(Vector2 v00, Vector2 v01, Vector2 v10, Vector2 v11) {
-		super();
-		this.vertices = new Vector2[] { v00, v01, v11, v10 };
+	public Rectangle(Vec2 v00, Vec2 v01, Vec2 v10, Vec2 v11) {
+		vertices = new Vec2[] { v00, v01, v11, v10 };
 	}
 
 	/**
@@ -69,21 +63,20 @@ public class Rectangle extends Polygon {
 	 * @param height The rectangle's height. This should be positive.
 	 */
 	public Rectangle(float x, float y, float width, float height) {
-		super();
-		this.vertices = new Vector2[] {
-				new Vector2(x, y),
-				new Vector2(x, y + height),
-				new Vector2(x + width, y + height),
-				new Vector2(x + width, y)
+		vertices = new Vec2[] {
+				new Vec2(x, y),
+				new Vec2(x, y + height),
+				new Vec2(x + width, y + height),
+				new Vec2(x + width, y)
 		};
 	}
 	
 	@Override
-	protected Vector2[] getAxes() {
+	protected Vec2[] getAxes() {
 		// Rectangles require only two axes; as a rectangle consists of two
-		// pairs of parallel sides, two axes would otherwise be duplicates -
+		// pairs of parallel edges, two axes would otherwise be duplicates -
 		// hence, we can ignore the dupes.
-		return new Vector2[] {
+		return new Vec2[] {
 				getAxis(vertices[V00], vertices[V01]),
 				getAxis(vertices[V00], vertices[V10])
 		};
@@ -105,17 +98,6 @@ public class Rectangle extends Polygon {
 	}
 	
 	@Override
-	public Rectangle precomputed() {
-		return new Precomputed(this);
-	}
-	
-	// Overriding for typecast purposes
-	@Override
-	public Rectangle notPrecomputed() {
-		return this;
-	}
-	
-	@Override
 	protected Rectangle newInstance() {
 		return new Rectangle();
 	}
@@ -127,115 +109,16 @@ public class Rectangle extends Polygon {
 	/**
 	 * @throws NullPointerException if {@code verts} or any of its elements are
 	 * {@code null}.
-	 * @throws IllegalArgumentException if {@code verts.size != 4}.
+	 * @throws IllegalArgumentException if {@code verts.length != 4}.
 	 */
-	protected static void checkVerts(Vector2[] verts) {
+	protected static void checkVerts(Vec2[] verts) {
 		if(verts.length != 4)
-			throw new IllegalArgumentException("vertices.size != 4");
-		for(Vector2 v : verts) {
+			throw new IllegalArgumentException("A rectangle must have 4 (not" +
+					verts.length + "!) vertices");
+		for(Vec2 v : verts) {
 			if(v == null)
 				throw new NullPointerException("A polygon's vertices may not be null!");
 		}
-	}
-	
-	//--------------------==========--------------------
-	//-------------=====Nested Classes=====-------------
-	//--------------------==========--------------------
-	
-	/**
-	 * The precomputed variant of a rectangle.
-	 * 
-	 * <p>Though an instance of this class may be instantiated directly, its
-	 * declared type should simply be that of Rectangle.
-	 */
-	public static final class Precomputed extends Rectangle {
-		
-		/** The shape's projection axes. */
-		protected Vector2[] axes;
-		/** The shape's projections for each of its axes. */
-		protected ShapeProjection[] projections;
-		
-		
-		/**
-		 * Creates a new precomputed Rectangle. It is implicitly trusted that
-		 * the given vertices form a valid Rectangle. Invalid vertices may
-		 * produce undefined behaviour.
-		 * 
-		 * @param vertices The rectangle's vertices. These should be indexed
-		 * such that vertices[0] is v00, vertices[1] is v01, vertices[2] is
-		 * v11, and vertices[3] is v01.
-		 * 
-		 * @throws NullPointerException if {@code vertices} or any of its
-		 * elements are {@code null}.
-		 * @throws IllegalArgumentException if {@code vertices.length != 4}.
-		 */
-		public Precomputed(Vector2[] vertices) {
-			super(vertices);
-			calculateProjections();
-		}
-
-		/**
-		 * Creates a new precomputed Rectangle.
-		 * 
-		 * @param x The x-coordinate of the rectangle's bottom-left vertex.
-		 * @param y The y-coordinate of the rectangle's bottom-left vertex.
-		 * @param width The rectangle's width. Should be positive.
-		 * @param height The rectangle's height. Should be positive.
-		 */
-		public Precomputed(float x, float y, float width, float height) {
-			super(x, y, width, height);
-			calculateProjections();
-		}
-		
-		/**
-		 * Constructor to be used by Rectangle.
-		 */
-		private Precomputed(Rectangle r) {
-			super();
-			vertices = r.vertices;
-			calculateProjections();
-		}
-		
-		private Precomputed() {}
-		
-		/**
-		 * Calculates the shape's projection axes, and their respective
-		 * projections.
-		 */
-		private void calculateProjections() {
-			axes = generateAxes();
-			projections = new ShapeProjection[axes.length];
-			
-			for(int i = 0; i < axes.length; i++)
-				projections[i] = getProjection(axes[i]);
-		}
-		
-		// Precomputification
-		@Override protected Vector2[] getAxes() { return axes; }
-		@Override protected ShapeProjection getProjection(int i) { return projections[i]; }
-		@Override public boolean containsPoint(float x, float y) { return containsPointPrecomputed(x,y); }
-		@Override protected boolean intersectsOnOwnAxes(Shape s) { return intersectsOnOwnAxesPrecomputed(s); }
-		@Override public boolean contains(Shape s) { return containsPrecomputed(s); }
-		
-		@Override
-		public Rectangle notPrecomputed() {
-			Rectangle r = new Rectangle();
-			r.vertices = vertices;
-			return r;
-		}
-		
-		@Override
-		protected Rectangle newInstance() {
-			return new Precomputed();
-		}
-		
-		@Override
-		protected Rectangle newInstance(Vector2[] vertices) {
-			Precomputed p = (Precomputed)super.newInstance(vertices);
-			p.calculateProjections();
-			return p;
-		}
-		
 	}
 	
 }

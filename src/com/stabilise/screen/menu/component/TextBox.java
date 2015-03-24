@@ -1,11 +1,6 @@
 package com.stabilise.screen.menu.component;
 
-import org.lwjgl.input.Keyboard;
-
 import com.stabilise.core.Constants;
-import com.stabilise.input.InputManager;
-import com.stabilise.opengl.Font;
-import com.stabilise.opengl.FontStyle;
 import com.stabilise.screen.menu.Menu;
 
 /**

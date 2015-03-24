@@ -85,6 +85,8 @@ public interface World extends Checkable {
 	 * destroy()} on an entity to remove it from the world.
 	 * 
 	 * @param e The entity.
+	 * 
+	 * @throws NullPointerException if {@code e} is {@code null}.
 	 */
 	void removeEntity(Entity e);
 	
@@ -107,6 +109,8 @@ public interface World extends Checkable {
 	 * @param h The hitbox.
 	 * @param x The x-coordinate at which to place the hitbox, in tile-lengths.
 	 * @param y The y-coordinate at which to place the hitbox, in tile-lengths.
+	 * 
+	 * @throws NullPointerException if {@code h} is {@code null}.
 	 */
 	void addHitbox(Hitbox h, double x, double y);
 	
@@ -114,6 +118,8 @@ public interface World extends Checkable {
 	 * Adds a hitbox to the world. The hitbox's ID is assigned automatically.
 	 * 
 	 * @param h The hitbox.
+	 * 
+	 * @throws NullPointerException if {@code h} is {@code null}.
 	 */
 	void addHitbox(Hitbox h);
 	
@@ -125,11 +131,15 @@ public interface World extends Checkable {
 	 * tile-lengths.
 	 * @param y The y-coordinate at which to place the particle, in
 	 * tile-lengths.
+	 * 
+	 * @throws NullPointerException if {@code p} is {@code null}.
 	 */
 	void addParticle(Particle p, double x, double y);
 	
 	/**
 	 * Adds a particle to the world.
+	 * 
+	 * @throws NullPointerException if {@code p} is {@code null}.
 	 */
 	void addParticle(Particle p);
 	

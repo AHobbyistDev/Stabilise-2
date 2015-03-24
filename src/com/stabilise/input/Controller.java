@@ -44,7 +44,7 @@ public class Controller implements InputProcessor {
 		SUMMON("summon", Keys.T, true),
 		SUMMON_SWARM("summonswarm", Keys.Y, true),
 		KILL_MOBS("killallmobs", Keys.K, true),
-		FLYLEFT("flyleft", Keys.B, true),
+		FLYLEFT("flyleft", Keys.A, true),
 		FLYRIGHT("flyright", Keys.D, true),
 		FLYUP("flyup", Keys.W, true),
 		FLYDOWN("flydown", Keys.S, true),

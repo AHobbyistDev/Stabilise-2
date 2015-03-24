@@ -1,6 +1,5 @@
 package com.stabilise.entity;
 
-import com.badlogic.gdx.math.Vector2;
 import com.stabilise.core.Settings;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.collision.LinkedHitbox;
@@ -10,6 +9,7 @@ import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.maths.Maths;
+import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Rectangle;
 import com.stabilise.world.World;
@@ -30,13 +30,13 @@ public class EntityBigFireball extends EntityProjectile {
 	
 	// These hitboxes roughtly construct the four quadrants of a circle of radius 4 tiles
 	/** The first hitbox produced by the fireball. */
-	public static final Polygon HITBOX_1 = new Polygon(new Vector2(0f,0f), new Vector2(0f,4f), new Vector2(3f,3f), new Vector2(4f,0f));
+	public static final Polygon HITBOX_1 = new Polygon(new Vec2(0f,0f), new Vec2(0f,4f), new Vec2(3f,3f), new Vec2(4f,0f));
 	/** The second hitbox produced by the fireball. */
-	public static final Polygon HITBOX_2 = new Polygon(new Vector2(0f,0f), new Vector2(0f,4f), new Vector2(-3f,3f), new Vector2(-4f,0f));
+	public static final Polygon HITBOX_2 = new Polygon(new Vec2(0f,0f), new Vec2(0f,4f), new Vec2(-3f,3f), new Vec2(-4f,0f));
 	/** The third hitbox produced by the fireball. */
-	public static final Polygon HITBOX_3 = new Polygon(new Vector2(0f,0f), new Vector2(0f,-4f), new Vector2(-3f,-3f), new Vector2(-4f,0f));
+	public static final Polygon HITBOX_3 = new Polygon(new Vec2(0f,0f), new Vec2(0f,-4f), new Vec2(-3f,-3f), new Vec2(-4f,0f));
 	/** The fourth hitbox produced by the fireball. */
-	public static final Polygon HITBOX_4 = new Polygon(new Vector2(0f,0f), new Vector2(0f,-4f), new Vector2(3f,-3f), new Vector2(4f,0f));
+	public static final Polygon HITBOX_4 = new Polygon(new Vec2(0f,0f), new Vec2(0f,-4f), new Vec2(3f,-3f), new Vec2(4f,0f));
 	
 	/** The number of ticks after which a fireball despawns. */
 	private static final int DESPAWN_TICKS = 600;

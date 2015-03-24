@@ -98,7 +98,7 @@ public class Array<E> implements Iterable<E> {
 	 * Gets the element at the specified index.
 	 * 
 	 * @throws ArrayIndexOutOfBoundsException if {@code index} is negative or
-	 * greater than {@link #length()}.
+	 * greater than or equal to {@link #length()}.
 	 */
 	public E get(int index) {
 		return data[index];

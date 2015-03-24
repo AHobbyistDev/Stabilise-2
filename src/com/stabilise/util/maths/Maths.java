@@ -1,7 +1,5 @@
 package com.stabilise.util.maths;
 
-import com.badlogic.gdx.math.Vector2;
-
 /**
  * This class provides some utility methods and fields with mathematical
  * purpose.
@@ -18,10 +16,14 @@ public class Maths {
 	/** Holds the value given by Math.PI / 2. */
 	public static final double PI_OVER_2 = Math.PI / 2;
 	
+	/** The x-axis unit vector with components (1,0). */
+	public static final Vec2 VEC_X = new Vec2(1f, 0f);
+	/** The y-axis unit vector with components (0,1). */
+	public static final Vec2 VEC_Y = new Vec2(0f, 1f);
 	/** A vector with components (1, 1). */
-	public static final Vector2 VEC_1_1 = new Vector2(1f, 1f);
-	/** An array containing the unit vectors. */
-	public static final Vector2[] UNIT_VECTORS = new Vector2[] { Vector2.X, Vector2.Y };
+	public static final Vec2 VEC_1_1 = new Vec2(1f, 1f);
+	/** An array containing the unit vectors {@link #VEC_X} and {@link #VEC_Y}. */
+	public static final Vec2[] UNIT_VECTORS = new Vec2[] { VEC_X, VEC_Y };
 	
 	/** The maximum value which can be held by an unsigned byte
 	 * (<tt>2<sup><font size=-1>8</font></sup>-1</tt>). */
@@ -132,17 +134,6 @@ public class Maths {
 	 */
 	public static long wrappedRem2(long num, long div) {
 		return num & (div - 1);
-	}
-	
-	/**
-	 * Rotates the specified vector by π/2 radians anticlockwise about (0,0).
-	 * 
-	 * @param v The vector.
-	 * 
-	 * @return A vector perpendicular to the given vector.
-	 */
-	public static Vector2 rotate90Degrees(Vector2 v) {
-		return v.set(-v.y, v.x);
 	}
 	
 	/**

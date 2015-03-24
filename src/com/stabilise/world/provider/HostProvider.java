@@ -251,11 +251,9 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		 */
 		public PlayerData getData(CharacterData player) throws IOException {
 			NBTTagCompound tag = loadData().getCompound(player.hash);
-			PlayerData p;
-			if(tag.isEmpty())
-				p = new PlayerData(this, player);
-			else
-				p = new PlayerData(this, player, tag);
+			PlayerData p = tag.isEmpty()
+					? new PlayerData(this, player)
+					: new PlayerData(this, player, tag);
 			chars.add(p);
 			return p;
 		}

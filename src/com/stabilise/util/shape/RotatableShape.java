@@ -1,7 +1,8 @@
 package com.stabilise.util.shape;
 
-import com.badlogic.gdx.math.Vector2;
+import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.maths.Matrix2;
+import com.stabilise.util.maths.Vec2;
 
 /**
  * A RotatableShape serves as a wrapper for a Shape which can be rotated,
@@ -17,13 +18,14 @@ import com.stabilise.util.maths.Matrix2;
  * 
  * @param <T> The type of shape.
  */
+@NotThreadSafe
 public class RotatableShape<T extends Shape> extends Shape {
 	
-	/** The original shape. */
+	/** The original, or template, shape. */
 	private final T baseShape;
-	/** The rotated shape. */
+	/** The rotated shape, which is treated as the actual shape. */
 	private T rotatedShape;
-	/** The rotation. */
+	/** Rotation, in radians. */
 	private float rotation;
 	
 	
@@ -35,7 +37,7 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 * @throws IllegalArgumentException if {@code shape} is an AABB.
 	 */
 	public RotatableShape(T shape) {
-		if(shape instanceof AABB)
+		if(shape.isAABB())
 			throw new IllegalArgumentException("Cannot wrap an AABB in a RotatableShape " +
 					"since it may not be rotated!");
 		
@@ -102,7 +104,7 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 */
 	@SuppressWarnings("unchecked")
 	public T setRotation(float rotation) {
-		if(rotation == 0)
+		if(rotation == 0f)
 			return rotatedShape = baseShape;
 		if(this.rotation == rotation)
 			return rotatedShape;
@@ -110,74 +112,41 @@ public class RotatableShape<T extends Shape> extends Shape {
 		return rotatedShape = (T)baseShape.rotate(rotation);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p>
-	 * Invoking this method is equivalent to invoking
-	 * <pre>get().translate(x, y)</pre>
-	 * </p>
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public T translate(float x, float y) {
 		return (T)rotatedShape.translate(x, y);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p>Invoking this method is equivalent to invoking
-	 * <pre>get().reflect()</pre>
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public T reflect() {
 		return (T)rotatedShape.reflect();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p>Invoking this method is equivalent to invoking
-	 * <pre>get().getVertices()</pre>
-	 */
 	@Override
-	protected Vector2[] getVertices() {
+	protected Vec2[] getVertices() {
 		return rotatedShape.getVertices();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p>Invoking this method is equivalent to invoking
-	 * <pre>get().intersects(s)</pre>
-	 */
 	@Override
 	public boolean intersects(Shape s) {
 		return rotatedShape.intersects(s);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p>Invoking this method is equivalent to invoking
-	 * <pre>get().contains(s)</pre>
-	 */
 	@Override
 	public boolean contains(Shape s) {
 		return rotatedShape.contains(s);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p>Invoking this method is equivalent to invoking
-	 * <pre>get().containsPoint(p)</pre>
-	 */
 	@Override
-	public boolean containsPoint(Vector2 p) {
-		return rotatedShape.containsPoint(p);
+	public boolean containsPoint(float x, float y) {
+		return rotatedShape.containsPoint(x, y);
+	}
+	
+	@Override
+	protected Shape newInstance() {
+		throw new UnsupportedOperationException();
 	}
 	
 }

@@ -1,8 +1,8 @@
 package com.stabilise.util.shape;
 
-import com.badlogic.gdx.math.Vector2;
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.maths.Matrix2;
+import com.stabilise.util.maths.Vec2;
 
 /**
  * For the uninitiated: <i>A circle is a simple shape of Euclidean geometry
@@ -24,7 +24,7 @@ public class Circle extends Shape {
 	 * 
 	 * @param centre The centre of the circle.
 	 */
-	public Circle(Vector2 centre) {
+	public Circle(Vec2 centre) {
 		this(centre, 0);
 	}
 	
@@ -34,7 +34,7 @@ public class Circle extends Shape {
 	 * @param centre The circle's centre.
 	 * @param radius The circle's radius.
 	 */
-	public Circle(Vector2 centre, float radius) {
+	public Circle(Vec2 centre, float radius) {
 		this(centre.x, centre.y, radius);
 	}
 	
@@ -84,8 +84,8 @@ public class Circle extends Shape {
 	}
 	
 	@Override
-	protected Vector2[] getVertices() {
-		return new Vector2[] {new Vector2(x, y)};
+	protected Vec2[] getVertices() {
+		return new Vec2[] {new Vec2(x, y)};
 	}
 	
 	/**
@@ -141,9 +141,10 @@ public class Circle extends Shape {
 	}
 	
 	@Override
-	protected ShapeProjection getProjection(Vector2 axis) {
+	protected ShapeProjection getProjection(Vec2 axis) {
 		// A circle, being a uniform shape, is of constant width for all axes
 		float mid = axis.dot(x, y);
+		// TODO + or - radius doesn't work unless be divide by |axis|
 		return new ShapeProjection(mid - radius, mid + radius);
 	}
 	
@@ -155,6 +156,11 @@ public class Circle extends Shape {
 	@Override
 	protected ShapeProjection getVerticalProjection() {
 		return new ShapeProjection(y - radius, y + radius);
+	}
+
+	@Override
+	protected Shape newInstance() {
+		return this;
 	}
 	
 }

@@ -46,9 +46,11 @@ public abstract class Task implements Runnable {
 	private volatile Thread thread;
 	
 	private volatile TaskState state = TaskState.UNSTARTED;
-	/** The throwable thrown during execution of the task. A value of
-	 * {@code null} indicates the task ran without throwing anything. */
-	private volatile Throwable throwable = null;
+	/** The throwable thrown during execution of the task. A value of {@code
+	 * null} indicates the task ran without throwing anything. This variable
+	 * piggybacks on the volatility of {@link #state} for consistency across
+	 * threads. */
+	private Throwable throwable = null;
 	
 	/** The task tracker. This is initially constructed as per
 	 * {@link TaskTracker#TaskTracker(int) new TaskTracker(parts)} when the
@@ -280,11 +282,6 @@ public abstract class Task implements Runnable {
 	 * Gets the Throwable thrown by this task. A return value of {@code null}
 	 * indicates that the task has run (or is still running) without throwing
 	 * an exception or error.
-	 * 
-	 * <p>Memory consistency effects: actions by the thread executing this task
-	 * before allowing a Throwable to propagate through {@link #execute()})
-	 * happen-before actions in the current thread when that Throwable is
-	 * returned.
 	 * 
 	 * @return The Throwable, or {@code null} if a Throwable has not been
 	 * thrown.

@@ -1,23 +1,23 @@
 package com.stabilise.util.shape;
 
-import com.badlogic.gdx.math.Vector2;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Matrix2;
+import com.stabilise.util.maths.Vec2;
 
 /**
  * An axis-aligned bounding box is a rectangular bounding volume bound to the
  * x and y axes, such that collision detection may be simplified.
  * 
  * <p>For cases where regular reference to an AABB's width and height are not
- * required, it may be preferable to use a {@link LightweightAABB} instead of an
+ * required, it may be preferable to use a {@link LightAABB} instead of an
  * AxisAlignedBoundingBox.
  */
 public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 	
-	/** The AABB's width. */
-	public final float width;
-	/** The AABB's height. */
-	public final float height;
+	/** The AABB's dimensions. These values aren't stricly needed as they can
+	 * be computed from the vertices, but they are cached as a memory -> 
+	 * computation time tradeoff. */
+	public final float width,  height;
 	
 	
 	/**
@@ -32,33 +32,11 @@ public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 	 * 
 	 * @throws NullPointerException if any of the vertices are {@code null}.
 	 */
-	public AxisAlignedBoundingBox(Vector2 v00, Vector2 v01, Vector2 v10, Vector2 v11) {
-		this(v00, v01, v10, v11, v10.x - v01.x, v11.y - v00.y);
-	}
-	
-	/**
-	 * Creates a new AxisAlignedBoundingBox. It is implicitly trusted that the
-	 * given vertices form a valid AABB. Invalid vertices may produce undefined
-	 * behaviour.
-	 * 
-	 * <p>This constructor is provided to allow one to explicitly set the
-	 * dimensions, if they are known, to save computation time.
-	 * 
-	 * @param v00 The AABB's bottom-left vertex.
-	 * @param v01 The AABB's top-left vertex.
-	 * @param v10 The AABB's bottom-right vertex.
-	 * @param v11 The AABB's top-right vertex.
-	 * @param width The AABB's width.
-	 * @param height The AABB's height.
-	 * 
-	 * @throws NullPointerException if any of the vertices are {@code null}.
-	 * @throws IllegalArgumentException if {@code vertices.length != 4}.
-	 */
-	public AxisAlignedBoundingBox(Vector2 v00, Vector2 v01, Vector2 v10, Vector2 v11,
-			float width, float height) {
+	public AxisAlignedBoundingBox(Vec2 v00, Vec2 v01, Vec2 v10, Vec2 v11) {
 		super(v00, v01, v10, v11);
-		this.width = width;
-		this.height = height;
+		width = v10.x - v01.x;
+		height = v11.y - v00.y;
+		calcProjections();
 	}
 	
 	/**
@@ -74,10 +52,11 @@ public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 	 * are {@code null}.
 	 * @throws IllegalArgumentException if {@code vertices.length != 4}.
 	 */
-	public AxisAlignedBoundingBox(Vector2[] vertices) {
+	public AxisAlignedBoundingBox(Vec2... vertices) {
 		super(vertices);
 		this.width = vertices[V11].x - vertices[V00].x;
 		this.height = vertices[V11].y - vertices[V00].y;
+		calcProjections();
 	}
 	
 	/**
@@ -92,35 +71,29 @@ public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 		super(x, y, width, height);
 		this.width = width;
 		this.height = height;
+		calcProjections();
 	}
 	
 	/**
-	 * Creates an AABB from a precomputed variant.
+	 * Convenience constructor which does NOT initialise the vertices.
 	 */
-	private AxisAlignedBoundingBox(Precomputed aabb) {
-		vertices = aabb.vertices;
-		width = aabb.width;
-		height = aabb.height;
-	}
-	
-	/**
-	 * Convenience constructor.
-	 */
-	protected AxisAlignedBoundingBox(float width, float height) {
-		super();
+	private AxisAlignedBoundingBox(float width, float height) {
 		this.width = width;
 		this.height = height;
+	}
+	
+	private void calcProjections() {
+		projections = new ShapeProjection[] {
+				new ShapeProjection(vertices[V00].x, vertices[V11].x),
+				new ShapeProjection(vertices[V00].y, vertices[V11].y)
+		};
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * <p>This method fails fast by throwing an {@code
-	 * IllegalArgumentException} if the given matrix transforms this into an
-	 * invalid AABB.
-	 * 
 	 * @throws IllegalArgumentException if the given transformation matrix
-	 * produces an invalid AABB.
+	 * produces a shape which is not an AABB.
 	 */
 	@Override
 	public AxisAlignedBoundingBox transform(Matrix2 matrix) {
@@ -147,15 +120,12 @@ public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 	
 	@Override
 	public AxisAlignedBoundingBox translate(float offsetX, float offsetY) {
-		return (AxisAlignedBoundingBox)super.translate(offsetX, offsetY);
+		return new AxisAlignedBoundingBox(
+				getV00().x + offsetX,
+				getV00().y + offsetY,
+				width, height
+		);
 	}
-	
-	/*
-	@Override
-	public AxisAlignedBoundingBox translate(float offsetX, float offsetY) {
-		return new AxisAlignedBoundingBox(v00.x + offsetX, v00.y + offsetY, width, height);
-	}
-	*/
 	
 	@Override
 	public AxisAlignedBoundingBox reflect() {
@@ -210,32 +180,27 @@ public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 	}
 	
 	@Override
-	protected Vector2[] generateAxes() {
+	protected Vec2[] getAxes() {
 		return Maths.UNIT_VECTORS;
 	}
 	
 	@Override
 	ShapeProjection getHorizontalProjection() {
-		return new ShapeProjection(vertices[V00].x, vertices[V11].x);
+		return projections[0];
 	}
 	
 	@Override
 	ShapeProjection getVerticalProjection() {
-		return new ShapeProjection(vertices[V00].y, vertices[V11].y);
+		return projections[1];
 	}
 	
 	@Override
-	protected boolean isAABB() {
-		return true;
-	}
-	
-	@Override
-	public Vector2 getV00() {
+	public Vec2 getV00() {
 		return vertices[V00];
 	}
 	
 	@Override
-	public Vector2 getV11() {
+	public Vec2 getV11() {
 		return vertices[V11];
 	}
 	
@@ -254,142 +219,20 @@ public class AxisAlignedBoundingBox extends Rectangle implements AABB {
 	}
 	
 	@Override
-	public AxisAlignedBoundingBox precomputed() {
-		return new Precomputed(this);
-	}
-	
-	// Overriding for typecast purposes
-	@Override
-	public AxisAlignedBoundingBox notPrecomputed() {
-		return this;
+	protected AxisAlignedBoundingBox newInstance() {
+		throw new UnsupportedOperationException("Can't use an empty constructor"
+				+ " for an AABB as width and height are final fields!");
 	}
 	
 	@Override
-	protected Rectangle newInstance() {
-		throw new UnsupportedOperationException();
-	}
-	
-	//--------------------==========--------------------
-	//-------------=====Nested Classes=====-------------
-	//--------------------==========--------------------
-	
-	/**
-	 * The precomputed variant of an AxisAlignedBoundingBox.
-	 * 
-	 * <p>Though an instance of this class may be instantiated directly, its
-	 * declared type should simply be that of AxisAlignedBoundingBox.
-	 */
-	public static final class Precomputed extends AxisAlignedBoundingBox {
-		
-		/** The shape's projections for each of its axes. */
-		private ShapeProjection[] projections;
-		
-		
-		/**
-		 * Creates a new precomputed AxisAlignedBoundingBox. It is implicitly
-		 * trusted that the given vertices form a valid AABB. Invalid vertices
-		 * may produce undefined behaviour.
-		 * 
-		 * @param v00 The AABB's bottom-left vertex.
-		 * @param v01 The AABB's top-left vertex.
-		 * @param v10 The AABB's bottom-right vertex.
-		 * @param v11 The AABB's top-right vertex.
-		 */
-		public Precomputed(Vector2 v00, Vector2 v01, Vector2 v10, Vector2 v11) {
-			super(v00, v01, v10, v11);
-			calculateProjections();
-		}
-		
-		/**
-		 * Creates a new precomputed AxisAlignedBoundingBox. It is implicitly
-		 * trusted that the given vertices form a valid AABB. Invalid vertices
-		 * may produce undefined behaviour.
-		 * 
-		 * <p>This constructor is provided to allow one to explicitly set the
-		 * dimensions, if they are known, to save computation time.
-		 * 
-		 * @param v00 The AABB's bottom-left vertex.
-		 * @param v01 The AABB's top-left vertex.
-		 * @param v10 The AABB's bottom-right vertex.
-		 * @param v11 The AABB's top-right vertex.
-		 * @param width The AABB's width.
-		 * @param height The AABB's height.
-		 */
-		public Precomputed(Vector2 v00, Vector2 v01, Vector2 v10, Vector2 v11,
-				float width, float height) {
-			super(v00, v01, v10, v11, width, height);
-			calculateProjections();
-		}
-		
-		/**
-		 * Creates a new precomputed AxisAlignedBoundingBox. It is implicitly
-		 * trusted that the given vertices form a valid AABB. Invalid vertices
-		 * may produce undefined behaviour.
-		 * 
-		 * @param vertices The rectangle's vertices. These should be indexed
-		 * such that vertices[0] is v00, vertices[1] is v01, vertices[2] is
-		 * v11, and vertices[3] is v01.
-		 * 
-		 * @throws IllegalArgumentException if {@code vertices.length != 4}.
-		 */
-		public Precomputed(Vector2[] vertices) {
-			super(vertices);
-			calculateProjections();
-		}
-		
-		/**
-		 * Creates a new precomputed AxisAlignedBoundingBox.
-		 * 
-		 * @param x The x-coordinate of the AABB's bottom-left vertex.
-		 * @param y The y-coordinate of the AABB's bottom-left vertex.
-		 * @param width The AABB's width.
-		 * @param height The AABB's height.
-		 */
-		public Precomputed(float x, float y, float width, float height) {
-			super(x, y, width, height);
-			calculateProjections();
-		}
-		
-		/**
-		 * Constructor to be used by AxisAlignedBoundingBox.
-		 */
-		private Precomputed(AxisAlignedBoundingBox aabb) {
-			super(aabb.width, aabb.height);
-			vertices = aabb.vertices;
-			calculateProjections();
-		}
-		
-		/**
-		 * Calculates the shape's projection axes, and their respective
-		 * projections.
-		 */
-		private void calculateProjections() {
-			projections = new ShapeProjection[] {
-					super.getHorizontalProjection(),
-					super.getVerticalProjection()
-			};
-		}
-		
-		@Override
-		protected ShapeProjection getProjection(int i) {
-			return projections[i];
-		}
-		
-		@Override
-		public ShapeProjection getHorizontalProjection() {
-			return projections[0];
-		}
-		
-		@Override
-		public ShapeProjection getVerticalProjection() {
-			return projections[1];
-		}
-		
-		@Override
-		public AxisAlignedBoundingBox notPrecomputed() {
-			return new AxisAlignedBoundingBox(this);
-		}
-		
+	protected AxisAlignedBoundingBox newInstance(Vec2[] verts) {
+		AxisAlignedBoundingBox aabb = new AxisAlignedBoundingBox(
+				verts[V11].x - verts[V00].x,
+				verts[V11].y - verts[V00].y
+		);
+		aabb.vertices = verts;
+		aabb.calcProjections();
+		return aabb;
 	}
 	
 }

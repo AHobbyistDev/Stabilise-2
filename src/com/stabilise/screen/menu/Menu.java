@@ -5,13 +5,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.lwjgl.input.Keyboard;
-
-import com.stabilise.input.Focusable;
-import com.stabilise.input.InputManager;
-import com.stabilise.opengl.Font;
-import com.stabilise.opengl.FontStyle;
-import com.stabilise.opengl.Sprite;
 import com.stabilise.screen.menu.component.Button;
 import com.stabilise.screen.menu.component.ComponentGrid;
 import com.stabilise.screen.menu.component.Image;
@@ -23,7 +16,7 @@ import com.stabilise.util.shape.AxisAlignedBoundingBox;
 /**
  * This class is the base for all menus.
  */
-public abstract class Menu implements Focusable {
+public abstract class Menu /*implements Focusable*/ {
 	
 	//--------------------==========--------------------
 	//-----=====Static Constants and Variables=====-----

@@ -106,6 +106,8 @@ public class LoadingState implements State {
 				);
 				world.setProfiler(Application.get().profiler);
 				
+				Log.get().postInfo("Loading world \"" + world.info.fileSystemName + "\"");
+				
 				player = world.addPlayer(CharacterData.defaultCharacter(), true);
 				HostWorld dim = player.world;
 				
