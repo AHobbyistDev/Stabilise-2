@@ -171,15 +171,21 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 	
 	@Override
 	public void update() {
-		// If we're caught within the update loop but should be shutting down,
-		// let's do so.
+		// If we should be shutting down but ended up in the update loop for
+		// whatever reason, shut down.
 		if(!isActive()) {
 			if(driver != null)
 				driver.stop();
 			shutdown();
 			return;
 		}
-		
+	}
+	
+	/**
+	 * Handles any queued incoming packets. Any subclass of {@code ServerBase}
+	 * should typically invoke this from {@link #update()}.
+	 */
+	protected void handleIncomingPackets() {
 		Packet p;
 		synchronized(connections) {
 			for(ServerTCPConnection con : connections)
@@ -233,6 +239,13 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 		synchronized(state) {
 			state.notifyAll();
 		}
+	}
+	
+	@Override
+	protected void finalize() {
+		// Use finalisers to ensure shutdown in case client code somehow
+		// forgets to do so.
+		shutdown();
 	}
 	
 	/**

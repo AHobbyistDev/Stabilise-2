@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.ClearingQueue;
+import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 import com.stabilise.util.maths.HashPoint;
 
@@ -452,22 +452,14 @@ public class Region {
 		
 		/** The name of the schematic queued to be added. */
 		public String schematicName;
-		/** The x-coordinate of the slice in which to place the schematic,
+		/** The x/y-coordinates of the slice in which to place the schematic,
 		 * relative to the region, in slice-lengths. */
-		public int sliceX;
-		/** The y-coordinate of the slice in which to place the schematic,
-		 * relative to the region, in slice-lengths. */
-		public int sliceY;
-		/** The x-coordinate of the tile in which to place the schematic,
+		public int sliceX, sliceY;
+		/** The x/y-coordinates of the tile in which to place the schematic,
 		 * relative to the slice in which it is in, in tile-lengths. */
-		public int tileX;
-		/** The y-coordinate of the tile in which to place the schematic,
-		 * relative to the slice in which it is in, in tile-lengths. */
-		public int tileY;
-		/** The x-offset of the schematic, in region-lengths. */
-		public int offsetX;
-		/** The y-offset of the schematic, in region-lengths. */
-		public int offsetY;
+		public int tileX, tileY;
+		/** The x/y-offset of the schematic, in region-lengths. */
+		public int offsetX, offsetY;
 		
 		
 		/**
@@ -479,18 +471,6 @@ public class Region {
 		
 		/**
 		 * Creates a new QueuedSchematic.
-		 * 
-		 * @param schematicName The name of the schematic queued to be added.
-		 * @param sliceX The x-coordinate of the slice in which to place the
-		 * schematic, relative to the region, in slice-lengths.
-		 * @param sliceY The y-coordinate of the slice in which to place the
-		 * schematic, relative to the region, in slice-lengths.
-		 * @param tileX The x-coordinate of the tile in which to place the 
-		 * schematic, relative to the slice in which it is in, in tile-lengths.
-		 * @param tileY The y-coordinate of the tile in which to place the
-		 * schematic, relative to the slice in which it is in, in tile-lengths.
-		 * @param offsetX The x-offset of the schematic, in region-lengths.
-		 * @param offsetY The y-offset of the schematic, in region-lengths.
 		 */
 		public QueuedSchematic(String schematicName, int sliceX, int sliceY, int tileX, int tileY, int offsetX, int offsetY) {
 			this.schematicName = schematicName;

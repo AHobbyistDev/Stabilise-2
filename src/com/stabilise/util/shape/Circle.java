@@ -157,10 +157,5 @@ public class Circle extends Shape {
 	protected ShapeProjection getVerticalProjection() {
 		return new ShapeProjection(y - radius, y + radius);
 	}
-
-	@Override
-	protected Shape newInstance() {
-		return this;
-	}
 	
 }

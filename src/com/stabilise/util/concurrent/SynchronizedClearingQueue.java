@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import com.stabilise.util.annotation.ThreadSafe;
-import com.stabilise.util.collect.ClearingQueue;
 
 /**
  * A {@link ClearingQueue} which uses a single mutex lock to guard the entire

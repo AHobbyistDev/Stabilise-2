@@ -7,7 +7,7 @@ import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.maths.Vec2;
-import com.stabilise.util.shape.AxisAlignedBoundingBox;
+import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Rectangle;
 import com.stabilise.util.shape.Shape;
@@ -38,8 +38,8 @@ public class EntityPerson extends EntityMob {
 	// Up attack (ground)
 	public static final int ATTACK_UP_GROUND_DURATION = 40;
 	public static final int ATTACK_UP_GROUND_FRAME_2_BEGIN = 16;
-	public static final AxisAlignedBoundingBox ATTACK_UP_GROUND_HITBOX = new AxisAlignedBoundingBox(-0.04f, 1.89f, 0.16f, 1.63f);
-	public static final AxisAlignedBoundingBox ATTACK_UP_GROUND_HITBOX_FLIPPED = ATTACK_UP_GROUND_HITBOX.reflect();
+	public static final AABB ATTACK_UP_GROUND_HITBOX = new AABB(-0.04f, 1.89f, 0.16f, 1.63f);
+	public static final AABB ATTACK_UP_GROUND_HITBOX_FLIPPED = ATTACK_UP_GROUND_HITBOX.reflect();
 	public static final float ATTACK_UP_GROUND_FORCE = 0.1f;
 	public static final int ATTACK_UP_GROUND_HITBOX_DURATION = 14;
 	
@@ -153,8 +153,8 @@ public class EntityPerson extends EntityMob {
 	
 	
 	@Override
-	protected AxisAlignedBoundingBox getAABB() {
-		return new AxisAlignedBoundingBox(-0.4f, 0f, 0.8f, 1.8f);
+	protected AABB getAABB() {
+		return new AABB(-0.4f, 0f, 0.8f, 1.8f);
 	}
 	
 	@Override

@@ -33,10 +33,9 @@ public class Hitbox extends FreeGameObject {
 	public int damage;
 	/** How much force the hitbox applies upon impact. */
 	public float force = 0.0f;
-	/** The amount of impact force distributed horizontally, from -1.0 to 1.0. */
-	public float fx = 0.0f;
-	/** The amount of impact force distributed vertically, from -1.0 to 1.0. */
-	public float fy = 0.0f;
+	/** The percentage of impact force distributed horizontally/vertically,
+	 * from -1.0 to 1.0. */
+	public float fx = 0.0f, fy = 0.0f;
 	/** The number of frames for which a mob hit by the hitbox will be trapped
 	 * in hitstun. */
 	public int freezeFrames = 0;

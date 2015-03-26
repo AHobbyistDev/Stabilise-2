@@ -34,7 +34,7 @@ public class Slice {
 	/** The tile entities within the slice.
 	 * <br>Tile entities are indexed in the form [y][x].
 	 * <br>This is lazily initialised - that is, {@code null} until a tile
-	 * entity is added to this slice to conserve memory. */
+	 * entity is added to this slice. */
 	public TileEntity[][] tileEntities;
 	
 	
@@ -218,7 +218,7 @@ public class Slice {
 	 * 
 	 * @param world The world.
 	 */
-	public void addContainedEntitiesToWorld(BaseWorld world) {
+	public void addContainedEntitiesToWorld(AbstractWorld world) {
 		if(tileEntities == null)
 			return;
 		// TODO: A more efficient method of finding tile entities may be preferable

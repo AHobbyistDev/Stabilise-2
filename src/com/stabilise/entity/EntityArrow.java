@@ -2,7 +2,7 @@ package com.stabilise.entity;
 
 import com.stabilise.entity.collision.LinkedHitbox;
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.util.shape.AxisAlignedBoundingBox;
+import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Rectangle;
 import com.stabilise.world.World;
 
@@ -58,8 +58,8 @@ public class EntityArrow extends EntityProjectile {
 	}
 	
 	@Override
-	protected AxisAlignedBoundingBox getAABB() {
-		return new AxisAlignedBoundingBox(-0.005f, -0.005f, 0.01f, 0.01f);
+	protected AABB getAABB() {
+		return new AABB(-0.005f, -0.005f, 0.01f, 0.01f);
 	}
 	
 	@Override

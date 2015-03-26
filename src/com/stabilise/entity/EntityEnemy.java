@@ -3,7 +3,7 @@ package com.stabilise.entity;
 import com.stabilise.entity.controller.IdleController;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;
-import com.stabilise.util.shape.AxisAlignedBoundingBox;
+import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.Tile;
 
@@ -18,8 +18,8 @@ public class EntityEnemy extends EntityMob {
 	};
 	
 	/** The AABB for enemy entities. */
-	private static final AxisAlignedBoundingBox ENEMY_AABB =
-			new AxisAlignedBoundingBox(-0.5f, 0, 1, 2);
+	private static final AABB ENEMY_AABB =
+			new AABB(-0.5f, 0, 1, 2);
 	
 	/** The number of ticks for which the enemy is to continue its current
 	 * action.*/
@@ -29,7 +29,7 @@ public class EntityEnemy extends EntityMob {
 	
 	
 	@Override
-	protected AxisAlignedBoundingBox getAABB() {
+	protected AABB getAABB() {
 		return ENEMY_AABB;
 	}
 	

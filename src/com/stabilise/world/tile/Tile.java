@@ -19,7 +19,6 @@ public class Tile {
 	private static final RegistryNamespacedDefaulted<Tile> TILES =
 			new RegistryNamespacedDefaulted<>("TileRegistry", "stabilise", "air", 32);
 	
-	// Template values for hardness
 	/** Template hardness values for different tile types. */
 	protected static final float
 			H_DIRT = 1.0f,
@@ -244,27 +243,27 @@ public class Tile {
 	 * @throws IllegalStateException if this method has already been invoked.
 	 */
 	public static void registerTiles() {
-		registerTile(0, "air", new TileAir());
-		registerTile(1, "void", new Tile().setHardness(H_INVULNERABLE));
-		registerTile(2, "bedrock", new Tile().setHardness(H_INVULNERABLE));
+		registerTile(0, "air",			new TileAir());
+		registerTile(1, "void",			new Tile().setHardness(H_INVULNERABLE));
+		registerTile(2, "bedrock",		new Tile().setHardness(H_INVULNERABLE));
 		registerTile(3, "invisibleBedrock", new Tile().setHardness(H_INVULNERABLE));
-		registerTile(4, "stone", new Tile().setHardness(H_STONE));
-		registerTile(5, "dirt", new Tile().setHardness(H_DIRT));
-		registerTile(6, "grass", new TileGrass().setHardness(H_DIRT));
-		registerTile(7, "wood", new Tile().setHardness(H_WOOD));
-		registerTile(8, "leaves", new Tile().setHardness(H_DIRT));
-		registerTile(9, "planks", new Tile().setHardness(H_WOOD));
-		registerTile(10, "water", new TileFluid().setViscosity(0.12f));
-		registerTile(11, "lava", new TileFluid().setViscosity(0.8f));
-		registerTile(12, "ice", new Tile().setHardness(H_DIRT).setFriction(0.008f));
-		registerTile(13, "stoneBrick", new Tile().setHardness(H_STONE));
-		registerTile(14, "oreIron", new TileOre().setHardness(H_STONE));
-		registerTile(15, "oreCopper", new TileOre().setHardness(H_STONE));
-		registerTile(16, "oreGold", new TileOre().setHardness(H_STONE));
-		registerTile(17, "oreSilver", new TileOre().setHardness(H_STONE));
-		registerTile(18, "oreDiamond", new TileOre().setHardness(H_STONE));
-		registerTile(19, "chest", new TileChest().setHardness(H_WOOD));
-		registerTile(20, "mobSpawner", new TileMobSpawner());
+		registerTile(4, "stone",		new Tile().setHardness(H_STONE));
+		registerTile(5, "dirt",			new Tile().setHardness(H_DIRT));
+		registerTile(6, "grass",		new TileGrass().setHardness(H_DIRT));
+		registerTile(7, "wood",			new Tile().setHardness(H_WOOD));
+		registerTile(8, "leaves",		new Tile().setHardness(H_DIRT));
+		registerTile(9, "planks",		new Tile().setHardness(H_WOOD));
+		registerTile(10, "water",		new TileFluid().setViscosity(0.12f));
+		registerTile(11, "lava",		new TileFluid().setViscosity(0.8f));
+		registerTile(12, "ice",			new Tile().setHardness(H_DIRT).setFriction(0.008f));
+		registerTile(13, "stoneBrick",	new Tile().setHardness(H_STONE));
+		registerTile(14, "oreIron",		new TileOre().setHardness(H_STONE));
+		registerTile(15, "oreCopper",	new TileOre().setHardness(H_STONE));
+		registerTile(16, "oreGold",		new TileOre().setHardness(H_STONE));
+		registerTile(17, "oreSilver",	new TileOre().setHardness(H_STONE));
+		registerTile(18, "oreDiamond",	new TileOre().setHardness(H_STONE));
+		registerTile(19, "chest",		new TileChest().setHardness(H_WOOD));
+		registerTile(20, "mobSpawner",	new TileMobSpawner());
 		
 		TILES.lock();
 	}

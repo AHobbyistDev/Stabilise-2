@@ -5,7 +5,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.stabilise.util.collect.ClearingQueue;
+import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.concurrent.ConcurrentClearingQueue;
 import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 

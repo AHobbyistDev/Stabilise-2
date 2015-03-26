@@ -24,7 +24,7 @@ import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.concurrent.TaskThread;
 import com.stabilise.util.concurrent.TaskTracker;
 import com.stabilise.util.maths.Point;
-import com.stabilise.world.BaseWorld;
+import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
 import com.stabilise.world.old.ClientWorld;
@@ -318,7 +318,7 @@ public class WorldSelectMenu extends SubMenu {
 	 * Loads the worlds.
 	 */
 	private void loadWorlds() {
-		worlds = BaseWorld.getWorldsList();
+		worlds = AbstractWorld.getWorldsList();
 		worlds = ArrayUtil.setMinArrayLength(worlds, NUM_WORLDS);
 	}
 	

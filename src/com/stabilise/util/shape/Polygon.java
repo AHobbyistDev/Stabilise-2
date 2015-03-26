@@ -106,15 +106,19 @@ public class Polygon extends AbstractPolygon {
 		return containsPointPrecomputed(x,y);
 	}
 	
-	private Vec2[] genAxes() {
+	/** Gens the axes. */
+	protected Vec2[] genAxes() {
 		axes = super.getAxes();
-		// Generate the self-projections while we're at it.
-		projections = new ShapeProjection[axes.length];
-		for(int i = 0; i < axes.length; i++)
-			projections[i] = getProjection(axes[i]);
+		genProjections();
 		return axes;
 	}
 	
+	/** Gens the projections. */
+	protected void genProjections() {
+		projections = new ShapeProjection[axes.length];
+		for(int i = 0; i < axes.length; i++)
+			projections[i] = getProjection(axes[i]);
+	}
 
 	@Override
 	protected Vec2[] getAxes() {
@@ -123,7 +127,10 @@ public class Polygon extends AbstractPolygon {
 	
 	// ------------------------------------------------------------------------
 	
-	@Override
+	/**
+	 * Returns a new shape instance of the same class as this one, for
+	 * duplication in transformation purposes.
+	 */
 	protected Polygon newInstance() {
 		return new Polygon();
 	}

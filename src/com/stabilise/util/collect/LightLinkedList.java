@@ -20,8 +20,9 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * {@link #add(Object) appending} and {@link #iterator() iterating}, and for
  * which removal of elements only occurs while iterating.
  * 
- * <p>Though this class is not thread-safe, it supports {@link #add(Object)
- * add} operations while being iterated over.
+ * <p>Iterators over elements of a {@code LightLinkedList} will never throw
+ * {@code ConcurrentModificationExceptions}, and as such it is safe to {@code
+ * add} elements while iterating.
  * 
  * <p>Refer to the documentation of a method before using it, as many methods
  * of this class will throw an {@code UnsupportedOperationException}.
@@ -214,13 +215,6 @@ public class LightLinkedList<E> extends AbstractCollection<E> implements List<E>
 	
 	@Override
 	public void clear() {
-		// Since LinkedList detatches all nodes rather than simply nullifying
-		// head and tail, I figure I may as well do that too.
-		for(Node<E> node = head; node != null;) {
-			Node<E> next = node.next;
-			node.wipe();
-			node = next;
-		}
 		head = tail = null;
 		size = 0;
 	}
@@ -346,14 +340,6 @@ public class LightLinkedList<E> extends AbstractCollection<E> implements List<E>
 		
 		Node(Node<E> next) {
 			this.next = next;
-		}
-		
-		/**
-		 * Nullifies pointers to help the GC.
-		 */
-		void wipe() {
-			e = null;
-			next = null;
 		}
 		
 	}

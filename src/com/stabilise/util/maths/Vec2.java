@@ -84,5 +84,5 @@ public class Vec2 {
 	public Vec2 rotate90Degrees() {
 		return new Vec2(-y, x);
 	}
-
+	
 }

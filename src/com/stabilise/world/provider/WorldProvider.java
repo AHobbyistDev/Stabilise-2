@@ -17,7 +17,7 @@ import com.stabilise.util.Checkable;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
-import com.stabilise.world.BaseWorld;
+import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.save.WorldLoader;
 
@@ -33,7 +33,7 @@ import com.stabilise.world.save.WorldLoader;
  * member through which they interact with the dimension they are in) for both
  * legacy and aesthetic purposes.
  */
-public abstract class WorldProvider<W extends BaseWorld> {
+public abstract class WorldProvider<W extends AbstractWorld> {
 	
 	/*
 	 * TYPES OF WORLDPROVIDER
@@ -74,7 +74,7 @@ public abstract class WorldProvider<W extends BaseWorld> {
 	/** Stores all dimensions. Maps dimension names -> dimensions. */
 	protected final Map<String, W> dimensions = new HashMap<>(2);
 	
-	/** Profile any world's operation with this. */
+	/** Profile any world's operation with this. Note this may be {@code null}. */
 	public Profiler profiler;
 	protected final Log log = Log.getAgent("WorldProvider");
 	
@@ -142,7 +142,7 @@ public abstract class WorldProvider<W extends BaseWorld> {
 	
 	// This is a WorldProvider method so we can catch client players being sent
 	// and shift the worldview
-	public void sendToDimension(BaseWorld oldDim, String dimension, Entity e, double x, double y) {
+	public void sendToDimension(AbstractWorld oldDim, String dimension, Entity e, double x, double y) {
 		oldDim.removeEntity(e);
 		W dim = loadDimension(dimension);
 		dim.addEntity(e, x, y);

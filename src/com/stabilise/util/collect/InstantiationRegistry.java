@@ -269,7 +269,8 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 				if(className == null)
 					className = "[null]";
 				throw new RuntimeException("Constructor for " + className
-						+ " with requested arguments does not exist! (" + e.getMessage() + ")");
+						+ " with requested arguments does not exist! ("
+						+ e.getMessage() + ")");
 			}
 		}
 		
@@ -278,8 +279,10 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 			try {
 				return constructor.newInstance(args);
 			} catch(Exception e) {
-				throw new RuntimeException("Could not reflectively instantiate object of class \""
-						+ constructor.getDeclaringClass().getSimpleName() + "\"! (" + e.getMessage() + ")",
+				throw new RuntimeException("Could not reflectively instantiate"
+						+ " object of class \""
+						+ constructor.getDeclaringClass().getSimpleName()
+						+ "\"! (" + e.getMessage() + ")",
 						e);
 			}
 		}

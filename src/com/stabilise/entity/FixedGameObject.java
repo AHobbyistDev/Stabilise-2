@@ -1,6 +1,6 @@
 package com.stabilise.entity;
 
-import com.stabilise.world.AbstractWorld;
+import static com.stabilise.world.World.*;
 
 /**
  * A FixedGameObject is a game object whose coordinates are constrained to the
@@ -21,12 +21,12 @@ public abstract class FixedGameObject extends GameObject {
 	
 	@Override
 	public final int getSliceX() {
-		return AbstractWorld.sliceCoordFromTileCoord(x);
+		return sliceCoordFromTileCoord(x);
 	}
 	
 	@Override
 	public final int getSliceY() {
-		return AbstractWorld.sliceCoordFromTileCoord(y);
+		return sliceCoordFromTileCoord(y);
 	}
 	
 }

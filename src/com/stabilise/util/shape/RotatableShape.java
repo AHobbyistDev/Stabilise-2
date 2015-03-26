@@ -37,9 +37,9 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 * @throws IllegalArgumentException if {@code shape} is an AABB.
 	 */
 	public RotatableShape(T shape) {
-		if(shape.isAABB())
-			throw new IllegalArgumentException("Cannot wrap an AABB in a RotatableShape " +
-					"since it may not be rotated!");
+		if(shape instanceof AABB)
+			throw new IllegalArgumentException("Cannot wrap an AABB in a "
+					+ "RotatableShape since it may not be rotated!");
 		
 		this.baseShape = shape;
 		rotatedShape = shape;
@@ -142,11 +142,6 @@ public class RotatableShape<T extends Shape> extends Shape {
 	@Override
 	public boolean containsPoint(float x, float y) {
 		return rotatedShape.containsPoint(x, y);
-	}
-	
-	@Override
-	protected Shape newInstance() {
-		throw new UnsupportedOperationException();
 	}
 	
 }

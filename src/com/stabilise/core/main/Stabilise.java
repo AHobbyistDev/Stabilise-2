@@ -62,11 +62,8 @@ public class Stabilise extends Application {
 				Constants.VERSION,
 				"Brought to you by Java!",
 				"Coming soon to a computer near you!",
-				//"All of the renderings!",
-				//"(Immediate rendering not included)",
 				"Look, a distraction!",
 				"II esilibatS",
-				//"Now with menus!",
 				"20% less bugs!",
 				"20% more bugs!",
 				"Stable release builds? Hah!",
@@ -78,7 +75,6 @@ public class Stabilise extends Application {
 				//"Made in China",
 				"Now with excavators!",
 				"(I lied about the excavators)",
-				//"Ignore the middle bar",
 				"No refunds!"
 		};
 		

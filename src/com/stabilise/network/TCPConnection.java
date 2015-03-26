@@ -232,10 +232,8 @@ public class TCPConnection {
 	 */
 	public void closeConnection() {
 		if(!state.compareAndSet(STATE_ACTIVE, STATE_SHUTDOWN) &&
-				!state.compareAndSet(STATE_CLOSE_REQUESTED, STATE_SHUTDOWN)) {
-			log.postWarning("Attempting to close while inactive!");
+				!state.compareAndSet(STATE_CLOSE_REQUESTED, STATE_SHUTDOWN))
 			return;
-		}
 		
 		log.postInfo("Closing connection...");
 		
@@ -246,8 +244,9 @@ public class TCPConnection {
 		close(out, "output stream");
 		close(socket, "socket");
 		
-		readThread.doJoin();
-		writeThread.doJoin();
+		// On second thought, don't bother joining these threads
+		//readThread.doJoin();
+		//writeThread.doJoin();
 		
 		state.set(STATE_TERMINATED);
 		
@@ -269,9 +268,11 @@ public class TCPConnection {
 		}
 	}
 	
-	//--------------------==========--------------------
-	//-------------=====Getters/Setters=====------------
-	//--------------------==========--------------------
+	@Override
+	protected void finalize() {
+		// Abuse finalisers to ensure a connection is closed properly.
+		closeConnection();
+	}
 	
 	/**
 	 * @return {@code true} if this connection is active; {@code false}
@@ -317,6 +318,7 @@ public class TCPConnection {
 		 * Invokes join() on this thread and silently ignores an
 		 * InterruptedException if it is thrown.
 		 */
+		@SuppressWarnings("unused")
 		public void doJoin() {
 			try {
 				join();

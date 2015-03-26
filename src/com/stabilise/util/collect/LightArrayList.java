@@ -172,6 +172,18 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
 		return e;
 	}
 	
+	/**
+	 * Sets the element at the specified index without returning the old
+	 * element at that index.
+	 * 
+	 * @throws ArrayIndexOutOfBoundsException if {@code index < 0 || index >=
+	 * size()}.
+	 */
+	public void set2(int index, E element) {
+		rangeCheckUpper(index);
+		data[index] = element;
+	}
+	
 	@Override
 	public void add(int index, E element) {
 		rangeCheck(index);

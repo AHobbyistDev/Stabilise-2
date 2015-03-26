@@ -72,14 +72,13 @@ public class Rectangle extends Polygon {
 	}
 	
 	@Override
-	protected Vec2[] getAxes() {
-		// Rectangles require only two axes; as a rectangle consists of two
-		// pairs of parallel edges, two axes would otherwise be duplicates -
-		// hence, we can ignore the dupes.
-		return new Vec2[] {
+	protected Vec2[] genAxes() {
+		axes = new Vec2[] {
 				getAxis(vertices[V00], vertices[V01]),
 				getAxis(vertices[V00], vertices[V10])
 		};
+		genProjections();
+		return axes;
 	}
 	
 	@Override

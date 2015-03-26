@@ -1,5 +1,7 @@
 package com.stabilise.world;
 
+import static com.stabilise.world.World.*;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -30,7 +32,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * and the world generator
  * -->
  */
-public class HostWorld extends BaseWorld {
+public class HostWorld extends AbstractWorld {
 	
 	/** The world generator. */
 	public final WorldGenerator generator;
@@ -58,7 +60,7 @@ public class HostWorld extends BaseWorld {
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public HostWorld(WorldProvider<? extends BaseWorld> provider, Dimension dimension) {
+	public HostWorld(WorldProvider<? extends AbstractWorld> provider, Dimension dimension) {
 		super(provider, dimension);
 		
 		spawnSliceX = dimension.info.spawnSliceX;
@@ -312,11 +314,11 @@ public class HostWorld extends BaseWorld {
 		int maxY = minY + Region.REGION_SIZE_IN_TILES;
 		
 		for(Entity e : getEntities()) {
-			if(e.x + e.boundingBox.getV11().x >= minX
-					&& e.x + e.boundingBox.getV00().x <= maxX
-					&& e.y + e.boundingBox.getV11().y >= minY
-					&& e.y + e.boundingBox.getV00().y <= maxY)
-				removeEntity(e);
+			if(e.x + e.boundingBox.v11.x >= minX
+					&& e.x + e.boundingBox.v00.x <= maxX
+					&& e.y + e.boundingBox.v11.y >= minY
+					&& e.y + e.boundingBox.v00.y <= maxY)
+				e.destroy();
 		}
 		
 		numRegions.getAndDecrement();
@@ -501,11 +503,6 @@ public class HostWorld extends BaseWorld {
 	@Override
 	public void sendToDimension(String dimension, Entity e, double x, double y) {
 		provider.sendToDimension(this, dimension, e, x, y);
-	}
-	
-	@Override
-	public long getAge() {
-		return dimension.info.age;
 	}
 	
 	/**

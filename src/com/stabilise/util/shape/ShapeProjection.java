@@ -22,6 +22,16 @@ class ShapeProjection {
 	}
 	
 	/**
+	 * Tests for projection intersection.
+	 * 
+	 * <p>This relation has the following properties;
+	 * 
+	 * <ul>
+	 * <li>It is <b>reflexive</b> - i.e. {@code a.intersects(a) == true}.
+	 * <li>It is <b>symmetric</b> - i.e. {@code a.intersects(b) ==
+	 *     b.intersects(a)}.
+	 * </ul>
+	 * 
 	 * @param p The projection to compare against.
 	 * 
 	 * @return {@code true} if the two projections overlap; {@code false}
@@ -33,6 +43,28 @@ class ShapeProjection {
 	}
 	
 	/**
+	 * Tests for projection intersection given the components of another
+	 * projection.
+	 * 
+	 * @see #intersects(ShapeProjection)
+	 */
+	public boolean intersects(float min, float max) {
+		return this.min <= min && this.max >= min;
+	}
+	
+	/**
+	 * Tests for containment of another projection.
+	 * 
+	 * <p>This relation has the following properties:
+	 * 
+	 * <ul>
+	 * <li>It is <b>reflexive</b> - i.e. {@code a.contains(a) == true}.
+	 * <li>It is <b>anti-symmetric</b> - i.e. {@code a.contains(b) !=
+	 *     b.contains(a)} unless {@code a == b}.
+	 * <li>It is <b>transitive</b> - i.e. {@code a.contains(b) && b.contains(c)
+	 *     => a.contains(c)}.
+	 * </ul>
+	 * 
 	 * @param p The projection to compare against.
 	 * 
 	 * @return {@code true} if this projection contains the other; {@code
@@ -51,6 +83,13 @@ class ShapeProjection {
 	 */
 	public boolean containsPoint(float x) {
 		return x >= min && x <= max;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(!(o instanceof ShapeProjection)) return false;
+		ShapeProjection p = (ShapeProjection)o;
+		return min == p.min && max == p.max;
 	}
 
 }

@@ -16,7 +16,9 @@ import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Checkable;
 import com.stabilise.util.IOUtil;
 import com.stabilise.util.Log;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.world.tile.Tile;
+import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -52,7 +54,11 @@ public interface World extends Checkable {
 	 * @param x The x-coordinate at which to place the entity, in tile-lengths.
 	 * @param y The y-coordinate at which to place the entity, in tile-lengths.
 	 */
-	void addEntity(Entity e, double x, double y);
+	default void addEntity(Entity e, double x, double y) {
+		e.x = x;
+		e.y = y;
+		addEntity(e);
+	}
 	
 	/**
 	 * Adds an entity to the world. The entity's ID is assigned automatically.
@@ -88,7 +94,9 @@ public interface World extends Checkable {
 	 * 
 	 * @throws NullPointerException if {@code e} is {@code null}.
 	 */
-	void removeEntity(Entity e);
+	default void removeEntity(Entity e) {
+		removeEntity(e.id);
+	}
 	
 	/**
 	 * Removes an entity from the world.
@@ -112,7 +120,11 @@ public interface World extends Checkable {
 	 * 
 	 * @throws NullPointerException if {@code h} is {@code null}.
 	 */
-	void addHitbox(Hitbox h, double x, double y);
+	default void addHitbox(Hitbox h, double x, double y) {
+		h.x = x;
+		h.y = y;
+		addHitbox(h);
+	}
 	
 	/**
 	 * Adds a hitbox to the world. The hitbox's ID is assigned automatically.
@@ -134,7 +146,11 @@ public interface World extends Checkable {
 	 * 
 	 * @throws NullPointerException if {@code p} is {@code null}.
 	 */
-	void addParticle(Particle p, double x, double y);
+	default void addParticle(Particle p, double x, double y) {
+		p.x = x;
+		p.y = y;
+		addParticle(p);
+	}
 	
 	/**
 	 * Adds a particle to the world.
@@ -197,7 +213,12 @@ public interface World extends Checkable {
 	 * @return The slice at the given coordinates, or {@code null} if no such
 	 * slice is loaded.
 	 */
-	Slice getSliceAtTile(int x, int y);
+	default Slice getSliceAtTile(int x, int y) {
+		// This should be optimised for worlds which deal with regions
+		return getSliceAt(
+				sliceCoordFromTileCoord(x),
+				sliceCoordFromTileCoord(y));
+	}
 	
 	/**
 	 * Gets a tile at the given coordinates. Fractional coordinates are rounded
@@ -210,7 +231,11 @@ public interface World extends Checkable {
 	 * {@link com.stabilise.world.tile.Tile#invisibleBedrock invisibleBedrock}
 	 * tile if no such tile is loaded.
 	 */
-	Tile getTileAt(double x, double y);
+	default Tile getTileAt(double x, double y) {
+		return getTileAt(
+				tileCoordFreeToTileCoordFixed(x),
+				tileCoordFreeToTileCoordFixed(y));
+	}
 	
 	/**
 	 * Gets a tile at the given coordinates.
@@ -222,7 +247,16 @@ public interface World extends Checkable {
 	 * {@link com.stabilise.world.tile.Tiles#BEDROCK_INVISIBLE invisible
 	 * bedrock} tile if no such tile is loaded.
 	 */
-	Tile getTileAt(int x, int y);
+	default Tile getTileAt(int x, int y) {
+		Slice s = getSliceAtTile(x, y);
+		if(s == null)
+			return Tiles.BEDROCK_INVISIBLE;
+		else
+			return s.getTileAt(
+					tileCoordRelativeToSliceFromTileCoord(x),
+					tileCoordRelativeToSliceFromTileCoord(y)
+			);
+	}
 	
 	/**
 	 * Sets a tile at the given coordinates.
@@ -250,7 +284,16 @@ public interface World extends Checkable {
 	 * @return The tile entity at the given coordinates, or {@code null} if no
 	 * such tile entity is loaded.
 	 */
-	TileEntity getTileEntityAt(int x, int y);
+	default TileEntity getTileEntityAt(int x, int y) {
+		Slice s = getSliceAtTile(x, y);
+		if(s == null)
+			return null;
+		else
+			return s.getTileEntityAt(
+					tileCoordRelativeToSliceFromTileCoord(x),
+					tileCoordRelativeToSliceFromTileCoord(y)
+			);
+	}
 	
 	/**
 	 * Sets a tile entity at the given coordinates.
@@ -365,6 +408,196 @@ public interface World extends Checkable {
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------
+	
+	/**
+	 * Gets the coordinate of the region at the given tile coordinate.
+	 * 
+	 * <p>Note that the given coordinate may be one along any axis.
+	 * 
+	 * @param c The coordinate, in tile-lengths.
+	 * 
+	 * @return The coordinate of the region occupying the given coordinate, in
+	 * region-lengths.
+	 */
+	public static int regionCoordFromTileCoord(int c) {
+		return c >> Region.REGION_SIZE_IN_TILES_SHIFT;
+	}
+	
+	/**
+	 * Gets the coordinate of the region at the given absolute slice
+	 * coordinate.
+	 * 
+	 * <p>Note that the given coordinate may be one along any axis.
+	 * 
+	 * @param c The coordinate, in slice-lengths.
+	 * 
+	 * @return The coordinate of the region occupying the given coordinate, in
+	 * region-lengths.
+	 */
+	public static int regionCoordFromSliceCoord(int c) {
+		return c >> Region.REGION_SIZE_SHIFT;
+	}
+	
+	/**
+	 * Gets the coordinate of the slice at the given coordinate.
+	 * 
+	 * <p>Note that the given coordinate may be one along any axis.
+	 * 
+	 * @param c The coordinate, in tile-lengths.
+	 * 
+	 * @return The coordinate of the slice occupying the given coordinate, in
+	 * slice-lengths.
+	 */
+	public static int sliceCoordFromTileCoord(int c) {
+		return c >> Slice.SLICE_SIZE_SHIFT;
+	}
+	
+	/**
+	 * Gets the coordinate of the slice at the given coordinate.
+	 * 
+	 * <p>Note that the given coordinate may be one along any axis.
+	 * 
+	 * @param c The coordinate, in tile-lengths.
+	 * 
+	 * @return The coordinate of the slice occupying the given coordinate, in
+	 * slice-lengths.
+	 */
+	public static int sliceCoordFromTileCoord(double c) {
+		return Maths.floor(c / Slice.SLICE_SIZE);
+	}
+	
+	/**
+	 * Gets the coordinate of the slice at the start of a region at the given
+	 * coordinate, in slice-lengths.
+	 * 
+	 * <p>Note that the given coordinate may be one along any axis.
+	 * 
+	 * @param c The coordinate, in region-lengths.
+	 * 
+	 * @return The coordinate of the slice at the start of the region, in
+	 * slice-lengths.
+	 */
+	public static int sliceCoordFromRegionCoord(int c) {
+		return c * Region.REGION_SIZE;
+	}
+	
+	/**
+	 * Gets the coordinate of the slice, relative to its parent region, at the
+	 * given coordinate.
+	 * 
+	 * <p>Note that the given coordinate may be one along any axis.
+	 * 
+	 * @param c The coordinate, in tile-lengths.
+	 * 
+	 * @return The coordinate of the slice occupying the given coordinate, in
+	 * slice-lengths, relative to its parent region.
+	 */
+	public static int sliceCoordRelativeToRegionFromTileCoord(int c) {
+		//return Maths.wrappedRem(c, Region.REGION_SIZE);
+		//return Maths.wrappedRem2(c, Region.REGION_SIZE);				// Way faster
+		return sliceCoordFromTileCoord(c) & Region.REGION_SIZE_MINUS_ONE;	// One less instruction
+	}
+	
+	/**
+	 * Gets the coordinate of the slice, relative to its parent region, at the
+	 * given coordinate. That is, converts the given slice coordinate to local
+	 * region space.
+	 * 
+	 * <p>Note that the given coordinate may be one along any axis.
+	 * 
+	 * @param c The coordinate, in slice-lengths.
+	 * 
+	 * @return The coordinate of the slice, in slice-lengths, relative to its
+	 * parent region.
+	 */
+	public static int sliceCoordRelativeToRegionFromSliceCoord(int c) {
+		//return Maths.wrappedRem(c, Region.REGION_SIZE);
+		//return Maths.wrappedRem2(c, Region.REGION_SIZE);		// Way faster
+		return c & Region.REGION_SIZE_MINUS_ONE;				// One less instruction
+	}
+	
+	/**
+	 * Gets the coordinate of the start of a slice at the given coordinate, in
+	 * tile-lengths.
+	 * 
+	 * <p>Note that the given coordinate may be one along any axis.
+	 * 
+	 * <p>Also note that this method also returns the starting tile of a slice
+	 * relative to a region, provided the {@code c} parameter given is that of
+	 * the slice's coordinate relative to the region.
+	 * 
+	 * @param c The coordinate, in slice-lengths.
+	 * 
+	 * @return The coordinate of the start of the slice, in tile-lengths.
+	 */
+	public static int tileCoordFromSliceCoord(int c) {
+		return c * Slice.SLICE_SIZE;
+	}
+	
+	/**
+	 * Gets the coordinate of the start of a region at the given coordinate,in
+	 * tile-lengths.
+	 * 
+	 * <p>Note that the given coordinate may be one along any axis.
+	 * 
+	 * @param c The coordinate, in region-lengths.
+	 * 
+	 * @return The coordinate of the start of the region, in tile-lengths.
+	 */
+	public static int tileCoordFromRegionCoord(int c) {
+		return c * Region.REGION_SIZE_IN_TILES;
+	}
+	
+	/**
+	 * Gets the coordinate of the tile, relative to its parent slice, at the
+	 * given coordinate. That is, converts the given tile coordinate to local
+	 * slice space.
+	 * 
+	 * <p>Note that the given coordinate may be one along any axis.
+	 * 
+	 * @param c The coordinate, in tile-lengths.
+	 * 
+	 * @return The coordinate of the tile, in tile-lengths, relative to its
+	 * parent slice.
+	 */
+	public static int tileCoordRelativeToSliceFromTileCoord(int c) {
+		//return Maths.wrappedRem(c, Slice.SLICE_SIZE);
+		//return Maths.wrappedRem2(c, Slice.SLICE_SIZE);		// Way faster
+		return c & Slice.SLICE_SIZE_MINUS_ONE;					// One less instruction
+	}
+	
+	/**
+	 * Gets the coordinate of the tile, relative to its parent region, at the
+	 * given coordinate. That is, converts the given tile coordinate to local
+	 * region space.
+	 * 
+	 * <p>Note that the given coordinate may be one along any axis.
+	 * 
+	 * @param c The coordinate, in tile-lengths.
+	 * 
+	 * @return The coordinate of the tile, in tile-lengths, relative to its
+	 * parent region.
+	 */
+	public static int tileCoordRelativeToRegionFromTileCoord(int c) {
+		//return Maths.wrappedRem(c, Region.REGION_SIZE_IN_TILES);
+		//return Maths.wrappedRem2(c, Region.REGION_SIZE_IN_TILES);		// Way faster
+		return c & Region.REGION_SIZE_IN_TILES_MINUS_ONE;				// One less instruction
+	}
+	
+	/**
+	 * Gets the coordinate of the tile which occupies the specified coordinate.
+	 * This method essentially provides a means to 'snap' an x or y to the
+	 * coordinate grid of the world.
+	 * 
+	 * @param c The coordinate, in tile-lengths.
+	 * 
+	 * @return The coordinate of the tile, in tile-lengths.
+	 */
+	public static int tileCoordFreeToTileCoordFixed(double c) {
+		return Maths.floor(c);
+	}
+	
+	// WORLD MANAGEMENT STUFF -------------------------------------------------
 	
 	/**
 	 * Creates a new world with a random seed.

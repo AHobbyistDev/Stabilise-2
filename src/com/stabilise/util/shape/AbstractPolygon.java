@@ -70,6 +70,7 @@ abstract class AbstractPolygon extends Shape {
 	 * {@code false} if it does not.
 	 */
 	protected boolean intersectsOnOwnAxes(Shape s) {
+		System.out.println("intersectsOnOwnAxes SHOULD NOT BE A THING THAT IS USED");
 		Vec2[] axes = getAxes();
 		for(Vec2 axis : axes) {
 			if(!getProjection(axis).intersects(s.getProjection(axis)))

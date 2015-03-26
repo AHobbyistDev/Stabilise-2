@@ -1,6 +1,7 @@
 package com.stabilise.world.save;
 
 import static com.stabilise.world.Region.REGION_SIZE;
+import static com.stabilise.world.World.*;
 
 import java.io.IOException;
 
@@ -12,7 +13,6 @@ import com.stabilise.util.nbt.NBTTagList;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
 import com.stabilise.world.Region.QueuedSchematic;
-import com.stabilise.world.BaseWorld;
 import com.stabilise.world.provider.WorldProvider;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
@@ -60,8 +60,8 @@ public class PreAlphaWorldLoader extends WorldLoader {
 						NBTTagCompound tc = (NBTTagCompound)t;
 						TileEntity te = TileEntity.createTileEntityFromNBT(tc);
 						s.tileEntities		// I just love really long method names!
-							[BaseWorld.tileCoordRelativeToSliceFromTileCoord(te.y)]
-							[BaseWorld.tileCoordRelativeToSliceFromTileCoord(te.x)] = te; 
+							[tileCoordRelativeToSliceFromTileCoord(te.y)]
+							[tileCoordRelativeToSliceFromTileCoord(te.x)] = te; 
 					}
 					
 					r.slices[y][x] = s;

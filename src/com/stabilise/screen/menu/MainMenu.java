@@ -200,7 +200,7 @@ public class MainMenu extends SubMenuBasedMenu {
 		background.draw();
 		
 		for(int i = 0; i < backgroundTiles; i++) {
-			backgroundTile.x = background.x + background.getWidth() + i * backgroundTile.getWidth();
+			backgroundTile.x = background.x + background.width() + i * backgroundTile.width();
 			backgroundTile.draw();
 			/*
 			if(screen.getWidth() >= BASE_WIDTH) {
@@ -235,15 +235,15 @@ public class MainMenu extends SubMenuBasedMenu {
 		super.rescale(width, height);
 		
 		sky.setSize(width, height);
-		screenSpace = width - background.getWidth();
+		screenSpace = width - background.width();
 		
 		if(width < BASE_WIDTH) {
 			// If the screen starts getting small, reposition the background so the character stays on screen
 			originX = screenSpace / 2 - (int)((float)CHARACTER_OFFSET_X * (BASE_WIDTH - width) / BASE_WIDTH / 2);
-			backgroundTiles = (int) Math.ceil((float)(width - backgroundTile.getWidth() - originX) / backgroundTile.getWidth());
+			backgroundTiles = (int) Math.ceil((float)(width - backgroundTile.width() - originX) / backgroundTile.width());
 		} else {
 			originX = screenSpace / 2;
-			backgroundTiles = (int) Math.ceil(screenSpace / (backgroundTile.getWidth() * 2f));
+			backgroundTiles = (int) Math.ceil(screenSpace / (backgroundTile.width() * 2f));
 		}
 		
 		if(height < BASE_HEIGHT) {

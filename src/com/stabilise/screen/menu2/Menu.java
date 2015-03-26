@@ -45,7 +45,7 @@ public abstract class Menu implements InputProcessor {
 	//private boolean itemHoveredOver = false;
 	
 	/** The scheduled events. */
-	private List<ScheduledEvent> scheduledEvents = new LightLinkedList<ScheduledEvent>();
+	private List<ScheduledEvent> scheduledEvents = new LightLinkedList<>();
 	
 	
 	/** Whether or not the menu is to be closed; this is {@code false} by

@@ -113,8 +113,8 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
 	 */
 	private void spawnParticleOnMob(World world, EntityMob e) {
 		ParticleSmoke p = new ParticleSmoke();
-		p.x = e.x + e.boundingBox.getV00().x + world.getRnd().nextFloat() * e.boundingBox.width;
-		p.y = e.y + e.boundingBox.getV11().y + world.getRnd().nextFloat() * e.boundingBox.height;
+		p.x = e.x + e.boundingBox.v00.x + world.getRnd().nextFloat() * e.boundingBox.width();
+		p.y = e.y + e.boundingBox.v11.y + world.getRnd().nextFloat() * e.boundingBox.height();
 		
 		ParticleGenerator.directParticle(p, 0.04f, 0.12f, 0, Maths.TAU);
 		p.dy *= 0.1;

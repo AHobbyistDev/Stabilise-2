@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import com.stabilise.util.annotation.ThreadSafe;
-import com.stabilise.util.collect.ClearingQueue;
 
 /**
  * A {@link ClearingQueue} which does not utilise locking, and instead offers

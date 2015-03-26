@@ -96,6 +96,7 @@ public class UnboundedContainer extends Container {
 	@Override
 	protected ItemStack getAndSetSlot(int slot, ItemStack stack) {
 		// add intermediates
+		items.ensureInternalLength(slot + 1);
 		while(items.size() <= slot)
 			items.add(ItemStack.NO_STACK);
 		return items.set(slot, stack);

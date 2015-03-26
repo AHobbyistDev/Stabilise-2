@@ -80,9 +80,7 @@ public class ClearingLinkedList<E> extends LightLinkedList<E> {
 		
 		@Override
 		public E next() {
-			Node<E> prev = lastReturned;
 			lastReturned = lastReturned.next;
-			prev.wipe();
 			if(lastReturned == null)
 				throw new NoSuchElementException();
 			return lastReturned.e;

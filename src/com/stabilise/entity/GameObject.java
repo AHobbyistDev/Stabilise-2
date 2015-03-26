@@ -45,6 +45,8 @@ public abstract class GameObject {
 	 * should be removed from the world ASAP; {@code false} otherwise.
 	 */
 	public boolean updateAndCheck(World world) {
+		if(isDestroyed())
+			return true;
 		update(world);
 		return isDestroyed();
 	}

@@ -1,4 +1,4 @@
-package com.stabilise.util.collect;
+package com.stabilise.util.concurrent;
 
 import java.util.Iterator;
 
@@ -51,7 +51,8 @@ public interface ClearingQueue<E> extends Iterable<E> {
 	 * 
 	 * <p>This method essentially ports the state of this queue over to the
 	 * returned iterator, and as such additions to the queue after iterator
-	 * creation are not seen by the iterator.
+	 * creation are not seen by the iterator. Synchronisation over the iterator
+	 * is not required.
 	 * 
 	 * <p>Memory consistency effects: actions in a thread prior to adding an
 	 * element to this queue <i>happen-before</i> actions in a thread which
@@ -62,6 +63,8 @@ public interface ClearingQueue<E> extends Iterable<E> {
 	/**
 	 * Returns an iterator over the elements in this list. The returned
 	 * iterator does not support remove().
+	 * 
+	 * <p>Note that synchronisation over the iterator is not required.
 	 * 
 	 * <p>Memory consistency effects: actions in a thread prior to adding an
 	 * element to this queue <i>happen-before</i> actions in a thread which

@@ -74,6 +74,7 @@ public abstract class Shape {
 	 * radians.
 	 * 
 	 * @return The rotated shape.
+	 * @throws UnsupportedOperationException if this shape is an {@code AABB}.
 	 */
 	public Shape rotate(float rotation) {
 		return transform(new Matrix2().setToRotation(rotation));
@@ -271,19 +272,6 @@ public abstract class Shape {
 		return new ShapeProjection(min, max);
 	}
 	
-	/**
-	 * @return {@code true} if this shape is an AABB; {@code false} otherwise.
-	 */
-	protected boolean isAABB() {
-		return this instanceof AABB;
-	}
-	
-	/**
-	 * Returns a new shape instance of the same class as this one, for
-	 * duplication in transformation purposes.
-	 */
-	protected abstract Shape newInstance();
-	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------
@@ -336,7 +324,6 @@ public abstract class Shape {
 		@Override public boolean contains(Shape s) { return false; }
 		@Override public boolean containsPoint(float x, float y) { return false; }
 		@Override public Shape reflect() { return this; }
-		@Override protected Shape newInstance() { return this; }
 	}
 	
 }

@@ -11,7 +11,7 @@ import com.stabilise.util.collect.DuplicatePolicy;
 import com.stabilise.util.collect.Registry;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
-import com.stabilise.world.BaseWorld;
+import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
@@ -63,7 +63,7 @@ public abstract class Dimension {
 	 * 
 	 * @throws NullPointerException if {@code provider} is {@code null}.
 	 */
-	public HostWorld createHost(WorldProvider<? extends BaseWorld> provider) {
+	public HostWorld createHost(WorldProvider<? extends AbstractWorld> provider) {
 		return new HostWorld(provider, this);
 	}
 	
@@ -161,7 +161,7 @@ public abstract class Dimension {
 	 * instantiated.
 	 */
 	private static Dimension getDimension(Info info) {
-		if(defaultDim == null) // equivalent to a fictitious !dimsHaveBeenRegistered() call
+		if(!DIMENSIONS.isLocked())
 			throw new IllegalStateException("Dimensions have not yet been registered!");
 		Class<? extends Dimension> dimClass = DIMENSIONS.get(info.name);
 		if(dimClass == null)
@@ -208,9 +208,9 @@ public abstract class Dimension {
 		
 		DIMENSIONS.lock();
 		if(defaultDim == null)
-			throw new Error("A default dimension must be set!");
+			throw new RuntimeException("A default dimension must be set!");
 		if(privateDim == null)
-			throw new Error("The private dimension must be set!");
+			throw new RuntimeException("The private dimension must be set!");
 	}
 	
 	/**
