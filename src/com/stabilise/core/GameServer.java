@@ -43,7 +43,9 @@ public class GameServer extends ServerBase {
 	
 	@Override
 	public void update() {
-		super.update();
+		if(checkShutdown())
+			return;
+		handleIncomingPackets();
 	}
 
 }

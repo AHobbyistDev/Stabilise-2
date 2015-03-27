@@ -59,8 +59,7 @@ public class Stabilise extends Application {
 	 */
 	public static String getGameSubtitle() {
 		final String[] titles = {
-				Constants.VERSION,
-				"Brought to you by Java!",
+				Constants.VERSION.toString(),
 				"Coming soon to a computer near you!",
 				"Look, a distraction!",
 				"II esilibatS",

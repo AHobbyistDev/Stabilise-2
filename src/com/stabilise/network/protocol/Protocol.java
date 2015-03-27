@@ -13,6 +13,7 @@ import com.stabilise.network.Packet;
 import com.stabilise.network.protocol.handshake.*;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.InstantiationRegistry;
+import com.stabilise.util.maths.Maths;
 
 /**
  * Defines the set of protocols a client-server connection may occupy. Each
@@ -50,6 +51,9 @@ public enum Protocol {
 	 * @see InstantiationRegistry#register(int, Class, Class...)
 	 */
 	protected void registerServerPacket(int id, Class<? extends Packet> packetClass) {
+		if(id > MAX_PACKET_ID)
+			throw new IllegalArgumentException("Packet ID for " + packetClass.getSimpleName()
+					+ " (" + id + ") too large!");
 		serverPackets.register(id, packetClass);
 	}
 	
@@ -59,6 +63,9 @@ public enum Protocol {
 	 * @see InstantiationRegistry#register(int, Class, Class...)
 	 */
 	protected void registerClientPacket(int id, Class<? extends Packet> packetClass) {
+		if(id > MAX_PACKET_ID)
+			throw new IllegalArgumentException("Packet ID for " + packetClass.getSimpleName()
+					+ " (" + id + ") too large!");
 		clientPackets.register(id, packetClass);
 	}
 	
@@ -147,6 +154,8 @@ public enum Protocol {
 	//--------------------==========--------------------
 	//--------------=====Static Stuff=====--------------
 	//--------------------==========--------------------
+	
+	public static final int MAX_PACKET_ID = Maths.UBYTE_MAX_VALUE;
 	
 	/** Maps Packet Class -> Packet ID for all packets across all protocols. */
 	private static final Map<Class<? extends Packet>, Integer> PACKET_IDS =

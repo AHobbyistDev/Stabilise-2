@@ -146,7 +146,7 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 		
 		try {
 			socket = createSocket();
-			log.postInfo("Server hosted on " + socket.getLocalSocketAddress());
+			log.postInfo("Server hosted on " + socket.getInetAddress().getHostAddress());
 			
 			clientListenerThread = new ClientListenerThread();
 			clientListenerThread.start();
@@ -169,21 +169,37 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 	 */
 	protected abstract ServerSocket createSocket() throws IOException;
 	
+	/**
+	 * Performs an update tick.
+	 * 
+	 * <p>Subclasses of {@code ServerBase} should invoke {@link
+	 * #checkShutdown()} and {@link #handleIncomingPackets()} from within this
+	 * method.
+	 */
 	@Override
-	public void update() {
-		// If we should be shutting down but ended up in the update loop for
-		// whatever reason, shut down.
+	public abstract void update();
+	
+	/**
+	 * Checks for whether or not this server has been requested to shut down,
+	 * and shuts it down via {@link #shutdown()} if so. This should typically
+	 * be invoked from within {@link #update()}.
+	 * 
+	 * @return {@code true} if the server was shut down; {@code false}
+	 * otherwise.
+	 */
+	protected boolean checkShutdown() {
 		if(!isActive()) {
 			if(driver != null)
 				driver.stop();
 			shutdown();
-			return;
+			return true;
 		}
+		return false;
 	}
 	
 	/**
-	 * Handles any queued incoming packets. Any subclass of {@code ServerBase}
-	 * should typically invoke this from {@link #update()}.
+	 * Handles any queued incoming packets. This should typically be invoked
+	 * from within {@link #update()}.
 	 */
 	protected void handleIncomingPackets() {
 		Packet p;
@@ -194,6 +210,12 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * <p>The default implementation does nothing and may be optionally
+	 * overridden.
+	 */
 	@Override
 	public void render() {
 		// nothing to see here, move along
@@ -207,14 +229,16 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 	}
 	
 	/**
-	 * Shuts the server down using the current thread.
+	 * Shuts the server down using the current thread. Invoking this does
+	 * nothing if the server is not currently running.
 	 */
 	public void shutdown() {
 		if(!state.compareAndSet(STATE_ACTIVE, STATE_SHUTDOWN) &&
 				!state.compareAndSet(STATE_CLOSE_REQUESTED, STATE_SHUTDOWN))
 			return;
 		
-		clientListenerThread.interrupt();
+		if(clientListenerThread != null)
+			clientListenerThread.interrupt();
 		
 		synchronized(connections) {
 			for(ServerTCPConnection con : connections)
@@ -223,28 +247,29 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 		}
 		
 		try {
-			socket.close();
+			if(socket != null)
+				socket.close();
 		} catch(IOException e) {
 			log.postWarning("Error closing socket", e);
 		}
 		
 		try {
-			clientListenerThread.join();
+			if(clientListenerThread != null)
+				clientListenerThread.join();
 		} catch(InterruptedException e) {
 			log.postWarning("Interrupted while waiting for client listener "
 					+ "thread to join");
 		}
 		
-		state.set(STATE_TERMINATED);
 		synchronized(state) {
+			state.set(STATE_TERMINATED);
 			state.notifyAll();
 		}
 	}
 	
 	@Override
 	protected void finalize() {
-		// Use finalisers to ensure shutdown in case client code somehow
-		// forgets to do so.
+		// Use finalisation to ensure shutdown always occurs
 		shutdown();
 	}
 	

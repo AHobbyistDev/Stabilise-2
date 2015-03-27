@@ -14,6 +14,10 @@ import com.stabilise.util.annotation.UserThread;
 /**
  * A TCPConnection instance maintains a connection between a server and a
  * client, and is the gateway for interaction between the two.
+ * 
+ * <p>A TCPConnection object has two threads associated with it, for managing
+ * the input and output streams of the associated socket. The activity of these
+ * threads is proportional to the amount of data traffic.
  */
 public class TCPConnection {
 	
@@ -65,11 +69,12 @@ public class TCPConnection {
 	private int packetsSent = 0;
 	private int packetsReceived = 0;
 	
-	private Log log;
+	private final Log log;
 	
 	
 	/**
-	 * Creates a new TCPConnection.
+	 * Creates a new TCPConnection, using the {@link Protocol#HANDSHAKE
+	 * handshake protocol} by default.
 	 * 
 	 * @param socket The socket upon which to base the connection.
 	 * @param server Whether or not this is a server-side connection.
@@ -119,8 +124,6 @@ public class TCPConnection {
 	 * Queues a packet for sending.
 	 * 
 	 * @throws NullPointerException if {@code packet} is {@code null}.
-	 * @throws IllegalStateException if the packet queue is full. This should
-	 * never happen unless something is seriously wrong.
 	 */
 	@UserThread("MainThread")
 	public void sendPacket(Packet packet) {
@@ -137,8 +140,8 @@ public class TCPConnection {
 				return;
 			}
 		}
-		
-		packetQueueOut.add(packet); // may throw ISE
+		// Should (theoretically) never throw an ISE as it is an unbounded queue.
+		packetQueueOut.add(packet);
 	}
 	
 	/**
@@ -228,7 +231,7 @@ public class TCPConnection {
 	}
 	
 	/**
-	 * Closes the connection and releases any resources held by it.
+	 * Closes this connection and releases any resources held by it.
 	 */
 	public void closeConnection() {
 		if(!state.compareAndSet(STATE_ACTIVE, STATE_SHUTDOWN) &&
@@ -351,7 +354,8 @@ public class TCPConnection {
 				// something has gone wrong.
 				if(isActive()) {
 					if(!socket.isClosed())
-						log.postSevere("IOException thrown in read thread before connection shutdown!", e);
+						log.postSevere("IOException thrown in read thread before connection"
+								+ " shutdown!", e);
 					requestClose();
 				}
 			}

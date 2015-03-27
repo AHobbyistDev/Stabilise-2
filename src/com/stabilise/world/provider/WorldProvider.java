@@ -224,12 +224,6 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 		/** The number of threads created with this factory. */
 		private final AtomicInteger threadNumber = new AtomicInteger(0);
 		
-		private final UncaughtExceptionHandler ripWorkerThread = new UncaughtExceptionHandler() {
-			@Override
-			public void uncaughtException(Thread t, Throwable e) {
-				log.postSevere("Worker thread \"" + t.getName() + "\" died!", e);
-			}
-		};
 		
 		@Override
 		public Thread newThread(Runnable r) {
@@ -238,7 +232,12 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 				t.setDaemon(false);
 			if(t.getPriority() != Thread.NORM_PRIORITY)
 				t.setPriority(Thread.NORM_PRIORITY);
-			t.setUncaughtExceptionHandler(ripWorkerThread);
+			t.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+				@Override
+				public void uncaughtException(Thread t, Throwable e) {
+					log.postSevere("Worker thread \"" + t.getName() + "\" died!", e);
+				}
+			});
 			return t;
 		}
 	}

@@ -27,7 +27,9 @@ public class Server extends ServerBase implements IServerHandshake {
 	
 	@Override
 	public void update() {
-		super.update();
+		if(checkShutdown())
+			return;
+		handleIncomingPackets();
 	}
 	
 	@Override

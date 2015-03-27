@@ -14,9 +14,6 @@ import com.stabilise.util.maths.Maths;
  * 
  * <p>All subclasses of {@code Packet} require a blank constructor so that they
  * may be instantiated reflectively.
- * 
- * @param <V> The interface defining the method with which to handle this type
- * of packet.
  */
 public abstract class Packet implements Sendable {
 	
@@ -73,11 +70,35 @@ public abstract class Packet implements Sendable {
 	 * characters.
 	 * @throws IOException
 	 */
-	protected static void writeString(String string, DataOutputStream out) throws IOException {
+	protected static void writeString(DataOutputStream out, String string) throws IOException {
 		if(string.length() > Maths.USHORT_MAX_VALUE)
 			throw new IllegalArgumentException("The given string is too large!");
 		out.writeShort(string.length());
 		out.writeChars(string);
+	}
+	
+	/**
+	 * Writes an int array to the provided output stream.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IOException
+	 */
+	protected static void readIntArray(DataInputStream in, int[] arr) throws IOException {
+		for(int i = 0; i < arr.length; i++)
+			arr[i] = in.readInt();
+	}
+	
+	/**
+	 * Reads an int array from the provided output stream and stores the data
+	 * in the provided array. The number of ints read is equal to the length of
+	 * the array.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws IOException
+	 */
+	protected static void writeIntArray(DataOutputStream out, int[] arr) throws IOException {
+		for(int i = 0; i < arr.length; i++)
+			out.writeInt(arr[i]);
 	}
 	
 }

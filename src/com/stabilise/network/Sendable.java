@@ -17,7 +17,7 @@ import java.io.IOException;
 public interface Sendable {
 	
 	/**
-	 * Reads this object's data in from the given DataInputStream.
+	 * Reads this object's data from the given DataInputStream.
 	 * 
 	 * @throws NullPointerException if {@code in} is {@code null}.
 	 * @throws IOException if an I/O error occurs.

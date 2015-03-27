@@ -1,5 +1,7 @@
 package com.stabilise.network.protocol.handshake;
 
+import static com.stabilise.core.Constants.*;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -15,41 +17,50 @@ import com.stabilise.network.protocol.PacketHandler;
  */
 public class C000VersionInfo extends Packet {
 	
-	/** @see com.stabilise.core.Constants */
-	public int release, patchMajor, patchMinor, build;
+	public Version senderVersion, senderBackwardsVersion;
 	
-	public C000VersionInfo() {}
+	
+	@Override
+	public void handle(PacketHandler handler, TCPConnection con) {
+		((IServerHandshake)handler).handleVersionInfo(this, con);
+	}
 	
 	@Override
 	public void readData(DataInputStream in) throws IOException {
-		release = in.readInt();
-		patchMajor = in.readInt();
-		patchMinor = in.readInt();
-		build = in.readInt();
+		senderVersion = new Version(in.readInt(), in.readInt(), in.readInt());
+		senderBackwardsVersion = new Version(in.readInt(), in.readInt(), in.readInt());
 	}
 	
 	@Override
 	public void writeData(DataOutputStream out) throws IOException {
-		out.writeInt(release);
-		out.writeInt(patchMajor);
-		out.writeInt(patchMinor);
-		out.writeInt(build);
+		out.writeInt(senderVersion.release);
+		out.writeInt(senderVersion.patchMajor);
+		out.writeInt(senderVersion.patchMinor);
+		out.writeInt(senderBackwardsVersion.release);
+		out.writeInt(senderBackwardsVersion.patchMajor);
+		out.writeInt(senderBackwardsVersion.patchMinor);
 	}
 	
 	/**
 	 * Sets this Packet's version info to that located in {@link Constants}.
 	 */
 	public C000VersionInfo setVersionInfo() {
-		release = Constants.RELEASE;
-		patchMajor = Constants.PATCH_MAJOR;
-		patchMinor = Constants.PATCH_MINOR;
-		build = Constants.BUILD;
+		senderVersion = VERSION;
+		senderBackwardsVersion = BACKWARDS_VERSION;
 		return this;
 	}
 	
-	@Override
-	public void handle(PacketHandler handler, TCPConnection con) {
-		((IServerHandshake)handler).handleVersionInfo(this, con);
+	/**
+	 * Returns {@code true} if the current game version is compatible with the
+	 * sender's game version.
+	 */
+	public boolean isCompatible() {
+		// true if our version is newer than the sender's oldest allowable version
+		boolean weAreCompatible = VERSION.compareTo(senderBackwardsVersion) >= 0;
+		// true if the sender's version is newer than our oldest allowable version
+		boolean senderIsCompatible = senderVersion.compareTo(BACKWARDS_VERSION) >= 0;
+		
+		return weAreCompatible && senderIsCompatible;
 	}
 	
 }

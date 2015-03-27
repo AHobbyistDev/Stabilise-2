@@ -287,7 +287,8 @@ public abstract class Application {
 		String[] msgs = new String[] {
 				"I am here to provide a stack trace",
 				"Stack trace buddy!",
-				"All your stack trace are belong to us"
+				"All your stack trace are belong to us",
+				"No reason was given for the crash :("
 		};
 		return msgs[new Random().nextInt(msgs.length)];
 	}

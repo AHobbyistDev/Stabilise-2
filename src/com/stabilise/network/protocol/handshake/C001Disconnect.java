@@ -11,8 +11,6 @@ import com.stabilise.network.protocol.PacketHandler;
 
 public class C001Disconnect extends Packet {
 	
-	public C001Disconnect() {}
-	
 	@Override
 	public void readData(DataInputStream in) throws IOException {
 		
