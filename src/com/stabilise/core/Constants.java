@@ -127,7 +127,7 @@ public class Constants {
 		 * #compareTo(Version) compareTo(v) == -1}).
 		 */
 		public boolean precedes(Version v) {
-			return compareTo(v) < 0;
+			return compareTo(v) == -1;
 		}
 		
 		private String genStr() {

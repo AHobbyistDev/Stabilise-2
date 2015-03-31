@@ -99,10 +99,10 @@ public class AABB extends AbstractPolygon {
 	}
 	
 	@Override
-	public boolean intersects(AbstractPolygon p) {
+	public boolean intersectsPolygon(AbstractPolygon p) {
 		if(p instanceof AABB)
 			return intersectsAABB((AABB)p);
-		return super.intersects(p);
+		return super.intersectsPolygon(p);
 	}
 	
 	@Override

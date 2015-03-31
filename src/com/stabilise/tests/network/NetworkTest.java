@@ -13,7 +13,7 @@ public class NetworkTest implements Drivable {
 	AppDriver driver;
 	
 	public NetworkTest() {
-		Log.setLogLevel(Level.DEBUG);
+		Log.setLogLevel(Level.ALL);
 		server = new Server();
 		server.runConcurrently();
 		client = new Client();

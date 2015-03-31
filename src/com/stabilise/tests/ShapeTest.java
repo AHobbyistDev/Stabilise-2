@@ -18,10 +18,10 @@ public class ShapeTest {
 		
 		int collisions = 16384*512;
 		
-		time(print, "1 i 1 as AbstractPolygon", collisions, () -> result = b1.intersects(b1));
-		time(print, "2 i 2 as AbstractPolygon", collisions, () -> result = b2.intersects(b2));
-		time(print, "1 i 2 as AbstractPolygon", collisions, () -> result = b1.intersects(b2));
-		time(print, "2 i 1 as AbstractPolygon", collisions, () -> result = b2.intersects(b1));
+		time(print, "1 i 1 as AbstractPolygon", collisions, () -> result = b1.intersectsPolygon(b1));
+		time(print, "2 i 2 as AbstractPolygon", collisions, () -> result = b2.intersectsPolygon(b2));
+		time(print, "1 i 2 as AbstractPolygon", collisions, () -> result = b1.intersectsPolygon(b2));
+		time(print, "2 i 1 as AbstractPolygon", collisions, () -> result = b2.intersectsPolygon(b1));
 		time(print, "1 i 1 as AABB", collisions, () -> result = b1.intersectsAABB(b1));
 		time(print, "2 i 2 as AABB", collisions, () -> result = b2.intersectsAABB(b2));
 		time(print, "1 i 2 as AABB", collisions, () -> result = b1.intersectsAABB(b2));

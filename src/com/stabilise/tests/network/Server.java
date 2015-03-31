@@ -34,7 +34,7 @@ public class Server extends ServerBase implements IServerHandshake {
 	
 	@Override
 	public void handleVersionInfo(C000VersionInfo packet, TCPConnection con) {
-		log.postInfo("Got info from client!");
+		log.postInfo("Got info from client - " + packet.isCompatible());
 		con.sendPacket(new S000VersionInfo().setVersionInfo());
 	}
 

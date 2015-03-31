@@ -18,6 +18,7 @@ import com.stabilise.util.TaskTimer;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.ClearingLinkedList;
+import com.stabilise.util.concurrent.ConcurrentBiIntHashMap;
 import com.stabilise.util.maths.HashPoint;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.HostWorld;
@@ -98,15 +99,15 @@ public abstract class WorldGenerator {
 	/** Whether or not the generator has been shut down. This is volatile. */
 	private volatile boolean isShutdown = false;
 	
-	/** A map of region points to each region's lock. A region's {@link
-	 * Region#loc loc} member should be used as its key. */
-	private final ConcurrentHashMap<HashPoint, RegionLock> regionLocks =
-			new ConcurrentHashMap<>();
+	/** A map of region points to each region's lock. Maps region coords ->
+	 * locks. */
+	private final ConcurrentBiIntHashMap<RegionLock> regionLocks =
+			new ConcurrentBiIntHashMap<>(Region.COORD_HASHER);
 	
-	/** A map of regions which have been cached by the world generator. A
-	 * region's {@link Region#loc loc} member should be used as its key.*/
-	private final ConcurrentHashMap<HashPoint, CachedRegion> cachedRegions =
-			new ConcurrentHashMap<>();
+	/** A map of regions which have been cached by the world generator. Maps
+	 * region coords -> cached region. */
+	private final ConcurrentBiIntHashMap<CachedRegion> cachedRegions =
+			new ConcurrentBiIntHashMap<>(Region.COORD_HASHER);
 	
 	/** Locks used for lock striping when managing cached regions. */
 	private final Object[] locks;
@@ -217,7 +218,7 @@ public abstract class WorldGenerator {
 	 */
 	@UserThread("WorkerThread")
 	private void genRegion(Region r, boolean cached) {
-		RegionLock l = regionLocks.get(r.loc); // shouldn't be null
+		RegionLock l = regionLocks.get(r.x, r.y); // shouldn't be null
 		
 		if(isShutdown) {
 			releaseRegion(r);
@@ -240,8 +241,8 @@ public abstract class WorldGenerator {
 				for(int y = 0; y < REGION_SIZE; y++) {
 					for(int x = 0; x < REGION_SIZE; x++) {
 						r.slices[y][x] = new Slice(
-								x + r.loc.x * REGION_SIZE,
-								y + r.loc.y * REGION_SIZE,
+								x + r.x * REGION_SIZE,
+								y + r.y * REGION_SIZE,
 								new int[SLICE_SIZE][SLICE_SIZE] // all values are 0 == Tiles.AIR
 						);
 					}
@@ -298,7 +299,7 @@ public abstract class WorldGenerator {
 		//     implant schematics), and then uncache the region from the world.
 		// Finally, we clear the threadlocal instance.
 		for(Region cRegion : localCachedRegions.get()) {
-			RegionLock cLock = regionLocks.get(cRegion.loc); // may be null
+			RegionLock cLock = regionLocks.get(cRegion.x, cRegion.y); // may be null
 			
 			// If the region is generated for the most part, implant the
 			// schematics
@@ -400,17 +401,17 @@ public abstract class WorldGenerator {
 		
 		// Inform neighbouring regions of the schematic if the schematic overlaps into them
 		if(params.informRegions) {
-			for(int regionY = r.loc.y + params.offsetY + ((tileY + sliceY * SLICE_SIZE - sc.y) / (REGION_SIZE_IN_TILES));
-					regionY <= r.loc.y + params.offsetY + ((tileY + sliceY * SLICE_SIZE - sc.y + sc.height) / (REGION_SIZE_IN_TILES));
+			for(int regionY = r.y + params.offsetY + ((tileY + sliceY * SLICE_SIZE - sc.y) / (REGION_SIZE_IN_TILES));
+					regionY <= r.y + params.offsetY + ((tileY + sliceY * SLICE_SIZE - sc.y + sc.height) / (REGION_SIZE_IN_TILES));
 					regionY++) {
-				for(int regionX = r.loc.x + params.offsetX + ((tileX + sliceX * SLICE_SIZE - sc.x) / (REGION_SIZE_IN_TILES));
-						regionX <= r.loc.x + params.offsetX + ((tileX + sliceX * SLICE_SIZE - sc.x + sc.width) / (REGION_SIZE_IN_TILES));
+				for(int regionX = r.x + params.offsetX + ((tileX + sliceX * SLICE_SIZE - sc.x) / (REGION_SIZE_IN_TILES));
+						regionX <= r.x + params.offsetX + ((tileX + sliceX * SLICE_SIZE - sc.x + sc.width) / (REGION_SIZE_IN_TILES));
 						regionX++) {
-					if(regionY != r.loc.y || regionX != r.loc.x) {
+					if(regionY != r.y || regionX != r.x) {
 						Region cachedRegion = cacheRegion(regionX, regionY);
 						cachedRegion.queueSchematic(
 								new Region.QueuedSchematic(
-										sc.name, sliceX, sliceY, tileX, tileY, r.loc.x - regionX, r.loc.y - regionY
+										sc.name, sliceX, sliceY, tileX, tileY, r.x - regionX, r.y - regionY
 								)
 						);
 						cachedRegion.unsavedChanges = true; // TODO: thread safety on this
@@ -538,7 +539,7 @@ public abstract class WorldGenerator {
 		
 		// If the region is already cached by this thread, use it
 		for(Region r : cRegions) {
-			if(r.loc.equals(x, y));
+			if(r.isAt(x, y));
 				return r;
 		}
 		
@@ -548,23 +549,21 @@ public abstract class WorldGenerator {
 		// Otherwise, if the region is already cached by the world generator,
 		// use it.
 		
-		HashPoint loc = Region.getKey(x, y);
-		
 		// Synchronised to make the put-if-absent atomic
 		synchronized(cachedRegions) {
-			cachedRegion = cachedRegions.get(loc);
+			cachedRegion = cachedRegions.get(x, y);
 			// If the region is not cached by the world generator, get it from
 			// the world
 			if(cachedRegion == null) {
 				wasUncached = true;
 				// Synchronise on a public lock to make this atomic. See
 				// HostWorld.loadRegion()
-				synchronized(getLock(loc)) {
-					Region region = world.getRegionAt(loc);
+				synchronized(getLock(x, y)) {
+					Region region = world.getRegionAt(x, y);
 					if(region == null)
-						region = new Region(loc, world.getAge());
+						region = new Region(x, y, world.getAge());
 					cachedRegion = new CachedRegion(region);
-					cachedRegions.put(loc, cachedRegion);
+					cachedRegions.put(x, y, cachedRegion);
 				}
 			}
 			
@@ -601,8 +600,8 @@ public abstract class WorldGenerator {
 	private void uncacheRegion(Region region) {
 		// Synchronised to make this atomic
 		synchronized(cachedRegions) {
-			if(cachedRegions.get(region.loc).decrementAndCheck())
-				cachedRegions.remove(region.loc);
+			if(cachedRegions.get(region.x, region.y).decrementAndCheck())
+				cachedRegions.remove(region.x, region.y);
 			else
 				return;	
 		}
@@ -614,14 +613,14 @@ public abstract class WorldGenerator {
 	 * within a synchronised block which holds the monitor on the lock returned
 	 * by {@link #getLock(HashPoint) getLock(loc)}.
 	 * 
-	 * @param loc The region's location, whose coordinates are in region-
-	 * lengths.
+	 * @param x The x-coordinate of the region, in region-lengths.
+	 * @param y The y-coordinate of the region, in region-lengths.
 	 * 
 	 * @return The region, or {@code null} if the region is not cached.
 	 */
 	@UserThread("MainThread")
-	public Region getCachedRegion(HashPoint loc) {
-		CachedRegion cachedRegion = cachedRegions.get(loc);
+	public Region getCachedRegion(int x, int y) {
+		CachedRegion cachedRegion = cachedRegions.get(x, y);
 		return cachedRegion == null ? null : cachedRegion.region;
 	}
 	
@@ -629,13 +628,13 @@ public abstract class WorldGenerator {
 	 * Gets the lock upon which to synchronise when atomically accessing a
 	 * region cached by the world generator.
 	 * 
-	 * @param loc The region's location, whose coordinates are in region-
-	 * lengths.
+	 * @param x The x-coordinate of the region, in region-lengths.
+	 * @param y The y-coordinate of the region, in region-lengths.
 	 * 
 	 * @return The object lock.
 	 * @throws NullPointerException if {@code loc} is {@code null}.
 	 */
-	public Object getLock(HashPoint loc) {
+	public Object getLock(int x, int y) {
 		// We use the lowest two bits holding whether or not x and y are odd
 		// or even numbers. This creates a repeating 2x2 grid such that
 		// adjacent regions do not use the same lock. This can be made
@@ -644,7 +643,7 @@ public abstract class WorldGenerator {
 		// locks[1] (01) if x is even and y is odd
 		// locks[2] (10) if x is odd and y is even
 		// locks[3] (11) if x is odd and y is odd
-		return locks[((loc.x & 1) << 1) | (loc.y & 1)];
+		return locks[((x & 1) << 1) | (y & 1)];
 	}
 	
 	/**
@@ -655,7 +654,7 @@ public abstract class WorldGenerator {
 	 * @throws NullPointerException if {@code r} is {@code null}.
 	 */
 	private boolean isGenerating(Region r) {
-		RegionLock l = regionLocks.get(r.loc);
+		RegionLock l = regionLocks.get(r.x, r.y);
 		return l != null && l.isLocked();
 	}
 	
@@ -673,10 +672,10 @@ public abstract class WorldGenerator {
 		// Synchronised to make this atomic. See releaseRegion().
 		// Is there a way to avoid overt synchronisation?
 		synchronized(r) {
-			l = regionLocks.get(r.loc);
+			l = regionLocks.get(r.x, r.y);
 			if(l == null) {
 				l = new RegionLock();
-				regionLocks.put(r.loc, l);
+				regionLocks.put(r.x, r.y, l);
 			}
 			// Pre-lock while synced so isUnused() returns false in releaseRegion
 			l.preLock();
@@ -734,12 +733,12 @@ public abstract class WorldGenerator {
 	private void releaseRegion(Region r) {
 		// No need to check to see if this is null; no thread should remove the
 		// mapping while the lock is obtained
-		RegionLock l = regionLocks.get(r.loc);
+		RegionLock l = regionLocks.get(r.x, r.y);
 		l.unlock();
 		// Synchronised to make this atomic. See prepareLock().
 		synchronized(r) {
 			if(l.isUnused())
-				regionLocks.remove(r.loc);
+				regionLocks.remove(r.x, r.y);
 		}
 	}
 	

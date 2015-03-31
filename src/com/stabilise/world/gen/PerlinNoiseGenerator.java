@@ -80,15 +80,15 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 			simplex512 = new SimplexNoise(seed, 512f);
 		}
 		private void generateRegion(Region r) {
-			int offsetX = r.loc.x * REGION_SIZE_IN_TILES;
-			int offsetY = r.loc.y * REGION_SIZE_IN_TILES;
+			int offsetX = r.x * REGION_SIZE_IN_TILES;
+			int offsetY = r.y * REGION_SIZE_IN_TILES;
 			
 			int sliceX = 15;
 			int sliceY = 15;
 			int tileX = 15;
 			int tileY = 15;
 			
-			int n = r.loc.x + r.loc.y * 57;
+			int n = r.x + r.y * 57;
 			n = (n<<13) ^ n;
 			n = n * (n * n * 15731 + 789221) + 1376312589;
 			Random rnd = new Random(seed + n);

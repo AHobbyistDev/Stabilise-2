@@ -88,7 +88,7 @@ public class Client {
 	}
 	
 	private void handleServerInfo(S000VersionInfo packet) {
-		log.postInfo("Got info from server!");
+		log.postInfo("Got info from server - " + packet.isCompatible());
 		log.postInfo("Sending disconnect...");
 		connection.sendPacket(new C001Disconnect());
 		close();

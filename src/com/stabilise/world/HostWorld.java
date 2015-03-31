@@ -5,7 +5,6 @@ import static com.stabilise.world.World.*;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.badlogic.gdx.files.FileHandle;
@@ -14,12 +13,13 @@ import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.LightLinkedList;
-import com.stabilise.util.maths.HashPoint;
+import com.stabilise.util.concurrent.ConcurrentBiIntHashMap;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.provider.HostProvider.PlayerData;
 import com.stabilise.world.provider.WorldProvider;
 import com.stabilise.world.tile.Tile;
+import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -37,10 +37,9 @@ public class HostWorld extends AbstractWorld {
 	/** The world generator. */
 	public final WorldGenerator generator;
 	
-	/** The map of all loaded regions. This is concurrent as to prevent
-	 * problems when relevant methods are accessed by the world loader. */
-	public final ConcurrentHashMap<HashPoint, Region> regions =
-			new ConcurrentHashMap<>();
+	/** The map of all loaded regions. Maps region coords -> regions. */
+	private final ConcurrentBiIntHashMap<Region> regions =
+			new ConcurrentBiIntHashMap<>(Region.COORD_HASHER);
 	/** Tracks the number of loaded regions, in preference to invoking
 	 * regions.size(), which is not a constant-time operation. */
 	private final AtomicInteger numRegions = new AtomicInteger(0);
@@ -198,7 +197,7 @@ public class HostWorld extends AbstractWorld {
 	 * @return Whether or not the region is loaded in memory.
 	 */
 	public boolean hasRegion(int x, int y) {
-		return regions.containsKey(Region.getKey(x, y));
+		return regions.containsKey(x, y);
 	}
 	
 	/**
@@ -212,21 +211,7 @@ public class HostWorld extends AbstractWorld {
 	 */
 	@UserThread({"MainThread", "WorldGenThread"})
 	public Region getRegionAt(int x, int y) {
-		return regions.get(Region.getKey(x, y));
-	}
-	
-	/**
-	 * Gets a region at the given location.
-	 * 
-	 * @param loc The region's location, whose coordinates are in
-	 * region-lengths.
-	 * 
-	 * @return The region at the given location, or {@code null} if no such
-	 * region exists.
-	 */
-	@UserThread({"WorldGenThread"})
-	public Region getRegionAt(HashPoint loc) {
-		return regions.get(loc);
+		return regions.get(x, y);
 	}
 	
 	/**
@@ -260,24 +245,19 @@ public class HostWorld extends AbstractWorld {
 	 */
 	@UserThread("MainThread")
 	public Region loadRegion(int x, int y, boolean generate) {
-		HashPoint loc = Region.getKey(x, y);
-		
 		// Get the region if it is already loaded
-		Region r = regions.get(loc);
-		if(r != null) {
-			if(generate)
-				generator.generate(r);
+		Region r = getRegionAt(x, y);
+		if(r != null)
 			return r;
-		}
 		
 		// If it is not loaded directly, try getting it from the world
 		// generator's cache.
 		// Synchronised to make this atomic. See WorldGenerator.cacheRegion()
-		synchronized(generator.getLock(loc)) {
-			r = generator.getCachedRegion(loc);
+		synchronized(generator.getLock(x, y)) {
+			r = generator.getCachedRegion(x, y);
 			if(r == null) // if it's not cached, create it
-				r = new Region(loc, getAge());
-			regions.put(loc, r);
+				r = new Region(x, y, getAge());
+			regions.put(x, y, r);
 		}
 		
 		numRegions.getAndIncrement();
@@ -308,9 +288,9 @@ public class HostWorld extends AbstractWorld {
 		saveRegion(r);
 		
 		// Now unload entities in the region as well...
-		int minX = r.loc.x * Region.REGION_SIZE_IN_TILES;
+		int minX = r.x * Region.REGION_SIZE_IN_TILES;
 		int maxX = minX + Region.REGION_SIZE_IN_TILES;
-		int minY = r.loc.y * Region.REGION_SIZE_IN_TILES;
+		int minY = r.y * Region.REGION_SIZE_IN_TILES;
 		int maxY = minY + Region.REGION_SIZE_IN_TILES;
 		
 		for(Entity e : getEntities()) {
@@ -415,7 +395,7 @@ public class HostWorld extends AbstractWorld {
 			
 			slice.getTileAt(tileX, tileY).handleBreak(this, x, y);
 			
-			slice.setTileAt(tileX, tileY, 0);
+			slice.setTileAt(tileX, tileY, Tiles.AIR);
 			r.unsavedChanges = true;
 		}
 	}
@@ -469,7 +449,7 @@ public class HostWorld extends AbstractWorld {
 				removeTileEntity(t2);
 			}
 			
-			slice.setTileEntityAt(tileX, tileY, null);
+			slice.removeTileEntityAt(tileX, tileY);
 			r.unsavedChanges = true;
 		}
 	}
@@ -492,17 +472,12 @@ public class HostWorld extends AbstractWorld {
 			if(slice.getTileAt(tileX, tileY).getHardness() < explosionPower) {
 				slice.getTileAt(tileX, tileY).handleRemove(this, x, y);
 				
-				slice.setTileAt(tileX, tileY, 0);
+				slice.setTileAt(tileX, tileY, Tiles.AIR);
 				r.unsavedChanges = true;
 				
-				//Tile.air.handlePlace(this, x, y);
+				//Tiles.AIR.handlePlace(this, x, y);
 			}
 		}
-	}
-	
-	@Override
-	public void sendToDimension(String dimension, Entity e, double x, double y) {
-		provider.sendToDimension(this, dimension, e, x, y);
 	}
 	
 	/**

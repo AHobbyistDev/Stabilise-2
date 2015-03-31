@@ -56,7 +56,7 @@ public abstract class AbstractWorld implements World {
 	 * <p>Implementation detail: Though it would be cleaner to invoke {@code
 	 * destroy()} on entities and let them self-remove while being iterated
 	 * over, this does not work when moving an entity to another dimension: if
-	 * {@code destroy} is invoked, this would also invalidate its position in
+	 * {@code destroy()} is invoked, this would also invalidate its position in
 	 * the dimension it is being moved to. */
 	private final ClearingLinkedList<Integer> entitiesToRemove =
 			new ClearingLinkedList<>();
@@ -83,12 +83,9 @@ public abstract class AbstractWorld implements World {
 	 * the world. */
 	protected int particleCount = 0;
 	
-	/** The x-coordinate the slice in which players initially spawn, in
+	/** The x/y-coordinates of the slice in which players initially spawn, in
 	 * slice-lengths. */
-	protected int spawnSliceX;
-	/** The x-coordinate the slice in which players initially spawn, in
-	 * slice-lengths. */
-	protected int spawnSliceY;
+	protected int spawnSliceX, spawnSliceY;
 	
 	private float timeDelta = 1f;
 	private float timeIncrement = timeDelta / Constants.TICKS_PER_SECOND;
@@ -97,8 +94,9 @@ public abstract class AbstractWorld implements World {
 	private float gravity2ndOrder = gravity * timeIncrement * timeIncrement / 2;
 	
 	/** An easy-access utility RNG which should be used by any GameObject with
-	 * a reference to this world in preference to constructing a new one. */
-	public final Random rng = new Random();
+	 * a reference to this world in preference to constructing a new one.
+	 * @see #getRnd() */
+	public final Random rnd = new Random();
 	
 	/** Use this to profile the world's operation. */
 	protected final Profiler profiler;
@@ -114,10 +112,10 @@ public abstract class AbstractWorld implements World {
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
 	public AbstractWorld(WorldProvider<? extends AbstractWorld> provider, Dimension dimension) {
-		this.provider = Objects.requireNonNull(provider);
-		this.dimension = Objects.requireNonNull(dimension);
+		this.provider = provider;
+		this.dimension = dimension;
 		
-		profiler = provider.profiler;
+		profiler = provider.getProfiler();
 		log = Log.getAgent("World_" + dimension.info.name);
 	}
 	
@@ -216,11 +214,6 @@ public abstract class AbstractWorld implements World {
 	}
 	
 	@Override
-	public void removeEntity(Entity e) {
-		removeEntity(e.id);
-	}
-	
-	@Override
 	public void removeEntity(int id) {
 		entitiesToRemove.add(id);
 	}
@@ -278,6 +271,11 @@ public abstract class AbstractWorld implements World {
 		TileEntity t = getTileEntityAt(x, y);
 		if(t != null)
 			removeTileEntity(t);
+	}
+	
+	@Override
+	public void sendToDimension(String dimension, Entity e, double x, double y) {
+		provider.sendToDimension(this, dimension, e, x, y);
 	}
 	
 	// ==========Collection getters==========
@@ -355,7 +353,7 @@ public abstract class AbstractWorld implements World {
 	
 	@Override
 	public Random getRnd() {
-		return rng;
+		return rnd;
 	}
 	
 	/**

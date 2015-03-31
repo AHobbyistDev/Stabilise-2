@@ -2,6 +2,8 @@ package com.stabilise.world;
 
 import static com.stabilise.core.Constants.LOADED_SLICE_RADIUS;
 
+import java.util.Objects;
+
 import com.stabilise.core.Constants;
 import com.stabilise.entity.GameObject;
 
@@ -32,7 +34,7 @@ public class SliceMap {
 	/** A reference to the world object. */
 	private HostWorld world;
 	/** The slice map's central target. */
-	private GameObject target;
+	private final GameObject target;
 	
 	/** The target's most recent slice positions (i.e. the centre slices of the
 	 * map). */
@@ -50,13 +52,8 @@ public class SliceMap {
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
 	public SliceMap(HostWorld world, GameObject target) {
-		if(world == null)
-			throw new NullPointerException("world is null!");
-		if(target == null)
-			throw new NullPointerException("target is null!");
-		
-		this.world = world;
-		this.target = target;
+		this.world = Objects.requireNonNull(world);
+		this.target = Objects.requireNonNull(target);
 		
 		reload();
 	}

@@ -42,6 +42,15 @@ public class NBTExporter {
 	private static final Predicate<Field> PRED_MARKED =
 			(f) -> { return f.getAnnotation(ExportToNBT.class) != null; };
 	
+	// The following predicate basically states that we aren't allowed to
+	// export final fields, BUT final Objects whose class have the Exportable
+	// annotation are allowed to be exported (we simply export their mutable
+	// fields). This pretty much ensures we export mutable state and don't
+	// bother with immutable state.
+	private static final Predicate<Field> ALLOWED_TO_EXPORT =
+			(f) -> { return !(Modifier.isFinal(f.getModifiers())
+					&& f.getType().getAnnotation(Exportable.class) == null); };
+	
 	private NBTExporter() {}
 	
 	
@@ -127,61 +136,6 @@ public class NBTExporter {
 	 */
 	public static NBTTagCompound exportCompletely(Object o, NBTTagCompound tag) {
 		return doExport(o, tag, PRED_ALL);
-	}
-	
-	private static NBTTagCompound doExport(Object o, NBTTagCompound tag, Predicate<Field> pred) {
-		for(Field f : o.getClass().getDeclaredFields()) {
-			try {
-				if(pred.test(f)) {
-					Class<?> c = f.getType();
-					String n = f.getName();
-					f.setAccessible(true);
-					// Test each possible option in general order of commonality
-					// First, try common variable types: int, long, float,
-					// double, String.
-					// Next, check if it's an array.
-					// If it's either an int or byte array, add it.
-					// If it's an object array of a type with the Exportable
-					// annotation, export each member via this member into an
-					// NBTTagList and add the list to the compound.
-					// Next, if the field is an object, basically do the same
-					// thing as with an object array but add it to the compound
-					// directly.
-					// Finally, if it's a byte or short, add it.
-					if(c.equals(Integer.TYPE)) tag.addInt(n, f.getInt(o));
-					else if(c.equals(Long.TYPE)) tag.addLong(n, f.getLong(o));
-					else if(c.equals(Float.TYPE)) tag.addFloat(n, f.getFloat(o));
-					else if(c.equals(Double.TYPE)) tag.addDouble(n, f.getDouble(o));
-					else if(c.equals(String.class)) tag.addString(n, (String)f.get(o));
-					else if(c.isArray()) {
-						Class<?> t = c.getComponentType();
-						if(t.equals(Integer.TYPE)) tag.addIntArray(n, (int[])f.get(o));
-						else if(t.equals(Byte.TYPE)) tag.addByteArray(n, (byte[])f.get(o));
-						else if(t.getAnnotation(Exportable.class) != null) {
-							Object[] arr = (Object[])f.get(o);
-							if(arr != null) {
-								NBTTagList list = new NBTTagList();
-								for(Object obj : arr)
-									if(obj != null)
-										list.appendTag(doExport(obj, new NBTTagCompound(), pred));
-								tag.addList(n, list);
-							}
-						}
-					} else if(c.getAnnotation(Exportable.class) != null) {
-						Object obj = f.get(o);
-						if(obj != null)
-							tag.addCompound(n, doExport(obj, new NBTTagCompound(), pred));
-					} else if(c.equals(Byte.TYPE)) tag.addByte(n, f.getByte(o));
-					else if(c.equals(Short.TYPE)) tag.addShort(n, f.getShort(o));
-					else
-						LOG_EXP.postWarning("Invalid field type " + f.getType().getSimpleName() +
-								" of field \"" + n + "\"");
-				}
-			} catch(Exception e) {
-				throw new RuntimeException("Could not export object!", e);
-			}
-		}
-		return tag;
 	}
 	
 	/**
@@ -302,10 +256,65 @@ public class NBTExporter {
 		doImport(o, tag, true, PRED_ALL);
 	}
 	
+	private static NBTTagCompound doExport(Object o, NBTTagCompound tag, Predicate<Field> pred) {
+		for(Field f : o.getClass().getDeclaredFields()) {
+			try {
+				if(pred.test(f) && ALLOWED_TO_EXPORT.test(f)) {
+					Class<?> c = f.getType();
+					String n = f.getName();
+					f.setAccessible(true);
+					// Test each possible option in general order of commonality
+					// First, try common variable types: int, long, float,
+					// double, String.
+					// Next, check if it's an array.
+					// If it's either an int or byte array, add it.
+					// If it's an object array of a type with the Exportable
+					// annotation, export each member via this member into an
+					// NBTTagList and add the list to the compound.
+					// Next, if the field is an object, basically do the same
+					// thing as with an object array but add it to the compound
+					// directly.
+					// Finally, if it's a byte or short, add it.
+					if(c.equals(Integer.TYPE)) tag.addInt(n, f.getInt(o));
+					else if(c.equals(Long.TYPE)) tag.addLong(n, f.getLong(o));
+					else if(c.equals(Float.TYPE)) tag.addFloat(n, f.getFloat(o));
+					else if(c.equals(Double.TYPE)) tag.addDouble(n, f.getDouble(o));
+					else if(c.equals(String.class)) tag.addString(n, (String)f.get(o));
+					else if(c.isArray()) {
+						Class<?> t = c.getComponentType();
+						if(t.equals(Integer.TYPE)) tag.addIntArray(n, (int[])f.get(o));
+						else if(t.equals(Byte.TYPE)) tag.addByteArray(n, (byte[])f.get(o));
+						else if(t.getAnnotation(Exportable.class) != null) {
+							Object[] arr = (Object[])f.get(o);
+							if(arr != null) {
+								NBTTagList list = new NBTTagList();
+								for(Object obj : arr)
+									if(obj != null)
+										list.appendTag(doExport(obj, new NBTTagCompound(), pred));
+								tag.addList(n, list);
+							}
+						}
+					} else if(c.getAnnotation(Exportable.class) != null) {
+						Object obj = f.get(o);
+						if(obj != null)
+							tag.addCompound(n, doExport(obj, new NBTTagCompound(), pred));
+					} else if(c.equals(Byte.TYPE)) tag.addByte(n, f.getByte(o));
+					else if(c.equals(Short.TYPE)) tag.addShort(n, f.getShort(o));
+					else
+						LOG_EXP.postWarning("Invalid field type " + c.getSimpleName() +
+								" of field \"" + n + "\"");
+				}
+			} catch(Exception e) {
+				throw new RuntimeException("Could not export object!", e);
+			}
+		}
+		return tag;
+	}
+	
 	private static void doImport(Object o, NBTTagCompound tag, boolean unsafe, Predicate<Field> pred) {
 		for(Field f : o.getClass().getDeclaredFields()) {
 			try {
-				if(pred.test(f) && !Modifier.isFinal(f.getModifiers())) {
+				if(pred.test(f) && ALLOWED_TO_EXPORT.test(f)) {
 					Class<?> c = f.getType();
 					String n = f.getName();
 					f.setAccessible(true);
@@ -334,7 +343,7 @@ public class NBTExporter {
 					} else if(c.equals(Byte.TYPE)) f.setByte(o, unsafe ? tag.getByteUnsafe(n) : tag.getByte(n));
 					else if(c.equals(Short.TYPE)) f.setShort(o, unsafe ? tag.getShortUnsafe(n) : tag.getShort(n));
 					else
-						LOG_IMP.postWarning("Invalid field type " + f.getType().getSimpleName() +
+						LOG_IMP.postWarning("Invalid field type " + c.getSimpleName() +
 								" of field \"" + n + "\"");
 				}
 			} catch(Exception e) {

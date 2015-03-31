@@ -363,8 +363,7 @@ public class Profiler {
 		private long startTime = 0L;
 		/** The duration of the section, in nanoseconds. */
 		private long duration = 0L;
-		/** The sections's constituent sections. This may be indefinitely
-		 * recursive. */
+		/** The sections's constituent sections. */
 		private final List<Section> constituents = new LightLinkedList<Section>();
 		
 		

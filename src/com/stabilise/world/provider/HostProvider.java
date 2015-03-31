@@ -38,7 +38,7 @@ public class HostProvider extends WorldProvider<HostWorld> {
 	public final WorldInfo info;
 	
 	/** Stores players using this world. Maps player names -> PlayerDataFiles. */
-	private final Map<String, PlayerDataFile> players = new HashMap<>(1);
+	private final Map<String, PlayerDataFile> players = new HashMap<>(2);
 	
 	
 	/**
@@ -358,8 +358,7 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		 * @throws RuntimeException if something went wrong.
 		 */
 		private NBTTagCompound toNBT() {
-			NBTTagCompound tag = NBTExporter.exportObj(this);
-			return tag;
+			return NBTExporter.exportObj(this);
 		}
 		
 		/**

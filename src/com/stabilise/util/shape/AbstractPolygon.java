@@ -13,7 +13,7 @@ abstract class AbstractPolygon extends Shape {
 	@Override
 	public boolean intersects(Shape s) {
 		if(s instanceof AbstractPolygon)
-			return intersects((AbstractPolygon)s);
+			return intersectsPolygon((AbstractPolygon)s);
 		if(s instanceof Circle)
 			return intersectsOnOwnAxes(s);
 		
@@ -39,7 +39,7 @@ abstract class AbstractPolygon extends Shape {
 	 * @return {@code true} if the two polygons intersect; {@code false}
 	 * otherwise.
 	 */
-	public boolean intersects(AbstractPolygon p) {
+	public boolean intersectsPolygon(AbstractPolygon p) {
 		return intersectsOnOwnAxes(p) && p.intersectsOnOwnAxes(this);
 	}
 	
@@ -49,7 +49,7 @@ abstract class AbstractPolygon extends Shape {
 	 * shapes may not necessarily intersect, as in all but a few special
 	 * cases (e.g. two axis-aligned bounding boxes), the axes of both shapes
 	 * need to be checked. Refer instead to - in the case of polygons -
-	 * {@link #intersects(AbstractPolygon)} to check for a collision using the
+	 * {@link #intersectsPolygon(AbstractPolygon)} to check for a collision using the
 	 * axes of both shapes.
 	 * 
 	 * <p>This method has a minimum computation time of O(1) and a maximum of

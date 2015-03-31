@@ -40,12 +40,12 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	 * 
 	 * 1. Singleplayer
 	 *     Fairly straightforward
-	 * 2. Singleplayer with integrated server
-	 *     As with singleplayer, but also hosts the world such that multiple
-	 *     players may play.
-	 * 3. Multiplayer
+	 * 2. Multiplayer
 	 *     Hosts the world such that multiple players may play. No integrated
 	 *     client.
+	 * 3. Singleplayer with integrated server
+	 *     Combination of 1 & 2; features an integrated client, but also hosts
+	 *     a server.
 	 * 4. Client
 	 *     Plays on a world provided by a server.
 	 * 
@@ -53,7 +53,7 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	 * 4 is a 'client provider', which merely views a world but does not own
 	 * it.
 	 * 
-	 * Furthermore, clients (all but 3.) are able to maintain a single client-
+	 * Furthermore, clients (all but 2.) are able to maintain a single client-
 	 * only dimension, unique to each player character. This is to be an
 	 * important gameplay feature.
 	 *     
@@ -61,7 +61,7 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	 * 
 	 * - Achieve all of the above four types of provider with all desired
 	 *   features.
-	 * - Minimal repetitious code across all four types
+	 * - Minimal repetition of code across all four types.
 	 * - Conversion between types while playing is not necessary, but do if
 	 *   able.
 	 */
@@ -74,8 +74,8 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	/** Stores all dimensions. Maps dimension names -> dimensions. */
 	protected final Map<String, W> dimensions = new HashMap<>(2);
 	
-	/** Profile any world's operation with this. Note this may be {@code null}. */
-	public Profiler profiler;
+	/** Profile any world's operation with this. Never {@code null}. */
+	protected Profiler profiler;
 	protected final Log log = Log.getAgent("WorldProvider");
 	
 	// Integrated player stuff
@@ -94,6 +94,8 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	 * Creates a new WorldProvider.
 	 */
 	public WorldProvider() {
+		setProfiler(null); // init the profiler so it is never null
+		
 		// Start up the executor
 		
 		final int coreThreads = 2; // region loading typically happens in pairs
@@ -140,9 +142,18 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	 */
 	public abstract W loadDimension(String name);
 	
-	// This is a WorldProvider method so we can catch client players being sent
-	// and shift the worldview
-	public void sendToDimension(AbstractWorld oldDim, String dimension, Entity e, double x, double y) {
+	/**
+	 * Moves an entity from its current dimension to the specified location in
+	 * the specified dimension.
+	 * 
+	 * @param oldDim The old dimension.
+	 * @param dimension The name of the new dimension, as per {@link
+	 * #loadDimension(String)}.
+	 * @param e The entity to move.
+	 * @param x The x-coordinate at which to place the entity, in tile-lengths.
+	 * @param y The y-coordinate at which to place the entity, in tile-lengths.
+	 */
+	public void sendToDimension(World oldDim, String dimension, Entity e, double x, double y) {
 		oldDim.removeEntity(e);
 		W dim = loadDimension(dimension);
 		dim.addEntity(e, x, y);
@@ -171,6 +182,13 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 		this.profiler = profiler != null
 				? profiler
 				: new Profiler(false, "root", false);
+	}
+	
+	/**
+	 * Returns this WorldProvider's profiler. Use this to profile a world.
+	 */
+	public Profiler getProfiler() {
+		return profiler;
 	}
 	
 	/**
