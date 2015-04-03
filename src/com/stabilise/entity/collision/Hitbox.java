@@ -80,6 +80,9 @@ public class Hitbox extends FreeGameObject {
 			distX = (float) (x - e.x);
 			distY = (float) (y - e.y);
 			if(boundingBox.translate(distX, distY).intersects(e.boundingBox)) {
+			//distX = (float) (e.x - x);
+			//distY = (float) (e.y - y);
+			//if(e.boundingBox.translate(distX, distY).intersects(boundingBox)) {
 				hit(world, e);
 				if(hits == 0)
 					break;

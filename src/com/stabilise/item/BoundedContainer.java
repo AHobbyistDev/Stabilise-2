@@ -29,13 +29,7 @@ public class BoundedContainer extends Container {
 	public int size() {
 		return items.length;
 	}
-
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws ArrayIndexOutOfBoundsException if {@code slot < 0} or {@code
-	 * slot >= size()}.
-	 */
+	
 	@Override
 	public ItemStack getStack(int slot) {
 		return items[slot];

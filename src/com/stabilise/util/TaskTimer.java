@@ -2,6 +2,8 @@ package com.stabilise.util;
 
 import java.util.concurrent.TimeUnit;
 
+import com.stabilise.util.annotation.NotThreadSafe;
+
 /**
  * A TaskTimer allows the execution time of a task to be measured and compared
  * to the execution time of another task for the sake of determining
@@ -33,6 +35,7 @@ import java.util.concurrent.TimeUnit;
  * <p>A TaskTimer is designed for use by a single thread, and an instance is
  * not thread-safe.
  */
+@NotThreadSafe
 public class TaskTimer {
 	
 	/** The name of the task being timed. */

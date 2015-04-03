@@ -40,14 +40,6 @@ public class TileEntityChest extends TileEntity {
 	}
 	
 	@Override
-	public boolean requiresUpdates() {
-		return false;
-	}
-	
-	@Override
-	public void update(World world) {}
-	
-	@Override
 	public void handleAdd(World world, int x, int y) {
 		// nothing to see here, move along
 	}

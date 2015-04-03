@@ -108,6 +108,7 @@ public class Region {
 	 * Private since this creates an ordinarily-invalid region.
 	 */
 	private Region() {
+		// TODO: Not actually invalid anymore
 		x = y = offsetX = offsetY = 0;
 	}
 	

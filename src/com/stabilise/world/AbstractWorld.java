@@ -1,6 +1,5 @@
 package com.stabilise.world;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -179,7 +178,7 @@ public abstract class AbstractWorld implements World {
 	 * collection by the iterator if {@code updateAndCheck()} returns {@code
 	 * true}.
 	 */
-	protected <E extends GameObject> void updateObjects(Collection<E> objects) {
+	protected <E extends GameObject> void updateObjects(Iterable<E> objects) {
 		Iterator<E> i = objects.iterator();
 		while(i.hasNext())
 			if(i.next().updateAndCheck(this))
@@ -230,47 +229,10 @@ public abstract class AbstractWorld implements World {
 		particles.add(Objects.requireNonNull(p));
 	}
 	
-	/**
-	 * Adds a tile entity to the list of tile entities, so that it may be
-	 * updated. Note that it will only be added if {@link
-	 * TileEntity#requiresUpdates() t.requiresUpdates()} returns {@code true}.
-	 * 
-	 * @param t The tile entity.
-	 * 
-	 * @throws NullPointerException if {@code t} is {@code null}.
-	 */
-	protected void addTileEntity(TileEntity t) {
+	@Override
+	public void addTileEntity(TileEntity t) {
 		if(t.requiresUpdates())
 			tileEntities.add(t);
-	}
-	
-	/**
-	 * Removes a tile entity from the list of tile entities. It will no longer
-	 * be updated.
-	 * 
-	 * <p>If the tile entity is not present in the list of tile entities, this
-	 * method does nothing asides from invoking {@link TileEntity#destroy()}.
-	 * 
-	 * @throws NullPointerException if {@code t} is {@code null}.
-	 */
-	protected void removeTileEntity(TileEntity t) {
-		// Since it is expensive to directly remove an object from a
-		// LinkedList, simply set its destroyed flag to true and have it remove
-		// itself upon the next iteration.
-		t.destroy();
-	}
-	
-	/**
-	 * Removes a tile entity from the map of tile entities. This does not
-	 * remove it from its owner slice.
-	 * 
-	 * @param x The x-coordinate of the tile entity, in tile-lengths.
-	 * @param y The y-coordinate of the tile entity, in tile-lengths.
-	 */
-	protected void removeTileEntity(int x, int y) {
-		TileEntity t = getTileEntityAt(x, y);
-		if(t != null)
-			removeTileEntity(t);
 	}
 	
 	@Override
@@ -281,27 +243,27 @@ public abstract class AbstractWorld implements World {
 	// ==========Collection getters==========
 	
 	@Override
-	public Collection<EntityMob> getPlayers() {
+	public Iterable<EntityMob> getPlayers() {
 		return players.values();
 	}
 	
 	@Override
-	public Collection<Entity> getEntities() {
+	public Iterable<Entity> getEntities() {
 		return entities.values();
 	}
 	
 	@Override
-	public Collection<Hitbox> getHitboxes() {
+	public Iterable<Hitbox> getHitboxes() {
 		return hitboxes;
 	}
 	
 	@Override
-	public Collection<TileEntity> getTileEntities() {
+	public Iterable<TileEntity> getTileEntities() {
 		return tileEntities;
 	}
 	
 	@Override
-	public Collection<Particle> getParticles() {
+	public Iterable<Particle> getParticles() {
 		return particles;
 	}
 	

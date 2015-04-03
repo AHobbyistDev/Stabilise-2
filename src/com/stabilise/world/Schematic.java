@@ -21,14 +21,10 @@ public class Schematic {
 	public String name = "";
 	/** The schematic's tiles. */
 	public int[][] tiles;
-	/** The schematic's origin's x-coordinate. */
-	public int x;
-	/** The schematic's origin's y-coordinate. */
-	public int y;
-	/** The schematic's width. */
-	public short width;
-	/** The schematic's height. */
-	public short height;
+	/** The schematic's origin's x/y-coordinate. */
+	public int x, y;
+	/** The schematic's width/height. */
+	public short width, height;
 	
 	
 	/**
@@ -93,8 +89,8 @@ public class Schematic {
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 * 
 	 * @return The ID of the tile at the specified coordinates.
-	 * @throws NullPointerException Thrown if the tiles haven't been set.
-	 * @throws ArrayIndexOutOfBoundsException Thrown if the specified tile
+	 * @throws NullPointerException if the tiles haven't been set.
+	 * @throws ArrayIndexOutOfBoundsException if the specified tile
 	 * coordinates are out of bounds.
 	 */
 	public int getTileAt(int x, int y) {

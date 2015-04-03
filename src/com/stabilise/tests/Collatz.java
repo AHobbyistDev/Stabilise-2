@@ -47,7 +47,7 @@ public class Collatz {
 	}
 	
 	protected long stepX(long x) {
-		if((x & 1) == 0) // is is even
+		if((x & 1) == 0) // it is even
 			return x >> 1;     // x /= 2
 		else
 			return 3*x + 1;

@@ -149,38 +149,16 @@ public class Slice {
 	 * tile-lengths.
 	 * @param y The y-coordinate of the tile relative to the slice, in
 	 * tile-lengths.
-	 * @param tileEntity The tile entity.
+	 * @param tileEntity The tile entity. Setting this to {@code null} will
+	 * remove the tile entity at the specified location, if it exists.
 	 * 
-	 * @throws NullPointerException if {@code tileEntity} is {@code null}.
 	 * @throws ArrayIndexOutOfBoundsException if either x or y is negative or
 	 * greater than 15.
 	 */
 	public void setTileEntityAt(int x, int y, TileEntity tileEntity) {
-		if(tileEntity == null)
-			throw new NullPointerException();
-		initTileEntities();
+		if(tileEntity != null)
+			initTileEntities();
 		tileEntities[y][x] = tileEntity;
-	}
-	
-	/**
-	 * Removes the tile entity at the specified coordinates.
-	 * 
-	 * @param x The x-coordinate of the tile relative to the slice, in
-	 * tile-lengths.
-	 * @param y The y-coordinate of the tile relative to the slice, in
-	 * tile-lengths.
-	 * 
-	 * @throws NullPointerException if there are no tile entities in this
-	 * slice. This should only be used to weed out programming bugs wherein
-	 * tile entities may be removed unnecessarily.
-	 * @throws ArrayIndexOutOfBoundsException if either x or y is negative or
-	 * greater than 15.
-	 */
-	public void removeTileEntityAt(int x, int y) {
-		// Even if this eliminates the last tile entity from this slice, we do
-		// not nullify tileEntities as to prevent a sequence of allocation and
-		// deallocation on tile entity addition and removal.
-		tileEntities[y][x] = null;
 	}
 	
 	/**

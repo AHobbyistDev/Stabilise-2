@@ -8,15 +8,17 @@ import static com.stabilise.world.World.*;
  */
 public abstract class FixedGameObject extends GameObject {
 	
-	/** The GameObject's coordinates, in tile-lengths */
-	public int x, y;
+	/** The GameObject's coordinates, in tile-lengths. */
+	public final int x, y;
 	
 	
 	/**
-	 * Creates a new FixedGameObject.
+	 * @param x The x-coordinate, in tile-lengths.
+	 * @param y The y-coordinate, in tile lengths.
 	 */
-	public FixedGameObject() {
-		// nothing to see here, move along
+	public FixedGameObject(int x, int y) {
+		this.x = x;
+		this.y = y;
 	}
 	
 	@Override

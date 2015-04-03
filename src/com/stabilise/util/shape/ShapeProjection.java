@@ -49,7 +49,7 @@ class ShapeProjection {
 	 * @see #intersects(ShapeProjection)
 	 */
 	public boolean intersects(float min, float max) {
-		return this.min <= min && this.max >= min;
+		return this.min <= max && this.max >= min;
 	}
 	
 	/**

@@ -785,6 +785,7 @@ public abstract class Interpolation {
 	 * "transformation function" {@code f(x)} of which typical properties are
 	 * outlined {@link Interpolation here}.
 	 */
+	@FunctionalInterface
 	public static interface TransformationFunction {
 		/**
 		 * Transforms a value.

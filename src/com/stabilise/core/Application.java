@@ -75,7 +75,7 @@ public abstract class Application {
 	private final InternalLCListener lcListener;
 	
 	/** The application's state. */
-	protected State state;
+	private State state;
 	
 	/** {@code true} if the application has been shut down. */
 	private boolean stopped = false;
@@ -276,14 +276,13 @@ public abstract class Application {
 			return;			// double-crash and re-save the log?
 		crashing = true;
 		if(t == null)
-			log.postSevere("The application has crashed!", new Exception(dummyExceptionMessage()));
-		else
-			log.postSevere("The application has crashed!", t);
+			t = new Exception(dummyExceptionMsg());
+		log.postSevere("The application has crashed!", t);
 		produceCrashLog();
 		shutdown();
 	}
 	
-	private String dummyExceptionMessage() {
+	private String dummyExceptionMsg() {
 		String[] msgs = new String[] {
 				"I am here to provide a stack trace",
 				"Stack trace buddy!",

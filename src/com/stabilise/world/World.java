@@ -3,7 +3,6 @@ package com.stabilise.world;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -166,22 +165,22 @@ public interface World extends Checkable {
 	 * player is an entity, every element in the returned collection is also
 	 * a member of the one returned by {@link #getEntities()}.
 	 */
-	Collection<EntityMob> getPlayers();
+	Iterable<EntityMob> getPlayers();
 	
 	/**
 	 * @return The collection of entities in the world.
 	 */
-	Collection<Entity> getEntities();
+	Iterable<Entity> getEntities();
 	
 	/**
 	 * @return The collection of hitboxes in the world.
 	 */
-	Collection<Hitbox> getHitboxes();
+	Iterable<Hitbox> getHitboxes();
 	
 	/**
 	 * @return The collection of tile entities in the world.
 	 */
-	Collection<TileEntity> getTileEntities();
+	Iterable<TileEntity> getTileEntities();
 	
 	/**
 	 * @return The collection of particles in the world, or {@code null} if
@@ -189,7 +188,7 @@ public interface World extends Checkable {
 	 * this would be the case if this is a server's world, as particles are
 	 * purely aesthetic and a server doesn't concern itself with them).
 	 */
-	Collection<Particle> getParticles();
+	Iterable<Particle> getParticles();
 	
 	// ==========World component getters and setters==========
 	
@@ -302,19 +301,64 @@ public interface World extends Checkable {
 	 * in tile-lengths.
 	 * @param y The y-coordinate of the tile at which to place the tile entity,
 	 * in tile-lengths.
-	 * @param t The tile entity.
+	 * @param t The tile entity. Setting this to {@code null} will remove the
+	 * tile entity at the specified location, if it exists.
 	 */
 	void setTileEntityAt(int x, int y, TileEntity t);
 	
 	/**
-	 * Removes a tile entity at the given coordinates.
+	 * Removes a tile entity at the given coordinates. Invoking this method is
+	 * equivalent to invoking {@link #setTileEntityAt(int, int, TileEntity)}
+	 * with a {@code null} parameter.
 	 * 
 	 * @param x The x-coordinate of the tile at which the tile entity to remove
 	 * is placed.
 	 * @param y The y-coordinate of the tile at which the tile entity to remove
 	 * is placed.
 	 */
-	void removeTileEntityAt(int x, int y);
+	default void removeTileEntityAt(int x, int y) {
+		setTileEntityAt(x, y, null);
+	}
+	
+	/**
+	 * Adds a tile entity to the "update list" of tile entities, so that it may
+	 * be updated as per {@link TileEntity#updateAndCheck(World)} every tick.
+	 * The supplied tile entity will only be added if {@link
+	 * TileEntity#requiresUpdates()} returns {@code true}. To remove a tile
+	 * entity from the update list, either {@link TileEntity#destroy() destroy}
+	 * it, or invoke {@link #removeTileEntity(TileEntity)}.
+	 * 
+	 * <p>Note that if the supplied tile entity is already on the update list,
+	 * it will be added again, and hence updated multiple times per tick!
+	 * 
+	 * @param t The tile entity.
+	 * 
+	 * @throws NullPointerException if {@code t} is {@code null}.
+	 */
+	void addTileEntity(TileEntity t);
+	
+	/**
+	 * Removes a tile entity from the "update list" of tile entities. It will
+	 * no longer be updated.
+	 * 
+	 * <p>If the tile entity is not present in the list of tile entities, this
+	 * method does nothing asides from invoking {@link TileEntity#destroy()}.
+	 * 
+	 * <p>A technical point: {@code t} is not removed from the update list
+	 * immediately; rather, it is removed by {@link Iterator#remove()} while
+	 * iterating over the update list iff {@link
+	 * TileEntity#updateAndCheck(World)} returns {@code true} (which it should,
+	 * as this method invokes {@code t.destroy()}).
+	 * 
+	 * @throws NullPointerException if {@code t} is {@code null}.
+	 */
+	default void removeTileEntity(TileEntity t) {
+		// Since it is expensive to directly remove an object from a
+		// LinkedList, simply set its destroyed flag to true and have it remove
+		// itself upon the next iteration.
+		if(t.requiresUpdates()) // not actually a necessary check
+			t.destroy();
+	}
 	
 	/**
 	 * Attempts to blow up a tile at the given coordinates.

@@ -17,13 +17,6 @@ public abstract class GameObject {
 	
 	
 	/**
-	 * Creates a new GameObject.
-	 */
-	protected GameObject() {
-		// nothing to see here, move along
-	}
-	
-	/**
 	 * Updates this GameObject.
 	 * 
 	 * @param world The world.

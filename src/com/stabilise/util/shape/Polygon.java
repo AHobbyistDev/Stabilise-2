@@ -1,5 +1,6 @@
 package com.stabilise.util.shape;
 
+import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.Vec2;
 
@@ -9,6 +10,7 @@ import com.stabilise.util.maths.Vec2;
  * <p>The worst-case expensiveness of a polygon to compute scales linearly
  * with its number of vertices.
  */
+@NotThreadSafe
 public class Polygon extends AbstractPolygon {
 	
 	/** The polygon's vertices. */

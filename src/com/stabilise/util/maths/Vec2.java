@@ -1,8 +1,11 @@
 package com.stabilise.util.maths;
 
+import com.stabilise.util.annotation.Immutable;
+
 /**
  * An immutable 2D vector.
  */
+@Immutable
 public class Vec2 {
 	
 	public final float x, y;

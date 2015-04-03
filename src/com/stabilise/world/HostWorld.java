@@ -37,9 +37,16 @@ public class HostWorld extends AbstractWorld {
 	/** The world generator. */
 	public final WorldGenerator generator;
 	
+	// VERY IMPORTANT IMPLEMENTATION DETAILS:
+	// Empirical testing has revealed that the table size for this map is
+	// usually 16, but can grow to 32. This means the number of valid hash
+	// bits is either 4 or 5, so we need to compress our data into those bits
+	// such that we minimise collisions.
 	/** The map of all loaded regions. Maps region coords -> regions. */
 	private final ConcurrentBiIntHashMap<Region> regions =
-			new ConcurrentBiIntHashMap<>(Region.COORD_HASHER);
+			new ConcurrentBiIntHashMap<>(
+					(x,y) -> { return (x << 2) ^ y; }
+	);
 	/** Tracks the number of loaded regions, in preference to invoking
 	 * regions.size(), which is not a constant-time operation. */
 	private final AtomicInteger numRegions = new AtomicInteger(0);
@@ -424,33 +431,8 @@ public class HostWorld extends AbstractWorld {
 			slice.setTileEntityAt(tileX, tileY, t);
 			r.unsavedChanges = true;
 			
-			addTileEntity(t);
-		}
-	}
-	
-	@Override
-	public void removeTileEntityAt(int x, int y) {
-		// Ditto in that we're duping getSliceAtTile()
-		Region r = getRegionAt(regionCoordFromTileCoord(x), regionCoordFromTileCoord(y));
-		if(r == null)
-			return;
-		Slice slice = r.getSliceAt(
-				sliceCoordRelativeToRegionFromTileCoord(x),
-				sliceCoordRelativeToRegionFromTileCoord(y)
-		);
-		
-		if(slice != null) {
-			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
-			int tileY = tileCoordRelativeToSliceFromTileCoord(y);
-			
-			TileEntity t2 = slice.getTileEntityAt(tileX, tileY);
-			if(t2 != null) {
-				t2.handleRemove(this, x, y);
-				removeTileEntity(t2);
-			}
-			
-			slice.removeTileEntityAt(tileX, tileY);
-			r.unsavedChanges = true;
+			if(t != null)
+				addTileEntity(t);
 		}
 	}
 	

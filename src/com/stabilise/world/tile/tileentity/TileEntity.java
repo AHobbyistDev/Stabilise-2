@@ -19,7 +19,7 @@ public abstract class TileEntity extends FixedGameObject {
 	
 	/** The tile entity registry. */
 	private static final InstantiationRegistry<TileEntity> TILE_ENTITIES =
-			new InstantiationRegistry<TileEntity>(4, THROW_EXCEPTION, TileEntity.class,
+			new InstantiationRegistry<>(4, THROW_EXCEPTION, TileEntity.class,
 					Integer.TYPE, Integer.TYPE);
 	
 	// Register all tile entity types.
@@ -41,8 +41,7 @@ public abstract class TileEntity extends FixedGameObject {
 	 * @param y The y-coordinate of the tile entity, in tile-lengths.
 	 */
 	protected TileEntity(int x, int y) {
-		this.x = x;
-		this.y = y;
+		super(x, y);
 	}
 	
 	
@@ -58,20 +57,32 @@ public abstract class TileEntity extends FixedGameObject {
 	static interface Updated {}
 	
 	/**
-	 * Updates this TileEntity, and then returns {@link #isDestroyed()}.
+	 * Updates this tile entity iff {@link #isDestroyed()} returns {@code
+	 * false}, then returns {@code isDestroyed()}.
 	 * 
-	 * <p>{@code update()} is not invoked if {@code isDestroyed()} already
-	 * returns {@code true}. This is due to the fact that tile entities are
-	 * stored in a List rather than a Map by the world for updating; it is
-	 * vastly more efficient to remove a TileEntity while iterating than when
-	 * not.
+	 * <p>If this method returns {@code true}, the {@code destroyed} flag is
+	 * cleared such that subsequent invocations of this method will return
+	 * {@code false} (unless, of course, this tile entity is {@link #destroy()
+	 * destroyed} again).
 	 */
 	@Override
 	public boolean updateAndCheck(World world) {
 		if(isDestroyed())
 			return true;
 		update(world);
-		return isDestroyed();
+		if(isDestroyed()) {
+			// We reset the destroyed flag as to permit behaviour wherein a
+			// tile entity may add and remove itself from the update list
+			// repeatedly as it wills.
+			destroyed = false;
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public void update(World world) {
+		// nothing in the default implementation
 	}
 	
 	@Override

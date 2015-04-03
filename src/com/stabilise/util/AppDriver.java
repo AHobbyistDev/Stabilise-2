@@ -97,7 +97,7 @@ public abstract class AppDriver implements Runnable {
 			throw new IllegalArgumentException("tps < 1");
 		
 		this.tps = tps;
-		nsPerTick = 1000000000L / tps;
+		nsPerTick = 1000000000 / tps;
 		setFPS(fps);
 		this.log = Objects.requireNonNull(log);
 		setTicksPerProfilerFlush(ticksPerFlush);
@@ -271,12 +271,7 @@ public abstract class AppDriver implements Runnable {
 	public void setFPS(int fps) {
 		if(fps < -1)
 			throw new IllegalArgumentException("fps < -1");
-		
-		this.fps = fps;
-		if(fps == 0)
-			nsPerFrame = 0;
-		else
-			nsPerFrame = 1000000000L / fps;
+		nsPerFrame = fps == 0 ? 0 : 1000000000 / fps;
 	}
 	
 	/**

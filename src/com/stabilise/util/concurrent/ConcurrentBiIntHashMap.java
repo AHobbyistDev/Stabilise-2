@@ -37,8 +37,6 @@ package com.stabilise.util.concurrent;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -55,6 +53,7 @@ import java.util.function.Consumer;
 
 import com.stabilise.util.BiIntFunction;
 import com.stabilise.util.TheUnsafe;
+import com.stabilise.util.annotation.ThreadSafe;
 
 /**
  * A variant of {@link java.util.concurrent.ConcurrentHashMap} which uses two
@@ -64,6 +63,7 @@ import com.stabilise.util.TheUnsafe;
  * I've stripped away much of the superfluous stuff, and (hopefully) properly
  * adapted all of its functions.
  */
+@ThreadSafe
 public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 	
 	/* ---------------- Constants -------------- */
@@ -88,16 +88,6 @@ public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 	 * Needed by toArray and related methods.
 	 */
 	static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
-
-	/**
-	 * The load factor for this table. Overrides of this value in
-	 * constructors affect only the initial table capacity.  The
-	 * actual floating point value isn't normally used -- it is
-	 * simpler to use expressions such as {@code n - (n >>> 2)} for
-	 * the associated resizing threshold.
-	 */
-	@SuppressWarnings("unused")
-	private static final float LOAD_FACTOR = 0.75f;
 
 	/**
 	 * The bin count threshold for using a tree rather than list for a
@@ -222,7 +212,7 @@ public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 
 	/* ---------------- Static utilities -------------- */
 
-	/**
+	/*
 	 * Spreads (XORs) higher bits of hash to lower and also forces top
 	 * bit to 0. Because the table uses power-of-two masking, sets of
 	 * hashes that vary only in bits above the current mask will
@@ -238,9 +228,13 @@ public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 	 * to incorporate impact of the highest bits that would otherwise
 	 * never be used in index calculations because of table bounds.
 	 */
+	/**
+	 * Gets the hash for the specified key components.
+	 */
 	final int hash(int x, int y) {
-		x = hasher.apply(x, y); // store result in x
-		return (x ^ (x >>> 16)) & HASH_BITS;
+		return hasher.apply(x, y) & HASH_BITS;
+		//x = hasher.apply(x, y); // store result in x
+		//return (x ^ (x >>> 16)) & HASH_BITS;
 	}
 
 	/**
@@ -255,29 +249,6 @@ public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 		n |= n >>> 8;
 		n |= n >>> 16;
 		return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
-	}
-
-	/**
-	 * Returns x's Class if it is of the form "class C implements
-	 * Comparable<C>", else null.
-	 */
-	static Class<?> comparableClassFor(Object x) {
-		if (x instanceof Comparable) {
-			Class<?> c; Type[] ts, as; Type t; ParameterizedType p;
-			if ((c = x.getClass()) == String.class) // bypass checks
-				return c;
-			if ((ts = c.getGenericInterfaces()) != null) {
-				for (int i = 0; i < ts.length; ++i) {
-					if (((t = ts[i]) instanceof ParameterizedType) &&
-						((p = (ParameterizedType)t).getRawType() ==
-						 Comparable.class) &&
-						(as = p.getActualTypeArguments()) != null &&
-						as.length == 1 && as[0] == c) // type arg is c
-						return c;
-				}
-			}
-		}
-		return null;
 	}
 
 	/**
@@ -474,6 +445,14 @@ public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 		return ((n < 0L) ? 0 :
 				(n > (long)Integer.MAX_VALUE) ? Integer.MAX_VALUE :
 				(int)n);
+	}
+	
+	/**
+	 * Returns the length of the internal backing table for this map, which is
+	 * always a power of 2. This method should only be used for debugging purposes.
+	 */
+	public int tableSize() {
+		return table == null ? 0 : table.length;
 	}
 
 	/**
@@ -1321,7 +1300,7 @@ public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 			// need to be done once-per-thread, so this shouldn't introduce too
 			// much of a performance deficit.
 			try {
-				Method m = ThreadLocalRandom.class.getMethod("localInit");
+				Method m = ThreadLocalRandom.class.getDeclaredMethod("localInit");
 				m.setAccessible(true);
 				m.invoke(null);
 			} catch(Exception e) {
@@ -2668,7 +2647,7 @@ public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 	private static final long ABASE;
 	private static final int ASHIFT;
 	
-	// Thrad#threadLocalRandomProbe
+	// Thread#threadLocalRandomProbe
 	private static final long PROBE;
 	
 	/** visible alternative to ThreadLocalRandom#getProbe() */
