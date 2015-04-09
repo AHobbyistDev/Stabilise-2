@@ -46,7 +46,7 @@ public class HostWorld extends AbstractWorld {
 	private final ConcurrentBiIntHashMap<Region> regions =
 			new ConcurrentBiIntHashMap<>(
 					(x,y) -> { return (x << 2) ^ y; }
-	);
+			);
 	/** Tracks the number of loaded regions, in preference to invoking
 	 * regions.size(), which is not a constant-time operation. */
 	private final AtomicInteger numRegions = new AtomicInteger(0);

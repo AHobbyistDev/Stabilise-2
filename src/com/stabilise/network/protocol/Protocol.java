@@ -38,7 +38,7 @@ public enum Protocol {
 	/** Registry of packets sent by the server to the client (i.e. clientbound
 	 * packets). */
 	private final InstantiationRegistry<Packet> serverPackets =
-			new InstantiationRegistry<Packet>(UBYTE_MAX_VALUE, THROW_EXCEPTION, Packet.class);
+			new InstantiationRegistry<>(UBYTE_MAX_VALUE, THROW_EXCEPTION, Packet.class);
 	/** Registry of packets sent by the client to the server (i.e. serverbound
 	 * packets). */
 	private final InstantiationRegistry<Packet> clientPackets =

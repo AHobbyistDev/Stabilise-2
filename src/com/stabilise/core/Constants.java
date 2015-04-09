@@ -18,8 +18,8 @@ public class Constants {
 	
 	// Primary Application Data -----------------------------------------------
 	
-	/** This should be false if the application will be compiled into a public-
-	 * release version. */
+	/** Indicates whether or not this copy of the game is a developer version.
+	 * <p>This should be {@code false} for all public releases. */
 	public static final boolean DEV_VERSION = true;
 	
 	/** The current game version. */
@@ -74,7 +74,7 @@ public class Constants {
 		
 		public final int release, patchMajor, patchMinor;
 		private final int build, revision;
-		private String str;
+		private String str; // lazy-initialised toString value
 		
 		public Version(int release, int patchMajor, int patchMinor) {
 			this.release = release;

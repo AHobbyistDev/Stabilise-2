@@ -76,7 +76,8 @@ public class LineCounter {
 				"C:/Users/Adam/Documents/GitHub/Stabilise-2/Stabilise 2/core/src",
 				new String[] {
 						"com/stabilise/tests",
-						"com/stabilise/screen/menu"
+						"com/stabilise/screen/menu",
+						"com/stabilise/character"
 				}
 		);
 	}

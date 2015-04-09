@@ -88,4 +88,21 @@ public class Vec2 {
 		return new Vec2(-y, x);
 	}
 	
+	@Override
+	public int hashCode() {
+		return Float.floatToRawIntBits(x) ^ Float.floatToRawIntBits(y);
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(!(o instanceof Vec2)) return false;
+		Vec2 v = (Vec2)o;
+		return x == v.x && y == v.y;
+	}
+	
+	@Override
+	public String toString() {
+		return "Vec2[" + x + "," + y + "]";
+	}
+	
 }

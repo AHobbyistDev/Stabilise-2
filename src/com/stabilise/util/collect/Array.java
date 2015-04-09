@@ -89,6 +89,9 @@ public class Array<E> implements Iterable<E> {
 	 * Returns this Array's backing array. Note that the returned array is not
 	 * guaranteed to maintain a consistent view of this Array, as the backing
 	 * array is replaced whenever this Array is resized.
+	 * 
+	 * <p>This method is <b>not safe</b> if this Array was created using either
+	 * the {@link #Array()} or {@link #Array(int)} constructor.
 	 */
 	public E[] get() {
 		return data;

@@ -779,23 +779,23 @@ public abstract class Interpolation {
 		};
 	}
 	
-	/**
-	 * Defines a single method - {@link #transform(float)} - which should be
-	 * implemented to transform a value in accordance with a desired
-	 * "transformation function" {@code f(x)} of which typical properties are
-	 * outlined {@link Interpolation here}.
-	 */
-	@FunctionalInterface
-	public static interface TransformationFunction {
-		/**
-		 * Transforms a value.
-		 * 
-		 * @param x The value.
-		 * 
-		 * @return The transformed value.
-		 */
-		float transform(float x);
-	}
+//	/**
+//	 * Defines a single method - {@link #transform(float)} - which should be
+//	 * implemented to transform a value in accordance with a desired
+//	 * "transformation function" {@code f(x)} of which typical properties are
+//	 * outlined {@link Interpolation here}.
+//	 */
+//	@FunctionalInterface
+//	public static interface TransformationFunction {
+//		/**
+//		 * Transforms a value.
+//		 * 
+//		 * @param x The value.
+//		 * 
+//		 * @return The transformed value.
+//		 */
+//		float transform(float x);
+//	}
 	
 	/**
 	 * <p>Ease in interpolation is characterised by a first derivative less

@@ -33,7 +33,7 @@ public class ConfigFile {
 	
 	/** The tags stored in the config file. Contains K/V mappings of each tag's
 	 * name to their represented property, stored in string form. */
-	public LinkedHashMap<String, String> tags = new LinkedHashMap<String, String>();
+	public LinkedHashMap<String, String> tags = new LinkedHashMap<>();
 	
 	/** The name of the config file. */
 	private final String name;
@@ -471,8 +471,9 @@ public class ConfigFile {
 	 */
 	private String validate(String s) {
 		if(s.contains(":"))
-			throw new IllegalArgumentException("The string \"" + s + "\" contains a colon, " +
-					" and as such is not valid as either a tag name or field within a config file!");
+			throw new IllegalArgumentException("The string \"" + s + "\" "
+					+ "contains a colon, and as such is not valid as either a "
+					+ "tag name or field within a config file!");
 		return s;
 	}
 	

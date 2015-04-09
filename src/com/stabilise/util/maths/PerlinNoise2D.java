@@ -12,11 +12,11 @@ import com.stabilise.util.annotation.NotThreadSafe;
 public class PerlinNoise2D {
 	
 	/** The pseudorandom number generator. */
-	private Random rnd;
+	private final Random rnd;
 	/** The base seed. */
-	private long seed;
+	private final long seed;
 	/** The wavelength of noise to generate. */
-	private float wavelength;
+	private final float wavelength;
 	
 	/** Gradient vectors. */
 	private final Vector2 g00 = new Vector2(),
@@ -75,8 +75,8 @@ public class PerlinNoise2D {
 	public double noise(double x, double y) {
 		x /= wavelength;
 		y /= wavelength;
-		int flooredX = (int)Math.floor(x);
-		int flooredY = (int)Math.floor(y);
+		int flooredX = Maths.floor(x);
+		int flooredY = Maths.floor(y);
 		
 		// Gen gradients for the vertices of the square about the point
 		genGradient(flooredX, flooredY, g00);

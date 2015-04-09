@@ -272,6 +272,23 @@ public abstract class Shape {
 		return new ShapeProjection(min, max);
 	}
 	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName());
+		sb.append('{');
+		Vec2[] verts = getVertices();
+		if(verts != null) {
+			for(int i = 0; i < verts.length; i++) {
+				sb.append(verts[i].toString());
+				if(i < verts.length - 1)
+					sb.append(',');
+			}
+		}
+		sb.append('}');
+		return sb.toString();
+	}
+	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------

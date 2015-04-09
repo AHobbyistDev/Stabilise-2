@@ -150,6 +150,17 @@ public class Polygon extends AbstractPolygon {
 		return p;
 	}
 	
+	@Override
+	public boolean equals(Object o) {
+		if(!(o instanceof Polygon)) return false;
+		Polygon p = (Polygon)o;
+		if(vertices.length != p.vertices.length) return false;
+		for(int i = 0; i < vertices.length; i++)
+			if(!vertices[i].equals(p.vertices[i]))
+				return false;
+		return true;
+	}
+	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------

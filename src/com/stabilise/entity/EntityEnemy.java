@@ -39,13 +39,13 @@ public class EntityEnemy extends EntityMob {
 		maxHealth = 20;
 		health = 20;
 		
-		jumpVelocity = 0.5f;
+		jumpVelocity = 15f;
 		jumpCrouchDuration = 8;
 		//jumpVelocity = PhysicsUtil.jumpHeightToInitialJumpVelocity(4, gravity);
 		swimAcceleration = 0.08f;
-		acceleration = 0.22f;
+		acceleration = 1.3f;
 		airAcceleration = AIR_TRACTION;
-		maxDx = 0.5f;
+		maxDx = 13f;
 		
 		state = State.IDLE;
 		

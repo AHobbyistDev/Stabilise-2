@@ -107,9 +107,13 @@ public class CharacterData {
 		       .putString(System.getProperty("os.name"), Charsets.UTF_8)
 		       .putString(System.getProperty("os.version"), Charsets.UTF_8)
 		       .putString(System.getProperty("user.name"), Charsets.UTF_8)
-		       .putLong(new Random().nextLong())// In Java 8, constructing new Random is sensitive to prior
-		       .hash();							// constructions, so we allow the hash to be influenced by
-												// earlier actions by the user in this sense.
+		       // In Java 8, the seed of a newly-constructed Random is
+		       // sensitive to prior Random constructions, so in this sense we
+		       // allow the hash to be influenced by earlier actions of the
+		       // user.
+		       .putLong(new Random().nextLong())
+		       .hash();
+		
 		hash = hc.toString();
 	}
 	

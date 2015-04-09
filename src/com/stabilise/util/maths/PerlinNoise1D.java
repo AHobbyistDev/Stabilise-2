@@ -11,11 +11,11 @@ import com.stabilise.util.annotation.NotThreadSafe;
 public class PerlinNoise1D {
 	
 	/** The pseudorandom number generator. */
-	private Random rnd;
+	private final Random rnd;
 	/** The base seed. */
-	private long seed;
+	private final long seed;
 	/** The wavelength of noise to generate. */
-	private float wavelength;
+	private final float wavelength;
 	
 	
 	/**

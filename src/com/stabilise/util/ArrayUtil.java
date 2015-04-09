@@ -51,7 +51,7 @@ public class ArrayUtil {
 			return null;
 		if(array.length >= minLength)
 			return array;
-		return (T[]) Arrays.copyOf(array, minLength);
+		return Arrays.copyOf(array, minLength);
 	}
 	
 	/**

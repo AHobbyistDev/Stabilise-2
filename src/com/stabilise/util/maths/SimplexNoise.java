@@ -35,11 +35,11 @@ public class SimplexNoise {
 	//--------------------==========--------------------
 	
 	/** The pseudorandom number generator. */
-	private Random rnd;
+	private final Random rnd;
 	/** The base seed. */
-	private long seed;
+	private final long seed;
 	/** The scale of noise to generate. */
-	private float scale;
+	private final float scale;
 	
 	/** Gradient vector. */
 	private final Vector2 grad = new Vector2();

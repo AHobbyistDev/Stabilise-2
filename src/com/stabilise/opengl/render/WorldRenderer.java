@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.stabilise.core.Application;
 import com.stabilise.core.Game;
@@ -19,6 +20,7 @@ import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
+import com.stabilise.opengl.ColourEffectShader;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
 import com.stabilise.util.Profiler;
@@ -39,7 +41,9 @@ public class WorldRenderer implements Renderer {
 	/** The font style used for the loading screen. */
 	//private static final FontStyle STYLE_LOADING_SCREEN = new FontStyle(36, Colour.BLACK, FontStyle.Alignment.CENTRE, 4, 0);
 	
+	@SuppressWarnings("unused")
 	private static final float COL_WHITE = Color.WHITE.toFloatBits();
+	private static final float DEFAULT_COL = new Color(1f, 1f, 1f, 0f).toFloatBits();
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -65,6 +69,7 @@ public class WorldRenderer implements Renderer {
 	SpriteBatch batch;
 	OrthographicCamera camera;
 	ScreenViewport viewport;
+	ShaderProgram shader;
 	
 	BitmapFont font;
 	
@@ -102,9 +107,13 @@ public class WorldRenderer implements Renderer {
 	
 	@Override
 	public void loadResources() {
+		shader = new ColourEffectShader();
+		if(!shader.isCompiled())
+			throw new RuntimeException("Shader could not compile: " + shader.getLog());
+		
 		camera = new OrthographicCamera();
 		viewport = new ScreenViewport(camera);
-		batch = new SpriteBatch();
+		batch = new SpriteBatch(512);
 		
 		FreeTypeFontParameter param = new FreeTypeFontParameter();
 		param.size = 16;
@@ -146,6 +155,9 @@ public class WorldRenderer implements Renderer {
 
 	@Override
 	public void unloadResources() {
+		shader.dispose();
+		batch.dispose();
+		
 		font.dispose();
 		
 		texEnemy.dispose();
@@ -280,8 +292,10 @@ public class WorldRenderer implements Renderer {
 	public void renderEnemy(EntityEnemy e) {
 		if(e.hasTint) {
 			if(e.dead) {
+				batch.setColor(e.tintStrength, 0f, 0f, 1f);
 				//texEnemy.tint(Color.RED, e.tintStrength);
 			} else {
+				batch.setColor(e.tintStrength, e.tintStrength, e.tintStrength, 1);
 				//texEnemy.tint(Color.WHITE, e.tintStrength);
 			}
 		} else {
@@ -292,7 +306,7 @@ public class WorldRenderer implements Renderer {
 				texEnemy, // texture
 				(float)e.x, // x
 				(float)e.y, // y
-				0.5f, // originX
+				-0.5f, // originX
 				0f, // originY
 				1f, // width
 				2f, // height
@@ -306,6 +320,8 @@ public class WorldRenderer implements Renderer {
 				!e.facingRight, // flipX
 				false // flipY
 		);
+		
+		batch.setColor(DEFAULT_COL);
 	}
 	
 	/**
@@ -403,7 +419,7 @@ public class WorldRenderer implements Renderer {
 				false, // flipX
 				false // flipY
 		);
-		batch.setColor(COL_WHITE);
+		batch.setColor(DEFAULT_COL);
 	}
 	
 	/**
@@ -425,7 +441,7 @@ public class WorldRenderer implements Renderer {
 				1f, // scaleY
 				0f // rotation
 		);
-		batch.setColor(COL_WHITE);
+		batch.setColor(DEFAULT_COL);
 	}
 	
 	/**
