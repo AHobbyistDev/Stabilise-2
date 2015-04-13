@@ -36,7 +36,8 @@ public class PreAlphaWorldLoader extends WorldLoader {
 		try {
 			regionTag = NBTIO.readCompressed(file);
 		} catch(IOException e) {
-			log.postSevere("Could not load the NBT data for region " + r.x + "," + r.y + "!", e);
+			log.postSevere("Could not load the NBT data for region " + r.x()
+					+ "," + r.y() + "!", e);
 			return;
 		}
 		
@@ -50,8 +51,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 			for(int y = 0; y < REGION_SIZE; y++) {			// Row (y)
 				for(int x = 0; x < REGION_SIZE; x++) {		// Col (x)
 					NBTTagCompound sliceTag = regionTag.getCompound("slice" + x + "_" + y);
-					Slice s = new Slice(r.offsetX + x, r.offsetY + y);
-					s.setTilesAsIntArray(sliceTag.getIntArray("tiles"));
+					Slice s = new Slice(r.offsetX + x, r.offsetY + y, sliceTag.getIntArray("tiles"));
 					
 					NBTTagList tileEntities = sliceTag.getList("tileEntities");
 					if(tileEntities.size() > 0)

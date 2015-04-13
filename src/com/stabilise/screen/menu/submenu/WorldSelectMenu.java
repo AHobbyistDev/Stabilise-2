@@ -23,7 +23,7 @@ import com.stabilise.util.StringUtil;
 import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.concurrent.TaskThread;
 import com.stabilise.util.concurrent.TaskTracker;
-import com.stabilise.util.maths.Point;
+import com.stabilise.util.maths.MutablePoint;
 import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
@@ -57,51 +57,51 @@ public class WorldSelectMenu extends SubMenu {
 	private static final int NUM_WORLDS = 6;
 	
 	/** The texture's dimensions. */
-	private static final Point GUI_TEXTURE_DIMENSIONS = new Point(256, 128);
+	private static final MutablePoint GUI_TEXTURE_DIMENSIONS = new MutablePoint(256, 128);
 	
 	/** The main panel's origin point. */
-	private static final Point GUI_TC_MAIN_ORIGIN = new Point(0, 0);
+	private static final MutablePoint GUI_TC_MAIN_ORIGIN = new MutablePoint(0, 0);
 	/** The main panel's dimensions. */
-	private static final Point GUI_TC_MAIN_DIMENSIONS = new Point(64, 96);
+	private static final MutablePoint GUI_TC_MAIN_DIMENSIONS = new MutablePoint(64, 96);
 	/** The world info panel's origin point. */
-	private static final Point GUI_TC_PANEL_ORIGIN = new Point(64, 0);
+	private static final MutablePoint GUI_TC_PANEL_ORIGIN = new MutablePoint(64, 0);
 	/** The world info panel's dimensions. */
-	private static final Point GUI_TC_PANEL_DIMENSIONS = new Point(64, 86);
+	private static final MutablePoint GUI_TC_PANEL_DIMENSIONS = new MutablePoint(64, 86);
 	/** The panel's text's origin point. */
-	private static final Point GUI_TC_TEXT_ORIGIN = new Point(0, 96);
+	private static final MutablePoint GUI_TC_TEXT_ORIGIN = new MutablePoint(0, 96);
 	/** The panel's text's dimensions. */
-	private static final Point GUI_TC_TEXT_DIMENSIONS = new Point(102, 9);
+	private static final MutablePoint GUI_TC_TEXT_DIMENSIONS = new MutablePoint(102, 9);
 	/** The filled normal button's origin point. */
-	private static final Point GUI_TC_FILLED_NORM_BUTTON_ORIGIN = new Point(128, 0);
+	private static final MutablePoint GUI_TC_FILLED_NORM_BUTTON_ORIGIN = new MutablePoint(128, 0);
 	/** The filled normal button's dimensions. */
-	private static final Point GUI_TC_FILLED_NORM_BUTTON_DIMENSIONS = new Point(61, 13);
+	private static final MutablePoint GUI_TC_FILLED_NORM_BUTTON_DIMENSIONS = new MutablePoint(61, 13);
 	/** The filled normal button's origin point. */
-	private static final Point GUI_TC_FILLED_HOVER_BUTTON_ORIGIN = new Point(128, 13);
+	private static final MutablePoint GUI_TC_FILLED_HOVER_BUTTON_ORIGIN = new MutablePoint(128, 13);
 	/** The filled normal button's dimensions. */
-	private static final Point GUI_TC_FILLED_HOVER_BUTTON_DIMENSIONS = new Point(61, 13);
+	private static final MutablePoint GUI_TC_FILLED_HOVER_BUTTON_DIMENSIONS = new MutablePoint(61, 13);
 	/** The filled normal button's origin point. */
-	private static final Point GUI_TC_FILLED_SELECTED_BUTTON_ORIGIN = new Point(128, 26);
+	private static final MutablePoint GUI_TC_FILLED_SELECTED_BUTTON_ORIGIN = new MutablePoint(128, 26);
 	/** The filled normal button's dimensions. */
-	private static final Point GUI_TC_FILLED_SELECTED_BUTTON_DIMENSIONS = new Point(61, 13);
+	private static final MutablePoint GUI_TC_FILLED_SELECTED_BUTTON_DIMENSIONS = new MutablePoint(61, 13);
 	/** The filled normal button's origin point. */
-	private static final Point GUI_TC_EMPTY_NORM_BUTTON_ORIGIN = new Point(128, 39);
+	private static final MutablePoint GUI_TC_EMPTY_NORM_BUTTON_ORIGIN = new MutablePoint(128, 39);
 	/** The filled normal button's dimensions. */
-	private static final Point GUI_TC_EMPTY_NORM_BUTTON_DIMENSIONS = new Point(61, 13);
+	private static final MutablePoint GUI_TC_EMPTY_NORM_BUTTON_DIMENSIONS = new MutablePoint(61, 13);
 	/** The filled normal button's origin point. */
-	private static final Point GUI_TC_EMPTY_HOVER_BUTTON_ORIGIN = new Point(128, 52);
+	private static final MutablePoint GUI_TC_EMPTY_HOVER_BUTTON_ORIGIN = new MutablePoint(128, 52);
 	/** The filled normal button's dimensions. */
-	private static final Point GUI_TC_EMPTY_HOVER_BUTTON_DIMENSIONS = new Point(61, 13);
+	private static final MutablePoint GUI_TC_EMPTY_HOVER_BUTTON_DIMENSIONS = new MutablePoint(61, 13);
 	/** The filled normal button's origin point. */
-	private static final Point GUI_TC_EMPTY_SELECTED_BUTTON_ORIGIN = new Point(128, 65);
+	private static final MutablePoint GUI_TC_EMPTY_SELECTED_BUTTON_ORIGIN = new MutablePoint(128, 65);
 	/** The filled normal button's dimensions. */
-	private static final Point GUI_TC_EMPTY_SELECTED_BUTTON_DIMENSIONS = new Point(61, 13);
+	private static final MutablePoint GUI_TC_EMPTY_SELECTED_BUTTON_DIMENSIONS = new MutablePoint(61, 13);
 	
 	/** A list button's dimensions. */
-	private static final Point GUI_BUTTON_DIMENSIONS = new Point(61, 11);
+	private static final MutablePoint GUI_BUTTON_DIMENSIONS = new MutablePoint(61, 11);
 	/** A list button's sprite's location, relative to the button. */
-	private static final Point GUI_BUTTON_SPRITE_LOCATION = new Point(0, -1);
+	private static final MutablePoint GUI_BUTTON_SPRITE_LOCATION = new MutablePoint(0, -1);
 	/** A list button's sprite's base vertex data. */
-	private static final Point GUI_BUTTON_SPRITE_DIMENSIONS = new Point(61, 13);
+	private static final MutablePoint GUI_BUTTON_SPRITE_DIMENSIONS = new MutablePoint(61, 13);
 	
 	
 	/** The number of pixels padding at the top of the main GUI screen. */
@@ -117,9 +117,9 @@ public class WorldSelectMenu extends SubMenu {
 	private static final int GUI_PANEL_PADDING_SIDE = 2;
 	
 	/** The location of the back button. */
-	private static final Point GUI_BUTTON_BACK_LOCATION = new Point(4,2);
+	private static final MutablePoint GUI_BUTTON_BACK_LOCATION = new MutablePoint(4,2);
 	/** The dimensions of the back button. */
-	private static final Point GUI_BUTTON_BACK_DIMENSIONS = new Point(56,12);
+	private static final MutablePoint GUI_BUTTON_BACK_DIMENSIONS = new MutablePoint(56,12);
 	
 	/** The title text's additional relative scaling. */
 	private static final float GUI_TEXT_SCALING = 0.5f;
@@ -133,7 +133,7 @@ public class WorldSelectMenu extends SubMenu {
 	private static final int GUI_CREATE_WORLD_PADDING = 8;
 	
 	/** The scaled GUI dimensions. */
-	private static final Point GUI_DIMENSIONS = new Point(1280, 640);
+	private static final MutablePoint GUI_DIMENSIONS = new MutablePoint(1280, 640);
 	/** The GUI scale. TODO: Temporary? */
 	private static final float GUI_SCALE = (float)GUI_DIMENSIONS.getX() / GUI_TEXTURE_DIMENSIONS.getX();
 	
@@ -156,7 +156,7 @@ public class WorldSelectMenu extends SubMenu {
 	private int selectedWorld;
 	
 	/** The effective (0,0) for the menu's components, for relative placement. */
-	private Point origin;
+	private MutablePoint origin;
 	
 	/** The GUI scaling. */
 	private float guiScale;
@@ -166,15 +166,15 @@ public class WorldSelectMenu extends SubMenu {
 	/** The texture coordinates for the main part of the GUI. */
 	private float[] guiMainTC;
 	/** The location for the main part of the GUI. */
-	private Point guiMainLocation;
+	private MutablePoint guiMainLocation;
 	/** The dimensions for the main part of the GUI. */
-	private Point guiMainDimensions;
+	private MutablePoint guiMainDimensions;
 	/** The texture coordinates for the GUI panel. */
 	private float[] guiPanelTC;
 	/** The location for the GUI panel. */
-	private Point guiPanelLocation;
+	private MutablePoint guiPanelLocation;
 	/** The dimensions for the GUI panel. */
-	private Point guiPanelDimensions;
+	private MutablePoint guiPanelDimensions;
 	/** The panel's top padding. */
 	private int guiPanelPaddingTop;
 	/** The panel's bottom padding. */
@@ -185,11 +185,11 @@ public class WorldSelectMenu extends SubMenu {
 	/** The texture coordinates for the GUI header text. */
 	private float[] guiTextTC;
 	/** The location for the GUI header text. */
-	private Point guiTextLocation;
+	private MutablePoint guiTextLocation;
 	/** The dimensions for the GUI header text. */
-	private Point guiTextDimensions;
+	private MutablePoint guiTextDimensions;
 	/** The location for the delete world confirmation text. */
-	private Point guiDeleteWorldConfirmationLocation;
+	private MutablePoint guiDeleteWorldConfirmationLocation;
 	/** The padding between elements in the create world screen. */
 	private int guiCreateWorldPadding;
 	
@@ -200,24 +200,24 @@ public class WorldSelectMenu extends SubMenu {
 	/** The style of the font to use for the world name text. */
 	private FontStyle styleWorldName;
 	/** The point at which the world name text will be placed. */
-	private Point guiSelectWorldNameLocation;
+	private MutablePoint guiSelectWorldNameLocation;
 	/** The world name text. */
 	private String selectedWorldName;
 	/** The style of the font to use for the world seed text. */
 	private FontStyle styleWorldInfo;
 	/** The point at which the world seed text will be placed. */
-	private Point guiSelectWorldInfoLocation;
+	private MutablePoint guiSelectWorldInfoLocation;
 	/** The world info text. */
 	private String[] selectedWorldInfo;
 	
 	/** The world name header's location. */
-	private Point worldNameHeaderLocation;
+	private MutablePoint worldNameHeaderLocation;
 	/** The world name input textbox. */
 	private TextBox worldNameTextBox;
 	/** The world name input textbox's background. */
 	private Rectangle worldNameTextboxBackground;
 	/** The world seed header's location. */
-	private Point worldSeedHeaderLocation;
+	private MutablePoint worldSeedHeaderLocation;
 	/** The world seed input textbox. */
 	private TextBox worldSeedTextBox;
 	/** The world seed input textbox's background. */
@@ -260,17 +260,17 @@ public class WorldSelectMenu extends SubMenu {
 		
 		selectedWorld = -1;
 		
-		origin = new Point();
+		origin = new MutablePoint();
 		guiScale = GUI_SCALE;		// TODO: temporary initial assignment
-		guiMainLocation = new Point();
-		guiMainDimensions = new Point();
-		guiPanelLocation = new Point();
-		guiPanelDimensions = new Point();
-		guiTextLocation = new Point();
-		guiTextDimensions = new Point();
-		guiDeleteWorldConfirmationLocation = new Point();
-		guiSelectWorldNameLocation = new Point();
-		guiSelectWorldInfoLocation = new Point();
+		guiMainLocation = new MutablePoint();
+		guiMainDimensions = new MutablePoint();
+		guiPanelLocation = new MutablePoint();
+		guiPanelDimensions = new MutablePoint();
+		guiTextLocation = new MutablePoint();
+		guiTextDimensions = new MutablePoint();
+		guiDeleteWorldConfirmationLocation = new MutablePoint();
+		guiSelectWorldNameLocation = new MutablePoint();
+		guiSelectWorldInfoLocation = new MutablePoint();
 		
 		gui = new SpriteBatch("worldselect", this);
 		gui.filter(Texture.NEAREST);
@@ -471,7 +471,7 @@ public class WorldSelectMenu extends SubMenu {
 			
 			// "World name:" text
 			
-			worldNameHeaderLocation = new Point(centredX, displayY);
+			worldNameHeaderLocation = new MutablePoint(centredX, displayY);
 			
 			displayY -= styleWorldInfo.size + guiCreateWorldPadding;
 			
@@ -488,7 +488,7 @@ public class WorldSelectMenu extends SubMenu {
 			
 			// "World seed:" text
 			
-			worldSeedHeaderLocation = new Point(centredX, displayY);
+			worldSeedHeaderLocation = new MutablePoint(centredX, displayY);
 			
 			displayY -= styleWorldInfo.size + guiCreateWorldPadding;
 			

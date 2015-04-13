@@ -122,6 +122,20 @@ public class Array<E> implements Iterable<E> {
 	}
 	
 	/**
+	 * Semi-safely gets the element at the specified index (that is, without
+	 * throwing an {@code ArrayIndexOutOfBoundsException} if {@code index >=
+	 * length()}).
+	 * 
+	 * @return The element at {@code index} (which may be {@code null}), or
+	 * {@code null} if {@code index} is greater than or equal to {@link
+	 * #length()}.
+	 * @throws ArrayIndexOutOfBoundsException if {@code index < 0}.
+	 */
+	public E getSemiSafe(int index) {
+		return index < data.length ? data[index] : null;
+	}
+	
+	/**
 	 * Sets the element at the specified index.
 	 * 
 	 * @throws ArrayIndexOutOfBoundsException if {@code index} is negative or
@@ -218,7 +232,7 @@ public class Array<E> implements Iterable<E> {
 	}
 	
 	/**
-	 * Resizes the backing array.
+	 * Resizes the backing array using {@link Arrays#copyOf(Object[], int)}.
 	 * 
 	 * @throws NegativeArraySizeException if {@code length} is negative.
 	 * @see Arrays#copyOf(Object[], int)

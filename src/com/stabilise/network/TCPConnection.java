@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.stabilise.network.protocol.Protocol;
 import com.stabilise.util.Log;
+import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 
 /**
@@ -226,6 +227,7 @@ public class TCPConnection {
 	 * no longer functioning, and should be properly closed via {@link
 	 * #closeConnection()}.
 	 */
+	@ThreadSafe
 	public boolean closeRequested() {
 		return state.get() == STATE_CLOSE_REQUESTED;
 	}
@@ -233,6 +235,7 @@ public class TCPConnection {
 	/**
 	 * Closes this connection and releases any resources held by it.
 	 */
+	@ThreadSafe
 	public void closeConnection() {
 		if(!state.compareAndSet(STATE_ACTIVE, STATE_SHUTDOWN) &&
 				!state.compareAndSet(STATE_CLOSE_REQUESTED, STATE_SHUTDOWN))

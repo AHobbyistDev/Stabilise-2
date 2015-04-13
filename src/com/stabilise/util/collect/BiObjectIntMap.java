@@ -86,7 +86,7 @@ public class BiObjectIntMap<V> implements Iterable<V> {
 	 * @throws IndexOutOfBoundsException if {@code key < 0}.
 	 */
 	public V getObject(int key) {
-		return key < list.length() ? list.get(key) : null;
+		return list.getSemiSafe(key);
 	}
 	
 	/**

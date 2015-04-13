@@ -104,7 +104,7 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 		BoundedThreadPoolExecutor tpe = new BoundedThreadPoolExecutor(
 				coreThreads, maxThreads,
 				30L, TimeUnit.SECONDS,
-				new LinkedBlockingQueue<Runnable>(),
+				new LinkedBlockingQueue<>(),
 				new WorldThreadFactory()
 		);
 		executor = tpe;

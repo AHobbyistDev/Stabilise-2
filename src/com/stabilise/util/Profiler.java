@@ -1,7 +1,6 @@
 package com.stabilise.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -342,10 +341,7 @@ public class Profiler {
 	 * @return The profiler's data.
 	 */
 	public SectionData getData() {
-		if(lastData == null)
-			return lastData = lastRoot.getData();
-		else
-			return lastData;
+		return lastData == null ? lastData = lastRoot.getData() : lastData;
 	}
 	
 	//--------------------==========--------------------
@@ -355,7 +351,7 @@ public class Profiler {
 	/**
 	 * A profiling section.
 	 */
-	private static class Section {
+	private class Section {
 		
 		/** The section's name. */
 		private final String name;
@@ -363,8 +359,10 @@ public class Profiler {
 		private long startTime = 0L;
 		/** The duration of the section, in nanoseconds. */
 		private long duration = 0L;
+		/** true if we're currently timing. */
+		private boolean active = false;
 		/** The sections's constituent sections. */
-		private final List<Section> constituents = new LightLinkedList<Section>();
+		private final List<Section> constituents = new LightLinkedList<>();
 		
 		
 		/**
@@ -381,6 +379,7 @@ public class Profiler {
 		 */
 		private void start() {
 			startTime = System.nanoTime();
+			active = true;
 		}
 		
 		/**
@@ -390,6 +389,7 @@ public class Profiler {
 		 */
 		private Section end() {
 			duration += System.nanoTime() - startTime;
+			active = false;
 			return this;
 		}
 		
@@ -414,15 +414,17 @@ public class Profiler {
 		 * @return The data.
 		 */
 		private SectionData getData(String parentName, float localPercent, float totalPercent) {
+			// If we're actively profiling in this section, we simply update
+			// duration to show a current value in an effort to be consistent.
+			if(active)
+				duration += (-startTime) + (startTime = System.nanoTime());
+			
 			// Make parentName function as absoluteName
-			if(parentName != "")
-				parentName += "." + name;
-			else
-				parentName = name;
+			parentName = parentName != "" ? parentName + "." + name : name;
 			
-			SectionData data = new SectionDataNormal(name, parentName, duration, localPercent, totalPercent);
-			
-			List<SectionData> children = new ArrayList<>(constituents.size() + 1);
+			// Imitating ArrayList functionality here
+			SectionData[] children = new SectionData[constituents.size() + 1];
+			int childCount = 0;
 			
 			long unspecified = duration; // time not specified by any constituents
 			for(Section s : constituents) {
@@ -432,20 +434,19 @@ public class Profiler {
 					((float)s.duration / duration);
 				float totPercent = locPercent * totalPercent;
 				
-				children.add(s.getData(parentName, 100*locPercent, totPercent));
+				children[childCount++] = s.getData(parentName, 100*locPercent, totPercent);
 			}
 			
 			//if(unspecified > 0L) {
 			float locPercent = duration == 0L ? 0f :
 				((float)unspecified / duration);
 			float totPercent = locPercent * totalPercent;
-			children.add(new SectionDataUnspecified(parentName, unspecified, 100*locPercent, totPercent));
+			children[childCount] = new SectionDataUnspecified(parentName, unspecified, 100*locPercent, totPercent);
 			//}
 			
-			Collections.sort(children);
-			data.setConstituents(children.toArray(new SectionData[0]));
+			Arrays.sort(children);
 			
-			return data;
+			return new SectionDataNormal(name, parentName, duration, localPercent, totalPercent, children);
 		}
 		
 	}
@@ -458,7 +459,7 @@ public class Profiler {
 	 * Ordinary sections always contain an unspecified section, plus any
 	 * child sections added during program lifetime.
 	 */
-	public static abstract class SectionData implements Comparable<SectionData> {
+	public abstract class SectionData implements Comparable<SectionData> {
 		
 		/** The name of the section represented by this data. */
 		public final String name;
@@ -495,13 +496,6 @@ public class Profiler {
 		 * {@code false} otherwise.
 		 */
 		public abstract boolean hasConstituents();
-		
-		/**
-		 * Sets this SectionData's array of constituents.
-		 * 
-		 * @param constituents The constituents.
-		 */
-		protected abstract void setConstituents(SectionData[] constituents);
 		
 		/**
 		 * Gets this section's constituent sections. The returned array will be
@@ -564,25 +558,22 @@ public class Profiler {
 	 * The section data of a 'normal' section. Most sections are normal
 	 * sections.
 	 */
-	private static class SectionDataNormal extends SectionData {
+	private class SectionDataNormal extends SectionData {
 		
 		/** The constituents. */
-		private SectionData[] constituents;
+		private final SectionData[] constituents;
 		
 		
 		private SectionDataNormal(String name, String absoluteName,
-				long duration, float localPercent, float totalPercent) {
+				long duration, float localPercent, float totalPercent,
+				SectionData[] constituents) {
 			super(name, absoluteName, duration, localPercent, totalPercent);
+			this.constituents = constituents;
 		}
 		
 		@Override
 		public boolean hasConstituents() {
 			return true;
-		}
-		
-		@Override
-		protected void setConstituents(SectionData[] constituents) {
-			this.constituents = constituents;
 		}
 		
 		@Override
@@ -595,7 +586,7 @@ public class Profiler {
 	/**
 	 * The section data of an 'unspecified' section.
 	 */
-	private static class SectionDataUnspecified extends SectionData {
+	private class SectionDataUnspecified extends SectionData {
 		
 		private SectionDataUnspecified(String parentName,
 				long duration, float localPercent, float totalPercent) {
@@ -605,11 +596,6 @@ public class Profiler {
 		@Override
 		public boolean hasConstituents() {
 			return false;
-		}
-		
-		@Override
-		protected void setConstituents(SectionData[] constituents) {
-			// ignored
 		}
 		
 		@Override

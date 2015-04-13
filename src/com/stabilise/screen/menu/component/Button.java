@@ -33,7 +33,7 @@ public class Button extends MenuItem {
 	/** The background graphics for each of the button's states. */
 	private Graphic graphicOff, graphicOver, graphicPressed;
 	/** The origin points of the background graphics. */
-	private Point graphicOriginOff, graphicOriginOver, graphicOriginPressed;
+	private MutablePoint graphicOriginOff, graphicOriginOver, graphicOriginPressed;
 	/** The font used for display text. */
 	private Font textFont;
 	/** The display text for each of the button's states. */
@@ -41,7 +41,7 @@ public class Button extends MenuItem {
 	/** The font styles used for the text for each of the button's states. */
 	private FontStyle textStyleOff, textStyleOver, textStylePressed;
 	/** The origin points of the display text. */
-	private Point textOriginOff, textOriginOver, textOriginPressed;
+	private MutablePoint textOriginOff, textOriginOver, textOriginPressed;
 	
 	
 	/**
@@ -75,9 +75,9 @@ public class Button extends MenuItem {
 	 * @return The Button, for chain construction.
 	 */
 	public Button setDisplay(
-			Graphic graphicOff, Point graphicOriginOff,
-			Graphic graphicOver, Point graphicOriginOver,
-			Graphic graphicPressed, Point graphicOriginPressed) {
+			Graphic graphicOff, MutablePoint graphicOriginOff,
+			Graphic graphicOver, MutablePoint graphicOriginOver,
+			Graphic graphicPressed, MutablePoint graphicOriginPressed) {
 		
 		this.graphicOff = graphicOff;
 		this.graphicOriginOff = graphicOriginOff;
@@ -112,9 +112,9 @@ public class Button extends MenuItem {
 	 * @return The Button, for chain construction.
 	 */
 	public Button setDisplayText(Font font,
-			String textOff, FontStyle textStyleOff, Point textOriginOff,
-			String textOver, FontStyle textStyleOver, Point textOriginOver,
-			String textPressed, FontStyle textStylePressed, Point textOriginPressed) {
+			String textOff, FontStyle textStyleOff, MutablePoint textOriginOff,
+			String textOver, FontStyle textStyleOver, MutablePoint textOriginOver,
+			String textPressed, FontStyle textStylePressed, MutablePoint textOriginPressed) {
 		
 		this.textFont = font;
 		

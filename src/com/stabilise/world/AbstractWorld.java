@@ -32,13 +32,11 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 public abstract class AbstractWorld implements World {
 	
 	public final WorldProvider<? extends AbstractWorld> provider;
-	/** This world's dimension.
-	 * <p>Though doing so is permitted for convenience purposes, it is
-	 * ill-advised to interact with this object directly. */
-	public final Dimension dimension;
+	/** This world's dimension. */
+	protected final Dimension dimension;
 	
 	/** All players in the world. Maps IDs -> players' EntityMobs. */
-	protected final Map<Integer, EntityMob> players = new HashMap<>(1);
+	protected final Map<Integer, EntityMob> players = new HashMap<>(2);
 	/** The map of loaded entities in the world. Maps IDs -> Entities.
 	 * This is a LinkedHashMap as to allow for consistent iteration. */
 	protected final Map<Integer, Entity> entities = new LinkedHashMap<>(64);

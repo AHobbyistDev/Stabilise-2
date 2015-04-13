@@ -1,7 +1,7 @@
 package com.stabilise.screen.menu.component;
 
 import com.stabilise.util.Interpolation;
-import com.stabilise.util.maths.Point;
+import com.stabilise.util.maths.MutablePoint;
 
 /**
  * This class allows for one to define the position of a MenuItem in terms of
@@ -101,7 +101,7 @@ public final class Position {
 	 * 
 	 * @return The location, the components of which are in pixels.
 	 */
-	public Point getLocation() {
+	public MutablePoint getLocation() {
 		return null;
 		//return getLocation(Screen.get());
 	}
@@ -115,7 +115,7 @@ public final class Position {
 	 * @throws NullPointerException if {@code screen} is {@code null}.
 	 */
 	/*
-	public Point getLocation(Screen screen) {
+	public MutablePoint getLocation(Screen screen) {
 		return getLocation(screen.getWidth(), screen.getHeight());
 	}
 	*/
@@ -128,8 +128,8 @@ public final class Position {
 	 * 
 	 * @return The location, the components of which are in pixels.
 	 */
-	public Point getLocation(int width, int height) {
-		return new Point(getX(width), getY(height));
+	public MutablePoint getLocation(int width, int height) {
+		return new MutablePoint(getX(width), getY(height));
 	}
 	
 	/**

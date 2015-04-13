@@ -7,10 +7,10 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.Objects;
 
-import com.stabilise.network.ServerBase;
+import com.stabilise.network.Server;
 import com.stabilise.world.provider.HostProvider;
 
-public class GameServer extends ServerBase {
+public class GameServer extends Server {
 	
 	public final HostProvider world;
 	private final int maxPlayers;

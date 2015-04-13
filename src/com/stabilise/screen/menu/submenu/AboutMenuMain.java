@@ -58,9 +58,9 @@ public class AboutMenuMain extends SubMenu {
 	private MenuButton backButton;
 	
 	/** The location of the header. */
-	private Point headerOrigin;
+	private MutablePoint headerOrigin;
 	/** The location of the text. */
-	private Point textOrigin;
+	private MutablePoint textOrigin;
 	
 	
 	/**
@@ -78,8 +78,8 @@ public class AboutMenuMain extends SubMenu {
 		panel = new Sprite("about");
 		panel.setScaledDimensions(640, 480);
 		
-		headerOrigin = new Point();
-		textOrigin = new Point();
+		headerOrigin = new MutablePoint();
+		textOrigin = new MutablePoint();
 		
 		backButton = new MenuButton(this, 0, 0, 300, 48, ACTION_EXIT, "Back to menu", 16, true, false);
 		addMenuItem(backButton);

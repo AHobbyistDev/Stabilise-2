@@ -72,4 +72,24 @@ public interface ClearingQueue<E> extends Iterable<E> {
 	 */
 	Iterator<E> nonClearingIterator();
 	
+	/**
+	 * Returns an iterable view of this queue whose iterator is returned as if
+	 * by {@link #nonClearingIterator()}. This method is provided as to allow
+	 * one to use the shorthand iterator notation for non-clearing iterators,
+	 * i.e., as if by:
+	 * 
+	 * <pre>
+	 * for(Object o : queue.asNonClearing()) { ... }
+	 * </pre>
+	 */
+	default Iterable<E> asNonClearing() {
+		final ClearingQueue<E> queue = this;
+		return new Iterable<E>() {
+			@Override
+			public Iterator<E> iterator() {
+				return queue.nonClearingIterator();
+			}
+		};
+	}
+	
 }

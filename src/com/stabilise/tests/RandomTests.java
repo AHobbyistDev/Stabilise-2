@@ -17,7 +17,7 @@ import javax.imageio.ImageIO;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.StringUtil;
-import com.stabilise.util.maths.HashPoint;
+import com.stabilise.util.maths.Point;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.SimplexNoise;
 
@@ -609,22 +609,22 @@ public class RandomTests {
 	}
 	
 	protected static final void hashPointCollisions() {
-		List<HashPoint> points = new LinkedList<HashPoint>();
+		List<Point> points = new LinkedList<Point>();
 		int len = 20;
 		for(int x = -len; x <= len; x++)
 			for(int y = -len; y <= len; y++)
-				points.add(new HashPoint(x, y));
+				points.add(new Point(x, y));
 		
-		List<HashPoint> hashCollisions = new LinkedList<HashPoint>();
+		List<Point> hashCollisions = new LinkedList<Point>();
 		while(points.size() > 0) {
-			HashPoint p1 = points.remove(0);
-			for(HashPoint p2 : points) {
+			Point p1 = points.remove(0);
+			for(Point p2 : points) {
 				if(p1.hashCode() == p2.hashCode())
 					hashCollisions.add(p2);
 			}
 			if(hashCollisions.size() > 0) {
 				System.out.println(p1 + " collisions:");
-				Iterator<HashPoint> i = hashCollisions.iterator();
+				Iterator<Point> i = hashCollisions.iterator();
 				while(i.hasNext()) {
 					System.out.println("    " + i.next());
 					i.remove();
@@ -637,13 +637,13 @@ public class RandomTests {
 		final int width = 1024;
 		final int height = 1024;
 		int[] pixels = new int[width*height];
-		HashPoint p = new HashPoint(0, 0);
+		Point p = new Point(0, 0);
 		final int collisionYes = 0xFFFF0000;
 		final int collisionNo = 0xFFFFFFFF;
 		
 		for(int y = 0; y < height; y++) {
 			for(int x = 0; x < width; x++) {
-				boolean collision = p.hashCode() == new HashPoint(x-width/2,y-height/2).hashCode();
+				boolean collision = p.hashCode() == new Point(x-width/2,y-height/2).hashCode();
 				pixels[y*height+x] = collision ? collisionYes : collisionNo;
 			}
 		}

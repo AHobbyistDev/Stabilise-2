@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.stabilise.network.protocol.PacketHandler;
@@ -15,7 +16,42 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.LightLinkedList;
 
 
-public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
+/**
+ * This class provides the basis architecture for constructing a server
+ * implementation. To use this, subclass this class and appropriately implement
+ * {@link #update()} (and optionally {@link #render()}) as you see fit.
+ * 
+ * <p>There are three ways to run a server:
+ * 
+ * <ul>
+ * <li>Invoke {@link #start()} to start the server, and then manually invoke
+ *     {@link #update()} and {@code #render()} repeatedly at your convenience.
+ *     That is, {@code update} and {@code render} should be invoked from within
+ *     a preexisting driver loop.
+ * <li>Invoke {@link #run()}, which constructs an {@link AppDriver} linked to
+ *     the server, and then {@link AppDriver#run() runs} it. {@code run} will
+ *     of course not return until the server terminates. Note that for this
+ *     method of running to work, the Server must be constructed with {@link
+ *     #Server(int)}, as to specify the tick rate when driving the server.
+ * <li>Invoke {@link #runConcurrently()}, which starts a new thread and
+ *     invokes {@code run} on that thread. As with the above point, the
+ *     Server must be constructed through {@link #Server(int)}.
+ * </ul>
+ * 
+ * <p>To close a server, either invoke {@link #requestShutdown()} and wait for
+ * the server to close itself, or directly invoke {@link #shutdown()}.
+ * 
+ * <p>Each active {@code Server} associates with it the following resources:
+ * 
+ * <ul>
+ * <li>A {@code ServerSocket} object.
+ * <li>A thread which listens for client connections using {@link
+ *     ServerSocket#accept()}.
+ * <li>Any number of {@link TCPConnection} objects which represent connections
+ *     to connected clients.
+ * </ul>
+ */
+public abstract class Server implements Runnable, Drivable, PacketHandler {
 	
 	//--------------------==========--------------------
 	//-----=====Static Constants and Variables=====-----
@@ -46,9 +82,11 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 	
 	/** The socket the server is being hosted on. */
 	private ServerSocket socket;
+	
+	private final ClientConnectionFactory clientFactory;
 	/** The list of client connections. Does not contain {@code null} elements.
 	 * This list should be manually synchronized on when being iterated over. */
-	protected final List<ServerTCPConnection> connections =
+	protected final List<TCPConnection> connections =
 			Collections.synchronizedList(new LightLinkedList<>());
 	
 	private Thread clientListenerThread;
@@ -66,26 +104,58 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 	
 	
 	/**
-	 * Creates a new ServerBase.
+	 * Creates a new Server.
 	 * 
 	 * <p>A server constructed with this method may <i>not</i> be run using
 	 * {@link #run()} or {@link #runConcurrently()}, as for this a {@code
 	 * ticksPerSecond} value must be specified. For this, refer to the other
-	 * constructor: {@link #ServerBase(int)}.
+	 * constructor: {@link #Server(int)}.
 	 */
-	public ServerBase() {
-		tps = -1;
+	public Server() {
+		this((s) -> { return new TCPConnection(s, true); });
 	}
 	
 	/**
-	 * Creates a new ServerBase.
+	 * Creates a new Server.
 	 * 
 	 * @param ticksPerSecond The number of update ticks per second to perform
 	 * while running as per {@link #run()} or {@link #runConcurrently()}.
 	 * 
 	 * @throws IllegalArgumentException if {@code ticksPerSecond < 1}.
 	 */
-	public ServerBase(int ticksPerSecond) {
+	public Server(int ticksPerSecond) {
+		this(ticksPerSecond, (s) -> { return new TCPConnection(s, true); });
+	}
+	
+	/**
+	 * Creates a new Server.
+	 * 
+	 * <p>A server constructed with this method may <i>not</i> be run using
+	 * {@link #run()} or {@link #runConcurrently()}, as for this a {@code
+	 * ticksPerSecond} value must be specified. For this, refer to the other
+	 * constructor: {@link #Server(int)}.
+	 * 
+	 * @param clientFactory The factory to use to create clients.
+	 * 
+	 * @throws NullPointerException if {@code clientFactory} is {@code null}.
+	 */
+	public Server(ClientConnectionFactory clientFactory) {
+		this.clientFactory = Objects.requireNonNull(clientFactory);
+		tps = -1;
+	}
+	
+	/**
+	 * Creates a new Server.
+	 * 
+	 * @param ticksPerSecond The number of update ticks per second to perform
+	 * while running as per {@link #run()} or {@link #runConcurrently()}.
+	 * @param clientFactory The factory to use to create clients.
+	 * 
+	 * @throws NullPointerException if {@code clientFactory} is {@code null}.
+	 * @throws IllegalArgumentException if {@code ticksPerSecond < 1}.
+	 */
+	public Server(int ticksPerSecond, ClientConnectionFactory clientFactory) {
+		this.clientFactory = Objects.requireNonNull(clientFactory);
 		if(ticksPerSecond < 1)
 			throw new IllegalArgumentException("ticksPerSecond < 1");
 		this.tps = ticksPerSecond;
@@ -172,7 +242,7 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 	/**
 	 * Performs an update tick.
 	 * 
-	 * <p>Subclasses of {@code ServerBase} should invoke {@link
+	 * <p>Subclasses of {@code Server} should invoke {@link
 	 * #checkShutdown()} and {@link #handleIncomingPackets()} from within this
 	 * method.
 	 */
@@ -204,7 +274,7 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 	protected void handleIncomingPackets() {
 		Packet p;
 		synchronized(connections) {
-			for(ServerTCPConnection con : connections)
+			for(TCPConnection con : connections)
 				while((p = con.getPacket()) != null)
 					p.handle(this, con);
 		}
@@ -241,7 +311,7 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 			clientListenerThread.interrupt();
 		
 		synchronized(connections) {
-			for(ServerTCPConnection con : connections)
+			for(TCPConnection con : connections)
 				con.closeConnection();
 			connections.clear();
 		}
@@ -303,10 +373,10 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 	 * Adds a client connection through the specified client socket.
 	 */
 	private void addConnection(Socket socket) {
-		ServerTCPConnection con;
+		TCPConnection con;
 		
 		try {
-			con = new ServerTCPConnection(socket);
+			con = clientFactory.create(socket);
 		} catch(IOException e) {
 			log.postSevere("Error creating connection (" + e.getMessage() + ")");
 			try {
@@ -325,13 +395,13 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 	
 	/**
 	 * This method is invoked by the client listener thread when it connects to
-	 * a new client, before the specified {@code ServerTCPConnection} is added
-	 * to {@link #connections the list of connections}.
+	 * a new client, before the specified {@code TCPConnection} is added to
+	 * {@link #connections the list of connections}.
 	 * 
 	 * <p>The default implementation does nothing.
 	 */
 	@UserThread("ClientListenerThread")
-	protected void onConnectionAdd(ServerTCPConnection con) {}
+	protected void onConnectionAdd(TCPConnection con) {}
 	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------
@@ -353,6 +423,18 @@ public abstract class ServerBase implements Runnable, Drivable, PacketHandler {
 				}
 			}
 		}
+		
+	}
+	
+	/**
+	 * A factory for client TCPConnection handles.
+	 */
+	public static interface ClientConnectionFactory {
+		
+		/**
+		 * Creates a TCPConnection object around the specified client socket.
+		 */
+		public TCPConnection create(Socket socket) throws IOException;
 		
 	}
 	

@@ -7,16 +7,16 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 
 import com.stabilise.core.Constants;
-import com.stabilise.network.ServerBase;
+import com.stabilise.network.Server;
 import com.stabilise.network.TCPConnection;
 import com.stabilise.network.protocol.handshake.C000VersionInfo;
 import com.stabilise.network.protocol.handshake.C001Disconnect;
 import com.stabilise.network.protocol.handshake.IServerHandshake;
 import com.stabilise.network.protocol.handshake.S000VersionInfo;
 
-public class Server extends ServerBase implements IServerHandshake {
+public class ServerImpl extends Server implements IServerHandshake {
 	
-	public Server() {
+	public ServerImpl() {
 		super(Constants.TICKS_PER_SECOND);
 	}
 	

@@ -1,5 +1,7 @@
 package com.stabilise.world;
 
+import java.util.Objects;
+
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
@@ -23,15 +25,15 @@ public class Slice {
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
-	/** The slice's coordinates, in slice-lengths. */
+	/** This slice's coordinates, in slice-lengths. */
 	public final int x, y;
 	
-	/** The tiles within the slice.
-	 * <br>Tiles are indexed in the form [y][x].
-	 * <br>Note that this may be {@code null}. */
-	public int[][] tiles;
+	/** The tiles within this slice. This is visible for convenience purposes.
+	 * <br>Tiles are indexed in the form [y][x]. */
+	public final int[][] tiles;
 	
-	/** The tile entities within the slice.
+	/** The tile entities within the slice. This is public for convenience
+	 * purposes, but should generally not be interacted with.
 	 * <br>Tile entities are indexed in the form [y][x].
 	 * <br>This is lazily initialised - that is, {@code null} until a tile
 	 * entity is added to this slice. */
@@ -43,9 +45,14 @@ public class Slice {
 	 * 
 	 * @param x The x-coordinate of the slice, in slice-lengths.
 	 * @param y The y-coordinate of the slice, in slice-lengths.
+	 * @param tiles The slice's tiles.
+	 * 
+	 * @throws NullPointerException if {@code tiles} is {@code null}.
 	 */
-	public Slice(int x, int y) {
-		this(x, y, null);
+	public Slice(int x, int y, int[][] tiles) {
+		this.x = x;
+		this.y = y;
+		this.tiles = Objects.requireNonNull(tiles);
 	}
 	
 	/**
@@ -53,12 +60,13 @@ public class Slice {
 	 * 
 	 * @param x The x-coordinate of the slice, in slice-lengths.
 	 * @param y The y-coordinate of the slice, in slice-lengths.
-	 * @param tiles The slice's tiles.
+	 * @param tiles The slice's tiles, as would be returned by {@link
+	 * #getTilesAsIntArray()}. This array is unpacked into a 2D array.
+	 * 
+	 * @throws NullPointerException if {@code tiles} is {@code null}.
 	 */
-	public Slice(int x, int y, int[][] tiles) {
-		this.x = x;
-		this.y = y;
-		this.tiles = tiles;
+	public Slice(int x, int y, int[] tiles) {
+		this(x, y, getTilesFromArray(tiles));
 	}
 	
 	/**
@@ -172,15 +180,14 @@ public class Slice {
 	}
 	
 	/**
-	 * Sets the slice's tiles.
-	 * 
-	 * @param tileArray The tiles, in the form of a 1D integer array. The array
-	 * will be converted to a suitable 2D array for tile storage.
+	 * Converts the specified int array into the 2D int array format used to
+	 * store tiles.
 	 */
-	public void setTilesAsIntArray(int[] tileArray) {
-		tiles = new int[SLICE_SIZE][SLICE_SIZE];
+	private static int[][] getTilesFromArray(int[] tileArray) {
+		int[][] t = new int[SLICE_SIZE][SLICE_SIZE];
 		for(int r = 0; r < SLICE_SIZE; r++)
-			System.arraycopy(tileArray, r*SLICE_SIZE, tiles[r], 0, SLICE_SIZE);
+			System.arraycopy(tileArray, r*SLICE_SIZE, t[r], 0, SLICE_SIZE);
+		return t;
 	}
 	
 	/**

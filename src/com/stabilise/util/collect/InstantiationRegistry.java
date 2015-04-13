@@ -180,9 +180,7 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 * @throws RuntimeException if object creation failed.
 	 */
 	public E instantiate(int id, Object... args) {
-		Factory<? extends E> factory = id < factoryArr.length()
-				? factoryArr.get(id)
-				: null;
+		Factory<? extends E> factory = factoryArr.getSemiSafe(id);
 		return factory == null ? null : factory.create(args);
 	}
 	

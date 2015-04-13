@@ -206,6 +206,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 				//Log.message(Texture.texturesToString());
 				Runtime r = Runtime.getRuntime();
 				Log.get().postDebug(r.freeMemory()/(1024*1024) + "/" + r.totalMemory()/(1024*1024) + "/" + r.maxMemory()/(1024*1024));
+				System.out.println(game.profiler.getData().toString());
 				break;
 			default:
 				return false;

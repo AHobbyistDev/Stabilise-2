@@ -11,6 +11,10 @@ import java.lang.annotation.Target;
  * presence of this annotation may serve to remind maintainers of the
  * concurrent conditions under which the annotated block may be executed, to
  * help ensure maintenance and optimisation is performed properly.
+ * 
+ * <p>This annotation may also be used to imply that the annotated method is
+ * not thread safe, and thus may cause unwanted behaviour if multiple threads
+ * access this method.
  */
 @Documented
 @Retention(RetentionPolicy.SOURCE)

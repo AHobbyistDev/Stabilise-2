@@ -11,7 +11,7 @@ import com.stabilise.core.Game;
 import com.stabilise.entity.EntityPerson;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.StringUtil;
-import com.stabilise.util.maths.Point;
+import com.stabilise.util.maths.MutablePoint;
 
 /**
  * Renders the in-game HUD.
@@ -89,7 +89,7 @@ public abstract class HUDRenderer implements Renderer {
 //	/** The panel for such statuses as health, stamina and mana. */
 //	public Sprite statusPanel;
 //	/** The status panel origin. */
-//	private Point statusOrigin = new Point();
+//	private MutablePoint statusOrigin = new MutablePoint();
 //	
 //	/** The health bar. */
 //	private Rectangle healthBar;

@@ -64,17 +64,17 @@ public class WorldListButton extends Button {
 	/** The SpriteBatch source for the button's texture. */
 	private SpriteBatch sprite;
 	/** The base dimensions of the button. */
-	private Point baseDimensions;
+	private MutablePoint baseDimensions;
 	/** The dimensions of the button. */
-	private Point dimensions = new Point();
+	private MutablePoint dimensions = new MutablePoint();
 	/** The base location of the sprite. */
-	private Point baseSpriteLocation;
+	private MutablePoint baseSpriteLocation;
 	/** The location of the sprite. */
-	private Point spriteLocation = new Point();
+	private MutablePoint spriteLocation = new MutablePoint();
 	/** The base dimensions of the sprite. */
-	private Point baseSpriteDimensions;
+	private MutablePoint baseSpriteDimensions;
 	/** The dimensions of the sprite. */
-	private Point spriteDimensions = new Point();
+	private MutablePoint spriteDimensions = new MutablePoint();
 	/** The texture coordinates for the normal created world slot. */
 	private float[] filledNormTC;
 	/** The texture coordinates for the hovered-over created world slot. */
@@ -115,7 +115,7 @@ public class WorldListButton extends Button {
 	 * world slot.
 	 */
 	public WorldListButton(Menu menu, int x, int y, WorldInfo world,
-			Point dimensions, SpriteBatch sprite, Point spriteLocation, Point spriteDimensions, float scale,
+			MutablePoint dimensions, SpriteBatch sprite, MutablePoint spriteLocation, MutablePoint spriteDimensions, float scale,
 			float[] filledNormTC, float[] filledHoverTC, float[] filledSelectedTC,
 			float[] emptyNormTC, float[] emptyHoverTC, float[] emptySelectedTC) {
 		super(menu, x, y, ACTION_SELECT, BOUNDING_BOX);

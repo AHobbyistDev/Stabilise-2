@@ -32,27 +32,27 @@ public class MenuButton extends Button {
 	
 	
 	/** The texture's reference dimensions. */
-	private static final Point SPRITE_DIMENSIONS = new Point(64, 16);
+	private static final MutablePoint SPRITE_DIMENSIONS = new MutablePoint(64, 16);
 	
 	/** The left cap's reference texture coordinate's location. */
-	private static final Point TC_NORMAL_CAP_LEFT_LOCATION = new Point(0, 0);
+	private static final MutablePoint TC_NORMAL_CAP_LEFT_LOCATION = new MutablePoint(0, 0);
 	/** The left cap's reference texture coordinate's dimensions. */
-	private static final Point TC_NORMAL_CAP_LEFT_DIMENSIONS = new Point(3, 12);
+	private static final MutablePoint TC_NORMAL_CAP_LEFT_DIMENSIONS = new MutablePoint(3, 12);
 	/** The right cap's reference texture coordinate's location. */
-	private static final Point TC_NORMAL_CAP_RIGHT_LOCATION = new Point(3, 0);
+	private static final MutablePoint TC_NORMAL_CAP_RIGHT_LOCATION = new MutablePoint(3, 0);
 	/** The right cap's reference texture coordinate's dimensions. */
-	private static final Point TC_NORMAL_CAP_RIGHT_DIMENSIONS = new Point(3, 12);
+	private static final MutablePoint TC_NORMAL_CAP_RIGHT_DIMENSIONS = new MutablePoint(3, 12);
 	/** The fill's reference texture coordinate's location. */
-	private static final Point TC_NORMAL_FILL_LOCATION = new Point(6, 0);
+	private static final MutablePoint TC_NORMAL_FILL_LOCATION = new MutablePoint(6, 0);
 	/** The fill's reference texture coordinate's dimensions. */
-	private static final Point TC_NORMAL_FILL_DIMENSIONS = new Point(1, 12);
+	private static final MutablePoint TC_NORMAL_FILL_DIMENSIONS = new MutablePoint(1, 12);
 	
 	/** The amount by which all texcoords must be translated from the normal
 	 * state to the over state. */
-	private static final Point TC_OVER_TRANSLATION = new Point(7, 0);
+	private static final MutablePoint TC_OVER_TRANSLATION = new MutablePoint(7, 0);
 	/** The amount by which all texcoords must be translated from the normal
 	 * state to the disabled state. */
-	private static final Point TC_DISABLED_TRANSLATION = new Point(14, 0);
+	private static final MutablePoint TC_DISABLED_TRANSLATION = new MutablePoint(14, 0);
 	
 	//--------------------==========--------------------
 	//------------=====Member Variables=====------------
@@ -72,7 +72,7 @@ public class MenuButton extends Button {
 	/** Whether or not the button is centred vertically. */
 	private boolean centredY;
 	/** The effective (0,0) for the button's sprites. */
-	private Point origin;
+	private MutablePoint origin;
 	
 	/** Whether or not the button has been initially updated. */
 	private boolean updated = false;
@@ -158,7 +158,7 @@ public class MenuButton extends Button {
 		
 		sprite.setScaledHeight(height);
 		
-		origin = new Point(centredX ? -width/2 : 0, centredY ? -height/2 : 0);
+		origin = new MutablePoint(centredX ? -width/2 : 0, centredY ? -height/2 : 0);
 		scale = (float)height / TC_NORMAL_CAP_LEFT_DIMENSIONS.getY();
 		
 		boundingBox = new AxisAlignedBoundingBox(origin.getX(), origin.getY(), width, height);
@@ -184,15 +184,15 @@ public class MenuButton extends Button {
 	 * 
 	 * @return The origin point of the display text.
 	 */
-	private Point getTextOrigin() {
-		return new Point(centredX ? 0 : width/2, (centredY ? 0 : height/2) - fontSize / 2);
+	private MutablePoint getTextOrigin() {
+		return new MutablePoint(centredX ? 0 : width/2, (centredY ? 0 : height/2) - fontSize / 2);
 	}
 	
 	/**
 	 * Refreshes the text placement.
 	 */
 	private void refreshText() {
-		Point p = getTextOrigin();
+		MutablePoint p = getTextOrigin();
 		
 		FontStyle styleNormal = new FontStyle(
 				fontSize,
@@ -259,7 +259,7 @@ public class MenuButton extends Button {
 					translateTexCoords(disabledTranslation);
 				}
 				// Set the font to the disabled state
-				Point p = getTextOrigin();
+				MutablePoint p = getTextOrigin();
 				FontStyle styleDisabled = new FontStyle(
 						fontSize,
 						STYLE_DISABLED_TEMPLATE.colour,

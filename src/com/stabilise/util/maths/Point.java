@@ -1,85 +1,57 @@
 package com.stabilise.util.maths;
 
-import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.annotation.Immutable;
 
 /**
- * A mutable 2-dimensional point with integer components.
+ * A Point is a point, which, unlike {@link MutablePoint}, is immutable, and
+ * precomputes its hash code upon construction.
+ * 
+ * <p>Point objects are compatible with MutablePoint objects as map keys: e.g.,
+ * {@code new Point(-5, 2).equals(new MutablePoint(-5, 2)) == true}.
+ * 
+ * @see MutablePoint
  */
-@NotThreadSafe
-public class Point {
+@Immutable
+public class Point extends AbstractPoint {
 	
-	public int x, y;
+	public final int x, y;
+	private final int hash;
 	
 	
 	/**
-	 * Creates a new point with x = 0 and y = 0.
+	 * Creates a point with x = 0 and y = 0.
 	 */
 	public Point() {
-		x = 0;
-		y = 0;
+		this(0, 0);
 	}
 	
 	/**
-	 * Creates a new point with the specified components.
+	 * Creates a point with the specified components.
 	 */
 	public Point(int x, int y) {
 		this.x = x;
 		this.y = y;
+		hash = genHash();
 	}
 	
-	/**
-	 * Creates a new point with components of those of the specified point.
-	 */
-	public Point(Point p) {
-		this.x = p.x;
-		this.y = p.y;
+	@Override
+	public int getX() {
+		return x;
 	}
 	
-	/**
-	 * Sets the components of this point.
-	 * 
-	 * @return This point, for chaining operations.
-	 */
-	public Point set(int x, int y) {
-		this.x = x;
-		this.y = y;
-		return this;
-	}
-	
-	/**
-	 * Sets the components of this point to those of the specified point.
-	 * 
-	 * @return This point, for chaining operations.
-	 */
-	public Point set(Point p) {
-		x = p.x;
-		y = p.y;
-		return this;
+	@Override
+	public int getY() {
+		return y;
 	}
 	
 	@Override
 	public int hashCode() {
-		return x ^ y; // fairly basic hash
+		return hash;
 	}
 	
 	@Override
-	public boolean equals(Object o) {
-		if(!(o instanceof Point)) return false;
-		Point p = (Point)o;
-		return x == p.x && y == p.y;
-	}
-	
-	/**
-	 * @return {@code true} if this Point holds the specified coordinates;
-	 * {@code false} otherwise.
-	 */
-	public boolean equals(int x, int y) {
-		return this.x == x && this.y == y;
-	}
-	
-	@Override
-	public String toString() {
-		return "Point[" + x + "," + y + "]";
+	public Point set(int x, int y) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException("A Point is immutable!");
 	}
 	
 }

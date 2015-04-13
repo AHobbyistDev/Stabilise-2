@@ -8,13 +8,13 @@ import com.stabilise.util.Log.Level;
 
 public class NetworkTest implements Drivable {
 	
-	Server server;
+	ServerImpl server;
 	Client client;
 	AppDriver driver;
 	
 	public NetworkTest() {
 		Log.setLogLevel(Level.ALL);
-		server = new Server();
+		server = new ServerImpl();
 		server.runConcurrently();
 		client = new Client();
 		driver = AppDriver.getDriverFor(this, 20, 20, Log.get());

@@ -13,6 +13,9 @@ import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.concurrent.SynchronizedClearingQueue;
+import com.stabilise.util.maths.MutablePoint;
+import com.stabilise.util.maths.Point;
+import com.stabilise.util.maths.PointFactory;
 
 /**
  * This class represents a region of the world, which contains 16x16 slices,
@@ -49,8 +52,25 @@ public class Region {
 	/** The function to use to hash region coordinates for keys in a hash map. */
 	// This method of hashing eliminates higher-order bits, but nearby regions
 	// will never collide.
-	public static final BiIntFunction COORD_HASHER =
-			(x,y) -> { return (x << 16) | (y & 0xFFFF); };
+	public static final BiIntFunction COORD_HASHER = (x,y) -> {
+		return (x << 16) | (y & 0xFFFF);
+	};
+	
+	/** The function to use a hash a region's {@link #loc} member. */
+	// This focuses most hashing into the lowest 4 bits. See comments for
+	// HostWorld.regions for why this is done (short answer is table size is
+	// almost always 16).
+	private static final BiIntFunction LOC_HASHER = (x,y) -> {
+		// We shift by 18 since ConcurrentHashMap likes to transform hashes by:
+		// hash = hash ^ (hash >>> 16);
+		// This would practically cancel out shifting x by only 16, so we shift
+		// by 2 more to preserve those bits for y.
+		return (x << 18) ^ y; // (x << 2) | (y & 3);
+	};
+	
+	/** The factory with which to generate a region's {@link #loc} member. */
+	private static final PointFactory LOC_FACTORY = new PointFactory(LOC_HASHER);
+	
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -72,9 +92,10 @@ public class Region {
 	 * #getSliceAt(int, int)} provides such an accessor.</i> */
 	public final Slice[][] slices = new Slice[REGION_SIZE][REGION_SIZE];
 	
-	/** The region's x/y-coordinates, in region-lengths. These should together
-	 * be used as this region's key for a map. */
-	public final int x, y;
+	/** The region's location, whose components are in region-lengths. This
+	 * should be used as this region's key in any map implementation. This
+	 * object is always created by {@link #createLoc(int, int)}. */
+	public final Point loc;
 	
 	/** The coordinate offsets on the x and y-axes due to the coordinates of
 	 * the region, in slice-lengths. */
@@ -108,8 +129,11 @@ public class Region {
 	 * Private since this creates an ordinarily-invalid region.
 	 */
 	private Region() {
-		// TODO: Not actually invalid anymore
-		x = y = offsetX = offsetY = 0;
+		offsetX = offsetY = Integer.MIN_VALUE;
+		loc = new Point(0, 0) {
+			public boolean equals(Object o) { return false; }
+			public int hashCode() { return Integer.MIN_VALUE; }
+		};
 	}
 	
 	/**
@@ -122,8 +146,7 @@ public class Region {
 	 * @throws NullPointerException if {@code world} is {@code null}.
 	 */
 	public Region(int x, int y, long worldAge) {
-		this.x = x;
-		this.y = y;
+		loc = createLoc(x, y);
 		
 		offsetX = x * REGION_SIZE;
 		offsetY = y * REGION_SIZE;
@@ -244,7 +267,7 @@ public class Region {
 	 * @return This region's file.
 	 */
 	public FileHandle getFile(HostWorld world) {
-		return world.getWorldDir().child("r_" + x + "_" + y + ".region");
+		return world.getWorldDir().child("r_" + loc.x + "_" + loc.y + ".region");
 	}
 	
 	/**
@@ -366,6 +389,20 @@ public class Region {
 	}
 	
 	/**
+	 * @return This region's x-coordinate, in region-lengths.
+	 */
+	public int x() {
+		return loc.x;
+	}
+	
+	/**
+	 * @return This region's y-coordinate, in region-lengths.
+	 */
+	public int y() {
+		return loc.y;
+	}
+	
+	/**
 	 * Notifies other threads waiting on {@link #waitUntilLoaded()} that this
 	 * region has been loaded.
 	 * 
@@ -383,7 +420,7 @@ public class Region {
 	 * Returns {@code true} if this region's coords match the specified coords.
 	 */
 	public boolean isAt(int x, int y) {
-		return this.x == x && this.y == y;
+		return loc.equals(x, y);
 	}
 	
 	/**
@@ -392,12 +429,35 @@ public class Region {
 	 */
 	@Override
 	public int hashCode() {
-		return COORD_HASHER.apply(x, y);
+		// Use the broader hash than the default loc hash.
+		return COORD_HASHER.apply(loc.x, loc.y);
 	}
 	
 	@Override
 	public String toString() {
-		return "Region[" + x + "," + y + "]";
+		return "Region[" + loc.x + "," + loc.y + "]";
+	}
+	
+	//--------------------==========--------------------
+	//------------=====Static Functions=====------------
+	//--------------------==========--------------------
+	
+	/**
+	 * Creates a {@code Point} object equivalent to a region with identical
+	 * coordinates' {@link #loc} member.
+	 */
+	public static Point createLoc(int x, int y) {
+		return LOC_FACTORY.newPoint(x, y);
+	}
+	
+	/**
+	 * Creates a mutable variant of a point returned by {@link
+	 * #createLoc(int, int)}. This method should not be invoked carelessly as
+	 * the sole purpose of creating mutable points should be to avoid needless
+	 * object creation in scenarios where thread safety is guaranteed.
+	 */
+	public static MutablePoint createMutableLoc(int x, int y) {
+		return LOC_FACTORY.newMutablePoint(x, y);
 	}
 	
 	//--------------------==========--------------------

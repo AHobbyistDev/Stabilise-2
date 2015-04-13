@@ -5,15 +5,19 @@ import static com.stabilise.world.World.*;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
+import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.annotation.Unguarded;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.LightLinkedList;
-import com.stabilise.util.concurrent.ConcurrentBiIntHashMap;
+import com.stabilise.util.maths.AbstractPoint;
+import com.stabilise.util.maths.MutablePoint;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.provider.HostProvider.PlayerData;
@@ -38,18 +42,20 @@ public class HostWorld extends AbstractWorld {
 	public final WorldGenerator generator;
 	
 	// VERY IMPORTANT IMPLEMENTATION DETAILS:
-	// Empirical testing has revealed that the table size for this map is
-	// usually 16, but can grow to 32. This means the number of valid hash
-	// bits is either 4 or 5, so we need to compress our data into those bits
-	// such that we minimise collisions.
-	/** The map of all loaded regions. Maps region coords -> regions. */
-	private final ConcurrentBiIntHashMap<Region> regions =
-			new ConcurrentBiIntHashMap<>(
-					(x,y) -> { return (x << 2) ^ y; }
-			);
+	// Empirical testing has revealed that the table size for region maps in
+	// HostWorld is usually 16, but can grow to 32. This means the number of
+	// valid hash bits is either 4 or 5 (all higher bits are masked out), so we
+	// need to compress our data into those bits while minimising collisions.
+	/** The map of all loaded regions. Maps region loc -> regions. */
+	private final ConcurrentHashMap<AbstractPoint, Region> regions =
+			new ConcurrentHashMap<>();
 	/** Tracks the number of loaded regions, in preference to invoking
 	 * regions.size(), which is not a constant-time operation. */
 	private final AtomicInteger numRegions = new AtomicInteger(0);
+	/** Dummy key for {@link #regions} whose mutability may be abused for
+	 * reusability ONLY on the main thread. */
+	@Unguarded
+	private final MutablePoint dummyLoc = Region.createMutableLoc(0, 0);
 	
 	/** Holds all player slice maps. */
 	private final List<SliceMap> sliceMaps = new LightLinkedList<>();
@@ -196,18 +202,6 @@ public class HostWorld extends AbstractWorld {
 	}
 	
 	/**
-	 * Checks for whether or not a region is in memory.
-	 * 
-	 * @param x The x-coordinate of the region, in region-lengths.
-	 * @param y The y-coordinate of the region, in region-lengths.
-	 * 
-	 * @return Whether or not the region is loaded in memory.
-	 */
-	public boolean hasRegion(int x, int y) {
-		return regions.containsKey(x, y);
-	}
-	
-	/**
 	 * Gets a region at the given coordinates.
 	 * 
 	 * @param x The x-coordinate of the region, in region-lengths.
@@ -218,7 +212,7 @@ public class HostWorld extends AbstractWorld {
 	 */
 	@UserThread({"MainThread", "WorldGenThread"})
 	public Region getRegionAt(int x, int y) {
-		return regions.get(x, y);
+		return regions.get(Region.createLoc(x, y));
 	}
 	
 	/**
@@ -233,6 +227,8 @@ public class HostWorld extends AbstractWorld {
 	 * 
 	 * @return The region.
 	 */
+	@UserThread("MainThread")
+	@NotThreadSafe
 	public Region loadRegion(int x, int y) {
 		return loadRegion(x, y, true);
 	}
@@ -251,9 +247,10 @@ public class HostWorld extends AbstractWorld {
 	 * @return The region.
 	 */
 	@UserThread("MainThread")
+	@NotThreadSafe
 	public Region loadRegion(int x, int y, boolean generate) {
 		// Get the region if it is already loaded
-		Region r = getRegionAt(x, y);
+		Region r = regions.get(dummyLoc.set(x, y));
 		if(r != null)
 			return r;
 		
@@ -261,10 +258,10 @@ public class HostWorld extends AbstractWorld {
 		// generator's cache.
 		// Synchronised to make this atomic. See WorldGenerator.cacheRegion()
 		synchronized(generator.getLock(x, y)) {
-			r = generator.getCachedRegion(x, y);
+			r = generator.getCachedRegion(dummyLoc); // dummyLoc is already (x,y)
 			if(r == null) // if it's not cached, create it
 				r = new Region(x, y, getAge());
-			regions.put(x, y, r);
+			regions.put(r.loc, r);
 		}
 		
 		numRegions.getAndIncrement();
@@ -295,9 +292,9 @@ public class HostWorld extends AbstractWorld {
 		saveRegion(r);
 		
 		// Now unload entities in the region as well...
-		int minX = r.x * Region.REGION_SIZE_IN_TILES;
+		int minX = r.loc.x * Region.REGION_SIZE_IN_TILES;
 		int maxX = minX + Region.REGION_SIZE_IN_TILES;
-		int minY = r.y * Region.REGION_SIZE_IN_TILES;
+		int minY = r.loc.y * Region.REGION_SIZE_IN_TILES;
 		int maxY = minY + Region.REGION_SIZE_IN_TILES;
 		
 		for(Entity e : getEntities()) {
@@ -463,8 +460,7 @@ public class HostWorld extends AbstractWorld {
 	}
 	
 	/**
-	 * Gets this world's filesystem directory. Equivalent to invoking:
-	 * <pre>dimension.info.getDimensionDir();</pre>
+	 * Gets this world's filesystem directory.
 	 */
 	public FileHandle getWorldDir() {
 		return dimension.info.getDimensionDir();

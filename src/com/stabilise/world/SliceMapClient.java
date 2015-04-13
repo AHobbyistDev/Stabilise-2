@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.stabilise.util.annotation.Incomplete;
-import com.stabilise.util.maths.HashPoint;
+import com.stabilise.util.maths.Point;
 
 /**
  * Holds all slices received by a client.
@@ -13,7 +13,7 @@ import com.stabilise.util.maths.HashPoint;
 @Incomplete
 public class SliceMapClient implements Iterable<Slice> {
 	
-	private final Map<HashPoint, Slice> slices = new HashMap<HashPoint, Slice>();
+	private final Map<Point, Slice> slices = new HashMap<Point, Slice>();
 	
 	public SliceMapClient() {
 		
@@ -36,12 +36,12 @@ public class SliceMapClient implements Iterable<Slice> {
 	
 	/** puts a slice in the map when it is received by the server */
 	public void putSlice(int x, int y, Slice slice) {
-		slices.put(new HashPoint(x, y), slice);
+		slices.put(new Point(x, y), slice);
 	}
 	
 	/** @return the slice; may be null */
 	public Slice getSlice(int x, int y) {
-		return slices.get(new HashPoint(x, y));
+		return slices.get(new Point(x, y));
 	}
 	
 	public Iterator<Slice> iterator() {
