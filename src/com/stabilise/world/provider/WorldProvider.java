@@ -30,8 +30,9 @@ import com.stabilise.world.save.WorldLoader;
  * different <i>Worlds</i> (e.g. {@code HostWorld}, etc.) are
  * <i>dimensions</i> of that world/WorldProvider. We largely refer to
  * 'dimensions' as 'worlds' in the code (e.g. GameObjects have a {@code world}
- * member through which they interact with the dimension they are in) for both
- * legacy and aesthetic purposes.
+ * member through which they interact with the dimension they are in, and we
+ * have AbstractWorld, HostWorld etc. instead of AbstractDimension,
+ * HostDimension) for both legacy and aesthetic purposes.
  */
 public abstract class WorldProvider<W extends AbstractWorld> {
 	
@@ -207,10 +208,13 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	public void close() {
 		loader.shutdown();
 		
-		for(W dim : dimensions.values())
+		for(AbstractWorld dim : dimensions.values())
 			dim.close();
 		
 		closeExtra();
+		
+		for(AbstractWorld dim : dimensions.values())
+			dim.blockUntilClosed();
 		
 		executor.shutdown();
 		

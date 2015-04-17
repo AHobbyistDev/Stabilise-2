@@ -148,6 +148,17 @@ public class Item {
 		return stackOf(quantity >= getMaxStackSize() ? getMaxStackSize() : quantity);
 	}
 	
+	/**
+	 * Writes this Item to an NBT compound tag. The returned compound tag
+	 * possesses an integer tag "id" corresponding to the item's ID, and can be
+	 * used to reobtain this Item via {@link #fromNBT(NBTTagCompound)}.
+	 */
+	public NBTTagCompound toNBT() {
+		NBTTagCompound tag = new NBTTagCompound();
+		tag.addInt("id", id);
+		return tag;
+	}
+	
 	@Override
 	public boolean equals(Object o) {
 		return o == this;
@@ -167,6 +178,7 @@ public class Item {
 	 * 
 	 * @return The item with the specified ID, or {@link #NO_ITEM} if no such
 	 * item exists.
+	 * @thros IndexOutOfBoundsException if {@code id < 0}.
 	 */
 	public static Item getItem(int id) {
 		Item item = ITEMS.get(id);
@@ -182,18 +194,6 @@ public class Item {
 	public static Item getItem(String name) {
 		Item item = ITEMS.get(name);
 		return item == null ? NO_ITEM : item;
-	}
-	
-	/**
-	 * Writes an Item to an NBT compound tag. The returned compound tag
-	 * possesses an integer tag "id" corresponding to the item's ID.
-	 * 
-	 * @return The item in the form of an NBT compound tag.
-	 */
-	public static NBTTagCompound toNBT(Item item) {
-		NBTTagCompound tag = new NBTTagCompound();
-		tag.addInt("id", item.id);
-		return tag;
 	}
 	
 	/**

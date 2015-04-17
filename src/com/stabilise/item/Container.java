@@ -385,7 +385,7 @@ public abstract class Container implements Iterable<ItemStack> {
 		
 		for(int i = 0; i < size(); i++) {
 			if(!isSlotEmpty(i)) {
-				NBTTagCompound stackTag = ItemStack.toNBT(getStack(i));
+				NBTTagCompound stackTag = getStack(i).toNBT();
 				stackTag.addByte("slot", (byte)i);
 				tag.appendTag(stackTag);
 			}

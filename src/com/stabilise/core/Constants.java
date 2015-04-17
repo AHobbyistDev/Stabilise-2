@@ -51,7 +51,18 @@ public class Constants {
 	 * player. */
 	public static final int LOADED_SLICE_RADIUS = 4;
 	/** The buffer length of loaded slices. Unused. */
-	public static final int BUFFER_LENGTH = 2;
+	public static final int LOADED_SLICE_BUFFER = 2;
+	/** The minimum number of slices which can be considered 'loaded' about a
+	 * player at any given time. */
+	public static final int MIN_LOADED_SLICES =
+			// Manually square the edge length to make this a compile-time
+			// constant.
+			(1 + 2 * LOADED_SLICE_RADIUS) * (1 + 2 * LOADED_SLICE_RADIUS);
+	/** The maximum number of slices which should theoretically be able to be
+	 * loaded about a player at any given time. */
+	public static final int MAX_LOADED_SLICES =
+			(1 + 2 * (LOADED_SLICE_RADIUS + LOADED_SLICE_BUFFER)) *
+			(1 + 2 * (LOADED_SLICE_RADIUS + LOADED_SLICE_BUFFER));
 	/** How many ticks after coming out of use that a region should unload. */
 	public static final int REGION_UNLOAD_TICK_BUFFER = 10 * TICKS_PER_SECOND;
 	

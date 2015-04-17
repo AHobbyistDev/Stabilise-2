@@ -20,6 +20,9 @@ import com.stabilise.util.IOUtil;
  * output operations should be performed as such:
  * 
  * <pre>
+ * FileHandle myNBTFile = ...
+ * NBTTagCompound tag = ...
+ * 
  * // Input/Loading
  * NBTTagCompound tag = {@link #read(File) NBTIO.read(myNBTFile)};
  * // Output/Saving

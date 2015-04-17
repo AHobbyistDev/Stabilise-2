@@ -404,4 +404,11 @@ public class Maths {
 		return ((long)x << 32) | (long)y;
 	}
 	
+	/**
+	 * Returns {@code x*x}.
+	 */
+	public static int square(int x) {
+		return x*x;
+	}
+	
 }

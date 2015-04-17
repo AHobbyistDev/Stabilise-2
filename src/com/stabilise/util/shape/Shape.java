@@ -60,8 +60,12 @@ public abstract class Shape {
 	 */
 	protected Vec2[] getTransformedVertices(Matrix2 matrix) {
 		Vec2[] verts = getVertices();
-		for(int i = 0; i < verts.length; i++)
+		for(int i = 0; i < verts.length; i++) {
+			Vec2 before = verts[i];
 			verts[i] = matrix.transform(verts[i]);
+			Vec2 after = verts[i];
+			System.out.println("transformed " + before + " into " + after);
+		}
 		return verts;
 	}
 	
@@ -166,12 +170,10 @@ public abstract class Shape {
 	 */
 	protected Vec2[] getAxes() {
 		Vec2[] verts = getVertices();
-		// We need to remember v0 since it is overwritten first, but used to
-		// compute the last.
-		Vec2 v0 = verts[0];
+		Vec2[] axes = new Vec2[verts.length];
 		for(int i = 0; i < verts.length; i++)
-			verts[i] = getAxis(verts[i], i+1 == verts.length ? v0 : verts[i+1]);
-		return verts;
+			axes[i] = getAxis(verts[i], verts[i+1 == verts.length ? 0 : i+1]);
+		return axes;
 	}
 	
 	/**

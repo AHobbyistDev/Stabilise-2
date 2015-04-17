@@ -10,7 +10,8 @@ import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
  * A registry allows for objects of a certain type to be registered and
- * allocated keys.
+ * allocated keys. It is essentially a lockable hash table for which mappings
+ * cannot be removed.
  * 
  * <p>This class is based on a similar one from the decompiled Minecraft 1.7.10
  * source.

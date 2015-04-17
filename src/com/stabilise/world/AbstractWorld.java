@@ -382,6 +382,11 @@ public abstract class AbstractWorld implements World {
 	}
 	
 	/**
+	 * Blocks the current thread until the world has closed.
+	 */
+	public abstract void blockUntilClosed();
+	
+	/**
 	 * Destroys all non-player-controlled mobs in the world.
 	 */
 	public void exterminateMobs() {

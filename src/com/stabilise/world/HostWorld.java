@@ -55,7 +55,7 @@ public class HostWorld extends AbstractWorld {
 	/** Dummy key for {@link #regions} whose mutability may be abused for
 	 * reusability ONLY on the main thread. */
 	@Unguarded
-	private final MutablePoint dummyLoc = Region.createMutableLoc(0, 0);
+	private final MutablePoint dummyLoc = Region.createMutableLoc(0,0);
 	
 	/** Holds all player slice maps. */
 	private final List<SliceMap> sliceMaps = new LightLinkedList<>();
@@ -212,7 +212,7 @@ public class HostWorld extends AbstractWorld {
 	 */
 	@UserThread({"MainThread", "WorldGenThread"})
 	public Region getRegionAt(int x, int y) {
-		return regions.get(Region.createLoc(x, y));
+		return regions.get(Region.createMutableLoc(x, y));
 	}
 	
 	/**
@@ -321,6 +321,25 @@ public class HostWorld extends AbstractWorld {
 	}
 	
 	/**
+	 * Returns the region occupying the specified tile coord, or {@code null}
+	 * if it is not loaded.
+	 */
+	private Region getRegionFromTileCoords(int x, int y) {
+		return getRegionAt(regionCoordFromTileCoord(x), regionCoordFromTileCoord(y));
+	}
+	
+	/**
+	 * Returns the slice occupying the specified location in the region, or
+	 * {@code null} if it has not been loaded yet.
+	 * 
+	 * @throws NullPointerException if {@code r} is {@code null}.
+	 */
+	private Slice getSliceFromTileCoords(Region r, int x, int y) {
+		return r.getSliceAt(sliceCoordRelativeToRegionFromTileCoord(x),
+				sliceCoordRelativeToRegionFromTileCoord(y));
+	}
+	
+	/**
 	 * Marks a slice as loaded. This will attempt to load and generate the
 	 * slice's parent region, as per {@link #loadRegion(int, int)}.
 	 * 
@@ -352,22 +371,18 @@ public class HostWorld extends AbstractWorld {
 	
 	@Override
 	public Slice getSliceAtTile(int x, int y) {
-		Region r = getRegionAt(regionCoordFromTileCoord(x), regionCoordFromTileCoord(y));
-		return r == null ? null : r.getSliceAt(
-				sliceCoordRelativeToRegionFromTileCoord(x), sliceCoordRelativeToRegionFromTileCoord(y));
+		Region r = getRegionFromTileCoords(x, y);
+		return r == null ? null : getSliceFromTileCoords(r, x, y);
 	}
 	
 	@Override
 	public void setTileAt(int x, int y, int id) {
 		// We're duplicating code from getSliceAtTile() so that we can maintain
 		// a reference to the slice's parent region.
-		Region r = getRegionAt(regionCoordFromTileCoord(x), regionCoordFromTileCoord(y));
+		Region r = getRegionFromTileCoords(x, y);
 		if(r == null)
 			return;
-		Slice slice = r.getSliceAt(
-				sliceCoordRelativeToRegionFromTileCoord(x),
-				sliceCoordRelativeToRegionFromTileCoord(y)
-		);
+		Slice slice = getSliceFromTileCoords(r, x, y);
 		
 		if(slice != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
@@ -498,9 +513,7 @@ public class HostWorld extends AbstractWorld {
 		generator.shutdown();
 	}
 	
-	/**
-	 * Blocks the current thread until this world has closed.
-	 */
+	@Override
 	public void blockUntilClosed() {
 		while(!allRegionsSaved()) {
 			try {

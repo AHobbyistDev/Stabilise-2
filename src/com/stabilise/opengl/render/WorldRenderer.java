@@ -43,7 +43,7 @@ public class WorldRenderer implements Renderer {
 	
 	@SuppressWarnings("unused")
 	private static final float COL_WHITE = Color.WHITE.toFloatBits();
-	private static final float DEFAULT_COL = new Color(1f, 1f, 1f, 0f).toFloatBits();
+	private static final float DEFAULT_COL = new Color(1f, 1f, 1f, 1f).toFloatBits();
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------

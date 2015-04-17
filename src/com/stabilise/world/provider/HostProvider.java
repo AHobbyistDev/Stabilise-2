@@ -161,9 +161,6 @@ public class HostProvider extends WorldProvider<HostWorld> {
 				throw new RuntimeException("Could not save " + p, e);
 			}
 		}
-		
-		for(HostWorld dim : dimensions.values())
-			dim.blockUntilClosed();
 	}
 	
 	//--------------------==========--------------------

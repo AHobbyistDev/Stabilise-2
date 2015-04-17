@@ -52,7 +52,7 @@ public class Region {
 	/** The function to use to hash region coordinates for keys in a hash map. */
 	// This method of hashing eliminates higher-order bits, but nearby regions
 	// will never collide.
-	public static final BiIntFunction COORD_HASHER = (x,y) -> {
+	private static final BiIntFunction COORD_HASHER = (x,y) -> {
 		return (x << 16) | (y & 0xFFFF);
 	};
 	
@@ -65,7 +65,7 @@ public class Region {
 		// hash = hash ^ (hash >>> 16);
 		// This would practically cancel out shifting x by only 16, so we shift
 		// by 2 more to preserve those bits for y.
-		return (x << 18) ^ y; // (x << 2) | (y & 3);
+		return (x << 18) ^ y; // (x << 2) | (y & 0b11);
 	};
 	
 	/** The factory with which to generate a region's {@link #loc} member. */
@@ -203,7 +203,9 @@ public class Region {
 		int sy = world.rnd.nextInt(REGION_SIZE);
 		int tx = world.rnd.nextInt(Slice.SLICE_SIZE);
 		int ty = world.rnd.nextInt(Slice.SLICE_SIZE);
-		getSliceAt(sx, sy).getTileAt(tx, ty).update(world, (offsetX + sx) * Slice.SLICE_SIZE + tx, (offsetY + sy) * Slice.SLICE_SIZE + ty);
+		getSliceAt(sx, sy).getTileAt(tx, ty).update(world,
+				(offsetX + sx) * Slice.SLICE_SIZE + tx,
+				(offsetY + sy) * Slice.SLICE_SIZE + ty);
 	}
 	
 	/** 
@@ -214,7 +216,7 @@ public class Region {
 	 * @param y The y-coordinate of the slice relative to the region, in slice
 	 * lengths.
 	 * 
-	 * @return The slice.
+	 * @return The slice, or {@code null} if it has not been loaded yet.
 	 * @throws ArrayIndexOutOfBoundsException if either {@code x} or {@code y}
 	 * are less than 0 or greater than 15.
 	 */
@@ -424,8 +426,7 @@ public class Region {
 	}
 	
 	/**
-	 * Gets this region's hash code, equivalent to {@link #COORD_HASHER}.{@link
-	 * BiIntFunction#apply(int, int) apply(x, y)}.
+	 * Gets this region's hash code.
 	 */
 	@Override
 	public int hashCode() {

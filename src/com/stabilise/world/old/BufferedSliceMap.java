@@ -1,6 +1,6 @@
 package com.stabilise.world.old;
 
-import static com.stabilise.core.Constants.BUFFER_LENGTH;
+import static com.stabilise.core.Constants.LOADED_SLICE_BUFFER;
 import static com.stabilise.core.Constants.LOADED_SLICE_RADIUS;
 
 import com.stabilise.world.HostWorld;
@@ -42,24 +42,24 @@ public class BufferedSliceMap extends SliceMapOld {
 		// At the moment it doesn't really matter though.
 		// TODO: Better implementation.
 		if(minSliceXLoaded < oldMinX) loadCol(minSliceXLoaded);
-		else if(minSliceXLoaded > oldMinX) unloadCol(oldMinX - BUFFER_LENGTH, oldMinY - BUFFER_LENGTH, oldMaxY + BUFFER_LENGTH);
+		else if(minSliceXLoaded > oldMinX) unloadCol(oldMinX - LOADED_SLICE_BUFFER, oldMinY - LOADED_SLICE_BUFFER, oldMaxY + LOADED_SLICE_BUFFER);
 		
-		if(maxSliceXLoaded < oldMaxX) unloadCol(oldMaxX + BUFFER_LENGTH, oldMinY - BUFFER_LENGTH, oldMaxY + BUFFER_LENGTH);
+		if(maxSliceXLoaded < oldMaxX) unloadCol(oldMaxX + LOADED_SLICE_BUFFER, oldMinY - LOADED_SLICE_BUFFER, oldMaxY + LOADED_SLICE_BUFFER);
 		else if(maxSliceXLoaded > oldMaxX) loadCol(maxSliceXLoaded);
 		
 		if(minSliceYLoaded < oldMinY) loadRow(minSliceYLoaded);
-		else if(minSliceYLoaded > oldMinY) unloadRow(oldMinY - BUFFER_LENGTH, oldMinX - BUFFER_LENGTH, oldMaxX + BUFFER_LENGTH);
+		else if(minSliceYLoaded > oldMinY) unloadRow(oldMinY - LOADED_SLICE_BUFFER, oldMinX - LOADED_SLICE_BUFFER, oldMaxX + LOADED_SLICE_BUFFER);
 		
-		if(maxSliceYLoaded < oldMaxY) unloadRow(oldMaxY + BUFFER_LENGTH, oldMinX - BUFFER_LENGTH, oldMaxX + BUFFER_LENGTH);
+		if(maxSliceYLoaded < oldMaxY) unloadRow(oldMaxY + LOADED_SLICE_BUFFER, oldMinX - LOADED_SLICE_BUFFER, oldMaxX + LOADED_SLICE_BUFFER);
 		else if(maxSliceYLoaded > oldMaxY) loadRow(maxSliceYLoaded);
 	}
 	
 	@Override
 	public void addSlice(Slice slice) {
-		if(slice.x < minSliceXLoaded - BUFFER_LENGTH ||
-				slice.x > maxSliceXLoaded + BUFFER_LENGTH ||
-				slice.y < minSliceYLoaded - BUFFER_LENGTH ||
-				slice.y > maxSliceYLoaded + BUFFER_LENGTH)
+		if(slice.x < minSliceXLoaded - LOADED_SLICE_BUFFER ||
+				slice.x > maxSliceXLoaded + LOADED_SLICE_BUFFER ||
+				slice.y < minSliceYLoaded - LOADED_SLICE_BUFFER ||
+				slice.y > maxSliceYLoaded + LOADED_SLICE_BUFFER)
 			;//----world.client.notifyOfSliceUnload(slice.x, slice.y);
 		else
 			slices.put(getSliceKey(slice.x, slice.y), slice);

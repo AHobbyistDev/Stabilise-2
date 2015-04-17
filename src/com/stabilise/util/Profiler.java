@@ -42,7 +42,8 @@ public class Profiler {
 	
 	/** The root section. */
 	private Section root;
-	/** The last root section. */
+	/** The last root section. Data returned (e.g., by {@link #getData()} is
+	 * that of the last root, and not the current one. */
 	private Section lastRoot;
 	
 	/** Caches lastRoot's data in case it is requested multiple times. */
@@ -51,7 +52,7 @@ public class Profiler {
 	/** The stack of sections being profiled. Sections near the tail of this
 	 * stack are constituents of sections closer to the head, with the first
 	 * section being {@link #root}. */
-	private final Deque<Section> stack = new LinkedList<Section>();
+	private final Deque<Section> stack = new LinkedList<>();
 	
 	/** Whether or not profiling is enabled. */
 	private boolean enabled;
@@ -190,8 +191,6 @@ public class Profiler {
 			if(resetOnFlush) {
 				root = new Section(lastRoot.name);
 				lastData = null;
-			} else {
-				lastData = root.getData();
 			}
 			stack.add(root);
 			root.start();
@@ -281,10 +280,7 @@ public class Profiler {
 	 *     successive invocations of {@code flush()} thus occur independently.
 	 * <li>If {@code resetOnFlush} is {@code false}, profiling between
 	 *     successive invocations of {@link #flush()} is summed, which may
-	 *     produce smoother and more averaged-out profiling information. This
-	 *     comes at the cost of some overhead when {@code flush()} is invoked,
-	 *     however, as profiling data (see {@link #getData()}) will be
-	 *     generated upon each invocation, which can be timely.
+	 *     produce smoother and more averaged-out profiling information.
 	 * </ul>
 	 */
 	public void setResetOnFlush(boolean resetOnFlush) {
@@ -341,7 +337,9 @@ public class Profiler {
 	 * @return The profiler's data.
 	 */
 	public SectionData getData() {
-		return lastData == null ? lastData = lastRoot.getData() : lastData;
+		return lastData == null || !resetOnFlush
+				? lastData = lastRoot.getData()
+				: lastData;
 	}
 	
 	//--------------------==========--------------------
@@ -370,14 +368,14 @@ public class Profiler {
 		 * 
 		 * @param name The name of the section.
 		 */
-		private Section(String name) {
+		public Section(String name) {
 			this.name = name;
 		}
 		
 		/**
 		 * Starts timing the section.
 		 */
-		private void start() {
+		public void start() {
 			startTime = System.nanoTime();
 			active = true;
 		}
@@ -387,10 +385,19 @@ public class Profiler {
 		 * 
 		 * @return This section.
 		 */
-		private Section end() {
-			duration += System.nanoTime() - startTime;
-			active = false;
+		public Section end() {
+			if(active) {
+				duration += System.nanoTime() - startTime;
+				active = false;
+			}
 			return this;
+		}
+		
+		private void updateDuration(long currTime) {
+			if(active) {
+				duration += currTime - startTime;
+				startTime = currTime;
+			}
 		}
 		
 		/**
@@ -398,8 +405,10 @@ public class Profiler {
 		 * 
 		 * @return The data.
 		 */
-		private SectionData getData() {
-			return getData("", 100f, 100f);
+		public SectionData getData() {
+			long t = System.nanoTime();
+			updateDuration(t);
+			return getData("", 100f, 100f, t);
 		}
 		
 		/**
@@ -410,15 +419,12 @@ public class Profiler {
 		 * occupies.
 		 * @param localPercent The percentage of its parent section which this
 		 * section occupies.
+		 * @param currentTime The current time, as per System.nanoTime().
 		 * 
 		 * @return The data.
 		 */
-		private SectionData getData(String parentName, float localPercent, float totalPercent) {
-			// If we're actively profiling in this section, we simply update
-			// duration to show a current value in an effort to be consistent.
-			if(active)
-				duration += (-startTime) + (startTime = System.nanoTime());
-			
+		private SectionData getData(String parentName, float localPercent, float totalPercent,
+				final long currentTime) {
 			// Make parentName function as absoluteName
 			parentName = parentName != "" ? parentName + "." + name : name;
 			
@@ -428,20 +434,24 @@ public class Profiler {
 			
 			long unspecified = duration; // time not specified by any constituents
 			for(Section s : constituents) {
+				s.updateDuration(currentTime);
+				
 				unspecified -= s.duration;
 				
 				float locPercent = duration == 0L ? 0f :
 					((float)s.duration / duration);
 				float totPercent = locPercent * totalPercent;
 				
-				children[childCount++] = s.getData(parentName, 100*locPercent, totPercent);
+				children[childCount++] = s.getData(parentName, 100*locPercent, totPercent,
+						currentTime);
 			}
 			
 			//if(unspecified > 0L) {
 			float locPercent = duration == 0L ? 0f :
 				((float)unspecified / duration);
 			float totPercent = locPercent * totalPercent;
-			children[childCount] = new SectionDataUnspecified(parentName, unspecified, 100*locPercent, totPercent);
+			children[childCount] = new SectionDataUnspecified(parentName, unspecified,
+					100*locPercent, totPercent);
 			//}
 			
 			Arrays.sort(children);
@@ -529,8 +539,8 @@ public class Profiler {
 			sb.append("% ");
 			sb.append(name);
 			sb.append(" (");
-			sb.append(duration);
-			sb.append(")");
+			sb.append(duration / 1000000);
+			sb.append(" millis)");
 			
 			// since all constituent arrays contain the unspecified entry,
 			// check length

@@ -178,6 +178,17 @@ public class ItemStack {
 		}
 	}
 	
+	/**
+	 * Writes this ItemStack to an NBT compound tag and returns the tag. The
+	 * returned NBT data can be used to reconstruct this ItemStack via {@link
+	 * #fromNBT(NBTTagCompound)}.
+	 */
+	public NBTTagCompound toNBT() {
+		NBTTagCompound tag = item.toNBT();
+		tag.addInt("count", quantity);
+		return tag;
+	}
+	
 	@Override
 	public boolean equals(Object o) {
 		if(!(o instanceof ItemStack)) return false;
@@ -193,20 +204,6 @@ public class ItemStack {
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------
-	
-	/**
-	 * Writes an ItemStack to an NBT compound tag.
-	 * 
-	 * @param stack The ItemStack.
-	 * 
-	 * @return The stack in the form of an NBT compound tag.
-	 * @throws NullPointerException if {@code stack} is {@code null}.
-	 */
-	public static NBTTagCompound toNBT(ItemStack stack) {
-		NBTTagCompound tag = Item.toNBT(stack.item);
-		tag.addInt("count", stack.quantity);
-		return tag;
-	}
 	
 	/**
 	 * Reads an ItemStack from an NBT compound tag.

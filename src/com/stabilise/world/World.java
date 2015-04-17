@@ -258,7 +258,20 @@ public interface World extends Checkable {
 	}
 	
 	/**
-	 * Sets a tile at the given coordinates.
+	 * Sets the tile at the specified coordinates.
+	 * 
+	 * @param x The x-coordinate of the tile, in tile-lengths.
+	 * @param y The y-coordinate of the tile, in tile-lengths.
+	 * @param tile The tile to set.
+	 * 
+	 * @throws NullPointerException if {@code tile} is {@code null}.
+	 */
+	default void setTileAt(int x, int y, Tile tile) {
+		setTileAt(x, y, tile.getID());
+	}
+	
+	/**
+	 * Sets a tile at the specified coordinates.
 	 * 
 	 * @param x The x-coordinate of the tile, in tile-lengths.
 	 * @param y The y-coordinate of the tile, in tile-lengths.
@@ -442,6 +455,14 @@ public interface World extends Checkable {
 	 * @return A {@code Random} instance held by this World.
 	 */
 	Random getRnd();
+	
+	/**
+	 * @return {@code true} if this is a {@code HostWorld}; {@code false}
+	 * otherwise.
+	 */
+	default boolean isHost() {
+		return this instanceof HostWorld;
+	}
 	
 	/**
 	 * Returns {@code true} if this world has particles; that is, if this is a

@@ -277,7 +277,7 @@ public abstract class Application {
 		crashing = true;
 		if(t == null)
 			t = new Exception(dummyExceptionMsg());
-		log.postSevere("The application has crashed!", t);
+		log.postSevere("The application has crashed for some reason!", t);
 		produceCrashLog();
 		shutdown();
 	}
@@ -287,7 +287,7 @@ public abstract class Application {
 				"I am here to provide a stack trace",
 				"Stack trace buddy!",
 				"All your stack trace are belong to us",
-				"No reason was given for the crash :("
+				"No cause was given for the crash :("
 		};
 		return msgs[new Random().nextInt(msgs.length)];
 	}

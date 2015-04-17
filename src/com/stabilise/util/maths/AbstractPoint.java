@@ -28,12 +28,13 @@ public abstract class AbstractPoint {
 	 * Generates and returns this point's hash code.
 s	 */
 	protected int genHash() {
-		// This has too many basic collisions
-		//hash = x ^ y;
+		// This has too many close collisions for my liking, but is acceptable
+		// as a default hash which incorporates all of the state.
+		return getX() ^ getY();
 		
 		// Collisions are nicely distributed this way (though there's collision
 		// clumping nearby (0,0) as there's more or less mirroring about (0,0))
-		//hash = x ^ (y << 16) ^ (y >>> 16); // Cyclicly shift y by 16 bits
+		//return x ^ (y << 16) ^ (y >>> 16); // Cyclicly shift y by 16 bits
 		
 		// This eliminates higher-order bits, and as such is susceptible to
 		// collisions between two points (x0, y0) and (x1, y1) when:
@@ -41,7 +42,9 @@ s	 */
 		// Maths.wrappedRem(y0, 65536) == Maths.wrappedRem(y1, 65536)
 		// I feel this is the best option for collision distribution since
 		// nearby points shouldn't have hash collisions at all.
-		return (getX() << 16) | (getY() & 0xFFFF);
+		// However, since this disobeys the general contract of hashCode() to
+		// utilise all of an object's state, we won't use it.
+		//return (getX() << 16) | (getY() & 0xFFFF);
 	}
 	
 	@Override

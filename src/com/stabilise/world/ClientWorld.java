@@ -72,4 +72,9 @@ public class ClientWorld extends AbstractWorld {
 
 	}
 	
+	@Override
+	public void blockUntilClosed() {
+		
+	}
+	
 }

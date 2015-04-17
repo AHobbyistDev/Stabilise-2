@@ -82,7 +82,7 @@ public class Polygon extends AbstractPolygon {
 	}
 	
 	@Override
-	protected Vec2[] getVertices() {
+	public Vec2[] getVertices() {
 		return vertices;
 	}
 	

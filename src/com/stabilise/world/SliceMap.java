@@ -40,7 +40,7 @@ public class SliceMap {
 	 * map). */
 	private int centreX, centreY;
 	/** Coordinates determining which slices are to be loaded. */
-	protected int minSliceXLoaded, maxSliceXLoaded, minSliceYLoaded, maxSliceYLoaded;
+	protected int minSliceX, maxSliceX, minSliceY, maxSliceY;
 	
 	
 	/**
@@ -71,7 +71,8 @@ public class SliceMap {
 			return;
 		
 		// If the target has moved very far, opt to refresh instead.
-		if(Math.abs(sliceX - centreX) >= REFRESH_BOUNDARY || Math.abs(sliceY - centreY) >= REFRESH_BOUNDARY) {
+		if(Math.abs(sliceX - centreX) >= REFRESH_BOUNDARY ||
+				Math.abs(sliceY - centreY) >= REFRESH_BOUNDARY) {
 			refresh();
 			return;
 		}
@@ -79,15 +80,15 @@ public class SliceMap {
 		centreX = sliceX;
 		centreY = sliceY;
 		
-		int oldMinX = minSliceXLoaded;
-		int oldMaxX = maxSliceXLoaded;
-		int oldMinY = minSliceYLoaded;
-		int oldMaxY = maxSliceYLoaded;
+		int oldMinX = minSliceX;
+		int oldMaxX = maxSliceX;
+		int oldMinY = minSliceY;
+		int oldMaxY = maxSliceY;
 		
-		minSliceXLoaded = centreX - LOADED_SLICE_RADIUS;
-		maxSliceXLoaded = centreX + LOADED_SLICE_RADIUS;
-		minSliceYLoaded = centreY - LOADED_SLICE_RADIUS;
-		maxSliceYLoaded = centreY + LOADED_SLICE_RADIUS;
+		minSliceX = centreX - LOADED_SLICE_RADIUS;
+		maxSliceX = centreX + LOADED_SLICE_RADIUS;
+		minSliceY = centreY - LOADED_SLICE_RADIUS;
+		maxSliceY = centreY + LOADED_SLICE_RADIUS;
 		
 		// This way of loading and unloading slices has the following
 		// characteristics:
@@ -102,15 +103,15 @@ public class SliceMap {
 		//   between point A and point B, no matter how far apart they are. For
 		//   purposes such as these, refresh() is invoked instead.
 		
-		for(int x = minSliceXLoaded; x < oldMinX; x++) loadCol(x);
-		for(int x = maxSliceXLoaded; x > oldMaxX; x--) loadCol(x);
-		for(int y = minSliceYLoaded; y < oldMinY; y++) loadRow(y);
-		for(int y = maxSliceYLoaded; y > oldMaxY; y--) loadRow(y);
+		for(int x = minSliceX; x < oldMinX; x++) loadCol(x);
+		for(int x = maxSliceX; x > oldMaxX; x--) loadCol(x);
+		for(int y = minSliceY; y < oldMinY; y++) loadRow(y);
+		for(int y = maxSliceY; y > oldMaxY; y--) loadRow(y);
 		
-		for(int x = oldMinX; x < minSliceXLoaded; x++) unloadCol(x, oldMinY, oldMaxY);
-		for(int x = maxSliceXLoaded; x < oldMaxX; x++) unloadCol(x, oldMinY, oldMaxY);
-		for(int y = oldMinY; y < minSliceYLoaded; y++) unloadRow(y, oldMinX, oldMaxX);
-		for(int y = maxSliceYLoaded; y < oldMaxY; y++) unloadRow(y, oldMinX, oldMaxX);
+		for(int x = oldMinX; x < minSliceX; x++) unloadCol(x, oldMinY, oldMaxY);
+		for(int x = maxSliceX; x < oldMaxX; x++) unloadCol(x, oldMinY, oldMaxY);
+		for(int y = oldMinY; y < minSliceY; y++) unloadRow(y, oldMinX, oldMaxX);
+		for(int y = maxSliceY; y < oldMaxY; y++) unloadRow(y, oldMinX, oldMaxX);
 	}
 	
 	/**
@@ -119,7 +120,7 @@ public class SliceMap {
 	 * @param x The x-coordinate of the column, in slice-lengths.
 	 */
 	protected void loadCol(int x) {
-		for(int y = minSliceYLoaded; y <= maxSliceYLoaded; y++)
+		for(int y = minSliceY; y <= maxSliceY; y++)
 			world.loadSlice(x, y);
 	}
 	
@@ -129,7 +130,7 @@ public class SliceMap {
 	 * @param y The y-coordinate of the row, in slice-lengths.
 	 */
 	protected void loadRow(int y) {
-		for(int x = minSliceXLoaded; x <= maxSliceXLoaded; x++)
+		for(int x = minSliceX; x <= maxSliceX; x++)
 			world.loadSlice(x, y);
 	}
 	
@@ -167,10 +168,10 @@ public class SliceMap {
 	 * loaded.
 	 */
 	public void refresh() {
-		int oldMinX = minSliceXLoaded;
-		int oldMaxX = maxSliceXLoaded;
-		int oldMinY = minSliceYLoaded;
-		int oldMaxY = maxSliceYLoaded;
+		int oldMinX = minSliceX;
+		int oldMaxX = maxSliceX;
+		int oldMinY = minSliceY;
+		int oldMaxY = maxSliceY;
 		
 		// Reload before unloading to prevent slices from being unloaded
 		// unnecessarily if they are to remain loaded anyway. The temporary
@@ -187,12 +188,12 @@ public class SliceMap {
 	private void reload() {
 		centreX = target.getSliceX();
 		centreY = target.getSliceY();
-		minSliceXLoaded = centreX - LOADED_SLICE_RADIUS;
-		maxSliceXLoaded = centreX + LOADED_SLICE_RADIUS;
-		minSliceYLoaded = centreY - LOADED_SLICE_RADIUS;
-		maxSliceYLoaded = centreY + LOADED_SLICE_RADIUS;
+		minSliceX = centreX - LOADED_SLICE_RADIUS;
+		maxSliceX = centreX + LOADED_SLICE_RADIUS;
+		minSliceY = centreY - LOADED_SLICE_RADIUS;
+		maxSliceY = centreY + LOADED_SLICE_RADIUS;
 		
-		for(int x = minSliceXLoaded; x <= maxSliceXLoaded; x++)
+		for(int x = minSliceX; x <= maxSliceX; x++)
 			loadCol(x);
 	}
 	
@@ -201,8 +202,8 @@ public class SliceMap {
 	 * be discontinued after invoking this.
 	 */
 	public void unload() {
-		for(int x = minSliceXLoaded; x <= maxSliceXLoaded; x++)
-			unloadCol(x, minSliceYLoaded, maxSliceYLoaded);
+		for(int x = minSliceX; x <= maxSliceX; x++)
+			unloadCol(x, minSliceY, maxSliceY);
 	}
 	
 }
