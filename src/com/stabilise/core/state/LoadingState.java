@@ -174,7 +174,8 @@ public class LoadingState implements State {
 		if(taskThread.stopped()) {
 			Throwable t = taskThread.getThrowable();
 			if(!taskThread.completed())
-				Application.crashApplication(t != null ? t : new AssertionError("Bootstrap failed!"));
+				Application.crashApplication(t != null ? t :
+					new AssertionError("Bootstrap failed!"));
 			//application.setState(new MenuTestState());
 			application.setState(new SingleplayerState(world, player));
 		}

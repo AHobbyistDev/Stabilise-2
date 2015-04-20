@@ -56,20 +56,18 @@ public class Region {
 		return (x << 16) | (y & 0xFFFF);
 	};
 	
-	/** The function to use a hash a region's {@link #loc} member. */
-	// This focuses most hashing into the lowest 4 bits. See comments for
-	// HostWorld.regions for why this is done (short answer is table size is
-	// almost always 16).
-	private static final BiIntFunction LOC_HASHER = (x,y) -> {
+	/** The factory with which to generate a region's {@link #loc} member. */
+	private static final PointFactory LOC_FACTORY = new PointFactory((x,y) -> {
+		// This focuses most hashing into the lowest 4 bits. See comments for
+		// HostWorld.regions for why this is done (short answer is table size is
+		// almost always 16).
+		// 
 		// We shift by 18 since ConcurrentHashMap likes to transform hashes by:
 		// hash = hash ^ (hash >>> 16);
 		// This would practically cancel out shifting x by only 16, so we shift
 		// by 2 more to preserve those bits for y.
 		return (x << 18) ^ y; // (x << 2) | (y & 0b11);
-	};
-	
-	/** The factory with which to generate a region's {@link #loc} member. */
-	private static final PointFactory LOC_FACTORY = new PointFactory(LOC_HASHER);
+	});
 	
 	
 	//--------------------==========--------------------

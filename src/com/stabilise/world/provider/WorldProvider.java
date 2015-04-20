@@ -100,7 +100,8 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 		// Start up the executor
 		
 		final int coreThreads = 2; // region loading typically happens in pairs
-		final int maxThreads = Math.max(coreThreads, Runtime.getRuntime().availableProcessors());
+		final int maxThreads = Math.max(coreThreads,
+				Runtime.getRuntime().availableProcessors());
 		
 		BoundedThreadPoolExecutor tpe = new BoundedThreadPoolExecutor(
 				coreThreads, maxThreads,

@@ -39,17 +39,19 @@ public class NBTExporter {
 	private static final Log LOG_IMP = Log.getAgent("NBTImporter");
 	
 	private static final Predicate<Field> PRED_ALL = (f) -> { return true; };
-	private static final Predicate<Field> PRED_MARKED =
-			(f) -> { return f.getAnnotation(ExportToNBT.class) != null; };
+	private static final Predicate<Field> PRED_MARKED = (f) -> {
+		return f.getAnnotation(ExportToNBT.class) != null;
+	};
 	
 	// The following predicate basically states that we aren't allowed to
 	// export final fields, BUT final Objects whose class have the Exportable
 	// annotation are allowed to be exported (we simply export their mutable
 	// fields). This pretty much ensures we export mutable state and don't
 	// bother with immutable state.
-	private static final Predicate<Field> ALLOWED_TO_EXPORT =
-			(f) -> { return !(Modifier.isFinal(f.getModifiers())
-					&& f.getType().getAnnotation(Exportable.class) == null); };
+	private static final Predicate<Field> ALLOWED_TO_EXPORT = (f) -> {
+		return !(Modifier.isFinal(f.getModifiers())
+					&& f.getType().getAnnotation(Exportable.class) == null);
+	};
 	
 	private NBTExporter() {}
 	

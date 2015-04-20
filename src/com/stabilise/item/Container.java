@@ -302,7 +302,7 @@ public abstract class Container implements Iterable<ItemStack> {
 	
 	/**
 	 * Sets the stack in a specified slot. This overwrites the contents of the
-	 * slot.
+	 * slot with no restrictions.
 	 * 
 	 * @param slot The slot.
 	 * @param stack The stack. This should not be {@code null}; {@link

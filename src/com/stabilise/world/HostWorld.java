@@ -366,7 +366,8 @@ public class HostWorld extends AbstractWorld {
 	public Slice getSliceAt(int x, int y) {
 		Region r = getRegionAt(regionCoordFromSliceCoord(x), regionCoordFromSliceCoord(y));
 		return r == null ? null : r.getSliceAt(
-				sliceCoordRelativeToRegionFromSliceCoord(x), sliceCoordRelativeToRegionFromSliceCoord(y));
+				sliceCoordRelativeToRegionFromSliceCoord(x),
+				sliceCoordRelativeToRegionFromSliceCoord(y));
 	}
 	
 	@Override
@@ -382,16 +383,16 @@ public class HostWorld extends AbstractWorld {
 		Region r = getRegionFromTileCoords(x, y);
 		if(r == null)
 			return;
-		Slice slice = getSliceFromTileCoords(r, x, y);
+		Slice s = getSliceFromTileCoords(r, x, y);
 		
-		if(slice != null) {
+		if(s != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
 			int tileY = tileCoordRelativeToSliceFromTileCoord(y);
 			
 			// TODO: remove this when I make sure one can't set a tile over another
-			slice.getTileAt(tileX, tileY).handleRemove(this, x, y);
+			s.getTileAt(tileX, tileY).handleRemove(this, x, y);
 			
-			slice.setTileAt(tileX, tileY, id);
+			s.setTileAt(tileX, tileY, id);
 			r.unsavedChanges = true;
 			
 			Tile.getTile(id).handlePlace(this, x, y);
@@ -401,20 +402,18 @@ public class HostWorld extends AbstractWorld {
 	@Override
 	public void breakTileAt(int x, int y) {
 		// Ditto in that we're duping getSliceAtTile();
-		Region r = getRegionAt(regionCoordFromTileCoord(x), regionCoordFromTileCoord(y));
+		Region r = getRegionFromTileCoords(x, y);
 		if(r == null)
 			return;
-		Slice slice = r.getSliceAt(
-				sliceCoordRelativeToRegionFromTileCoord(x),
-				sliceCoordRelativeToRegionFromTileCoord(y)
-		);
-		if(slice != null) {
+		Slice s = getSliceFromTileCoords(r, x, y);
+		
+		if(s != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
 			int tileY = tileCoordRelativeToSliceFromTileCoord(y);
 			
-			slice.getTileAt(tileX, tileY).handleBreak(this, x, y);
+			s.getTileAt(tileX, tileY).handleBreak(this, x, y);
 			
-			slice.setTileAt(tileX, tileY, Tiles.AIR);
+			s.setTileAt(tileX, tileY, Tiles.AIR);
 			r.unsavedChanges = true;
 		}
 	}
@@ -422,25 +421,22 @@ public class HostWorld extends AbstractWorld {
 	@Override
 	public void setTileEntityAt(int x, int y, TileEntity t) {
 		// Ditto in that we're duping getSliceAtTile() code
-		Region r = getRegionAt(regionCoordFromTileCoord(x), regionCoordFromTileCoord(y));
+		Region r = getRegionFromTileCoords(x, y);
 		if(r == null)
 			return;
-		Slice slice = r.getSliceAt(
-				sliceCoordRelativeToRegionFromTileCoord(x),
-				sliceCoordRelativeToRegionFromTileCoord(y)
-		);
+		Slice s = getSliceFromTileCoords(r, x, y);
 			
-		if(slice != null) {
+		if(s != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
 			int tileY = tileCoordRelativeToSliceFromTileCoord(y);
 			
-			TileEntity t2 = slice.getTileEntityAt(tileX, tileY);
+			TileEntity t2 = s.getTileEntityAt(tileX, tileY);
 			if(t2 != null) {
 				t2.handleRemove(this, x, y);
 				removeTileEntity(t2);
 			}
 			
-			slice.setTileEntityAt(tileX, tileY, t);
+			s.setTileEntityAt(tileX, tileY, t);
 			r.unsavedChanges = true;
 			
 			if(t != null)
@@ -451,22 +447,19 @@ public class HostWorld extends AbstractWorld {
 	@Override
 	public void blowUpTile(int x, int y, float explosionPower) {
 		// Ditto in that we're duping getSliceAtTile()
-		Region r = getRegionAt(regionCoordFromTileCoord(x), regionCoordFromTileCoord(y));
+		Region r = getRegionFromTileCoords(x, y);
 		if(r == null)
 			return;
-		Slice slice = r.getSliceAt(
-				sliceCoordRelativeToRegionFromTileCoord(x),
-				sliceCoordRelativeToRegionFromTileCoord(y)
-		);
+		Slice s = getSliceFromTileCoords(r, x, y);
 		
-		if(slice != null) {
+		if(s != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
 			int tileY = tileCoordRelativeToSliceFromTileCoord(y);
 			
-			if(slice.getTileAt(tileX, tileY).getHardness() < explosionPower) {
-				slice.getTileAt(tileX, tileY).handleRemove(this, x, y);
+			if(s.getTileAt(tileX, tileY).getHardness() < explosionPower) {
+				s.getTileAt(tileX, tileY).handleRemove(this, x, y);
 				
-				slice.setTileAt(tileX, tileY, Tiles.AIR);
+				s.setTileAt(tileX, tileY, Tiles.AIR);
 				r.unsavedChanges = true;
 				
 				//Tiles.AIR.handlePlace(this, x, y);

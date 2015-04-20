@@ -11,6 +11,7 @@ import java.util.Map;
 
 import com.stabilise.network.Packet;
 import com.stabilise.network.protocol.handshake.*;
+import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.InstantiationRegistry;
 import com.stabilise.util.maths.Maths;
@@ -78,10 +79,10 @@ public enum Protocol {
 	 * a client.
 	 * @param id The ID of the packet.
 	 * 
-	 * @return The packet.
+	 * @return The packet, or {@code null} if there is no packet type with the
+	 * specified ID.
 	 * @throws FaultyPacketRegistrationException if the packet could not be
-	 * created, either due to {@code id} lacking a mapping or instantiation
-	 * outright failing.
+	 * created due to instantiation outright failing.
 	 */
 	@UserThread("ReadThread")
 	private Packet createPacket(boolean server, int id) {
@@ -103,20 +104,27 @@ public enum Protocol {
 	 * (i.e. we want a clientbound packet); {@code false} if we want a
 	 * serverbound packet.
 	 * @param in The input stream from which to read the packet.
+	 * @param log The logging agent to which to report problems.
 	 * 
 	 * @return The packet, or {@code null} if the end of stream has been
-	 * reached (i.e. the socket has closed).
+	 * reached (i.e. the socket has closed), or {@link Packet#DUMMY_PACKET} if
+	 * there is no packet on this protocol with the specified ID.
 	 * @throws NullPointerException if {@code in} is {@code null}.
 	 * @throws FaultyPacketRegistrationException if the packet was registered
 	 * incorrectly (in this case the error lies in the registration code).
 	 * @throws IOException if an I/O error occurs.
 	 */
 	@UserThread("ReadThread")
-	public Packet readPacket(boolean server, DataInputStream in) throws IOException {
+	public Packet readPacket(boolean server, DataInputStream in, Log log) throws IOException {
 		int id = in.read(); // ID is always first byte
 		if(id == -1) // end of stream; abort!
 			return null;
 		Packet packet = createPacket(server, id);
+		if(packet == null) {
+			log.postWarning("Unrecognised packet id " + id + " in protocol " + this
+					+ " (perhaps it was sent before a protocol switch?)");
+			return Packet.DUMMY_PACKET;
+		}
 		packet.readData(in);
 		return packet;
 	}

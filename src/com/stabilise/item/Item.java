@@ -221,11 +221,11 @@ public class Item {
 		if(registered)
 			throw new IllegalStateException("Items have already been registered!");
 		
-		registerItem(0, "", NO_ITEM);
-		registerItem(1, "tile", new Item()); // TODO: ItemTile
-		registerItem(2, "sword", new Item());
-		registerItem(3, "apple", new Item());
-		registerItem(4, "arrow", new Item());
+		registerItem(0, "",			NO_ITEM);
+		registerItem(1, "tile",		new Item()); // TODO: ItemTile
+		registerItem(2, "sword",	new Item());
+		registerItem(3, "apple",	new Item());
+		registerItem(4, "arrow",	new Item());
 		
 		// Create an item for every tile
 		//for(Tile tile : Tile.TILES)

@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.stabilise.character.CharacterData;
 import com.stabilise.core.Resources;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
@@ -15,7 +17,9 @@ import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Checkable;
 import com.stabilise.util.IOUtil;
 import com.stabilise.util.Log;
+import com.stabilise.util.Profiler;
 import com.stabilise.util.maths.Maths;
+import com.stabilise.world.provider.WorldProvider;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -785,6 +789,89 @@ public interface World extends Checkable {
 	 */
 	public static void deleteWorld(String worldName) {
 		getWorldDir(worldName).deleteDirectory();
+	}
+	
+	/**
+	 * Creates and returns a new {@link WorldBuilder} to use to construct a
+	 * world.
+	 */
+	public static WorldBuilder builder() {
+		return new WorldBuilder();
+	}
+	
+	//--------------------==========--------------------
+	//-------------=====Nested Classes=====-------------
+	//--------------------==========--------------------
+	
+	public static class WorldBuilder {
+		
+		/** The directory of the world. Null if client-only. Can be null if
+		 * worldInfo is set directly; used to construct worldInfo otherwise. */
+		private FileHandle worldDir = null;
+		/** The info of the world. Null if client-only. */
+		private WorldInfo worldInfo = null;
+		/** The WorldProvider we'll be ultimately returning. */
+		private WorldProvider<?> provider = null;
+		/** The data of the integrated player. Null if server only. */
+		private CharacterData integratedPlayer = null;
+		/** Profiler to use for the world. */
+		private Profiler profiler = null;
+		
+		private WorldBuilder() {}
+		
+		
+		/**
+		 * Sets the world.
+		 * 
+		 * @param worldName The world's filesystem name.
+		 * 
+		 * @return This WorldBuilder.
+		 * @throws NullPointerException if {@code worldName} is {@code null}.
+		 * @throws IllegalStateException if the world has already been set.
+		 */
+		public WorldBuilder setWorld(String worldName) {
+			return setWorld(new WorldInfo(Objects.requireNonNull(worldName)));
+		}
+		
+		/**
+		 * Sets the world.
+		 * 
+		 * @param worldInfo The world's info.
+		 * 
+		 * @return This WorldBuilder.
+		 * @throws NullPointerException if {@code worldInfo} is {@code null}.
+		 * @throws IllegalStateException if the world has already been set.
+		 */
+		public WorldBuilder setWorld(WorldInfo worldInfo) {
+			if(this.worldInfo != null)
+				throw new IllegalStateException("World already set!");
+			this.worldInfo = Objects.requireNonNull(worldInfo);
+			worldDir = worldInfo.getWorldDir();
+			return this;
+		}
+		
+		public WorldBuilder setPlayer(String characterName) {
+			return setPlayer(new CharacterData(Objects.requireNonNull(characterName)));
+		}
+		
+		public WorldBuilder setPlayer(CharacterData character) {
+			if(integratedPlayer != null)
+				throw new IllegalStateException("Player already set!");
+			integratedPlayer = Objects.requireNonNull(character);
+			return this;
+		}
+		
+		public WorldBuilder setProfiler(Profiler profiler) {
+			if(this.profiler != null)
+				throw new IllegalStateException("Profiler already set!");
+			this.profiler = profiler;
+			return this;
+		}
+		
+	}
+	
+	public static class WorldBundle {
+		
 	}
 	
 }

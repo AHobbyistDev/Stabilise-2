@@ -11,6 +11,8 @@ import com.stabilise.util.nbt.NBTTagCompound;
  */
 public class WorldInfo implements Comparable<WorldInfo> {
 	
+	private boolean loaded = false;
+	
 	/** The name of the world. This is aesthetic. */
 	public String name;
 	/** The name of the world on the file system. */
@@ -49,13 +51,16 @@ public class WorldInfo implements Comparable<WorldInfo> {
 	}
 	
 	/**
-	 * Loads the world info. Note that {@code fileSystemName} must first be
-	 * set.
+	 * Loads this world info if it has not been previously loaded. Note that
+	 * {@code fileSystemName} must first be set.
 	 * 
 	 * @throws IOException if the info file does not exist or an I/O error
 	 * otherwise occurs.
 	 */
 	public void load() throws IOException {
+		if(loaded)
+			return;
+		
 		NBTTagCompound infoTag = NBTIO.readCompressed(getFile());
 		
 		name = infoTag.getStringUnsafe("worldName");
@@ -67,6 +72,8 @@ public class WorldInfo implements Comparable<WorldInfo> {
 		
 		worldFormatVersion = infoTag.getIntUnsafe("formatVersion");
 		sliceFormatVersion = infoTag.getIntUnsafe("sliceFormatVersion");
+		
+		loaded = true;
 	}
 	
 	/**

@@ -56,9 +56,9 @@ public class C000VersionInfo extends Packet {
 	 */
 	public boolean isCompatible() {
 		// true if our version is newer than the sender's oldest allowable version
-		boolean weAreCompatible = VERSION.compareTo(senderBackwardsVersion) >= 0;
+		boolean weAreCompatible = !VERSION.precedes(senderBackwardsVersion);
 		// true if the sender's version is newer than our oldest allowable version
-		boolean senderIsCompatible = senderVersion.compareTo(BACKWARDS_VERSION) >= 0;
+		boolean senderIsCompatible = !senderVersion.precedes(BACKWARDS_VERSION);
 		
 		return weAreCompatible && senderIsCompatible;
 	}

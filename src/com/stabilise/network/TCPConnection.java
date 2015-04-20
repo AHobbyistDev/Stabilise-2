@@ -131,13 +131,13 @@ public class TCPConnection {
 		if(server) {
 			if(!protocol.isServerPacket(packet)) {
 				log.postWarning("Attempting to send a non-server packet ("
-						+ packet.getClass().getSimpleName() + ")");
+						+ packet + ")");
 				return;
 			}
 		} else {
 			if(!protocol.isClientPacket(packet)) {
 				log.postWarning("Attempting to send a non-client packet ("
-						+ packet.getClass().getSimpleName() + ")");
+						+ packet + ")");
 				return;
 			}
 		}
@@ -166,10 +166,10 @@ public class TCPConnection {
 	 */
 	@UserThread("ReadThread")
 	private void readPacket() throws IOException {
-		Packet packet = protocol.readPacket(server, in);
+		Packet packet = protocol.readPacket(server, in, log);
 		if(packet == null)
 			requestClose();
-		else {
+		else if(packet != Packet.DUMMY_PACKET) {
 			packetQueueIn.add(packet);
 			packetsReceived++;
 		}
