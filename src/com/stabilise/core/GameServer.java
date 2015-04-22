@@ -42,10 +42,8 @@ public class GameServer extends Server {
 	}
 	
 	@Override
-	public void update() {
-		if(checkShutdown())
-			return;
-		handleIncomingPackets();
+	public void doUpdate() {
+		
 	}
 
 }

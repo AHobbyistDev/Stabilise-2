@@ -333,28 +333,29 @@ public abstract class Task implements Runnable {
 	}
 	
 	/**
-	 * Sets the identifying name of the task being executed, as returned by
-	 * {@link #getName()}.
+	 * Sets the status of the task being executed, as returned by
+	 * {@link #getStatus()}.
 	 * 
-	 * @param name The name of the current task being executed.
+	 * @param status The status of the current task being executed.
 	 * 
-	 * @throws IllegalArgumentException if {@code name} is {@code null}.
+	 * @throws IllegalArgumentException if {@code status} is {@code null}.
+	 * @see TaskTracker#setStatus(String)
 	 */
-	public final void setName(String name) {
-		tracker.setName(name);
+	protected final void setStatus(String status) {
+		tracker.setStatus(status);
 	}
 	
 	/**
-	 * Gets the identifying name of the current task being executed.
+	 * Gets the status of task being.
 	 * 
-	 * <p>Memory consistency effects: actions by the thread which set the name
-	 * happen-before actions in the current thread.
+	 * <p>Memory consistency effects: actions by the thread which set the
+	 * status happen-before actions in the current thread.
 	 * 
-	 * @return The task's identifying name.
-	 * @see TaskTracker#getName()
+	 * @return The task's status.
+	 * @see TaskTracker#getStatus()
 	 */
-	public String getName() {
-		return tracker.getName();
+	public String getStatus() {
+		return tracker.getStatus();
 	}
 	
 	/**

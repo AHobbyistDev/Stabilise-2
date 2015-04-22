@@ -47,7 +47,7 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	 * 3. Singleplayer with integrated server
 	 *     Combination of 1 & 2; features an integrated client, but also hosts
 	 *     a server.
-	 * 4. Client
+	 * 4. ClientImpl
 	 *     Plays on a world provided by a server.
 	 * 
 	 * 1, 2 & 3 are variants of the 'host provider', which hosts each world.
@@ -93,9 +93,14 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	
 	/**
 	 * Creates a new WorldProvider.
+	 * 
+	 * @param profiler The profiler to use to profile this world provider and
+	 * its worlds. If {@code null}, a default disabled profiler is instead set.
 	 */
-	public WorldProvider() {
-		setProfiler(null); // init the profiler so it is never null
+	public WorldProvider(Profiler profiler) {
+		this.profiler = profiler != null
+				? profiler
+				: new Profiler(false, "root", false);
 		
 		// Start up the executor
 		
@@ -174,17 +179,6 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	 * <p>If this is not a {@code HostProvider}, a dummy seed is returned.
 	 */
 	public abstract long getSeed();
-	
-	/**
-	 * Sets the profiler with which to profile the operation of this
-	 * WorldProvider. If the given profiler is {@code null}, a disabled
-	 * profiler will instead be set.
-	 */
-	public void setProfiler(Profiler profiler) {
-		this.profiler = profiler != null
-				? profiler
-				: new Profiler(false, "root", false);
-	}
 	
 	/**
 	 * Returns this WorldProvider's profiler. Use this to profile a world.

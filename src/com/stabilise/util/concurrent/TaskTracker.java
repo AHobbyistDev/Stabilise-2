@@ -13,86 +13,70 @@ import com.stabilise.util.annotation.ThreadSafe;
  * <p>As is implied, this class is thread-safe.
  */
 @ThreadSafe
-public class TaskTracker {
+public class TaskTracker implements Tracker {
 	
-	/** Task name. */
-	private volatile String name;
+	/** Task status. Never null. */
+	private volatile String status;
 	
 	private final AtomicInteger numPartsCompleted = new AtomicInteger(0);
 	private final int numPartsToComplete;
 	
 	
 	/**
-	 * Creates a new TaskTracker with a task name of "Loading" and 1 part to
-	 * complete.
-	 */
-	public TaskTracker() {
-		this(1);
-	}
-	
-	/**
 	 * Creates a new TaskTracker with 1 part to complete.
 	 * 
-	 * @param name The name of the task.
+	 * @param status The initial status of the task.
 	 * 
-	 * @throws NullPointerException if {@code name} is {@code null}.
+	 * @throws NullPointerException if {@code status} is {@code null}.
 	 */
-	public TaskTracker(String name) {
-		this(name, 1);
-	}
-	
-	/**
-	 * Creates a new TaskTracker with a task name of "Loading".
-	 * 
-	 * @param parts The number of parts to complete.
-	 * 
-	 * @throws IllegalArgumentException if {@code parts < 0}.
-	 */
-	public TaskTracker(int parts) {
-		this("Loading", parts);
+	public TaskTracker(String status) {
+		this(status, 1);
 	}
 	
 	/**
 	 * Creates a new TaskTracker.
 	 * 
-	 * @param name The name of the task.
+	 * @param status The initial status of the task.
 	 * @param parts The number of parts to complete.
 	 * 
-	 * @throws NullPointerException if {@code name} is {@code null}.
+	 * @throws NullPointerException if {@code status} is {@code null}.
 	 * @throws IllegalArgumentException if {@code parts < 0}.
 	 */
-	public TaskTracker(String name, int parts) {
-		if(name == null)
-			throw new NullPointerException("name is null");
+	public TaskTracker(String status, int parts) {
+		if(status == null)
+			throw new NullPointerException("status is null");
 		if(parts < 0)
 			throw new IllegalArgumentException("parts < 0");
-		this.name = name;
+		this.status = status;
 		numPartsToComplete = parts;
 	}
 	
 	/**
-	 * Sets the name of the task.
+	 * Sets the status of the task.
 	 * 
-	 * @param name The desired name.
+	 * <p>Memory consistency effects: actions by a thread which sets the
+	 * status happen-before subsequent {@link #getStatus() reads} of the
+	 * status.
 	 * 
-	 * @throws NullPointerException if {@code name} is {@code null}.
+	 * @param status The name.
+	 * 
+	 * @throws NullPointerException if {@code status} is {@code null}.
 	 */
-	public void setName(String name) {
-		if(name == null)
-			throw new IllegalArgumentException("name is null!");
-		this.name = name;
+	public void setStatus(String status) {
+		if(status == null)
+			throw new IllegalArgumentException("status is null!");
+		this.status = status;
 	}
 	
 	/**
-	 * Gets the name of the task.
+	 * {@inheritDoc}
 	 * 
-	 * <p>Memory consistency effects: actions by the thread which set the name
-	 * happen-before actions in the current thread.
-	 * 
-	 * @return The name of the task.
+	 * <p>Memory consistency effects: actions by the thread which set the
+	 * status happen-before actions in the current thread.
 	 */
-	public String getName() {
-		return name;
+	@Override
+	public String getStatus() {
+		return status;
 	}
 	
 	/**
@@ -119,45 +103,47 @@ public class TaskTracker {
 		numPartsCompleted.getAndAdd(parts);
 	}
 	
-	/**
-	 * @return The number of parts in the task, as defined in the constructor.
-	 */
+	@Override
 	public int parts() {
 		return numPartsToComplete;
 	}
 	
 	/**
+	 * {@inheritDoc}
+	 * 
 	 * Memory consistency effects: actions in a thread prior to invoking {@link
 	 * #increment()} or {@link #increment(int)} happen-before actions in the
 	 * current thread.
-	 * 
-	 * @return The number of parts of the task completed.
 	 */
+	@Override
 	public int partsCompleted() {
 		return numPartsCompleted.get();
 	}
 	
 	/**
-	 * Gets the percentage of the task which has been completed thus far. Note
-	 * that the returned value may not necessarily be within the range of
+	 * {@inheritDoc}
+	 * 
+	 * Note that the returned value may not necessarily be within the range of
 	 * {@code 0.0} to {@code 1.0} if the task behaves contrary to the general
 	 * contract of this class.
 	 * 
 	 * <p>Memory consistency effects: actions in a thread prior to invoking
 	 * {@link #increment()} or {@link #increment(int)} happen-before actions in
 	 * the current thread.
-	 * 
-	 * @return The percentage, from {@code 0.0} (inclusive) to {@code 1.0}
-	 * (inclusive).
 	 */
+	@Override
 	public float percentComplete() {
-		return numPartsToComplete == 0f ? 1f : (float)numPartsCompleted.get() / numPartsToComplete;
+		return numPartsToComplete == 0f
+				? 1f
+				: (float)numPartsCompleted.get() / numPartsToComplete;
 	}
 	
 	/**
-	 * Checks for whether or not the task has been completed. Note that this
-	 * may never return {@code true} if implementing code does not ensure to
-	 * invoke {@link #increment()} or {@link #increment(int)} appropriately.
+	 * {@inheritDoc}
+	 * 
+	 * Note that this may never return {@code true} if implementing code does
+	 * not ensure to invoke {@link #increment()} or {@link #increment(int)}
+	 * appropriately.
 	 * 
 	 * @return {@code true} if the task has been completed; {@code false} if it
 	 * has not.
@@ -171,12 +157,12 @@ public class TaskTracker {
 	 * takes the form:
 	 * 
 	 * <blockquote>
-	 * {@code NAME... X%}
+	 * {@code STATUS... X%}
 	 * </blockquote>
 	 * 
-	 * where NAME is the name of the task, set either in the constructor or by
-	 * {@link #setName(String)}, and X is the percentage towards completion of
-	 * the task, equivalent to:
+	 * where STATUS is the status of the task, set either in the constructor or
+	 * by {@link #setStatus(String)}, and X is the percentage towards
+	 * completion of the task, equivalent to:
 	 * 
 	 * <blockquote>
 	 * {@code (int)(100*percentComplete())}
@@ -188,7 +174,7 @@ public class TaskTracker {
 	 */
 	@Override
 	public String toString() {
-		return name + "... " + ((int)(100*percentComplete())) + "%";
+		return status + "... " + ((int)(100*percentComplete())) + "%";
 	}
 	
 }

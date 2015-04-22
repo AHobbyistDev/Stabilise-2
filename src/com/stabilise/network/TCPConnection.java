@@ -250,7 +250,8 @@ public class TCPConnection {
 		close(out, "output stream");
 		close(socket, "socket");
 		
-		// On second thought, don't bother joining these threads
+		// On second thought, don't bother joining these threads since it
+		// causes unnecessary delays.
 		//readThread.doJoin();
 		//writeThread.doJoin();
 		
@@ -290,7 +291,8 @@ public class TCPConnection {
 	
 	/**
 	 * @return {@code true} if this connection is terminated; {@code false}
-	 * otherwise.
+	 * otherwise. If this connection is neither active nor terminated, it is
+	 * currently in the process of terminating.
 	 */
 	public boolean isTerminated() {
 		return state.get() == STATE_TERMINATED;
@@ -329,7 +331,8 @@ public class TCPConnection {
 			try {
 				join();
 			} catch(InterruptedException e) {
-				log.postWarning("Interrupted while waiting for " + getName() + " to die!");
+				log.postWarning("Interrupted while waiting for " + getName()
+						+ " to die!");
 			}
 		}
 	}
@@ -357,8 +360,8 @@ public class TCPConnection {
 				// something has gone wrong.
 				if(isActive()) {
 					if(!socket.isClosed())
-						log.postSevere("IOException thrown in read thread before connection"
-								+ " shutdown!", e);
+						log.postSevere("IOException thrown in read thread before"
+								+ " connection shutdown!", e);
 					requestClose();
 				}
 			}

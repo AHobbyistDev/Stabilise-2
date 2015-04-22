@@ -88,7 +88,7 @@ public class LoadingState implements State {
 				Stabilise.bootstrap();
 				
 				tracker.increment();
-				tracker.setName("Preparing worlds");
+				tracker.setStatus("Preparing worlds");
 				
 				WorldInfo[] worldList = World.getWorldsList();
 				if(worldList.length == 0) {
@@ -99,7 +99,7 @@ public class LoadingState implements State {
 				}
 				
 				tracker.increment();
-				tracker.setName("Constructing world");
+				tracker.setStatus("Constructing world");
 				
 				world = new HostProvider(
 						worldList[0]
@@ -112,13 +112,13 @@ public class LoadingState implements State {
 				HostWorld dim = player.world;
 				
 				tracker.increment();
-				tracker.setName("Loading dimension \"" + dim.getDimensionName() + "\"");
+				tracker.setStatus("Loading dimension \"" + dim.getDimensionName() + "\"");
 				
 				while(!dim.isLoaded())
 					Thread.sleep(50L);
 				
 				tracker.increment();
-				tracker.setName("All is done!");
+				tracker.setStatus("All is done!");
 			}
 		};
 		//task.loadTextures(new String[] {"mainbg", "mainbgtile", "stickfigure", "sheets/cloak", "head", "button", "sheets/font1"});

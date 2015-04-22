@@ -25,12 +25,7 @@ public class ServerImpl extends Server implements IServerHandshake {
 		return new ServerSocket(DEFAULT_PORT, 4, InetAddress.getLocalHost());
 	}
 	
-	@Override
-	public void update() {
-		if(checkShutdown())
-			return;
-		handleIncomingPackets();
-	}
+	public void doUpdate() {}
 	
 	@Override
 	public void handleVersionInfo(C000VersionInfo packet, TCPConnection con) {

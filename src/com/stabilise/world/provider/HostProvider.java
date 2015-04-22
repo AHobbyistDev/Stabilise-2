@@ -8,6 +8,7 @@ import java.util.Objects;
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.EntityMob;
+import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.collect.LightArrayList;
 import com.stabilise.util.nbt.NBTIO;
@@ -45,11 +46,13 @@ public class HostProvider extends WorldProvider<HostWorld> {
 	 * Creates a new HostProvider.
 	 * 
 	 * @param info The world info.
+	 * @param profiler The profiler to use to profile this world provider and
+	 * its worlds. If {@code null}, a default disabled profiler is instead set.
 	 * 
 	 * @throws NullPointerException if {@code info} is {@code null}.
 	 */
-	public HostProvider(WorldInfo info) {
-		super();
+	public HostProvider(WorldInfo info, Profiler profiler) {
+		super(profiler);
 		this.info = Objects.requireNonNull(info);
 	}
 	

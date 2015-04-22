@@ -12,14 +12,14 @@ import com.stabilise.network.protocol.handshake.C001Disconnect;
 import com.stabilise.network.protocol.handshake.S000VersionInfo;
 import com.stabilise.util.Log;
 
-public class Client {
+public class ClientImpl {
 	
 	private Socket socket;
 	public TCPConnection connection;
 	
 	private Log log = Log.getAgent("CLIENT");
 	
-	public Client() {
+	public ClientImpl() {
 		try {
 			log.postInfo("Initiating client...");
 			socket = new Socket(InetAddress.getLocalHost(), DEFAULT_PORT);
@@ -60,7 +60,7 @@ public class Client {
 			while((packet = connection.getPacket()) != null)
 				handlePacket(packet);
 		} catch(Exception e) {
-			log.postSevere("Client encountered error!", e);
+			log.postSevere("ClientImpl encountered error!", e);
 			close();
 		}
 	}

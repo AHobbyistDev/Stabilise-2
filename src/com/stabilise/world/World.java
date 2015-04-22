@@ -6,6 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
@@ -18,6 +21,8 @@ import com.stabilise.util.Checkable;
 import com.stabilise.util.IOUtil;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
+import com.stabilise.util.concurrent.TaskTracker;
+import com.stabilise.util.concurrent.TrackableFuture;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.provider.WorldProvider;
 import com.stabilise.world.tile.Tile;
@@ -803,6 +808,10 @@ public interface World extends Checkable {
 	//-------------=====Nested Classes=====-------------
 	//--------------------==========--------------------
 	
+	/**
+	 * A WorldBuilder is a builder used to construct and set up {@link
+	 * WorldProvider} objects in an easy, concise, and consistent manner.
+	 */
 	public static class WorldBuilder {
 		
 		/** The directory of the world. Null if client-only. Can be null if
@@ -814,11 +823,19 @@ public interface World extends Checkable {
 		private WorldProvider<?> provider = null;
 		/** The data of the integrated player. Null if server only. */
 		private CharacterData integratedPlayer = null;
-		/** Profiler to use for the world. */
+		/** Profiler to use for the world. May be null. */
 		private Profiler profiler = null;
+		
+		private boolean building = false;
+		private Thread builderThread;
+		private WorldFuture task;
 		
 		private WorldBuilder() {}
 		
+		private void checkState() {
+			if(building)
+				throw new IllegalStateException("Already building or built!");
+		}
 		
 		/**
 		 * Sets the world.
@@ -827,7 +844,8 @@ public interface World extends Checkable {
 		 * 
 		 * @return This WorldBuilder.
 		 * @throws NullPointerException if {@code worldName} is {@code null}.
-		 * @throws IllegalStateException if the world has already been set.
+		 * @throws IllegalStateException if this builder has already built the
+		 * world provider, or the world has already been set.
 		 */
 		public WorldBuilder setWorld(String worldName) {
 			return setWorld(new WorldInfo(Objects.requireNonNull(worldName)));
@@ -840,9 +858,11 @@ public interface World extends Checkable {
 		 * 
 		 * @return This WorldBuilder.
 		 * @throws NullPointerException if {@code worldInfo} is {@code null}.
-		 * @throws IllegalStateException if the world has already been set.
+		 * @throws IllegalStateException if this builder has already built the
+		 * world provider, or the world has already been set.
 		 */
 		public WorldBuilder setWorld(WorldInfo worldInfo) {
+			checkState();
 			if(this.worldInfo != null)
 				throw new IllegalStateException("World already set!");
 			this.worldInfo = Objects.requireNonNull(worldInfo);
@@ -855,6 +875,7 @@ public interface World extends Checkable {
 		}
 		
 		public WorldBuilder setPlayer(CharacterData character) {
+			checkState();
 			if(integratedPlayer != null)
 				throw new IllegalStateException("Player already set!");
 			integratedPlayer = Objects.requireNonNull(character);
@@ -862,10 +883,59 @@ public interface World extends Checkable {
 		}
 		
 		public WorldBuilder setProfiler(Profiler profiler) {
+			checkState();
 			if(this.profiler != null)
 				throw new IllegalStateException("Profiler already set!");
 			this.profiler = profiler;
 			return this;
+		}
+		
+		public TrackableFuture<WorldBundle> build() {
+			checkState();
+			final TaskTracker tracker = new TaskTracker("Loading", 1);
+			Callable<WorldBundle> callable = new Callable<WorldBundle>() {
+				
+				@Override
+				public WorldBundle call() throws Exception {
+					return null;
+				}
+				
+			};
+			task = new WorldFuture(callable, tracker);
+			builderThread = new Thread(task);
+			builderThread.setName("WorldBuilderThread");
+			builderThread.run();
+			return task;
+		}
+		
+	}
+	
+	/**
+	 * Implementation combining FutureTask and TrackableFuture.
+	 */
+	static class WorldFuture extends FutureTask<WorldBundle>
+			implements TrackableFuture<WorldBundle> {
+		
+		private final TaskTracker tracker;
+		
+		public WorldFuture(Callable<WorldBundle> callable, TaskTracker tracker) {
+			super(callable);
+			this.tracker = tracker;
+		}
+		
+		@Override
+		public String getStatus() {
+			return tracker.getStatus();
+		}
+		
+		@Override
+		public int parts() {
+			return tracker.parts();
+		}
+		
+		@Override
+		public int partsCompleted() {
+			return tracker.partsCompleted();
 		}
 		
 	}

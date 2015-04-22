@@ -72,7 +72,7 @@ public class HostWorld extends AbstractWorld {
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public HostWorld(WorldProvider<? extends AbstractWorld> provider, Dimension dimension) {
+	public HostWorld(WorldProvider<?> provider, Dimension dimension) {
 		super(provider, dimension);
 		
 		spawnSliceX = dimension.info.spawnSliceX;

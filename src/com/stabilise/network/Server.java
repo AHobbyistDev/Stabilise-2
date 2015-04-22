@@ -241,23 +241,31 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	
 	/**
 	 * Performs an update tick.
-	 * 
-	 * <p>Subclasses of {@code Server} should invoke {@link
-	 * #checkShutdown()} and {@link #handleIncomingPackets()} from within this
-	 * method.
 	 */
 	@Override
-	public abstract void update();
+	public final void update() {
+		if(!checkShutdown()) {
+			handleIncomingPackets();
+			doUpdate();
+		}
+	}
+	
+	/**
+	 * Performs any custom update logic. This is invoked by {@link #update()}
+	 * unless this server has been shut down.
+	 * 
+	 * <p>This method does nothing by default.
+	 */
+	protected void doUpdate() {}
 	
 	/**
 	 * Checks for whether or not this server has been requested to shut down,
-	 * and shuts it down via {@link #shutdown()} if so. This should typically
-	 * be invoked from within {@link #update()}.
+	 * and shuts it down via {@link #shutdown()} if so.
 	 * 
 	 * @return {@code true} if the server was shut down; {@code false}
 	 * otherwise.
 	 */
-	protected boolean checkShutdown() {
+	private boolean checkShutdown() {
 		if(!isActive()) {
 			if(driver != null)
 				driver.stop();
@@ -268,10 +276,9 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	}
 	
 	/**
-	 * Handles any queued incoming packets. This should typically be invoked
-	 * from within {@link #update()}.
+	 * Handles any queued incoming packets.
 	 */
-	protected void handleIncomingPackets() {
+	private void handleIncomingPackets() {
 		Packet p;
 		synchronized(connections) {
 			for(TCPConnection con : connections)

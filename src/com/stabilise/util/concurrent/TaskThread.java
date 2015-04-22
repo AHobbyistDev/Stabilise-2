@@ -93,17 +93,17 @@ public class TaskThread extends Thread {
 	}
 	
 	/**
-	 * @see Task#setName(String)
+	 * @see Task#setStatus(String)
 	 */
 	public void setTaskName(String name) {
-		task.setName(name);
+		task.setStatus(name);
 	}
 	
 	/**
-	 * @see Task#getName()
+	 * @see Task#getStatus()
 	 */
 	public String getTaskName() {
-		return task.getName();
+		return task.getStatus();
 	}
 	
 	/**
