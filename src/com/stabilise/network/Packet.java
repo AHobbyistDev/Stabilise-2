@@ -33,6 +33,7 @@ public abstract class Packet implements Sendable {
 	 * @param con The {@code TCPConnection} object with which this packet is
 	 * associated.
 	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
 	 * @throws ClassCastException if the specified handler is not of the proper
 	 * type to handle this packet.
 	 */

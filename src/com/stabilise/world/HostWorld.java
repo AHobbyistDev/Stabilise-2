@@ -510,7 +510,7 @@ public class HostWorld extends AbstractWorld {
 	public void blockUntilClosed() {
 		while(!allRegionsSaved()) {
 			try {
-				Thread.sleep(50L);
+				Thread.sleep(20L);
 			} catch(InterruptedException ignored) {
 				log.postWarning("Interrupted while blocking until world is closed");
 			}

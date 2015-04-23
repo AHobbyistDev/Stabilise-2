@@ -6,8 +6,7 @@ import com.stabilise.core.Application;
 import com.stabilise.core.Game;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Profiler;
-import com.stabilise.world.provider.HostProvider;
-import com.stabilise.world.provider.HostProvider.PlayerBundle;
+import com.stabilise.world.World.WorldBundle;
 
 /**
  * The SingleplayerState is the state which will run while singleplayer
@@ -31,13 +30,14 @@ public class SingleplayerState implements State {
 	/**
 	 * Creates a new SingleplayerState instance.
 	 * 
-	 * @param world The world on which to play.
-	 * @param player The integrated player.
+	 * @param worldBundle The world and player data.
+	 * 
+	 * @throws NullPointerException if {@code bundle} is {@code null}.
 	 */
-	public SingleplayerState(HostProvider world, PlayerBundle player) {
+	public SingleplayerState(WorldBundle worldBundle) {
 		super();
 		
-		game = new Game(world, player);
+		game = new Game(worldBundle);
 	}
 	
 	@Override
@@ -48,10 +48,10 @@ public class SingleplayerState implements State {
 		input.addProcessor(game.playerController);
 		Gdx.input.setInputProcessor(input);
 		
-		renderer = new WorldRenderer(game, game.getWorld(), game.player.playerEntity);
+		renderer = new WorldRenderer(game, game.getWorld(), game.player);
 		//game.hudRenderer = renderer.hudRenderer;
 		
-		profiler.enable();
+		//profiler.enable();
 	}
 	
 	@Override

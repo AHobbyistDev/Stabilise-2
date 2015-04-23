@@ -69,6 +69,8 @@ public class CharacterData {
 	/** The character's inventory. */
 	public Container inventory;
 	
+	private boolean loaded = false;
+	
 	
 	/**
 	 * Creates a new CharacterData.
@@ -120,10 +122,16 @@ public class CharacterData {
 	/**
 	 * Loads the character data.
 	 * 
+	 * <p>If this data has already been loaded (i.e. this method has returned
+	 * without throwing an exception), this method does nothing.
+	 * 
 	 * @throws IOException if an I/O exception is encountered while attempting
 	 * to load the character data.
 	 */
 	public void load() throws IOException {
+		if(loaded)
+			return;
+		
 		NBTTagCompound tag = NBTIO.readCompressed(getFile());
 		
 		// TODO: For now only the hash and name are configured to throw
@@ -142,6 +150,8 @@ public class CharacterData {
 		
 		inventory = new BoundedContainer(Constants.INVENTORY_CAPACITY);
 		inventory.fromNBT(tag.getList("inventory"));
+		
+		loaded = true;
 	}
 	
 	/**
@@ -267,6 +277,7 @@ public class CharacterData {
 	public static CharacterData defaultCharacter() {
 		CharacterData data = new CharacterData("Player");
 		data.hash = "";
+		data.loaded = true;
 		return data;
 	}
 	

@@ -49,8 +49,9 @@ public class TCPConnection {
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
-	/** {@code true} if this is a server-side connection. */
-	private final boolean server;
+	/** {@code true} if this is a server-side connection; {@code false} if
+	 * client-side. */
+	public final boolean server;
 	
 	/** The current connection protocol. Default is {@link Protocol#HANDSHAKE}. */
 	private Protocol protocol = Protocol.HANDSHAKE;
@@ -69,6 +70,18 @@ public class TCPConnection {
 	
 	private int packetsSent = 0;
 	private int packetsReceived = 0;
+	
+	/** Number of pings sent to the connection partner. */
+	int pingCount = 0;
+	/** Number of pings sent by the partner to us. */
+	int partnerPingCount = 0;
+	/** System.currentTimeMillis() at which we sent our most recent ping. */
+	long pingSent = 0L;
+	/** true if we've received the rebound packet for our ping request. */
+	private boolean pingReceived = false;
+	/** Ping, in ms. Updated every second, or after the last ping request
+	 * returns, whichever is later. */
+	int ping = 0;
 	
 	private final Log log;
 	
@@ -103,6 +116,49 @@ public class TCPConnection {
 		
 		readThread.start();
 		writeThread.start();
+	}
+	
+	/**
+	 * Performs an update tick on this TCPConnection. By default, this method
+	 * ensures we ping our peer on a per-second basis.
+	 */
+	public void update() {
+		if(pingReceived)
+			trySendPingRequest();
+	}
+	
+	/**
+	 * Handles a ping packet.
+	 */
+	void handlePing(P255Ping packet) {
+		if(packet.request) {
+			if(++partnerPingCount != packet.pingID) {
+				log.postWarning("Out of sync with peer's ping requests? We "
+						+ "think peer has sent " + partnerPingCount + " ping"
+						+ " requests; peer says it has sent " + packet.pingID
+						+ ".");
+				partnerPingCount = packet.pingID;
+			}
+			sendPacket(new P255Ping(partnerPingCount, false));
+		} else {
+			if(pingCount != packet.pingID) {
+				log.postWarning("Peer out of since with our ping requests? We "
+						+ "have sent " + pingCount + " ping requests; peer "
+						+ " thinks we have sent " + packet.pingID);
+			}
+			ping = (int)(System.currentTimeMillis() - pingSent);
+			pingReceived = true;
+			// If the ping is especially large, 
+			trySendPingRequest();
+		}
+	}
+	
+	private void trySendPingRequest() {
+		if(System.currentTimeMillis() - pingSent > 1000L) {
+			sendPacket(new P255Ping(++pingCount, true));
+			pingSent = System.currentTimeMillis();
+			pingReceived = false;
+		}
 	}
 	
 	/**

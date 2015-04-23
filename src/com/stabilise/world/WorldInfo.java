@@ -54,6 +54,8 @@ public class WorldInfo implements Comparable<WorldInfo> {
 	 * Loads this world info if it has not been previously loaded. Note that
 	 * {@code fileSystemName} must first be set.
 	 * 
+	 * <p>If this method has been previously invoked, this does nothing.
+	 * 
 	 * @throws IOException if the info file does not exist or an I/O error
 	 * otherwise occurs.
 	 */

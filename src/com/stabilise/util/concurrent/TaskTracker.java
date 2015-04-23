@@ -103,6 +103,23 @@ public class TaskTracker implements Tracker {
 		numPartsCompleted.getAndAdd(parts);
 	}
 	
+	/**
+	 * Invokes {@link #increment()} and then {@link #setStatus(String)
+	 * setStatus(status)}.
+	 */
+	public void next(String status) {
+		next(1, status);
+	}
+	
+	/**
+	 * Invokes {@link #increment(int) increment(parts)} and then {@link
+	 * #setStatus(String) setStatus(status)}.
+	 */
+	public void next(int parts, String status) {
+		increment(parts);
+		setStatus(status);
+	}
+	
 	@Override
 	public int parts() {
 		return numPartsToComplete;

@@ -4,6 +4,7 @@ import static com.badlogic.gdx.Input.Keys;
 
 import com.badlogic.gdx.InputProcessor;
 import com.stabilise.core.state.LoadingState;
+import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.controller.PlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
@@ -11,8 +12,9 @@ import com.stabilise.input.Controller.Control;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.HostWorld;
+import com.stabilise.world.World.WorldBundle;
 import com.stabilise.world.provider.HostProvider;
-import com.stabilise.world.provider.HostProvider.PlayerBundle;
+import com.stabilise.world.provider.HostProvider.PlayerData;
 
 /**
  * The game itself.
@@ -27,7 +29,8 @@ public class Game implements Controllable, InputProcessor {
 	private final HostProvider provider;
 	/** The game's world instance. */
 	public final HostWorld world;
-	public final PlayerBundle player;
+	public final PlayerData playerData;
+	public final EntityMob player;
 	
 	/** The controller. */
 	public Controller controller;
@@ -52,20 +55,22 @@ public class Game implements Controllable, InputProcessor {
 	/**
 	 * Creates a new Game instance.
 	 * 
-	 * @param provider The world to run.
-	 * @param player The integrated player.
+	 * @param worldBundle The world and player data.
+	 * 
+	 * @throws NullPointerException if {@code worldBundle} is {@code null}.
 	 */
-	public Game(HostProvider provider, PlayerBundle player) {
-		this.provider = provider;
-		this.player = player;
-		this.world = player.world;
+	public Game(WorldBundle worldBundle) {
+		this.provider = worldBundle.provider;
+		this.world = worldBundle.world;
+		this.playerData = worldBundle.playerData;
+		this.player = worldBundle.playerEntity;
 		
 		log.postInfo("Initiating game...");
 		
 		controller = new Controller(this);
 		
 		// TODO: Hardcoding this is poor design and should be changed in the future
-		playerController = new PlayerController(player.playerEntity, controller, this);
+		playerController = new PlayerController(player, controller, this);
 	}
 	
 	/**

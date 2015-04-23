@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 import com.badlogic.gdx.files.FileHandle;
@@ -24,6 +23,9 @@ import com.stabilise.util.Profiler;
 import com.stabilise.util.concurrent.TaskTracker;
 import com.stabilise.util.concurrent.TrackableFuture;
 import com.stabilise.util.maths.Maths;
+import com.stabilise.world.provider.HostProvider;
+import com.stabilise.world.provider.HostProvider.PlayerBundle;
+import com.stabilise.world.provider.HostProvider.PlayerData;
 import com.stabilise.world.provider.WorldProvider;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
@@ -754,7 +756,6 @@ public interface World extends Checkable {
 	 * @return An array of created worlds.
 	 */
 	public static WorldInfo[] getWorldsList() {
-		IOUtil.createDir(Resources.WORLDS_DIR);
 		FileHandle[] worldDirs = Resources.WORLDS_DIR.list();
 		
 		List<WorldInfo> worlds = new ArrayList<>(worldDirs.length);
@@ -814,13 +815,8 @@ public interface World extends Checkable {
 	 */
 	public static class WorldBuilder {
 		
-		/** The directory of the world. Null if client-only. Can be null if
-		 * worldInfo is set directly; used to construct worldInfo otherwise. */
-		private FileHandle worldDir = null;
 		/** The info of the world. Null if client-only. */
 		private WorldInfo worldInfo = null;
-		/** The WorldProvider we'll be ultimately returning. */
-		private WorldProvider<?> provider = null;
 		/** The data of the integrated player. Null if server only. */
 		private CharacterData integratedPlayer = null;
 		/** Profiler to use for the world. May be null. */
@@ -854,7 +850,8 @@ public interface World extends Checkable {
 		/**
 		 * Sets the world.
 		 * 
-		 * @param worldInfo The world's info.
+		 * @param worldInfo The world's info. This may or may not have already
+		 * been loaded.
 		 * 
 		 * @return This WorldBuilder.
 		 * @throws NullPointerException if {@code worldInfo} is {@code null}.
@@ -866,14 +863,35 @@ public interface World extends Checkable {
 			if(this.worldInfo != null)
 				throw new IllegalStateException("World already set!");
 			this.worldInfo = Objects.requireNonNull(worldInfo);
-			worldDir = worldInfo.getWorldDir();
 			return this;
 		}
 		
+		/**
+		 * Sets the integrated player.
+		 * 
+		 * @param characterName The name of the character.
+		 * 
+		 * @return This WorldBuilder.
+		 * @throws NullPointerException if {@code characterName} is {@code
+		 * null}.
+		 * @throws IllegalStateException if this builder has already built the
+		 * world provider, or the integrated player has already been set.
+		 */
 		public WorldBuilder setPlayer(String characterName) {
 			return setPlayer(new CharacterData(Objects.requireNonNull(characterName)));
 		}
 		
+		/**
+		 * Sets the integrated player.
+		 * 
+		 * @param character The character's data. This may or may not be
+		 * already loaded.
+		 * 
+		 * @return This WorldBuilder.
+		 * @throws NullPointerException if {@code character} is {@code null}.
+		 * @throws IllegalStateException if this builder has already built the
+		 * world provider, or the integrated player has already been set.
+		 */
 		public WorldBuilder setPlayer(CharacterData character) {
 			checkState();
 			if(integratedPlayer != null)
@@ -882,22 +900,49 @@ public interface World extends Checkable {
 			return this;
 		}
 		
+		/**
+		 * Sets the profiler to use to profile each world.
+		 * 
+		 * @return This WorldBuilder.
+		 * @throws NullPointerException if {@code profiler} is {@code null}.
+		 * @throws IllegalStateException if this builder has already built the
+		 * world provider, or the profiler has already been set.
+		 */
 		public WorldBuilder setProfiler(Profiler profiler) {
 			checkState();
 			if(this.profiler != null)
 				throw new IllegalStateException("Profiler already set!");
-			this.profiler = profiler;
+			this.profiler = Objects.requireNonNull(profiler);
 			return this;
 		}
 		
 		public TrackableFuture<WorldBundle> build() {
 			checkState();
-			final TaskTracker tracker = new TaskTracker("Loading", 1);
+			building = true;
+			final TaskTracker tracker = new TaskTracker("Loading world data", 4);
+			final WorldInfo worldInfo = this.worldInfo;
+			final CharacterData integratedPlayer = this.integratedPlayer;
+			final Profiler profiler = this.profiler;
 			Callable<WorldBundle> callable = new Callable<WorldBundle>() {
 				
 				@Override
 				public WorldBundle call() throws Exception {
-					return null;
+					if(worldInfo != null)
+						worldInfo.load();
+					tracker.next("Loading player data");
+					if(integratedPlayer != null)
+						integratedPlayer.load();
+					tracker.next("Constructing world");
+					
+					HostProvider provider = new HostProvider(worldInfo, profiler);
+					PlayerBundle player = provider.addPlayer(integratedPlayer, true);
+					HostWorld starterDim = player.world;
+					tracker.next("Loading dimension " + starterDim.getDimensionName());
+					while(!starterDim.isLoaded()) // 
+						Thread.sleep(20L);
+					tracker.next("All is done!");
+					return new WorldBundle(provider, starterDim, player.playerEntity,
+							player.playerData);
 				}
 				
 			};
@@ -938,10 +983,26 @@ public interface World extends Checkable {
 			return tracker.partsCompleted();
 		}
 		
+		@Override
+		public String toString() {
+			return tracker.toString();
+		}
+		
 	}
 	
 	public static class WorldBundle {
+		public final HostProvider provider;
+		public final HostWorld world;
+		public final EntityMob playerEntity;
+		public final PlayerData playerData;
 		
+		private WorldBundle(HostProvider provider, HostWorld world,
+				EntityMob playerEntity, PlayerData playerData) {
+			this.provider = provider;
+			this.world = world;
+			this.playerEntity = playerEntity;
+			this.playerData = playerData;
+		}
 	}
 	
 }

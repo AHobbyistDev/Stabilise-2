@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import com.stabilise.network.P255Ping;
 import com.stabilise.network.Packet;
 import com.stabilise.network.protocol.handshake.*;
 import com.stabilise.util.Log;
@@ -39,11 +40,13 @@ public enum Protocol {
 	/** Registry of packets sent by the server to the client (i.e. clientbound
 	 * packets). */
 	private final InstantiationRegistry<Packet> serverPackets =
-			new InstantiationRegistry<>(UBYTE_MAX_VALUE, THROW_EXCEPTION, Packet.class);
+			new InstantiationRegistry<>(MAX_PACKET_ID - RESERVED_IDS,
+					THROW_EXCEPTION, Packet.class);
 	/** Registry of packets sent by the client to the server (i.e. serverbound
 	 * packets). */
 	private final InstantiationRegistry<Packet> clientPackets =
-			new InstantiationRegistry<>(UBYTE_MAX_VALUE, THROW_EXCEPTION, Packet.class);
+			new InstantiationRegistry<>(MAX_PACKET_ID - RESERVED_IDS,
+					THROW_EXCEPTION, Packet.class);
 	
 	
 	/**
@@ -52,9 +55,7 @@ public enum Protocol {
 	 * @see InstantiationRegistry#register(int, Class, Class...)
 	 */
 	protected void registerServerPacket(int id, Class<? extends Packet> packetClass) {
-		if(id > MAX_PACKET_ID)
-			throw new IllegalArgumentException("Packet ID for " + packetClass.getSimpleName()
-					+ " (" + id + ") too large!");
+		checkID(id, packetClass);
 		serverPackets.register(id, packetClass);
 	}
 	
@@ -64,10 +65,15 @@ public enum Protocol {
 	 * @see InstantiationRegistry#register(int, Class, Class...)
 	 */
 	protected void registerClientPacket(int id, Class<? extends Packet> packetClass) {
-		if(id > MAX_PACKET_ID)
-			throw new IllegalArgumentException("Packet ID for " + packetClass.getSimpleName()
-					+ " (" + id + ") too large!");
+		checkID(id, packetClass);
 		clientPackets.register(id, packetClass);
+	}
+	
+	private void checkID(int id, Class<? extends Packet> packetClass) {
+		if(id < 0 || id > MAX_PACKET_ID)
+			throw new IllegalArgumentException("Packet ID for "
+					+ packetClass.getSimpleName() + " (" + id + ") too "
+					+ (id > MAX_PACKET_ID ? "large" : "small") + "!");
 	}
 	
 	/**
@@ -163,17 +169,35 @@ public enum Protocol {
 	//--------------=====Static Stuff=====--------------
 	//--------------------==========--------------------
 	
+	/** Largest allowable protocol-specific packet ID. */
 	public static final int MAX_PACKET_ID = Maths.UBYTE_MAX_VALUE;
+	/** The number of packet IDs reserved for universal bi-directional
+	 * protocol-inspecific packets. */
+	private static final int RESERVED_IDS = 8;
 	
 	/** Maps Packet Class -> Packet ID for all packets across all protocols. */
 	private static final Map<Class<? extends Packet>, Integer> PACKET_IDS =
 			new IdentityHashMap<>();
+	/** Registry of packets sent by the server to the client (i.e. clientbound
+	 * packets). */
+	private static final InstantiationRegistry<Packet> RESERVED_PACKETS =
+			new InstantiationRegistry<>(RESERVED_IDS, THROW_EXCEPTION, Packet.class);
 	
 	static {
+		registerReservedPacket(255, P255Ping.class);
 		for(Protocol protocol : Protocol.values()) {
 			checkPackets(protocol, protocol.clientPackets);
 			checkPackets(protocol, protocol.serverPackets);
 		}
+	}
+	
+	private static void registerReservedPacket(int id, Class<? extends Packet> packetClass) {
+		if(id > MAX_PACKET_ID || id <= MAX_PACKET_ID - RESERVED_IDS)
+			throw new IllegalArgumentException("Invalid id for a reserved packet ("
+					+ id + ") - must be in range " + (MAX_PACKET_ID - RESERVED_IDS + 1)
+					+ " - " + MAX_PACKET_ID + " (inclusive).");
+		RESERVED_PACKETS.register(id, packetClass);
+		PACKET_IDS.put(packetClass, Integer.valueOf(id));
 	}
 	
 	private static void checkPackets(Protocol protocol, InstantiationRegistry<Packet> registry) {
