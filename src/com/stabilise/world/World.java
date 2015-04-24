@@ -11,6 +11,7 @@ import java.util.concurrent.FutureTask;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
+import com.stabilise.core.GameClient;
 import com.stabilise.core.Resources;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
@@ -819,6 +820,9 @@ public interface World extends Checkable {
 		private WorldInfo worldInfo = null;
 		/** The data of the integrated player. Null if server only. */
 		private CharacterData integratedPlayer = null;
+		/** The GameClient through which to communicate to the host server.
+		 * Null unless multiplayer client. */
+		private GameClient client = null;
 		/** Profiler to use for the world. May be null. */
 		private Profiler profiler = null;
 		
@@ -834,21 +838,26 @@ public interface World extends Checkable {
 		}
 		
 		/**
-		 * Sets the world.
+		 * Sets the world. This will throw an exception if the client has
+		 * already been set via {@link #setClient(GameClient)}, as a client
+		 * does not know the info of the world it is visiting.
 		 * 
 		 * @param worldName The world's filesystem name.
 		 * 
 		 * @return This WorldBuilder.
 		 * @throws NullPointerException if {@code worldName} is {@code null}.
 		 * @throws IllegalStateException if this builder has already built the
-		 * world provider, or the world has already been set.
+		 * world provider, or the world has already been set, or the client has
+		 * already been set.
 		 */
 		public WorldBuilder setWorld(String worldName) {
 			return setWorld(new WorldInfo(Objects.requireNonNull(worldName)));
 		}
 		
 		/**
-		 * Sets the world.
+		 * Sets the world. This will throw an exception if the client has
+		 * already been set via {@link #setClient(GameClient)}, as a client
+		 * does not know the info of the world it is visiting.
 		 * 
 		 * @param worldInfo The world's info. This may or may not have already
 		 * been loaded.
@@ -856,12 +865,15 @@ public interface World extends Checkable {
 		 * @return This WorldBuilder.
 		 * @throws NullPointerException if {@code worldInfo} is {@code null}.
 		 * @throws IllegalStateException if this builder has already built the
-		 * world provider, or the world has already been set.
+		 * world provider, or the world has already been set, or the client has
+		 * already been set.
 		 */
 		public WorldBuilder setWorld(WorldInfo worldInfo) {
 			checkState();
 			if(this.worldInfo != null)
 				throw new IllegalStateException("World already set!");
+			if(client != null)
+				throw new IllegalStateException("Cannot set both client and world");
 			this.worldInfo = Objects.requireNonNull(worldInfo);
 			return this;
 		}
@@ -901,6 +913,32 @@ public interface World extends Checkable {
 		}
 		
 		/**
+		 * Sets the client with which to communicate with the server that is
+		 * hosting the world. This will throw an exception if the world has
+		 * already been set via either {@link #setWorld(String)} or {@link
+		 * #setWorld(WorldInfo)}, as a client does not know the info of the
+		 * world it is visiting.
+		 * 
+		 * @param client The client.
+		 * 
+		 * @return This WorldBuilder.
+		 * @throws NullPointerException if {@code client} is {@code null}.
+		 * @throws IllegalStateException if this builder has already built the
+		 * world provider, or the client has already been set, or the world
+		 * has been set.
+		 */
+		public WorldBuilder setClient(GameClient client) {
+			checkState();
+			if(this.client != null)
+				throw new IllegalStateException("Client already set!");
+			if(worldInfo != null)
+				throw new IllegalStateException("Cannot set both client and world"
+						+ " info!");
+			this.client = Objects.requireNonNull(client);
+			return this;
+		}
+		
+		/**
 		 * Sets the profiler to use to profile each world.
 		 * 
 		 * @return This WorldBuilder.
@@ -916,36 +954,75 @@ public interface World extends Checkable {
 			return this;
 		}
 		
-		public TrackableFuture<WorldBundle> build() {
+		/**
+		 * Builds a HostProvider, and optionally, if an integrated player has
+		 * been set, that player's PlayerData, entity, and initial world.
+		 * 
+		 * @throws IllegalStateException if the world has already been built,
+		 * or the world has not been set.
+		 */
+		public TrackableFuture<WorldBundle> buildHost() {
+			return build(true);
+		}
+		
+		/**
+		 * Builds a ClientProvider, and the integrated player's entity and
+		 * initial world.
+		 * 
+		 * @throws IllegalStateException if the world has already been built,
+		 * or either the player or client have not been set.
+		 */
+		public TrackableFuture<WorldBundle> buildClient() {
+			return build(false);
+		}
+		
+		private TrackableFuture<WorldBundle> build(final boolean buildHost) {
 			checkState();
 			building = true;
-			final TaskTracker tracker = new TaskTracker("Loading world data", 4);
-			final WorldInfo worldInfo = this.worldInfo;
-			final CharacterData integratedPlayer = this.integratedPlayer;
-			final Profiler profiler = this.profiler;
+			
+			// Make sure we've set the right parameters for the requested
+			// build before we begin building.
+			if(buildHost) {
+				if(worldInfo == null)
+					throw new IllegalStateException("Cannot create a host "
+							+ "world without setting the world!");
+			} else {
+				if(client == null)
+					throw new IllegalStateException("Cannot create a client "
+							+ "world without setting the game client!");
+				if(integratedPlayer == null)
+					throw new IllegalStateException("Cannot create a client "
+							+ "world without setting the player!");
+			}
+			
+			
+			final TaskTracker tracker = new TaskTracker("Loading", buildHost ? 4 : 5);
+			
 			Callable<WorldBundle> callable = new Callable<WorldBundle>() {
-				
 				@Override
 				public WorldBundle call() throws Exception {
-					if(worldInfo != null)
-						worldInfo.load();
 					tracker.next("Loading player data");
-					if(integratedPlayer != null)
+					if(integratedPlayer != null) // host or client
 						integratedPlayer.load();
 					tracker.next("Constructing world");
 					
-					HostProvider provider = new HostProvider(worldInfo, profiler);
-					PlayerBundle player = provider.addPlayer(integratedPlayer, true);
-					HostWorld starterDim = player.world;
-					tracker.next("Loading dimension " + starterDim.getDimensionName());
-					while(!starterDim.isLoaded()) // 
-						Thread.sleep(20L);
-					tracker.next("All is done!");
-					return new WorldBundle(provider, starterDim, player.playerEntity,
-							player.playerData);
+					if(buildHost) {
+						worldInfo.load();
+						HostProvider provider = new HostProvider(worldInfo, profiler);
+						PlayerBundle player = provider.addPlayer(integratedPlayer, true);
+						HostWorld starterDim = player.world;
+						tracker.next("Loading dimension " + starterDim.getDimensionName());
+						while(!starterDim.isLoaded()) // 
+							Thread.sleep(10L);
+						tracker.next("All is done!");
+						return new WorldBundle(provider, starterDim,
+								player.playerEntity, player.playerData);
+					} else {
+						return new WorldBundle(null, null, null, null);
+					}
 				}
-				
 			};
+			
 			task = new WorldFuture(callable, tracker);
 			builderThread = new Thread(task);
 			builderThread.setName("WorldBuilderThread");
@@ -990,13 +1067,30 @@ public interface World extends Checkable {
 		
 	}
 	
+	/**
+	 * Encapsulates the items which may be built and returned by a {@link
+	 * World#builder() WorldBuilder}.
+	 */
 	public static class WorldBundle {
-		public final HostProvider provider;
-		public final HostWorld world;
+		
+		/** The world provider. This should be cast to a {@link HostProvider}
+		 * if a host was built, or a {@link ClientProvider} if a client was
+		 * built. */
+		public final WorldProvider<?> provider;
+		/** The world in which the integrated player has been placed. This
+		 * should be cast to a {@link HostWorld} if a host was built, and
+		 * to a {@link ClientWorld} if a client was built. This is {@code null}
+		 * if the world was built without setting an integrated player (i.e. if
+		 * a server was constructed). */
+		public final AbstractWorld world;
+		/** The player entity. This is {@code null} if no player was
+		 * specified. */
 		public final EntityMob playerEntity;
+		/** The world-specific player data. This is non-null iff a host was
+		 * built with an integrated player specified. */
 		public final PlayerData playerData;
 		
-		private WorldBundle(HostProvider provider, HostWorld world,
+		protected WorldBundle(WorldProvider<?> provider, AbstractWorld world,
 				EntityMob playerEntity, PlayerData playerData) {
 			this.provider = provider;
 			this.world = world;

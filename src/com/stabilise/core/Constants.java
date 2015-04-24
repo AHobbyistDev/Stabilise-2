@@ -61,6 +61,7 @@ public class Constants {
 	/** The maximum number of slices which should theoretically be able to be
 	 * loaded about a player at any given time. */
 	public static final int MAX_LOADED_SLICES =
+			// Manually square this to make it a compile-time constant.
 			(1 + 2 * (LOADED_SLICE_RADIUS + LOADED_SLICE_BUFFER)) *
 			(1 + 2 * (LOADED_SLICE_RADIUS + LOADED_SLICE_BUFFER));
 	/** How many ticks after coming out of use that a region should unload. */

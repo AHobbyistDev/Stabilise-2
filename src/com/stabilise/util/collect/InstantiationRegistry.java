@@ -157,7 +157,7 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 */
 	public <S extends E> void register(int id, Class<S> objClass, Factory<S> factory) {
 		checkLock();
-		if(factoryArr.get(id) != null && dupePolicy.handle(log, "Duplicate id " + id))
+		if(factoryArr.getSemiSafe(id) != null && dupePolicy.handle(log, "Duplicate id " + id))
 			return;
 		if(idMap.containsKey(objClass) && dupePolicy.handle(log, "Duplicate class " + objClass.getSimpleName()))
 			return;

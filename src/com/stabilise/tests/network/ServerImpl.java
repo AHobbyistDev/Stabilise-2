@@ -16,6 +16,9 @@ import com.stabilise.network.protocol.handshake.S000VersionInfo;
 
 public class ServerImpl extends Server implements IServerHandshake {
 	
+	volatile TCPConnection client;
+	int ticks = 0;
+	
 	public ServerImpl() {
 		super(Constants.TICKS_PER_SECOND);
 	}
@@ -25,11 +28,24 @@ public class ServerImpl extends Server implements IServerHandshake {
 		return new ServerSocket(DEFAULT_PORT, 4, InetAddress.getLocalHost());
 	}
 	
-	public void doUpdate() {}
+	public void doUpdate() {
+		if(++ticks % 60 == 0 && client != null)
+			log.postInfo("Ping to client: " + client.getPing());
+	}
+	
+	@Override
+	protected void onClientConnect(TCPConnection con) {
+		client = con;
+	}
+	
+	@Override
+	protected void onClientDisconnect(TCPConnection con) {
+		shutdown();
+	}
 	
 	@Override
 	public void handleVersionInfo(C000VersionInfo packet, TCPConnection con) {
-		log.postInfo("Got info from client - " + packet.isCompatible());
+		log.postInfo("Got info from client... is compatible: " + packet.isCompatible());
 		con.sendPacket(new S000VersionInfo().setVersionInfo());
 	}
 

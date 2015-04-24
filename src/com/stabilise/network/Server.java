@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -172,7 +173,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 		if(state.compareAndSet(STATE_UNSTARTED, STATE_BOOTING))
 			new Thread(this, "ServerThread").start();
 		else
-			throw new IllegalArgumentException("Server is already running!");
+			throw new IllegalStateException("Server is already running!");
 	}
 	
 	/**
@@ -243,9 +244,29 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	 * Performs an update tick.
 	 */
 	@Override
+	@UserThread("ServerThread/MainThread")
 	public final void update() {
 		if(!checkShutdown()) {
-			handleIncomingPackets();
+			synchronized(connections) {
+				Iterator<TCPConnection> i = connections.iterator();
+				Packet p;
+				while(i.hasNext()) {
+					TCPConnection con = i.next();
+					
+					// Handle incoming packets
+					while((p = con.getPacket()) != null)
+						p.handle(this, con);
+					
+					// Update the connection and then remove it if the client
+					// has been disconnected.
+					con.update();
+					if(!con.isActive()) {
+						con.closeConnection();
+						onClientDisconnect(con);
+						i.remove();
+					}
+				}
+			}
 			doUpdate();
 		}
 	}
@@ -256,6 +277,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	 * 
 	 * <p>This method does nothing by default.
 	 */
+	@UserThread("ServerThread/MainThread")
 	protected void doUpdate() {}
 	
 	/**
@@ -276,32 +298,21 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	}
 	
 	/**
-	 * Handles any queued incoming packets.
-	 */
-	private void handleIncomingPackets() {
-		Packet p;
-		synchronized(connections) {
-			for(TCPConnection con : connections)
-				while((p = con.getPacket()) != null)
-					p.handle(this, con);
-		}
-	}
-	
-	/**
 	 * {@inheritDoc}
 	 * 
 	 * <p>The default implementation does nothing and may be optionally
 	 * overridden.
 	 */
 	@Override
+	@UserThread("ServerThread/MainThread")
 	public void render() {
 		// nothing to see here, move along
 	}
 	
 	/**
-	 * Requests for the server to shut down through its execution thread.
+	 * Requests for the server to shut down.
 	 */
-	public void requestShutdown() {
+	public final void requestShutdown() {
 		state.compareAndSet(STATE_ACTIVE, STATE_CLOSE_REQUESTED);
 	}
 	
@@ -337,6 +348,8 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 			log.postWarning("Interrupted while waiting for client listener "
 					+ "thread to join");
 		}
+		
+		log.postInfo("Shut down.");
 		
 		synchronized(state) {
 			state.set(STATE_TERMINATED);
@@ -380,10 +393,12 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	 * Adds a client connection through the specified client socket.
 	 */
 	private void addConnection(Socket socket) {
-		TCPConnection con;
-		
 		try {
-			con = clientFactory.create(socket);
+			TCPConnection con = clientFactory.create(socket);
+			onClientConnect(con);
+			connections.add(con);
+			
+			log.postInfo("Connected to client on " + socket.getLocalSocketAddress());
 		} catch(IOException e) {
 			log.postSevere("Error creating connection (" + e.getMessage() + ")");
 			try {
@@ -393,11 +408,6 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 			}
 			return;
 		}
-		
-		onConnectionAdd(con);
-		connections.add(con);
-		
-		log.postInfo("Connected to client on " + socket.getLocalSocketAddress());
 	}
 	
 	/**
@@ -408,7 +418,18 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	 * <p>The default implementation does nothing.
 	 */
 	@UserThread("ClientListenerThread")
-	protected void onConnectionAdd(TCPConnection con) {}
+	protected void onClientConnect(TCPConnection con) {}
+	
+	/**
+	 * This method is invoked when a client disconnects from this server from
+	 * within {@link #update()}, after the connection is {@link
+	 * TCPConnection#closeConnection() closed}, and before connection is
+	 * removed from {@link #connections the list of connections}.
+	 * 
+	 * <p>The default implementation does nothing.
+	 */
+	@UserThread("ServerThread/MainThread")
+	protected void onClientDisconnect(TCPConnection con) {}
 	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------

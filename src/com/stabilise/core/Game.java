@@ -60,8 +60,8 @@ public class Game implements Controllable, InputProcessor {
 	 * @throws NullPointerException if {@code worldBundle} is {@code null}.
 	 */
 	public Game(WorldBundle worldBundle) {
-		this.provider = worldBundle.provider;
-		this.world = worldBundle.world;
+		this.provider = (HostProvider)worldBundle.provider;
+		this.world = (HostWorld)worldBundle.world;
 		this.playerData = worldBundle.playerData;
 		this.player = worldBundle.playerEntity;
 		

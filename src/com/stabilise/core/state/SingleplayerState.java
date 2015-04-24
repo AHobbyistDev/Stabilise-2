@@ -14,9 +14,6 @@ import com.stabilise.world.World.WorldBundle;
  */
 public class SingleplayerState implements State {
 	
-	/** The name of the world being played. */
-	public String worldName;
-	
 	/** The game. */
 	public Game game;
 	
@@ -62,6 +59,7 @@ public class SingleplayerState implements State {
 	@Override
 	public void predispose() {
 		game.close();
+		profiler.disable();
 	}
 	
 	@Override
@@ -70,8 +68,6 @@ public class SingleplayerState implements State {
 		
 		renderer.unloadResources();
 		renderer = null;
-		
-		profiler.disable();
 		
 		// Try to garbage collect everything which has been unloaded
 		//game = null;		// <-- No-can-do, crashes in update() at if(!game.running)

@@ -12,6 +12,7 @@ import com.stabilise.util.collect.Registry;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.AbstractWorld;
+import com.stabilise.world.ClientWorld;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
@@ -65,6 +66,19 @@ public abstract class Dimension {
 	 */
 	public HostWorld createHost(WorldProvider<? extends AbstractWorld> provider) {
 		return new HostWorld(provider, this);
+	}
+	
+	/**
+	 * Creates the ClientWorld object upon which this dimension will be used.
+	 * Subclasses may override this to return a custom implementation of
+	 * ClientWorld to implement dimension-specific features.
+	 * 
+	 * @param provider The world provider.
+	 * 
+	 * @throws NullPointerException if {@code provider} is {@code null}.
+	 */
+	public ClientWorld createClient(WorldProvider<AbstractWorld> provider) {
+		return new ClientWorld(provider, this);
 	}
 	
 	/**
@@ -130,7 +144,9 @@ public abstract class Dimension {
 	//--------------------==========--------------------
 	
 	/**
-	 * Gets an instance of a Dimension.
+	 * Gets an instance of a Dimension. This method should be used to get the
+	 * Dimension object for a host world. For a non-host (i.e. client-only
+	 * variant), use {@link #getDimension(String)} instead.
 	 * 
 	 * @param worldInfo The WorldInfo object of the dimension's parent world.
 	 * @param dimName The name of the dimension.
@@ -145,6 +161,25 @@ public abstract class Dimension {
 	 */
 	public static Dimension getDimension(WorldInfo worldInfo, String dimName) {
 		return getDimension(new Info(worldInfo, dimName));
+	}
+	
+	/**
+	 * Gets an instance of a Dimension. This method should be used to get the
+	 * Dimension object for a non-host (i.e. client-only) world. For a host
+	 * variant, use {@link #getDimension(WorldInfo, String)} instead.
+	 * 
+	 * @param dimName The name of the dimension.
+	 * 
+	 * @return The Dimension, or {@code null} if there is no such dimension
+	 * with the specified name.
+	 * @throws NullPointerException if {@code name} is {@code null}.
+	 * @throws IllegalStateException if the dimensions have not yet been
+	 * {@link #registerDimensions() registered}.
+	 * @throws RuntimeException if the Dimension object could not be
+	 * instantiated.
+	 */
+	public static Dimension getDimension(String dimName) {
+		return getDimension(new Info(dimName));
 	}
 	
 	/**
@@ -296,6 +331,16 @@ public abstract class Dimension {
 		}
 		
 		/**
+		 * Dimension info for a client view of some dimension
+		 * @throws NullPointerException if name is null
+		 */
+		private Info(String name) {
+			this.name = Objects.requireNonNull(name);
+			privateDimension = false;
+			dir = null;
+		}
+		
+		/**
 		 * Dimension info for a character's private dimension
 		 * @throws NullPointerException if either arg is null
 		 */
@@ -352,6 +397,9 @@ public abstract class Dimension {
 		 * @return This DimensionInfo's filesystem location.
 		 */
 		public FileHandle getFile() {
+			if(dir == null)
+				throw new IllegalStateException("Cannot get the file for a "
+						+ "client's view of a dimension!");
 			return dir.child(World.FILE_INFO);
 		}
 		

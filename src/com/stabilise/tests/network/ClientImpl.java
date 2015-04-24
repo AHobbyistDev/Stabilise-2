@@ -1,97 +1,52 @@
 package com.stabilise.tests.network;
 
-import java.io.*;
 import java.net.*;
 
 import static com.stabilise.core.Constants.DEFAULT_PORT;
 
-import com.stabilise.network.Packet;
+import com.stabilise.network.Client;
 import com.stabilise.network.TCPConnection;
 import com.stabilise.network.protocol.handshake.C000VersionInfo;
 import com.stabilise.network.protocol.handshake.C001Disconnect;
+import com.stabilise.network.protocol.handshake.IClientHandshake;
 import com.stabilise.network.protocol.handshake.S000VersionInfo;
-import com.stabilise.util.Log;
 
-public class ClientImpl {
+public class ClientImpl extends Client implements IClientHandshake {
 	
-	private Socket socket;
-	public TCPConnection connection;
-	
-	private Log log = Log.getAgent("CLIENT");
+	private TCPConnection con;
+	private int ticks = 0;
 	
 	public ClientImpl() {
-		try {
-			log.postInfo("Initiating client...");
-			socket = new Socket(InetAddress.getLocalHost(), DEFAULT_PORT);
-			
-			connection = new TCPConnection(socket, false);
-			
-			log.postInfo("Connected to server on " + socket.getLocalSocketAddress());
-			log.postInfo("Sending version info...");
-			
-			connection.sendPacket(new C000VersionInfo().setVersionInfo());
-		} catch (IOException e) {
-			log.postSevere("Error creating client-server connection!");
-			if(socket != null) {
-				if(connection != null) {
-					connection.closeConnection();
-				} else {
-					try {
-						socket.close();
-					} catch (IOException e1) { 
-						// asdfghjkl
-					}
-				}
-			}
-			
-			close();
-			
-			return;
+		super(getLocalHost(), DEFAULT_PORT);
+	}
+	
+	@Override
+	protected void onConnect() {
+		con = getConnection();
+		con.sendPacket(new C000VersionInfo().setVersionInfo());
+	}
+	
+	@Override
+	public void doUpdate() {
+		if(ticks++ % 60 == 0)
+			log.postInfo("Ping: " + con.getPing());
+		if(ticks % 600 == 0) {
+			con.sendPacket(new C001Disconnect());
+			disconnect();
 		}
 	}
 	
-	/**
-	 * The main client update method - this should be called by the main game
-	 * update loop.
-	 */
-	public void update() {
+	@Override
+	public void handleVersionInfo(S000VersionInfo packet) {
+		log.postInfo("Got info from server... is compatible: " + packet.isCompatible());
+	}
+	
+	private static InetAddress getLocalHost() {
 		try {
-			Packet packet;
-			while((packet = connection.getPacket()) != null)
-				handlePacket(packet);
-		} catch(Exception e) {
-			log.postSevere("ClientImpl encountered error!", e);
-			close();
+			return InetAddress.getLocalHost();
+		} catch (UnknownHostException e) {
+			throw new RuntimeException(e);
 		}
-	}
-	
-	/**
-	 * Closes the connection with the server.
-	 */
-	public void close() {
-		log.postInfo("Closing client...");
-		if(connection != null)
-			connection.closeConnection();
-	}
-	
-	/**
-	 * Handles all received packets by redirecting them to their appropriate
-	 * handler method.
-	 * 
-	 * @param packet The packet to handle.
-	 */
-	private void handlePacket(Packet packet) {
-		if(packet.getClass() == S000VersionInfo.class)
-			handleServerInfo((S000VersionInfo)packet);
-		else
-			log.postWarning("Unrecognised packet " + packet);
-	}
-	
-	private void handleServerInfo(S000VersionInfo packet) {
-		log.postInfo("Got info from server - " + packet.isCompatible());
-		log.postInfo("Sending disconnect...");
-		connection.sendPacket(new C001Disconnect());
-		close();
 	}
 	
 }

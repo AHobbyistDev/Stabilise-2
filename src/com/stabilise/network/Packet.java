@@ -26,6 +26,14 @@ public abstract class Packet implements Sendable {
 	};
 	
 	/**
+	 * Implement this interface to indicate that a packet of a particular class
+	 * is 'important' - when queued for sending, important packets are added to
+	 * the head of the packet queue rather than the tail.
+	 */
+	public static interface Important {}
+	
+	
+	/**
 	 * Handles this packet - that is, performs some action in response to
 	 * receiving this packet.
 	 * 
@@ -44,6 +52,13 @@ public abstract class Packet implements Sendable {
 	 */
 	public final int getID() {
 		return Protocol.getPacketID(this);
+	}
+	
+	/**
+	 * Returns true if this is an {@link Important} packet.
+	 */
+	public final boolean isImportant() {
+		return this instanceof Important;
 	}
 	
 	@Override

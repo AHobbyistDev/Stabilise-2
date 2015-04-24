@@ -1,7 +1,6 @@
 package com.stabilise.network.protocol;
 
 import static com.stabilise.util.collect.DuplicatePolicy.THROW_EXCEPTION;
-import static com.stabilise.util.maths.Maths.UBYTE_MAX_VALUE;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -40,12 +39,12 @@ public enum Protocol {
 	/** Registry of packets sent by the server to the client (i.e. clientbound
 	 * packets). */
 	private final InstantiationRegistry<Packet> serverPackets =
-			new InstantiationRegistry<>(MAX_PACKET_ID - RESERVED_IDS,
+			new InstantiationRegistry<>(MAX_NORMAL_PACKET_ID,
 					THROW_EXCEPTION, Packet.class);
 	/** Registry of packets sent by the client to the server (i.e. serverbound
 	 * packets). */
 	private final InstantiationRegistry<Packet> clientPackets =
-			new InstantiationRegistry<>(MAX_PACKET_ID - RESERVED_IDS,
+			new InstantiationRegistry<>(MAX_NORMAL_PACKET_ID,
 					THROW_EXCEPTION, Packet.class);
 	
 	
@@ -70,10 +69,10 @@ public enum Protocol {
 	}
 	
 	private void checkID(int id, Class<? extends Packet> packetClass) {
-		if(id < 0 || id > MAX_PACKET_ID)
+		if(id < 0 || id > MAX_NORMAL_PACKET_ID)
 			throw new IllegalArgumentException("Packet ID for "
 					+ packetClass.getSimpleName() + " (" + id + ") too "
-					+ (id > MAX_PACKET_ID ? "large" : "small") + "!");
+					+ (id > MAX_NORMAL_PACKET_ID ? "large" : "small") + "!");
 	}
 	
 	/**
@@ -93,13 +92,16 @@ public enum Protocol {
 	@UserThread("ReadThread")
 	private Packet createPacket(boolean server, int id) {
 		try {
+			if(id > MAX_NORMAL_PACKET_ID)
+				return RESERVED_PACKETS.instantiate(id);
 			return server
 					? clientPackets.instantiate(id)
 					: serverPackets.instantiate(id);
 		} catch(RuntimeException e) {
-			throw new FaultyPacketRegistrationException((server ? "Serverbound" : "Clientbound")
-					+ " packet of ID " + id
-					+ " could not be instantiated! (" + e.getMessage() + ")");
+			throw new FaultyPacketRegistrationException(
+					  (server ? "Serverbound" : "Clientbound") + " packet of ID "
+					+ id + " could not be instantiated! (" + e.getMessage()
+					+ ")");
 		}
 	}
 	
@@ -153,7 +155,8 @@ public enum Protocol {
 	 * @throws NullPointerException if {@code packet} is {@code null}.
 	 */
 	public boolean isServerPacket(Packet packet) {
-		return serverPackets.getID(packet.getClass()) != -1;
+		return serverPackets.getID(packet.getClass()) != -1
+				|| RESERVED_PACKETS.getID(packet.getClass()) != -1;
 	}
 	
 	/**
@@ -162,39 +165,51 @@ public enum Protocol {
 	 * @throws NullPointerException if {@code packet} is {@code null}.
 	 */
 	public boolean isClientPacket(Packet packet) {
-		return clientPackets.getID(packet.getClass()) != -1;
+		return clientPackets.getID(packet.getClass()) != -1
+				|| RESERVED_PACKETS.getID(packet.getClass()) != -1;
 	}
 	
 	//--------------------==========--------------------
 	//--------------=====Static Stuff=====--------------
 	//--------------------==========--------------------
 	
-	/** Largest allowable protocol-specific packet ID. */
+	
+	/** Largest allowable packet ID. */
 	public static final int MAX_PACKET_ID = Maths.UBYTE_MAX_VALUE;
-	/** The number of packet IDs reserved for universal bi-directional
-	 * protocol-inspecific packets. */
+	/** The number of reserved IDs. */
 	private static final int RESERVED_IDS = 8;
+	/** The largest allowable ID a protocol-specific packet may have. */
+	private static final int MAX_NORMAL_PACKET_ID = MAX_PACKET_ID - RESERVED_IDS;
 	
 	/** Maps Packet Class -> Packet ID for all packets across all protocols. */
 	private static final Map<Class<? extends Packet>, Integer> PACKET_IDS =
 			new IdentityHashMap<>();
-	/** Registry of packets sent by the server to the client (i.e. clientbound
-	 * packets). */
+	/** Registry of 'reserved packets' - i.e. packets which can be sent by
+	 * any protocol, and by both the client and server. */
 	private static final InstantiationRegistry<Packet> RESERVED_PACKETS =
-			new InstantiationRegistry<>(RESERVED_IDS, THROW_EXCEPTION, Packet.class);
+			new InstantiationRegistry<>(MAX_PACKET_ID - MAX_NORMAL_PACKET_ID,
+					THROW_EXCEPTION, Packet.class);
 	
 	static {
 		registerReservedPacket(255, P255Ping.class);
+		RESERVED_PACKETS.lock();
 		for(Protocol protocol : Protocol.values()) {
 			checkPackets(protocol, protocol.clientPackets);
 			checkPackets(protocol, protocol.serverPackets);
 		}
 	}
 	
+	/**
+	 * Registers a reserved/universal packet.
+	 * 
+	 * @param id The ID, between {@link #MAX_NORMAL_PACKET_ID} (exclusive), and
+	 * {@link #MAX_PACKET_ID} (inclusive).
+	 * @param packetClass The class of the packet.
+	 */
 	private static void registerReservedPacket(int id, Class<? extends Packet> packetClass) {
-		if(id > MAX_PACKET_ID || id <= MAX_PACKET_ID - RESERVED_IDS)
+		if(id > MAX_PACKET_ID || id <= MAX_NORMAL_PACKET_ID)
 			throw new IllegalArgumentException("Invalid id for a reserved packet ("
-					+ id + ") - must be in range " + (MAX_PACKET_ID - RESERVED_IDS + 1)
+					+ id + ") - must be in range " + (MAX_NORMAL_PACKET_ID + 1)
 					+ " - " + MAX_PACKET_ID + " (inclusive).");
 		RESERVED_PACKETS.register(id, packetClass);
 		PACKET_IDS.put(packetClass, Integer.valueOf(id));

@@ -30,7 +30,8 @@ public class GameServer extends Server {
 		super(Constants.TICKS_PER_SECOND);
 		
 		if(maxPlayers < 1)
-			throw new IllegalArgumentException("Invalid max number of players " + maxPlayers);
+			throw new IllegalArgumentException("Invalid max number of players "
+					+ maxPlayers);
 		
 		this.world = Objects.requireNonNull(world);
 		this.maxPlayers = maxPlayers;

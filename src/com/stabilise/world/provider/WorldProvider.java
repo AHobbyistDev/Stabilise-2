@@ -143,6 +143,7 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	 * @param name The name of the dimension.
 	 * 
 	 * @return The dimension.
+	 * @throws NullPointerException if {@code name} is {@code null}.
 	 * @throws IllegalArgumentException if {@code name} is not the name of a
 	 * valid dimension.
 	 * @throws RuntimeException if the dimension could not be prepared.
@@ -225,8 +226,10 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	 * Performs any closing procedures which may be done in-between {@link
 	 * World#close()} being invoked on every world, and the executor being
 	 * shutdown.
+	 * 
+	 * <p>The default implementation does nothing.
 	 */
-	protected abstract void closeExtra();
+	protected void closeExtra() {}
 	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------

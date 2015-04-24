@@ -3,8 +3,8 @@ package com.stabilise.network;
 import java.io.*;
 import java.net.*;
 import java.util.Objects;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.stabilise.network.protocol.Protocol;
@@ -45,6 +45,12 @@ public class TCPConnection {
 	private static final AtomicInteger CONNECTIONS_SERVER = new AtomicInteger(0);
 	private static final AtomicInteger CONNECTIONS_CLIENT = new AtomicInteger(0);
 	
+	/** Number of ms between consective ping requests. */
+	private static final long PING_INTERVAL = 1000;
+	/** Number of ms before a connection disconnects automatically due to
+	 * large ping. */
+	private static final long TIMEOUT_PING = 15000L;
+	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
@@ -62,14 +68,14 @@ public class TCPConnection {
 	private final DataInputStream in;
 	private final DataOutputStream out;
 	
-	private final BlockingQueue<Packet> packetQueueIn = new LinkedBlockingQueue<>();
-	private final BlockingQueue<Packet> packetQueueOut = new LinkedBlockingQueue<>();
+	private final BlockingDeque<Packet> packetQueueIn = new LinkedBlockingDeque<>();
+	private final BlockingDeque<Packet> packetQueueOut = new LinkedBlockingDeque<>();
 	
 	private final TCPReadThread readThread;
 	private final TCPWriteThread writeThread;
 	
-	private int packetsSent = 0;
-	private int packetsReceived = 0;
+	private volatile int packetsSent = 0;
+	private volatile int packetsReceived = 0;
 	
 	/** Number of pings sent to the connection partner. */
 	int pingCount = 0;
@@ -77,11 +83,14 @@ public class TCPConnection {
 	int partnerPingCount = 0;
 	/** System.currentTimeMillis() at which we sent our most recent ping. */
 	long pingSent = 0L;
-	/** true if we've received the rebound packet for our ping request. */
-	private boolean pingReceived = false;
+	/** true if we've received the rebound packet for our ping request. If
+	 * false we don't send pings to avoid overlapping requests. */
+	private boolean pingReceived = true;
 	/** Ping, in ms. Updated every second, or after the last ping request
 	 * returns, whichever is later. */
 	int ping = 0;
+	
+	private volatile String disconnectReason = "";
 	
 	private final Log log;
 	
@@ -120,11 +129,23 @@ public class TCPConnection {
 	
 	/**
 	 * Performs an update tick on this TCPConnection. By default, this method
-	 * ensures we ping our peer on a per-second basis.
+	 * ensures we ping our peer on a per-second basis if possible.
 	 */
-	public void update() {
-		if(pingReceived)
-			trySendPingRequest();
+	void update() {
+		if(pingSent == 0L) // initialise pingSent
+			pingSent = System.currentTimeMillis() - PING_INTERVAL;
+		long pingTime = System.currentTimeMillis() - pingSent;
+		if(pingTime > TIMEOUT_PING) {
+			requestClose("Timed out.");
+			return;
+		}
+		// If we're not currently waiting for a ping response and it's been at
+		// least 1 second since we sent our last ping request, sent a request.
+		if(pingReceived && pingTime > PING_INTERVAL) {
+			sendPacket(new P255Ping(++pingCount, true));
+			pingSent = System.currentTimeMillis();
+			pingReceived = false;
+		}
 	}
 	
 	/**
@@ -148,17 +169,15 @@ public class TCPConnection {
 			}
 			ping = (int)(System.currentTimeMillis() - pingSent);
 			pingReceived = true;
-			// If the ping is especially large, 
-			trySendPingRequest();
 		}
 	}
 	
-	private void trySendPingRequest() {
-		if(System.currentTimeMillis() - pingSent > 1000L) {
-			sendPacket(new P255Ping(++pingCount, true));
-			pingSent = System.currentTimeMillis();
-			pingReceived = false;
-		}
+	/**
+	 * Returns this connection's ping to its peer, which is the approximate
+	 * time in ms required for a round trip of data.
+	 */
+	public int getPing() {
+		return ping;
 	}
 	
 	/**
@@ -197,8 +216,11 @@ public class TCPConnection {
 				return;
 			}
 		}
-		// Should (theoretically) never throw an ISE as it is an unbounded queue.
-		packetQueueOut.add(packet);
+		
+		if(packet.isImportant())
+			packetQueueOut.addFirst(packet);
+		else
+			packetQueueOut.addLast(packet);
 	}
 	
 	/**
@@ -224,9 +246,12 @@ public class TCPConnection {
 	private void readPacket() throws IOException {
 		Packet packet = protocol.readPacket(server, in, log);
 		if(packet == null)
-			requestClose();
+			requestClose("End of stream.");
 		else if(packet != Packet.DUMMY_PACKET) {
-			packetQueueIn.add(packet);
+			if(packet.isImportant())
+				packetQueueIn.addFirst(packet);
+			else
+				packetQueueIn.addLast(packet);
 			packetsReceived++;
 		}
 	}
@@ -270,7 +295,8 @@ public class TCPConnection {
 	 * Requests for this connection to close, if an error occurs.
 	 */
 	@UserThread({"ReadThread", "WriteThread"})
-	private void requestClose() {
+	private void requestClose(String reason) {
+		disconnectReason = Objects.requireNonNull(reason);
 		state.compareAndSet(STATE_ACTIVE, STATE_CLOSE_REQUESTED);
 	}
 	
@@ -290,6 +316,8 @@ public class TCPConnection {
 	
 	/**
 	 * Closes this connection and releases any resources held by it.
+	 * 
+	 * <p>This method does nothing if this connection has already been closed.
 	 */
 	@ThreadSafe
 	public void closeConnection() {
@@ -298,6 +326,9 @@ public class TCPConnection {
 			return;
 		
 		log.postInfo("Closing connection...");
+		
+		if(disconnectReason.equals(""))
+			disconnectReason = "Disconnected.";
 		
 		readThread.interrupt();
 		writeThread.interrupt();
@@ -338,8 +369,11 @@ public class TCPConnection {
 	}
 	
 	/**
-	 * @return {@code true} if this connection is active; {@code false}
-	 * otherwise.
+	 * Returns {@code true} if this connection is active; {@code false}
+	 * otherwise. A connection should generally be {@link #closeConnection()
+	 * closed} if this method returns false, as {@code false} is returned by
+	 * this method in all cases where {@link #closeRequested()} returns {@code
+	 * true}.
 	 */
 	public boolean isActive() {
 		return state.get() == STATE_ACTIVE;
@@ -352,6 +386,13 @@ public class TCPConnection {
 	 */
 	public boolean isTerminated() {
 		return state.get() == STATE_TERMINATED;
+	}
+	
+	/**
+	 * Returns a user-friendly reason for why this connection has disconnected.
+	 */
+	public String getDisconnectReason() {
+		return disconnectReason;
 	}
 	
 	//--------------------==========--------------------
@@ -373,7 +414,8 @@ public class TCPConnection {
 				public void uncaughtException(Thread t, Throwable e) {
 					log.postSevere("Uncaught exception " + e.getClass().getSimpleName()
 							+ " in " + t.getName(), e);
-					requestClose();
+					requestClose("Uncaught " + e.getClass().getSimpleName()
+							+ ": " + e.getMessage());
 				}
 			});
 		}
@@ -418,7 +460,7 @@ public class TCPConnection {
 					if(!socket.isClosed())
 						log.postSevere("IOException thrown in read thread before"
 								+ " connection shutdown!", e);
-					requestClose();
+					requestClose(e.getClass() + ": " + e.getMessage());
 				}
 			}
 		}
@@ -466,7 +508,7 @@ public class TCPConnection {
 					if(!socket.isClosed())
 						log.postSevere(e.getClass().getSimpleName() + " thrown in write "
 								+ "thread before connection shutdown!");
-					requestClose();
+					requestClose(e.getClass() + ": " + e.getMessage());
 				}
 			}
 		}

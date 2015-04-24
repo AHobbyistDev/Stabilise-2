@@ -87,7 +87,7 @@ public class LoadingState implements State {
 				.setWorld(worldList[0])
 				.setPlayer(CharacterData.defaultCharacter())
 				.setProfiler(Application.get().profiler)
-				.build();
+				.buildHost();
 	}
 	
 	@Override
