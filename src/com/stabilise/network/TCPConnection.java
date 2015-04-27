@@ -78,17 +78,17 @@ public class TCPConnection {
 	private volatile int packetsReceived = 0;
 	
 	/** Number of pings sent to the connection partner. */
-	int pingCount = 0;
+	private int pingCount = 0;
 	/** Number of pings sent by the partner to us. */
-	int partnerPingCount = 0;
+	private int partnerPingCount = 0;
 	/** System.currentTimeMillis() at which we sent our most recent ping. */
-	long pingSent = 0L;
+	private long pingSent = 0L;
 	/** true if we've received the rebound packet for our ping request. If
 	 * false we don't send pings to avoid overlapping requests. */
 	private boolean pingReceived = true;
 	/** Ping, in ms. Updated every second, or after the last ping request
 	 * returns, whichever is later. */
-	int ping = 0;
+	private int ping = 0;
 	
 	private volatile String disconnectReason = "";
 	
@@ -325,10 +325,10 @@ public class TCPConnection {
 				!state.compareAndSet(STATE_CLOSE_REQUESTED, STATE_SHUTDOWN))
 			return;
 		
-		log.postInfo("Closing connection...");
-		
 		if(disconnectReason.equals(""))
 			disconnectReason = "Disconnected.";
+		
+		log.postInfo("Closing connection... reason: " + disconnectReason);
 		
 		readThread.interrupt();
 		writeThread.interrupt();

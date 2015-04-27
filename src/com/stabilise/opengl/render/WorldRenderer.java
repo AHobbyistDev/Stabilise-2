@@ -304,9 +304,9 @@ public class WorldRenderer implements Renderer {
 		
 		batch.draw(
 				texEnemy, // texture
-				(float)e.x, // x
+				(float)e.x - 0.5f, // x
 				(float)e.y, // y
-				-0.5f, // originX
+				0f, // originX
 				0f, // originY
 				1f, // width
 				2f, // height

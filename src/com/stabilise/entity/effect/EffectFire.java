@@ -4,8 +4,8 @@ import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.ParticleFlame;
-import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.world.World;
+import com.stabilise.world.AbstractWorld.ParticleSource;
 
 /**
  * The effect a Mob has when it is on fire.
@@ -14,6 +14,8 @@ import com.stabilise.world.World;
  * flame particles.
  */
 public class EffectFire extends Effect {
+	
+	private ParticleSource particleSrc;
 	
 	/**
 	 * Creates a new fire effect.
@@ -27,6 +29,9 @@ public class EffectFire extends Effect {
 	@Override
 	public void update(World world, EntityMob target) {
 		super.update(world, target);
+		
+		if(particleSrc == null)
+			particleSrc = world.getParticleManager().getSource(new ParticleFlame());
 		
 		if(Settings.settingParticlesAll())
 			createFireParticle(world, target);
@@ -43,13 +48,8 @@ public class EffectFire extends Effect {
 	 * @param target The target of the effect.
 	 */
 	private void createFireParticle(World world, EntityMob target) {
-		ParticleFlame p = new ParticleFlame();
-		p.x = target.x + target.boundingBox.v00.x + world.getRnd().nextFloat() * target.boundingBox.width();
-		p.y = target.y + target.boundingBox.v11.y + world.getRnd().nextFloat() * target.boundingBox.height();
-		
-		ParticleGenerator.directParticle(p, 0.02f, 0.07f, Math.PI / 6.0D, Math.PI * 5.0D / 6.0D);
-		
-		world.addParticle(p);
+		particleSrc.createBurst(1, 0.02f, 0.07f, (float)Math.PI / 6.0f,
+				(float)Math.PI * 5.0f / 6.0f, target);
 	}
 	
 	@Override

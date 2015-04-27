@@ -4,10 +4,10 @@ import com.stabilise.core.Settings;
 import com.stabilise.entity.collision.LinkedHitbox;
 import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.particle.ParticleFlame;
-import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.Rectangle;
+import com.stabilise.world.AbstractWorld.ParticleSource;
 import com.stabilise.world.World;
 
 /**
@@ -27,10 +27,13 @@ public class EntityFireball extends EntityProjectile {
 	/** The number of ticks after which a fireball despawns. */
 	private static final int DESPAWN_TICKS = 300;
 	
+	private final ParticleSource particleSrc;
+	
 	
 	/** TODO: temporary */
 	public EntityFireball() {
 		super(null, null, null);
+		particleSrc = null;
 	}
 	
 	/**
@@ -55,6 +58,7 @@ public class EntityFireball extends EntityProjectile {
 		((LinkedHitbox)hitbox).linkedEntity = this;
 		hitbox.force = 0.3f;
 		hitbox.effect = new EffectFire(300);
+		particleSrc = world.getParticleManager().getSource(new ParticleFlame());
 	}
 	
 	@Override
@@ -89,13 +93,7 @@ public class EntityFireball extends EntityProjectile {
 	}
 	
 	private void addFlightParticles(World world, int particles) {
-		for(int i = 0; i < particles; i++) {
-			ParticleFlame p = new ParticleFlame();
-			p.x = x;
-			p.y = y;
-			ParticleGenerator.directParticle(p, 0.02f, 0.05f, 0, Maths.TAU);
-			world.addParticle(p);
-		}
+		particleSrc.createBurst(particles, x, y, 0.02f, 0.05f, 0f, (float)Maths.TAU);
 	}
 	
 	/**
@@ -104,16 +102,7 @@ public class EntityFireball extends EntityProjectile {
 	 * @param particles The number of particles to create.
 	 */
 	private void addImpactParticles(World world, int particles) {
-		//float velocity = (float)Math.sqrt(dx*dx + dy*dy) / 4;
-		//double angle = Math.atan2(dy, dx);
-		for(int i = 0; i < particles; i++) {
-			ParticleFlame p = new ParticleFlame();
-			p.x = x;
-			p.y = y;
-			//ParticleGenerator.directParticle(p, velocity - 0.05f, velocity + 0.15f, angle - Math.PI / 6, angle + Math.PI / 6);
-			ParticleGenerator.directParticle(p, 0.08f, 0.15f, 0, Maths.TAU);
-			world.addParticle(p);
-		}
+		particleSrc.createBurst(particles, x, y, 0.08f, 0.15f, 0f, (float)Maths.TAU);
 	}
 	
 	@Override

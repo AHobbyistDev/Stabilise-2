@@ -135,6 +135,7 @@ public class LoadingState implements State {
 			try {
 				application.setState(new SingleplayerState(future.get()));
 			} catch(InterruptedException | ExecutionException e) {
+				e.printStackTrace();
 				throw new RuntimeException(e); // TODO
 			}
 		}

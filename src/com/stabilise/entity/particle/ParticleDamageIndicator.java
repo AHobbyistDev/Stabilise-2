@@ -54,8 +54,6 @@ public class ParticleDamageIndicator extends Particle {
 	 * @param text The indicator's display text.
 	 */
 	public ParticleDamageIndicator(String text) {
-		super();
-		
 		this.text = text;
 	}
 	
@@ -101,6 +99,11 @@ public class ParticleDamageIndicator extends Particle {
 	@Override
 	public void render(WorldRenderer renderer) {
 		renderer.renderDamageIndicator(this);
+	}
+	
+	@Override
+	public Particle duplicate() {
+		return new ParticleDamageIndicator(0);
 	}
 	
 	/**

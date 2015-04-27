@@ -45,8 +45,6 @@ public class ParticleExplosion extends Particle {
 	 * @param finalRadius The final radius of the explosion, in tile-lengths.
 	 */
 	public ParticleExplosion(float initialRadius, float finalRadius) {
-		super();
-		
 		radiusInit = initialRadius;
 		radiusFinal = finalRadius;
 		
@@ -74,6 +72,11 @@ public class ParticleExplosion extends Particle {
 	@Override
 	public void render(WorldRenderer renderer) {
 		renderer.renderExplosion(this);
+	}
+	
+	@Override
+	public Particle duplicate() {
+		return new ParticleExplosion(0,0);
 	}
 	
 }

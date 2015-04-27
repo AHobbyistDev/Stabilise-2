@@ -183,6 +183,18 @@ public class Array<E> implements Iterable<E> {
 	}
 	
 	/**
+	 * Sets every array value between {@code fromIndex} (inclusive) and {@code
+	 * toIndex} (exclusive) to {@code value}. If {@code toIndex <= fromIndex},
+	 * this method does nothing.
+	 * 
+	 * @throws ArrayIndexOutOfBoundsException if {@code toIndex >= length()}.
+	 */
+	public void setBetween(E value, int fromIndex, int toIndex) {
+		for(int i = fromIndex; i < toIndex; i++)
+			data[i] = value;
+	}
+	
+	/**
 	 * Adds a new element to the array, increasing its length by 1. Note that
 	 * this is an expensive operation as it requires a memory copy.
 	 */
@@ -191,6 +203,7 @@ public class Array<E> implements Iterable<E> {
 		data[data.length - 1] = value;
 	}
 	
+
 	/**
 	 * Adds a new element to the array, increasing its length by the specified
 	 * scaling factor as if by:

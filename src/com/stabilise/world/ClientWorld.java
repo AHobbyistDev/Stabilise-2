@@ -54,7 +54,7 @@ public class ClientWorld extends AbstractWorld {
 	
 	@Override
 	public void prepare() {
-
+		
 	}
 	
 	@Override
@@ -63,13 +63,18 @@ public class ClientWorld extends AbstractWorld {
 	}
 	
 	@Override
+	public boolean isClient() {
+		return true;
+	}
+	
+	@Override
 	public void save() {
-
+		
 	}
 	
 	@Override
 	public void close() {
-
+		
 	}
 	
 	@Override

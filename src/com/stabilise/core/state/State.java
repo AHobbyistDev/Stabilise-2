@@ -22,16 +22,6 @@ public interface State {
 	void start();
 	
 	/**
-	 * Called when the application is resized. This is also called when a state
-	 * is set as the application's current state, immediately after {@link
-	 * #start()}.
-	 * 
-	 * @param width The new application width, in pixels.
-	 * @param height The new application height, in pixels.
-	 */
-	void resize(int width, int height);
-	
-	/**
 	 * Called when the state is stopped and disposed, and before {@link
 	 * #start()} is invoked on the new state, if one has been set.
 	 * 
@@ -68,6 +58,16 @@ public interface State {
 	 * predispose()}.
 	 */
 	void dispose();
+	
+	/**
+	 * Called when the application is resized. This is also called when a state
+	 * is set as the application's current state, immediately after {@link
+	 * #start()}.
+	 * 
+	 * @param width The new application width, in pixels.
+	 * @param height The new application height, in pixels.
+	 */
+	void resize(int width, int height);
 	
 	/**
 	 * Called when the application is paused.

@@ -22,4 +22,10 @@ public abstract class ParticlePhysical extends Particle {
 		y += dy;
 	}
 	
+	@Override
+	public void reset() {
+		super.reset();
+		dx = dy = 0f;
+	}
+	
 }

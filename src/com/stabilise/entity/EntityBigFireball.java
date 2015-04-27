@@ -6,13 +6,13 @@ import com.stabilise.entity.collision.LinkedHitbox;
 import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
-import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Rectangle;
 import com.stabilise.world.World;
+import com.stabilise.world.AbstractWorld.ParticleSource;
 
 /**
  * A flaming projectile which deals damage to mobs.
@@ -48,10 +48,13 @@ public class EntityBigFireball extends EntityProjectile {
 	/** The fireball's damage. */
 	private int damage;
 	
+	private final ParticleSource particleSrc;
+	
 	
 	/** TODO: temporary. */
 	public EntityBigFireball() {
 		super(null, null, null);
+		particleSrc = null;
 	}
 	
 	/**
@@ -78,6 +81,8 @@ public class EntityBigFireball extends EntityProjectile {
 		hitbox.effect = new EffectFire(420);
 		
 		this.damage = damage;
+		
+		particleSrc = world.getParticleManager().getSource(new ParticleFlame());
 	}
 	
 	@Override
@@ -112,13 +117,7 @@ public class EntityBigFireball extends EntityProjectile {
 	}
 	
 	private void addFlightParticles(World world, int particles) {
-		for(int i = 0; i < particles; i++) {
-			ParticleFlame p = new ParticleFlame();
-			p.x = x;
-			p.y = y;
-			ParticleGenerator.directParticle(p, 0.02f, 0.05f, 0, Maths.TAU);
-			world.addParticle(p);
-		}
+		particleSrc.createBurst(particles, x, y, 0.02f, 0.05f, 0f, (float)Maths.TAU);
 	}
 	
 	/**
@@ -127,13 +126,7 @@ public class EntityBigFireball extends EntityProjectile {
 	 * @param particles The number of particles to create.
 	 */
 	private void addImpactParticles(World world, int particles) {
-		for(int i = 0; i < particles; i++) {
-			ParticleFlame p = new ParticleFlame();
-			p.x = x;
-			p.y = y;
-			ParticleGenerator.directParticle(p, 0.08f, 0.15f, 0, Math.PI * 2);
-			world.addParticle(p);
-		}
+		particleSrc.createBurst(particles, x, y, 0.08f, 0.15f, 0f, (float)Maths.TAU);
 	}
 	
 	@Override

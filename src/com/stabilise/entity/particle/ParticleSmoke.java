@@ -23,8 +23,6 @@ public class ParticleSmoke extends ParticlePhysical {
 	 * Creates a new smoke particle.
 	 */
 	public ParticleSmoke() {
-		super();
-		
 		/*
 		double angle = (0.16666667f + world.rng.nextFloat() / 3) * Math.PI;
 		float velocity = 0.05f + world.rng.nextFloat() * 0.4f;
@@ -54,6 +52,11 @@ public class ParticleSmoke extends ParticlePhysical {
 	@Override
 	public void render(WorldRenderer renderer) {
 		renderer.renderSmoke(this);
+	}
+	
+	@Override
+	public Particle duplicate() {
+		return new ParticleSmoke();
 	}
 	
 }

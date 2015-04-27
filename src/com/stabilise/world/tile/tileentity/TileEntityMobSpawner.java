@@ -3,11 +3,11 @@ package com.stabilise.world.tile.tileentity;
 import com.stabilise.entity.EntityEnemy;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.particle.ParticleFlame;
-import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.World;
+import com.stabilise.world.AbstractWorld.ParticleSource;
 import com.stabilise.world.tile.tileentity.TileEntity.Updated;
 
 /**
@@ -23,6 +23,9 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
 	
 	private int ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS;
 	private double xPos, yPos;
+	
+	private ParticleSource fireGen;
+	private ParticleSource smokeGen;
 	
 	
 	/**
@@ -47,6 +50,11 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
 	@Override
 	public void update(World world) {
 		if(playerInRange(world)) {
+			if(fireGen == null) {
+				fireGen = world.getParticleManager().getSource(new ParticleFlame());
+				smokeGen = world.getParticleManager().getSource(new ParticleSmoke());
+			}
+			
 			if(--ticksUntilNextSpawn == 0) {
 				ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS;
 				
@@ -97,13 +105,8 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
 	 * Spawns a flame particle on the spawner.
 	 */
 	private void spawnParticle(World world) {
-		ParticleFlame p = new ParticleFlame();
-		p.x = x + world.getRnd().nextFloat();
-		p.y = y + world.getRnd().nextFloat();
-		
-		ParticleGenerator.directParticle(p, 0.02f, 0.07f, Math.PI / 6.0D, Math.PI * 5.0D / 6.0D);
-		
-		world.addParticle(p);
+		fireGen.createBurstOnTile(1, x, y, 0.02f, 0.07f,
+				(float)Math.PI / 6.0f, (float)Math.PI * 5.0f / 6.0f);
 	}
 	
 	/**
@@ -112,14 +115,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
 	 * @param e The mob.
 	 */
 	private void spawnParticleOnMob(World world, EntityMob e) {
-		ParticleSmoke p = new ParticleSmoke();
-		p.x = e.x + e.boundingBox.v00.x + world.getRnd().nextFloat() * e.boundingBox.width();
-		p.y = e.y + e.boundingBox.v11.y + world.getRnd().nextFloat() * e.boundingBox.height();
-		
-		ParticleGenerator.directParticle(p, 0.04f, 0.12f, 0, Maths.TAU);
-		p.dy *= 0.1;
-		
-		world.addParticle(p);
+		smokeGen.createBurst(1, 0.04f, 0.12f, 0, (float)Maths.TAU, e);
 	}
 	
 	@Override

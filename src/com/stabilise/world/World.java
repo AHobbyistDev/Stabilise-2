@@ -24,6 +24,7 @@ import com.stabilise.util.Profiler;
 import com.stabilise.util.concurrent.TaskTracker;
 import com.stabilise.util.concurrent.TrackableFuture;
 import com.stabilise.util.maths.Maths;
+import com.stabilise.world.AbstractWorld.ParticleManager;
 import com.stabilise.world.provider.HostProvider;
 import com.stabilise.world.provider.HostProvider.PlayerBundle;
 import com.stabilise.world.provider.HostProvider.PlayerData;
@@ -201,6 +202,11 @@ public interface World extends Checkable {
 	 * purely aesthetic and a server doesn't concern itself with them).
 	 */
 	Iterable<Particle> getParticles();
+	
+	/**
+	 * Gets this world's particle manager.
+	 */
+	ParticleManager getParticleManager();
 	
 	// ==========World component getters and setters==========
 	
@@ -475,6 +481,13 @@ public interface World extends Checkable {
 	default boolean isHost() {
 		return this instanceof HostWorld;
 	}
+	
+	/**
+	 * Returns {@code true} if this {@code World} holds a client view. This is
+	 * {@code true} for all cases but for a server world without an integrated
+	 * client.
+	 */
+	boolean isClient();
 	
 	/**
 	 * Returns {@code true} if this world has particles; that is, if this is a

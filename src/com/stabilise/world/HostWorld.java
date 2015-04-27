@@ -167,8 +167,6 @@ public class HostWorld extends AbstractWorld {
 	public void update() {
 		super.update();
 		
-		dimension.info.age++;
-		
 		profiler.start("sliceMap"); // root.update.game.world.sliceMap
 		for(SliceMap m : sliceMaps)
 			m.update();
@@ -472,6 +470,11 @@ public class HostWorld extends AbstractWorld {
 	 */
 	public FileHandle getWorldDir() {
 		return dimension.info.getDimensionDir();
+	}
+	
+	@Override
+	public boolean isClient() {
+		return provider.hasClient();
 	}
 	
 	/**

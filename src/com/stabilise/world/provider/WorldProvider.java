@@ -189,6 +189,15 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	}
 	
 	/**
+	 * Checks for whether or not this WorldProvider has an integrated client
+	 * associated with it. This returns {@code true} in all cases but for a
+	 * server with no integrated client.
+	 */
+	public boolean hasClient() {
+		return true; // TODO
+	}
+	
+	/**
 	 * Saves the worlds.
 	 * 
 	 * @throws RuntimeException if an I/O error occurred while saving.

@@ -93,7 +93,9 @@ public enum Protocol {
 	private Packet createPacket(boolean server, int id) {
 		try {
 			if(id > MAX_NORMAL_PACKET_ID)
-				return RESERVED_PACKETS.instantiate(id);
+				// Offset of "- MAX_NORMAL_PACKET_ID - 1" to keep registry memory
+				// footprint minimal.
+				return RESERVED_PACKETS.instantiate(id - MAX_NORMAL_PACKET_ID - 1);
 			return server
 					? clientPackets.instantiate(id)
 					: serverPackets.instantiate(id);
@@ -185,9 +187,12 @@ public enum Protocol {
 	private static final Map<Class<? extends Packet>, Integer> PACKET_IDS =
 			new IdentityHashMap<>();
 	/** Registry of 'reserved packets' - i.e. packets which can be sent by
-	 * any protocol, and by both the client and server. */
+	 * any protocol, and by both the client and server.
+	 * <p>To avoid wasting unnecessary memory, we give this registry a small
+	 * size, and offset IDs by {@code -MAX_NORMAL_PACKET_ID - 1} when accessing
+	 * entries. */
 	private static final InstantiationRegistry<Packet> RESERVED_PACKETS =
-			new InstantiationRegistry<>(MAX_PACKET_ID - MAX_NORMAL_PACKET_ID,
+			new InstantiationRegistry<>(RESERVED_IDS,
 					THROW_EXCEPTION, Packet.class);
 	
 	static {
@@ -211,7 +216,9 @@ public enum Protocol {
 			throw new IllegalArgumentException("Invalid id for a reserved packet ("
 					+ id + ") - must be in range " + (MAX_NORMAL_PACKET_ID + 1)
 					+ " - " + MAX_PACKET_ID + " (inclusive).");
-		RESERVED_PACKETS.register(id, packetClass);
+		// Offset of "- MAX_NORMAL_PACKET_ID - 1" to keep registry memory
+		// footprint minimal.
+		RESERVED_PACKETS.register(id - MAX_NORMAL_PACKET_ID - 1, packetClass);
 		PACKET_IDS.put(packetClass, Integer.valueOf(id));
 	}
 	

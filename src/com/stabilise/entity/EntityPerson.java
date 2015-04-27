@@ -3,7 +3,6 @@ package com.stabilise.entity;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.particle.ParticleFlame;
-import com.stabilise.entity.particle.ParticleGenerator;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.maths.Vec2;
@@ -12,6 +11,7 @@ import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Rectangle;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
+import com.stabilise.world.AbstractWorld.ParticleSource;
 
 /**
  * A Person is a Mob intended to be like a human. The Player is a Person.
@@ -151,6 +151,8 @@ public class EntityPerson extends EntityMob {
 	 * frames. */
 	private int damageDealt = 0;
 	
+	private ParticleSource particleSrc;
+	
 	
 	@Override
 	protected AABB getAABB() {
@@ -181,6 +183,9 @@ public class EntityPerson extends EntityMob {
 	@Override
 	public void update(World world) {
 		super.update(world);
+		
+		if(particleSrc == null)
+			particleSrc = world.getParticleManager().getSource(new ParticleFlame());
 		
 		ticksSinceHealthLoss++;
 		ticksSinceStaminaLoss++;
@@ -336,13 +341,8 @@ public class EntityPerson extends EntityMob {
 							maxAngle = Math.PI * 7.0D / 7.0D;
 						}
 						
-						for(int i = 0; i < 6; i++) {
-							ParticleFlame p = new ParticleFlame();
-							p.x = px;
-							p.y = y + SPECIAL_SIDE_GROUND_ORIGIN.y;
-							ParticleGenerator.directParticle(p, 0.03f, 0.08f, minAngle, maxAngle);
-							world.addParticle(p);
-						}
+						particleSrc.createBurst(6, px, y + SPECIAL_SIDE_GROUND_ORIGIN.y,
+								0.03f, 0.08f, (float)minAngle, (float)maxAngle);
 					}
 				}
 				break;
@@ -369,21 +369,9 @@ public class EntityPerson extends EntityMob {
 						h2.effect = new EffectFire(300);
 						world.addHitbox(h2, x, y);
 						
-						for(int i = 0; i < 30; i++) {
-							ParticleFlame p = new ParticleFlame();
-							p.x = x;
-							p.y = y;
-							ParticleGenerator.directParticle(p, 0.08f, 0.15f, 0, Math.PI);
-							world.addParticle(p);
-						}
+						particleSrc.createBurst(30, x, y, 0.03f, 0.08f, 0, (float)Math.PI);
 					} else {
-						for(int i = 0; i < 10; i++) {
-							ParticleFlame p = new ParticleFlame();
-							p.x = x;
-							p.y = y;
-							ParticleGenerator.directParticle(p, 0.08f, 0.15f, 0, Math.PI);
-							world.addParticle(p);
-						}
+						particleSrc.createBurst(10, x, y, 0.03f, 0.08f, 0, (float)Math.PI);
 					}
 				}
 				break;
@@ -419,13 +407,8 @@ public class EntityPerson extends EntityMob {
 							maxAngle = Math.PI * 7.0D / 7.0D;
 						}
 						
-						for(int i = 0; i < 6; i++) {
-							ParticleFlame p = new ParticleFlame();
-							p.x = px;
-							p.y = y + SPECIAL_SIDE_AIR_ORIGIN.y;
-							ParticleGenerator.directParticle(p, 0.03f, 0.08f, minAngle, maxAngle);
-							world.addParticle(p);
-						}
+						particleSrc.createBurst(6, px, y + SPECIAL_SIDE_AIR_ORIGIN.y,
+								0.03f, 0.08f, (float)minAngle, (float)maxAngle);
 					}
 				}
 				break;
@@ -452,13 +435,9 @@ public class EntityPerson extends EntityMob {
 						} else {
 							px = x - SPECIAL_DOWN_AIR_ORIGIN.x;
 						}
-						for(int i = 0; i < 6; i++) {
-							ParticleFlame p = new ParticleFlame();
-							p.x = px;
-							p.y = y + SPECIAL_DOWN_AIR_ORIGIN.y;
-							ParticleGenerator.directParticle(p, 0.03f, 0.08f, minAngle, maxAngle);
-							world.addParticle(p);
-						}
+						
+						particleSrc.createBurst(6, px, y + SPECIAL_DOWN_AIR_ORIGIN.y,
+								0.03f, 0.08f, (float)minAngle, (float)maxAngle);
 					}
 				}
 				break;
@@ -490,13 +469,8 @@ public class EntityPerson extends EntityMob {
 			}
 		} else {
 			double px = facingRight ? x + originPoint.x : x - originPoint.x;
-			for(int i = 0; i < 6; i++) {
-				ParticleFlame p = new ParticleFlame();
-				p.x = px;
-				p.y = y + originPoint.y;
-				ParticleGenerator.directParticle(p, 0.03f, 0.08f, Math.PI / 3D, Math.PI * 0.6666D);
-				world.addParticle(p);
-			}
+			particleSrc.createBurst(6, px, y + originPoint.y,
+					0.03f, 0.08f, (float)Math.PI / 3f, (float)Math.PI * 0.6666f);
 		}
 	}
 	

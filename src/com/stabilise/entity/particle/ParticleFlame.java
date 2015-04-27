@@ -39,4 +39,9 @@ public class ParticleFlame extends ParticlePhysical {
 		renderer.renderFlame(this);
 	}
 	
+	@Override
+	public Particle duplicate() {
+		return new ParticleFlame();
+	}
+	
 }

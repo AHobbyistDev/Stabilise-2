@@ -10,7 +10,6 @@ public class EntityPlayer extends EntityPerson {
 	/** The name of the player. */
 	public String name;
 	
-	
 	@Override
 	public void update(World world) {
 		super.update(world);
