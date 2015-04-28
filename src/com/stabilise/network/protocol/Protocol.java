@@ -4,10 +4,12 @@ import static com.stabilise.util.collect.DuplicatePolicy.THROW_EXCEPTION;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import com.stabilise.network.P254ProtocolSwitch;
 import com.stabilise.network.P255Ping;
 import com.stabilise.network.Packet;
 import com.stabilise.network.protocol.handshake.*;
@@ -26,7 +28,6 @@ public enum Protocol {
 	
 	HANDSHAKE {{
 		registerClientPacket(0, C000VersionInfo.class);
-		registerClientPacket(1, C001Disconnect.class);
 		registerServerPacket(0, S000VersionInfo.class);
 	}},
 	LOGIN {{
@@ -126,7 +127,15 @@ public enum Protocol {
 	 */
 	@UserThread("ReadThread")
 	public Packet readPacket(boolean server, DataInputStream in, Log log) throws IOException {
-		int id = in.read(); // ID is always first byte
+		int id;
+		try {
+			id = in.read(); // ID is always first byte
+		} catch(EOFException e) {
+			// Since InflaterInputStream and prefers to throw an EOFException
+			// EOFrather than return -1 when the stream ends, we'll have to
+			// catch this.
+			return null;
+		}
 		if(id == -1) // end of stream; abort!
 			return null;
 		Packet packet = createPacket(server, id);
@@ -171,6 +180,13 @@ public enum Protocol {
 				|| RESERVED_PACKETS.getID(packet.getClass()) != -1;
 	}
 	
+	/**
+	 * Returns this protocol's ID.
+	 */
+	public int getID() {
+		return ordinal();
+	}
+	
 	//--------------------==========--------------------
 	//--------------=====Static Stuff=====--------------
 	//--------------------==========--------------------
@@ -186,8 +202,9 @@ public enum Protocol {
 	/** Maps Packet Class -> Packet ID for all packets across all protocols. */
 	private static final Map<Class<? extends Packet>, Integer> PACKET_IDS =
 			new IdentityHashMap<>();
-	/** Registry of 'reserved packets' - i.e. packets which can be sent by
-	 * any protocol, and by both the client and server.
+	/** Registry of reserved/universal/protocol-independent packets - i.e.
+	 * packets which can be sent by any protocol, and by both the client and
+	 * server.
 	 * <p>To avoid wasting unnecessary memory, we give this registry a small
 	 * size, and offset IDs by {@code -MAX_NORMAL_PACKET_ID - 1} when accessing
 	 * entries. */
@@ -197,6 +214,7 @@ public enum Protocol {
 	
 	static {
 		registerReservedPacket(255, P255Ping.class);
+		registerReservedPacket(254, P254ProtocolSwitch.class);
 		RESERVED_PACKETS.lock();
 		for(Protocol protocol : Protocol.values()) {
 			checkPackets(protocol, protocol.clientPackets);
@@ -243,6 +261,28 @@ public enum Protocol {
 	public static int getPacketID(Packet packet) {
 		Integer id = PACKET_IDS.get(packet.getClass());
 		return id == null ? -1 : id.intValue();
+	}
+	
+	/**
+	 * Checks for whether or not the specified packet is a universal, or
+	 * <i>protocol-independent</i>, packet.
+	 * 
+	 * <p>Protocol-independent packets may be sent using any protocol, and by
+	 * both clients and servers.
+	 * 
+	 * @return {@code true} if {@code packet} is protocol-independent; {@code
+	 * false} otherwise.
+	 */
+	public static boolean isPacketUniversal(Packet packet) {
+		return packet.getID() > MAX_NORMAL_PACKET_ID;
+	}
+	
+	/**
+	 * Gets the Protocol with the specified ID, as returned by {@link
+	 * #getID()}.
+	 */
+	public static Protocol getProtocol(int id) {
+		return Protocol.values()[id];
 	}
 	
 	//--------------------==========--------------------

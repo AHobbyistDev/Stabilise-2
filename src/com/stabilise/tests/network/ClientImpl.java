@@ -7,7 +7,6 @@ import static com.stabilise.core.Constants.DEFAULT_PORT;
 import com.stabilise.network.Client;
 import com.stabilise.network.TCPConnection;
 import com.stabilise.network.protocol.handshake.C000VersionInfo;
-import com.stabilise.network.protocol.handshake.C001Disconnect;
 import com.stabilise.network.protocol.handshake.IClientHandshake;
 import com.stabilise.network.protocol.handshake.S000VersionInfo;
 
@@ -31,7 +30,7 @@ public class ClientImpl extends Client implements IClientHandshake {
 		if(ticks++ % 60 == 0)
 			log.postInfo("Ping: " + con.getPing());
 		if(ticks % 600 == 0) {
-			con.sendPacket(new C001Disconnect());
+			//con.sendPacket(new C001Disconnect());
 			disconnect();
 		}
 	}

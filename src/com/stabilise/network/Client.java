@@ -32,29 +32,31 @@ public abstract class Client implements PacketHandler {
 	
 	private final PacketHandler handler;
 	
-	/** The underlying connection. This null until we first connect. */
+	/** The underlying connection. This is null if every connection attempt
+	 * has failed. */
 	private TCPConnection connection;
 	
 	protected final Log log = Log.getAgent("CLIENT");
 	
 	
 	/**
-	 * Creates a new client to connect to the specified IP address and port.
+	 * Creates a new client to connect to the specified IP address and port,
+	 * and immediately {@link #connect() connects}.
 	 * 
 	 * @param address The IP to connect to.
 	 * @param port The port to use.
 	 * 
 	 * @throws NullPointerException if {@code address} is {@code null}.
 	 * @throws IllegalArgumentException if the port parameter is outside the
-	 * specified range of valid port values, which is between 0 and 65535,
-	 * inclusive.
+	 * range of valid port values, which is between 0 and 65535, inclusive.
 	 */
 	public Client(InetAddress address, int port) {
 		this(address, port, null);
 	}
 	
 	/**
-	 * Creates a new client to connect to the specified IP address and port.
+	 * Creates a new client to connect to the specified IP address and port,
+	 * and immediately {@link #connect() connects}.
 	 * 
 	 * @param address The IP to connect to.
 	 * @param port The port to use.
@@ -68,10 +70,10 @@ public abstract class Client implements PacketHandler {
 	 */
 	public Client(InetAddress address, int port, PacketHandler handler) {
 		this.address = Objects.requireNonNull(address);
-        if(port < 0 || port > 0xFFFF)
-            throw new IllegalArgumentException("Port out of range: " + port);
 		this.port = port;
 		this.handler = handler == null ? this : handler;
+		
+		connect();
 	}
 	
 	/**
@@ -80,7 +82,7 @@ public abstract class Client implements PacketHandler {
 	 * @throws IllegalStateException if this client is already connected.
 	 */
 	public final void connect() {
-		if(state != STATE_DISCONNECTED && !recheckDisconnect())
+		if(isConnected() && !recheckDisconnect())
 			throw new IllegalStateException("Cannot connect unless disconnected!");
 		try {
 			Socket socket = new Socket(address, port);
@@ -106,7 +108,7 @@ public abstract class Client implements PacketHandler {
 	 * Closes this client's connection, if it is currently connected.
 	 */
 	public final void disconnect() {
-		if(state == STATE_CONNECTED) {
+		if(isConnected()) {
 			connection.closeConnection();
 			state = STATE_DISCONNECTED;
 		}
@@ -121,11 +123,11 @@ public abstract class Client implements PacketHandler {
 	}
 	
 	/**
-	 * Returns {@code true} if this client has disconnected from the server.
+	 * Returns {@code true} if this client is connected to the server.
 	 */
-	public final boolean isDisconnected() {
-		//return state == STATE_DISCONNECTED;
-		return connection.isTerminated();
+	public final boolean isConnected() {
+		return state == STATE_CONNECTED;
+		//return !connection.isTerminated();
 	}
 	
 	/**
@@ -133,7 +135,7 @@ public abstract class Client implements PacketHandler {
 	 */
 	public final void update() {
 		if(!checkDisconnect()) {
-			handleIncomingPackets();
+			connection.handleIncomingPackets(handler);
 			connection.update();
 			doUpdate();
 		}
@@ -155,9 +157,9 @@ public abstract class Client implements PacketHandler {
 	 * otherwise.
 	 */
 	private boolean checkDisconnect() {
-		if(state == STATE_DISCONNECTED)
+		if(!isConnected())
 			return true;
-		if(connection != null && !connection.isActive()) {
+		if(!connection.isActive()) {
 			disconnect();
 			return true;
 		}
@@ -171,7 +173,7 @@ public abstract class Client implements PacketHandler {
 	 * @returns true if disconnected
 	 */
 	private boolean recheckDisconnect() {
-		if(isDisconnected()) {
+		if(connection != null && connection.isTerminated()) {
 			state = STATE_DISCONNECTED;
 			return true;
 		}
@@ -179,26 +181,11 @@ public abstract class Client implements PacketHandler {
 	}
 	
 	/**
-	 * Gets this client's underlying connection.
-	 * 
-	 * @throws IllegalStateException if this client has not {@link #connect()
-	 * connected}. This is not thrown if a client has disconnected after
-	 * connecting.
+	 * Gets this client's underlying connection. Returns {@code null} if this
+	 * client has not successfully established a connection.
 	 */
 	public TCPConnection getConnection() {
-		if(connection == null)
-			throw new IllegalStateException("Client not connected!");
 		return connection;
-	}
-	
-	/**
-	 * Handles any queued incoming packets. This should typically be invoked
-	 * from within {@link #update()}.
-	 */
-	private void handleIncomingPackets() {
-		Packet p;
-		while((p = connection.getPacket()) != null)
-			p.handle(handler, connection);
 	}
 	
 }

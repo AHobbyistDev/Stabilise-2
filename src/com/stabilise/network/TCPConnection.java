@@ -6,7 +6,9 @@ import java.util.Objects;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
+import com.stabilise.network.protocol.PacketHandler;
 import com.stabilise.network.protocol.Protocol;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.ThreadSafe;
@@ -59,8 +61,18 @@ public class TCPConnection {
 	 * client-side. */
 	public final boolean server;
 	
-	/** The current connection protocol. Default is {@link Protocol#HANDSHAKE}. */
+	/** The current connection protocol. Default is {@link Protocol#HANDSHAKE}.
+	 * When this is changed via {@link #setProtocol(Protocol)} we send out a
+	 * packet to tell our peer, to ensure it doesn't try to handle packets we
+	 * send across the new protocol while it is still using the old one. */
 	private Protocol protocol = Protocol.HANDSHAKE;
+	/** The ID of the protocol being used by our peer. */
+	// We start off with the same protocol as our peer
+	private int peerProtocol = protocol.getID();
+	/** Listener which is invoked when we our protocol synchronises with our
+	 * peer's. */
+	private Consumer<Protocol> protocolSyncListener = null;
+	
 	private final AtomicInteger state = new AtomicInteger(STATE_STARTING);
 	
 	protected final Socket socket;
@@ -115,8 +127,10 @@ public class TCPConnection {
 		
 		log = Log.getAgent((server ? "SERVER" : "CLIENT") + id);
 		
-		in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-		out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+		in = new DataInputStream(new BufferedInputStream(//new InflaterInputStream(
+				socket.getInputStream()));
+		out = new DataOutputStream(new BufferedOutputStream(//new DeflaterOutputStream(
+				socket.getOutputStream()));
 		
 		readThread = new TCPReadThread((server ? "ServerReader" : "ClientReader") + id);
 		writeThread = new TCPWriteThread((server ? "ServerWriter" : "ClientWriter") + id);
@@ -193,7 +207,27 @@ public class TCPConnection {
 	 * @throws NullPointerException if {@code protocol} is {@code null}.
 	 */
 	public void setProtocol(Protocol protocol) {
-		this.protocol = Objects.requireNonNull(protocol);
+		if(this.protocol != protocol) {
+			sendPacket(new P254ProtocolSwitch(protocol));
+			this.protocol = protocol;
+			tryProtocolSync();
+		}
+	}
+	
+	/**
+	 * Handles a {@link P254ProtocolSwitch} packet, which tells us that our
+	 * peer has switched to a different protocol.
+	 */
+	void handlePeerProtocolSwitch(int protocolID) {
+		if(protocolID == peerProtocol)
+			return;
+		this.peerProtocol = protocolID;
+		tryProtocolSync();
+	}
+	
+	private void tryProtocolSync() {
+		if(protocol.getID() == peerProtocol && protocolSyncListener != null)
+			protocolSyncListener.accept(Protocol.getProtocol(peerProtocol));
 	}
 	
 	/**
@@ -231,6 +265,22 @@ public class TCPConnection {
 	@UserThread("MainThread")
 	public Packet getPacket() {
 		return packetQueueIn.poll();
+	}
+	
+	/**
+	 * Handles as many incoming packets as possible (i.e. until {@link
+	 * #getPacket()} returns {@code null}), as if by:
+	 * 
+	 * <pre>
+	 * for(Packet p; (p = getPacket()) != null;)
+	 *     p.handle(handler, this);<pre>
+	 * 
+	 * @param handler The handler with which to handle the packets.
+	 */
+	@UserThread("MainThread")
+	public void handleIncomingPackets(PacketHandler handler) {
+		for(Packet p; (p = getPacket()) != null;)
+			p.handle(handler, this);
 	}
 	
 	/**
@@ -352,13 +402,14 @@ public class TCPConnection {
 	}
 	
 	/**
-	 * Closes a Closeable and logs an IOException, if it is thrown.
+	 * Closes a Closeable and ignores thrown IOExceptions.
 	 */
 	private void close(Closeable closeable, String identifier) {
 		try {
 			closeable.close();
 		} catch(IOException e) {
-			log.postWarning("IOException while closing " + identifier + " (" + e.getMessage() + ")");
+			//log.postWarning("IOException while closing " + identifier + " ("
+			//		+ e.getMessage() + ")");
 		}
 	}
 	

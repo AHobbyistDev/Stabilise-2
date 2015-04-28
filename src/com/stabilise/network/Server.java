@@ -249,13 +249,10 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 		if(!checkShutdown()) {
 			synchronized(connections) {
 				Iterator<TCPConnection> i = connections.iterator();
-				Packet p;
 				while(i.hasNext()) {
 					TCPConnection con = i.next();
 					
-					// Handle incoming packets
-					while((p = con.getPacket()) != null)
-						p.handle(this, con);
+					con.handleIncomingPackets(this);
 					
 					// Update the connection and then remove it if the client
 					// has been disconnected.

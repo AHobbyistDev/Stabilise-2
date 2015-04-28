@@ -5,6 +5,6 @@ import com.stabilise.network.protocol.PacketHandler;
 
 public interface IClientHandshake extends PacketHandler {
 	
-	void handleVersionInfo(S000VersionInfo info);
+	void handleVersionInfo(S000VersionInfo packet);
 	
 }

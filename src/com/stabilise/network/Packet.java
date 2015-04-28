@@ -29,8 +29,11 @@ public abstract class Packet implements Sendable {
 	 * Implement this interface to indicate that a packet of a particular class
 	 * is 'important' - when queued for sending, important packets are added to
 	 * the head of the packet queue rather than the tail.
+	 * 
+	 * <p>This is package-private so that only protocol-independent packets can
+	 * be labelled important.
 	 */
-	public static interface Important {}
+	static interface Important {}
 	
 	
 	/**
@@ -48,7 +51,8 @@ public abstract class Packet implements Sendable {
 	public abstract void handle(PacketHandler handler, TCPConnection con);
 	
 	/**
-	 * Gets this packet's ID.
+	 * Gets this packet's ID. {@code -1} is returned if this packet is of a
+	 * type which has not been assigned to any protocol.
 	 */
 	public final int getID() {
 		return Protocol.getPacketID(this);
@@ -59,6 +63,20 @@ public abstract class Packet implements Sendable {
 	 */
 	public final boolean isImportant() {
 		return this instanceof Important;
+	}
+	
+	/**
+	 * Checks for whether or not the this packet is a universal, or
+	 * <i>protocol-independent</i>, packet.
+	 * 
+	 * <p>Protocol-independent packets may be sent using any protocol, and by
+	 * both clients and servers.
+	 * 
+	 * @return {@code true} if {@code packet} is protocol-independent; {@code
+	 * false} otherwise.
+	 */
+	public final boolean isUniversal() {
+		return Protocol.isPacketUniversal(this);
 	}
 	
 	@Override

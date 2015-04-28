@@ -17,7 +17,6 @@ public class NetworkTest implements Drivable {
 		server = new ServerImpl();
 		server.runConcurrently();
 		client = new ClientImpl();
-		client.connect();
 		driver = AppDriver.getDriverFor(this, 60, 60, Log.get());
 		driver.run();
 	}
@@ -29,7 +28,7 @@ public class NetworkTest implements Drivable {
 	@Override
 	public void update() {
 		client.update();
-		if(client.isDisconnected())
+		if(!client.isConnected())
 			driver.stop();
 	}
 	

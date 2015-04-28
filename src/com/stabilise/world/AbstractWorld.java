@@ -433,8 +433,11 @@ public abstract class AbstractWorld implements World {
 	public static class ParticleManager {
 		
 		private final AbstractWorld world;
+		/** Caches all the particle pools used and shared by each
+		 * ParticleSource. */
 		private final Map<Class<? extends Particle>, ParticlePool> pools =
 				new IdentityHashMap<>();
+		
 		
 		private ParticleManager(AbstractWorld world) {
 			this.world = world;
@@ -470,6 +473,10 @@ public abstract class AbstractWorld implements World {
 			if(pool == null) {
 				pool = new ParticlePool(p);
 				pools.put(p.getClass(), pool);
+			} else {
+				// We don't want p to go to waste so we may as well put it in
+				// the pool.
+				pool.put(p);
 			}
 			return pool;
 		}
@@ -495,7 +502,7 @@ public abstract class AbstractWorld implements World {
 		/** Functions as the initial and the minimum capacity. */
 		private static final int CAPACITY_INITIAL = 16;
 		/** Maximum pool capacity. */
-		private static final int CAPACITY_MAX = 64; // 2 expansions
+		private static final int CAPACITY_MAX = 1024; // 6 expansions
 		/** Number of active particles must be this many times the size of
 		 * the pool to force a resize. */
 		private static final int LOAD_FACTOR = 3;
@@ -585,14 +592,23 @@ public abstract class AbstractWorld implements World {
 		
 		/**
 		 * Flushes this pool by garbage-collecting all but a few pooled
-		 * particles, and shrinking the internal size if necessary.
+		 * particles, and shrinking the internal size if necessary. This
+		 * shouldn't be invoked too frequently as this can be an expensive
+		 * operation.
 		 */
 		void flush() {
+			// Dump all but RETENTION_ON_FLUSH-many pooled particles.
+			// TODO: We might want to retain a larger amount if the pool has
+			// sufficiently expanded.
 			pool.setBetween(null, RETENTION_ON_FLUSH, poolSize);
-			// If the pool has been expanded over its initial capacity and it
-			// doesn't appear to be very active, we'll shrink it.
-			if(pool.length() > CAPACITY_INITIAL && activeParticles < CAPACITY_INITIAL)
-				pool.resize((int)(pool.length() / EXPANSION));
+			// If the pool has been expanded over its initial capacity and the
+			// most recent expansion's worth of space is unused, we'll shrink
+			// the pool.
+			if(pool.length() > CAPACITY_INITIAL &&
+					activeParticles < pool.length() / LOAD_FACTOR) {
+				pool.resize(pool.length() / EXPANSION);
+				expansionLoad = pool.length() * LOAD_FACTOR;
+			}
 			if(poolSize > RETENTION_ON_FLUSH)
 				poolSize = RETENTION_ON_FLUSH;
 		}
@@ -615,6 +631,17 @@ public abstract class AbstractWorld implements World {
 		ParticleSource(ParticleManager manager, Particle template) {
 			this.manager = manager;
 			pool = manager.poolFor(template);
+		}
+		
+		/**
+		 * Creates a particle and adds it to the world as if by {@link
+		 * World#addParticle(Particle) addParticle(particle)}, and then returns
+		 * the particle.
+		 */
+		public Particle create() {
+			Particle p = pool.get();
+			manager.world.addParticle(p);
+			return p;
 		}
 		
 		/**
