@@ -15,6 +15,8 @@ import com.stabilise.world.provider.ClientProvider;
 
 public class GameClient extends Client implements IClientHandshake, IClientLogin {
 	
+	private boolean firstTimeConnecting = true;
+	
 	private ClientProvider provider;
 	private ClientWorld world;
 	private CharacterData player;
@@ -27,7 +29,11 @@ public class GameClient extends Client implements IClientHandshake, IClientLogin
 	
 	@Override
 	protected void onConnect() {
-		
+		if(firstTimeConnecting) {
+			firstTimeConnecting = false;
+			
+			
+		}
 	}
 	
 	@Override

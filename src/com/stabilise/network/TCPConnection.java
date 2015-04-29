@@ -6,11 +6,12 @@ import java.util.Objects;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import com.stabilise.network.protocol.PacketHandler;
 import com.stabilise.network.protocol.Protocol;
 import com.stabilise.util.Log;
+import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 
@@ -22,6 +23,7 @@ import com.stabilise.util.annotation.UserThread;
  * the input and output streams of the associated socket. The activity of these
  * threads is proportional to the amount of data traffic.
  */
+@NotThreadSafe
 public class TCPConnection {
 	
 	//--------------------==========--------------------
@@ -66,12 +68,21 @@ public class TCPConnection {
 	 * packet to tell our peer, to ensure it doesn't try to handle packets we
 	 * send across the new protocol while it is still using the old one. */
 	private Protocol protocol = Protocol.HANDSHAKE;
-	/** The ID of the protocol being used by our peer. */
-	// We start off with the same protocol as our peer
-	private int peerProtocol = protocol.getID();
+	/** Protocol being used by the read thread. This updates when our peer
+	 * sends us a {@link P254ProtocolSwitch} packet. This is only ever modified
+	 * by the read thread, and NOT the main thread. */
+	private Protocol readThreadProtocol = protocol;
+	/** Protocol being used by the write thread. This updates when we send a
+	 * {@link P254ProtocolSwitch} packet. This is only ever modified by the
+	 * write thread, and NOT the main thread. */
+	private Protocol writeThreadProtocol = protocol;
+	/** The protocol being used by our peer. This is basically the same as
+	 * {@link #readThreadProtocol}, but this is updated by the main thread when
+	 * the protocol switch packet is handled, rather than read. */
+	private Protocol peerProtocol = protocol;
 	/** Listener which is invoked when we our protocol synchronises with our
-	 * peer's. */
-	private Consumer<Protocol> protocolSyncListener = null;
+	 * peer's, in order to perform some sort of action. */
+	private BiConsumer<TCPConnection, Protocol> protocolSyncListener = null;
 	
 	private final AtomicInteger state = new AtomicInteger(STATE_STARTING);
 	
@@ -142,10 +153,16 @@ public class TCPConnection {
 	}
 	
 	/**
-	 * Performs an update tick on this TCPConnection. By default, this method
-	 * ensures we ping our peer on a per-second basis if possible.
+	 * Performs an update tick on this TCPConnection. This method {@link
+	 * Packet#handle(PacketHandler, TCPConnection) handles} all packets
+	 * received since the last update, and ensures we ping our peer on a
+	 * per-second basis.
+	 * 
+	 * @param handler The PacketHandler with which to handle received packets.
 	 */
-	void update() {
+	void update(PacketHandler handler) {
+		handleIncomingPackets(handler);
+		
 		if(pingSent == 0L) // initialise pingSent
 			pingSent = System.currentTimeMillis() - PING_INTERVAL;
 		long pingTime = System.currentTimeMillis() - pingSent;
@@ -160,6 +177,20 @@ public class TCPConnection {
 			pingSent = System.currentTimeMillis();
 			pingReceived = false;
 		}
+	}
+	
+	/**
+	 * Handles as many incoming packets as possible (i.e. until {@link
+	 * #getPacket()} returns {@code null}).
+	 * 
+	 * @param handler The handler with which to handle the packets.
+	 */
+	private void handleIncomingPackets(PacketHandler handler) {
+		for(Packet p; (p = getPacket()) != null;)
+			// Only handle protocol-dependent packets while our protocols are
+			// synced.
+			if(areProtocolsSynced() || p.isUniversal())
+				p.handle(handler, this);
 	}
 	
 	/**
@@ -215,19 +246,39 @@ public class TCPConnection {
 	}
 	
 	/**
+	 * Sets this connection's protocol synchronisation listener. The specified
+	 * listener is invoked when this connection synchronises protocols with its
+	 * peer - i.e. when it is known that it is safe to begin sending packets
+	 * across the new protocol.
+	 * 
+	 * @param listener The listener. {@code null} is allowed.
+	 */
+	public void setProtocolSyncListener(
+			BiConsumer<TCPConnection, Protocol> listener) {
+		this.protocolSyncListener = listener;
+	}
+	
+	/**
 	 * Handles a {@link P254ProtocolSwitch} packet, which tells us that our
 	 * peer has switched to a different protocol.
 	 */
-	void handlePeerProtocolSwitch(int protocolID) {
-		if(protocolID == peerProtocol)
+	void handlePeerProtocolSwitch(Protocol peerProtocol) {
+		if(this.peerProtocol == peerProtocol)
 			return;
-		this.peerProtocol = protocolID;
+		this.peerProtocol = peerProtocol;
 		tryProtocolSync();
 	}
 	
+	/**
+	 * @return {@code true} if our protocol is synchronised with our peer's.
+	 */
+	private boolean areProtocolsSynced() {
+		return protocol == peerProtocol;
+	}
+	
 	private void tryProtocolSync() {
-		if(protocol.getID() == peerProtocol && protocolSyncListener != null)
-			protocolSyncListener.accept(Protocol.getProtocol(peerProtocol));
+		if(areProtocolsSynced() && protocolSyncListener != null)
+			protocolSyncListener.accept(this, protocol);
 	}
 	
 	/**
@@ -237,16 +288,21 @@ public class TCPConnection {
 	 */
 	@UserThread("MainThread")
 	public void sendPacket(Packet packet) {
+		// Discard protocol-dependent packets until we synchronise protocols
+		// with our peer.
+		if(!areProtocolsSynced() && !packet.isUniversal())
+			return;
+		
 		if(server) {
 			if(!protocol.isServerPacket(packet)) {
 				log.postWarning("Attempting to send a non-server packet ("
-						+ packet + ")");
+						+ packet + ") across protocol " + protocol);
 				return;
 			}
 		} else {
 			if(!protocol.isClientPacket(packet)) {
 				log.postWarning("Attempting to send a non-client packet ("
-						+ packet + ")");
+						+ packet + ") across protocol " + protocol);
 				return;
 			}
 		}
@@ -263,24 +319,8 @@ public class TCPConnection {
 	 * @return The oldest queued packet, or {@code null} if the queue is empty.
 	 */
 	@UserThread("MainThread")
-	public Packet getPacket() {
+	private Packet getPacket() {
 		return packetQueueIn.poll();
-	}
-	
-	/**
-	 * Handles as many incoming packets as possible (i.e. until {@link
-	 * #getPacket()} returns {@code null}), as if by:
-	 * 
-	 * <pre>
-	 * for(Packet p; (p = getPacket()) != null;)
-	 *     p.handle(handler, this);<pre>
-	 * 
-	 * @param handler The handler with which to handle the packets.
-	 */
-	@UserThread("MainThread")
-	public void handleIncomingPackets(PacketHandler handler) {
-		for(Packet p; (p = getPacket()) != null;)
-			p.handle(handler, this);
 	}
 	
 	/**
@@ -294,10 +334,16 @@ public class TCPConnection {
 	 */
 	@UserThread("ReadThread")
 	private void readPacket() throws IOException {
-		Packet packet = protocol.readPacket(server, in, log);
+		Packet packet = readThreadProtocol.readPacket(server, in, log);
 		if(packet == null)
 			requestClose("End of stream.");
 		else if(packet != Packet.DUMMY_PACKET) {
+			// If the read thread encounters a protocol switch packet, it means
+			// our peer will be sending through that protocol henceforth, so
+			// we'll switch to using that protocol.
+			if(packet instanceof P254ProtocolSwitch)
+				readThreadProtocol = ((P254ProtocolSwitch)packet).protocol;
+			
 			if(packet.isImportant())
 				packetQueueIn.addFirst(packet);
 			else
@@ -337,7 +383,11 @@ public class TCPConnection {
 	
 	@UserThread("WriteThread")
 	private void doWritePacket(Packet packet) throws IOException {
-		protocol.writePacket(out, packet);
+		// Once the write thread encounters a protocol switch packet, we
+		// update this thread's view of the protocol.
+		if(packet instanceof P254ProtocolSwitch)
+			writeThreadProtocol = ((P254ProtocolSwitch)packet).protocol;
+		writeThreadProtocol.writePacket(out, packet);
 		packetsSent++;
 	}
 	
@@ -348,20 +398,6 @@ public class TCPConnection {
 	private void requestClose(String reason) {
 		disconnectReason = Objects.requireNonNull(reason);
 		state.compareAndSet(STATE_ACTIVE, STATE_CLOSE_REQUESTED);
-	}
-	
-	/**
-	 * Returns {@code true} if closing this connection has been requested by
-	 * either the reader thread or the writer thread due to encountering an
-	 * exception.
-	 * 
-	 * <p>If {@code true} is returned, this means that this TCPConnection is
-	 * no longer functioning, and should be properly closed via {@link
-	 * #closeConnection()}.
-	 */
-	@ThreadSafe
-	public boolean closeRequested() {
-		return state.get() == STATE_CLOSE_REQUESTED;
 	}
 	
 	/**
@@ -421,10 +457,10 @@ public class TCPConnection {
 	
 	/**
 	 * Returns {@code true} if this connection is active; {@code false}
-	 * otherwise. A connection should generally be {@link #closeConnection()
-	 * closed} if this method returns false, as {@code false} is returned by
-	 * this method in all cases where {@link #closeRequested()} returns {@code
-	 * true}.
+	 * otherwise. If this returns {@code false}, it is important that you
+	 * invoke {@link #closeConnection()} to properly terminate this connection
+	 * (since it is possible for a connection to exist in a state where it is
+	 * inactive but still not terminated).
 	 */
 	public boolean isActive() {
 		return state.get() == STATE_ACTIVE;
@@ -433,7 +469,8 @@ public class TCPConnection {
 	/**
 	 * @return {@code true} if this connection is terminated; {@code false}
 	 * otherwise. If this connection is neither active nor terminated, it is
-	 * currently in the process of terminating.
+	 * either currently in the process of terminating, or needs to be
+	 * terminated via {@link #closeConnection()}.
 	 */
 	public boolean isTerminated() {
 		return state.get() == STATE_TERMINATED;

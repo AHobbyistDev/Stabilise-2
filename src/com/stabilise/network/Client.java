@@ -135,8 +135,7 @@ public abstract class Client implements PacketHandler {
 	 */
 	public final void update() {
 		if(!checkDisconnect()) {
-			connection.handleIncomingPackets(handler);
-			connection.update();
+			connection.update(handler);
 			doUpdate();
 		}
 	}

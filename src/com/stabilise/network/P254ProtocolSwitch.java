@@ -9,7 +9,7 @@ import com.stabilise.network.protocol.Protocol;
 
 public class P254ProtocolSwitch extends Packet {
 	
-	private int protocolID;
+	public Protocol protocol;
 	
 	public P254ProtocolSwitch() {}
 	
@@ -18,22 +18,22 @@ public class P254ProtocolSwitch extends Packet {
 	 * @throws NullPointerException if newProtocol is null.
 	 */
 	public P254ProtocolSwitch(Protocol newProtocol) {
-		protocolID = newProtocol.getID();
+		protocol = newProtocol;
 	}
 	
 	@Override
 	public void readData(DataInputStream in) throws IOException {
-		protocolID = in.readByte();
+		protocol = Protocol.getProtocol(in.readByte());
 	}
 	
 	@Override
 	public void writeData(DataOutputStream out) throws IOException {
-		out.writeByte(protocolID);
+		out.writeByte(protocol.getID());
 	}
 	
 	@Override
 	public void handle(PacketHandler handler, TCPConnection con) {
-		con.handlePeerProtocolSwitch(protocolID);
+		con.handlePeerProtocolSwitch(protocol);
 	}
 	
 }

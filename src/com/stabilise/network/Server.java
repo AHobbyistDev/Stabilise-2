@@ -252,11 +252,10 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 				while(i.hasNext()) {
 					TCPConnection con = i.next();
 					
-					con.handleIncomingPackets(this);
-					
 					// Update the connection and then remove it if the client
 					// has been disconnected.
-					con.update();
+					con.update(this);
+					
 					if(!con.isActive()) {
 						con.closeConnection();
 						onClientDisconnect(con);
