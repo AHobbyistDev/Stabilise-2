@@ -1,6 +1,6 @@
 package com.stabilise.util.concurrent;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.stabilise.util.annotation.ThreadSafe;
 
@@ -18,8 +18,24 @@ public class TaskTracker implements Tracker {
 	/** Task status. Never null. */
 	private volatile String status;
 	
-	private final AtomicInteger numPartsCompleted = new AtomicInteger(0);
-	private final int numPartsToComplete;
+	/** The state of the task, encoded as follows, from the highest bit to the
+	 * lowest bit:
+	 * 
+	 * <ul>
+	 * <li><b>1</b> - 1 if the task is done, 0 if not. A task which is done may
+	 *     not necessarily have been completed; for example, it may have been
+	 *     cancelled.
+	 * <li><b>2</b> - 1 if the task is completed, 0 if not.
+	 * <li><b>3-33</b> (31 bits) - the total number of parts in the task.
+	 * <li><b>34-64</b> (31 bits) - the number of parts which have been
+	 *     completed. Always less than the total number of parts.
+	 * </ul>
+	 * 
+	 * <p>Since the number of completed parts, and total number of parts,
+	 * cannot be negative, we make space for the two indicator bits by shaving
+	 * off their negation bits without sacrificing information.
+	 */
+	private final AtomicLong state;
 	
 	
 	/**
@@ -40,15 +56,15 @@ public class TaskTracker implements Tracker {
 	 * @param parts The number of parts to complete.
 	 * 
 	 * @throws NullPointerException if {@code status} is {@code null}.
-	 * @throws IllegalArgumentException if {@code parts < 0}.
+	 * @throws IllegalArgumentException if {@code parts <= 0}.
 	 */
 	public TaskTracker(String status, int parts) {
 		if(status == null)
 			throw new NullPointerException("status is null");
-		if(parts < 0)
-			throw new IllegalArgumentException("parts < 0");
+		if(parts <= 0)
+			throw new IllegalArgumentException("parts <= 0");
 		this.status = status;
-		numPartsToComplete = parts;
+		state = new AtomicLong(setParts(0L, parts));
 	}
 	
 	/**
@@ -60,9 +76,11 @@ public class TaskTracker implements Tracker {
 	 * 
 	 * @param status The name.
 	 * 
+	 * @throws IllegalStateException if the task has already been completed.
 	 * @throws NullPointerException if {@code status} is {@code null}.
 	 */
 	public void setStatus(String status) {
+		checkDone(state.get());
 		if(status == null)
 			throw new IllegalArgumentException("status is null!");
 		this.status = status;
@@ -86,6 +104,8 @@ public class TaskTracker implements Tracker {
 	 * <p>Memory consistency effects: actions in a thread prior to invoking
 	 * this method happen before actions in another thread which invokes {@link
 	 * #percentComplete()} or {@link #completed()}.
+	 * 
+	 * @throws IllegalStateException if the task has already been completed.
 	 */
 	public void increment() {
 		increment(1);
@@ -97,15 +117,29 @@ public class TaskTracker implements Tracker {
 	 * 
 	 * <p>Memory consistency effects: actions in a thread prior to invoking
 	 * this method happen before actions in another thread which invokes {@link
-	 * #percentComplete()} or {@link #completed()}.
+	 * #percentComplete()}.
+	 * 
+	 * @throws IllegalStateException if the task is already done.
 	 */
 	public void increment(int parts) {
-		numPartsCompleted.getAndAdd(parts);
+		long s;
+		int p, c;
+		do {
+			s = state.get();
+			checkDone(s);
+			p = extractParts(s);
+			c = extractPartsCompleted(s) + parts;
+			if(c < 0 || c > p) // if we overflow or exceed parts, clamp to parts
+				c = p;
+		} while(!state.compareAndSet(s, setState(p, c)));
 	}
 	
 	/**
 	 * Invokes {@link #increment()} and then {@link #setStatus(String)
 	 * setStatus(status)}.
+	 * 
+	 * @throws IllegalStateException if the task is already done.
+	 * @throws NullPointerException if {@code status} is {@code null}.
 	 */
 	public void next(String status) {
 		next(1, status);
@@ -114,15 +148,50 @@ public class TaskTracker implements Tracker {
 	/**
 	 * Invokes {@link #increment(int) increment(parts)} and then {@link
 	 * #setStatus(String) setStatus(status)}.
+	 * 
+	 * @throws IllegalStateException if the task is already done.
 	 */
 	public void next(int parts, String status) {
-		increment(parts);
-		setStatus(status);
+		synchronized(state) {
+			increment(parts);
+			setStatus(status);
+		}
+	}
+	
+	/**
+	 * Resets this tracker, by setting the number of {@link #parts() parts} to
+	 * the specified value, and the number of {@link #partsCompleted()
+	 * completed parts} to {@code 0}.
+	 * 
+	 * @param parts The number of parts to reset to.
+	 * 
+	 * @throws IllegalStateException if the task is already done.
+	 */
+	public void reset(int parts) {
+		checkDone(state.get());
+		state.set(setState(parts, 0));
+	}
+	
+	/**
+	 * Resets this tracker, by setting the number of {@link #parts() parts} to
+	 * the specified value, and the number of {@link #partsCompleted()
+	 * completed parts} to {@code 0}. This method also sets the status.
+	 * 
+	 * @param parts The number of parts to reset to.
+	 * @param status The new status.
+	 * 
+	 * @throws IllegalStateException if the task is already done.
+	 */
+	public void reset(int parts, String status) {
+		synchronized(state) {
+			reset(parts);
+			setStatus(status);
+		}
 	}
 	
 	@Override
 	public int parts() {
-		return numPartsToComplete;
+		return extractParts(state.get());
 	}
 	
 	/**
@@ -134,15 +203,11 @@ public class TaskTracker implements Tracker {
 	 */
 	@Override
 	public int partsCompleted() {
-		return numPartsCompleted.get();
+		return extractPartsCompleted(state.get());
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * 
-	 * Note that the returned value may not necessarily be within the range of
-	 * {@code 0.0} to {@code 1.0} if the task behaves contrary to the general
-	 * contract of this class.
 	 * 
 	 * <p>Memory consistency effects: actions in a thread prior to invoking
 	 * {@link #increment()} or {@link #increment(int)} happen-before actions in
@@ -150,23 +215,75 @@ public class TaskTracker implements Tracker {
 	 */
 	@Override
 	public float percentComplete() {
-		return numPartsToComplete == 0f
-				? 1f
-				: (float)numPartsCompleted.get() / numPartsToComplete;
+		long s = state.get();
+		return (float)extractPartsCompleted(s) / extractParts(s);
+	}
+	
+	private void checkDone(long state) {
+		if(extractDone(state))
+			throw new IllegalStateException("Task already done!");
 	}
 	
 	/**
-	 * {@inheritDoc}
+	 * Sets the task as completed.
 	 * 
-	 * Note that this may never return {@code true} if implementing code does
-	 * not ensure to invoke {@link #increment()} or {@link #increment(int)}
-	 * appropriately.
-	 * 
-	 * @return {@code true} if the task has been completed; {@code false} if it
-	 * has not.
+	 * @throws IllegalStateException if the task is already done.
 	 */
+	public synchronized void setCompleted() {
+		setCompletionStatus(true);
+		notifyAll();
+	}
+	
+	/**
+	 * Sets the task as failed.
+	 */
+	public synchronized void setFailed() {
+		setCompletionStatus(false);
+		state.notifyAll();
+	}
+	
+	private void setCompletionStatus(boolean success) {
+		long s;
+		do {
+			s = state.get();
+			if(extractDone(s))
+				throw new IllegalStateException("Task already done!");
+		} while(!state.compareAndSet(s, setCompleted(s, success)));
+	}
+	
+	@Override
+	public boolean stopped() {
+		return extractDone(state.get());
+	}
+	
+	@Override
 	public boolean completed() {
-		return numPartsCompleted.get() >= numPartsToComplete;
+		return extractCompleted(state.get());
+	}
+	
+	@Override
+	public boolean failed() {
+		return extractFailed(state.get());
+	}
+	
+	@Override
+	public synchronized void waitUntilDone() throws InterruptedException {
+		while(!stopped())
+			this.wait();
+	}
+	
+	@Override
+	public synchronized void waitUninterruptibly() {
+		boolean interrupted = false;
+		while(!stopped()) {
+			try {
+				this.wait();
+			} catch(InterruptedException retry) {
+				interrupted = true;
+			}
+		}
+		if(interrupted)
+			Thread.currentThread().interrupt();
 	}
 	
 	/**
@@ -191,7 +308,54 @@ public class TaskTracker implements Tracker {
 	 */
 	@Override
 	public String toString() {
-		return status + "... " + ((int)(100*percentComplete())) + "%";
+		synchronized(state) {
+			return status + "... " + ((int)(100*percentComplete())) + "%";
+		}
+	}
+	
+	private static boolean extractDone(long state) {
+		return state < 0;
+	}
+	
+	private static boolean extractCompleted(long state) {
+		return (state & 0x40000000) == 0x40000000;
+	}
+	
+	private static boolean extractFailed(long state) {
+		return extractDone(state) && !extractCompleted(state);
+	}
+	
+	private static int extractParts(long state) {
+		return (int)(state >>> 31) & 0x7FFF;
+	}
+	
+	private static int extractPartsCompleted(long state) {
+		return (int)state & 0x7FFF;
+	}
+	
+	private static long setParts(long state, int parts) {
+		return (state & 0xC0007FFF) | (((long)parts) << 31);
+	}
+	
+	private static long setPartsCompleted(long state, int partsCompleted) {
+		return (state & 0xFFFF8000) | partsCompleted;
+	}
+	
+	//private static long setDone(long state, boolean done) {
+	//	return done ? state | 0x80000000 : state & 0x3FFFFFFF;
+	//}
+	
+	/** Sets the done bit, and optionally sets the completed bit. If completed,
+	 * this also sets partsCompleted = parts. */
+	private static long setCompleted(long state, boolean completed) {
+		// Invoking this method implies done, so we set done in either case
+		return completed
+				? setPartsCompleted(state, extractParts(state)) | 0xC0000000
+				: state | 0x80000000;
+	}
+	
+	private static long setState(int parts, int partsCompleted) {
+		return (((long)parts) << 31) | partsCompleted;
 	}
 	
 }

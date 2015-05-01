@@ -1074,8 +1074,38 @@ public interface World extends Checkable {
 		}
 		
 		@Override
+		public float percentComplete() {
+			return tracker.percentComplete();
+		}
+		
+		@Override
+		public boolean completed() {
+			return tracker.completed();
+		}
+		
+		@Override
 		public String toString() {
 			return tracker.toString();
+		}
+		
+		@Override
+		public boolean stopped() {
+			return tracker.stopped();
+		}
+		
+		@Override
+		public boolean failed() {
+			return tracker.failed();
+		}
+		
+		@Override
+		public void waitUntilDone() throws InterruptedException {
+			tracker.waitUntilDone();
+		}
+		
+		@Override
+		public void waitUninterruptibly() {
+			tracker.waitUninterruptibly();
 		}
 		
 	}

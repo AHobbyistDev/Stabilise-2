@@ -6,6 +6,7 @@ import static com.stabilise.core.Constants.DEFAULT_PORT;
 
 import com.stabilise.network.Client;
 import com.stabilise.network.TCPConnection;
+import com.stabilise.network.protocol.Protocol;
 import com.stabilise.network.protocol.handshake.C000VersionInfo;
 import com.stabilise.network.protocol.handshake.IClientHandshake;
 import com.stabilise.network.protocol.handshake.S000VersionInfo;
@@ -20,8 +21,8 @@ public class ClientImpl extends Client implements IClientHandshake {
 	}
 	
 	@Override
-	protected void onConnect() {
-		con = getConnection();
+	protected void handleProtocolSwitch(TCPConnection con, Protocol protocol) {
+		this.con = con;
 		con.sendPacket(new C000VersionInfo().setVersionInfo());
 	}
 	

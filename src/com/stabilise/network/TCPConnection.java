@@ -49,7 +49,9 @@ public class TCPConnection {
 	private static final AtomicInteger CONNECTIONS_SERVER = new AtomicInteger(0);
 	private static final AtomicInteger CONNECTIONS_CLIENT = new AtomicInteger(0);
 	
-	/** Number of ms between consective ping requests. */
+	private static final Protocol DEFAULT_PROTOCOL = Protocol.HANDSHAKE;
+	
+	/** Number of ms between consecutive ping requests. */
 	private static final long PING_INTERVAL = 1000;
 	/** Number of ms before a connection disconnects automatically due to
 	 * large ping. */
@@ -63,11 +65,11 @@ public class TCPConnection {
 	 * client-side. */
 	public final boolean server;
 	
-	/** The current connection protocol. Default is {@link Protocol#HANDSHAKE}.
+	/** The current connection protocol. Default is {@link #DEFAULT_PROTOCOL}.
 	 * When this is changed via {@link #setProtocol(Protocol)} we send out a
 	 * packet to tell our peer, to ensure it doesn't try to handle packets we
 	 * send across the new protocol while it is still using the old one. */
-	private Protocol protocol = Protocol.HANDSHAKE;
+	private Protocol protocol = DEFAULT_PROTOCOL;
 	/** Protocol being used by the read thread. This updates when our peer
 	 * sends us a {@link P254ProtocolSwitch} packet. This is only ever modified
 	 * by the read thread, and NOT the main thread. */
@@ -83,6 +85,7 @@ public class TCPConnection {
 	/** Listener which is invoked when we our protocol synchronises with our
 	 * peer's, in order to perform some sort of action. */
 	private BiConsumer<TCPConnection, Protocol> protocolSyncListener = null;
+	private boolean hasInitiallySynced = false;
 	
 	private final AtomicInteger state = new AtomicInteger(STATE_STARTING);
 	
@@ -111,7 +114,7 @@ public class TCPConnection {
 	private boolean pingReceived = true;
 	/** Ping, in ms. Updated every second, or after the last ping request
 	 * returns, whichever is later. */
-	private int ping = 0;
+	private int ping = -1;
 	
 	private volatile String disconnectReason = "";
 	
@@ -119,7 +122,7 @@ public class TCPConnection {
 	
 	
 	/**
-	 * Creates a new TCPConnection, using the {@link Protocol#HANDSHAKE
+	 * Creates a new TCPConnection, using the {@link #DEFAULT_PROTOCOL
 	 * handshake protocol} by default.
 	 * 
 	 * @param socket The socket upon which to base the connection.
@@ -129,8 +132,35 @@ public class TCPConnection {
 	 * @throws IOException if the connection could not be established.
 	 */
 	public TCPConnection(Socket socket, boolean server) throws IOException {
+		this(socket, server, null);
+	}
+	
+	/**
+	 * Creates a new TCPConnection, using the {@link #DEFAULT_PROTOCOL
+	 * handshake protocol} by default.
+	 * 
+	 * <p>If {@code protocolSyncListener} is non-null, it will be invoked with
+	 * the {@link #DEFAULT_PROTOCOL default protocol} when {@link
+	 * #update(PacketHandler)} is first invoked. If using this constructor is
+	 * not preferred, then as long as the listener is manually set through
+	 * {@link #setProtocolSyncListener(BiConsumer)} before {@code update()} is
+	 * first invoked, then it will behave as if you set it using this
+	 * constructor.
+	 * 
+	 * @param socket The socket upon which to base the connection.
+	 * @param server Whether or not this is a server-side connection.
+	 * @param protocolSyncListener This connection's {@link
+	 * #setProtocolSyncListener(BiConsumer) protocol synchronisation listener}.
+	 * This is allowed to be {@code null}.
+	 * 
+	 * @throws NullPointerException if {@code socket} is {@code null}.
+	 * @throws IOException if the connection could not be established.
+	 */
+	public TCPConnection(Socket socket, boolean server,
+			BiConsumer<TCPConnection, Protocol> protocolSyncListener) throws IOException {
 		this.socket = socket;
 		this.server = server;
+		this.protocolSyncListener = protocolSyncListener;
 		
 		int id = server
 				? CONNECTIONS_SERVER.getAndIncrement()
@@ -161,6 +191,14 @@ public class TCPConnection {
 	 * @param handler The PacketHandler with which to handle received packets.
 	 */
 	void update(PacketHandler handler) {
+		if(!hasInitiallySynced) {
+			hasInitiallySynced = true;
+			if(protocol == DEFAULT_PROTOCOL)
+				tryProtocolSync();
+			else
+				log.postWarning("Unexpected protocol " + protocol);
+		}
+		
 		handleIncomingPackets(handler);
 		
 		if(pingSent == 0L) // initialise pingSent
@@ -172,10 +210,14 @@ public class TCPConnection {
 		}
 		// If we're not currently waiting for a ping response and it's been at
 		// least 1 second since we sent our last ping request, sent a request.
-		if(pingReceived && pingTime > PING_INTERVAL) {
-			sendPacket(new P255Ping(++pingCount, true));
-			pingSent = System.currentTimeMillis();
-			pingReceived = false;
+		if(pingTime > PING_INTERVAL) {
+			if(pingReceived) {
+				sendPacket(new P255Ping(++pingCount, true));
+				pingSent = System.currentTimeMillis();
+				pingReceived = false;
+			} else {
+				ping = (int)pingTime;
+			}
 		}
 	}
 	
@@ -219,7 +261,8 @@ public class TCPConnection {
 	
 	/**
 	 * Returns this connection's ping to its peer, which is the approximate
-	 * time in ms required for a round trip of data.
+	 * time in ms required for a round trip of data. {@code -1} is returned if
+	 * we haven't yet pinged our peer.
 	 */
 	public int getPing() {
 		return ping;
@@ -248,10 +291,16 @@ public class TCPConnection {
 	/**
 	 * Sets this connection's protocol synchronisation listener. The specified
 	 * listener is invoked when this connection synchronises protocols with its
-	 * peer - i.e. when it is known that it is safe to begin sending packets
-	 * across the new protocol.
+	 * peer - i.e. when it is known that both us and our peer are now using the
+	 * same protocol.
 	 * 
-	 * @param listener The listener. {@code null} is allowed.
+	 * <p>If {@link #update(PacketHandler)} has not yet been invoked on this
+	 * connection, then the specified listener (if it is non-null), will be
+	 * invoked upon the first invocation of {@code update()} with the {@link
+	 * #DEFAULT_PROTOCOL default protocol}.
+	 * 
+	 * @param listener The listener. A value of {@code null} removes the
+	 * current listener, if there is one.
 	 */
 	public void setProtocolSyncListener(
 			BiConsumer<TCPConnection, Protocol> listener) {

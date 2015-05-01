@@ -51,16 +51,27 @@ public class C000VersionInfo extends Packet {
 	}
 	
 	/**
+	 * Returns {@code true} if our current game version is outdated compared to
+	 * our peer.
+	 */
+	public boolean areWeOutdated() {
+		return VERSION.precedes(senderBackwardsVersion);
+	}
+	
+	/**
+	 * Returns {@code true} if our peer's game version is outdated compared to
+	 * us.
+	 */
+	public boolean isPeerOutdated() {
+		return senderVersion.precedes(BACKWARDS_VERSION);
+	}
+	
+	/**
 	 * Returns {@code true} if the current game version is compatible with the
 	 * sender's game version.
 	 */
 	public boolean isCompatible() {
-		// true if our version is newer than the sender's oldest allowable version
-		boolean weAreCompatible = !VERSION.precedes(senderBackwardsVersion);
-		// true if the sender's version is newer than our oldest allowable version
-		boolean senderIsCompatible = !senderVersion.precedes(BACKWARDS_VERSION);
-		
-		return weAreCompatible && senderIsCompatible;
+		return !areWeOutdated() && !isPeerOutdated();
 	}
 	
 }

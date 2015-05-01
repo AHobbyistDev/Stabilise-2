@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.stabilise.network.protocol.PacketHandler;
+import com.stabilise.network.protocol.Protocol;
 import com.stabilise.util.AppDriver;
 import com.stabilise.util.AppDriver.Drivable;
 import com.stabilise.util.Log;
@@ -241,6 +242,39 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	protected abstract ServerSocket createSocket() throws IOException;
 	
 	/**
+	 * This method is invoked when this server synchronises protocols with a
+	 * client, but only when this {@code Server} is constructed using {@link
+	 * #Server()} or {@link #Server(int)}. To make use of this method when
+	 * either the {@link #Server(ClientConnectionFactory)} or {@link
+	 * #Server(int, ClientConnectionFactory)} constructors are used, construct
+	 * {@code TCPConnection} objects with protocol switch listeners which
+	 * appropriately redirect to this method. For example:
+	 * 
+	 * <pre>
+	 * class MyServer extends Server {
+	 *     public MyServer() {
+	 *         super((s) -> {
+	 *             return new TCPConnection(s, true, (c,p) -> {
+	 *                 handleProtocolSwitch(c,p);
+	 *             }); 
+	 *         });
+	 *     }
+	 * }</pre>
+	 * 
+	 * <p>This method does nothing in the default implementation.
+	 * 
+	 * @param con The {@code TCPConnection} connected to a client.
+	 * @param protocol The new protocol.
+	 * 
+	 * @deprecated Turns out we can't refer to an instance method in a
+	 * constructor.
+	 */
+	@SuppressWarnings("unused")
+	private void handleProtocolSwitch(TCPConnection con, Protocol protocol) {
+		// nothing in the default implementation
+	}
+	
+	/**
 	 * Performs an update tick.
 	 */
 	@Override
@@ -388,6 +422,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	/**
 	 * Adds a client connection through the specified client socket.
 	 */
+	@UserThread("ClientListenerThread")
 	private void addConnection(Socket socket) {
 		try {
 			TCPConnection con = clientFactory.create(socket);
@@ -409,7 +444,9 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	/**
 	 * This method is invoked by the client listener thread when it connects to
 	 * a new client, before the specified {@code TCPConnection} is added to
-	 * {@link #connections the list of connections}.
+	 * {@link #connections the list of connections}. In other words, actions
+	 * performed by this method happen-before actions on a thread which sees
+	 * {@code con} in {@link #connections}.
 	 * 
 	 * <p>The default implementation does nothing.
 	 */
@@ -420,7 +457,10 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	 * This method is invoked when a client disconnects from this server from
 	 * within {@link #update()}, after the connection is {@link
 	 * TCPConnection#closeConnection() closed}, and before connection is
-	 * removed from {@link #connections the list of connections}.
+	 * removed from {@link #connections the list of connections}. In other
+	 * words, actions performed by this method happen-before actions on a
+	 * thread which sees that {@code con} has been removed from {@link
+	 * #connections}.
 	 * 
 	 * <p>The default implementation does nothing.
 	 */

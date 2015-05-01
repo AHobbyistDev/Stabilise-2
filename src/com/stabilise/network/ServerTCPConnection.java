@@ -10,6 +10,10 @@ import java.net.Socket;
  */
 public class ServerTCPConnection extends TCPConnection {
 	
+	/** Whether or not the client can log in. This is false if either we or the
+	 * client are running an outdated game version. */
+	public boolean canLogIn = true;
+	
 	/** True if the client is logged in, and false if they're waiting at the
 	 * server select screen or for their login request to be validated. */
 	public boolean loggedIn = false;
@@ -26,16 +30,11 @@ public class ServerTCPConnection extends TCPConnection {
 	
 	
 	/**
-	 * Creates a new ServerTCPConnection.
-	 * 
-	 * @param socket The socket upon which to base the connection.
-	 * 
-	 * @throws IOException if the connection could not be created.
+	 * @see TCPConnection#TCPConnection(Socket, boolean)
+	 * new TCPConnection(socket, true)
 	 */
 	public ServerTCPConnection(Socket socket) throws IOException {
 		super(socket, true);
-		
-		hash = socket.hashCode();
 	}
 	
 	//--------------------==========--------------------

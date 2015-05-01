@@ -8,9 +8,15 @@ import java.net.ServerSocket;
 import java.util.Objects;
 
 import com.stabilise.network.Server;
+import com.stabilise.network.ServerTCPConnection;
+import com.stabilise.network.TCPConnection;
+import com.stabilise.network.protocol.Protocol;
+import com.stabilise.network.protocol.handshake.C000VersionInfo;
+import com.stabilise.network.protocol.handshake.IServerHandshake;
+import com.stabilise.network.protocol.handshake.S000VersionInfo;
 import com.stabilise.world.provider.HostProvider;
 
-public class GameServer extends Server {
+public class GameServer extends Server implements IServerHandshake {
 	
 	public final HostProvider world;
 	private final int maxPlayers;
@@ -27,7 +33,9 @@ public class GameServer extends Server {
 	 * @throws IllegalArgumentException if {@code maxPlayers < 1}.
 	 */
 	public GameServer(HostProvider world, int maxPlayers) {
-		super(Constants.TICKS_PER_SECOND);
+		super(Constants.TICKS_PER_SECOND, (s) -> {
+			return new ServerTCPConnection(s);
+		});
 		
 		if(maxPlayers < 1)
 			throw new IllegalArgumentException("Invalid max number of players "
@@ -42,9 +50,45 @@ public class GameServer extends Server {
 		return new ServerSocket(DEFAULT_PORT, maxPlayers, InetAddress.getLocalHost());
 	}
 	
+	/**
+	 * Handles a switch with a client to a new protocol.
+	 */
+	private void handleProtocolSwitch(ServerTCPConnection con, Protocol protocol) {
+		switch(protocol) {
+			case HANDSHAKE:
+				// Client sends first so it has a harder time providing valid
+				// falsified information.
+				break;
+			case LOGIN:
+				break;
+			case GAME:
+				break;
+			default:
+				throw new IllegalArgumentException("Unrecognised protocol");
+		}
+	}
+	
 	@Override
 	public void doUpdate() {
-		
+		world.update();
 	}
-
+	
+	@Override
+	protected void onClientConnect(TCPConnection con) {
+		con.setProtocolSyncListener((c,p) -> {
+			handleProtocolSwitch((ServerTCPConnection)c, p);
+		});
+	}
+	
+	// HANDSHAKE---------------------------------------------------------------
+	
+	@Override
+	public void handleVersionInfo(C000VersionInfo packet, TCPConnection con) {
+		boolean compatible = packet.isCompatible();
+		((ServerTCPConnection)con).canLogIn = compatible;
+		con.sendPacket(new S000VersionInfo(compatible).setVersionInfo());
+		
+		con.setProtocol(Protocol.LOGIN);
+	}
+	
 }

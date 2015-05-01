@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.Objects;
 
 import com.stabilise.network.protocol.PacketHandler;
+import com.stabilise.network.protocol.Protocol;
 import com.stabilise.util.Log;
 
 /**
@@ -86,10 +87,14 @@ public abstract class Client implements PacketHandler {
 			throw new IllegalStateException("Cannot connect unless disconnected!");
 		try {
 			Socket socket = new Socket(address, port);
-			connection = new TCPConnection(socket, false);
+			// Set state before actually establishing connection so there's
+			// some sense of continuity in handleProtocolSwitch() when it is
+			// first invoked.
 			state = STATE_CONNECTED;
-			onConnect();
+			connection = new TCPConnection(socket, false,
+					(c,p) -> { handleProtocolSwitch(c,p); });
 		} catch(IOException e) {
+			state = STATE_DISCONNECTED;
 			log.postWarning("Could not connect to server at "
 					+ address.getHostAddress() + ":" + port + " (" +
 					e.getClass().getSimpleName() + ": " + e.getMessage() + ")");
@@ -97,12 +102,21 @@ public abstract class Client implements PacketHandler {
 	}
 	
 	/**
-	 * Invoked by {@link #connect()} immediately after a connection is
-	 * established.
+	 * This method is invoked when this client synchronises protocols with the
+	 * server, and as such should be used to perform any desired actions upon
+	 * entering a protocol.
 	 * 
-	 * <p>The default implementation does nothing.
+	 * <p>This method is invoked by {@link #connect()} when a connection is
+	 * established, with the {@link Protocol#HANDSHAKE HANDSHAKE} protocol.
+	 * 
+	 * <p>This method does nothing in the default implementation.
+	 * 
+	 * @param con This client's underlying {@code TCPConnection}.
+	 * @param protocol The new protocol.
 	 */
-	protected void onConnect() {}
+	protected void handleProtocolSwitch(TCPConnection con, Protocol protocol) {
+		// nothing in the default implementation
+	}
 	
 	/**
 	 * Closes this client's connection, if it is currently connected.
