@@ -49,8 +49,8 @@ public class NBTExporter {
 	// fields). This pretty much ensures we export mutable state and don't
 	// bother with immutable state.
 	private static final Predicate<Field> ALLOWED_TO_EXPORT = (f) -> {
-		return !(Modifier.isFinal(f.getModifiers())
-					&& f.getType().getAnnotation(Exportable.class) == null);
+		return !Modifier.isFinal(f.getModifiers())
+					|| f.getType().getAnnotation(Exportable.class) == null;
 	};
 	
 	private NBTExporter() {}
@@ -221,7 +221,7 @@ public class NBTExporter {
 	 * @see ExportToNBT
 	 * @see Exportable
 	 */
-	public void importCompletely(Object o, NBTTagCompound tag) {
+	public static void importCompletely(Object o, NBTTagCompound tag) {
 		doImport(o, tag, false, PRED_ALL);
 	}
 	
@@ -254,11 +254,12 @@ public class NBTExporter {
 	 * @see ExportToNBT
 	 * @see Exportable
 	 */
-	public void importCompletelyUnsafe(Object o, NBTTagCompound tag) throws IOException {
+	public static void importCompletelyUnsafe(Object o, NBTTagCompound tag) throws IOException {
 		doImport(o, tag, true, PRED_ALL);
 	}
 	
-	private static NBTTagCompound doExport(Object o, NBTTagCompound tag, Predicate<Field> pred) {
+	private static NBTTagCompound doExport(Object o, NBTTagCompound tag,
+			Predicate<Field> pred) {
 		for(Field f : o.getClass().getDeclaredFields()) {
 			try {
 				if(pred.test(f) && ALLOWED_TO_EXPORT.test(f)) {
@@ -301,19 +302,24 @@ public class NBTExporter {
 						if(obj != null)
 							tag.addCompound(n, doExport(obj, new NBTTagCompound(), pred));
 					} else if(c.equals(Byte.TYPE)) tag.addByte(n, f.getByte(o));
+					else if(c.equals(Boolean.TYPE)) tag.addByte(n, (byte)(f.getBoolean(o) ? 1 : 0));
 					else if(c.equals(Short.TYPE)) tag.addShort(n, f.getShort(o));
 					else
 						LOG_EXP.postWarning("Invalid field type " + c.getSimpleName() +
 								" of field \"" + n + "\"");
+				} else {
+					//System.out.println("Not exporting field \"" + f.getName() + "\"");
 				}
 			} catch(Exception e) {
 				throw new RuntimeException("Could not export object!", e);
 			}
 		}
+		//System.out.println("Exported " + o + " as:\n" + tag);
 		return tag;
 	}
 	
-	private static void doImport(Object o, NBTTagCompound tag, boolean unsafe, Predicate<Field> pred) {
+	private static void doImport(Object o, NBTTagCompound tag, boolean unsafe,
+			Predicate<Field> pred) {
 		for(Field f : o.getClass().getDeclaredFields()) {
 			try {
 				if(pred.test(f) && ALLOWED_TO_EXPORT.test(f)) {
@@ -321,15 +327,22 @@ public class NBTExporter {
 					String n = f.getName();
 					f.setAccessible(true);
 					// See comments for doExport()
-					if(c.equals(Integer.TYPE)) f.setInt(o, unsafe ? tag.getIntUnsafe(n) : tag.getInt(n));
-					else if(c.equals(Long.TYPE)) f.setLong(o, unsafe ? tag.getLongUnsafe(n) : tag.getLong(n));
-					else if(c.equals(Float.TYPE)) f.setFloat(o, unsafe ? tag.getFloatUnsafe(n) : tag.getFloat(n));
-					else if(c.equals(Double.TYPE)) f.setDouble(o, unsafe ? tag.getDoubleUnsafe(n) : tag.getDouble(n));
-					else if(c.equals(String.class)) f.set(o, unsafe ? tag.getStringUnsafe(n) : tag.getString(n));
+					if(c.equals(Integer.TYPE))
+						f.setInt(o, unsafe ? tag.getIntUnsafe(n) : tag.getInt(n));
+					else if(c.equals(Long.TYPE))
+						f.setLong(o, unsafe ? tag.getLongUnsafe(n) : tag.getLong(n));
+					else if(c.equals(Float.TYPE))
+						f.setFloat(o, unsafe ? tag.getFloatUnsafe(n) : tag.getFloat(n));
+					else if(c.equals(Double.TYPE))
+						f.setDouble(o, unsafe ? tag.getDoubleUnsafe(n) : tag.getDouble(n));
+					else if(c.equals(String.class))
+						f.set(o, unsafe ? tag.getStringUnsafe(n) : tag.getString(n));
 					else if(c.isArray()) {
 						Class<?> t = c.getComponentType();
-						if(t.equals(Integer.TYPE)) f.set(o, unsafe ? tag.getIntArrayUnsafe(n) : tag.getIntArray(n));
-						else if(t.equals(Byte.TYPE)) f.set(o, unsafe ? tag.getByteArrayUnsafe(n) : tag.getByteArray(n));
+						if(t.equals(Integer.TYPE))
+							f.set(o, unsafe ? tag.getIntArrayUnsafe(n) : tag.getIntArray(n));
+						else if(t.equals(Byte.TYPE))
+							f.set(o, unsafe ? tag.getByteArrayUnsafe(n) : tag.getByteArray(n));
 						else if(t.getAnnotation(Exportable.class) != null) {
 							Object[] arr = (Object[])f.get(o);
 							if(arr != null) {
@@ -342,16 +355,23 @@ public class NBTExporter {
 						Object obj = f.get(o);
 						if(obj != null)
 							doImport(obj, tag.getCompound(n), unsafe, pred);
-					} else if(c.equals(Byte.TYPE)) f.setByte(o, unsafe ? tag.getByteUnsafe(n) : tag.getByte(n));
-					else if(c.equals(Short.TYPE)) f.setShort(o, unsafe ? tag.getShortUnsafe(n) : tag.getShort(n));
+					} else if(c.equals(Byte.TYPE))
+						f.setByte(o, unsafe ? tag.getByteUnsafe(n) : tag.getByte(n));
+					else if(c.equals(Boolean.TYPE))
+						f.setBoolean(o, (unsafe ? tag.getByteUnsafe(n) : tag.getByte(n)) == 1);
+					else if(c.equals(Short.TYPE))
+						f.setShort(o, unsafe ? tag.getShortUnsafe(n) : tag.getShort(n));
 					else
 						LOG_IMP.postWarning("Invalid field type " + c.getSimpleName() +
 								" of field \"" + n + "\"");
+				} else {
+					//System.out.println("Not importing field \"" + f.getName() + "\"");
 				}
 			} catch(Exception e) {
 				throw new RuntimeException("Could not import object!", e);
 			}
 		}
+		//System.out.println("Imported " + o + " from:\n" + tag);
 	}
 	
 }

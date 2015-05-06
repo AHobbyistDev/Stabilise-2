@@ -1,8 +1,9 @@
 package com.stabilise.network;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
 
 /**
  * Defines the two complementary methods {@code readData} and {@code writeData}
@@ -17,19 +18,19 @@ import java.io.IOException;
 public interface Sendable {
 	
 	/**
-	 * Reads this object's data from the given DataInputStream.
+	 * Reads this object's data from the given DataInStream.
 	 * 
 	 * @throws NullPointerException if {@code in} is {@code null}.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	void readData(DataInputStream in) throws IOException;
+	void readData(DataInStream in) throws IOException;
 	
 	/**
-	 * Writes this object's data to the given DataOutputStream.
+	 * Writes this object's data to the given DataOutStream.
 	 * 
 	 * @throws NullPointerException if {@code out} is {@code null}.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	void writeData(DataOutputStream out) throws IOException;
+	void writeData(DataOutStream out) throws IOException;
 	
 }

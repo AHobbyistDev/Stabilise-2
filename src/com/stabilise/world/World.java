@@ -18,11 +18,11 @@ import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Checkable;
-import com.stabilise.util.IOUtil;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.concurrent.TaskTracker;
 import com.stabilise.util.concurrent.TrackableFuture;
+import com.stabilise.util.io.IOUtil;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.AbstractWorld.ParticleManager;
 import com.stabilise.world.provider.HostProvider;
@@ -1028,6 +1028,7 @@ public interface World extends Checkable {
 						while(!starterDim.isLoaded()) // 
 							Thread.sleep(10L);
 						tracker.next("All is done!");
+						tracker.setCompleted();
 						return new WorldBundle(provider, starterDim,
 								player.playerEntity, player.playerData);
 					} else {
@@ -1051,11 +1052,22 @@ public interface World extends Checkable {
 	static class WorldFuture extends FutureTask<WorldBundle>
 			implements TrackableFuture<WorldBundle> {
 		
+		private volatile Thread runner;
 		private final TaskTracker tracker;
 		
 		public WorldFuture(Callable<WorldBundle> callable, TaskTracker tracker) {
 			super(callable);
 			this.tracker = tracker;
+		}
+		
+		@Override
+		public void run() {
+			if(runner != null) {
+				Log.get().postWarning("World builder's future being run again?");
+				return;
+			}
+			runner = Thread.currentThread();
+			super.run();
 		}
 		
 		@Override
@@ -1079,33 +1091,59 @@ public interface World extends Checkable {
 		}
 		
 		@Override
-		public boolean completed() {
-			return tracker.completed();
-		}
-		
-		@Override
 		public String toString() {
 			return tracker.toString();
 		}
 		
 		@Override
 		public boolean stopped() {
+			//return runner != null && !runner.isAlive();
 			return tracker.stopped();
 		}
 		
 		@Override
+		public boolean completed() {
+			return tracker.completed();// && stopped();
+		}
+		
+		@Override
 		public boolean failed() {
-			return tracker.failed();
+			return tracker.failed();// && stopped();
 		}
 		
 		@Override
 		public void waitUntilDone() throws InterruptedException {
 			tracker.waitUntilDone();
+			/*
+			while(runner == null)
+				Thread.sleep(5);
+			runner.join();
+			*/
 		}
 		
 		@Override
 		public void waitUninterruptibly() {
 			tracker.waitUninterruptibly();
+			/*
+			boolean interrupted = false;
+			while(runner == null) {
+				try {
+					Thread.sleep(5);
+				} catch(InterruptedException ignored) {
+					interrupted = true;
+				}
+			}
+			while(true) {
+				try {
+					runner.join();
+					break;
+				} catch(InterruptedException ignored) {
+					interrupted = true;
+				}
+			}
+			if(interrupted)
+				Thread.currentThread().interrupt();
+			*/
 		}
 		
 	}

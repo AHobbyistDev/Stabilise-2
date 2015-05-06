@@ -17,7 +17,7 @@ import com.stabilise.util.annotation.ThreadSafe;
  * algorithm for this class!
  */
 @ThreadSafe
-public class ConcurrentClearingQueue<E> implements ClearingQueue<E> {
+class ConcurrentClearingQueue<E> implements ClearingQueue<E> {
 	
 	// Unsafe stuff -----------------------------------------------------------
 	

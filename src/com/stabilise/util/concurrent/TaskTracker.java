@@ -34,6 +34,10 @@ public class TaskTracker implements Tracker {
 	 * <p>Since the number of completed parts, and total number of parts,
 	 * cannot be negative, we make space for the two indicator bits by shaving
 	 * off their negation bits without sacrificing information.
+	 * 
+	 * <p>We also synchronise on this when updating both the state and status,
+	 * such that these changes are atomic from the perspective of {@link
+	 * #toString()}.
 	 */
 	private final AtomicLong state;
 	
@@ -101,10 +105,6 @@ public class TaskTracker implements Tracker {
 	 * Registers a part of the task as completed, as if by {@link
 	 * #increment(int) increment(1)}.
 	 * 
-	 * <p>Memory consistency effects: actions in a thread prior to invoking
-	 * this method happen before actions in another thread which invokes {@link
-	 * #percentComplete()} or {@link #completed()}.
-	 * 
 	 * @throws IllegalStateException if the task has already been completed.
 	 */
 	public void increment() {
@@ -112,16 +112,14 @@ public class TaskTracker implements Tracker {
 	}
 	
 	/**
-	 * Registers a specified number of parts of the task as completed. Note
-	 * that negative values are technically permitted.
-	 * 
-	 * <p>Memory consistency effects: actions in a thread prior to invoking
-	 * this method happen before actions in another thread which invokes {@link
-	 * #percentComplete()}.
+	 * Registers a specified number of parts of the task as completed. Negative
+	 * values are permitted, but the stored value is clamped to 0.
 	 * 
 	 * @throws IllegalStateException if the task is already done.
 	 */
 	public void increment(int parts) {
+		if(parts == 0)
+			return;
 		long s;
 		int p, c;
 		do {
@@ -129,7 +127,9 @@ public class TaskTracker implements Tracker {
 			checkDone(s);
 			p = extractParts(s);
 			c = extractPartsCompleted(s) + parts;
-			if(c < 0 || c > p) // if we overflow or exceed parts, clamp to parts
+			if(c < 0)
+				c = parts < 0 ? 0 : p; // if parts > 0, there was an overflow
+			else if(c > p)
 				c = p;
 		} while(!state.compareAndSet(s, setState(p, c)));
 	}
@@ -150,6 +150,7 @@ public class TaskTracker implements Tracker {
 	 * #setStatus(String) setStatus(status)}.
 	 * 
 	 * @throws IllegalStateException if the task is already done.
+	 * @throws NullPointerException if {@code status} is {@code null}.
 	 */
 	public void next(int parts, String status) {
 		synchronized(state) {
@@ -159,28 +160,32 @@ public class TaskTracker implements Tracker {
 	}
 	
 	/**
-	 * Resets this tracker, by setting the number of {@link #parts() parts} to
-	 * the specified value, and the number of {@link #partsCompleted()
+	 * Resets this tracker by setting the number of {@link #parts() parts} to
+	 * the specified value and the number of {@link #partsCompleted()
 	 * completed parts} to {@code 0}.
 	 * 
 	 * @param parts The number of parts to reset to.
 	 * 
 	 * @throws IllegalStateException if the task is already done.
+	 * @throws IllegalArgumentException if {@code parts <= 0}.
 	 */
 	public void reset(int parts) {
 		checkDone(state.get());
+		if(parts <= 0)
+			throw new IllegalArgumentException("parts <= 0");
 		state.set(setState(parts, 0));
 	}
 	
 	/**
-	 * Resets this tracker, by setting the number of {@link #parts() parts} to
-	 * the specified value, and the number of {@link #partsCompleted()
+	 * Resets this tracker by setting the number of {@link #parts() parts} to
+	 * the specified value and the number of {@link #partsCompleted()
 	 * completed parts} to {@code 0}. This method also sets the status.
 	 * 
 	 * @param parts The number of parts to reset to.
 	 * @param status The new status.
 	 * 
 	 * @throws IllegalStateException if the task is already done.
+	 * @throws IllegalArgumentException if {@code parts <= 0}.
 	 */
 	public void reset(int parts, String status) {
 		synchronized(state) {
@@ -194,25 +199,11 @@ public class TaskTracker implements Tracker {
 		return extractParts(state.get());
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * Memory consistency effects: actions in a thread prior to invoking {@link
-	 * #increment()} or {@link #increment(int)} happen-before actions in the
-	 * current thread.
-	 */
 	@Override
 	public int partsCompleted() {
 		return extractPartsCompleted(state.get());
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p>Memory consistency effects: actions in a thread prior to invoking
-	 * {@link #increment()} or {@link #increment(int)} happen-before actions in
-	 * the current thread.
-	 */
 	@Override
 	public float percentComplete() {
 		long s = state.get();
@@ -301,10 +292,6 @@ public class TaskTracker implements Tracker {
 	 * <blockquote>
 	 * {@code (int)(100*percentComplete())}
 	 * </blockquote>
-	 * 
-	 * <p>Memory consistency effects: actions in a thread prior to invoking
-	 * {@link #increment()} or {@link #increment(int)} happen-before actions in
-	 * the current thread.
 	 */
 	@Override
 	public String toString() {

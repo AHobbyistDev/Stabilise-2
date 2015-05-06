@@ -2,8 +2,6 @@ package com.stabilise.network.protocol;
 
 import static com.stabilise.util.collect.DuplicatePolicy.THROW_EXCEPTION;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.IdentityHashMap;
@@ -16,6 +14,8 @@ import com.stabilise.network.protocol.handshake.*;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.InstantiationRegistry;
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.maths.Maths;
 
 /**
@@ -126,7 +126,7 @@ public enum Protocol {
 	 * @throws IOException if an I/O error occurs.
 	 */
 	@UserThread("ReadThread")
-	public Packet readPacket(boolean server, DataInputStream in, Log log) throws IOException {
+	public Packet readPacket(boolean server, DataInStream in, Log log) throws IOException {
 		int id;
 		try {
 			id = in.read(); // ID is always first byte
@@ -155,7 +155,7 @@ public enum Protocol {
 	 * @throws IOException if an I/O error occurs.
 	 */
 	@UserThread("WriteThread")
-	public void writePacket(DataOutputStream out, Packet packet) throws IOException {
+	public void writePacket(DataOutStream out, Packet packet) throws IOException {
 		out.writeByte(packet.getID()); // ID is always first byte
 		packet.writeData(out);
 	}

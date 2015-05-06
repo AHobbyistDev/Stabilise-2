@@ -37,7 +37,7 @@ public class ClientImpl extends Client implements IClientHandshake {
 	}
 	
 	@Override
-	public void handleVersionInfo(S000VersionInfo packet) {
+	public void handleVersionInfo(S000VersionInfo packet, TCPConnection con) {
 		log.postInfo("Got info from server... is compatible: " + packet.isCompatible());
 	}
 	

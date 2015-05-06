@@ -1,8 +1,9 @@
 package com.stabilise.util.nbt;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
 
 /**
  * An NBT tag containing an arbitrary-length byte array as it's payload.
@@ -43,13 +44,13 @@ public class NBTTagByteArray extends NBTTag {
 	}
 	
 	@Override
-	void write(DataOutputStream out) throws IOException {
+	public void writeData(DataOutStream out) throws IOException {
 		out.writeInt(data.length);
 		out.write(data);
 	}
 	
 	@Override
-	void load(DataInputStream in) throws IOException {
+	public void readData(DataInStream in) throws IOException {
         data = new byte[in.readInt()];
         in.readFully(data);
 	}

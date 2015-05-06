@@ -1,8 +1,6 @@
 package com.stabilise.util.nbt;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import com.stabilise.network.Sendable;
 
 /**
  * Named binary tags (NBT tags) present a convenient method of saving data.
@@ -10,7 +8,7 @@ import java.io.IOException;
  * <p>Created by Notch and used by Minecraft - I'm borrowing them because
  * they're so nice.
  */
-public abstract class NBTTag {
+public abstract class NBTTag implements Sendable {
 	
 	//--------------------==========--------------------
 	//------------=====Static Constants=====------------
@@ -79,24 +77,6 @@ public abstract class NBTTag {
 	public String getName() {
 		return name;
 	}
-	
-	/**
-	 * Writes the tag to the specified output.
-	 * 
-	 * @param out The output stream to which to write the tag.
-	 * 
-	 * @throws IOException if an I/O error occurs.
-	 */
-	abstract void write(DataOutputStream out) throws IOException;
-	
-	/**
-	 * Reads the tag from the specified input.
-	 * 
-	 * @param in The input stream from which to read the tag.
-	 * 
-	 * @throws IOException if an I/O error occurs.
-	 */
-	abstract void load(DataInputStream in) throws IOException;
 	
 	/**
 	 * Gets a string representation of the tag, as per the contract of

@@ -1,8 +1,9 @@
 package com.stabilise.util.nbt;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
 
 /**
  * The compound end tag is placed at the end of every compound tag to indicate
@@ -20,12 +21,12 @@ public class NBTTagCompoundEnd extends NBTTag {
 	}
 	
 	@Override
-	void write(DataOutputStream out) throws IOException {
+	public void writeData(DataOutStream out) throws IOException {
 		// nothing to see here, move along
 	}
 	
 	@Override
-	void load(DataInputStream in) throws IOException {
+	public void readData(DataInStream in) throws IOException {
 		// nothing to see here, move along
 	}
 	

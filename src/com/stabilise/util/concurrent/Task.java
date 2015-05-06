@@ -52,11 +52,7 @@ public abstract class Task implements Runnable {
 	 * threads. */
 	private Throwable throwable = null;
 	
-	/** The task tracker. This is initially constructed as per
-	 * {@link TaskTracker#TaskTracker(int) new TaskTracker(parts)} when the
-	 * Task is constructed through {@link #Task(int) new Task(parts)}, or may
-	 * be otherwise set by {@link Task#Task(TaskTracker) new
-	 * Task(TaskTracker)}. */
+	/** The task tracker. This is set by the constructor. */
 	protected final TaskTracker tracker;
 	
 	
@@ -93,9 +89,11 @@ public abstract class Task implements Runnable {
 			execute();
 		} catch(Throwable t) {
 			throwable = t;
+			tracker.setFailed();
 			ceaseRunning(TaskState.STOPPED);
 			return;
 		}
+		tracker.setCompleted();
 		ceaseRunning(TaskState.COMPLETED);
 	}
 	
@@ -182,13 +180,14 @@ public abstract class Task implements Runnable {
 	 * the task on the current thread if it failed to complete otherwise. This
 	 * method executes as if by:
 	 * 
-	 * <pre>
+	 * <blockquote>
 	 * if(stopped()) {
 	 *     if(!completed())
 	 *         run();
 	 *     return true;
 	 * }
-	 * return false;</pre>
+	 * return false;
+	 * </blockquote>
 	 * 
 	 * <p>Note that this implies that this method may stall the current thread
 	 * if the expression {@code stopped() && !completed()} evaluates to
@@ -201,6 +200,7 @@ public abstract class Task implements Runnable {
 	 * @return {@code true} if the task has been completed; {@code false} if it
 	 * has not.
 	 */
+	/*
 	public final boolean completedWithReattempt() {
 		if(stopped()) {
 			if(!completed())
@@ -209,6 +209,7 @@ public abstract class Task implements Runnable {
 		}
 		return false;
 	}
+	*/
 	
 	/**
 	 * Gets the percentage of the task which has been completed thus far.
@@ -338,7 +339,7 @@ public abstract class Task implements Runnable {
 	 * 
 	 * @param status The status of the current task being executed.
 	 * 
-	 * @throws IllegalArgumentException if {@code status} is {@code null}.
+	 * @throws NullPointerException if {@code status} is {@code null}.
 	 * @see TaskTracker#setStatus(String)
 	 */
 	protected final void setStatus(String status) {
@@ -346,16 +347,10 @@ public abstract class Task implements Runnable {
 	}
 	
 	/**
-	 * Gets the status of task being.
-	 * 
-	 * <p>Memory consistency effects: actions by the thread which set the
-	 * status happen-before actions in the current thread.
-	 * 
-	 * @return The task's status.
-	 * @see TaskTracker#getStatus()
+	 * Gets this task's {@code Tracker}.
 	 */
-	public String getStatus() {
-		return tracker.getStatus();
+	public Tracker tracker() {
+		return tracker;
 	}
 	
 	/**

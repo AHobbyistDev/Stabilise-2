@@ -1,11 +1,11 @@
 package com.stabilise.network;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import com.stabilise.network.protocol.PacketHandler;
 import com.stabilise.network.protocol.Protocol;
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
 
 public class P254ProtocolSwitch extends Packet {
 	
@@ -22,12 +22,12 @@ public class P254ProtocolSwitch extends Packet {
 	}
 	
 	@Override
-	public void readData(DataInputStream in) throws IOException {
+	public void readData(DataInStream in) throws IOException {
 		protocol = Protocol.getProtocol(in.readByte());
 	}
 	
 	@Override
-	public void writeData(DataOutputStream out) throws IOException {
+	public void writeData(DataOutStream out) throws IOException {
 		out.writeByte(protocol.getID());
 	}
 	

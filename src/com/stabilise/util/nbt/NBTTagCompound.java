@@ -1,7 +1,5 @@
 package com.stabilise.util.nbt;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 import com.stabilise.util.Log;
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
 
 /**
  * A compound tag is essentially a tag 'group' which may contain any number
@@ -40,7 +40,7 @@ public class NBTTagCompound extends NBTTag {
 	}
 	
 	@Override
-	void write(DataOutputStream out) throws IOException {
+	public void writeData(DataOutStream out) throws IOException {
 		for(NBTTag tag : data.values())
 			NBTIO.writeTag(out, tag);
 		
@@ -48,7 +48,7 @@ public class NBTTagCompound extends NBTTag {
 	}
 	
 	@Override
-	void load(DataInputStream in) throws IOException {
+	public void readData(DataInStream in) throws IOException {
 		data.clear();
 		NBTTag tag;
 		
@@ -723,6 +723,18 @@ public class NBTTagCompound extends NBTTag {
 		sb.append("]");
 
         return sb.toString();
+	}
+	
+	/**
+	 * Reads a compound tag from the provided DataInStream.
+	 * 
+	 * @return The compound.
+	 * @throws IOException if an I/O error occurs.
+	 */
+	public static NBTTagCompound read(DataInStream in) throws IOException {
+		NBTTagCompound tag = new NBTTagCompound();
+		tag.readData(in);
+		return tag;
 	}
 	
 }

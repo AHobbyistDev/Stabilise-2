@@ -1,10 +1,11 @@
 package com.stabilise.util.nbt;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
 
 /**
  * An NBT tag containing an arbitrary-length list of tags of the same tag type.
@@ -37,7 +38,7 @@ public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
 	}
 	
 	@Override
-	void write(DataOutputStream out) throws IOException {
+	public void writeData(DataOutStream out) throws IOException {
 		if(!data.isEmpty())
 			dataType = ((NBTTag)data.get(0)).getId();
 		else
@@ -47,18 +48,18 @@ public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
 		out.writeInt(data.size());
 		
 		for(NBTTag t : data)
-			t.write(out);
+			t.writeData(out);
 	}
 	
 	@Override
-	void load(DataInputStream in) throws IOException {
+	public void readData(DataInStream in) throws IOException {
 		dataType = in.readByte();
 		int length = in.readInt();
 		data = new ArrayList<NBTTag>();
 		
 		for(int i = 0; i < length; i++) {
 			NBTTag tag = NBTTag.createTag(dataType, null);
-			tag.load(in);
+			tag.readData(in);
 			data.add(tag);
 		}
 	}

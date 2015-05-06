@@ -4,7 +4,9 @@ import java.lang.reflect.Constructor;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
+import com.stabilise.util.TheUnsafe;
 import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
@@ -63,7 +65,8 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	
 	
 	/**
-	 * Creates a new instantiation registry.
+	 * Creates a new instantiation registry, naming it appropriate to the base
+	 * class.
 	 * 
 	 * @param capacity The initial registry capacity.
 	 * @param dupePolicy The duplicate entry policy.
@@ -77,9 +80,29 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 * @throws IllegalArgumentException if {@code capacity < 0}.
 	 * @see DuplicatePolicy
 	 */
-	public InstantiationRegistry(int capacity, DuplicatePolicy dupePolicy, Class<E> baseClass,
-			Class<?>... defaultArgs) {
-		super(baseClass.getSimpleName() + "InstRegistry", dupePolicy);
+	public InstantiationRegistry(int capacity, DuplicatePolicy dupePolicy,
+			Class<E> baseClass, Class<?>... defaultArgs) {
+		this(capacity, dupePolicy, baseClass.getSimpleName() + "InstRegistry",
+				defaultArgs);
+	}
+	
+	/**
+	 * Creates a new instantiation registry.
+	 * 
+	 * @param capacity The initial registry capacity.
+	 * @param dupePolicy The duplicate entry policy.
+	 * @param registryName The name of this registry.
+	 * @param defaultArgs The default constructor arguments. Permitted to be
+	 * empty.
+	 * 
+	 * @throws NullPointerException if {@code dupePolicy} or any of the {@code
+	 * defaultArgs} - if any are provided - are {@code null}.
+	 * @throws IllegalArgumentException if {@code capacity < 0}.
+	 * @see DuplicatePolicy
+	 */
+	public InstantiationRegistry(int capacity, DuplicatePolicy dupePolicy,
+			String registryName, Class<?>... defaultArgs) {
+		super(registryName, dupePolicy);
 		
 		factoryArr = new Array<Factory<? extends E>>(capacity);
 		idMap = new IdentityHashMap<>(capacity);
@@ -88,6 +111,16 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 		for(Class<?> c : this.defaultArgs)
 			if(c == null)
 				throw new NullPointerException("A default arg is null!");
+	}
+	
+	/**
+	 * Creates a new InstantiationRegistry with a generic name.
+	 * 
+	 * @see #InstantiationRegistry(int, DuplicatePolicy, String, Class...)
+	 */
+	public InstantiationRegistry(int capacity, DuplicatePolicy dupePolicy,
+			Class<?>... defaultArgs) {
+		this(capacity, dupePolicy, "InstRegistry", defaultArgs);
 	}
 	
 	/**
@@ -281,6 +314,45 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 						+ " object of class \""
 						+ constructor.getDeclaringClass().getSimpleName()
 						+ "\"! (" + e.getMessage() + ")",
+						e);
+			}
+		}
+		
+	}
+	
+	/**
+	 * A factory which utilises {@link sun.misc.Unsafe} to instantiate objects.
+	 * 
+	 * <p>As implied by the name, it is generally not safe to use an
+	 * UnsafeFactory to instantiate objects, as instantiation is done
+	 * <i>without invoking a constructor</i>, so object fields will be
+	 * <i>uninitialised</i>. If you do choose to use this, be careful!
+	 */
+	public static class UnsafeFactory<T> implements Factory<T> {
+		
+		private final Class<? extends T> objClass;
+		
+		/**
+		 * Creates a new UnsafeFactory for objects of the specified class.
+		 * 
+		 * @param objClass The objects' class.
+		 * 
+		 * @throws NullPointerException if {@code objClass} is {@code null}.
+		 */
+		public UnsafeFactory(Class<? extends T> objClass) {
+			this.objClass = Objects.requireNonNull(objClass);
+		}
+		
+		@SuppressWarnings("unchecked")
+		@Override
+		public T create(Object... args) {
+			try {
+				return (T) TheUnsafe.unsafe.allocateInstance(objClass);
+			} catch(InstantiationException e) {
+				throw new RuntimeException("Could not unsafely instantiate "
+						+ "object of class \""
+						+ objClass.getSimpleName()
+						+ "\" (" + e.getMessage() + ")",
 						e);
 			}
 		}

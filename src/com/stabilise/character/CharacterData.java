@@ -16,15 +16,18 @@ import com.stabilise.core.Constants;
 import com.stabilise.core.Resources;
 import com.stabilise.item.BoundedContainer;
 import com.stabilise.item.Container;
-import com.stabilise.util.IOUtil;
+import com.stabilise.network.Sendable;
 import com.stabilise.util.Log;
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
+import com.stabilise.util.io.IOUtil;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 
 /**
  * Data about a character.
  */
-public class CharacterData {
+public class CharacterData implements Sendable {
 	
 	//--------------------==========--------------------
 	//-----=====Static Constants and Variables=====-----
@@ -67,10 +70,16 @@ public class CharacterData {
 	public int maxMana;
 	
 	/** The character's inventory. */
-	public Container inventory;
+	public final Container inventory =
+			new BoundedContainer(Constants.INVENTORY_CAPACITY);
 	
 	private boolean loaded = false;
 	
+	
+	/**
+	 * Creates a blank CharacterData.
+	 */
+	public CharacterData() {}
 	
 	/**
 	 * Creates a new CharacterData.
@@ -82,9 +91,7 @@ public class CharacterData {
 	 * @throws IllegalArgumentException if {@code characterName} is empty.
 	 */
 	public CharacterData(String characterName) {
-		if(characterName == null)
-			throw new NullPointerException("characterName is null");
-		if(characterName == "")
+		if(characterName.equals("")) // throws NPE
 			throw new IllegalArgumentException("characterName is empty");
 		
 		fileSystemName = characterName;
@@ -99,12 +106,20 @@ public class CharacterData {
 		creationDate = System.currentTimeMillis();//new Date().getTime();
 		lastPlayed = creationDate;
 		
+		genHash();
+	}
+	
+	/**
+	 * Generates a hash for this character.
+	 */
+	private void genHash() {
 		// Hash based on a bunch of things hopefully unique to the user to
 		// minimise hash collisions
 		HashFunction hf = Hashing.sha256();
 		HashCode hc = hf.newHasher()
 		       .putLong(creationDate)
 		       .putLong(System.nanoTime())
+		       .putLong(System.currentTimeMillis())
 		       .putString(System.getProperty("java.version"), Charsets.UTF_8)
 		       .putString(System.getProperty("os.name"), Charsets.UTF_8)
 		       .putString(System.getProperty("os.version"), Charsets.UTF_8)
@@ -148,7 +163,6 @@ public class CharacterData {
 		maxStamina = tag.getInt("maxStamina");
 		maxMana = tag.getInt("maxMana");
 		
-		inventory = new BoundedContainer(Constants.INVENTORY_CAPACITY);
 		inventory.fromNBT(tag.getList("inventory"));
 		
 		loaded = true;
@@ -179,6 +193,26 @@ public class CharacterData {
 		tag.addList("inventory", inventory.toNBT());
 		
 		NBTIO.safeWriteCompressed(getFile(), tag);
+	}
+	
+	@Override
+	public void readData(DataInStream in) throws IOException {
+		hash = in.readString();
+		name = in.readString();
+		maxHealth = in.readInt();
+		maxStamina = in.readInt();
+		maxMana = in.readInt();
+		inventory.readData(in);
+	}
+	
+	@Override
+	public void writeData(DataOutStream out) throws IOException {
+		out.writeString(hash);
+		out.writeString(name);
+		out.writeInt(maxHealth);
+		out.writeInt(maxStamina);
+		out.writeInt(maxMana);
+		inventory.writeData(out);
 	}
 	
 	/**

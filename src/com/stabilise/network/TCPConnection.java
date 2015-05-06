@@ -14,6 +14,8 @@ import com.stabilise.util.Log;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
 
 /**
  * A TCPConnection instance maintains a connection between a server and a
@@ -91,8 +93,8 @@ public class TCPConnection {
 	
 	protected final Socket socket;
 	
-	private final DataInputStream in;
-	private final DataOutputStream out;
+	private final DataInStream in;
+	private final DataOutStream out;
 	
 	private final BlockingDeque<Packet> packetQueueIn = new LinkedBlockingDeque<>();
 	private final BlockingDeque<Packet> packetQueueOut = new LinkedBlockingDeque<>();
@@ -168,9 +170,9 @@ public class TCPConnection {
 		
 		log = Log.getAgent((server ? "SERVER" : "CLIENT") + id);
 		
-		in = new DataInputStream(new BufferedInputStream(//new InflaterInputStream(
+		in = new DataInStream(new BufferedInputStream(//new InflaterInputStream(
 				socket.getInputStream()));
-		out = new DataOutputStream(new BufferedOutputStream(//new DeflaterOutputStream(
+		out = new DataOutStream(new BufferedOutputStream(//new DeflaterOutputStream(
 				socket.getOutputStream()));
 		
 		readThread = new TCPReadThread((server ? "ServerReader" : "ClientReader") + id);
@@ -209,7 +211,8 @@ public class TCPConnection {
 			return;
 		}
 		// If we're not currently waiting for a ping response and it's been at
-		// least 1 second since we sent our last ping request, sent a request.
+		// least 1 second since we sent our last ping request, send a new
+		// request.
 		if(pingTime > PING_INTERVAL) {
 			if(pingReceived) {
 				sendPacket(new P255Ping(++pingCount, true));
@@ -250,9 +253,9 @@ public class TCPConnection {
 			sendPacket(new P255Ping(partnerPingCount, false));
 		} else {
 			if(pingCount != packet.pingID) {
-				log.postWarning("Peer out of since with our ping requests? We "
+				log.postWarning("Peer out of sync with our ping requests? We "
 						+ "have sent " + pingCount + " ping requests; peer "
-						+ " thinks we have sent " + packet.pingID);
+						+ "thinks we have sent " + packet.pingID + ".");
 			}
 			ping = (int)(System.currentTimeMillis() - pingSent);
 			pingReceived = true;

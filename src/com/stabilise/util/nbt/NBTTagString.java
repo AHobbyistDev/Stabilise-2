@@ -1,8 +1,9 @@
 package com.stabilise.util.nbt;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
 
 /**
  * An NBT tag containing a string as its payload.
@@ -48,7 +49,7 @@ public class NBTTagString extends NBTTag {
 	}
 	
 	@Override
-	public void write(DataOutputStream out) throws IOException {
+	public void writeData(DataOutStream out) throws IOException {
 		if(data != null)
 			out.writeUTF(data);
 		else
@@ -56,7 +57,7 @@ public class NBTTagString extends NBTTag {
 	}
 	
 	@Override
-	public void load(DataInputStream in) throws IOException {
+	public void readData(DataInStream in) throws IOException {
 		data = in.readUTF();
 	}
 	

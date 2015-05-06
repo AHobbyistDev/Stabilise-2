@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Resources;
+import com.stabilise.util.io.IOUtil;
 
 /**
  * A config file is a file containing simple tags representing config values.

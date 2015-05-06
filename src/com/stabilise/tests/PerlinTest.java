@@ -8,7 +8,7 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.stabilise.util.IOUtil;
+import com.stabilise.util.io.IOUtil;
 import com.stabilise.util.maths.PerlinNoise2D;
 
 public class PerlinTest {

@@ -1,6 +1,7 @@
 package com.stabilise.core;
 
 import java.net.InetAddress;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 import com.stabilise.character.CharacterData;
@@ -11,8 +12,10 @@ import com.stabilise.network.protocol.handshake.C000VersionInfo;
 import com.stabilise.network.protocol.handshake.IClientHandshake;
 import com.stabilise.network.protocol.handshake.S000VersionInfo;
 import com.stabilise.network.protocol.login.IClientLogin;
+import com.stabilise.network.protocol.login.S000LoginRejected;
 import com.stabilise.util.concurrent.TrackableFuture;
 import com.stabilise.world.ClientWorld;
+import com.stabilise.world.World;
 import com.stabilise.world.World.WorldBundle;
 import com.stabilise.world.provider.ClientProvider;
 
@@ -63,20 +66,36 @@ public class GameClient extends Client implements IClientHandshake, IClientLogin
 		
 	}
 	
-	public void login(CharacterData player) {
+	public TrackableFuture<WorldBundle> login(CharacterData player) {
 		if(getConnection().getProtocol() != Protocol.LOGIN)
-			throw new IllegalStateException("Not in login state!");
-		this.player = player;
+			return null;
+		return World.builder()
+				.setClient(this)
+				.setPlayer(this.player = player)
+				.buildClient();
 	}
 	
 	// HANDSHAKE --------------------------------------------------------------
 	
 	@Override
-	public void handleVersionInfo(S000VersionInfo packet) {
+	public void handleVersionInfo(S000VersionInfo packet, TCPConnection con) {
 		weCanLogin = packet.canLogin;
 		weAreOutdated = packet.areWeOutdated();
+		
+		con.setProtocol(Protocol.LOGIN);
+	}
+
+	// LOGIN ------------------------------------------------------------------
+	
+	public class WorldLoadHandle {
+		
 	}
 	
-	// LOGIN ------------------------------------------------------------------
+	@Override
+	public void handleLoginReject(S000LoginRejected packet, TCPConnection con) {
+		
+	}
+	
+	
 	
 }

@@ -6,10 +6,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.stabilise.util.concurrent.ClearingQueue;
-import com.stabilise.util.concurrent.ConcurrentClearingQueue;
 import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 
-@SuppressWarnings({ "unused", "deprecation" })
+@SuppressWarnings({ "unused" })
 public class QueueTest {
 	
 	public static void main(String[] args) throws InterruptedException {

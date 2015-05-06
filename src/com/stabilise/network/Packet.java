@@ -1,12 +1,11 @@
 package com.stabilise.network;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import com.stabilise.network.protocol.PacketHandler;
 import com.stabilise.network.protocol.Protocol;
-import com.stabilise.util.maths.Maths;
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
 
 /**
  * Packets are modular chunks of data which may be sent over a network as a
@@ -20,8 +19,8 @@ public abstract class Packet implements Sendable {
 	/** A dummy packet which does nothing, to use when a non-null packet is
 	 * otherwise required for API purposes. */
 	public static final Packet DUMMY_PACKET = new Packet() {
-		@Override public void readData(DataInputStream in) throws IOException {}
-		@Override public void writeData(DataOutputStream out) throws IOException {}
+		@Override public void readData(DataInStream in) throws IOException {}
+		@Override public void writeData(DataOutStream out) throws IOException {}
 		@Override public void handle(PacketHandler handler, TCPConnection con) {}
 	};
 	
@@ -82,65 +81,6 @@ public abstract class Packet implements Sendable {
 	@Override
 	public String toString() {
 		return getClass().getSimpleName();
-	}
-	
-	//--------------------==========--------------------
-	//------------=====Static Functions=====------------
-	//--------------------==========--------------------
-	
-	/**
-	 * Reads and returns a string from the provided input stream.
-	 * 
-	 * @param in The input stream from which to read the string.
-	 * 
-	 * @throws NullPointerException if {@code in} is {@code null}.
-	 * @throws IOException
-	 */
-	protected static String readString(DataInputStream in) throws IOException {
-		int length = (int)in.readShort();
-		StringBuilder sb = new StringBuilder(length);
-		while(length-- > 0)
-			sb.append(in.readChar());
-		return sb.toString();
-	}
-	
-	/**
-	 * Writes a string to the provided output stream.
-	 * 
-	 * @throws NullPointerException if either argument is {@code null}.
-	 * @throws IllegalArgumentException if {@code string} exceeds 65535
-	 * characters.
-	 * @throws IOException
-	 */
-	protected static void writeString(DataOutputStream out, String string) throws IOException {
-		if(string.length() > Maths.USHORT_MAX_VALUE)
-			throw new IllegalArgumentException("The given string is too large!");
-		out.writeShort(string.length());
-		out.writeChars(string);
-	}
-	
-	/**
-	 * Writes an int array to the provided output stream.
-	 * 
-	 * @throws NullPointerException if either argument is {@code null}.
-	 * @throws IOException
-	 */
-	protected static void readIntArray(DataInputStream in, int[] arr) throws IOException {
-		for(int i = 0; i < arr.length; i++)
-			arr[i] = in.readInt();
-	}
-	
-	/**
-	 * Reads an int array from the provided output stream and stores the data
-	 * in the provided array. The number of ints read is equal to the length of
-	 * the array.
-	 * 
-	 * @throws NullPointerException if either argument is {@code null}.
-	 * @throws IOException
-	 */
-	protected static void writeIntArray(DataOutputStream out, int[] arr) throws IOException {
-		for(int i = 0; i < arr.length; i++)
-			out.writeInt(arr[i]);
 	}
 	
 }

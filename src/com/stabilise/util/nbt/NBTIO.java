@@ -2,8 +2,6 @@ package com.stabilise.util.nbt;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +11,9 @@ import java.util.zip.GZIPOutputStream;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.stabilise.util.IOUtil;
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
+import com.stabilise.util.io.IOUtil;
 
 /**
  * This class provides I/O operations for NBT files. In most cases, input and
@@ -82,7 +82,7 @@ public class NBTIO {
 	 */
 	public static NBTTagCompound read(InputStream in) throws IOException {
 		BufferedInputStream bis = new BufferedInputStream(in);
-		DataInputStream dis = new DataInputStream(bis);
+		DataInStream dis = new DataInStream(bis);
 		
 		try {
 			return read(dis);
@@ -124,7 +124,7 @@ public class NBTIO {
 	 * @throws NullPointerException if {@code in} is {@code null}.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	private static NBTTagCompound read(DataInputStream in) throws IOException {
+	private static NBTTagCompound read(DataInStream in) throws IOException {
 		NBTTag tag = readTag(in);
 
         if(tag instanceof NBTTagCompound)
@@ -142,7 +142,7 @@ public class NBTIO {
 	 * @throws NullPointerException if {@code in} is {@code null}.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	static NBTTag readTag(DataInputStream in) throws IOException {
+	static NBTTag readTag(DataInStream in) throws IOException {
 		byte id = in.readByte();
 		
 		if(id == NBTTag.COMPOUND_END) {
@@ -150,7 +150,7 @@ public class NBTIO {
 		} else {
 			String name = in.readUTF();
 			NBTTag tag = NBTTag.createTag(id, name); // should never be null
-			tag.load(in);		// May throw an IOException (or an NPE if
+			tag.readData(in);		// May throw an IOException (or an NPE if
 			return tag;			// something went really wrong)
 		}
 	}
@@ -196,7 +196,7 @@ public class NBTIO {
 	 */
 	public static void write(OutputStream out, NBTTagCompound tag) throws IOException {
 		BufferedOutputStream bos = new BufferedOutputStream(out);
-		DataOutputStream dos = new DataOutputStream(bos);
+		DataOutStream dos = new DataOutStream(bos);
 		try {
 			writeTag(dos, tag);
 		} finally {
@@ -240,12 +240,12 @@ public class NBTIO {
 	 * @throws NullPointerException if either argument is {@code null}.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	static void writeTag(DataOutputStream out, NBTTag tag) throws IOException {
+	static void writeTag(DataOutStream out, NBTTag tag) throws IOException {
 		out.writeByte(tag.getId());
 		
 		if(tag.getId() != NBTTag.COMPOUND_END) {
 			out.writeUTF(tag.name);
-			tag.write(out);
+			tag.writeData(out);
 		}
 	}
 	

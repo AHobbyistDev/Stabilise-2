@@ -1,11 +1,11 @@
 package com.stabilise.network.protocol.handshake;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import com.stabilise.network.TCPConnection;
 import com.stabilise.network.protocol.PacketHandler;
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
 
 /**
  * Sent by a server to a client upon receiving a {@link C000VersionInfo}
@@ -26,20 +26,20 @@ public class S000VersionInfo extends C000VersionInfo {
 	}
 	
 	@Override
-	public void readData(DataInputStream in) throws IOException {
+	public void readData(DataInStream in) throws IOException {
 		super.readData(in);
 		canLogin = in.readBoolean();
 	}
 	
 	@Override
-	public void writeData(DataOutputStream out) throws IOException {
+	public void writeData(DataOutStream out) throws IOException {
 		super.writeData(out);
 		out.writeBoolean(canLogin);
 	}
 	
 	@Override
 	public void handle(PacketHandler handler, TCPConnection con) {
-		((IClientHandshake)handler).handleVersionInfo(this);
+		((IClientHandshake)handler).handleVersionInfo(this, con);
 	}
 	
 }

@@ -10,6 +10,7 @@ import java.util.List;
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Resources;
 import com.stabilise.util.collect.LightLinkedList;
+import com.stabilise.util.io.IOUtil;
 
 /**
  * The Log class allows for the logging and more streamlined management of

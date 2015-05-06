@@ -1,4 +1,4 @@
-package com.stabilise.util;
+package com.stabilise.util.io;
 
 import java.io.File;
 

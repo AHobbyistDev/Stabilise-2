@@ -1,9 +1,13 @@
 package com.stabilise.item;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import com.stabilise.network.Sendable;
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.util.nbt.NBTTagList;
 
@@ -11,7 +15,7 @@ import com.stabilise.util.nbt.NBTTagList;
  * A container is something which contains items - e.g. player inventory,
  * chest.
  */
-public abstract class Container implements Iterable<ItemStack> {
+public abstract class Container implements Iterable<ItemStack>, Sendable {
 	
 	/**
 	 * Checks for whether or not this container is a bounded container.
@@ -415,6 +419,17 @@ public abstract class Container implements Iterable<ItemStack> {
 			}
 		}
 		*/
+	}
+	
+	@Override
+	public void readData(DataInStream in) throws IOException {
+		NBTTagList l = new NBTTagList();
+		l.readData(in);
+		fromNBT(l);
+	}
+	
+	public void writeData(DataOutStream out) throws IOException {
+		toNBT().writeData(out);
 	}
 	
 	/**

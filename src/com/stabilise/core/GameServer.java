@@ -80,7 +80,7 @@ public class GameServer extends Server implements IServerHandshake {
 		});
 	}
 	
-	// HANDSHAKE---------------------------------------------------------------
+	// HANDSHAKE --------------------------------------------------------------
 	
 	@Override
 	public void handleVersionInfo(C000VersionInfo packet, TCPConnection con) {
@@ -90,5 +90,7 @@ public class GameServer extends Server implements IServerHandshake {
 		
 		con.setProtocol(Protocol.LOGIN);
 	}
+	
+	// LOGIN ------------------------------------------------------------------
 	
 }
