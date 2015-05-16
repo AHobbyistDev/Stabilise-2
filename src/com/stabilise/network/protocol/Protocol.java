@@ -56,7 +56,7 @@ public enum Protocol {
 	 */
 	protected void registerServerPacket(int id, Class<? extends Packet> packetClass) {
 		checkID(id, packetClass);
-		serverPackets.register(id, packetClass);
+		serverPackets.registerUnsafe(id, packetClass);
 	}
 	
 	/**
@@ -66,7 +66,7 @@ public enum Protocol {
 	 */
 	protected void registerClientPacket(int id, Class<? extends Packet> packetClass) {
 		checkID(id, packetClass);
-		clientPackets.register(id, packetClass);
+		clientPackets.registerUnsafe(id, packetClass);
 	}
 	
 	private void checkID(int id, Class<? extends Packet> packetClass) {
@@ -236,7 +236,7 @@ public enum Protocol {
 					+ " - " + MAX_PACKET_ID + " (inclusive).");
 		// Offset of "- MAX_NORMAL_PACKET_ID - 1" to keep registry memory
 		// footprint minimal.
-		RESERVED_PACKETS.register(id - MAX_NORMAL_PACKET_ID - 1, packetClass);
+		RESERVED_PACKETS.registerUnsafe(id - MAX_NORMAL_PACKET_ID - 1, packetClass);
 		PACKET_IDS.put(packetClass, Integer.valueOf(id));
 	}
 	

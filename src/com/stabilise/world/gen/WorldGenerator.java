@@ -1,32 +1,24 @@
 package com.stabilise.world.gen;
 
 import static com.stabilise.world.Region.REGION_SIZE;
-import static com.stabilise.world.Region.REGION_SIZE_IN_TILES;
 import static com.stabilise.world.Slice.SLICE_SIZE;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.stabilise.util.Log;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.ClearingLinkedList;
-import com.stabilise.util.maths.AbstractPoint;
-import com.stabilise.util.maths.MutablePoint;
-import com.stabilise.util.maths.Point;
-import com.stabilise.util.maths.Maths;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
-import com.stabilise.world.Schematic;
+import com.stabilise.world.RegionCache;
 import com.stabilise.world.Slice;
 import com.stabilise.world.provider.WorldProvider;
+import com.stabilise.world.structure.Structure;
 import com.stabilise.world.tile.Tiles;
 
 /**
@@ -46,7 +38,7 @@ import com.stabilise.world.tile.Tiles;
  * <p>{@link #generateSynchronously(Region)} is provided as a convenience
  * alternative to {@link #generate(Region)} if it is known that the thread
  * invoking it will not suffer from the prolonged blocking that generation
- * entails (as a rule of thumb, it is acceptable invoke {@code
+ * entails (as a rule of thumb, it is acceptable to invoke {@code
  * generateSynchronously} on any thread but the main thread).
  * 
  * <p>To shut down the {@code WorldGenerator}, invoke {@link #shutdown()} and
@@ -63,7 +55,7 @@ import com.stabilise.world.tile.Tiles;
  * 
  * <p>The generation of a region may entail that any number of other regions
  * are cached by the generator to enable inter-region generation, specifically
- * in the case of certain 'structures', or {@link Schematic schematics}, which
+ * in the case of certain 'structures', or {@link Structure schematics}, which
  * may be generated across region boundaries. These regions are obtained from
  * the world via invocation of {@link HostWorld#getRegionAt(int, int)
  * getRegionAt}, and have a slice marked as per {@link Region#anchorSlice()} to
@@ -100,31 +92,11 @@ public abstract class WorldGenerator {
 	/** Whether or not the generator has been shut down. This is volatile. */
 	private volatile boolean isShutdown = false;
 	
-	/** A map of region points to each region's lock. Maps region.loc ->
-	 * locks. */
-	private final ConcurrentHashMap<AbstractPoint, RegionLock> regionLocks =
-			new ConcurrentHashMap<>();
-	
-	/** A map of regions which have been cached by the world generator. Maps
-	 * region.loc -> cached region. */
-	private final ConcurrentHashMap<AbstractPoint, CachedRegion> cachedRegions =
-			new ConcurrentHashMap<>();
-	
-	/** Locks used for lock striping when managing cached regions. */
-	private final Object[] locks;
-	private static final int LOCKS = 4; // Do not modify this without first checking getLock()
-	
-	/** Regions which have been cached by the current worker thread. The list
-	 * member is a {@link ClearingLinkedList}. */
-	private final ThreadLocal<List<Region>> localCachedRegions = new ThreadLocal<List<Region>>() {
-		@Override
-		protected List<Region> initialValue() {
-			return new ClearingLinkedList<>();
-		}
-	};
+	private final RegionCache regionCache;
 	
 	/** The cache of schematics in use. TODO: this system is outdated */
-	private final Map<String, Schematic> schematics = new ConcurrentHashMap<>(5);
+	@SuppressWarnings("unused")
+	private final Map<String, Structure> schematics = new ConcurrentHashMap<>(5);
 	
 	/** The generator's log. */
 	protected final Log log = Log.getAgent("GENERATOR");
@@ -136,17 +108,18 @@ public abstract class WorldGenerator {
 	 * @param worldProv The world provider. This should be a {@code
 	 * HostProvider} for all but a {@code PrivateDimensionGenerator}.
 	 * @param world The world.
+	 * @param regionCache The region world's cache.
+	 * 
+	 * @throws NullPointerException if any argument is {@code null}.
 	 */
-	protected WorldGenerator(WorldProvider<?> worldProv, HostWorld world) {
-		this.prov = worldProv;
-		this.world = world;
+	protected WorldGenerator(WorldProvider<?> worldProv, HostWorld world,
+			RegionCache regionCache) {
+		this.prov = Objects.requireNonNull(worldProv);
+		this.world = Objects.requireNonNull(world);
+		this.regionCache = Objects.requireNonNull(regionCache);
 		this.executor = prov.getExecutor();
 		
 		seed = prov.getSeed();
-		
-		locks = new Object[LOCKS];
-		for(int i = 0; i < LOCKS; i++)
-			locks[i] = new Object();
 	}
 	
 	/**
@@ -169,23 +142,8 @@ public abstract class WorldGenerator {
 	 */
 	@UserThread("MainThread")
 	public final void generate(final Region region) {
-		// This method should return from here in most cases
-		if(region.isGenerated() || !region.loaded)
-			return;
-		
-		// Abort if the region is being generated:
-		// Obtaining the region here prevents a large flux of calls (e.g.
-		// when the world is initially loaded) from each creating a new
-		// request and cluttering the executor
-		if(isGenerating(region) || !tryObtainRegion(region))
-			return;
-		
-		executor.execute(new Runnable() {
-			@Override
-			public void run() {
-				genRegion(region, false);
-			}
-		});
+		if(region.getGenerationPermit())
+			executor.execute(() -> { genRegion(region); });
 	}
 	
 	/**
@@ -203,8 +161,8 @@ public abstract class WorldGenerator {
 	 */
 	@UserThread("WorkerThread")
 	public final void generateSynchronously(Region region) {
-		if(!region.isGenerated() && obtainRegion(region))
-			genRegion(region, false);
+		if(region.getGenerationPermit())
+			genRegion(region);
 	}
 	
 	/**
@@ -212,57 +170,43 @@ public abstract class WorldGenerator {
 	 * method is invoked.
 	 * 
 	 * @param r The region to generate.
-	 * @param cached Whether or not the region should be treated as a cached
-	 * region.
 	 * 
 	 * @throws NullPointerException if {@code r} is {@code null}.
 	 */
 	@UserThread("WorkerThread")
-	private void genRegion(Region r, boolean cached) {
-		RegionLock l = regionLocks.get(r.loc); // shouldn't be null
-		
-		if(isShutdown) {
-			releaseRegion(r);
-			if(cached)
-				uncacheRegion(r);
+	private void genRegion(Region r) {
+		if(isShutdown)
 			return;
-		}
 		
 		//log.logMessage("Generating " + r);
 		
 		TaskTimer timer = new TaskTimer("Generating " + r);
 		timer.start();
 		
-		boolean changes = false; // whether or not anything was changed during gen
-		
 		try {
-			// Skip over this part if the region has already been generated
-			if(!r.generated) {
+			// Don't generate a region if we don't need to!
+			if(!r.isGenerated()) {
 				// Set up the region's slices
 				for(int y = 0; y < REGION_SIZE; y++) {
 					for(int x = 0; x < REGION_SIZE; x++) {
 						r.slices[y][x] = new Slice(
 								x + r.loc.x * REGION_SIZE,
 								y + r.loc.y * REGION_SIZE,
-								new int[SLICE_SIZE][SLICE_SIZE] // all values are 0 == Tiles.AIR
+								// all values are 0 == Tiles.AIR
+								new int[SLICE_SIZE][SLICE_SIZE]
 						);
 					}
 				}
 				
 				// Generate the region, as implemented in subclasses
 				generateRegion(r);
-				
-				changes = true;
 			}
 			
 			// After normal generation processes have been completed, add any
 			// queued schematics.
+			r.implantStructures(regionCache);
 			
-			// Notifies other gen threads that this region is now beyond the
-			// point where schematics can be queued and still generated.
-			l.schematicsPlaced = true;
-			
-			// Now add the schematics
+			/*
 			for(Region.QueuedSchematic s : r.getSchematics(true)) {
 				changes = true;
 				addSchematicAt(
@@ -272,63 +216,21 @@ public abstract class WorldGenerator {
 						SchematicParams.scheduledGenParams(s.offsetX, s.offsetY)
 				);
 			}
+			*/
 			
 			timer.stop();
 			log.postDebug(timer.getResult(TimeUnit.MILLISECONDS));
-			
-			r.generated = true;
 		} catch(Throwable t) {
 			log.postSevere("Worldgen of " + r + " failed!", t);
-		} finally {
-			// Enclosed in a finally block in case generateRegion() disobeys
-			// the order to not throw an exception or error.
-			releaseRegion(r);
 		}
 		
-		// Save the region once it's done generating, but don't burden the
-		// world loader if nothing was changed.
-		if(changes || cached)
-			prov.loader.saveRegion(world, r);
-		if(cached)
-			uncacheRegion(r);
+		r.setGenerated();
 		
-		// Now that generation is done, we will perform the following with each
-		// of the cached regions:
-		//   > If the region has already been generated (i.e. generated==true),
-		//     then pass that region through to this method, which simply adds
-		//     any queued schematics to it (since now is a convenient time to
-		//     implant schematics), and then uncache the region from the world.
-		// Finally, we clear the threadlocal instance.
-		for(Region cRegion : localCachedRegions.get()) {
-			RegionLock cLock = regionLocks.get(cRegion.loc); // may be null
-			
-			// If the region is generated for the most part, implant the
-			// schematics
-			
-			// Whether or not we can treat the cached region as generated. If
-			// we can treat it as generated, then we can implant schematics.
-			// TODO: Verify that in all cases this check works as if it is
-			// atomic.
-			boolean generated = cRegion.generated || (cLock != null && cLock.schematicsPlaced);
-			
-			if(generated && cRegion.hasQueuedSchematics()) {
-				executor.execute(new Runnable() {
-					@Override
-					public void run() {
-						if(obtainRegion(cRegion))
-							genRegion(cRegion, true);
-						else // game being shut down; save what we can
-							prov.loader.saveRegion(world, r);
-					}
-				});
-			} else {
-				// Save the region here since the current implementation of
-				// HostWorld prevents it from saving non-generated regions
-				prov.loader.saveRegion(world, cRegion);
-				uncacheRegion(cRegion);
-			}
-		}
-		localCachedRegions.remove();
+		// Save the region once it's done generating
+		prov.loader.saveRegion(world, r, null);
+		
+		// Finally we clean up all the regions cached during generation.
+		regionCache.uncacheAll();
 	}
 	
 	/**
@@ -364,10 +266,12 @@ public abstract class WorldGenerator {
 	 * schematic, relative to the slice, in tile-lengths.
 	 * @param params The parameters to use for adding the schematic.
 	 */
+	/*
 	@UserThread("WorkerThread")
 	protected final void addSchematicAt(Region r, String name, int sliceX, int sliceY, int tileX, int tileY, SchematicParams params) {
 		addSchematicAt(r, getSchematic(name), sliceX, sliceY, tileX, tileY, params);
 	}
+	*/
 	
 	/**
 	 * Adds a schematic to the world.
@@ -387,8 +291,9 @@ public abstract class WorldGenerator {
 	 * @throws IllegalArgumentException Thrown if the schematic's origin has
 	 * negative coordinates.
 	 */
+	/*
 	@UserThread("WorkerThread")
-	protected final void addSchematicAt(Region r, Schematic sc, int sliceX, int sliceY, int tileX, int tileY, SchematicParams params) {
+	protected final void addSchematicAt(Region r, Structure sc, int sliceX, int sliceY, int tileX, int tileY, SchematicParams params) {
 		if(sc == null)
 			return;
 		
@@ -409,13 +314,12 @@ public abstract class WorldGenerator {
 						regionX <= r.loc.x + params.offsetX + ((tileX + sliceX * SLICE_SIZE - sc.x + sc.width) / (REGION_SIZE_IN_TILES));
 						regionX++) {
 					if(regionY != r.loc.y || regionX != r.loc.x) {
-						Region cachedRegion = cacheRegion(regionX, regionY);
-						cachedRegion.queueSchematic(
-								new Region.QueuedSchematic(
+						Region cachedRegion = regionCache.cacheRegion(regionX, regionY);
+						cachedRegion.addStructure(
+								new Region.QueuedStructure(
 										sc.name, sliceX, sliceY, tileX, tileY, r.loc.x - regionX, r.loc.y - regionY
 								)
 						);
-						cachedRegion.unsavedChanges = true; // TODO: thread safety on this
 					}
 				}
 			}
@@ -492,6 +396,7 @@ public abstract class WorldGenerator {
 			s = r.getSliceAt(sliceX, sliceY);
 		}
 	}
+	*/
 	
 	/**
 	 * Gets a schematic.
@@ -501,15 +406,16 @@ public abstract class WorldGenerator {
 	 * @return The schematic, or {@code null} if a schematic with the given
 	 * name could not be found.
 	 */
+	/*
 	@UserThread("WorkerThread")
-	private Schematic getSchematic(String schematic) {
+	private Structure getSchematic(String schematic) {
 		// Weakly synchronised through use of a ConcurrentHashMap - this is
 		// sufficient for now (it doesn't really matter if a map entry is
 		// overwritten by an equivalent schematic)
 		if(schematics.containsKey(schematic)) {
 			return schematics.get(schematic);
 		} else {
-			Schematic s = new Schematic(schematic);
+			Structure s = new Structure(schematic);
 			try {
 				s.load();
 			} catch(IOException e) {
@@ -520,221 +426,9 @@ public abstract class WorldGenerator {
 			return s;
 		}
 	}
+	*/
 	
-	/**
-	 * Caches a region for referencing during world generation. Note that the
-	 * returned region may currently be in the process of generating.
-	 * 
-	 * <p>It is imperative that the region is uncached as per an invocation of
-	 * {@link #uncacheRegion(Region)} once the returned region is no longer
-	 * needed.
-	 * 
-	 * @param x The x-coordinate of the region, in region-lengths.
-	 * @param y The y-coordinate of the region, in region-lengths.
-	 * 
-	 * @return The region.
-	 */
-	@UserThread("WorkerThread")
-	private Region cacheRegion(int x, int y) {
-		List<Region> cRegions = localCachedRegions.get();
-		
-		// If the region is already cached by this thread, use it
-		for(Region r : cRegions) {
-			if(r.isAt(x, y));
-				return r;
-		}
-		
-		CachedRegion cachedRegion;
-		boolean wasUncached = false;
-		
-		// Otherwise, if the region is already cached by the world generator,
-		// use it.
-		
-		// Synchronised to make the put-if-absent atomic
-		synchronized(cachedRegions) {
-			cachedRegion = cachedRegions.get(Region.createLoc(x, y));
-			// If the region is not cached by the world generator, get it from
-			// the world
-			if(cachedRegion == null) {
-				wasUncached = true;
-				// Synchronise on a public lock to make this atomic. See
-				// HostWorld.loadRegion()
-				synchronized(getLock(x, y)) {
-					Region region = world.getRegionAt(x, y);
-					if(region == null)
-						region = new Region(x, y, world.getAge());
-					cachedRegion = new CachedRegion(region);
-					cachedRegions.put(region.loc, cachedRegion);
-				}
-			}
-			
-			cachedRegion.increment();
-		}
-		
-		cRegions.add(cachedRegion.region);
-		
-		// No guarantees are made as to whether or not the region is loaded, so
-		// perform a loading operation here.
-		if(wasUncached) {
-			prov.loader.loadRegionSynchronously(world, cachedRegion.region);
-			// In case it is being loaded due to another thread's actions..
-			cachedRegion.region.waitUntilLoaded();
-		}
-		
-		return cachedRegion.region;
-	}
-	
-	/**
-	 * Tries to uncache the specified region. If the region is still being used
-	 * by another worker thread, it will remain cached; if not, the region will
-	 * be saved as per {@link
-	 * com.stabilise.world.save.WorldLoader#saveRegionSynchronously(Region)
-	 * WorldLoader.saveRegionSynchronously(Region)}.
-	 * 
-	 * <p>An invocation of this method should have an associated prior call to
-	 * {@link #cacheRegion(int, int)}.
-	 * 
-	 * @param region The region to uncache, as returned by
-	 * {@link #cacheRegion(int, int)}.
-	 */
-	@UserThread("WorkerThread")
-	private void uncacheRegion(Region region) {
-		// Synchronised to make this atomic
-		synchronized(cachedRegions) {
-			if(cachedRegions.get(region.loc).decrementAndCheck())
-				cachedRegions.remove(region.loc);
-			else
-				return;	
-		}
-		prov.loader.saveRegionSynchronously(world, region);
-	}
-	
-	/**
-	 * Gets a region cached by the world generator. This should be accessed
-	 * within a synchronised block which holds the monitor on the lock returned
-	 * by {@link #getLock(Point) getLock(loc)}.
-	 * 
-	 * @param loc The coordinates of the region, whose components are in
-	 * region-lengths.
-	 * 
-	 * @return The region, or {@code null} if the region is not cached.
-	 */
-	@UserThread("MainThread")
-	public Region getCachedRegion(MutablePoint loc) {
-		CachedRegion cachedRegion = cachedRegions.get(loc);
-		return cachedRegion == null ? null : cachedRegion.region;
-	}
-	
-	/**
-	 * Gets the lock upon which to synchronise when atomically accessing a
-	 * region cached by the world generator.
-	 * 
-	 * @param x The x-coordinate of the region, in region-lengths.
-	 * @param y The y-coordinate of the region, in region-lengths.
-	 * 
-	 * @return The object lock.
-	 * @throws NullPointerException if {@code loc} is {@code null}.
-	 */
-	public Object getLock(int x, int y) {
-		// We use the lowest bit in both x and y to return one of 4 locks.
-		return locks[((x & 1) << 1) | (y & 1)];
-	}
-	
-	/**
-	 * Checks for whether or not a region is currently being generated.
-	 * 
-	 * @return {@code true} if the region is being generated; {@code false}
-	 * otherwise.
-	 * @throws NullPointerException if {@code r} is {@code null}.
-	 */
-	private boolean isGenerating(Region r) {
-		RegionLock l = regionLocks.get(r.loc);
-		return l != null && l.isLocked();
-	}
-	
-	/**
-	 * Prepares the RegionLock instance associated with a region. This should
-	 * only be invoked once per gen attempt of a region - that is, only if it
-	 * is guaranteed that either {@code lock()} or {@code tryLock()} will be
-	 * invoked on the returned RegionLock.
-	 * 
-	 * @return The region's lock.
-	 * @throws NullPointerException if {@code r} is {@code null}.
-	 */
-	private RegionLock prepareLock(Region r) {
-		RegionLock l;
-		// Synchronised to make this atomic. See releaseRegion().
-		// Is there a way to avoid overt synchronisation?
-		synchronized(r) {
-			l = regionLocks.get(r.loc);
-			if(l == null) {
-				l = new RegionLock();
-				regionLocks.put(r.loc, l);
-			}
-			// Pre-lock while synced so isUnused() returns false in releaseRegion
-			l.preLock();
-		}
-		return l;
-	}
-	
-	/**
-	 * Acquires the permit to generate the given region. If this method returns
-	 * {@code true}, it is safe to generate the region.
-	 * 
-	 * <p>To release the generation permit once generation is complete, use
-	 * {@link #releaseRegion(Region) releaseRegion(r)}. Every invocation of
-	 * this method should have an associated call to {@code releaseRegion} for
-	 * <i>all</i> code paths.
-	 * 
-	 * @param r The region.
-	 * 
-	 * @return {@code true} if the permit was acquired; {@code false} if the
-	 * current thread was interrupted while waiting to acquire the permit.
-	 * @throws NullPointerException if {@code r} is {@code null}.
-	 */
-	private boolean obtainRegion(Region r) {
-		// If this fails due to interruption, don't bother removing the lock
-		// through releaseRegion(r) since this thread being interrupted means
-		// the world generator is being shutdown, in which case the lock map
-		// will be GC'd anyway.
-		return prepareLock(r).lock();
-	}
-	
-	/**
-	 * Attempts to acquire the permit to generate the given region. If this
-	 * method returns {@code true}, it is safe to generate the region.
-	 * 
-	 * <p>To release the generation permit once generation is complete, use
-	 * {@link #releaseRegion(Region) releaseRegion(r)}. Every invocation of
-	 * this method which returns {@code true} should have an associated call to
-	 * {@code releaseRegion} for <i>all</i> code paths.
-	 * 
-	 * @return {@code true} if the permit was acquired; {@code false}
-	 * otherwise.
-	 * @throws NullPointerException if {@code r} is {@code null}.
-	 */
-	private boolean tryObtainRegion(Region r) {
-		return prepareLock(r).tryLock();
-	}
-	
-	/**
-	 * Releases the permit to generate the given region.
-	 * 
-	 * @param r The region.
-	 * 
-	 * @throws NullPointerException if {@code r} is {@code null}.
-	 */
-	private void releaseRegion(Region r) {
-		// No need to check to see if this is null; no thread should remove the
-		// mapping while the lock is obtained
-		RegionLock l = regionLocks.get(r.loc);
-		l.unlock();
-		// Synchronised to make this atomic. See prepareLock().
-		synchronized(r) {
-			if(l.isUnused())
-				regionLocks.remove(r.loc);
-		}
-	}
+
 	
 	/**
 	 * Instructs the WorldGenerator to shut down.
@@ -799,163 +493,6 @@ public abstract class WorldGenerator {
 			return new SchematicParams(true, false, offsetX, offsetY);
 		}
 		
-	}
-	
-	/**
-	 * A class which holds a cached region and a counter as to the number of
-	 * times it has been cached.
-	 */
-	private static class CachedRegion {
-		
-		/** The region. */
-		private final Region region;
-		/** The number of times the region has been cached. */
-		private final AtomicInteger timesCached = new AtomicInteger(0);
-		
-		
-		/**
-		 * Creates a new CachedRegion.
-		 * 
-		 * @param region The region being wrapped.
-		 */
-		private CachedRegion(Region region) {
-			this.region = region;
-		}
-		
-		/**
-		 * Marks the region as cached. This also {@link Region#anchorSlice()
-		 * anchors} one of the region's slices.
-		 */
-		private void increment() {
-			region.anchorSlice();
-			timesCached.getAndIncrement();
-		}
-		
-		/**
-		 * Removes a cache marking and checks as to whether or not it is no
-		 * longer needed. This also {@link Region#deAnchorSlice() de-anchors}
-		 * one of the region's slices.
-		 * 
-		 * @return {@code true} if the region is no longer being cached for any
-		 * thread and may be removed; {@code false} if the region is still in
-		 * use.
-		 */
-		private boolean decrementAndCheck() {
-			region.deAnchorSlice();
-			return timesCached.decrementAndGet() == 0;
-		}
-		
-	}
-	
-	/**
-	 * A lock used to prevent a region from being generated multiple times
-	 * simultaneously.
-	 */
-	private static class RegionLock {
-		
-		/** The RegionLock's backing semaphore. This is used instead of a
-		 * ReentrantLock so that the permit may be acquired and released on
-		 * different threads. Do <i>not</i> interact with this directly. */
-		private final Semaphore semaphore = new Semaphore(1, false);
-		/** Tracks the number of threads which are using this RegionLock, to
-		 * determine whether or not it should be allowed to be garbage
-		 * collected. Do <i>not</i> interact with this directly. */
-		private final AtomicInteger threadsUsing = new AtomicInteger(0);
-		/** Whether or not the schematics have been implanted in the region.
-		 * This is reset to {@code false} every time the lock is freshly
-		 * obtained. This is volatile. */
-		private volatile boolean schematicsPlaced = false;
-		
-		
-		/**
-		 * Creates a new RegionLock.
-		 */
-		private RegionLock() {}
-		
-		/**
-		 * Prepares to acquire the lock. This should prepend any invocations of
-		 * {@link #lock} and {@link #tryLock}.
-		 */
-		private void preLock() {
-			threadsUsing.getAndIncrement();
-		}
-		
-		/**
-		 * Acquires the lock. An invocation of this should be prepended by an
-		 * invocation of {@link #preLock()}.
-		 * 
-		 * @return {@code true} if the lock was acquired; {@code false} if the
-		 * current thread was interrupted while waiting to acquire the lock.
-		 * @see Semaphore#acquire()
-		 */
-		private boolean lock() {
-			try {
-				semaphore.acquire();
-				onLockSuccess();
-				return true;
-			} catch(InterruptedException e) {
-				onLockFailure();
-				return false;
-			}
-		}
-		
-		/**
-		 * Attempts to acquire the lock. An invocation of this should be
-		 * prepended by an invocation of {@link #preLock()}.
-		 * 
-		 * @return {@code true} if the lock was acquired; {@code false}
-		 * otherwise.
-		 */
-		private boolean tryLock() {
-			if(semaphore.tryAcquire()) {
-				onLockSuccess();
-				return true;
-			} else {
-				onLockFailure();
-				return false;
-			}
-		}
-		
-		private void onLockSuccess() {
-			// Reset at the start of every gen
-			schematicsPlaced = false;
-		}
-		
-		private void onLockFailure() {
-			// Undo what preLock() does
-			threadsUsing.getAndDecrement();
-		}
-		
-		/**
-		 * Releases the lock.
-		 * 
-		 * @see Semaphore#release()
-		 */
-		private void unlock() {
-			semaphore.release();
-			threadsUsing.getAndDecrement();
-		}
-		
-		/**
-		 * Queries if the lock is being held by another thread - that is, if
-		 * the region is currently being generated (since this should be the
-		 * only time the lock is held).
-		 * 
-		 * @return {@code true} if any thread holds the lock; {@code false}
-		 * otherwise.
-		 */
-		private boolean isLocked() {
-			return semaphore.availablePermits() == 0;
-		}
-		
-		/**
-		 * Checks for whether or not the lock is being used.
-		 * 
-		 * @return {@code true} if the lock is in use; {@code false} otherwise.
-		 */
-		private boolean isUnused() {
-			return threadsUsing.get() == 0;
-		}
 	}
 	
 }

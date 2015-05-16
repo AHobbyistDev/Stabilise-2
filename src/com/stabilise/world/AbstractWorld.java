@@ -342,6 +342,11 @@ public abstract class AbstractWorld implements World {
 		return dimension.info.name;
 	}
 	
+	@Override
+	public boolean isClient() {
+		return provider.hasClient();
+	}
+	
 	// ========== Lifecycle Methods ==========
 	
 	/**
@@ -506,7 +511,7 @@ public abstract class AbstractWorld implements World {
 		/** Number of active particles must be this many times the size of
 		 * the pool to force a resize. */
 		private static final int LOAD_FACTOR = 3;
-		/** The amount by which the pool's length is multipled when it is
+		/** The amount by which the pool's length is multiplied when it is
 		 * resized. */
 		private static final int EXPANSION = 2;
 		/** Maximum number of pooled particles retained when the pool is

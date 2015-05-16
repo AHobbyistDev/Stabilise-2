@@ -5,8 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.stabilise.util.nbt.NBTTagCompound;
-
 /**
  * Indicates that the annotated field should be automatically exported to and
  * from NBT via {@link NBTExporter#exportObj(Object)} and {@link

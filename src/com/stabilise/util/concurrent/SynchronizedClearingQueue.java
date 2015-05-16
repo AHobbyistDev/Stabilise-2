@@ -68,10 +68,10 @@ public class SynchronizedClearingQueue<E> implements ClearingQueue<E> {
 	
 	@Override
 	public Iterator<E> iterator() {
+		if(isEmpty())
+			return Collections.emptyIterator();
 		Node n;
 		synchronized(head) {
-			if(head.next == null)
-				return Collections.emptyIterator();
 			n = head.next;
 			head.next = null;
 			tail = head;

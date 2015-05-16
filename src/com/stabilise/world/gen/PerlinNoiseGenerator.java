@@ -11,6 +11,7 @@ import com.stabilise.util.maths.PerlinNoise1D;
 import com.stabilise.util.maths.SimplexNoise;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
+import com.stabilise.world.RegionCache;
 import com.stabilise.world.Slice;
 import com.stabilise.world.provider.WorldProvider;
 import com.stabilise.world.tile.tileentity.TileEntityChest;
@@ -30,8 +31,9 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 	 * @param worldProv The world provider.
 	 * @param world The world.
 	 */
-	public PerlinNoiseGenerator(WorldProvider<?> worldProv, HostWorld world) {
-		super(worldProv, world);
+	public PerlinNoiseGenerator(WorldProvider<?> worldProv, HostWorld world,
+			RegionCache cache) {
+		super(worldProv, world, cache);
 	}
 	
 	@Override
@@ -46,7 +48,7 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 	 * region is to be generated simultaneously.
 	 */
 	private class PerlinRegionGenerator {
-		private List<Region.QueuedSchematic> schematics = new ArrayList<>();
+		private List<Region.QueuedStructure> schematics = new ArrayList<>();
 		
 		// Landform 							WAVELENGTH	AMPLITUDE
 		private PerlinNoise1D noise1D_1;	//	128			64
@@ -258,13 +260,13 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 		}
 		
 		private void addSchematic(String sc, int sliceX, int sliceY, int tileX, int tileY) {
-			schematics.add(new Region.QueuedSchematic(sc, sliceX, sliceY, tileX, tileY, 0, 0));
+			schematics.add(new Region.QueuedStructure(sc, sliceX, sliceY, tileX, tileY, 0, 0));
 		}
 		
 		private void addSchematics(Region r) {
-			for(Region.QueuedSchematic s : schematics)
-				addSchematicAt(r, s.schematicName, s.sliceX, s.sliceY, s.tileX, s.tileY, SchematicParams.defaultParams());
-			schematics.clear();
+			//for(Region.QueuedStructure s : schematics)
+			//	addSchematicAt(r, s.schematicName, s.sliceX, s.sliceY, s.tileX, s.tileY, SchematicParams.defaultParams());
+			//schematics.clear();
 		}
 	}
 	

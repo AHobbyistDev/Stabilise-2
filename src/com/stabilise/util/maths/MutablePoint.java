@@ -43,6 +43,7 @@ public class MutablePoint extends AbstractPoint {
 	 * 
 	 * @return This point, for chaining operations.
 	 */
+	@Override
 	public MutablePoint set(int x, int y) {
 		this.x = x;
 		this.y = y;
@@ -54,9 +55,9 @@ public class MutablePoint extends AbstractPoint {
 	 * 
 	 * @return This point, for chaining operations.
 	 */
-	public MutablePoint set(MutablePoint p) {
-		x = p.x;
-		y = p.y;
+	public MutablePoint set(AbstractPoint p) {
+		x = p.getX();
+		y = p.getY();
 		return this;
 	}
 	
@@ -68,14 +69,6 @@ public class MutablePoint extends AbstractPoint {
 	@Override
 	public int getY() {
 		return y;
-	}
-	
-	/**
-	 * @return {@code true} if this MutablePoint holds the specified coordinates;
-	 * {@code false} otherwise.
-	 */
-	public boolean equals(int x, int y) {
-		return this.x == x && this.y == y;
 	}
 	
 }

@@ -142,7 +142,7 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 * locked}.
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
-	 * @throws IllegalArgumentException if either {@code id} is already mapped
+	 * @throws IllegalArgumentException if {@code id} is already mapped
 	 * to a factory and this registry uses the {@link
 	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
 	 */
@@ -151,7 +151,7 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	}
 	
 	/**
-	 * Registers a reflective object factory.
+	 * Registers a {@link ReflectiveFactory reflective object factory}.
 	 * 
 	 * @param id The ID of the object type.
 	 * @param objClass The objects' class.
@@ -163,7 +163,7 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 * locked}.
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
-	 * @throws IllegalArgumentException if either {@code id} is already mapped
+	 * @throws IllegalArgumentException if {@code id} is already mapped
 	 * to a factory and this registry uses the {@link
 	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
 	 */
@@ -184,7 +184,7 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 * locked}.
 	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 * @throws NullPointerException if any argument is {@code null}.
-	 * @throws IllegalArgumentException if either {@code id} is already mapped
+	 * @throws IllegalArgumentException if {@code id} is already mapped
 	 * to a factory and this registry uses the {@link
 	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
 	 */
@@ -199,6 +199,24 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 		size++;
 		if(id > maxID)
 			maxID = id;
+	}
+	
+	/**
+	 * Registers an {@link UnsafeFactory unsafe object factory}.
+	 * 
+	 * @param id The ID of the object type.
+	 * @param objClass The objects' class.
+	 * 
+	 * @throws IllegalStateException if this registry is {@link #lock()
+	 * locked}.
+	 * @throws IndexOutOfBoundsException if {@code id < 0}.
+	 * @throws NullPointerException if {@code objClass} is {@code null}.
+	 * @throws IllegalArgumentException if {@code id} is already mapped
+	 * to a factory and this registry uses the {@link
+	 * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
+	 */
+	public <S extends E> void registerUnsafe(int id, Class<S> objClass) {
+		register(id, objClass, new UnsafeFactory<S>(objClass));
 	}
 	
 	/**

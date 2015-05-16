@@ -84,12 +84,21 @@ public interface ClearingQueue<E> extends Iterable<E> {
 	 */
 	default Iterable<E> asNonClearing() {
 		final ClearingQueue<E> queue = this;
-		return new Iterable<E>() {
-			@Override
-			public Iterator<E> iterator() {
-				return queue.nonClearingIterator();
-			}
-		};
+		return () -> { return queue.nonClearingIterator(); };
+	}
+	
+	/**
+	 * Returns an iterable view of this queue whose iterator is optionally
+	 * clearing.
+	 * 
+	 * @param clearing If {@code true}, returns this. If {@code false}, returns
+	 * {@link #asNonClearing()}.
+	 */
+	default Iterable<E> asIterable(final boolean clearing) {
+		if(clearing)
+			return this;
+		else
+			return asNonClearing();
 	}
 	
 }

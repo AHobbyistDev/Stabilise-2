@@ -28,7 +28,7 @@ public class GameCamera extends FreeGameObject {
 	/**
 	 * Creates a new GameCamera.
 	 * 
-	 * @param world The game world.
+	 * @param provider The game world.
 	 * @param focus The entity upon which to focus the camera.
 	 */
 	public GameCamera(Entity focus) {

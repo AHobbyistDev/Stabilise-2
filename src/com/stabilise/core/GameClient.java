@@ -35,6 +35,7 @@ public class GameClient extends Client implements IClientHandshake, IClientLogin
 	private CharacterData player;
 	
 	private TrackableFuture<WorldBundle> loader;
+	private WorldLoadHandle loadHandle;
 	
 	public GameClient(InetAddress address, int port) {
 		super(address, port);
@@ -63,14 +64,29 @@ public class GameClient extends Client implements IClientHandshake, IClientLogin
 	
 	@Override
 	protected void doUpdate() {
-		
+		if(loader != null) {
+			
+		} else if(provider != null) {
+			provider.update();
+		}
 	}
 	
+	/**
+	 * Joins the server.
+	 * 
+	 * @param player The player to play as.
+	 * 
+	 * @return The TrackableFuture with which to track the login process, or
+	 * {@code null} if: we're not connected to the server, we're not currently
+	 * in the login protocol, or we're currently loading the world from the
+	 * server.
+	 */
 	public TrackableFuture<WorldBundle> login(CharacterData player) {
-		if(getConnection().getProtocol() != Protocol.LOGIN)
+		if(loader != null || getConnection() == null
+				|| getConnection().getProtocol() != Protocol.LOGIN)
 			return null;
-		return World.builder()
-				.setClient(this)
+		return loader = World.builder()
+				.setClient(this, new WorldLoadHandle())
 				.setPlayer(this.player = player)
 				.buildClient();
 	}
@@ -84,18 +100,21 @@ public class GameClient extends Client implements IClientHandshake, IClientLogin
 		
 		con.setProtocol(Protocol.LOGIN);
 	}
-
+	
 	// LOGIN ------------------------------------------------------------------
 	
 	public class WorldLoadHandle {
+		public volatile boolean rejected = false;
+		public volatile String rejectReason = null;
 		
+		private WorldLoadHandle() {}
 	}
 	
 	@Override
 	public void handleLoginReject(S000LoginRejected packet, TCPConnection con) {
-		
+		// Set rejectReason before rejected to avoid race conditions.
+		loadHandle.rejectReason = packet.reason;
+		loadHandle.rejected = true;
 	}
-	
-	
 	
 }

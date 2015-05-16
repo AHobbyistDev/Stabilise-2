@@ -3,7 +3,7 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Simple rendering
 	- Simple menu
 	- Simple slices
-	- Simple superimposed cos wave worldgen
+	- Simple superimposed sine wave worldgen
 	- Simple entity logic
 	- Log
 06/12/13
@@ -17,7 +17,7 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Beginning migration of worlds to saved worlds
 	- Beginning migration of game to client-server architecture (not really - just creating relevant classes in advance)
 18/12/13
-	- School finished; can finally begin spending dedicated time coding
+	- Term 4/1 finished; can finally begin spending dedicated time coding
 19/12/13
 	- Added TextBox.java
 	- Added the ability to create and select worlds
@@ -223,14 +223,31 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Projection precomputation for shapes in util.shape is now an optional optimisation
 14/12/14
 	- Ported to libGDX. Everything is broken!
-07/01/14	
+07/01/15	
 	- Added InstantiationRegistry to create entities, tile entities, packets, etc.
-10/01/14
+10/01/15
 	- Porting World architecture over to something more extensive and usable for all world types (e.g. singleplayer, server, client to a server)
-27/01/14
+27/01/15
 	- The game is now runnable to an extent. Menu architecture is still broken, rendering is crude and incomplete, and only one sample world can be run.
-27/04/14
+11/02/15
+	- Preparing architecture to add multiple dimensions.
+12/02/15
+	- Added NBTExporter to automatically convert objects to and from NBT
+20/02/15
+	- Improving networking architecture.
+17/04/15
+	- Fixed broken SAT collisions!
+20/04/15
+	- Added WorldBuilder.
+27/04/15
 	- Added AbstractWorld.ParticleManager and particle pooling.
+29/04/15
+	- Even more improvement of networking architecture
+		- Protocol synchronisation between peers, ping packets
+12/05/15
+	- Beginning refactoring of region state, WorldGenerator, WorldLoader, and HostWorld.
+16/05/15
+	- Added RegionCache.
 
 
 	

@@ -1,6 +1,7 @@
 package com.stabilise.world.dimension;
 
 import com.stabilise.world.HostWorld;
+import com.stabilise.world.RegionCache;
 import com.stabilise.world.gen.PerlinNoiseGenerator;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.provider.WorldProvider;
@@ -15,8 +16,9 @@ public class DimOverworld extends Dimension {
 	}
 	
 	@Override
-	public WorldGenerator createWorldGenerator(WorldProvider<?> provider, HostWorld world) {
-		return new PerlinNoiseGenerator(provider, world);
+	public WorldGenerator createWorldGenerator(WorldProvider<?> provider,
+			HostWorld world, RegionCache cache) {
+		return new PerlinNoiseGenerator(provider, world, cache);
 	}
 	
 }

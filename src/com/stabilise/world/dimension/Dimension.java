@@ -14,6 +14,7 @@ import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.ClientWorld;
 import com.stabilise.world.HostWorld;
+import com.stabilise.world.RegionCache;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
 import com.stabilise.world.gen.WorldGenerator;
@@ -86,11 +87,13 @@ public abstract class Dimension {
 	 * 
 	 * @param provider The world provider.
 	 * @param world This dimension's host world.
+	 * @param regionCache The dimension's region cache.
 	 * 
 	 * @return The world generator.
-	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws NullPointerException if any argument is {@code null}.
 	 */
-	public abstract WorldGenerator createWorldGenerator(WorldProvider<?> provider, HostWorld world);
+	public abstract WorldGenerator createWorldGenerator(WorldProvider<?> provider,
+			HostWorld world, RegionCache regionCache);
 	
 	/**
 	 * Loads this dimension's info, if it exists on the filesystem.
@@ -313,7 +316,8 @@ public abstract class Dimension {
 		/** The name of the dimension. */
 		public final String name;
 		/** The age of this dimension. This is volatile. */
-		public volatile long age = 0L; // see WorldLoader.saveRegion() for why this is volatile
+		// see WorldLoader.saveRegion() for why this is volatile
+		public volatile long age = 0L;
 		
 		/** The coordinates of the slice in which players should initially spawn,
 		 * in slice-lengths. */

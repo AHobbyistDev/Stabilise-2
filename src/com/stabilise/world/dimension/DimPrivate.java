@@ -1,6 +1,7 @@
 package com.stabilise.world.dimension;
 
 import com.stabilise.world.HostWorld;
+import com.stabilise.world.RegionCache;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.provider.WorldProvider;
 
@@ -14,7 +15,8 @@ public class DimPrivate extends Dimension {
 	}
 	
 	@Override
-	public WorldGenerator createWorldGenerator(WorldProvider<?> provider, HostWorld world) {
+	public WorldGenerator createWorldGenerator(WorldProvider<?> provider, 
+			HostWorld world, RegionCache cache) {
 		return null;
 	}
 	

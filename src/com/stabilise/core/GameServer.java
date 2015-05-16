@@ -14,11 +14,13 @@ import com.stabilise.network.protocol.Protocol;
 import com.stabilise.network.protocol.handshake.C000VersionInfo;
 import com.stabilise.network.protocol.handshake.IServerHandshake;
 import com.stabilise.network.protocol.handshake.S000VersionInfo;
+import com.stabilise.network.protocol.login.C000Login;
+import com.stabilise.network.protocol.login.IServerLogin;
 import com.stabilise.world.provider.HostProvider;
 
-public class GameServer extends Server implements IServerHandshake {
+public class GameServer extends Server implements IServerHandshake, IServerLogin {
 	
-	public final HostProvider world;
+	public final HostProvider provider;
 	private final int maxPlayers;
 	
 	
@@ -41,7 +43,7 @@ public class GameServer extends Server implements IServerHandshake {
 			throw new IllegalArgumentException("Invalid max number of players "
 					+ maxPlayers);
 		
-		this.world = Objects.requireNonNull(world);
+		this.provider = Objects.requireNonNull(world);
 		this.maxPlayers = maxPlayers;
 	}
 	
@@ -70,7 +72,7 @@ public class GameServer extends Server implements IServerHandshake {
 	
 	@Override
 	public void doUpdate() {
-		world.update();
+		provider.update();
 	}
 	
 	@Override
@@ -90,7 +92,12 @@ public class GameServer extends Server implements IServerHandshake {
 		
 		con.setProtocol(Protocol.LOGIN);
 	}
-	
+
 	// LOGIN ------------------------------------------------------------------
+	
+	@Override
+	public void handleLogin(C000Login packet, TCPConnection con) {
+		
+	}
 	
 }

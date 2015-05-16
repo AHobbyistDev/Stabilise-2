@@ -13,6 +13,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
 import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.Unguarded;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.LightLinkedList;
@@ -40,6 +41,8 @@ public class HostWorld extends AbstractWorld {
 	
 	/** The world generator. */
 	public final WorldGenerator generator;
+	/** The region cache. */
+	public final RegionCache regionCache;
 	
 	// VERY IMPORTANT IMPLEMENTATION DETAILS:
 	// Empirical testing has revealed that the table size for region maps in
@@ -78,7 +81,8 @@ public class HostWorld extends AbstractWorld {
 		spawnSliceX = dimension.info.spawnSliceX;
 		spawnSliceY = dimension.info.spawnSliceY;
 		
-		generator = dimension.createWorldGenerator(provider, this);
+		regionCache = new RegionCache(this, provider.loader);
+		generator = dimension.createWorldGenerator(provider, this, regionCache);
 	}
 	
 	@Override
@@ -152,10 +156,9 @@ public class HostWorld extends AbstractWorld {
 	@Override
 	public boolean isLoaded() {
 		for(Region r : regions.values()) {
-			if(!r.loaded || !r.isGenerated()) {
+			if(!r.isActive()) {
 				//log.postInfo("Not all regions loaded (" + r + ": "
-				//		+ r.loaded + ", " + r.isGenerated() + "(" + r.generated + ", "
-				//		+ r.hasQueuedSchematics + "))");
+				//		+ r.isLoaded() + ", " + r.isGenerated() + ")");
 				return false;
 			}
 		}
@@ -179,12 +182,18 @@ public class HostWorld extends AbstractWorld {
 			r.update(this);
 			profiler.next("unload"); // root.update.game.world.region.unload
 			if(r.unload) {
+				// To unload the region we use unloadRegion() to stick in into
+				// the cache, and then we remove it from our map of regions.
 				unloadRegion(r);
 				i.remove();
 			}
 			profiler.end(); // root.update.game.world.region
 		}
+		
 		profiler.end(); // root.update.game.world
+		
+		// Uncache any regions which may have been cached during this tick.
+		regionCache.uncacheAll();
 	}
 	
 	/**
@@ -208,17 +217,21 @@ public class HostWorld extends AbstractWorld {
 	 * @return The region at the given coordinates, or {@code null} if no such
 	 * region exists.
 	 */
-	@UserThread({"MainThread", "WorldGenThread"})
+	@UserThread("MainThread")
+	@NotThreadSafe
 	public Region getRegionAt(int x, int y) {
-		return regions.get(Region.createMutableLoc(x, y));
+		return regions.get(dummyLoc.set(x, y));
+	}
+	
+	@UserThread("Any")
+	@ThreadSafe
+	public Region getRegionAt(AbstractPoint point) {
+		return regions.get(point);
 	}
 	
 	/**
-	 * Loads a region into memory as if by
-	 * {@link #loadRegion(int, int, boolean) loadRegion(x, y, true)}. If the
-	 * region has already been loaded, it is returned. This method should not
-	 * be invoked regularly as it will induce a significant performance
-	 * deficit; refer to {@link #getRegionAt(int, int)} instead.
+	 * Loads a region into memory. If the region has already been loaded, it
+	 * is returned.
 	 * 
 	 * @param x The x-coordinate of the region, in region-lengths.
 	 * @param y The y-coordinate of the region, in region-lengths.
@@ -228,35 +241,15 @@ public class HostWorld extends AbstractWorld {
 	@UserThread("MainThread")
 	@NotThreadSafe
 	public Region loadRegion(int x, int y) {
-		return loadRegion(x, y, true);
-	}
-	
-	/**
-	 * Loads a region into memory. If the region has already been loaded, it is
-	 * returned. This method should not be invoked regularly as it will induce
-	 * a significant performance deficit; refer to
-	 * {@link #getRegionAt(int, int)} instead.
-	 * 
-	 * @param x The x-coordinate of the region, in region-lengths.
-	 * @param y The y-coordinate of the region, in region-lengths.
-	 * @param generate Whether or not the region should be generated, if it was
-	 * not already.
-	 * 
-	 * @return The region.
-	 */
-	@UserThread("MainThread")
-	@NotThreadSafe
-	public Region loadRegion(int x, int y, boolean generate) {
 		// Get the region if it is already loaded
 		Region r = regions.get(dummyLoc.set(x, y));
 		if(r != null)
 			return r;
 		
-		// If it is not loaded directly, try getting it from the world
-		// generator's cache.
-		// Synchronised to make this atomic. See WorldGenerator.cacheRegion()
-		synchronized(generator.getLock(x, y)) {
-			r = generator.getCachedRegion(dummyLoc); // dummyLoc is already (x,y)
+		// If it is not loaded directly, try getting it from the cache.
+		// Synchronised to make this atomic. See RegionCache.cacheRegion()
+		synchronized(regionCache.getLock(x, y)) {
+			r = regionCache.get(dummyLoc); // dummyLoc is already (x,y)
 			if(r == null) // if it's not cached, create it
 				r = new Region(x, y, getAge());
 			regions.put(r.loc, r);
@@ -264,31 +257,21 @@ public class HostWorld extends AbstractWorld {
 		
 		numRegions.getAndIncrement();
 		
-		// Now, we load the region appropriately
-		if(generate)
-			provider.loader.loadAndGenerateRegion(this, r);
-		else
-			provider.loader.loadRegion(this, r);
+		provider.loader.loadRegion(this, r, true);
 		
 		return r;
 	}
 	
 	/**
-	 * Saves a region at the specified coordinates, then unloads it. Entities
-	 * within the region are removed from the world. The region will, however,
-	 * not be removed from the map of regions in the world.
+	 * Ports the state of all entities located in a region to that region, and
+	 * then moves the region to the cache so that it may be saved.
 	 * 
-	 * <p>It is expected that the region will be removed from the map of
-	 * regions immediately after this method returns.
+	 * <p>The region should be removed from the map of regions immediately
+	 * after this method returns.
 	 * 
 	 * @param r The region.
 	 */
 	private void unloadRegion(Region r) {
-		// TODO: What do we do if the region is currently loading or
-		// generating?
-		
-		saveRegion(r);
-		
 		// Now unload entities in the region as well...
 		int minX = r.loc.x * Region.REGION_SIZE_IN_TILES;
 		int maxX = minX + Region.REGION_SIZE_IN_TILES;
@@ -305,7 +288,9 @@ public class HostWorld extends AbstractWorld {
 		
 		numRegions.getAndDecrement();
 		
-		//log.logMessage("Unloaded region " + r.x + "," + r.y);
+		// Finally, we submit the region to the cache and let it manage saving
+		// and then unloading.
+		regionCache.doUnload(r);
 	}
 	
 	/**
@@ -314,8 +299,7 @@ public class HostWorld extends AbstractWorld {
 	 * @param r The region to save.
 	 */
 	public void saveRegion(Region r) {
-		if(r.generated)
-			provider.loader.saveRegion(this, r);
+		provider.loader.saveRegion(this, r, null);
 	}
 	
 	/**
@@ -323,7 +307,13 @@ public class HostWorld extends AbstractWorld {
 	 * if it is not loaded.
 	 */
 	private Region getRegionFromTileCoords(int x, int y) {
-		return getRegionAt(regionCoordFromTileCoord(x), regionCoordFromTileCoord(y));
+		return getRegionAt(regionCoordFromTileCoord(x),
+				regionCoordFromTileCoord(y));
+	}
+	
+	private Region getRegionFromSliceCoords(int x, int y) {
+		return getRegionAt(regionCoordFromSliceCoord(x),
+				regionCoordFromSliceCoord(y));
 	}
 	
 	/**
@@ -345,7 +335,10 @@ public class HostWorld extends AbstractWorld {
 	 * @param y The y-coordinate of the slice, in slice lengths.
 	 */
 	public void loadSlice(int x, int y) {
-		loadRegion(regionCoordFromSliceCoord(x), regionCoordFromSliceCoord(y)).anchorSlice();
+		loadRegion(
+				regionCoordFromSliceCoord(x),
+				regionCoordFromSliceCoord(y)
+		).anchorSlice();
 	}
 	
 	/**
@@ -355,14 +348,14 @@ public class HostWorld extends AbstractWorld {
 	 * @param y The y-coordinate of the slice, in slice lengths.
 	 */
 	public void unloadSlice(int x, int y) {
-		Region r = getRegionAt(regionCoordFromSliceCoord(x), regionCoordFromSliceCoord(y));
+		Region r = getRegionFromSliceCoords(x, y);
 		if(r != null)
 			r.deAnchorSlice();
 	}
 	
 	@Override
 	public Slice getSliceAt(int x, int y) {
-		Region r = getRegionAt(regionCoordFromSliceCoord(x), regionCoordFromSliceCoord(y));
+		Region r = getRegionFromSliceCoords(x, y);
 		return r == null ? null : r.getSliceAt(
 				sliceCoordRelativeToRegionFromSliceCoord(x),
 				sliceCoordRelativeToRegionFromSliceCoord(y));
@@ -376,12 +369,7 @@ public class HostWorld extends AbstractWorld {
 	
 	@Override
 	public void setTileAt(int x, int y, int id) {
-		// We're duplicating code from getSliceAtTile() so that we can maintain
-		// a reference to the slice's parent region.
-		Region r = getRegionFromTileCoords(x, y);
-		if(r == null)
-			return;
-		Slice s = getSliceFromTileCoords(r, x, y);
+		Slice s = getSliceAtTile(x, y);
 		
 		if(s != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
@@ -391,7 +379,6 @@ public class HostWorld extends AbstractWorld {
 			s.getTileAt(tileX, tileY).handleRemove(this, x, y);
 			
 			s.setTileAt(tileX, tileY, id);
-			r.unsavedChanges = true;
 			
 			Tile.getTile(id).handlePlace(this, x, y);
 		}
@@ -399,11 +386,7 @@ public class HostWorld extends AbstractWorld {
 	
 	@Override
 	public void breakTileAt(int x, int y) {
-		// Ditto in that we're duping getSliceAtTile();
-		Region r = getRegionFromTileCoords(x, y);
-		if(r == null)
-			return;
-		Slice s = getSliceFromTileCoords(r, x, y);
+		Slice s = getSliceAtTile(x, y);
 		
 		if(s != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
@@ -412,17 +395,12 @@ public class HostWorld extends AbstractWorld {
 			s.getTileAt(tileX, tileY).handleBreak(this, x, y);
 			
 			s.setTileAt(tileX, tileY, Tiles.AIR);
-			r.unsavedChanges = true;
 		}
 	}
 	
 	@Override
 	public void setTileEntityAt(int x, int y, TileEntity t) {
-		// Ditto in that we're duping getSliceAtTile() code
-		Region r = getRegionFromTileCoords(x, y);
-		if(r == null)
-			return;
-		Slice s = getSliceFromTileCoords(r, x, y);
+		Slice s = getSliceAtTile(x, y);
 			
 		if(s != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
@@ -435,7 +413,6 @@ public class HostWorld extends AbstractWorld {
 			}
 			
 			s.setTileEntityAt(tileX, tileY, t);
-			r.unsavedChanges = true;
 			
 			if(t != null)
 				addTileEntity(t);
@@ -444,11 +421,7 @@ public class HostWorld extends AbstractWorld {
 	
 	@Override
 	public void blowUpTile(int x, int y, float explosionPower) {
-		// Ditto in that we're duping getSliceAtTile()
-		Region r = getRegionFromTileCoords(x, y);
-		if(r == null)
-			return;
-		Slice s = getSliceFromTileCoords(r, x, y);
+		Slice s = getSliceAtTile(x, y);
 		
 		if(s != null) {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
@@ -458,7 +431,6 @@ public class HostWorld extends AbstractWorld {
 				s.getTileAt(tileX, tileY).handleRemove(this, x, y);
 				
 				s.setTileAt(tileX, tileY, Tiles.AIR);
-				r.unsavedChanges = true;
 				
 				//Tiles.AIR.handlePlace(this, x, y);
 			}
@@ -470,11 +442,6 @@ public class HostWorld extends AbstractWorld {
 	 */
 	public FileHandle getWorldDir() {
 		return dimension.info.getDimensionDir();
-	}
-	
-	@Override
-	public boolean isClient() {
-		return provider.hasClient();
 	}
 	
 	/**
@@ -521,10 +488,12 @@ public class HostWorld extends AbstractWorld {
 	}
 	
 	private boolean allRegionsSaved() {
+		/*
 		for(Region r : regions.values()) {
 			if(r.pendingSave || r.saving)
 				return false;
 		}
+		*/
 		return true;
 	}
 	

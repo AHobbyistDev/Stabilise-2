@@ -3,6 +3,7 @@ package com.stabilise.util.maths;
 import java.util.Objects;
 
 import com.stabilise.util.BiIntFunction;
+import com.stabilise.util.annotation.Immutable;
 import com.stabilise.util.annotation.ThreadSafe;
 
 /**
@@ -15,7 +16,7 @@ import com.stabilise.util.annotation.ThreadSafe;
  * different PointFactory, so it is a very bad idea to intermix these different
  * 'breeds' of points.
  */
-@ThreadSafe
+@Immutable
 public class PointFactory {
 	
 	final BiIntFunction hasher;
@@ -35,6 +36,7 @@ public class PointFactory {
 	/**
 	 * Creates a new Point with the specified components.
 	 */
+	@ThreadSafe
 	public Point newPoint(int x, int y) {
 		return new OwnedPoint(x, y);
 	}
@@ -42,13 +44,15 @@ public class PointFactory {
 	/**
 	 * Creates a new MutablePoint with the specified components.
 	 */
+	@ThreadSafe
 	public MutablePoint newMutablePoint(int x, int y) {
 		return new OwnedMutablePoint(x, y);
 	}
 	
 	/**
-	 * Creates a new MutablePoint with the specified components.
+	 * Creates a new MutablePoint with components (0,0).
 	 */
+	@ThreadSafe
 	public MutablePoint newMutablePoint() {
 		return newMutablePoint(0, 0);
 	}

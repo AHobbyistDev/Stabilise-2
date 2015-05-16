@@ -87,7 +87,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	
 	private final ClientConnectionFactory clientFactory;
 	/** The list of client connections. Does not contain {@code null} elements.
-	 * This list should be manually synchronized on when being iterated over. */
+	 * This list should be manually synchronised on when being iterated over. */
 	protected final List<TCPConnection> connections =
 			Collections.synchronizedList(new LightLinkedList<>());
 	
@@ -164,7 +164,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	}
 	
 	/**
-	 * Instantiates a new thread and runs the server on that thread.
+	 * Starts a new thread and runs the server on that thread.
 	 * 
 	 * @throws IllegalStateException if this server may not be internally
 	 * driven, or this server has already been started.

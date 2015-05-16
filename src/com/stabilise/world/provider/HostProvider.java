@@ -103,12 +103,8 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		PlayerData data = players.get(player.hash);
 		if(data == null)
 			data = new PlayerData(player);
-		try {
-			data.load();
-		} catch(IOException e) {
-			log.postSevere("Could not load data for " + player + "!");
+		if(!data.load())
 			return null;
-		}
 		players.putIfAbsent(player.hash, data);
 		HostWorld world = loadDimension(data.dimension);
 		if(world == null)
@@ -207,15 +203,22 @@ public class HostProvider extends WorldProvider<HostWorld> {
 		}
 		
 		/**
-		 * @throws IOException if the file exists but could not be read.
+		 * @return true if loading was a success; false if an I/O error
+		 * occurred.
 		 */
-		public void load() throws IOException {
+		public boolean load() {
 			if(file.exists()) {
-				NBTExporter.importObj(this, NBTIO.readCompressed(file));
-				newToWorld = false;
+				try {
+					NBTExporter.importObj(this, NBTIO.readCompressed(file));
+					newToWorld = false;
+				} catch(IOException e) {
+					log.postSevere("Could not load data for " + data + "!");
+					return false;
+				}
 			} else {
 				defaultData();
 			}
+			return true;
 		}
 		
 		/**

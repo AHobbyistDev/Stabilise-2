@@ -12,6 +12,7 @@ import java.util.concurrent.FutureTask;
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
 import com.stabilise.core.GameClient;
+import com.stabilise.core.GameClient.WorldLoadHandle;
 import com.stabilise.core.Resources;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
@@ -836,6 +837,7 @@ public interface World extends Checkable {
 		/** The GameClient through which to communicate to the host server.
 		 * Null unless multiplayer client. */
 		private GameClient client = null;
+		private WorldLoadHandle loadHandle = null; // same conditions as client
 		/** Profiler to use for the world. May be null. */
 		private Profiler profiler = null;
 		
@@ -933,14 +935,15 @@ public interface World extends Checkable {
 		 * world it is visiting.
 		 * 
 		 * @param client The client.
+		 * @param loadHandle The handle through which to detect world loading.
 		 * 
 		 * @return This WorldBuilder.
-		 * @throws NullPointerException if {@code client} is {@code null}.
+		 * @throws NullPointerException if either argument is {@code null}.
 		 * @throws IllegalStateException if this builder has already built the
 		 * world provider, or the client has already been set, or the world
 		 * has been set.
 		 */
-		public WorldBuilder setClient(GameClient client) {
+		public WorldBuilder setClient(GameClient client, WorldLoadHandle loadHandle) {
 			checkState();
 			if(this.client != null)
 				throw new IllegalStateException("Client already set!");
@@ -948,6 +951,7 @@ public interface World extends Checkable {
 				throw new IllegalStateException("Cannot set both client and world"
 						+ " info!");
 			this.client = Objects.requireNonNull(client);
+			this.loadHandle = Objects.requireNonNull(loadHandle);
 			return this;
 		}
 		
@@ -1014,25 +1018,30 @@ public interface World extends Checkable {
 			Callable<WorldBundle> callable = new Callable<WorldBundle>() {
 				@Override
 				public WorldBundle call() throws Exception {
-					tracker.next("Loading player data");
-					if(integratedPlayer != null) // host or client
-						integratedPlayer.load();
-					tracker.next("Constructing world");
-					
-					if(buildHost) {
-						worldInfo.load();
-						HostProvider provider = new HostProvider(worldInfo, profiler);
-						PlayerBundle player = provider.addPlayer(integratedPlayer, true);
-						HostWorld starterDim = player.world;
-						tracker.next("Loading dimension " + starterDim.getDimensionName());
-						while(!starterDim.isLoaded()) // 
-							Thread.sleep(10L);
-						tracker.next("All is done!");
-						tracker.setCompleted();
-						return new WorldBundle(provider, starterDim,
-								player.playerEntity, player.playerData);
-					} else {
-						return new WorldBundle(null, null, null, null);
+					try {
+						tracker.next("Loading player data");
+						if(integratedPlayer != null) // host or client
+							integratedPlayer.load();
+						tracker.next("Constructing world");
+						
+						if(buildHost) {
+							worldInfo.load();
+							HostProvider provider = new HostProvider(worldInfo, profiler);
+							PlayerBundle player = provider.addPlayer(integratedPlayer, true);
+							HostWorld starterDim = player.world;
+							tracker.next("Loading dimension " + starterDim.getDimensionName());
+							while(!starterDim.isLoaded()) // 
+								Thread.sleep(10L);
+							tracker.next("All is done!");
+							tracker.setCompleted();
+							return new WorldBundle(provider, starterDim,
+									player.playerEntity, player.playerData);
+						} else {
+							return new WorldBundle(null, null, null, null);
+						}
+					} catch(Throwable t) {
+						Log.get().postSevere("Shit", t);
+						return null;
 					}
 				}
 			};

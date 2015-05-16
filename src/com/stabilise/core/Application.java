@@ -277,7 +277,7 @@ public abstract class Application {
 		crashing = true;
 		if(t == null)
 			t = new Exception(dummyExceptionMsg());
-		log.postSevere("The application has crashed for some reason!", t);
+		log.postSevere("The application has crashed!", t);
 		produceCrashLog();
 		shutdown();
 	}
