@@ -83,8 +83,7 @@ public interface ClearingQueue<E> extends Iterable<E> {
 	 * </pre>
 	 */
 	default Iterable<E> asNonClearing() {
-		final ClearingQueue<E> queue = this;
-		return () -> { return queue.nonClearingIterator(); };
+		return () -> nonClearingIterator();
 	}
 	
 	/**
@@ -95,10 +94,7 @@ public interface ClearingQueue<E> extends Iterable<E> {
 	 * {@link #asNonClearing()}.
 	 */
 	default Iterable<E> asIterable(final boolean clearing) {
-		if(clearing)
-			return this;
-		else
-			return asNonClearing();
+		return clearing ? this : asNonClearing();
 	}
 	
 }

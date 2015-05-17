@@ -1,6 +1,6 @@
 package com.stabilise.screen.menu.component;
 
-import com.stabilise.util.Interpolation;
+import com.stabilise.util.maths.Interpolation;
 import com.stabilise.util.maths.MutablePoint;
 
 /**

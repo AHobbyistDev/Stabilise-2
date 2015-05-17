@@ -549,14 +549,11 @@ public class TCPConnection {
 		public TCPThread(String threadName) {
 			super(threadName);
 			
-			setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-				@Override
-				public void uncaughtException(Thread t, Throwable e) {
-					log.postSevere("Uncaught exception " + e.getClass().getSimpleName()
-							+ " in " + t.getName(), e);
-					requestClose("Uncaught " + e.getClass().getSimpleName()
-							+ ": " + e.getMessage());
-				}
+			setUncaughtExceptionHandler((t, e) -> {
+				log.postSevere("Uncaught exception " + e.getClass().getSimpleName()
+						+ " in " + t.getName(), e);
+				requestClose("Uncaught " + e.getClass().getSimpleName()
+						+ ": " + e.getMessage());
 			});
 		}
 		

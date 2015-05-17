@@ -214,8 +214,7 @@ public class HostWorld extends AbstractWorld {
 	 * @param x The x-coordinate of the region, in region-lengths.
 	 * @param y The y-coordinate of the region, in region-lengths.
 	 * 
-	 * @return The region at the given coordinates, or {@code null} if no such
-	 * region exists.
+	 * @return The region, or {@code null} if no such region exists.
 	 */
 	@UserThread("MainThread")
 	@NotThreadSafe
@@ -223,7 +222,14 @@ public class HostWorld extends AbstractWorld {
 		return regions.get(dummyLoc.set(x, y));
 	}
 	
-	@UserThread("Any")
+	/**
+	 * Gets the region at the specified location.
+	 * 
+	 * @param point The region's location, whose coordinates are in
+	 * region-lengths.
+	 * 
+	 * @return The region, or {@code null} if no such region exists.
+	 */
 	@ThreadSafe
 	public Region getRegionAt(AbstractPoint point) {
 		return regions.get(point);

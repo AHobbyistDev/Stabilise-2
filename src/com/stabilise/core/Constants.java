@@ -29,9 +29,10 @@ public class Constants {
 	
 	static {
 		if(VERSION.compareTo(BACKWARDS_VERSION) == -1)
-			throw new Error("The oldest game version we're backwards-compatible"
-					+ " with (" + BACKWARDS_VERSION.toString() + ") is somehow"
-					+ "newer than our current version (" + VERSION.toString() + ")!");
+			throw new AssertionError("The oldest game version we're "
+					+ "backwards-compatible with (" + BACKWARDS_VERSION
+					+ ") is somehow newer than our current version ("
+					+ VERSION + ")!");
 	}
 	
 	/** The number of game ticks each second. */
@@ -55,8 +56,7 @@ public class Constants {
 	/** The minimum number of slices which can be considered 'loaded' about a
 	 * player at any given time. */
 	public static final int MIN_LOADED_SLICES =
-			// Manually square the edge length to make this a compile-time
-			// constant.
+			// Manually square this to make it a compile-time constant.
 			(1 + 2 * LOADED_SLICE_RADIUS) * (1 + 2 * LOADED_SLICE_RADIUS);
 	/** The maximum number of slices which should theoretically be able to be
 	 * loaded about a player at any given time. */

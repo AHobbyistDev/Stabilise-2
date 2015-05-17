@@ -50,8 +50,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.IntBinaryOperator;
 
-import com.stabilise.util.BiIntFunction;
 import com.stabilise.util.TheUnsafe;
 import com.stabilise.util.annotation.ThreadSafe;
 
@@ -232,7 +232,7 @@ public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 	 * Gets the hash for the specified key components.
 	 */
 	final int hash(int x, int y) {
-		return hasher.apply(x, y) & HASH_BITS;
+		return hasher.applyAsInt(x, y) & HASH_BITS;
 		//x = hasher.apply(x, y); // store result in x
 		//return (x ^ (x >>> 16)) & HASH_BITS;
 	}
@@ -343,7 +343,7 @@ public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 	/**
 	 * The function to use to hash the incoming integer keys.
 	 */
-	private final BiIntFunction hasher;
+	private final IntBinaryOperator hasher;
 
 	// views
 	private transient ValuesView<V> values;
@@ -359,7 +359,7 @@ public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 	 * 
 	 * @throws NullPointerException if {@code hasher} is {@code null}.
 	 */
-	public ConcurrentBiIntHashMap(BiIntFunction hasher) {
+	public ConcurrentBiIntHashMap(IntBinaryOperator hasher) {
 		this.hasher = Objects.requireNonNull(hasher);
 	}
 
@@ -373,7 +373,7 @@ public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 	 * @throws IllegalArgumentException if the initial capacity of
 	 * elements is negative
 	 */
-	public ConcurrentBiIntHashMap(int initialCapacity, BiIntFunction hasher) {
+	public ConcurrentBiIntHashMap(int initialCapacity, IntBinaryOperator hasher) {
 		this(hasher);
 		if (initialCapacity < 0)
 			throw new IllegalArgumentException();
@@ -399,7 +399,7 @@ public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 	 * @since 1.6
 	 */
 	public ConcurrentBiIntHashMap(int initialCapacity, float loadFactor,
-			BiIntFunction hasher) {
+			IntBinaryOperator hasher) {
 		this(initialCapacity, loadFactor, 1, hasher);
 	}
 
@@ -422,7 +422,7 @@ public class ConcurrentBiIntHashMap<V> implements Iterable<V> {
 	 * nonpositive
 	 */
 	public ConcurrentBiIntHashMap(int initialCapacity, float loadFactor,
-			int concurrencyLevel, BiIntFunction hasher) {
+			int concurrencyLevel, IntBinaryOperator hasher) {
 		this(hasher);
 		if (!(loadFactor > 0.0f) || initialCapacity < 0 || concurrencyLevel <= 0)
 			throw new IllegalArgumentException();

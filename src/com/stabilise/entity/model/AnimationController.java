@@ -1,6 +1,6 @@
 package com.stabilise.entity.model;
 
-import com.stabilise.util.Interpolation;
+import com.stabilise.util.maths.Interpolation;
 
 /**
  * Controls model animations.

@@ -25,7 +25,7 @@ import com.stabilise.world.tile.Tiles;
  * The {@code WorldGenerator} class provides the mechanism for generating the
  * terrain of a world.
  * 
- * <h3>Standard Usage Guidelines</h3>
+ * <h3>Standard Usage Guidelines - OUT OF DATE</h3>
  * 
  * <p>To obtain the {@code WorldGenerator} instance to use for a world, simply
  * invoke {@link #getGenerator(WorldData)}.
@@ -45,7 +45,7 @@ import com.stabilise.world.tile.Tiles;
  * then {@code shutdown()} on {@link WorldData#executor data.executor}, where
  * {@code data} is the {@code WorldData} object passed to {@code getGenerator}.
  * 
- * <h3>Implementation Details</h3>
+ * <h3>Implementation Details - OUT OF DATE</h3>
  * 
  * <p>Each invocation of {@code generate} either creates a new thread or reuses
  * an existing thread created for generation, loading, or saving, depending on

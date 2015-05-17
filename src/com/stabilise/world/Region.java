@@ -4,16 +4,18 @@ import static com.stabilise.core.Constants.REGION_UNLOAD_TICK_BUFFER;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntBinaryOperator;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Constants;
-import com.stabilise.util.BiIntFunction;
 import com.stabilise.util.Log;
+import com.stabilise.util.annotation.GuardedBy;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.concurrent.SynchronizedClearingQueue;
+import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.maths.MutablePoint;
 import com.stabilise.util.maths.Point;
 import com.stabilise.util.maths.PointFactory;
@@ -53,7 +55,7 @@ public class Region {
 	/** The function to use to hash region coordinates for keys in a hash map. */
 	// This method of hashing eliminates higher-order bits, but nearby regions
 	// will never collide.
-	private static final BiIntFunction COORD_HASHER = (x,y) -> {
+	private static final IntBinaryOperator COORD_HASHER = (x,y) -> {
 		return (x << 16) | (y & 0xFFFF);
 	};
 	
@@ -72,6 +74,8 @@ public class Region {
 	
 	/** Values for a region's state. Unless otherwise stated, the only valid
 	 * state transition for each state is to the one following it.
+	 * 
+	 * <p>TODO: Outdated descriptions; rewrite.
 	 * 
 	 * <ul>
 	 * <li><b>STATE_NEW</b>: A region is newly-instantiated and is not ready to
@@ -102,9 +106,12 @@ public class Region {
 	private static final int STATE_NEW = 0,
 			STATE_LOADING = -1,
 			STATE_GENERATING = -2,
-			STATE_ACTIVE = 1,
-			STATE_SAVING = 2,
-			STATE_SAVING_CACHED = -3;
+			STATE_ACTIVE = 1;
+	
+	private static final int SAVESTATE_IDLE = 0,
+			SAVESTATE_SAVING = 1,
+			SAVESTATE_WAITING = 2,
+			SAVESTATE_IDLE_WAITER = 3;
 	
 	
 	//--------------------==========--------------------
@@ -139,6 +146,7 @@ public class Region {
 	/** The state of this region. See the documentation for {@link #STATE_NEW}
 	 * and all other states. */
 	private final AtomicInteger state = new AtomicInteger(STATE_NEW);
+	@GuardedBy("state") private int saveState = SAVESTATE_IDLE;
 	/** Whether or not this region has been generated. */
 	private boolean generated = false;
 	
@@ -314,25 +322,6 @@ public class Region {
 	}
 	
 	/**
-	 * Queues a slice to send to a client once world generation has been
-	 * completed.
-	 * 
-	 * @param clientHash The hash of the client to send the slice to.
-	 * @param sliceX The x-coordinate of the slice, in slice-lengths.
-	 * @param sliceY The y-coordinate of the slice, in slice-lengths.
-	 * 
-	 * @deprecated Due to removal of networking architecture.
-	 */
-	/*
-	public void queueSlice(int clientHash, int sliceX, int sliceY) {
-		if(queuedSlices == null)
-			queuedSlices = new ArrayList<QueuedSlice>();
-		
-		queuedSlices.add(new QueuedSlice(clientHash, sliceX, sliceY));
-	}
-	*/
-	
-	/**
 	 * Queues a structure for generation in this region.
 	 * 
 	 * @throws NullPointerException if {@code struct} is {@code null}.
@@ -376,12 +365,7 @@ public class Region {
 	 * Returns {@code true} if this region is active and may be safely used.
 	 */
 	public boolean isActive() {
-		return state.get() >= STATE_ACTIVE;
-	}
-	
-	public boolean isLoaded() {
-		int s = state.get();
-		return s != STATE_NEW && s != STATE_LOADING;
+		return state.get() == STATE_ACTIVE;
 	}
 	
 	/**
@@ -429,7 +413,8 @@ public class Region {
 		} else if(s == STATE_GENERATING)
 			state.compareAndSet(STATE_GENERATING, STATE_ACTIVE);
 		else
-			Log.get().postWarning("State warning for " + this + "; ");
+			Log.get().postWarning("Invalid state " + s + " on setGenerated for "
+					+ this);
 	}
 	
 	/**
@@ -447,13 +432,34 @@ public class Region {
 	 * true}, the caller may save this region.
 	 */
 	public boolean getSavePermit() {
-		// We can save this region in two cases:
-		// 1: We are in STATE_ACTIVE. This is the normal case, and we save
-		//    normally.
-		// 2: We are in STATE_LOADING. This means this region is currently
-		//    cached, and we're now saving any changes.
-		return state.compareAndSet(STATE_ACTIVE, STATE_SAVING)
-				|| state.compareAndSet(STATE_LOADING, STATE_SAVING_CACHED);
+		synchronized(state) {
+			if(saveState == SAVESTATE_IDLE) {
+				// If we're in IDLE, we switch to SAVING and save.
+				saveState = SAVESTATE_SAVING;
+				return true;
+			} else if(saveState == SAVESTATE_SAVING) {
+				// If we're in SAVING, this means another thread is currently
+				// saving this region. However, since we have no guarantee that
+				// it is saving up-to-date data, we wait for it to finish and
+				// then save again on this thread.
+				saveState = SAVESTATE_WAITING;
+				Task.waitOnUntil(state, () -> saveState == SAVESTATE_IDLE
+								|| saveState == SAVESTATE_IDLE_WAITER);
+				saveState = SAVESTATE_SAVING;
+				return true;
+			} else if(saveState == SAVESTATE_WAITING ||
+					saveState == SAVESTATE_IDLE_WAITER) {
+				// As above, except another thread is waiting to save the
+				// updated state. We abort and let that thread do it.
+				// 
+				// As an added bonus, since we just grabbed the sync lock,
+				// we've established a happens-before with the waiter and thus
+				// provided it with a more recent batch of data. Hooray!
+				return false;
+			} else {
+				throw new IllegalStateException();
+			}
+		}
 	}
 	
 	/**
@@ -461,27 +467,32 @@ public class Region {
 	 * {@code true}, the caller may generate this region.
 	 */
 	public boolean getGenerationPermit() {
-		// We generate this region in only one case, which is the conventional
-		// one 
-		return state.compareAndSet(STATE_LOADING, STATE_GENERATING)
-				|| state.compareAndSet(STATE_SAVING_CACHED, STATE_GENERATING);
+		return state.compareAndSet(STATE_LOADING, STATE_GENERATING);
 	}
 	
-	/*
-	public void finishLoading() {
-		
-	}
-	*/
-	
+	/**
+	 * Finalises a save operation by inducing an appropriate state change and
+	 * notifying relevant threads.
+	 */
+	@UserThread("WorldLoaderThread")
 	public void finishSaving() {
-		// Since the world generator may 
-		if(!state.compareAndSet(STATE_SAVING, STATE_ACTIVE) &&
-				!state.compareAndSet(STATE_SAVING_CACHED, STATE_LOADING))
-			;//throw new IllegalStateException();
+		synchronized(state) {
+			saveState = saveState == SAVESTATE_WAITING
+					? SAVESTATE_IDLE_WAITER
+					: SAVESTATE_IDLE;
+			state.notifyAll();
+		}
 	}
 	
+	/**
+	 * Blocks the current thread until this region has finished saving. If the
+	 * current thread was interrupted while waiting, the interrupt flag will be
+	 * set when this method returns.
+	 */
 	public void waitUntilSaved() {
-		
+		synchronized(state) {
+			Task.waitOnUntil(state, () -> saveState == SAVESTATE_IDLE);
+		}
 	}
 	
 	/**
@@ -495,50 +506,6 @@ public class Region {
 			for(int c = 0; c < REGION_SIZE; c++)
 				slices[r][c].addContainedEntitiesToWorld(world);
 	}
-	
-	/**
-	 * Blocks the current thread until this region has loaded. If this thread
-	 * is interrupted while waiting, the interrupt status flag will be set when
-	 * this method returns.
-	 * 
-	 * <p>This method returns immediately if this region is already loaded.
-	 * 
-	 * <p>This method is intended for WorldGenerator use only.
-	 */
-	/*
-	@UserThread("WorldGenThread")
-	public void waitUntilLoaded() {
-		if(isLoaded())
-			return;
-		boolean interrupted = false;
-		synchronized(state) {
-			while(!isLoaded()) { // TODO: What if loading fails or is aborted?
-				try {
-					state.wait();
-				} catch(InterruptedException e) {
-					interrupted = true;
-				}
-			}
-		}
-		if(interrupted)
-			Thread.currentThread().interrupt();
-	}
-	*/
-	
-	/**
-	 * Notifies other threads waiting on {@link #waitUntilLoaded()} that this
-	 * region has been loaded.
-	 * 
-	 * <p>This method is intended for WorldLoader use only.
-	 */
-	/*
-	@UserThread("WorldLoaderThread")
-	public void notifyOfLoaded() {
-		synchronized(state) {
-			state.notifyAll();
-		}
-	}
-	*/
 	
 	/**
 	 * @return This region's x-coordinate, in region-lengths.
@@ -567,7 +534,7 @@ public class Region {
 	@Override
 	public int hashCode() {
 		// Use the broader hash than the default loc hash.
-		return COORD_HASHER.apply(loc.x, loc.y);
+		return COORD_HASHER.applyAsInt(loc.x, loc.y);
 	}
 	
 	@Override

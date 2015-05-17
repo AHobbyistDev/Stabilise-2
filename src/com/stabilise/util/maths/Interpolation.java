@@ -1,6 +1,7 @@
-package com.stabilise.util;
+package com.stabilise.util.maths;
 
-import com.stabilise.util.maths.Maths;
+import java.util.Objects;
+
 
 /**
  * This class provides a variety of functions for achieving three modes of
@@ -68,7 +69,7 @@ import com.stabilise.util.maths.Maths;
  * <a href=http://hosted.zeh.com.br/tweener/docs/en-us/misc/transitions.html>
  * here</a> and <a href=http://www.robertpenner.com/easing/>here</a>.
  */
-public abstract class Interpolation {
+public interface Interpolation {
 	
 	/**
 	 * The different interpolation types.
@@ -429,9 +430,6 @@ public abstract class Interpolation {
 	
 	// ------------------------------------------------------------------------
 	
-	// Not publicly instantiable
-	private Interpolation() {}
-	
 	
 	/**
 	 * Transforms the given value using this Interpolation object's
@@ -444,7 +442,7 @@ public abstract class Interpolation {
 	 * @param x The value, between 0.0 and 1.0 (inclusive).
 	 * @return The transformed value.
 	 */
-	public abstract float transform(float x);
+	float transform(float x);
 	
 	/**
 	 * Interpolates between {@code start} and {@code end} using this
@@ -461,7 +459,7 @@ public abstract class Interpolation {
 	 * 
 	 * @return The interpolated value.
 	 */
-	public final float apply(float start, float end, float x) {
+	default float apply(float start, float end, float x) {
 		return lerp(start, end, transform(x));
 	}
 	
@@ -537,7 +535,9 @@ public abstract class Interpolation {
 							//      = x(2x)^(n-1)
 							return (float)Math.pow(2*x, n-1);
 						} else {
-							// f(x) = 1 + (-2)^(n-1) * (x-1)^n		Note this would fail in the non-int implementation
+							// Note the first form would fail in the non-int
+							// implementation
+							// f(x) = 1 + (-2)^(n-1) * (x-1)^n
 							//      = 1 + (x-1)[2(1-x)]^(n-1)
 							return 1 + (x-1)*(float)Math.pow(2-2*x, n-1);
 						}
@@ -590,7 +590,8 @@ public abstract class Interpolation {
 					//      = x(2x)^(n-1)
 					return x * (float)Math.pow(2*x, n-1);
 				} else {
-					// f(x) = 1 + (-2)^(n-1) * (x-1)^n				Note this form would fail as n is a non-integer
+					// Note the initial form would fail as n is a non-integer
+					// f(x) = 1 + (-2)^(n-1) * (x-1)^n
 					//      = 1 + (x-1)[2(1-x)]^(n-1)
 					return 1 + (x-1)*(float)Math.pow(2-2*x, n-1);
 				}
@@ -754,82 +755,32 @@ public abstract class Interpolation {
 	 *     }
 	 * );</pre>
 	 * 
-	 * @param function The transformation function {@code f(x)}.
+	 * @param easeIn The transformation function {@code f(x)}.
 	 * 
 	 * @return An Interpolation object which uses the specified function as its
 	 * transformation function.
+	 * @throws NullPointerException if {@code easeIn} is {@code null}.
 	 */
-	public static All newInterpolation(final EaseIn function) {
+	public static All newInterpolation(Interpolation easeIn) {
+		Objects.requireNonNull(easeIn);
+		
 		return new All() {
 			@Override
 			public float easeInTransform(float x) {
-				return function.transform(x);
+				return easeIn.transform(x);
 			}
 			@Override
 			public float easeOutTransform(float x) {
-				return 1 - function.transform(1-x);
+				return 1 - easeIn.transform(1-x);
 			}
 			@Override
 			public float easeInOutTransform(float x) {
 				if(x < 0.5f)
-					return function.transform(2*x) / 2;
+					return easeIn.transform(2*x) / 2;
 				else
-					return 1 - function.transform(2 - 2*x) / 2;
+					return 1 - easeIn.transform(2 - 2*x) / 2;
 			}
 		};
-	}
-	
-//	/**
-//	 * Defines a single method - {@link #transform(float)} - which should be
-//	 * implemented to transform a value in accordance with a desired
-//	 * "transformation function" {@code f(x)} of which typical properties are
-//	 * outlined {@link Interpolation here}.
-//	 */
-//	@FunctionalInterface
-//	public static interface TransformationFunction {
-//		/**
-//		 * Transforms a value.
-//		 * 
-//		 * @param x The value.
-//		 * 
-//		 * @return The transformed value.
-//		 */
-//		float transform(float x);
-//	}
-	
-	/**
-	 * <p>Ease in interpolation is characterised by a first derivative less
-	 * than {@code 1} as {@code x} tends to {@code 0}, and a first derivative
-	 * greater than {@code 1} as {@code x} tends to {@code 1}. This results in
-	 * an interpolative function which smoothly tends towards {@code start}
-	 * and sharply tends toward {@code end}.
-	 */
-	public static abstract class EaseIn extends Interpolation {
-		// nothing to see here, move along
-	}
-	
-	/**
-	 * <p>Ease out interpolation is characterised by a first derivative greater
-	 * than {@code 1} as {@code x} tends to {@code 0}, and a first derivative
-	 * less than {@code 1} as {@code x} tends to {@code 1}.  This results in
-	 * an interpolative function which sharply tends towards {@code start} and
-	 * and smoothly tends toward {@code end}.
-	 */
-	public static abstract class EaseOut extends Interpolation {
-		// nothing to see here, move along
-	}
-	
-	/**
-	 * <p>Ease in-out interpolation is characterised by a reminiscence to
-	 * ease-in interpolation for {@code 0 <= x <= 0.5}, and to ease-out
-	 * interpolation for {@code 0.5 <= x <= 1}. This implies a first derivative
-	 * less than {@code 1} as {@code x} tends to {@code 0} and {@code 1}, and a
-	 * first derivative greater than {@code 1} as {@code x} tends to
-	 * {@code 0.5}. This results in an interpolative function which smoothly
-	 * tends towards both {@code start} and {@code end}.
-	 */
-	public static abstract class EaseInOut extends Interpolation {
-		// nothing to see here, move along
 	}
 	
 	/**
@@ -840,30 +791,54 @@ public abstract class Interpolation {
 	 * used, they will delegate to {@link All#easeInOutTransform(float)
 	 * easeInOutTransform} and {@link All#easeInOut(float, float, float)
 	 * easeInOut} respectively.
-	 * 
-	 * @see Interpolation#EaseIn
-	 * @see Interpolation#EaseOut
-	 * @see Interpolation#EaseInOut
 	 */
-	public static abstract class All extends Interpolation {
+	public static abstract class All implements Interpolation {
 		
 		// Ignoring naming conventions because these things should generally
 		// be treated as static constants anyway (e.g.
 		// Interpolation.CUBIC.EASE_IN). Besides, there'd be naming conflicts
 		// if I opted to name them e.g. easeIn()
 		
-		/** Ease in interpolation. */
-		public final EaseIn EASE_IN = new EaseIn() {
-			@Override public float transform(float x) { return easeInTransform(x); }
-		};
-		/** Ease out interpolation. */
-		public final EaseOut EASE_OUT = new EaseOut() {
-			@Override public float transform(float x) { return easeOutTransform(x); }
-		};
-		/** Ease in-out interpolation. */
-		public final EaseInOut EASE_IN_OUT = new EaseInOut() {
-			@Override public float transform(float x) { return easeInOutTransform(x); }
-		};
+		/**
+		 * An ease-in interpolation function f(x) is broadly characterised by:
+		 * 
+		 * <ul>
+		 * <li>f'(x) < 1 nearby x = 0 (often f'(x) = 0 at x = 0).
+		 * <li>f'(x) > 1 nearby x = 1.
+		 * </ul>
+		 * 
+		 * <p>This results in an interpolative function which smoothly tends
+		 * towards {@code start} and sharply tends toward {@code end}.
+		 */
+		public final Interpolation EASE_IN = (x) -> easeInTransform(x);
+		/**
+		 * An ease-out interpolation function f(x) is broadly characterised by:
+		 * 
+		 * <ul>
+		 * <li>f'(x) > 1 nearby x = 0.
+		 * <li>f'(x) < 1 nearby x = 1 (often f'(x) = 0 at x = 1).
+		 * </ul>
+		 * 
+		 * <p>This results in an interpolative function which sharply tends
+		 * towards {@code start} and smoothly tends toward {@code end}.
+		 */
+		public final Interpolation EASE_OUT = (x) -> easeOutTransform(x);
+		/**
+		 * An ease-in-out interpolation function f(x) is broadly characterised
+		 * as identical to an ease-in function on [0,0.5) and an ease-out
+		 * function on (0.5,1]. That is:
+		 * 
+		 * <ul>
+		 * <li>f'(x) < 1 nearby x = 0 (often f'(x) = 0 at x = 0).
+		 * <li>f'(x) > 1 nearby x = 0.5.
+		 * <li>f'(x) < 1 nearby x = 1 (often f'(x) = 0 at x = 1).
+		 * </ul>
+		 * 
+		 * <p>This results in an interpolative function which smoothly tends
+		 * towards both {@code start} and {@code end}.
+		 */
+		public final Interpolation EASE_IN_OUT = (x) -> easeInOutTransform(x);
+		
 		
 		@Override
 		public float transform(float x) {
@@ -1003,6 +978,7 @@ public abstract class Interpolation {
 		 * @see {@link Interpolation.EaseInOut} for implementation details.
 		 */
 		public abstract float easeInOutTransform(float x);
+		
 	}
 	
 }

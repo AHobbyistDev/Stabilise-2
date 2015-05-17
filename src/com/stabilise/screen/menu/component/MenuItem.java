@@ -1,7 +1,7 @@
 package com.stabilise.screen.menu.component;
 
 import com.stabilise.screen.menu.Menu;
-import com.stabilise.util.Interpolation;
+import com.stabilise.util.maths.Interpolation;
 
 /**
  * The MenuItem class is an abstract class representing an item which is

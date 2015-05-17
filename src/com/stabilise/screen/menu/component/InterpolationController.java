@@ -1,6 +1,6 @@
 package com.stabilise.screen.menu.component;
 
-import com.stabilise.util.Interpolation;
+import com.stabilise.util.maths.Interpolation;
 
 /**
  * An InterpolationController manages and controls the interpolation of some

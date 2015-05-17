@@ -1,8 +1,8 @@
 package com.stabilise.util.maths;
 
 import java.util.Objects;
+import java.util.function.IntBinaryOperator;
 
-import com.stabilise.util.BiIntFunction;
 import com.stabilise.util.annotation.Immutable;
 import com.stabilise.util.annotation.ThreadSafe;
 
@@ -19,7 +19,7 @@ import com.stabilise.util.annotation.ThreadSafe;
 @Immutable
 public class PointFactory {
 	
-	final BiIntFunction hasher;
+	final IntBinaryOperator hasher;
 	
 	
 	/**
@@ -29,7 +29,7 @@ public class PointFactory {
 	 * 
 	 * @throws NullPointerException if {@code hasher} is {@code null}.
 	 */
-	public PointFactory(BiIntFunction hasher) {
+	public PointFactory(IntBinaryOperator hasher) {
 		this.hasher = Objects.requireNonNull(hasher);
 	}
 	
@@ -61,12 +61,12 @@ public class PointFactory {
 	
 	private class OwnedPoint extends Point {
 		private OwnedPoint(int x, int y) { super(x,y); }
-		@Override protected int genHash() { return hasher.apply(x, y); }
+		@Override protected int genHash() { return hasher.applyAsInt(x, y); }
 	}
 	
 	private class OwnedMutablePoint extends MutablePoint {
 		private OwnedMutablePoint(int x, int y) { super(x,y); }
-		@Override protected int genHash() { return hasher.apply(x, y); }
+		@Override protected int genHash() { return hasher.applyAsInt(x, y); }
 	}
 
 }

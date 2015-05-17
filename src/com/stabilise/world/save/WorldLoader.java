@@ -64,7 +64,7 @@ public abstract class WorldLoader {
 	}
 	
 	/**
-	 * Instructs the WorldLoader to asynchronously load a region. This method
+	 * Instructs this WorldLoader to asynchronously load a region. This method
 	 * does nothing if {@link Region#getLoadPermit() region.getLoadPermit()}
 	 * returns {@code false}.
 	 * 
@@ -82,7 +82,7 @@ public abstract class WorldLoader {
 	}
 	
 	/**
-	 * Instructs the WorldLoader to load a region on the current thread. This
+	 * Instructs this WorldLoader to load a region on the current thread. This
 	 * instruction is ignored, however, if the region has already loaded or is
 	 * currently loading. Note that this will set {@link Region#loaded loaded}
 	 * to {@code true} once the region has completed loading.
@@ -100,7 +100,7 @@ public abstract class WorldLoader {
 	*/
 	
 	/**
-	 * Instructs the WorldLoader to asynchronously save a region.
+	 * Instructs this WorldLoader to asynchronously save a region.
 	 * 
 	 * <p>The request will be ignored if the region does not grant its {@link
 	 * Region#getSavePermit() save permit}.
@@ -256,8 +256,12 @@ public abstract class WorldLoader {
 		
 		@Override
 		public void run() {
-			if(r.getSavePermit())
+			if(r.getSavePermit()) {
 				save(r, r.getFile(world));
+				r.finishSaving();
+			}
+			// Extremely important final step in the lifecycle of a region: try
+			// to uncache a region after it has been saved.
 			world.regionCache.finaliseUncaching(cacheHandle);
 		}
 		

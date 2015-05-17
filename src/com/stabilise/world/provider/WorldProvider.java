@@ -1,6 +1,5 @@
 package com.stabilise.world.provider;
 
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -265,12 +264,9 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 				t.setDaemon(false);
 			if(t.getPriority() != Thread.NORM_PRIORITY)
 				t.setPriority(Thread.NORM_PRIORITY);
-			t.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-				@Override
-				public void uncaughtException(Thread t, Throwable e) {
-					log.postSevere("Worker thread \"" + t.getName() + "\" died!", e);
-				}
-			});
+			t.setUncaughtExceptionHandler((th, e) -> 
+				log.postSevere("Worker thread \"" + th.getName() + "\" died!", e)
+			);
 			return t;
 		}
 	}

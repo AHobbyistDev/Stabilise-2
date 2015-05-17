@@ -1030,7 +1030,7 @@ public interface World extends Checkable {
 							PlayerBundle player = provider.addPlayer(integratedPlayer, true);
 							HostWorld starterDim = player.world;
 							tracker.next("Loading dimension " + starterDim.getDimensionName());
-							while(!starterDim.isLoaded()) // 
+							while(!starterDim.isLoaded())
 								Thread.sleep(10L);
 							tracker.next("All is done!");
 							tracker.setCompleted();

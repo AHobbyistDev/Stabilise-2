@@ -1,6 +1,7 @@
 package com.stabilise.util.concurrent;
 
 import java.util.concurrent.ExecutionException;
+import java.util.function.BooleanSupplier;
 
 import com.stabilise.util.annotation.ThreadSafe;
 
@@ -110,9 +111,8 @@ public abstract class Task implements Runnable {
 	 * for this task to complete, as per {@link #waitUntilStopped()} or {@link
 	 * #waitUninterruptibly()}.
 	 */
-	private synchronized void ceaseRunning(TaskState newState) {
-		state = newState;
-		notifyAll();
+	private void ceaseRunning(TaskState newState) {
+		doThenNotify(this, () -> state = newState);
 	}
 	
 	/**
@@ -238,10 +238,7 @@ public abstract class Task implements Runnable {
 	 */
 	public final void waitUntilStopped() throws InterruptedException, ExecutionException {
 		if(canWait()) {
-			synchronized(this) {
-				while(state.equals(TaskState.RUNNING))
-					wait(); // Awoken by ceaseRunning()
-			}
+			waitOnInterruptibly(this, () -> !state.equals(TaskState.RUNNING));
 			throwExcecutionException();
 		}
 	}
@@ -263,18 +260,7 @@ public abstract class Task implements Runnable {
 	 */
 	public final void waitUninterruptibly() throws ExecutionException {
 		if(canWait()) {
-			boolean interrupted = false;
-			synchronized(this) {
-				while(state.equals(TaskState.RUNNING)) {
-					try {
-						wait(); // Awoken by ceaseRunning()
-					} catch(InterruptedException retry) {
-						interrupted = true;
-					}
-				}
-			}
-			if(interrupted)
-				Thread.currentThread().interrupt();
+			waitOnUntil(this, () -> state.equals(TaskState.RUNNING));
 			throwExcecutionException();
 		}
 	}
@@ -362,6 +348,73 @@ public abstract class Task implements Runnable {
 	@Override
 	public String toString() {
 		return tracker.toString();
+	}
+	
+	//--------------------==========--------------------
+	//------------=====Static Functions=====------------
+	//--------------------==========--------------------
+	
+	/**
+	 * Waits on the specified object's monitor lock until the specified
+	 * condition returns {@code true}. If the current thread was interrupted
+	 * while waiting, the interrupt flag will be set when this method returns.
+	 * 
+	 * @param o The object to wait on.
+	 * @param endCondition The condition on which to wait.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 */
+	public static void waitOnUntil(Object o, BooleanSupplier endCondition) {
+		boolean interrupted = false;
+		synchronized(o) {
+			while(!endCondition.getAsBoolean()) {
+				try {
+					o.wait();
+				} catch(InterruptedException retry) {
+					interrupted = true;
+				}
+			}
+		}
+		if(interrupted)
+			Thread.currentThread().interrupt();
+	}
+	
+	/**
+	 * Waits on the specified object's monitor lock until the specified
+	 * condition returns {@code true}.
+	 * 
+	 * @param o The object to wait on.
+	 * @param endCondition The condition on which to wait.
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws InterruptedException if the current thread received an
+	 * interrupt while waiting.
+	 */
+	public static void waitOnInterruptibly(Object o, BooleanSupplier endCondition)
+			throws InterruptedException {
+		synchronized(o) {
+			while(!endCondition.getAsBoolean())
+				o.wait();
+		}
+	}
+	
+	/**
+	 * Synchronises on {@code o}, then runs {@code task}, and then invokes
+	 * {@code notifyAll()} on {@code o} as such:
+	 * 
+	 * <pre>
+	 * synchronized(o) {
+	 *     task.run();
+	 *     o.notifyAll();
+	 * }</pre>
+	 * 
+	 * @throws NullPointerException if either argument is {@code null}.
+	 */
+	public static void doThenNotify(Object o, Runnable task) {
+		synchronized(o) {
+			task.run();
+			o.notifyAll();
+		}
 	}
 	
 }

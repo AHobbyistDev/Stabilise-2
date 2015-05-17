@@ -11,7 +11,7 @@ import com.stabilise.screen.menu.component.MenuItem;
 import com.stabilise.screen.menu.component.Position;
 import com.stabilise.screen.menu.customcomponents.MenuButton;
 import com.stabilise.util.Colour;
-import com.stabilise.util.Interpolation;
+import com.stabilise.util.maths.Interpolation;
 
 /**
  * The main sub-menu of the main menu.

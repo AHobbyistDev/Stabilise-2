@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.stabilise.util.annotation.GuardedBy;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.ClearingLinkedList;
+import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.maths.AbstractPoint;
 import com.stabilise.util.maths.MutablePoint;
 import com.stabilise.util.maths.Point;
@@ -53,15 +53,12 @@ public class RegionCache {
 	@GuardedBy("locks")
 	private final MutablePoint loc = Region.createMutableLoc(0, 0);
 	
-	/** Regions which have been cached by the current worker thread. The list
-	 * member is a {@link ClearingLinkedList}. */
+	/** Regions which have been cached by the current worker thread. */
+	// Note: Sometime in the future it might be a good idea to switch from a
+	// List to a Map, especially if some implementation decides to rapid-fire
+	// on cache() to fetch tons of different regions.
 	private final ThreadLocal<List<Region>> localCachedRegions =
-			new ThreadLocal<List<Region>>() {
-		@Override
-		protected List<Region> initialValue() {
-			return new ClearingLinkedList<>();
-		}
-	};
+			ThreadLocal.withInitial(() -> new LightLinkedList<>());
 	
 	
 	/**
@@ -99,17 +96,14 @@ public class RegionCache {
 		List<Region> localRegions = localCachedRegions.get();
 		
 		// If the region is locally cached by this thread, use it.
-		// TODO: Sometime in the future we might wish to upgrade this from a
-		// list to a HashMap if there ever turns out to exist cases where we
-		// end up caching lots of regions at once.
 		for(Region r : localRegions) {
 			if(r.isAt(x, y));
 				return r;
 		}
 		
-		CachedRegion regionHandle;
-		
 		// Otherwise, if the region is cached, we local-cache and return it.
+		
+		CachedRegion regionHandle;
 		
 		// Synchronised to make the put-if-absent atomic
 		synchronized(regions) {
@@ -149,15 +143,16 @@ public class RegionCache {
 	 */
 	@UserThread("Any")
 	public void uncacheAll() {
-		for(Region cRegion : localCachedRegions.get())
+		List<Region> localRegions = localCachedRegions.get();
+		for(Region cRegion : localRegions)
 			uncache(cRegion);
-		localCachedRegions.remove();
+		localRegions.clear();
 	}
 	
 	/**
 	 * Tries to uncache the specified region. If the region is still being used
 	 * by another thread, it will remain cached; if not, the region will
-	 * be saved.
+	 * be saved and then unloaded.
 	 * 
 	 * <p>An invocation of this method should have an associated prior call to
 	 * {@link #cache(int, int)}.
@@ -211,6 +206,11 @@ public class RegionCache {
 	public void finaliseUncaching(CachedRegion r) {
 		if(r == null)
 			return;
+		// Implementation note: To avoid a race-condition with
+		// HostWorld.loadRegion we'd also want to synchronise on a lock
+		// returned by getLock() - otherwise the HostWorld could get a region
+		// from get(), only to have us suddenly remove it. We don't care if
+		// this happens since it doesn't have any effect.
 		synchronized(regions) {
 			// Remove the region unless it has been re-cached.
 			if(r.isUnused())
@@ -231,6 +231,9 @@ public class RegionCache {
 	 */
 	@UserThread("MainThread")
 	public Region get(AbstractPoint loc) {
+		// Note: do not under any circumstances try to synchronise on regions
+		// here since it can lead to deadlock (see HostWorld.loadRegion() and
+		// cache()).
 		CachedRegion cachedRegion = regions.get(loc);
 		return cachedRegion == null ? null : cachedRegion.region;
 	}

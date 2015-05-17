@@ -1,7 +1,5 @@
 package com.stabilise.network;
 
-import java.io.IOException;
-
 import com.stabilise.network.protocol.PacketHandler;
 import com.stabilise.network.protocol.Protocol;
 import com.stabilise.util.io.DataInStream;
@@ -19,8 +17,8 @@ public abstract class Packet implements Sendable {
 	/** A dummy packet which does nothing, to use when a non-null packet is
 	 * otherwise required for API purposes. */
 	public static final Packet DUMMY_PACKET = new Packet() {
-		@Override public void readData(DataInStream in) throws IOException {}
-		@Override public void writeData(DataOutStream out) throws IOException {}
+		@Override public void readData(DataInStream in) {}
+		@Override public void writeData(DataOutStream out) {}
 		@Override public void handle(PacketHandler handler, TCPConnection con) {}
 	};
 	

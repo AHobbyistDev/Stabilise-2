@@ -220,17 +220,15 @@ public class TaskTracker implements Tracker {
 	 * 
 	 * @throws IllegalStateException if the task is already done.
 	 */
-	public synchronized void setCompleted() {
-		setCompletionStatus(true);
-		notifyAll();
+	public void setCompleted() {
+		Task.doThenNotify(this, () -> setCompletionStatus(true));
 	}
 	
 	/**
 	 * Sets the task as failed.
 	 */
-	public synchronized void setFailed() {
-		setCompletionStatus(false);
-		state.notifyAll();
+	public void setFailed() {
+		Task.doThenNotify(this, () -> setCompletionStatus(false));
 	}
 	
 	private void setCompletionStatus(boolean success) {
@@ -258,23 +256,13 @@ public class TaskTracker implements Tracker {
 	}
 	
 	@Override
-	public synchronized void waitUntilDone() throws InterruptedException {
-		while(!stopped())
-			this.wait();
+	public void waitUntilDone() throws InterruptedException {
+		Task.waitOnInterruptibly(this, () -> stopped());
 	}
 	
 	@Override
-	public synchronized void waitUninterruptibly() {
-		boolean interrupted = false;
-		while(!stopped()) {
-			try {
-				this.wait();
-			} catch(InterruptedException retry) {
-				interrupted = true;
-			}
-		}
-		if(interrupted)
-			Thread.currentThread().interrupt();
+	public void waitUninterruptibly() {
+		Task.waitOnUntil(this, () -> stopped());
 	}
 	
 	/**

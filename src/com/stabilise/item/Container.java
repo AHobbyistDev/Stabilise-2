@@ -541,23 +541,20 @@ public abstract class Container implements Iterable<ItemStack>, Sendable {
 	 * <p>Note that even after being sorted in this manner, a container may
 	 * hold adjacent stacks which may be merged.
 	 */
-	public static final Comparator<ItemStack> COMPARATOR_ID = new Comparator<ItemStack>() {
-		@Override
-		public int compare(ItemStack s1, ItemStack s2) {
-			// ItemStacks in a container should NEVER be null
-			//if(s1 == null && s2 == null) return 0;
-			//if(s1 == null) return 1;
-			//if(s2 == null) return -1;
-			
-			if(s1 == ItemStack.NO_STACK && s2 == ItemStack.NO_STACK) return 0;
-			if(s1 == ItemStack.NO_STACK) return 1;
-			if(s2 == ItemStack.NO_STACK) return -1;
-			if(s1.getItem().getID() > s2.getItem().getID()) return 1;
-			if(s1.getItem().getID() < s2.getItem().getID()) return -1;
-			if(s1.getQuantity() > s2.getQuantity()) return -1;
-			if(s1.getQuantity() < s2.getQuantity()) return 1;
-			return 0;
-		}
+	public static final Comparator<ItemStack> COMPARATOR_ID = (s1, s2) -> {
+		// ItemStacks in a container should NEVER be null
+		//if(s1 == null && s2 == null) return 0;
+		//if(s1 == null) return 1;
+		//if(s2 == null) return -1;
+		
+		if(s1 == ItemStack.NO_STACK && s2 == ItemStack.NO_STACK) return 0;
+		if(s1 == ItemStack.NO_STACK) return 1;
+		if(s2 == ItemStack.NO_STACK) return -1;
+		if(s1.getItem().getID() > s2.getItem().getID()) return 1;
+		if(s1.getItem().getID() < s2.getItem().getID()) return -1;
+		if(s1.getQuantity() > s2.getQuantity()) return -1;
+		if(s1.getQuantity() < s2.getQuantity()) return 1;
+		return 0;
 	};
 	
 	/**
@@ -567,23 +564,20 @@ public abstract class Container implements Iterable<ItemStack>, Sendable {
 	 * <p>Note that even after being sorted in this manner, a container may
 	 * hold adjacent stacks which may be merged.
 	 */
-	public static final Comparator<ItemStack> COMPARATOR_NAME = new Comparator<ItemStack>() {
-		@Override
-		public int compare(ItemStack s1, ItemStack s2) {
-			// ItemStacks in a container should NEVER be null
-			//if(s1 == null && s2 == null) return 0;
-			//if(s1 == null) return 1;
-			//if(s2 == null) return -1;
-			
-			if(s1 == ItemStack.NO_STACK && s2 == ItemStack.NO_STACK) return 0;
-			if(s1 == ItemStack.NO_STACK) return 1;
-			if(s2 == ItemStack.NO_STACK) return -1;
-			int r = s1.getItem().getName().compareToIgnoreCase(s2.getItem().getName());
-			if(r != 0) return r;
-			if(s1.getQuantity() > s2.getQuantity()) return -1;
-			if(s1.getQuantity() < s2.getQuantity()) return 1;
-			return 0;
-		}
+	public static final Comparator<ItemStack> COMPARATOR_NAME = (s1, s2) -> {
+		// ItemStacks in a container should NEVER be null
+		//if(s1 == null && s2 == null) return 0;
+		//if(s1 == null) return 1;
+		//if(s2 == null) return -1;
+		
+		if(s1 == ItemStack.NO_STACK && s2 == ItemStack.NO_STACK) return 0;
+		if(s1 == ItemStack.NO_STACK) return 1;
+		if(s2 == ItemStack.NO_STACK) return -1;
+		int r = s1.getItem().getName().compareToIgnoreCase(s2.getItem().getName());
+		if(r != 0) return r;
+		if(s1.getQuantity() > s2.getQuantity()) return -1;
+		if(s1.getQuantity() < s2.getQuantity()) return 1;
+		return 0;
 	};
 	
 }
