@@ -1,9 +1,6 @@
-package com.stabilise.network;
+package com.stabilise.util.io;
 
 import java.io.IOException;
-
-import com.stabilise.util.io.DataInStream;
-import com.stabilise.util.io.DataOutStream;
 
 /**
  * Defines the two complementary methods {@code readData} and {@code writeData}

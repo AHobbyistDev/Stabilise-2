@@ -66,6 +66,8 @@ public class HostWorld extends AbstractWorld {
 	/** Whether or not the world has been {@link #prepare() prepared}. */
 	private boolean prepared = false;
 	
+	public final WorldStatistics stats = new WorldStatistics();
+	
 	
 	/**
 	 * Creates a new HostWorld.
@@ -317,6 +319,10 @@ public class HostWorld extends AbstractWorld {
 				regionCoordFromTileCoord(y));
 	}
 	
+	/**
+	 * Returns the region occupying the specified slice coord, or {@code null}
+	 * if it is not loaded.
+	 */
 	private Region getRegionFromSliceCoords(int x, int y) {
 		return getRegionAt(regionCoordFromSliceCoord(x),
 				regionCoordFromSliceCoord(y));
@@ -491,6 +497,8 @@ public class HostWorld extends AbstractWorld {
 				log.postWarning("Interrupted while blocking until world is closed");
 			}
 		}
+		
+		log.postDebug(stats.toString());
 	}
 	
 	private boolean allRegionsSaved() {
@@ -501,6 +509,16 @@ public class HostWorld extends AbstractWorld {
 		}
 		*/
 		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		return dimension.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return o == this;
 	}
 	
 	//--------------------==========--------------------

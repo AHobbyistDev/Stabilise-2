@@ -19,7 +19,7 @@ import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.event.EventBus;
-import com.stabilise.world.save.WorldLoader;
+import com.stabilise.world.loader.WorldLoader;
 
 /**
  * A WorldProvider manages and 'provides' all the dimensions/worlds of a
@@ -118,6 +118,9 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 				new WorldThreadFactory()
 		);
 		executor = tpe;
+		
+		log.postDebug("Started thread pool with [" + coreThreads + ","
+				+ maxThreads + "] threads.");
 		
 		// Start up the world loader
 		loader = WorldLoader.getLoader(this);

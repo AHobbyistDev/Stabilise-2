@@ -43,6 +43,7 @@ import com.stabilise.util.collect.LightLinkedList;
  * <p>To close a server, either invoke {@link #requestShutdown()} and wait for
  * the server to close itself, or directly invoke {@link #shutdown()}.
  * 
+ * <!--
  * <p>Each active {@code Server} associates with it the following resources:
  * 
  * <ul>
@@ -52,6 +53,7 @@ import com.stabilise.util.collect.LightLinkedList;
  * <li>Any number of {@link TCPConnection} objects which represent connections
  *     to connected clients.
  * </ul>
+ * -->
  */
 public abstract class Server implements Runnable, Drivable, PacketHandler {
 	

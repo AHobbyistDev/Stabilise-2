@@ -50,9 +50,9 @@ public class Constants {
 	
 	/** The half-length of an edge of the square of loaded slices around the
 	 * player. */
-	public static final int LOADED_SLICE_RADIUS = 4;
+	public static final int LOADED_SLICE_RADIUS = 6;
 	/** The buffer length of loaded slices. Unused. */
-	public static final int LOADED_SLICE_BUFFER = 2;
+	public static final int LOADED_SLICE_BUFFER = 3;
 	/** The minimum number of slices which can be considered 'loaded' about a
 	 * player at any given time. */
 	public static final int MIN_LOADED_SLICES =

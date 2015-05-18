@@ -2,6 +2,8 @@ package com.stabilise.util.maths;
 
 import java.util.Objects;
 
+import com.stabilise.util.annotation.Immutable;
+
 
 /**
  * This class provides a variety of functions for achieving three modes of
@@ -95,26 +97,11 @@ public interface Interpolation {
 	 * <p>The standard function for linear interpolation is:
 	 * <pre>f(x) = x</pre>
 	 */
-	public static final All LINEAR = new All() {
-		
-		// f(x) = x for everything
-		
-		@Override
-		public float easeInTransform(float x) {
-			return x;
-		}
-		
-		@Override
-		public float easeOutTransform(float x) {
-			return x;
-		}
-		
-		@Override
-		public float easeInOutTransform(float x) {
-			return x;
-		}
-		
-	};
+	public static final All LINEAR = newInterpolation(
+			x -> x,
+			x -> x,
+			x -> x
+	);
 	
 	/**
 	 * Quadratic interpolation uses a degree-2 polynomial for its interpolative
@@ -123,34 +110,11 @@ public interface Interpolation {
 	 * <p>The standard function for quadratic interpolation is:
 	 * <pre>f(x) = x<font size=-1><sup>2</sup></font></pre>
 	 */
-	public static final All QUADRATIC = new All() {
-		
-		@Override
-		public float easeInTransform(float x) {
-			// f(x) = x^2
-			return x*x;
-		}
-		
-		@Override
-		public float easeOutTransform(float x) {
-			// f(x) = 1 - (x-1)^2
-			//      = x(2-x)
-			return x*(2-x);
-		}
-		
-		@Override
-		public float easeInOutTransform(float x) {
-			if(x < 0.5f) {
-				// f(x) = 2x^2
-				return 2*x*x;
-			} else {
-				// f(x) = 1 - (2-2x)^2 / 2
-				//      = 1 - 2(x-1)^2
-				x--;
-				return 1 - 2*x*x;
-			}
-		}
-	};
+	public static final All QUADRATIC = newInterpolation(
+			x -> x*x,
+			x -> x*(2-x),
+			x -> x < 0.5f ? 2*x*x : 1 - 2*(--x)*x
+	);
 	
 	/**
 	 * Cubic interpolation uses a degree-3 polynomial for its interpolative
@@ -159,33 +123,11 @@ public interface Interpolation {
 	 * <p>The standard function for cubic interpolation is:
 	 * <pre>f(x) = x<font size=-1><sup>3</sup></font></pre>
 	 */
-	public static final All CUBIC = new All() {
-		
-		@Override
-		public float easeInTransform(float x) {
-			// f(x) = x^3
-			return x*x*x;
-		}
-		
-		@Override
-		public float easeOutTransform(float x) {
-			// f(x) = 1 + (x-1)^3
-			x--;
-			return 1 + x*x*x;
-		}
-		
-		@Override
-		public float easeInOutTransform(float x) {
-			if(x < 0.5f) {
-				// f(x) = 4x^3
-				return 4*x*x*x;
-			} else {
-				// f(x) = 1 - 4(x-1)^3
-				x--;
-				return 1 - 4*x*x*x;
-			}
-		}
-	};
+	public static final All CUBIC = newInterpolation(
+			x -> x*x*x,
+			x -> 1 + (--x)*x*x,
+			x -> x < 0.5f ? 4*x*x*x : 1 - 4*(--x)*x*x
+	);
 	
 	/**
 	 * Quartic interpolation uses a degree-4 polynomial for its interpolative
@@ -194,39 +136,11 @@ public interface Interpolation {
 	 * <p>The standard function for quartic interpolation is:
 	 * <pre>f(x) = x<font size=-1><sup>4</sup></font></pre>
 	 */
-	public static final All QUARTIC = new All() {
-		
-		// N.B. A benchmarking test has indicated that for degree-4 exponentiation,
-		// x*x*x*x is faster than:
-		// x *= x;
-		// x*x
-		
-		@Override
-		public float easeInTransform(float x) {
-			// f(x) = x^4
-			x *= x;
-			return x*x;
-		}
-		
-		@Override
-		public float easeOutTransform(float x) {
-			// f(x) = 1 - (x-1)^4
-			x--;
-			return 1 - x*x*x*x;
-		}
-		
-		@Override
-		public float easeInOutTransform(float x) {
-			if(x < 0.5f) {
-				// f(x) = 8x^4
-				return 8*x*x*x*x;
-			} else {
-				// f(x) = 1 - 8(x-1)^4
-				x--;
-				return 1 - 8*x*x*x*x;
-			}
-		}
-	};
+	public static final All QUARTIC = newInterpolation(
+			x -> x*x*x*x,
+			x -> 1 - x*x*x*x,
+			x -> x < 0.5f ? 8*x*x*x*x : 1 - 8*(--x)*x*x*x
+	);
 	
 	/**
 	 * Quintic interpolation uses a degree-5 polynomial for its interpolative
@@ -235,42 +149,11 @@ public interface Interpolation {
 	 * <p>The standard function for quintic interpolation is:
 	 * <pre>f(x) = x<font size=-1><sup>5</sup></font></pre>
 	 */
-	public static final All QUINTIC = new All() {
-		
-		// N.B. A benchmarking test has indicated that for degree-5 exponentiation,
-		// float xSquared = x*x;
-		// xSquared*xSquared*x is faster than:
-		// x*x*x*x*x
-		
-		@Override
-		public float easeInTransform(float x) {
-			// f(x) = x^5
-			float xSquared = x*x;
-			return xSquared * xSquared * x;
-		}
-		
-		@Override
-		public float easeOutTransform(float x) {
-			// f(x) = 1 + (x-1)^5
-			x--;
-			float xSquared = x*x;
-			return 1 - xSquared*xSquared*x;
-		}
-		
-		@Override
-		public float easeInOutTransform(float x) {
-			if(x < 0.5f) {
-				// f(x) = 16x^5
-				float xSquared = x*x;
-				return 16*xSquared*xSquared*x;
-			} else {
-				// f(x) = 1 + 16(x-1)^5
-				x--;
-				float xSquared = x*x;
-				return 1 + 16*xSquared*xSquared*x;
-			}
-		}
-	};
+	public static final All QUINTIC = newInterpolation(
+			x -> x*x*x*x*x,
+			x -> 1 - (--x)*x*x*x*x,
+			x -> x < 0.5f ? 16*x*x*x*x*x : 1 + 16*(--x)*x*x*x*x
+	);
 	
 	/**
 	 * Sinusoidal interpolation uses a sine curve for its interpolative
@@ -282,26 +165,12 @@ public interface Interpolation {
 	 * and {@code easeInOut}, sine and cosine functions with varying arguments
 	 * are appropriately used instead.
 	 */
-	public static final All SINUSOIDAL = new All() {
-		
-		@Override
-		public float easeInTransform(float x) {
+	public static final All SINUSOIDAL = newInterpolation(
 			// f(x) = 1 - cos(x*pi/2)
-			return 1 - (float)Math.cos(x * Maths.PI_OVER_2);
-		}
-		
-		@Override
-		public float easeOutTransform(float x) {
-			// f(x) = sin(x*pi/2)
-			return (float)Math.sin(x * Maths.PI_OVER_2);
-		}
-		
-		@Override
-		public float easeInOutTransform(float x) {
-			// f(x) = (1 - cos(x*pi))/2
-			return (1 - (float)Math.cos(x * Math.PI)) / 2;
-		}
-	};
+			x -> 1 - (float)Math.cos(x * Maths.PI_OVER_2),
+			x -> (float)Math.sin(x * Maths.PI_OVER_2),
+			x -> (1 - (float)Math.cos(x * Math.PI)) / 2
+	);
 	
 	/**
 	 * Circular interpolation uses circular curves for its interpolative
@@ -311,33 +180,13 @@ public interface Interpolation {
 	 * <p>The standard function for circular interpolation is:
 	 * <pre>f(x) = 1 - sqrt(1 - x<font size=-1><sup>2</sup></font>)</pre>
 	 */
-	public static final All CIRCULAR = new All() {
-		
-		@Override
-		public float easeInTransform(float x) {
+	public static final All CIRCULAR = newInterpolation(
 			// f(x) = 1 - sqrt(1-x^2)
-			return 1 - (float)Math.sqrt(1 - x*x);
-		}
-		
-		@Override
-		public float easeOutTransform(float x) {
-			// f(x) = sqrt(1 - (x-1)^2)
-			//      = sqrt(x(2-x))
-			return (float)Math.sqrt(x*(2-x));
-		}
-		
-		@Override
-		public float easeInOutTransform(float x) {
-			if(x < 0.5f) {
-				// f(x) = (1 - sqrt(1-4x^2)) / 2
-				return (1 - (float)Math.sqrt(1 - 4*x*x)) / 2;
-			} else {
-				// f(x) = (1 + sqrt(1-4(x-1)^2)) / 2
-				x--;
-				return (1 + (float)Math.sqrt(1 - 4*x*x)) / 2;
-			}
-		}
-	};
+			x -> 1 - (float)Math.sqrt(1 - x*x),
+			x -> (float)Math.sqrt(x*(2-x)),
+			x -> x < 0.5f ? (1 - (float)Math.sqrt(1 - 4*x*x)) / 2
+					: (1 + (float)Math.sqrt(1 - 4*(--x)*x)) / 2
+	);
 	
 	/**
 	 * Exponential interpolation uses exponential functions for its
@@ -356,43 +205,20 @@ public interface Interpolation {
 	 * with customisable base and exponent skew. (This has base=2 and exponent
 	 * skew=10.) -->
 	 */
-	public static final All EXPONENTIAL = new All() {
-		
-		@Override
-		public float easeInTransform(float x) {
-			if(x == 0f)
-				return 0f;
-			else			// f(x) = 2^(10(x-1))
-				return (float)Math.pow(2, 10*x - 10);
-		}
-		
-		@Override
-		public float easeOutTransform(float x) {
-			if(x == 1f)
-				return 1f;
-			else			// f(x) = 1 - 2^(-10x)
-				return 1 - (float)Math.pow(2, -10*x);
-		}
-		
-		@Override
-		public float easeInOutTransform(float x) {
-			if(x < 0.5f) {
-				if(x == 0f)
-					return 0f;
-				// f(x) = b^(n(2x-1)) / 2
-				// f(x) = 2^(10(2x-1)) / 2
-				//      = 2^(20x-11)
-				return (float)Math.pow(2, 20*x - 11);
-			} else {
-				if(x == 1)
-					return 1;
-				// f(x) = 1 - b^(-n(2x - 1)) / 2
-				// f(x) = 1 - 2^(-10(2x-1)) / 2
-				//      = 1 - 2^(-20x+9)
-				return 1 - (float)Math.pow(2, 9 - 20*x);
-			}
-		}
-	};
+	public static final All EXPONENTIAL = newInterpolation(
+			// f(x) = 2^(10(x-1))
+			x -> x == 0f ? 0f : (float)Math.pow(2, 10*x - 10),
+			x -> x == 1f ? 1f : 1 - (float)Math.pow(2, -10*x),
+			x -> x < 0.5f
+					// f(x) = b^(n(2x-1)) / 2
+					// f(x) = 2^(10(2x-1)) / 2
+					//      = 2^(20x-11)
+					? (x == 0f ? 0f : (float)Math.pow(2, 20*x - 11))
+					// f(x) = 1 - b^(-n(2x - 1)) / 2
+					// f(x) = 1 - 2^(-10(2x-1)) / 2
+					//      = 1 - 2^(-20x+9)
+					: (x == 1 ? 1 : 1 - (float)Math.pow(2, 9 - 20*x))
+	);
 	
 	/**
 	 * Back interpolation is a special type of interpolation which is
@@ -510,39 +336,13 @@ public interface Interpolation {
 			default:
 				if(degree < 1)
 					throw new IllegalArgumentException("degree < 1");
-				
-				return new All() {
-					
-					/** The degree. */
-					private int n = degree;
-					
-					@Override
-					public float easeInTransform(float x) {
-						// f(x) = x^n
-						return (float)Math.pow(x, n);
-					}
-					
-					@Override
-					public float easeOutTransform(float x) {
-						// f(x) = 1 + (1-x)^n
-						return 1 + (float)Math.pow(1-x, n);
-					}
-					
-					@Override
-					public float easeInOutTransform(float x) {
-						if(x < 0.5f) {
-							// f(x) = 2^(n-1) * x^n
-							//      = x(2x)^(n-1)
-							return (float)Math.pow(2*x, n-1);
-						} else {
-							// Note the first form would fail in the non-int
-							// implementation
-							// f(x) = 1 + (-2)^(n-1) * (x-1)^n
-							//      = 1 + (x-1)[2(1-x)]^(n-1)
-							return 1 + (x-1)*(float)Math.pow(2-2*x, n-1);
-						}
-					}
-				};
+				final int n = degree;
+				return newInterpolation(
+						x -> (float)Math.pow(x, n),
+						x -> 1 + (float)Math.pow(1-x, n),
+						x -> x < 0.5f ? (float)Math.pow(2*x, n-1)
+								: 1 + (x-1)*(float)Math.pow(2-2*x, n-1)
+				);
 		}
 	}
 	
@@ -566,37 +366,13 @@ public interface Interpolation {
 		if(degree < 1)
 			throw new IllegalArgumentException("degree < 1");
 		
-		return new All() {
-			
-			/** The polynomial degree. */
-			private double n = degree;
-			
-			@Override
-			public float easeInTransform(float x) {
-				// f(x) = x^n
-				return (float)Math.pow(x, n);
-			}
-			
-			@Override
-			public float easeOutTransform(float x) {
-				// f(x) = 1 + (1-x)^n
-				return 1 + (float)Math.pow(1-x, n);
-			}
-			
-			@Override
-			public float easeInOutTransform(float x) {
-				if(x < 0.5f) {
-					// f(x) = 2^(n-1) * x^n
-					//      = x(2x)^(n-1)
-					return x * (float)Math.pow(2*x, n-1);
-				} else {
-					// Note the initial form would fail as n is a non-integer
-					// f(x) = 1 + (-2)^(n-1) * (x-1)^n
-					//      = 1 + (x-1)[2(1-x)]^(n-1)
-					return 1 + (x-1)*(float)Math.pow(2-2*x, n-1);
-				}
-			}
-		};
+		final double n = degree;
+		return newInterpolation(
+				x -> (float)Math.pow(x, n),
+				x -> 1 + (float)Math.pow(1-x, n),
+				x -> x < 0.5f ? (float)Math.pow(2*x, n-1)
+						: 1 + (x-1)*(float)Math.pow(2-2*x, n-1)
+		);
 	}
 	
 	/**
@@ -686,54 +462,35 @@ public interface Interpolation {
 		if(strength == 0f)
 			return CUBIC;
 		
-		return new All() {
-			
-			/** Alias strength to s. */
-			private final float s = strength;
-			
-			@Override
-			public float easeInTransform(float x) {
+		final float s = strength;
+		return newInterpolation(
 				// f(x) = x^2 ((s+1)x - s)
-				
+				// 
 				// Note: The point where this function is a minimum is:
 				// (2s/3(s+1), -4s^3 / (27(s+1)^2)
-				return x*x*((s+1)*x - s);
-			}
-			
-			@Override
-			public float easeOutTransform(float x) {
+				x -> x*x*((s+1)*x - s),
 				// Provided in the reference code, but geogebra tells me this is incorrect
 				// g(x) 1 + x*(x-1)*((s+1)*x + s)
 				// Instead...
-				
+				// 
 				// g(x) = 1 - f(1-x), where f(x) = x^2 ((s+1)x - s) [the ease-in formula]
 				//      = 1 + (x-1)^2 ((s+1)(x-1) + s)		Note: can this be simplified?
-				
+				// 
 				// Note: The point where this function is a maximum is:
 				// ((s+3)/3(s+1), 1 + 4s^3 / (27(s+1)^2)
-				x--;
-				return 1 + x*x*((s+1)*x + s);
-			}
-			
-			@Override
-			public float easeInOutTransform(float x) {
+				x -> 1 + (--x)*x*((s+1)*x + s),
 				//float s2 = s * 1.525f;
-				
-				if(x < 0.5f) {
-					// g(x) = f(2x) / 2
-					//      = 4x^2 (2(s+1)x - s) / 2
-					//      = 2x^2 (2(s+1)x - s)
-					return 2*x*x*(2*(s+1)*x - s);
-				} else {
-					// g(x) = 1 - f(2-2x) / 2
-					//      = 1 - (2-2x)^2 ((s+1)(2-2x) - s) / 2
-					//      = 1 - 2(1-x)^2 (2(s+1)(1-x) - s)
-					//      = 1 + 2(x-1)^2 (2(s+1)(x-1) + s)
-					x--;
-					return 1 + 2*x*x*(2*(s+1)*x + s);
-				}
-			}
-		};
+				x -> x < 0.5f
+						// g(x) = f(2x) / 2
+						//      = 4x^2 (2(s+1)x - s) / 2
+						//      = 2x^2 (2(s+1)x - s)
+						? 2*x*x*(2*(s+1)*x - s)
+						// g(x) = 1 - f(2-2x) / 2
+						//      = 1 - (2-2x)^2 ((s+1)(2-2x) - s) / 2
+						//      = 1 - 2(1-x)^2 (2(s+1)(1-x) - s)
+						//      = 1 + 2(x-1)^2 (2(s+1)(x-1) + s)
+						: 1 + 2*(--x)*x*(2*(s+1)*x + s)
+		);
 	}
 	
 	/**
@@ -762,7 +519,25 @@ public interface Interpolation {
 	 * @throws NullPointerException if {@code easeIn} is {@code null}.
 	 */
 	public static All newInterpolation(Interpolation easeIn) {
+		return newInterpolation(
+				easeIn,
+				x -> 1 - easeIn.transform(1-x),
+				x -> x < 0.5f ? easeIn.transform(2*x) / 2
+						: 1 - easeIn.transform(2 - 2*x) / 2
+		);
+	}
+	
+	/**
+	 * Creates a new {@link All} encapsulating the three specified modes of
+	 * interpolation.
+	 * 
+	 * @throws NullPointerException if any argument is {@code null}.
+	 */
+	public static All newInterpolation(Interpolation easeIn, Interpolation easeOut,
+			Interpolation easeInOut) {
 		Objects.requireNonNull(easeIn);
+		Objects.requireNonNull(easeOut);
+		Objects.requireNonNull(easeInOut);
 		
 		return new All() {
 			@Override
@@ -771,14 +546,11 @@ public interface Interpolation {
 			}
 			@Override
 			public float easeOutTransform(float x) {
-				return 1 - easeIn.transform(1-x);
+				return easeOut.transform(x);
 			}
 			@Override
 			public float easeInOutTransform(float x) {
-				if(x < 0.5f)
-					return easeIn.transform(2*x) / 2;
-				else
-					return 1 - easeIn.transform(2 - 2*x) / 2;
+				return easeInOut.transform(x);
 			}
 		};
 	}
@@ -792,6 +564,7 @@ public interface Interpolation {
 	 * easeInOutTransform} and {@link All#easeInOut(float, float, float)
 	 * easeInOut} respectively.
 	 */
+	@Immutable
 	public static abstract class All implements Interpolation {
 		
 		// Ignoring naming conventions because these things should generally

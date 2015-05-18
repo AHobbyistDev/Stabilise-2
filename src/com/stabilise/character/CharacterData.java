@@ -16,11 +16,11 @@ import com.stabilise.core.Constants;
 import com.stabilise.core.Resources;
 import com.stabilise.item.BoundedContainer;
 import com.stabilise.item.Container;
-import com.stabilise.network.Sendable;
 import com.stabilise.util.Log;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.IOUtil;
+import com.stabilise.util.io.Sendable;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 

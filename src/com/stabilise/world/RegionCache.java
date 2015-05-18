@@ -10,7 +10,7 @@ import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.maths.AbstractPoint;
 import com.stabilise.util.maths.MutablePoint;
 import com.stabilise.util.maths.Point;
-import com.stabilise.world.save.WorldLoader;
+import com.stabilise.world.loader.WorldLoader;
 
 /**
  * Provides a cache implementation for regions. Every {@link HostWorld} owns a
@@ -117,7 +117,7 @@ public class RegionCache {
 				synchronized(getLock(x, y)) {
 					// If the world has the region, we take it and put it in
 					// the cache. If the world doesn't have it, we create the
-					// region in the cache initially.
+					// region in the cache.
 					Region region = world.getRegionAt(loc.set(x,y));
 					if(region == null)
 						region = new Region(x, y, world.getAge());
@@ -126,7 +126,7 @@ public class RegionCache {
 				}
 			}
 			
-			regionHandle.increment();
+			regionHandle.mark();
 		}
 		
 		localRegions.add(regionHandle.region);
@@ -139,7 +139,9 @@ public class RegionCache {
 	}
 	
 	/**
-	 * Uncaches any regions which have been cached by this thread.
+	 * Uncaches any regions which have been cached by this thread. It is okay
+	 * to defensively invoke this method, as this does nothing if no regions
+	 * have been cached.
 	 */
 	@UserThread("Any")
 	public void uncacheAll() {
@@ -157,15 +159,14 @@ public class RegionCache {
 	 * <p>An invocation of this method should have an associated prior call to
 	 * {@link #cache(int, int)}.
 	 * 
-	 * @param region The region to uncache, as returned by
-	 * {@link #cache(int, int)}.
+	 * @param r The region to uncache, as returned by {@link #cache(int, int)}.
 	 * 
 	 * @throws NullPointerException if {@code region} is {@code null}.
 	 * @throws IllegalArgumentException if the specified region is not
 	 * currently cached.
 	 */
 	@UserThread("Any")
-	private void uncache(Region region) {
+	private void uncache(Region r) {
 		// If the region is no longer being used as a part of the cache, we
 		// first save it and then remove it.
 		// 
@@ -173,25 +174,12 @@ public class RegionCache {
 		// in the cache until saving is complete, and then we remove it. To do
 		// this, we simply instruct the WorldLoader to invoke
 		// finaliseUncaching() once it has finished saving.
-		//
-		// There is a special case worth mentioning here: what if the region is
-		// currently being saved, but is currently past the point where the
-		// loader saves the schematics? Then region.getSavePermit() will return
-		// false, meaning our attempt to save the region will fail...
-		//
-		// How can we approach this?
-		// We either guarantee that at least one uncaching thread succeeds in a
-		// save, OR guarantee that the structures are saved. We want to do this
-		// without blocking the current thread, since we don't want to stall
-		// either the main thread or the thread pool in general (e.g., if the
-		// executor is single-threaded, and its only thread is stuck waiting
-		// for another thread to complete saving, the we have a problem).
 		synchronized(regions) {
-			CachedRegion cacheHandle = regions.get(region.loc);
+			CachedRegion cacheHandle = regions.get(r.loc);
 			if(cacheHandle == null)
-				throw new IllegalArgumentException("The given region is not in the cache!");
-			if(cacheHandle.decrementAndCheck())
-				loader.saveRegion(world, region, cacheHandle);
+				throw new IllegalArgumentException(r + " is not in the cache!");
+			if(cacheHandle.removeMarking())
+				loader.saveRegion(world, r, cacheHandle);
 		}
 	}
 	
@@ -213,7 +201,7 @@ public class RegionCache {
 		// this happens since it doesn't have any effect.
 		synchronized(regions) {
 			// Remove the region unless it has been re-cached.
-			if(r.isUnused())
+			if(r.tryFinalise())
 				regions.remove(r.region.loc);
 		}
 	}
@@ -230,6 +218,7 @@ public class RegionCache {
 	 * @throws NullPointerException if {@code loc} is {@code null}.
 	 */
 	@UserThread("MainThread")
+	@GuardedBy("getLock()")
 	public Region get(AbstractPoint loc) {
 		// Note: do not under any circumstances try to synchronise on regions
 		// here since it can lead to deadlock (see HostWorld.loadRegion() and
@@ -291,7 +280,9 @@ public class RegionCache {
 				regions.put(region.loc, handle);
 			}
 			
-			if(handle.isUnused())
+			// Stake our claim, and then swiftly remove it.
+			handle.mark();
+			if(handle.removeMarking())
 				loader.saveRegion(world, region, handle);
 		}
 	}
@@ -311,7 +302,7 @@ public class RegionCache {
 		/** The region. */
 		private final Region region;
 		/** The number of times the region has been cached. */
-		private int timesCached = 0;
+		@GuardedBy("RegionCache.regions") private int timesCached = 0;
 		
 		
 		/**
@@ -324,30 +315,39 @@ public class RegionCache {
 		}
 		
 		/**
-		 * Marks the region as cached. This also {@link Region#anchorSlice()
-		 * anchors} one of the region's slices.
+		 * Marks the region as cached by the current thread.
 		 */
-		private void increment() {
-			region.anchorSlice();
+		@GuardedBy("RegionCache.regions")
+		private void mark() {
 			timesCached++;
 		}
 		
 		/**
-		 * Removes a cache marking and checks as to whether or not it is no
-		 * longer needed. This also {@link Region#deAnchorSlice() de-anchors}
-		 * one of the region's slices.
+		 * Removes the current thread's marking, and returns {@code true} if
+		 * the region is no longer considered marked and should be saved.
+		 */
+		@GuardedBy("RegionCache.regions")
+		private boolean removeMarking() {
+			// If this is the last mark, we don't remove it; rather, we let the
+			// WorldLoader save the region (see uncache()), and then have the
+			// final mark safely removed in tryFinalise().
+			if(timesCached == 1)
+				return true;
+			timesCached--;
+			return false;
+		}
+		
+		/**
+		 * Checks to see if this cached region has been finalised (that is, is
+		 * not marked by any thread) and should be removed.
 		 * 
 		 * @return {@code true} if the region is no longer being cached for any
 		 * thread and may be removed; {@code false} if the region is still in
 		 * use.
 		 */
-		private boolean decrementAndCheck() {
-			region.deAnchorSlice();
+		@GuardedBy("RegionCache.regions")
+		private boolean tryFinalise() {
 			return --timesCached == 0;
-		}
-		
-		private boolean isUnused() {
-			return timesCached == 0;
 		}
 		
 	}

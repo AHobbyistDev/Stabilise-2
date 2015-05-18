@@ -45,7 +45,7 @@ public abstract class Dimension {
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
 	
-	/** This dimension's info. */
+	/** This dimension's info. Never null. */
 	public final Info info;
 	
 	
@@ -140,6 +140,16 @@ public abstract class Dimension {
 	 */
 	protected void saveExtraData(NBTTagCompound tag) {
 		// nothing to see here, move along
+	}
+	
+	@Override
+	public int hashCode() {
+		return info.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return o == this;
 	}
 	
 	//--------------------==========--------------------
@@ -266,7 +276,8 @@ public abstract class Dimension {
 	 * the default dimension has already been set.
 	 * @throws RuntimeException see {@link Registry#register(Object, Object)}.
 	 */
-	private static void registerDimension(boolean isDefault, String name, Class<? extends Dimension> dimClass) {
+	private static void registerDimension(boolean isDefault, String name,
+			Class<? extends Dimension> dimClass) {
 		if(isDefault) {
 			if(defaultDim != null)
 				throw new IllegalStateException("Default dimension had already been set!");
@@ -313,7 +324,7 @@ public abstract class Dimension {
 		 * dimensions this is {@code false}. */
 		public final boolean privateDimension;
 		
-		/** The name of the dimension. */
+		/** The name of the dimension. Never null. */
 		public final String name;
 		/** The age of this dimension. This is volatile. */
 		// see WorldLoader.saveRegion() for why this is volatile
@@ -413,6 +424,16 @@ public abstract class Dimension {
 		 */
 		public boolean fileExists() {
 			return getFile().exists();
+		}
+		
+		@Override
+		public int hashCode() {
+			return name.hashCode();
+		}
+		
+		@Override
+		public boolean equals(Object o) {
+			return o == this;
 		}
 		
 	}

@@ -3,9 +3,7 @@ package com.stabilise.world.gen;
 import static com.stabilise.world.Region.REGION_SIZE;
 import static com.stabilise.world.Slice.SLICE_SIZE;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
@@ -94,11 +92,7 @@ public abstract class WorldGenerator {
 	
 	private final RegionCache regionCache;
 	
-	/** The cache of schematics in use. TODO: this system is outdated */
-	@SuppressWarnings("unused")
-	private final Map<String, Structure> schematics = new ConcurrentHashMap<>(5);
-	
-	/** The generator's log. */
+	// Logging and statistics
 	protected final Log log = Log.getAgent("GENERATOR");
 	
 	
@@ -142,8 +136,11 @@ public abstract class WorldGenerator {
 	 */
 	@UserThread("MainThread")
 	public final void generate(final Region region) {
+		world.stats.gen.requests.increment();
 		if(region.getGenerationPermit())
-			executor.execute(() -> { genRegion(region); });
+			executor.execute(() -> genRegion(region));
+		else
+			world.stats.gen.rejected.increment();
 	}
 	
 	/**
@@ -161,8 +158,11 @@ public abstract class WorldGenerator {
 	 */
 	@UserThread("WorkerThread")
 	public final void generateSynchronously(Region region) {
+		world.stats.gen.requests.increment();
 		if(region.getGenerationPermit())
 			genRegion(region);
+		else
+			world.stats.gen.rejected.increment();
 	}
 	
 	/**
@@ -175,8 +175,12 @@ public abstract class WorldGenerator {
 	 */
 	@UserThread("WorkerThread")
 	private void genRegion(Region r) {
-		if(isShutdown)
+		world.stats.gen.started.increment();
+		
+		if(isShutdown) {
+			world.stats.gen.aborted.increment();
 			return;
+		}
 		
 		//log.logMessage("Generating " + r);
 		
@@ -220,17 +224,22 @@ public abstract class WorldGenerator {
 			
 			timer.stop();
 			log.postDebug(timer.getResult(TimeUnit.MILLISECONDS));
+			
+			world.stats.gen.completed.increment();
+			
+			r.setGenerated();
+			
+			// Save the region once it's done generating
+			prov.loader.saveRegion(world, r, null);
 		} catch(Throwable t) {
+			// TODO: What do we do if worldgen fails? Do we retry?
+			world.stats.gen.failed.increment();
 			log.postSevere("Worldgen of " + r + " failed!", t);
+			return;
+		} finally {
+			// We always clean up all regions cached during generation.
+			regionCache.uncacheAll();
 		}
-		
-		r.setGenerated();
-		
-		// Save the region once it's done generating
-		prov.loader.saveRegion(world, r, null);
-		
-		// Finally we clean up all the regions cached during generation.
-		regionCache.uncacheAll();
 	}
 	
 	/**

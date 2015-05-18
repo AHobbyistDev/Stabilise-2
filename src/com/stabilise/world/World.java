@@ -246,8 +246,8 @@ public interface World extends Checkable {
 	 * @param y The y-coordinate of the tile, in tile-lengths.
 	 * 
 	 * @return The tile at the given coordinates, or the
-	 * {@link com.stabilise.world.tile.Tile#invisibleBedrock invisibleBedrock}
-	 * tile if no such tile is loaded.
+	 * {@link Tiles#BEDROCK_INVISIBLE invisible bedrock} tile if no such tile
+	 * is loaded.
 	 */
 	default Tile getTileAt(double x, double y) {
 		return getTileAt(

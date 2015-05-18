@@ -445,6 +445,8 @@ public class TCPConnection {
 	
 	/**
 	 * Requests for this connection to close, if an error occurs.
+	 * 
+	 * @throws NullPointerException if {@code reason} is {@code null}.
 	 */
 	@UserThread({"ReadThread", "WriteThread"})
 	private void requestClose(String reason) {

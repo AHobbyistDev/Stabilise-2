@@ -92,7 +92,7 @@ public abstract class Client implements PacketHandler {
 			// first invoked.
 			state = STATE_CONNECTED;
 			connection = new TCPConnection(socket, false,
-					(c,p) -> { handleProtocolSwitch(c,p); });
+					(c,p) -> handleProtocolSwitch(c,p));
 		} catch(IOException e) {
 			state = STATE_DISCONNECTED;
 			log.postWarning("Could not connect to server at "

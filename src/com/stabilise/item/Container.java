@@ -5,9 +5,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import com.stabilise.network.Sendable;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
+import com.stabilise.util.io.Sendable;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.util.nbt.NBTTagList;
 

@@ -4,6 +4,7 @@ import com.stabilise.network.protocol.PacketHandler;
 import com.stabilise.network.protocol.Protocol;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
+import com.stabilise.util.io.Sendable;
 
 /**
  * Packets are modular chunks of data which may be sent over a network as a

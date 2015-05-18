@@ -1,6 +1,6 @@
 package com.stabilise.util.nbt;
 
-import com.stabilise.network.Sendable;
+import com.stabilise.util.io.Sendable;
 
 /**
  * Named binary tags (NBT tags) present a convenient method of saving data.

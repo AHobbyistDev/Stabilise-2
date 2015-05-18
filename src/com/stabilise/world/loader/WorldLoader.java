@@ -1,4 +1,4 @@
-package com.stabilise.world.save;
+package com.stabilise.world.loader;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -70,34 +70,21 @@ public abstract class WorldLoader {
 	 * 
 	 * @param world The region's parent world.
 	 * @param region The region to load.
+	 * @param generate Whether or not the region should also be generated, if
+	 * it is not already.
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
 	@UserThread("Any")
 	public final void loadRegion(HostWorld world, Region region, boolean generate) {
+		world.stats.load.requests.increment();
 		if(region.getLoadPermit())
 			executor.execute(new RegionLoader(world, region, generate));
-		else if(generate)
+		else if(generate) {
+			world.stats.load.rejected.increment();
 			world.generator.generate(region);
+		}
 	}
-	
-	/**
-	 * Instructs this WorldLoader to load a region on the current thread. This
-	 * instruction is ignored, however, if the region has already loaded or is
-	 * currently loading. Note that this will set {@link Region#loaded loaded}
-	 * to {@code true} once the region has completed loading.
-	 * 
-	 * <p>This method exists for the use of the WorldGenerator.
-	 * 
-	 * @param world The region's parent world.
-	 * @param region The region to load.
-	 */
-	/*
-	public final void loadRegionSynchronously(HostWorld world, Region region) {
-		if(region.getLoadPermit())
-			new RegionLoader(world, region, false).run();
-	}
-	*/
 	
 	/**
 	 * Instructs this WorldLoader to asynchronously save a region.
@@ -113,30 +100,10 @@ public abstract class WorldLoader {
 	@UserThread("Any")
 	public final void saveRegion(HostWorld world, Region region,
 			CachedRegion cacheHandle) {
-		//if(region.getSavePermit()) {
+		world.stats.save.requests.increment();
 		executor.execute(new RegionSaver(world, region, cacheHandle));
 		region.lastSaved = world.getAge();
-		//}
 	}
-	
-	/**
-	 * Instructs the WorldLoader to save a region on the current thread.
-	 * 
-	 * <p>This method exists for the use of the WorldGenerator.
-	 * 
-	 * @param world The region's parent world.
-	 * @param region The region to save.
-	 */
-	/*
-	@UserThread("WorkerThread")
-	public final void saveRegionSynchronously(HostWorld world, Region region) {
-		if(region.getSavePermit()) {
-			new RegionSaver(world, region).run();
-			region.unsavedChanges = false;
-			region.lastSaved = world.getAge();
-		}
-	}
-	*/
 	
 	/**
 	 * Loads a region.
@@ -217,11 +184,21 @@ public abstract class WorldLoader {
 		
 		@Override
 		public void run() {
-			if(cancelLoadOperations)
-				return;
+			world.stats.load.started.increment();
 			
-			if(r.fileExists(world))
-				load(r, r.getFile(world));
+			if(cancelLoadOperations) {
+				world.stats.load.aborted.increment();
+				return;
+			}
+			
+			try {
+				if(r.fileExists(world))
+					load(r, r.getFile(world));
+				world.stats.load.completed.increment();
+			} catch(Throwable t) {
+				world.stats.load.failed.increment();
+				log.postSevere("Loading " + r + " failed!", t);
+			}
 			
 			if(generate)
 				world.generator.generateSynchronously(r);
@@ -256,10 +233,19 @@ public abstract class WorldLoader {
 		
 		@Override
 		public void run() {
+			world.stats.save.started.increment();
+			
 			if(r.getSavePermit()) {
-				save(r, r.getFile(world));
-				r.finishSaving();
-			}
+				try {
+					save(r, r.getFile(world));
+					r.finishSaving();
+					world.stats.save.completed.increment();
+				} catch(Throwable t) {
+					world.stats.save.failed.increment();
+					log.postSevere("Saving " + r + " failed!", t);
+				}
+			} else
+				world.stats.save.aborted.increment();
 			// Extremely important final step in the lifecycle of a region: try
 			// to uncache a region after it has been saved.
 			world.regionCache.finaliseUncaching(cacheHandle);

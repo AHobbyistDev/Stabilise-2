@@ -1,4 +1,4 @@
-package com.stabilise.world.save;
+package com.stabilise.world.loader;
 
 import static com.stabilise.world.Region.REGION_SIZE;
 import static com.stabilise.world.World.*;
