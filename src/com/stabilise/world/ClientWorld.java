@@ -2,14 +2,14 @@ package com.stabilise.world;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.world.dimension.Dimension;
-import com.stabilise.world.provider.WorldProvider;
+import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 public class ClientWorld extends AbstractWorld {
 
-	public ClientWorld(WorldProvider<? extends AbstractWorld> provider,
+	public ClientWorld(Multiverse<? extends AbstractWorld> multiverse,
 			Dimension dimension) {
-		super(provider, dimension);
+		super(multiverse, dimension);
 	}
 	
 	@Override

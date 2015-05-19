@@ -1,4 +1,4 @@
-package com.stabilise.world.provider;
+package com.stabilise.world.multiverse;
 
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.Incomplete;
@@ -6,9 +6,9 @@ import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.dimension.Dimension;
 
 @Incomplete
-public class ClientProvider extends WorldProvider<AbstractWorld> {
+public class ClientMultiverse extends Multiverse<AbstractWorld> {
 	
-	public ClientProvider(Profiler profiler) {
+	public ClientMultiverse(Profiler profiler) {
 		super(profiler);
 	}
 	

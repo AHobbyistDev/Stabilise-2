@@ -13,8 +13,8 @@ import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World.WorldBundle;
-import com.stabilise.world.provider.HostProvider;
-import com.stabilise.world.provider.HostProvider.PlayerData;
+import com.stabilise.world.multiverse.HostMultiverse;
+import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
 
 /**
  * The game itself.
@@ -26,7 +26,7 @@ public class Game implements Controllable, InputProcessor {
 	/** Whether or not the game is currently paused. */
 	public boolean paused = false;
 	
-	private final HostProvider provider;
+	private final HostMultiverse provider;
 	/** The game's world instance. */
 	public final HostWorld world;
 	public final PlayerData playerData;
@@ -60,7 +60,7 @@ public class Game implements Controllable, InputProcessor {
 	 * @throws NullPointerException if {@code worldBundle} is {@code null}.
 	 */
 	public Game(WorldBundle worldBundle) {
-		this.provider = (HostProvider)worldBundle.provider;
+		this.provider = (HostMultiverse)worldBundle.multiverse;
 		this.world = (HostWorld)worldBundle.world;
 		this.playerData = worldBundle.playerData;
 		this.player = worldBundle.playerEntity;

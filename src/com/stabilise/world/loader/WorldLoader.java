@@ -9,7 +9,8 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.RegionCache.CachedRegion;
-import com.stabilise.world.provider.WorldProvider;
+import com.stabilise.world.gen.WorldGenerator;
+import com.stabilise.world.multiverse.Multiverse;
 
 /**
  * A {@code WorldLoader} instance manages the loading and saving of regions for
@@ -39,13 +40,9 @@ import com.stabilise.world.provider.WorldProvider;
  */
 public abstract class WorldLoader {
 	
-	/** The world provider for which the loader is loading. */
-	protected final WorldProvider<?> provider;
+	/** The multiverse for which the loader is loading. */
+	protected final Multiverse<?> multiverse;
 	private final Executor executor;
-	
-	/** Whether or not loading operations should be cancelled due to the loader
-	 * having been shut down. This is volatile. */
-	private volatile boolean cancelLoadOperations = false;
 	
 	/** The world loader's log. */
 	protected final Log log = Log.getAgent("WORLDLOADER");
@@ -54,51 +51,40 @@ public abstract class WorldLoader {
 	/**
 	 * Creates a new WorldLoader.
 	 * 
-	 * @param provider The world provider.
+	 * @param multiverse The multiverse.
 	 * 
-	 * @throws NullPointerException if {@code provider} is {@code null}.
+	 * @throws NullPointerException if {@code multiverse} is {@code null}.
 	 */
-	public WorldLoader(WorldProvider<?> provider) {
-		this.provider = Objects.requireNonNull(provider);
-		executor = provider.getExecutor();
+	public WorldLoader(Multiverse<?> multiverse) {
+		this.multiverse = Objects.requireNonNull(multiverse);
+		executor = multiverse.getExecutor();
 	}
 	
 	/**
-	 * Instructs this WorldLoader to asynchronously load a region. This method
-	 * does nothing if {@link Region#getLoadPermit() region.getLoadPermit()}
-	 * returns {@code false}.
+	 * Gets the handle to this WorldLoader to use for the specified world.
 	 * 
-	 * @param world The region's parent world.
-	 * @param region The region to load.
-	 * @param generate Whether or not the region should also be generated, if
-	 * it is not already.
+	 * @param world The world to get the loader for.
 	 * 
-	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws NullPointerException if world is null.
 	 */
+	public DimensionLoader loaderFor(HostWorld world) {
+		return new DimensionLoader(this, Objects.requireNonNull(world));
+	}
+	
 	@UserThread("Any")
-	public final void loadRegion(HostWorld world, Region region, boolean generate) {
-		world.stats.load.requests.increment();
-		if(region.getLoadPermit())
-			executor.execute(new RegionLoader(world, region, generate));
+	private void loadRegion(DimensionLoader handle, Region r, boolean generate) {
+		handle.world.stats.load.requests.increment();
+		
+		if(r.getLoadPermit())
+			executor.execute(new RegionLoader(handle, r, generate));
 		else if(generate) {
-			world.stats.load.rejected.increment();
-			world.generator.generate(region);
+			handle.world.stats.load.rejected.increment();
+			handle.generator.generate(r);
 		}
 	}
 	
-	/**
-	 * Instructs this WorldLoader to asynchronously save a region.
-	 * 
-	 * <p>The request will be ignored if the region does not grant its {@link
-	 * Region#getSavePermit() save permit}.
-	 * 
-	 * @param world The region's parent world.
-	 * @param region The region to save.
-	 * @param cacheHandle The handle to this region's cache entry. {@code null}
-	 * is allowed.
-	 */
 	@UserThread("Any")
-	public final void saveRegion(HostWorld world, Region region,
+	private void saveRegion(HostWorld world, Region region,
 			CachedRegion cacheHandle) {
 		world.stats.save.requests.increment();
 		executor.execute(new RegionSaver(world, region, cacheHandle));
@@ -123,18 +109,88 @@ public abstract class WorldLoader {
 	@UserThread("WorkerThread")
 	protected abstract void save(Region r, FileHandle file);
 	
-	/**
-	 * Shuts down the WorldLoader; region loading operations will be cancelled
-	 * but region saves will be permitted to complete.
-	 */
 	@UserThread("MainThread")
-	public void shutdown() {
-		cancelLoadOperations = true;
+	@Deprecated
+	private void shutdown() {
+		// TODO remove?
 	}
 	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------
 	//--------------------==========--------------------
+	
+	/**
+	 * A DimensionLoader is essentially a world-local handle to the WorldLoader
+	 * of a Multiverse.
+	 */
+	public static class DimensionLoader {
+		
+		private final WorldLoader loader;
+		private final HostWorld world;
+		private WorldGenerator generator = null;
+		private volatile boolean cancelLoadOperations = false;
+		
+		
+		private DimensionLoader(WorldLoader loader, HostWorld world) {
+			this.loader = loader;
+			this.world = world;
+		}
+		
+		/**
+		 * Prepares this this loader by providing it with a reference to the
+		 * world generator.
+		 * 
+		 * @throws IllegalStateException if this loader has already been
+		 * prepared.
+		 * @throws NullPointerException if generator is null.
+		 */
+		public void prepare(WorldGenerator generator) {
+			if(this.generator != null)
+				throw new IllegalStateException("Generator already set");
+			this.generator = generator;
+		}
+		
+		/**
+		 * Instructs the WorldLoader to asynchronously load a region. This
+		 * method does nothing if {@link Region#getLoadPermit()
+		 * region.getLoadPermit()} returns {@code false}.
+		 * 
+		 * @param region The region to load.
+		 * @param generate Whether or not the region should also be generated,
+		 * if it is not already.
+		 * 
+		 * @throws NullPointerException if {@code region} is {@code null}.
+		 */
+		@UserThread("Any")
+		public void loadRegion(Region region, boolean generate) {
+			loader.loadRegion(this, region, generate);
+		}
+		
+		/**
+		 * Instructs the WorldLoader to asynchronously save a region.
+		 * 
+		 * <p>The request will be ignored if the region does not grant its
+		 * {@link Region#getSavePermit() save permit}.
+		 * 
+		 * @param region The region to save.
+		 * @param cacheHandle The handle to this region's cache entry. {@code
+		 * null} is allowed.
+		 */
+		@UserThread("Any")
+		public void saveRegion(Region region, CachedRegion cacheHandle) {
+			loader.saveRegion(world, region, cacheHandle);
+		}
+		
+		/**
+		 * Shuts down the WorldLoader; region loading operations will be cancelled
+		 * but region saves will be permitted to complete.
+		 */
+		@UserThread("MainThread")
+		public void shutdown() {
+			cancelLoadOperations = true;
+		}
+		
+	}
 	
 	/**
 	 * A {@code Runnable} which is passed into {@link #executor} for the
@@ -164,29 +220,24 @@ public abstract class WorldLoader {
 	 */
 	private class RegionLoader extends RegionIO {
 		
+		private final DimensionLoader loader;
+		private final WorldGenerator generator;
 		/** True if the region should be generated, if it is not already. */
 		private final boolean generate;
 		
-		/**
-		 * Creates a new RegionLoader.
-		 * 
-		 * @param world The region's parent world.
-		 * @param region The region to load.
-		 * @param generate Whether or not the region should be generated after
-		 * being loaded, if it is not already.
-		 * 
-		 * @throws NullPointerException if {@code world} is {@code null}.
-		 */
-		public RegionLoader(HostWorld world, Region region, boolean generate) {
-			super(world, region);
+		
+		public RegionLoader(DimensionLoader loader, Region r, boolean generate) {
+			super(loader.world, r);
+			this.loader = loader;
 			this.generate = generate;
+			this.generator = loader.generator;
 		}
 		
 		@Override
 		public void run() {
 			world.stats.load.started.increment();
 			
-			if(cancelLoadOperations) {
+			if(loader.cancelLoadOperations) {
 				world.stats.load.aborted.increment();
 				return;
 			}
@@ -201,7 +252,7 @@ public abstract class WorldLoader {
 			}
 			
 			if(generate)
-				world.generator.generateSynchronously(r);
+				generator.generateSynchronously(r);
 			
 			//log.postFineDebug("Finished loading " + r);
 		}
@@ -219,15 +270,15 @@ public abstract class WorldLoader {
 		/**
 		 * Creates a new RegionSaver.
 		 * 
-		 * @param world The region's parent world.
-		 * @param region The region to save.
+		 * @param world The region's host world.
+		 * @param r The region to save.
 		 * @param cache The handle to the region's cache entry. null is
 		 * allowed.
 		 * 
 		 * @throws NullPointerException if {@code world} is {@code null}.
 		 */
-		public RegionSaver(HostWorld world, Region region, CachedRegion cache) {
-			super(world, region);
+		public RegionSaver(HostWorld world, Region r, CachedRegion cache) {
+			super(world, r);
 			this.cacheHandle = cache;
 		}
 		
@@ -248,7 +299,8 @@ public abstract class WorldLoader {
 				world.stats.save.aborted.increment();
 			// Extremely important final step in the lifecycle of a region: try
 			// to uncache a region after it has been saved.
-			world.regionCache.finaliseUncaching(cacheHandle);
+			if(cacheHandle != null)
+				cacheHandle.dispose();
 		}
 		
 	}
@@ -260,12 +312,13 @@ public abstract class WorldLoader {
 	/**
 	 * Gets the loader to use for world loading.
 	 * 
-	 * @param provider The world provider.
+	 * @param multiverse The multiverse.
 	 * 
 	 * @return The loader to use for world loading.
+	 * @throws NullPointerException if multiverse is null.
 	 */
-	public static WorldLoader getLoader(WorldProvider<?> provider) {
-		return new PreAlphaWorldLoader(provider);
+	public static WorldLoader getLoader(Multiverse<?> multiverse) {
+		return new PreAlphaWorldLoader(multiverse);
 	}
 	
 }

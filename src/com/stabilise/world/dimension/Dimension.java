@@ -14,14 +14,13 @@ import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.ClientWorld;
 import com.stabilise.world.HostWorld;
-import com.stabilise.world.RegionCache;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
 import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.provider.WorldProvider;
+import com.stabilise.world.multiverse.Multiverse;
 
 /**
- * A Dimension is a distinct 'world' within the game. Each world provider may
+ * A Dimension is a distinct 'world' within the game. Each multiverse may
  * have multiple dimensions/worlds.
  */
 public abstract class Dimension {
@@ -61,12 +60,12 @@ public abstract class Dimension {
 	 * Subclasses may override this to return a custom implementation of
 	 * HostWorld to implement dimension-specific logic.
 	 * 
-	 * @param provider The world provider.
+	 * @param multiverse The multiverse.
 	 * 
-	 * @throws NullPointerException if {@code provider} is {@code null}.
+	 * @throws NullPointerException if {@code multiverse} is {@code null}.
 	 */
-	public HostWorld createHost(WorldProvider<? extends AbstractWorld> provider) {
-		return new HostWorld(provider, this);
+	public HostWorld createHost(Multiverse<? extends AbstractWorld> multiverse) {
+		return new HostWorld(multiverse, this);
 	}
 	
 	/**
@@ -74,26 +73,25 @@ public abstract class Dimension {
 	 * Subclasses may override this to return a custom implementation of
 	 * ClientWorld to implement dimension-specific features.
 	 * 
-	 * @param provider The world provider.
+	 * @param multiverse The multiverse.
 	 * 
-	 * @throws NullPointerException if {@code provider} is {@code null}.
+	 * @throws NullPointerException if {@code multiverse} is {@code null}.
 	 */
-	public ClientWorld createClient(WorldProvider<AbstractWorld> provider) {
-		return new ClientWorld(provider, this);
+	public ClientWorld createClient(Multiverse<AbstractWorld> multiverse) {
+		return new ClientWorld(multiverse, this);
 	}
 	
 	/**
 	 * Creates the world generator to use for generating this dimension.
 	 * 
-	 * @param provider The world provider.
+	 * @param multiverse The multiverse.
 	 * @param world This dimension's host world.
-	 * @param regionCache The dimension's region cache.
 	 * 
 	 * @return The world generator.
-	 * @throws NullPointerException if any argument is {@code null}.
+	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public abstract WorldGenerator createWorldGenerator(WorldProvider<?> provider,
-			HostWorld world, RegionCache regionCache);
+	public abstract WorldGenerator generatorFor(Multiverse<?> multiverse,
+			HostWorld world);
 	
 	/**
 	 * Loads this dimension's info, if it exists on the filesystem.

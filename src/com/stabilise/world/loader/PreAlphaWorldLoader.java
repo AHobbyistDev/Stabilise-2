@@ -13,7 +13,7 @@ import com.stabilise.util.nbt.NBTTagList;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
 import com.stabilise.world.Region.QueuedStructure;
-import com.stabilise.world.provider.WorldProvider;
+import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -31,7 +31,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
 	 * 
 	 * @param provider The world provider.
 	 */
-	public PreAlphaWorldLoader(WorldProvider<?> provider) {
+	public PreAlphaWorldLoader(Multiverse<?> provider) {
 		super(provider);
 	}
 	

@@ -238,7 +238,7 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 17/04/15
 	- Fixed broken SAT collisions!
 20/04/15
-	- Added WorldBuilder.
+	- Added World.WorldBuilder.
 27/04/15
 	- Added AbstractWorld.ParticleManager and particle pooling.
 29/04/15
@@ -248,6 +248,7 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Beginning refactoring of region state, WorldGenerator, WorldLoader, and HostWorld.
 16/05/15
 	- Added RegionCache.
-
+19/05/15
+	- WorldProvider -> Multiverse
 
 	

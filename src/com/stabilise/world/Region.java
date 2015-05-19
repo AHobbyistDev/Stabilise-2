@@ -339,7 +339,7 @@ public class Region {
 		structures.add(Objects.requireNonNull(struct));
 	}
 	
-	private void doAddStructure(QueuedStructure s, RegionCache world) {
+	private void doAddStructure(QueuedStructure s, RegionCache regionCache) {
 		//s.add(world);
 	}
 	
@@ -555,6 +555,59 @@ public class Region {
 		return "Region[" + loc.x + "," + loc.y + "]";
 	}
 	
+	/**
+	 * Returns a string representation of this Region, with some additional
+	 * debug information.
+	 */
+	public String toStringDebug() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Region[");
+		sb.append(loc.x);
+		sb.append(',');
+		sb.append(loc.y);
+		sb.append(": ");
+		sb.append(stateToString());
+		sb.append('/');
+		sb.append(saveStateToString());
+		sb.append("]");
+		return sb.toString();
+	}
+	
+	private String stateToString() {
+		int s = state.get();
+		switch(s) {
+			case STATE_NEW:
+				return "NEW";
+			case STATE_LOADING:
+				return "LOADING";
+			case STATE_GENERATING:
+				return "GENERATING";
+			case STATE_ACTIVE:
+				return "ACTIVE";
+			default:
+				return "ILLEGAL STATE " + s;
+		}
+	}
+	
+	private String saveStateToString() {
+		int s;
+		synchronized(state) {
+			s = saveState;
+		}
+		switch(s) {
+			case SAVESTATE_IDLE:
+				return "IDLE";
+			case SAVESTATE_SAVING:
+				return "SAVING";
+			case SAVESTATE_WAITING:
+				return "SAVING/WAITING";
+			case SAVESTATE_IDLE_WAITER:
+				return "IDLE_WAITER";
+			default:
+				return "ILLEGAL SAVESTATE " + s;
+		}
+	}
+	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------
@@ -573,8 +626,8 @@ public class Region {
 	 * the sole purpose of creating mutable points should be to avoid needless
 	 * object creation in scenarios where thread safety is guaranteed.
 	 */
-	public static MutablePoint createMutableLoc(int x, int y) {
-		return LOC_FACTORY.newMutablePoint(x, y);
+	public static MutablePoint createMutableLoc() {
+		return LOC_FACTORY.newMutablePoint();
 	}
 	
 	//--------------------==========--------------------

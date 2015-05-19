@@ -1,9 +1,8 @@
 package com.stabilise.world.dimension;
 
 import com.stabilise.world.HostWorld;
-import com.stabilise.world.RegionCache;
 import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.provider.WorldProvider;
+import com.stabilise.world.multiverse.Multiverse;
 
 /**
  * The private player-local client-only dimension.
@@ -15,8 +14,8 @@ public class DimPrivate extends Dimension {
 	}
 	
 	@Override
-	public WorldGenerator createWorldGenerator(WorldProvider<?> provider, 
-			HostWorld world, RegionCache cache) {
+	public WorldGenerator generatorFor(Multiverse<?> multiverse, 
+			HostWorld world) {
 		return null;
 	}
 	

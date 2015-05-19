@@ -28,7 +28,7 @@ import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.dimension.Dimension;
-import com.stabilise.world.provider.WorldProvider;
+import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -37,7 +37,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  */
 public abstract class AbstractWorld implements World {
 	
-	public final WorldProvider<?> provider;
+	public final Multiverse<?> multiverse;
 	/** This world's dimension. */
 	protected final Dimension dimension;
 	
@@ -111,16 +111,17 @@ public abstract class AbstractWorld implements World {
 	/**
 	 * Creates a new AbstractWorld.
 	 * 
-	 * @param provider This world's provider.
+	 * @param multiverse The multiverse.
 	 * @param dimension The dimension of this world.
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public AbstractWorld(WorldProvider<? extends AbstractWorld> provider, Dimension dimension) {
-		this.provider = provider;
+	public AbstractWorld(Multiverse<? extends AbstractWorld> multiverse,
+			Dimension dimension) {
+		this.multiverse = multiverse;
 		this.dimension = dimension;
 		
-		profiler = provider.getProfiler();
+		profiler = multiverse.getProfiler();
 		log = Log.getAgent("World_" + dimension.info.name);
 	}
 	
@@ -249,7 +250,7 @@ public abstract class AbstractWorld implements World {
 	
 	@Override
 	public void sendToDimension(String dimension, Entity e, double x, double y) {
-		provider.sendToDimension(this, dimension, e, x, y);
+		multiverse.sendToDimension(this, dimension, e, x, y);
 	}
 	
 	// ==========Collection getters==========
@@ -344,7 +345,7 @@ public abstract class AbstractWorld implements World {
 	
 	@Override
 	public boolean isClient() {
-		return provider.hasClient();
+		return multiverse.hasClient();
 	}
 	
 	// ========== Lifecycle Methods ==========

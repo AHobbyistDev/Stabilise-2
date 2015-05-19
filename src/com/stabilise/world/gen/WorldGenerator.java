@@ -15,7 +15,8 @@ import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.RegionCache;
 import com.stabilise.world.Slice;
-import com.stabilise.world.provider.WorldProvider;
+import com.stabilise.world.loader.WorldLoader.DimensionLoader;
+import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.structure.Structure;
 import com.stabilise.world.tile.Tiles;
 
@@ -78,10 +79,9 @@ import com.stabilise.world.tile.Tiles;
 @ThreadSafe
 public abstract class WorldGenerator {
 	
-	/** The world provider. */
-	private final WorldProvider<?> prov;
 	/** The world for which the generator is generating. */
 	private final HostWorld world;
+	private DimensionLoader loader;
 	/** The seed to use for world generation. */
 	protected final long seed;
 	
@@ -90,7 +90,7 @@ public abstract class WorldGenerator {
 	/** Whether or not the generator has been shut down. This is volatile. */
 	private volatile boolean isShutdown = false;
 	
-	private final RegionCache regionCache;
+	private RegionCache regionCache;
 	
 	// Logging and statistics
 	protected final Log log = Log.getAgent("GENERATOR");
@@ -99,21 +99,31 @@ public abstract class WorldGenerator {
 	/**
 	 * Creates a new WorldGenerator.
 	 * 
-	 * @param worldProv The world provider. This should be a {@code
-	 * HostProvider} for all but a {@code PrivateDimensionGenerator}.
+	 * @param multiverse The multiverse.
 	 * @param world The world.
-	 * @param regionCache The region world's cache.
 	 * 
-	 * @throws NullPointerException if any argument is {@code null}.
+	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	protected WorldGenerator(WorldProvider<?> worldProv, HostWorld world,
-			RegionCache regionCache) {
-		this.prov = Objects.requireNonNull(worldProv);
+	protected WorldGenerator(Multiverse<?> multiverse, HostWorld world) {
 		this.world = Objects.requireNonNull(world);
-		this.regionCache = Objects.requireNonNull(regionCache);
-		this.executor = prov.getExecutor();
+		this.executor = multiverse.getExecutor();
 		
-		seed = prov.getSeed();
+		seed = multiverse.getSeed();
+	}
+	
+	/**
+	 * Prepares this WorldGenerator by providing it with references to the
+	 * world loader and region cache of the world.
+	 * 
+	 * @throws IllegalStateException if this generator has already been
+	 * prepared.
+	 * @throws NullPointerException if either argument is null.
+	 */
+	public void prepare(DimensionLoader loader, RegionCache cache) {
+		if(this.regionCache != null || this.loader != null)
+			throw new IllegalStateException("Already prepared");
+		this.loader = Objects.requireNonNull(loader);
+		this.regionCache = Objects.requireNonNull(cache);
 	}
 	
 	/**
@@ -137,7 +147,7 @@ public abstract class WorldGenerator {
 	@UserThread("MainThread")
 	public final void generate(final Region region) {
 		world.stats.gen.requests.increment();
-		if(region.getGenerationPermit())
+		if(!isShutdown && region.getGenerationPermit())
 			executor.execute(() -> genRegion(region));
 		else
 			world.stats.gen.rejected.increment();
@@ -159,7 +169,7 @@ public abstract class WorldGenerator {
 	@UserThread("WorkerThread")
 	public final void generateSynchronously(Region region) {
 		world.stats.gen.requests.increment();
-		if(region.getGenerationPermit())
+		if(!isShutdown && region.getGenerationPermit())
 			genRegion(region);
 		else
 			world.stats.gen.rejected.increment();
@@ -230,7 +240,7 @@ public abstract class WorldGenerator {
 			r.setGenerated();
 			
 			// Save the region once it's done generating
-			prov.loader.saveRegion(world, r, null);
+			loader.saveRegion(r, null);
 		} catch(Throwable t) {
 			// TODO: What do we do if worldgen fails? Do we retry?
 			world.stats.gen.failed.increment();

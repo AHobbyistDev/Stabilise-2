@@ -26,10 +26,10 @@ import com.stabilise.util.concurrent.TrackableFuture;
 import com.stabilise.util.io.IOUtil;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.AbstractWorld.ParticleManager;
-import com.stabilise.world.provider.HostProvider;
-import com.stabilise.world.provider.HostProvider.PlayerBundle;
-import com.stabilise.world.provider.HostProvider.PlayerData;
-import com.stabilise.world.provider.WorldProvider;
+import com.stabilise.world.multiverse.HostMultiverse;
+import com.stabilise.world.multiverse.Multiverse;
+import com.stabilise.world.multiverse.HostMultiverse.PlayerBundle;
+import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -826,7 +826,7 @@ public interface World extends Checkable {
 	
 	/**
 	 * A WorldBuilder is a builder used to construct and set up {@link
-	 * WorldProvider} objects in an easy, concise, and consistent manner.
+	 * Multiverse} objects in an easy, concise, and consistent manner.
 	 */
 	public static class WorldBuilder {
 		
@@ -862,7 +862,7 @@ public interface World extends Checkable {
 		 * @return This WorldBuilder.
 		 * @throws NullPointerException if {@code worldName} is {@code null}.
 		 * @throws IllegalStateException if this builder has already built the
-		 * world provider, or the world has already been set, or the client has
+		 * multiverse, or the world has already been set, or the client has
 		 * already been set.
 		 */
 		public WorldBuilder setWorld(String worldName) {
@@ -880,7 +880,7 @@ public interface World extends Checkable {
 		 * @return This WorldBuilder.
 		 * @throws NullPointerException if {@code worldInfo} is {@code null}.
 		 * @throws IllegalStateException if this builder has already built the
-		 * world provider, or the world has already been set, or the client has
+		 * multiverse, or the world has already been set, or the client has
 		 * already been set.
 		 */
 		public WorldBuilder setWorld(WorldInfo worldInfo) {
@@ -902,7 +902,7 @@ public interface World extends Checkable {
 		 * @throws NullPointerException if {@code characterName} is {@code
 		 * null}.
 		 * @throws IllegalStateException if this builder has already built the
-		 * world provider, or the integrated player has already been set.
+		 * multiverse, or the integrated player has already been set.
 		 */
 		public WorldBuilder setPlayer(String characterName) {
 			return setPlayer(new CharacterData(Objects.requireNonNull(characterName)));
@@ -917,7 +917,7 @@ public interface World extends Checkable {
 		 * @return This WorldBuilder.
 		 * @throws NullPointerException if {@code character} is {@code null}.
 		 * @throws IllegalStateException if this builder has already built the
-		 * world provider, or the integrated player has already been set.
+		 * multiverse, or the integrated player has already been set.
 		 */
 		public WorldBuilder setPlayer(CharacterData character) {
 			checkState();
@@ -940,7 +940,7 @@ public interface World extends Checkable {
 		 * @return This WorldBuilder.
 		 * @throws NullPointerException if either argument is {@code null}.
 		 * @throws IllegalStateException if this builder has already built the
-		 * world provider, or the client has already been set, or the world
+		 * multiverse, or the client has already been set, or the world
 		 * has been set.
 		 */
 		public WorldBuilder setClient(GameClient client, WorldLoadHandle loadHandle) {
@@ -961,7 +961,7 @@ public interface World extends Checkable {
 		 * @return This WorldBuilder.
 		 * @throws NullPointerException if {@code profiler} is {@code null}.
 		 * @throws IllegalStateException if this builder has already built the
-		 * world provider, or the profiler has already been set.
+		 * multiverse, or the profiler has already been set.
 		 */
 		public WorldBuilder setProfiler(Profiler profiler) {
 			checkState();
@@ -972,7 +972,7 @@ public interface World extends Checkable {
 		}
 		
 		/**
-		 * Builds a HostProvider, and optionally, if an integrated player has
+		 * Builds a HostMultiverse, and optionally, if an integrated player has
 		 * been set, that player's PlayerData, entity, and initial world.
 		 * 
 		 * @throws IllegalStateException if the world has already been built,
@@ -983,7 +983,7 @@ public interface World extends Checkable {
 		}
 		
 		/**
-		 * Builds a ClientProvider, and the integrated player's entity and
+		 * Builds a ClientMultiverse, and the integrated player's entity and
 		 * initial world.
 		 * 
 		 * @throws IllegalStateException if the world has already been built,
@@ -1015,38 +1015,33 @@ public interface World extends Checkable {
 			
 			final TaskTracker tracker = new TaskTracker("Loading", buildHost ? 4 : 5);
 			
-			Callable<WorldBundle> callable = new Callable<WorldBundle>() {
-				@Override
-				public WorldBundle call() throws Exception {
-					try {
-						tracker.next("Loading player data");
-						if(integratedPlayer != null) // host or client
-							integratedPlayer.load();
-						tracker.next("Constructing world");
-						
-						if(buildHost) {
-							worldInfo.load();
-							HostProvider provider = new HostProvider(worldInfo, profiler);
-							PlayerBundle player = provider.addPlayer(integratedPlayer, true);
-							HostWorld starterDim = player.world;
-							tracker.next("Loading dimension " + starterDim.getDimensionName());
-							while(!starterDim.isLoaded())
-								Thread.sleep(10L);
-							tracker.next("All is done!");
-							tracker.setCompleted();
-							return new WorldBundle(provider, starterDim,
-									player.playerEntity, player.playerData);
-						} else {
-							return new WorldBundle(null, null, null, null);
-						}
-					} catch(Throwable t) {
-						Log.get().postSevere("Shit", t);
-						return null;
+			task = new WorldFuture(() -> {
+				try {
+					tracker.next("Loading player data");
+					if(integratedPlayer != null) // host or client
+						integratedPlayer.load();
+					tracker.next("Constructing world");
+					
+					if(buildHost) {
+						worldInfo.load();
+						HostMultiverse multi = new HostMultiverse(worldInfo, profiler);
+						PlayerBundle player = multi.addPlayer(integratedPlayer, true);
+						HostWorld starterDim = player.world;
+						tracker.next("Loading dimension " + starterDim.getDimensionName());
+						while(!starterDim.isLoaded())
+							Thread.sleep(10L);
+						tracker.next("All is done!");
+						tracker.setCompleted();
+						return new WorldBundle(multi, starterDim,
+								player.playerEntity, player.playerData);
+					} else {
+						return new WorldBundle(null, null, null, null);
 					}
+				} catch(Throwable t) {
+					Log.get().postSevere("Shit", t);
+					return null;
 				}
-			};
-			
-			task = new WorldFuture(callable, tracker);
+			}, tracker);
 			builderThread = new Thread(task);
 			builderThread.setName("WorldBuilderThread");
 			builderThread.run();
@@ -1163,10 +1158,10 @@ public interface World extends Checkable {
 	 */
 	public static class WorldBundle {
 		
-		/** The world provider. This should be cast to a {@link HostProvider}
-		 * if a host was built, or a {@link ClientProvider} if a client was
+		/** The multiverse. This should be cast to a {@link HostMultiverse}
+		 * if a host was built, or a {@link ClientMultiverse} if a client was
 		 * built. */
-		public final WorldProvider<?> provider;
+		public final Multiverse<?> multiverse;
 		/** The world in which the integrated player has been placed. This
 		 * should be cast to a {@link HostWorld} if a host was built, and
 		 * to a {@link ClientWorld} if a client was built. This is {@code null}
@@ -1180,9 +1175,9 @@ public interface World extends Checkable {
 		 * built with an integrated player specified. */
 		public final PlayerData playerData;
 		
-		protected WorldBundle(WorldProvider<?> provider, AbstractWorld world,
+		protected WorldBundle(Multiverse<?> multiverse, AbstractWorld world,
 				EntityMob playerEntity, PlayerData playerData) {
-			this.provider = provider;
+			this.multiverse = multiverse;
 			this.world = world;
 			this.playerEntity = playerEntity;
 			this.playerData = playerData;

@@ -1,4 +1,4 @@
-package com.stabilise.world.provider;
+package com.stabilise.world.multiverse;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ import com.stabilise.world.dimension.Dimension;
  *     integrated player who does not require a connection.
  * </ul>
  */
-public class HostProvider extends WorldProvider<HostWorld> {
+public class HostMultiverse extends Multiverse<HostWorld> {
 	
 	/** Dimensions should treat this as read-only. */
 	public final WorldInfo info;
@@ -49,7 +49,7 @@ public class HostProvider extends WorldProvider<HostWorld> {
 	 * 
 	 * @throws NullPointerException if {@code info} is {@code null}.
 	 */
-	public HostProvider(WorldInfo info, Profiler profiler) {
+	public HostMultiverse(WorldInfo info, Profiler profiler) {
 		super(profiler);
 		this.info = Objects.requireNonNull(info);
 	}

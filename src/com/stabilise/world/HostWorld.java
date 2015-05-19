@@ -21,8 +21,9 @@ import com.stabilise.util.maths.AbstractPoint;
 import com.stabilise.util.maths.MutablePoint;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.provider.HostProvider.PlayerData;
-import com.stabilise.world.provider.WorldProvider;
+import com.stabilise.world.loader.WorldLoader.DimensionLoader;
+import com.stabilise.world.multiverse.Multiverse;
+import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -39,10 +40,13 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  */
 public class HostWorld extends AbstractWorld {
 	
-	/** The world generator. */
-	public final WorldGenerator generator;
-	/** The region cache. */
+	/** This world's region cache. */
 	public final RegionCache regionCache;
+	
+	/** The world loader. */
+	private final DimensionLoader loader;
+	/** The world generator. */
+	private final WorldGenerator generator;
 	
 	// VERY IMPORTANT IMPLEMENTATION DETAILS:
 	// Empirical testing has revealed that the table size for region maps in
@@ -58,7 +62,7 @@ public class HostWorld extends AbstractWorld {
 	/** Dummy key for {@link #regions} whose mutability may be abused for
 	 * reusability ONLY on the main thread. */
 	@Unguarded
-	private final MutablePoint dummyLoc = Region.createMutableLoc(0,0);
+	private final MutablePoint dummyLoc = Region.createMutableLoc();
 	
 	/** Holds all player slice maps. */
 	private final List<SliceMap> sliceMaps = new LightLinkedList<>();
@@ -72,19 +76,26 @@ public class HostWorld extends AbstractWorld {
 	/**
 	 * Creates a new HostWorld.
 	 * 
-	 * @param provider This world's provider.
+	 * @param multiverse The multiverse..
 	 * @param dimension The dimension of this world.
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public HostWorld(WorldProvider<?> provider, Dimension dimension) {
-		super(provider, dimension);
+	public HostWorld(Multiverse<?> multiverse, Dimension dimension) {
+		super(multiverse, dimension);
 		
 		spawnSliceX = dimension.info.spawnSliceX;
 		spawnSliceY = dimension.info.spawnSliceY;
 		
-		regionCache = new RegionCache(this, provider.loader);
-		generator = dimension.createWorldGenerator(provider, this, regionCache);
+		// We instatiate the loader, generator and cache, and then safely hand
+		// them references to each other as required.
+		loader = multiverse.loader.loaderFor(this);
+		generator = dimension.generatorFor(multiverse, this);
+		regionCache = new RegionCache(this);
+		
+		loader.prepare(generator);
+		generator.prepare(loader, regionCache);
+		regionCache.prepare(loader);
 	}
 	
 	@Override
@@ -265,7 +276,7 @@ public class HostWorld extends AbstractWorld {
 		
 		numRegions.getAndIncrement();
 		
-		provider.loader.loadRegion(this, r, true);
+		loader.loadRegion(r, true);
 		
 		return r;
 	}
@@ -298,7 +309,7 @@ public class HostWorld extends AbstractWorld {
 		
 		// Finally, we submit the region to the cache and let it manage saving
 		// and then unloading.
-		regionCache.doUnload(r);
+		regionCache.saveRegion(r);
 	}
 	
 	/**
@@ -307,7 +318,7 @@ public class HostWorld extends AbstractWorld {
 	 * @param r The region to save.
 	 */
 	public void saveRegion(Region r) {
-		provider.loader.saveRegion(this, r, null);
+		loader.saveRegion(r, null);
 	}
 	
 	/**
@@ -463,10 +474,27 @@ public class HostWorld extends AbstractWorld {
 	 */
 	@Override
 	public void save() {
+		save(false);
+	}
+	
+	/**
+	 * Saves this world.
+	 * 
+	 * @param unload Whether or not every region should be unloaded as well as
+	 * saved.
+	 * 
+	 * @throws RuntimeException if an I/O error occurred while saving.
+	 */
+	private void save(boolean unload) {
 		log.postInfo("Saving dimension...");
 		
-		for(Region r : regions.values())
-			saveRegion(r);
+		if(unload) // just in case
+			regionCache.uncacheAll();
+		
+		for(Region r : regions.values()) {
+			if(unload) regionCache.saveRegion(r);
+			else saveRegion(r);
+		}
 		
 		try {
 			dimension.saveData();
@@ -484,31 +512,16 @@ public class HostWorld extends AbstractWorld {
 	 */
 	@Override
 	public void close() {
-		save();
+		loader.shutdown();
+		save(true);
 		generator.shutdown();
 	}
 	
 	@Override
 	public void blockUntilClosed() {
-		while(!allRegionsSaved()) {
-			try {
-				Thread.sleep(20L);
-			} catch(InterruptedException ignored) {
-				log.postWarning("Interrupted while blocking until world is closed");
-			}
-		}
+		regionCache.waitUntilDone();
 		
 		log.postDebug(stats.toString());
-	}
-	
-	private boolean allRegionsSaved() {
-		/*
-		for(Region r : regions.values()) {
-			if(r.pendingSave || r.saving)
-				return false;
-		}
-		*/
-		return true;
 	}
 	
 	@Override

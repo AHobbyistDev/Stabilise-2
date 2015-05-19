@@ -17,7 +17,7 @@ import com.stabilise.util.concurrent.TrackableFuture;
 import com.stabilise.world.ClientWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.World.WorldBundle;
-import com.stabilise.world.provider.ClientProvider;
+import com.stabilise.world.multiverse.ClientMultiverse;
 
 
 public class GameClient extends Client implements IClientHandshake, IClientLogin {
@@ -30,7 +30,7 @@ public class GameClient extends Client implements IClientHandshake, IClientLogin
 	 * false indicates the server is outdated. */
 	private boolean weAreOutdated = false;
 	
-	private ClientProvider provider;
+	private ClientMultiverse provider;
 	private ClientWorld world;
 	private CharacterData player;
 	

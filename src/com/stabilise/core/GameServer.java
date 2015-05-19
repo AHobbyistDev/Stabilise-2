@@ -16,11 +16,11 @@ import com.stabilise.network.protocol.handshake.IServerHandshake;
 import com.stabilise.network.protocol.handshake.S000VersionInfo;
 import com.stabilise.network.protocol.login.C000Login;
 import com.stabilise.network.protocol.login.IServerLogin;
-import com.stabilise.world.provider.HostProvider;
+import com.stabilise.world.multiverse.HostMultiverse;
 
 public class GameServer extends Server implements IServerHandshake, IServerLogin {
 	
-	public final HostProvider provider;
+	public final HostMultiverse provider;
 	private final int maxPlayers;
 	
 	
@@ -34,7 +34,7 @@ public class GameServer extends Server implements IServerHandshake, IServerLogin
 	 * @throws NullPointerException if {@code world} is {@code null}.
 	 * @throws IllegalArgumentException if {@code maxPlayers < 1}.
 	 */
-	public GameServer(HostProvider world, int maxPlayers) {
+	public GameServer(HostMultiverse world, int maxPlayers) {
 		super(Constants.TICKS_PER_SECOND, (s) -> {
 			return new ServerTCPConnection(s);
 		});

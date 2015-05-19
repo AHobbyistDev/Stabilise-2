@@ -1,4 +1,4 @@
-package com.stabilise.world.provider;
+package com.stabilise.world.multiverse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +34,7 @@ import com.stabilise.world.loader.WorldLoader;
  * have AbstractWorld, HostWorld etc. instead of AbstractDimension,
  * HostDimension) for both legacy and aesthetic purposes.
  */
-public abstract class WorldProvider<W extends AbstractWorld> {
+public abstract class Multiverse<W extends AbstractWorld> {
 	
 	/*
 	 * TYPES OF WORLDPROVIDER
@@ -100,7 +100,7 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	 * @param profiler The profiler to use to profile this world provider and
 	 * its worlds. If {@code null}, a default disabled profiler is instead set.
 	 */
-	public WorldProvider(Profiler profiler) {
+	public Multiverse(Profiler profiler) {
 		this.profiler = profiler != null
 				? profiler
 				: new Profiler(false, "root", false);
@@ -217,7 +217,7 @@ public abstract class WorldProvider<W extends AbstractWorld> {
 	 * @throws RuntimeException if an I/O error occurred while saving.
 	 */
 	public void close() {
-		loader.shutdown();
+		//loader.shutdown();
 		
 		for(AbstractWorld dim : dimensions.values())
 			dim.close();

@@ -1,7 +1,7 @@
 package com.stabilise.world.structure;
 
-import java.util.Objects;
-
+import com.stabilise.util.collect.DuplicatePolicy;
+import com.stabilise.util.collect.InstantiationRegistry;
 import com.stabilise.world.Region;
 import com.stabilise.world.RegionCache;
 
@@ -14,24 +14,22 @@ import com.stabilise.world.RegionCache;
  */
 public class Structure {
 	
-	/** The schematic's name. */
-	public String name = "";
+	private static final InstantiationRegistry<Structure> STRUCTURES =
+			new InstantiationRegistry<>(8, DuplicatePolicy.THROW_EXCEPTION);
 	
+	static {
+		STRUCTURES.register(0, SchematicHouse.class);
+	}
+	
+	public static Structure getStructure(int id) {
+		return STRUCTURES.instantiate(id);
+	}
 	
 	/**
 	 * Creates a new empty schematic.
 	 */
 	public Structure() {
 		// le nothing
-	}
-	
-	/**
-	 * Creates a new schematic.
-	 * 
-	 * @throws NullPointerException if {@code name} is {@code null}.
-	 */
-	public Structure(String name) {
-		this.name = Objects.requireNonNull(name);
 	}
 	
 	/**
@@ -45,14 +43,72 @@ public class Structure {
 	 * region's neighbours.
 	 */
 	public void add(RegionCache regions, Region r,
-			int offsetX, int offsetY, boolean addToNeighbours) {
+			int x, int y, long seed, boolean addToNeighbours) {
+		StructureBuilder builder = new StructureBuilder(
+				this,
+				regions, r,
+				x, y,
+				seed,
+				addToNeighbours
+		);
+		//builder.start();
+		build(builder);
+		//builder.end();
+	}
+	
+	protected void build(StructureBuilder builder) {
 		
-		
+	}
+	
+	protected int originX() {
+		return 0;
+	}
+	
+	protected int originY() {
+		return 0;
+	}
+	
+	public int id() {
+		return STRUCTURES.getID(getClass());
 	}
 	
 	@Override
 	public String toString() {
-		return "Schematic[" + name + "]";
+		return "Schematic[" + /*name +*/ "]";
+	}
+	
+	protected static class StructureBuilder {
+		
+		private final Structure structure;
+		private final RegionCache cache;
+		private final Region r;
+		private final int x, y;
+		private final int ox, oy;
+		private final long seed;
+		private final boolean progenitor;
+		
+		private StructureBuilder(Structure structure, RegionCache cache,
+				Region r, int x, int y, long seed, boolean progenitor) {
+			this.structure = structure;
+			this.cache = cache;
+			this.r = r;
+			this.x = x;
+			this.y = y;
+			this.seed = seed;
+			this.progenitor = progenitor;
+			
+			ox = structure.originX();
+			oy = structure.originY();
+		}
+		
+		public void fillRect(int x, int y, int width, int height, int id) {
+			
+		}
+		
+		public void fill(int x, int y, int[][] template) {
+			
+		}
+		
 	}
 	
 }

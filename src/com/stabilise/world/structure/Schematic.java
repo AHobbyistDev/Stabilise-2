@@ -1,10 +1,7 @@
 package com.stabilise.world.structure;
 
-import com.stabilise.util.ArrayUtil;
-
-public class Schematic extends Structure {
+public abstract class Schematic extends Structure {
 	
-	public int[][] tiles;
 	public int x, y;
 	public int width, height;
 	
@@ -13,31 +10,7 @@ public class Schematic extends Structure {
 		
 	}
 	
-	public Schematic(String name) {
-		super(name);
-	}
-	
-	public Schematic(String name, int[][] tiles, int x, int y) {
-		this(name);
-		this.tiles = tiles;
-		this.x = x;
-		this.y = y;
-	}
-	
-	/**
-	 * Gets the ID of the tile at the specified coordinates.
-	 * 
-	 * @param x The x-coordinate of the tile, in tile-lengths.
-	 * @param y The y-coordinate of the tile, in tile-lengths.
-	 * 
-	 * @return The ID of the tile at the specified coordinates.
-	 * @throws NullPointerException if the tiles haven't been set.
-	 * @throws ArrayIndexOutOfBoundsException if the specified tile
-	 * coordinates are out of bounds.
-	 */
-	public int getTileAt(int x, int y) {
-		return tiles[y][x];
-	}
+	protected abstract int[][] template();
 	
 	/**
 	 * Gets the schematic's file.
@@ -122,7 +95,8 @@ public class Schematic extends Structure {
 	}
 	*/
 	
-	public static final Schematic TREE_1 = new Schematic("tree_1", ArrayUtil.flip2DIntArray(new int[][] {
+	/*
+	public static final Schematic TREE_1 = new Schematic(ArrayUtil.flip2DIntArray(new int[][] {
 			{ -1,-1, 5, 5, 5,-1,-1 },
 			{ -1, 5, 5, 5, 5, 5,-1 },
 			{  5, 5, 5, 4, 5, 5, 5 },
@@ -133,5 +107,6 @@ public class Schematic extends Structure {
 			{ -1,-1,-1, 4,-1,-1,-1 },
 			{ -1,-1,-1, 2,-1,-1,-1 },
 	}), 3, 0);
+	*/
 	
 }

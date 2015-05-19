@@ -404,15 +404,15 @@ public abstract class Task implements Runnable {
 	 * 
 	 * <pre>
 	 * synchronized(o) {
-	 *     task.run();
+	 *     if(task != null) task.run();
 	 *     o.notifyAll();
 	 * }</pre>
 	 * 
-	 * @throws NullPointerException if either argument is {@code null}.
+	 * @throws NullPointerException if {@code o} is {@code null}.
 	 */
 	public static void doThenNotify(Object o, Runnable task) {
 		synchronized(o) {
-			task.run();
+			if(task != null) task.run();
 			o.notifyAll();
 		}
 	}

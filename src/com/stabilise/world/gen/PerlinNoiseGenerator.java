@@ -11,9 +11,8 @@ import com.stabilise.util.maths.PerlinNoise1D;
 import com.stabilise.util.maths.SimplexNoise;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
-import com.stabilise.world.RegionCache;
 import com.stabilise.world.Slice;
-import com.stabilise.world.provider.WorldProvider;
+import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.tile.tileentity.TileEntityChest;
 
 import static com.stabilise.world.Region.REGION_SIZE;
@@ -28,12 +27,11 @@ public class PerlinNoiseGenerator extends WorldGenerator {
 	/**
 	 * Creates a new PerlinNoiseGenerator.
 	 * 
-	 * @param worldProv The world provider.
+	 * @param multiverse The world provider.
 	 * @param world The world.
 	 */
-	public PerlinNoiseGenerator(WorldProvider<?> worldProv, HostWorld world,
-			RegionCache cache) {
-		super(worldProv, world, cache);
+	public PerlinNoiseGenerator(Multiverse<?> multiverse, HostWorld world) {
+		super(multiverse, world);
 	}
 	
 	@Override

@@ -3,14 +3,19 @@ package com.stabilise.world;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import com.stabilise.util.Log;
 import com.stabilise.util.annotation.GuardedBy;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.maths.AbstractPoint;
 import com.stabilise.util.maths.MutablePoint;
 import com.stabilise.util.maths.Point;
-import com.stabilise.world.loader.WorldLoader;
+import com.stabilise.world.loader.WorldLoader.DimensionLoader;
 
 /**
  * Provides a cache implementation for regions. Every {@link HostWorld} owns a
@@ -37,8 +42,11 @@ import com.stabilise.world.loader.WorldLoader;
  */
 public class RegionCache {
 	
+	/** Wait time in seconds for {@link #waitUntilDone()}. */
+	private static final int WAIT_TIME = 5;
+	
 	private final HostWorld world;
-	private final WorldLoader loader;
+	private DimensionLoader loader = null;
 	
 	/** The map of cached regions. Maps region.loc -> region. */
 	private final ConcurrentHashMap<AbstractPoint, CachedRegion> regions =
@@ -51,7 +59,7 @@ public class RegionCache {
 	/** A guarded MutablePoint to use for {@link
 	 * HostWorld#getRegionAt(AbstractPoint)}. */
 	@GuardedBy("locks")
-	private final MutablePoint loc = Region.createMutableLoc(0, 0);
+	private final MutablePoint loc = Region.createMutableLoc();
 	
 	/** Regions which have been cached by the current worker thread. */
 	// Note: Sometime in the future it might be a good idea to switch from a
@@ -60,22 +68,41 @@ public class RegionCache {
 	private final ThreadLocal<List<Region>> localCachedRegions =
 			ThreadLocal.withInitial(() -> new LightLinkedList<>());
 	
+	// Lock and its associated Condition to wait on in waitUntilDone().
+	private final Lock doneLock = new ReentrantLock();
+	private final Condition emptyCondition = doneLock.newCondition();
+	
+	private final Log log;
+	
 	
 	/**
 	 * Creates a new region cache.
 	 * 
 	 * @param world The world to cache regions for.
-	 * @param loader The world's WorldLoader.
 	 * 
 	 * @throws NullPointerException if either argument is {@code null}.
 	 */
-	public RegionCache(HostWorld world, WorldLoader loader) {
+	public RegionCache(HostWorld world) {
 		this.world = Objects.requireNonNull(world);
-		this.loader = Objects.requireNonNull(loader);
 		
 		locks = new Object[LOCKS];
 		for(int i = 0; i < LOCKS; i++)
 			locks[i] = new Object();
+		
+		log = Log.getAgent(world.getDimensionName() + "RegionCache");
+	}
+	
+	/**
+	 * Prepares this WorldGenerator by providing it with a reference to the
+	 * world's loader.
+	 * 
+	 * @throws IllegalStateException if this cache has already been prepared.
+	 * @throws NullPointerException if loader is null.
+	 */
+	public void prepare(DimensionLoader loader) {
+		if(this.loader != null)
+			throw new IllegalStateException("Loader already set");
+		this.loader = Objects.requireNonNull(loader);
 	}
 	
 	/**
@@ -133,7 +160,7 @@ public class RegionCache {
 		
 		// We need the region to be loaded such that when we save it we don't
 		// lose any old data.
-		loader.loadRegion(world, regionHandle.region, false);
+		loader.loadRegion(regionHandle.region, false);
 		
 		return regionHandle.region;
 	}
@@ -162,8 +189,6 @@ public class RegionCache {
 	 * @param r The region to uncache, as returned by {@link #cache(int, int)}.
 	 * 
 	 * @throws NullPointerException if {@code region} is {@code null}.
-	 * @throws IllegalArgumentException if the specified region is not
-	 * currently cached.
 	 */
 	@UserThread("Any")
 	private void uncache(Region r) {
@@ -177,32 +202,43 @@ public class RegionCache {
 		synchronized(regions) {
 			CachedRegion cacheHandle = regions.get(r.loc);
 			if(cacheHandle == null)
-				throw new IllegalArgumentException(r + " is not in the cache!");
+				throw new AssertionError(r + " is not in the cache?");
 			if(cacheHandle.removeMarking())
-				loader.saveRegion(world, r, cacheHandle);
+				loader.saveRegion(r, cacheHandle);
 		}
 	}
 	
 	/**
-	 * Finalises the uncaching of a cached region. This is invoked by the
-	 * WorldLoader once it has finished saving a region.
+	 * Finalises the uncaching of a cached region. This is invoked by {@link
+	 * CachedRegion#dispose()}, which is invoked by the WorldLoader once it
+	 * finishes saving a region.
 	 * 
-	 * @param r The handle to the cached region. If this is {@code null} this
-	 * method does nothing.
+	 * @param r The handle to the cached region.
 	 */
 	@UserThread("WorldLoaderThread")
-	public void finaliseUncaching(CachedRegion r) {
-		if(r == null)
-			return;
+	private void finaliseUncaching(CachedRegion r) {
 		// Implementation note: To avoid a race-condition with
 		// HostWorld.loadRegion we'd also want to synchronise on a lock
 		// returned by getLock() - otherwise the HostWorld could get a region
 		// from get(), only to have us suddenly remove it. We don't care if
 		// this happens since it doesn't have any effect.
+		boolean removed = false;
 		synchronized(regions) {
 			// Remove the region unless it has been re-cached.
-			if(r.tryFinalise())
+			if(r.tryFinalise()) {
 				regions.remove(r.region.loc);
+				removed = true;
+			}
+		}
+		
+		// We notify any thread which may be waiting in waitUntilDone().
+		if(removed && regions.isEmpty()) {
+			try {
+				doneLock.lock();
+				emptyCondition.signalAll();
+			} finally {
+				doneLock.unlock();
+			}
 		}
 	}
 	
@@ -253,8 +289,7 @@ public class RegionCache {
 	}
 	
 	/**
-	 * Performs the function of unloading a region. This is done through the
-	 * following steps:
+	 * Safely saves a region. This is done through the following steps:
 	 * 
 	 * <ul>
 	 * <li>Store the region in this cache.
@@ -267,7 +302,7 @@ public class RegionCache {
 	 * @throws NullPointerException if {@code region} is {@code null}.
 	 */
 	@UserThread("MainThread")
-	public void doUnload(Region region) {
+	public void saveRegion(Region region) {
 		// We pretty much dupe the functionality of cache() and uncache() here.
 		
 		// Synchronised to make the put-if-absent atomic
@@ -283,7 +318,40 @@ public class RegionCache {
 			// Stake our claim, and then swiftly remove it.
 			handle.mark();
 			if(handle.removeMarking())
-				loader.saveRegion(world, region, handle);
+				loader.saveRegion(region, handle);
+		}
+	}
+	
+	/**
+	 * Blocks the current thread until all regions in the cache have finished
+	 * saving.
+	 */
+	public void waitUntilDone() {
+		try {
+			doneLock.lock();
+			
+			if(regions.isEmpty())
+				return;
+			
+			// We only wait for a certain number of seconds, since we shouldn't
+			// risk deadlock if some bug causes some regions to not be managed
+			// properly. Instead we'l just complain about it to the log.
+			// TODO: Instead, we could perhaps take charge of unloading them
+			// ourselves?
+			if(!emptyCondition.await(WAIT_TIME, TimeUnit.SECONDS)) {
+				StringBuilder sb = new StringBuilder();
+				sb.append("Regions too long to finish saving! "
+						+ "Here are our offenders:");
+				for(CachedRegion c : regions.values()) {
+					sb.append("\n    > ");
+					sb.append(c.region.toStringDebug());
+				}
+				log.postWarning(sb.toString());
+			}
+		} catch(InterruptedException e) {
+			log.postWarning("Interrupted while waiting to finish.");
+		} finally {
+			doneLock.unlock();
 		}
 	}
 	
@@ -297,7 +365,7 @@ public class RegionCache {
 	 * <p>All methods of this class should only be invoked while the monitor
 	 * lock on {@link RegionCache#regions} is held.
 	 */
-	public static class CachedRegion {
+	public class CachedRegion {
 		
 		/** The region. */
 		private final Region region;
@@ -348,6 +416,15 @@ public class RegionCache {
 		@GuardedBy("RegionCache.regions")
 		private boolean tryFinalise() {
 			return --timesCached == 0;
+		}
+		
+		/**
+		 * Disposes this cached region. This is invoked by the WorldLoader once
+		 * it has finished saving a region.
+		 */
+		@UserThread("WorldLoaderThread")
+		public void dispose() {
+			finaliseUncaching(this);
 		}
 		
 	}
