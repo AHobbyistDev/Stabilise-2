@@ -2,8 +2,8 @@ package com.stabilise.core.state;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.stabilise.core.Application;
 import com.stabilise.core.Game;
+import com.stabilise.core.app.Application;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.World.WorldBundle;

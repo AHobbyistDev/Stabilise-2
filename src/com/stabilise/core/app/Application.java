@@ -1,5 +1,6 @@
-package com.stabilise.core;
+package com.stabilise.core.app;
 
+import java.util.Objects;
 import java.util.Random;
 
 import com.badlogic.gdx.ApplicationListener;
@@ -76,6 +77,10 @@ public abstract class Application {
 	
 	/** The application's state. */
 	private State state;
+	private State newState = null;
+	
+	/** The event bus. */
+	private final EventBus eventBus = new EventBus();
 	
 	/** {@code true} if the application has been shut down. */
 	private boolean stopped = false;
@@ -196,6 +201,13 @@ public abstract class Application {
 		}
 	}
 	
+	private void update() {
+		tick();
+		eventBus.update();
+		state.update();
+		doSetState();
+	}
+	
 	/**
 	 * Executes an update tick. This method is invoked a number of times per
 	 * second equivalent to {@link #ticksPerSecond} specified in the
@@ -309,8 +321,9 @@ public abstract class Application {
 	}
 	
 	/**
-	 * Sets the application's state. This method performs the following
-	 * operations in order:
+	 * Sets the application's state. After the current (or next) {@link
+	 * State#update() state update}, the following operations will be performed
+	 * in order:
 	 * 
 	 * <ul>
 	 * <li>{@link State#predispose() predispose()} is invoked on the old state.
@@ -322,18 +335,26 @@ public abstract class Application {
 	 * 
 	 * @param state The application's new state.
 	 * 
+	 * @throws IllegalStateException if a new state is already waiting to be
+	 * set.
 	 * @throws NullPointerException if {@code state} is {@code null}.
 	 */
 	public final void setState(State state) {
-		if(stopped)
+		if(newState != null)
+			throw new IllegalStateException("New state already set!");
+		newState = Objects.requireNonNull(state);
+	}
+	
+	private void doSetState() {
+		if(stopped || newState == null)
 			return;
-		if(state == null)
-			throw new NullPointerException("state is null!");
-		this.state.predispose();
-		state.start();
-		state.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		this.state.dispose();
-		this.state = state;
+		state.predispose();
+		eventBus.clear(true); // clear state-local events
+		newState.start();
+		newState.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		state.dispose();
+		state = newState;
+		newState = null;
 	}
 	
 	/**
@@ -364,6 +385,13 @@ public abstract class Application {
 		return listener;
 	}
 	
+	/**
+	 * Gets this Application's event bus.
+	 */
+	public final EventBus getEvents() {
+		return eventBus;
+	}
+	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------
@@ -376,6 +404,19 @@ public abstract class Application {
 	 */
 	public static Application get() {
 		return instance;
+	}
+	
+	/**
+	 * Gets the current Application's event bus.
+	 * 
+	 * @throws IllegalStateException if an Application is not running.
+	 */
+	public static EventBus events() {
+		try {
+			return instance.getEvents();
+		} catch(NullPointerException e) {
+			throw new IllegalStateException("An Application does not exist!");
+		}
 	}
 	
 	/**
@@ -408,8 +449,7 @@ public abstract class Application {
 		
 		@Override
 		protected void update() {
-			Application.this.tick();
-			Application.this.state.update();
+			Application.this.update();
 		}
 		
 		@Override

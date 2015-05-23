@@ -1,6 +1,6 @@
 package com.stabilise.util;
 
-import java.util.Iterator;
+import com.stabilise.util.collect.CollectionUtils;
 
 /**
  * Defines {@link #updateAndCheck()} and {@link #updateCheckables(Collection)},
@@ -24,10 +24,7 @@ public interface Checkable {
 	 * @param c The collection.
 	 */
 	public static <E extends Checkable> void updateCheckables(Iterable<E> c) {
-		Iterator<E> i = c.iterator();
-		while(i.hasNext())
-			if(i.next().updateAndCheck())
-				i.remove();
+		CollectionUtils.iterate(c, e -> e.updateAndCheck());
 	}
 	
 }

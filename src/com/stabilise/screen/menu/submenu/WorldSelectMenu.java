@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.stabilise.character.CharacterData;
-import com.stabilise.core.Application;
+import com.stabilise.core.app.Application;
 import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.EntityPlayer;
 import com.stabilise.screen.menu.SubMenuBasedMenu;

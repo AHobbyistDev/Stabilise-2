@@ -17,8 +17,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.stabilise.character.CharacterData;
-import com.stabilise.core.Application;
 import com.stabilise.core.Resources;
+import com.stabilise.core.app.Application;
 import com.stabilise.core.main.Stabilise;
 import com.stabilise.util.concurrent.TrackableFuture;
 import com.stabilise.world.World;
@@ -105,9 +105,7 @@ public class LoadingState implements State {
 		shapes.dispose();
 		
 		future.cancel(true);
-		try {
-			future.get();
-		} catch(Exception ignored) {}
+		future.waitUntilStopped();
 	}
 	
 	@Override

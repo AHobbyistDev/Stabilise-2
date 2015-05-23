@@ -1,6 +1,6 @@
 package com.stabilise.screen.menu.submenu;
 
-import com.stabilise.core.Application;
+import com.stabilise.core.app.Application;
 import com.stabilise.core.main.Stabilise;
 import com.stabilise.opengl.Font;
 import com.stabilise.opengl.FontStyle;

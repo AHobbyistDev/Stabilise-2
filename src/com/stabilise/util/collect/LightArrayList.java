@@ -8,9 +8,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.RandomAccess;
+import java.util.function.Predicate;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.Iterators;
 import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
@@ -104,7 +103,30 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 * elements. The returned iterator does not support {@code remove()}.
 	 */
 	public Iterator<E> iteratorNullsFiltered() {
-		return Iterators.filter(iterator(), Predicates.notNull());
+		return CollectionUtils.iteratorNullsFiltered(this);
+	}
+	
+	/**
+	 * Iterates over this list, removing any element for which the specified
+	 * predicate returns true.
+	 * 
+	 * @throws NullPointerException if pred is null.
+	 */
+	public void iterate(Predicate<E> pred) {
+		CollectionUtils.iterate(this, pred);
+	}
+	
+	/**
+	 * Iterates over this list, removing any element for which the specified
+	 * predicate returns true.
+	 * 
+	 * <p>This method is identical to {@link #iterate(Predicate)}, but is
+	 * provided as to make code more readable in some cases.
+	 * 
+	 * @throws NullPointerException if pred is null.
+	 */
+	public void remove(Predicate<E> pred) {
+		iterate(pred);
 	}
 	
 	@Override

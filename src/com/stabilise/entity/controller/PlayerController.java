@@ -2,9 +2,9 @@ package com.stabilise.entity.controller;
 
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Input.Keys;
-import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Game;
+import com.stabilise.core.app.Application;
 import com.stabilise.core.main.Stabilise;
 import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.EntityEnemy;

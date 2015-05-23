@@ -5,9 +5,9 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Game;
+import com.stabilise.core.app.Application;
 import com.stabilise.entity.EntityPerson;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.StringUtil;

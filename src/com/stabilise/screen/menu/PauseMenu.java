@@ -1,7 +1,7 @@
 package com.stabilise.screen.menu;
 
-import com.stabilise.core.Application;
 import com.stabilise.core.Game;
+import com.stabilise.core.app.Application;
 import com.stabilise.core.state.MainMenuState;
 import com.stabilise.opengl.Rectangle;
 import com.stabilise.screen.menu.submenu.HowToPlayMenu;

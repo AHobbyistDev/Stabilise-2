@@ -92,7 +92,6 @@ public abstract class WorldGenerator {
 	
 	private RegionCache regionCache;
 	
-	// Logging and statistics
 	protected final Log log = Log.getAgent("GENERATOR");
 	
 	
@@ -130,15 +129,8 @@ public abstract class WorldGenerator {
 	 * Instructs the WorldGenerator to generate the given region.
 	 * 
 	 * <p>Regions which are ineligible for generation will ignored. That is,
-	 * the given region will not be generated if:
-	 * 
-	 * <ul>
-	 * <li>it has not been loaded (i.e. {@link Region#loaded region.loaded}
-	 *     is {@code false}).
-	 * <li>it has already been generated (i.e. {@link
-	 *     Region#isGenerated() region.isGenerated()} is {@code true}).
-	 * <li>it is being generated concurrently.
-	 * </ul>
+	 * the given region will not be generated if {@link
+	 * Region#getGenerationPermit()} returns false.
 	 * 
 	 * @param region The region to generate.
 	 * 
@@ -155,12 +147,8 @@ public abstract class WorldGenerator {
 	
 	/**
 	 * Instructs the WorldGenerator to generate the given region on the current
-	 * thread. Unlike {@link #generate(Region)}, this method does not ignore
-	 * the instruction if the region is currently generating (though it will if
-	 * <tt>{@link Region#isGenerated() region.isGenerated()} == true</tt>);
-	 * this is because it is expected for this method to be invoked only by the
-	 * WorldLoader once it finishes loading a region, and hence it is
-	 * guaranteed that {@code region} is not currently being generated.
+	 * thread. This method does nothing if {@link Region#getGenerationPermit()}
+	 * returns false.
 	 * 
 	 * @param region The region to generate.
 	 * 

@@ -17,7 +17,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.stabilise.core.Application;
+import com.stabilise.core.app.Application;
 import com.stabilise.opengl.OrthoCamera;
 import com.stabilise.util.Profiler;
 
