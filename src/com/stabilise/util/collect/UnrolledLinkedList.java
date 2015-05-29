@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 import com.stabilise.util.annotation.NotThreadSafe;
 
@@ -208,7 +209,11 @@ public class UnrolledLinkedList<E> extends AbstractCollection<E> implements List
 		
 		@Override
 		public E next() {
-			return node.elems[i++];
+			try {
+				return node.elems[i++];
+			} catch(NullPointerException e) {
+				throw new NoSuchElementException();
+			}
 		}
 		
 	}

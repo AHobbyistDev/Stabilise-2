@@ -93,9 +93,11 @@ public class Array<E> implements Iterable<E> {
 	 * <p>This method is <b>not safe</b> if this Array was created using either
 	 * the {@link #Array()} or {@link #Array(int)} constructor.
 	 */
+	/*
 	public E[] get() {
 		return data;
 	}
+	*/
 	
 	/**
 	 * Gets the element at the specified index.

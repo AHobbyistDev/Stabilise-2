@@ -28,7 +28,7 @@ public class EventBus {
 			new SynchronizedClearingQueue<>();
 	
 	// Lock striping
-	private final int numLocks = 16; // must be a power of two
+	private static final int numLocks = 16; // must be a power of two
 	private final Object[] locks;
 	
 	
@@ -78,13 +78,10 @@ public class EventBus {
 	 */
 	public void addListener(Event event, Consumer<Event> handler,
 			boolean persistent, boolean singleUse) {
-		Listener listener = new Listener(handler, persistent, singleUse ? 1 : -1);
-		LightArrayList<Listener> listeners;
 		synchronized(lockFor(event)) {
-			listeners = handlers.get(event);
-			if(listeners != null)
-				listeners = new LightArrayList<Listener>(4, 1.5f);
-			listeners.add(listener);
+			handlers.computeIfAbsent(event, k -> new LightArrayList<>(4, 1.5f)).add(
+					new Listener(handler, persistent, singleUse ? 1 : -1)
+			);
 		}
 	}
 	
@@ -97,12 +94,16 @@ public class EventBus {
 	 * @throws NullPointerException if either argument is null.
 	 */
 	public void removeListener(Event e, final Consumer<Event> handler) {
+		Objects.requireNonNull(handler);
+		
 		LightArrayList<Listener> listeners;
 		synchronized(lockFor(e)) {
 			listeners = handlers.get(e);
 			if(listeners == null)
 				return;
 			listeners.remove(l -> l.handler.equals(handler));
+			if(listeners.size() == 0)
+				handlers.remove(e);
 		}
 	}
 	
@@ -155,7 +156,7 @@ public class EventBus {
 			handlers.clear();
 		CollectionUtils.iterate(handlers.entrySet(), e -> {
 			synchronized(lockFor(e.getKey())) {
-				e.getValue().iterate(l -> !l.persistent);
+				e.getValue().remove(l -> !l.persistent);
 				return e.getValue().isEmpty();
 			}
 		});
@@ -165,7 +166,7 @@ public class EventBus {
 		return locks[e.hashCode() & (numLocks-1)];
 	}
 	
-	private final class Listener {
+	private static final class Listener {
 		private final Consumer<Event> handler;
 		private final boolean persistent;
 		private int uses;

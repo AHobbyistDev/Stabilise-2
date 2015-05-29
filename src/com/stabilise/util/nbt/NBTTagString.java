@@ -44,7 +44,7 @@ public class NBTTagString extends NBTTag {
 	public NBTTagString(String tagName, String data) {
 		super(tagName);
 		this.data = data;
-		if(data == null || data == "")
+		if(data == null || data.equals(""))
 			throw new IllegalArgumentException("An NBT String may not be empty!");
 	}
 	

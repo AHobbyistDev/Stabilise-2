@@ -206,23 +206,24 @@ public class ConfigFile {
 	 */
 	public Object getTag(String name, Class<?> tagClass) {
 		if(tagClass == Boolean.class)
-			return new Boolean(getBoolean(name));
+			return Boolean.valueOf(getBoolean(name));
 		else if(tagClass == Byte.class)
-			return new Byte(getByte(name));
+			return Byte.valueOf(getByte(name));
 		else if(tagClass == Short.class)
-			return new Short(getShort(name));
+			return Short.valueOf(getShort(name));
 		else if(tagClass == Integer.class)
-			return new Integer(getInteger(name));
+			return Integer.valueOf(getInteger(name));
 		else if(tagClass == Long.class)
-			return new Long(getLong(name));
+			return Long.valueOf(getLong(name));
 		else if(tagClass == Float.class)
-			return new Float(getFloat(name));
+			return Float.valueOf(getFloat(name));
 		else if(tagClass == Double.class)
-			return new Double(getDouble(name));
+			return Double.valueOf(getDouble(name));
 		else if(tagClass == String.class)
 			return getString(name);
 		else
-			Log.get().postWarning("Invalid tag class \"" + tagClass.toString() + "\" for tag \"" + name + "\"!");
+			Log.get().postWarning("Invalid tag class \"" + tagClass.toString() +
+					"\" for tag \"" + name + "\"!");
 		return null;
 	}
 	

@@ -190,6 +190,12 @@ public class ItemStack {
 	}
 	
 	@Override
+	public int hashCode() {
+		assert false : "hashCode not designed";
+		return 1;
+	}
+	
+	@Override
 	public boolean equals(Object o) {
 		if(!(o instanceof ItemStack)) return false;
 		ItemStack i = (ItemStack)o;

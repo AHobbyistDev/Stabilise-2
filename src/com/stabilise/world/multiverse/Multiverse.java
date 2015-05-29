@@ -26,9 +26,9 @@ import com.stabilise.world.loader.WorldLoader;
  * world.<sup><font size=-1>1</font></sup>
  * 
  * <p>{@code 1.} The terminology is somewhat confusing here. From the user's
- * perspective, a <i>WorldProvider</i> is actually a <i>world</i>, and
+ * perspective, a <i>Multiverse</i> is actually a <i>world</i>, and
  * different <i>Worlds</i> (e.g. {@code HostWorld}, etc.) are
- * <i>dimensions</i> of that world/WorldProvider. We largely refer to
+ * <i>dimensions</i> of that world/Multiverse. We largely refer to
  * 'dimensions' as 'worlds' in the code (e.g. GameObjects have a {@code world}
  * member through which they interact with the dimension they are in, and we
  * have AbstractWorld, HostWorld etc. instead of AbstractDimension,
@@ -80,7 +80,7 @@ public abstract class Multiverse<W extends AbstractWorld> {
 	
 	/** Profile any world's operation with this. Never {@code null}. */
 	protected Profiler profiler;
-	protected final Log log = Log.getAgent("WorldProvider");
+	protected final Log log = Log.getAgent("Multiverse");
 	
 	// Integrated player stuff
 	/** {@code true} if we're providing for an integrated client. {@code false}
@@ -95,10 +95,10 @@ public abstract class Multiverse<W extends AbstractWorld> {
 	
 	
 	/**
-	 * Creates a new WorldProvider.
+	 * Creates a new Multiverse.
 	 * 
-	 * @param profiler The profiler to use to profile this world provider and
-	 * its worlds. If {@code null}, a default disabled profiler is instead set.
+	 * @param profiler The profiler to use to profile this multiverse and its
+	 * worlds. If {@code null}, a default disabled profiler is instead set.
 	 */
 	public Multiverse(Profiler profiler) {
 		this.profiler = profiler != null

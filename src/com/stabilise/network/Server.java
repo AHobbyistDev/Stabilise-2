@@ -116,7 +116,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	 * constructor: {@link #Server(int)}.
 	 */
 	public Server() {
-		this((s) -> { return new TCPConnection(s, true); });
+		this(s -> new TCPConnection(s, true));
 	}
 	
 	/**
@@ -128,7 +128,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	 * @throws IllegalArgumentException if {@code ticksPerSecond < 1}.
 	 */
 	public Server(int ticksPerSecond) {
-		this(ticksPerSecond, (s) -> { return new TCPConnection(s, true); });
+		this(ticksPerSecond, s -> new TCPConnection(s, true));
 	}
 	
 	/**
@@ -428,6 +428,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	private void addConnection(Socket socket) {
 		try {
 			TCPConnection con = clientFactory.create(socket);
+			con.open();
 			onClientConnect(con);
 			connections.add(con);
 			

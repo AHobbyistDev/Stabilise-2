@@ -296,7 +296,7 @@ public class Profiler {
 	 * {@link #getStackName() stack name} does not equal {@code stack}.
 	 */
 	public void verify(int level, String stack) {
-		if(isEnabled() && getStackLevel() != level && getStackName() != stack)
+		if(isEnabled() && getStackLevel() != level && !getStackName().equals(stack))
 			throw new IllegalStateException("Profiler stack is \"" + getStackName()
 					+ "\" (it should be \"" + stack + "\")");
 	}
@@ -426,7 +426,7 @@ public class Profiler {
 		private SectionData getData(String parentName, float localPercent, float totalPercent,
 				final long currentTime) {
 			// Make parentName function as absoluteName
-			parentName = parentName != "" ? parentName + "." + name : name;
+			parentName = !parentName.equals("") ? parentName + "." + name : name;
 			
 			// Imitating ArrayList functionality here
 			SectionData[] children = new SectionData[constituents.size() + 1];
@@ -557,9 +557,10 @@ public class Profiler {
 		
 		@Override
 		public int compareTo(SectionData s) {
-			if(localPercent > s.localPercent) return -1;
-			if(localPercent < s.localPercent) return 1;
-			return 0;
+			return Float.compare(s.localPercent, localPercent);
+			//if(localPercent > s.localPercent) return -1;
+			//if(localPercent < s.localPercent) return 1;
+			//return 0;
 		}
 		
 	}

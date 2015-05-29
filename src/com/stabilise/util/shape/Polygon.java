@@ -151,6 +151,12 @@ public class Polygon extends AbstractPolygon {
 	}
 	
 	@Override
+	public int hashCode() {
+		assert false : "hashCode not designed";
+		return -1;
+	}
+	
+	@Override
 	public boolean equals(Object o) {
 		if(!(o instanceof Polygon)) return false;
 		Polygon p = (Polygon)o;

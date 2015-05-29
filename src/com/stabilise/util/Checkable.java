@@ -24,7 +24,7 @@ public interface Checkable {
 	 * @param c The collection.
 	 */
 	public static <E extends Checkable> void updateCheckables(Iterable<E> c) {
-		CollectionUtils.iterate(c, e -> e.updateAndCheck());
+		CollectionUtils.iterate(c, Checkable::updateAndCheck);
 	}
 	
 }

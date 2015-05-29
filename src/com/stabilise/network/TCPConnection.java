@@ -177,7 +177,12 @@ public class TCPConnection {
 		
 		readThread = new TCPReadThread((server ? "ServerReader" : "ClientReader") + id);
 		writeThread = new TCPWriteThread((server ? "ServerWriter" : "ClientWriter") + id);
-		
+	}
+	
+	/**
+	 * Opens this connection.
+	 */
+	void open() {
 		state.set(STATE_ACTIVE);
 		
 		readThread.start();

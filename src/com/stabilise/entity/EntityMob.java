@@ -33,7 +33,9 @@ public abstract class EntityMob extends Entity {
 	public static enum StatePriority {
 		// For want of better names/identifiers
 		ORDINARY(0),		// An ordinary state from which a mob can do other stuff
-		OCCUPIED(1),		// A mob is considered 'occupied' if in a state with this priority and must wait for it to finish before being able to do other stuff
+		OCCUPIED(1),		// A mob is considered 'occupied' if in a state with
+							// this priority and must wait for it to finish before
+							// being able to do other stuff
 		UNOVERRIDEABLE(2);	// This state is un-overridable by any other
 		
 		/** The StatePriority's underlying integer value, for comparison
@@ -539,7 +541,8 @@ public abstract class EntityMob extends Entity {
 	 * considered locked in the state.
 	 */
 	public void setState(State state, boolean validatePriority, int stateLockDuration) {
-		if(this.state == state || (validatePriority && stateTicks < this.stateLockDuration && !state.priority.canOverride(this.state.priority)))
+		if(this.state == state || (validatePriority && stateTicks < this.stateLockDuration
+				&& !state.priority.canOverride(this.state.priority)))
 			return;
 		
 		this.state = state;

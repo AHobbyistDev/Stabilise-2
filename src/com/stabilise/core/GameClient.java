@@ -103,7 +103,7 @@ public class GameClient extends Client implements IClientHandshake, IClientLogin
 	
 	// LOGIN ------------------------------------------------------------------
 	
-	public class WorldLoadHandle {
+	public static class WorldLoadHandle {
 		public volatile boolean rejected = false;
 		public volatile String rejectReason = null;
 		

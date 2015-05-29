@@ -107,8 +107,6 @@ public class HostMultiverse extends Multiverse<HostWorld> {
 			return null;
 		players.putIfAbsent(player.hash, data);
 		HostWorld world = loadDimension(data.dimension);
-		if(world == null)
-			return null;
 		EntityMob playerEntity = world.addPlayer(data);
 		if(integrated) {
 			integratedClient = true;

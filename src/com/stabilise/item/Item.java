@@ -160,6 +160,12 @@ public class Item {
 	}
 	
 	@Override
+	public int hashCode() {
+		assert false : "hashCode not designed";
+		return -1;
+	}
+	
+	@Override
 	public boolean equals(Object o) {
 		return o == this;
 	}

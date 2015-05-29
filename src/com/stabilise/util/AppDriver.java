@@ -271,6 +271,7 @@ public abstract class AppDriver implements Runnable {
 	public void setFPS(int fps) {
 		if(fps < -1)
 			throw new IllegalArgumentException("fps < -1");
+		this.fps = fps;
 		nsPerFrame = fps == 0 ? 0 : 1000000000 / fps;
 	}
 	

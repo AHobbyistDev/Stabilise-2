@@ -146,7 +146,7 @@ public class Log {
 	 * @param tag The tag with which to prefix log entries.
 	 */
 	private Log(String tag) {
-		if(tag != null && tag != "")
+		if(tag != null && !tag.equals(""))
 			this.tag = "[" + tag + "] - "; // formerly tag.toUpperCase()
 		else
 			this.tag = "";
@@ -389,7 +389,7 @@ public class Log {
 				writer.newLine();
 			}
 			
-			if(prefixMessage != null && prefixMessage != "") {
+			if(prefixMessage != null && !prefixMessage.equals("")) {
 				writer.write(prefixMessage);
 				writer.newLine();
 				writer.newLine();

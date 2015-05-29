@@ -124,7 +124,7 @@ public class RegionCache {
 		
 		// If the region is locally cached by this thread, use it.
 		for(Region r : localRegions) {
-			if(r.isAt(x, y));
+			if(r.isAt(x, y))
 				return r;
 		}
 		

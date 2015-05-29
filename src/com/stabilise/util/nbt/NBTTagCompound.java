@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.stabilise.util.Log;
@@ -710,12 +711,12 @@ public class NBTTagCompound extends NBTTag {
 		String pre = prefix + "    ";
 		StringBuilder sb = new StringBuilder("[\n");
 		
-		for(String tagName : data.keySet()) {
+		for(Map.Entry<String, NBTTag> e : data.entrySet()) {
 			sb.append(pre);
 			sb.append("\"");
-			sb.append(tagName);
+			sb.append(e.getKey());
 			sb.append("\": ");
-			sb.append(data.get(tagName).toString(pre));
+			sb.append(e.getValue().toString(pre));
 			sb.append(",\n");
 		}
 		

@@ -29,57 +29,88 @@ public class EntityPerson extends EntityMob {
 	public static final int ATTACK_SIDE_GROUND_FRAME_2_BEGIN = 16;
 	public static final int ATTACK_SIDE_GROUND_FRAME_3_BEGIN = 20;
 	//public static final Rectangle ATTACK_SIDE_GROUND_FRAME_2_HITBOX;
-	public static final Rectangle ATTACK_SIDE_GROUND_HITBOX_1 = Shape.rotate(new Rectangle(0.53f, 1.11f, 1.82f, 0.18f), 0.099483f);//.precomputed();
-	public static final Rectangle ATTACK_SIDE_GROUND_HITBOX_1_FLIPPED = ATTACK_SIDE_GROUND_HITBOX_1.reflect();
-	public static final Rectangle ATTACK_SIDE_GROUND_HITBOX_2 = Shape.rotate(new Rectangle(-1.87f, 1.16f, 2.25f, 0.18f), 0.15708f);//.precomputed();
-	public static final Rectangle ATTACK_SIDE_GROUND_HITBOX_2_FLIPPED = ATTACK_SIDE_GROUND_HITBOX_2.reflect();
+	public static final Rectangle ATTACK_SIDE_GROUND_HITBOX_1 =
+			Shape.rotate(new Rectangle(0.53f, 1.11f, 1.82f, 0.18f), 0.099483f);//.precomputed();
+	public static final Rectangle ATTACK_SIDE_GROUND_HITBOX_1_FLIPPED =
+			ATTACK_SIDE_GROUND_HITBOX_1.reflect();
+	public static final Rectangle ATTACK_SIDE_GROUND_HITBOX_2 =
+			Shape.rotate(new Rectangle(-1.87f, 1.16f, 2.25f, 0.18f), 0.15708f);//.precomputed();
+	public static final Rectangle ATTACK_SIDE_GROUND_HITBOX_2_FLIPPED =
+			ATTACK_SIDE_GROUND_HITBOX_2.reflect();
 	public static final float ATTACK_SIDE_GROUND_FORCE = 3.2f;
 	
 	// Up attack (ground)
 	public static final int ATTACK_UP_GROUND_DURATION = 40;
 	public static final int ATTACK_UP_GROUND_FRAME_2_BEGIN = 16;
 	public static final AABB ATTACK_UP_GROUND_HITBOX = new AABB(-0.04f, 1.89f, 0.16f, 1.63f);
-	public static final AABB ATTACK_UP_GROUND_HITBOX_FLIPPED = ATTACK_UP_GROUND_HITBOX.reflect();
+	public static final AABB ATTACK_UP_GROUND_HITBOX_FLIPPED =
+			ATTACK_UP_GROUND_HITBOX.reflect();
 	public static final float ATTACK_UP_GROUND_FORCE = 1.1f;
 	public static final int ATTACK_UP_GROUND_HITBOX_DURATION = 14;
 	
 	// Down attack (ground)
 	public static final int ATTACK_DOWN_GROUND_DURATION = 20;
 	public static final int ATTACK_DOWN_GROUND_FRAME_2_BEGIN = 1;
-	public static final Rectangle ATTACK_DOWN_GROUND_HITBOX = Shape.rotate(new Rectangle(0.49f, 0.34f, 1.43f, 0.16f), -0.116937f);//.precomputed();
-	public static final Rectangle ATTACK_DOWN_GROUND_HITBOX_FLIPPED = ATTACK_DOWN_GROUND_HITBOX.reflect();
+	public static final Rectangle ATTACK_DOWN_GROUND_HITBOX =
+			Shape.rotate(new Rectangle(0.49f, 0.34f, 1.43f, 0.16f), -0.116937f);//.precomputed();
+	public static final Rectangle ATTACK_DOWN_GROUND_HITBOX_FLIPPED =
+			ATTACK_DOWN_GROUND_HITBOX.reflect();
 	public static final float ATTACK_DOWN_GROUND_FORCE = 1.2f;
 	
 	// Side attack (air)
 	public static final int ATTACK_SIDE_AIR_DURATION = 30;
 	public static final int ATTACK_SIDE_AIR_FRAME_2_BEGIN = 6;
-	public static final Polygon ATTACK_SIDE_AIR_HITBOX_1 = new Polygon(new Vec2(2.72f,1.29f), new Vec2(0.96f,0.98f), new Vec2(-0.45f,2.56f), new Vec2(1.29f,2.35f));
-	public static final Polygon ATTACK_SIDE_AIR_HITBOX_1_FLIPPED = ATTACK_SIDE_AIR_HITBOX_1.reflect();
+	public static final Polygon ATTACK_SIDE_AIR_HITBOX_1 =
+			new Polygon(new Vec2(2.72f,1.29f), new Vec2(0.96f,0.98f),
+					new Vec2(-0.45f,2.56f), new Vec2(1.29f,2.35f));
+	public static final Polygon ATTACK_SIDE_AIR_HITBOX_1_FLIPPED =
+			ATTACK_SIDE_AIR_HITBOX_1.reflect();
 	public static final int ATTACK_SIDE_AIR_FRAME_3_BEGIN = 8;
-	public static final Polygon ATTACK_SIDE_AIR_HITBOX_2 = new Polygon(new Vec2(2.72f,1.29f), new Vec2(1.44f,-0.41f), new Vec2(0.45f,0.45f), new Vec2(0.96f,0.98f));
-	public static final Polygon ATTACK_SIDE_AIR_HITBOX_2_FLIPPED = ATTACK_SIDE_AIR_HITBOX_2.reflect();
+	public static final Polygon ATTACK_SIDE_AIR_HITBOX_2 =
+			new Polygon(new Vec2(2.72f,1.29f), new Vec2(1.44f,-0.41f),
+					new Vec2(0.45f,0.45f), new Vec2(0.96f,0.98f));
+	public static final Polygon ATTACK_SIDE_AIR_HITBOX_2_FLIPPED =
+			ATTACK_SIDE_AIR_HITBOX_2.reflect();
 	
 	// Up attack (air)
 	public static final int ATTACK_UP_AIR_DURATION = 30;
 	public static final int ATTACK_UP_AIR_FRAME_2_BEGIN = 6;
-	public static final Polygon ATTACK_UP_AIR_HITBOX_1_1 = new Polygon(new Vec2(2.72f,1.51f), new Vec2(1.22f,-0.45f), new Vec2(0.8f,0.75f), new Vec2(0.89f,1.38f));
-	public static final Polygon ATTACK_UP_AIR_HITBOX_1_1_FLIPPED = ATTACK_UP_AIR_HITBOX_1_1.reflect();
-	public static final Polygon ATTACK_UP_AIR_HITBOX_1_2 = new Polygon(new Vec2(2.69f,1.95f), new Vec2(0.84f,1.49f), new Vec2(0.27f,2.05f), new Vec2(0.58f,3.33f));
-	public static final Polygon ATTACK_UP_AIR_HITBOX_1_2_FLIPPED = ATTACK_UP_AIR_HITBOX_1_2.reflect();
+	public static final Polygon ATTACK_UP_AIR_HITBOX_1_1 =
+			new Polygon(new Vec2(2.72f,1.51f), new Vec2(1.22f,-0.45f),
+					new Vec2(0.8f,0.75f), new Vec2(0.89f,1.38f));
+	public static final Polygon ATTACK_UP_AIR_HITBOX_1_1_FLIPPED =
+			ATTACK_UP_AIR_HITBOX_1_1.reflect();
+	public static final Polygon ATTACK_UP_AIR_HITBOX_1_2 =
+			new Polygon(new Vec2(2.69f,1.95f), new Vec2(0.84f,1.49f),
+					new Vec2(0.27f,2.05f), new Vec2(0.58f,3.33f));
+	public static final Polygon ATTACK_UP_AIR_HITBOX_1_2_FLIPPED =
+			ATTACK_UP_AIR_HITBOX_1_2.reflect();
 	public static final int ATTACK_UP_AIR_FRAME_3_BEGIN = 8;
-	public static final Polygon ATTACK_UP_AIR_HITBOX_2 = new Polygon(new Vec2(-0.8f,1.4f), new Vec2(-1.65f,2.4f), new Vec2(0.6f,3.35f), new Vec2(0.29f,2.04f));
-	public static final Polygon ATTACK_UP_AIR_HITBOX_2_FLIPPED = ATTACK_UP_AIR_HITBOX_2.reflect();
+	public static final Polygon ATTACK_UP_AIR_HITBOX_2 =
+			new Polygon(new Vec2(-0.8f,1.4f), new Vec2(-1.65f,2.4f),
+					new Vec2(0.6f,3.35f), new Vec2(0.29f,2.04f));
+	public static final Polygon ATTACK_UP_AIR_HITBOX_2_FLIPPED =
+			ATTACK_UP_AIR_HITBOX_2.reflect();
 	
 	// Down attack (air)
 	public static final int ATTACK_DOWN_AIR_DURATION = 30;
 	public static final int ATTACK_DOWN_AIR_FRAME_2_BEGIN = 6;
-	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_1 = new Polygon(new Vec2(0.78f,0.91f), new Vec2(0.0f,1.63f), new Vec2(1.91f,-0.15f), new Vec2(0.6f,0.65f));
-	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED = ATTACK_DOWN_AIR_HITBOX_1_1.reflect();
-	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_2 = new Polygon(new Vec2(0.6f,0.65f), new Vec2(1.91f,-0.15f), new Vec2(0.44f,-0.87f), new Vec2(0.25f,0.42f));
-	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_2_FLIPPED = ATTACK_DOWN_AIR_HITBOX_1_2.reflect();
+	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_1 =
+			new Polygon(new Vec2(0.78f,0.91f), new Vec2(0.0f,1.63f),
+					new Vec2(1.91f,-0.15f), new Vec2(0.6f,0.65f));
+	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED =
+			ATTACK_DOWN_AIR_HITBOX_1_1.reflect();
+	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_2 =
+			new Polygon(new Vec2(0.6f,0.65f), new Vec2(1.91f,-0.15f),
+					new Vec2(0.44f,-0.87f), new Vec2(0.25f,0.42f));
+	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_2_FLIPPED =
+			ATTACK_DOWN_AIR_HITBOX_1_2.reflect();
 	public static final int ATTACK_DOWN_AIR_FRAME_3_BEGIN = 8;
-	public static final Polygon ATTACK_DOWN_AIR_HITBOX_2 = new Polygon(new Vec2(0.25f,0.42f), new Vec2(0.44f,-0.87f), new Vec2(-1.47f,0.11f), new Vec2(-0.31f,0.69f));
-	public static final Polygon ATTACK_DOWN_AIR_HITBOX_2_FLIPPED = ATTACK_DOWN_AIR_HITBOX_2.reflect();
+	public static final Polygon ATTACK_DOWN_AIR_HITBOX_2 =
+			new Polygon(new Vec2(0.25f,0.42f), new Vec2(0.44f,-0.87f),
+					new Vec2(-1.47f,0.11f), new Vec2(-0.31f,0.69f));
+	public static final Polygon ATTACK_DOWN_AIR_HITBOX_2_FLIPPED =
+			ATTACK_DOWN_AIR_HITBOX_2.reflect();
 	
 	// Specials
 	
@@ -99,8 +130,10 @@ public class EntityPerson extends EntityMob {
 	public static final int SPECIAL_DOWN_GROUND_COST_MANA = 100;
 	public static final int SPECIAL_DOWN_GROUND_DURATION = 40;
 	public static final int SPECIAL_DOWN_GROUND_FRAME_2_BEGIN = 16;
-	public static final Polygon SPECIAL_DOWN_GROUND_HITBOX_1 = new Polygon(new Vec2(3f,0f), new Vec2(0f,0f), new Vec2(0f,2f), new Vec2(1.5f,2f));
-	public static final Polygon SPECIAL_DOWN_GROUND_HITBOX_2 = new Polygon(new Vec2(0f,0f), new Vec2(-3f,0f), new Vec2(-1.5f,2f), new Vec2(0f,2f));
+	public static final Polygon SPECIAL_DOWN_GROUND_HITBOX_1 =
+			new Polygon(new Vec2(3f,0f), new Vec2(0f,0f), new Vec2(0f,2f), new Vec2(1.5f,2f));
+	public static final Polygon SPECIAL_DOWN_GROUND_HITBOX_2 =
+			new Polygon(new Vec2(0f,0f), new Vec2(-3f,0f), new Vec2(-1.5f,2f), new Vec2(0f,2f));
 	
 	// Side special (air)
 	public static final int SPECIAL_SIDE_AIR_COST_MANA = 50;
@@ -212,14 +245,18 @@ public class EntityPerson extends EntityMob {
 			case ATTACK_SIDE_GROUND:
 				if(stateTicks == ATTACK_SIDE_GROUND_FRAME_2_BEGIN) {
 					damageDealt = world.getRnd().nextInt(16) + 5;
-					Hitbox h = new Hitbox(this, facingRight ? ATTACK_SIDE_GROUND_HITBOX_1 : ATTACK_SIDE_GROUND_HITBOX_1_FLIPPED, damageDealt);
+					Hitbox h = new Hitbox(this, facingRight
+							? ATTACK_SIDE_GROUND_HITBOX_1
+							: ATTACK_SIDE_GROUND_HITBOX_1_FLIPPED, damageDealt);
 					h.hits = -1;
 					h.force = ATTACK_SIDE_GROUND_FORCE;
 					h.fx = facingRight ? 1.0f : -1.0f;
 					//h.effect = new EffectFire(120);
 					world.addHitbox(h, x, y);
 				} else if(stateTicks == ATTACK_SIDE_GROUND_FRAME_3_BEGIN) {
-					Hitbox h = new Hitbox(this, facingRight ? ATTACK_SIDE_GROUND_HITBOX_2 : ATTACK_SIDE_GROUND_HITBOX_2_FLIPPED, damageDealt);
+					Hitbox h = new Hitbox(this, facingRight
+							? ATTACK_SIDE_GROUND_HITBOX_2
+							: ATTACK_SIDE_GROUND_HITBOX_2_FLIPPED, damageDealt);
 					h.hits = -1;
 					h.force = ATTACK_SIDE_GROUND_FORCE;
 					h.fx = facingRight ? -1.0f : 1.0f;
@@ -229,7 +266,10 @@ public class EntityPerson extends EntityMob {
 				break;
 			case ATTACK_UP_GROUND:
 				if(stateTicks == ATTACK_UP_GROUND_FRAME_2_BEGIN) {
-					Hitbox h = new Hitbox(this, facingRight ? ATTACK_UP_GROUND_HITBOX : ATTACK_UP_GROUND_HITBOX_FLIPPED, world.getRnd().nextInt(16) + 20);
+					Hitbox h = new Hitbox(this, facingRight
+							? ATTACK_UP_GROUND_HITBOX
+							: ATTACK_UP_GROUND_HITBOX_FLIPPED,
+							world.getRnd().nextInt(16) + 20);
 					h.hits = -1;
 					h.force = ATTACK_UP_GROUND_FORCE;
 					h.fy = 1.0f;
@@ -240,7 +280,10 @@ public class EntityPerson extends EntityMob {
 				break;
 			case ATTACK_DOWN_GROUND:
 				if(stateTicks == ATTACK_DOWN_GROUND_FRAME_2_BEGIN) {
-					Hitbox h = new Hitbox(this, facingRight ? ATTACK_DOWN_GROUND_HITBOX : ATTACK_DOWN_GROUND_HITBOX_FLIPPED, world.getRnd().nextInt(16) + 5);
+					Hitbox h = new Hitbox(this, facingRight
+							? ATTACK_DOWN_GROUND_HITBOX
+							: ATTACK_DOWN_GROUND_HITBOX_FLIPPED,
+							world.getRnd().nextInt(16) + 5);
 					h.hits = -1;
 					h.force = ATTACK_DOWN_GROUND_FORCE;
 					h.fx = facingRight ? 1.0f : -1.0f;
@@ -250,13 +293,17 @@ public class EntityPerson extends EntityMob {
 			case ATTACK_SIDE_AIR:
 				if(stateTicks == ATTACK_SIDE_AIR_FRAME_2_BEGIN) {
 					damageDealt = world.getRnd().nextInt(16) + 5;
-					Hitbox h = new Hitbox(this, facingRight ? ATTACK_SIDE_AIR_HITBOX_1 : ATTACK_SIDE_AIR_HITBOX_1_FLIPPED, damageDealt);
+					Hitbox h = new Hitbox(this, facingRight ?
+							ATTACK_SIDE_AIR_HITBOX_1
+							: ATTACK_SIDE_AIR_HITBOX_1_FLIPPED, damageDealt);
 					h.hits = -1;
 					h.force = 0.3f;
 					h.fx = facingRight ? 1.0f : -1.0f;
 					world.addHitbox(h, x, y);
 				} else if(stateTicks == ATTACK_SIDE_AIR_FRAME_3_BEGIN) {
-					Hitbox h = new Hitbox(this, facingRight ? ATTACK_SIDE_AIR_HITBOX_2 : ATTACK_SIDE_AIR_HITBOX_2_FLIPPED, damageDealt);
+					Hitbox h = new Hitbox(this, facingRight
+							? ATTACK_SIDE_AIR_HITBOX_2
+							: ATTACK_SIDE_AIR_HITBOX_2_FLIPPED, damageDealt);
 					h.hits = -1;
 					h.force = 0.3f;
 					h.fx = facingRight ? 1.0f : -1.0f;
@@ -266,21 +313,27 @@ public class EntityPerson extends EntityMob {
 			case ATTACK_UP_AIR:
 				if(stateTicks == ATTACK_UP_AIR_FRAME_2_BEGIN) {
 					damageDealt = world.getRnd().nextInt(16) + 5;
-					Hitbox h1 = new Hitbox(this, facingRight ? ATTACK_UP_AIR_HITBOX_1_1 : ATTACK_UP_AIR_HITBOX_1_1_FLIPPED, damageDealt);
+					Hitbox h1 = new Hitbox(this, facingRight
+							? ATTACK_UP_AIR_HITBOX_1_1
+							: ATTACK_UP_AIR_HITBOX_1_1_FLIPPED, damageDealt);
 					h1.hits = -1;
 					h1.force = 0.3f;
 					//h1.fx = facingRight ? 0.86f : -0.85f;
 					h1.fy = 1.0f;
 					world.addHitbox(h1, x, y);
 					
-					Hitbox h2 = new Hitbox(this, facingRight ? ATTACK_UP_AIR_HITBOX_1_2 : ATTACK_UP_AIR_HITBOX_1_2_FLIPPED, damageDealt);
+					Hitbox h2 = new Hitbox(this, facingRight
+							? ATTACK_UP_AIR_HITBOX_1_2
+							: ATTACK_UP_AIR_HITBOX_1_2_FLIPPED, damageDealt);
 					h2.hits = -1;
 					h2.force = 0.3f;
 					//h2.fx = facingRight ? 0.5f : -0.5f;
 					h2.fy = 1.0f;
 					world.addHitbox(h2, x, y);
 				} else if(stateTicks == ATTACK_UP_AIR_FRAME_3_BEGIN) {
-					Hitbox h = new Hitbox(this, facingRight ? ATTACK_UP_AIR_HITBOX_2 : ATTACK_UP_AIR_HITBOX_2_FLIPPED, damageDealt);
+					Hitbox h = new Hitbox(this, facingRight
+							? ATTACK_UP_AIR_HITBOX_2
+							: ATTACK_UP_AIR_HITBOX_2_FLIPPED, damageDealt);
 					h.hits = -1;
 					h.force = 0.3f;
 					h.fy = 1.0f;
@@ -290,19 +343,25 @@ public class EntityPerson extends EntityMob {
 			case ATTACK_DOWN_AIR:
 				if(stateTicks == ATTACK_DOWN_AIR_FRAME_2_BEGIN) {
 					damageDealt = world.getRnd().nextInt(16) + 5;
-					Hitbox h1 = new Hitbox(this, facingRight ? ATTACK_DOWN_AIR_HITBOX_1_1 : ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED, damageDealt);
+					Hitbox h1 = new Hitbox(this, facingRight
+							? ATTACK_DOWN_AIR_HITBOX_1_1
+							: ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED, damageDealt);
 					h1.hits = -1;
 					h1.force = 0.3f;
 					h1.fy = -1.0f;
 					world.addHitbox(h1, x, y);
 					
-					Hitbox h2 = new Hitbox(this, facingRight ? ATTACK_DOWN_AIR_HITBOX_1_2 : ATTACK_DOWN_AIR_HITBOX_1_2_FLIPPED, damageDealt);
+					Hitbox h2 = new Hitbox(this, facingRight
+							? ATTACK_DOWN_AIR_HITBOX_1_2
+							: ATTACK_DOWN_AIR_HITBOX_1_2_FLIPPED, damageDealt);
 					h2.hits = -1;
 					h2.force = 0.3f;
 					h2.fy = -1.0f;
 					world.addHitbox(h2, x, y);
 				} else if(stateTicks == ATTACK_DOWN_AIR_FRAME_3_BEGIN) {
-					Hitbox h = new Hitbox(this, facingRight ? ATTACK_DOWN_AIR_HITBOX_2 : ATTACK_DOWN_AIR_HITBOX_2_FLIPPED, damageDealt);
+					Hitbox h = new Hitbox(this, facingRight
+							? ATTACK_DOWN_AIR_HITBOX_2
+							: ATTACK_DOWN_AIR_HITBOX_2_FLIPPED, damageDealt);
 					h.hits = -1;
 					h.force = 0.3f;
 					h.fy = -1.0f;
@@ -312,7 +371,8 @@ public class EntityPerson extends EntityMob {
 			case SPECIAL_SIDE_GROUND:
 				if(stateTicks == SPECIAL_SIDE_GROUND_FRAME_2_BEGIN) {
 					if(useMana(SPECIAL_SIDE_GROUND_COST_MANA)) {
-						EntityFireball e = new EntityFireball(world, this, world.getRnd().nextInt(3) + 5);
+						EntityFireball e = new EntityFireball(world, this,
+								world.getRnd().nextInt(3) + 5);
 						
 						if(facingRight) {
 							e.x = x + SPECIAL_SIDE_GROUND_ORIGIN.x;
@@ -348,12 +408,14 @@ public class EntityPerson extends EntityMob {
 				break;
 			case SPECIAL_UP_GROUND:
 				if(stateTicks == SPECIAL_UP_GROUND_FRAME_2_BEGIN)
-					fireballStorm(world, SPECIAL_UP_GROUND_COST_MANA, SPECIAL_UP_GROUND_ORIGIN);
+					fireballStorm(world, SPECIAL_UP_GROUND_COST_MANA,
+							SPECIAL_UP_GROUND_ORIGIN);
 				break;
 			case SPECIAL_DOWN_GROUND:
 				if(stateTicks == SPECIAL_DOWN_GROUND_FRAME_2_BEGIN) {
 					if(useMana(SPECIAL_DOWN_GROUND_COST_MANA)) {
-						Hitbox h1 = new Hitbox(this, SPECIAL_DOWN_GROUND_HITBOX_1, world.getRnd().nextInt(16)+5);
+						Hitbox h1 = new Hitbox(this, SPECIAL_DOWN_GROUND_HITBOX_1,
+								world.getRnd().nextInt(16)+5);
 						h1.hits = -1;
 						h1.force = 0.3f;
 						h1.fx = 0.5f;
@@ -361,7 +423,8 @@ public class EntityPerson extends EntityMob {
 						h1.effect = new EffectFire(300);
 						world.addHitbox(h1, x, y);
 						
-						Hitbox h2 = new Hitbox(this, SPECIAL_DOWN_GROUND_HITBOX_2, world.getRnd().nextInt(16)+5);
+						Hitbox h2 = new Hitbox(this, SPECIAL_DOWN_GROUND_HITBOX_2,
+								world.getRnd().nextInt(16)+5);
 						h2.hits = -1;
 						h2.force = 0.3f;
 						h2.fx = -0.5f;
@@ -378,7 +441,8 @@ public class EntityPerson extends EntityMob {
 			case SPECIAL_SIDE_AIR:
 				if(stateTicks == SPECIAL_SIDE_AIR_FRAME_2_BEGIN) {
 					if(useMana(SPECIAL_SIDE_AIR_COST_MANA)) {
-						EntityFireball e = new EntityFireball(world, this, world.getRnd().nextInt(3) + 5);
+						EntityFireball e = new EntityFireball(world, this,
+								world.getRnd().nextInt(3) + 5);
 						
 						if(facingRight) {
 							e.x = x + SPECIAL_SIDE_AIR_ORIGIN.x;
@@ -420,7 +484,8 @@ public class EntityPerson extends EntityMob {
 				if(stateTicks == SPECIAL_DOWN_AIR_FRAME_2_BEGIN) {
 					if(useMana(SPECIAL_DOWN_AIR_COST_MANA)) {
 						EntityBigFireball f = new EntityBigFireball(world, this);
-						f.x = x + (facingRight ? SPECIAL_DOWN_AIR_ORIGIN.x : -SPECIAL_DOWN_AIR_ORIGIN.x);
+						f.x = x + (facingRight ? SPECIAL_DOWN_AIR_ORIGIN.x
+								: -SPECIAL_DOWN_AIR_ORIGIN.x);
 						f.y = y + SPECIAL_DOWN_AIR_ORIGIN.y;
 						f.dy = world.getRnd().nextFloat() * 0.05f - 0.25f;
 						world.addEntity(f);
@@ -491,6 +556,7 @@ public class EntityPerson extends EntityMob {
 							setState(State.LAND_CROUCH, false, 20);
 						else
 							stateLockDuration = 0;
+						break;
 					case ATTACK_DOWN_AIR:
 						if(ATTACK_DOWN_AIR_DURATION - stateTicks > 10)
 							setState(State.LAND_CROUCH, false, 20);

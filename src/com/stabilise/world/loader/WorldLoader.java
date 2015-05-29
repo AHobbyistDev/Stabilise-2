@@ -109,12 +109,6 @@ public abstract class WorldLoader {
 	@UserThread("WorkerThread")
 	protected abstract void save(Region r, FileHandle file);
 	
-	@UserThread("MainThread")
-	@Deprecated
-	private void shutdown() {
-		// TODO remove?
-	}
-	
 	//--------------------==========--------------------
 	//-------------=====Nested Classes=====-------------
 	//--------------------==========--------------------

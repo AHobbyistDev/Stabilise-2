@@ -1044,7 +1044,7 @@ public interface World extends Checkable {
 			}, tracker);
 			builderThread = new Thread(task);
 			builderThread.setName("WorldBuilderThread");
-			builderThread.run();
+			builderThread.start();
 			return task;
 		}
 		
