@@ -189,7 +189,8 @@ public class Array<E> implements Iterable<E> {
 	 * toIndex} (exclusive) to {@code value}. If {@code toIndex <= fromIndex},
 	 * this method does nothing.
 	 * 
-	 * @throws ArrayIndexOutOfBoundsException if {@code toIndex >= length()}.
+	 * @throws ArrayIndexOutOfBoundsException if {@code fromIndex < 0 ||
+	 * toIndex >= length()}.
 	 */
 	public void setBetween(E value, int fromIndex, int toIndex) {
 		for(int i = fromIndex; i < toIndex; i++)

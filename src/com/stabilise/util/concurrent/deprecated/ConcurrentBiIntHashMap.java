@@ -33,7 +33,7 @@
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
 
-package com.stabilise.util.concurrent;
+package com.stabilise.util.concurrent.deprecated;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -62,6 +62,8 @@ import com.stabilise.util.annotation.ThreadSafe;
  * <p>This class is more or less the exact same as ConcurrentHashMap, except
  * I've stripped away much of the superfluous stuff, and (hopefully) properly
  * adapted all of its functions.
+ * 
+ * @deprecated 
  */
 @ThreadSafe
 public class ConcurrentBiIntHashMap<V> implements Iterable<V> {

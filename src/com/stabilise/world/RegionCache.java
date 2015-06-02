@@ -201,9 +201,7 @@ public class RegionCache {
 		// finaliseUncaching() once it has finished saving.
 		synchronized(regions) {
 			CachedRegion cacheHandle = regions.get(r.loc);
-			if(cacheHandle == null)
-				throw new AssertionError(r + " is not in the cache?");
-			if(cacheHandle.removeMarking())
+			if(cacheHandle.removeMarking()) // cacheHandle should never be null
 				loader.saveRegion(r, cacheHandle);
 		}
 	}

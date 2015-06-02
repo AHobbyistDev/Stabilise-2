@@ -583,7 +583,7 @@ public interface Interpolation {
 		 * <p>This results in an interpolative function which smoothly tends
 		 * towards {@code start} and sharply tends toward {@code end}.
 		 */
-		public final Interpolation EASE_IN = (x) -> easeInTransform(x);
+		public final Interpolation EASE_IN = x -> easeInTransform(x);
 		/**
 		 * An ease-out interpolation function f(x) is broadly characterised by:
 		 * 
@@ -595,7 +595,7 @@ public interface Interpolation {
 		 * <p>This results in an interpolative function which sharply tends
 		 * towards {@code start} and smoothly tends toward {@code end}.
 		 */
-		public final Interpolation EASE_OUT = (x) -> easeOutTransform(x);
+		public final Interpolation EASE_OUT = x -> easeOutTransform(x);
 		/**
 		 * An ease-in-out interpolation function f(x) is broadly characterised
 		 * as identical to an ease-in function on [0,0.5) and an ease-out
@@ -610,7 +610,7 @@ public interface Interpolation {
 		 * <p>This results in an interpolative function which smoothly tends
 		 * towards both {@code start} and {@code end}.
 		 */
-		public final Interpolation EASE_IN_OUT = (x) -> easeInOutTransform(x);
+		public final Interpolation EASE_IN_OUT = x -> easeInOutTransform(x);
 		
 		
 		@Override

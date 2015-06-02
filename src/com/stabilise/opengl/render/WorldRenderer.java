@@ -193,8 +193,8 @@ public class WorldRenderer implements Renderer {
 		viewport.update(width, height);
 		batch.setProjectionMatrix(viewport.getCamera().combined);
 		
-		tilesHorizontal = (int)((width/2) / pixelsPerTile) + 1;
-		tilesVertical = (int)((height/2) / pixelsPerTile) + 1;
+		tilesHorizontal = (int)(width / (2 * pixelsPerTile)) + 1;
+		tilesVertical = (int)(height / (2 * pixelsPerTile)) + 1;
 		slicesHorizontal = Maths.ceil((float)tilesHorizontal / Slice.SLICE_SIZE);
 		slicesVertical = Maths.ceil((float)tilesVertical / Slice.SLICE_SIZE);
 	}

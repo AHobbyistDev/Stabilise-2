@@ -13,7 +13,8 @@ import java.util.function.Predicate;
 import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
- * An alternative ArrayList implementation with some design adjustments.
+ * An alternative ArrayList implementation with some design adjustments and
+ * additional features.
  * 
  * <p>This class permits list modification during iteration, and as such
  * iterators will not throw {@code ConcurrentModificationExceptions}.
@@ -103,7 +104,7 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 * elements. The returned iterator does not support {@code remove()}.
 	 */
 	public Iterator<E> iteratorNullsFiltered() {
-		return CollectionUtils.iteratorNullsFiltered(this);
+		return IteratorUtils.iteratorNullsFiltered(this);
 	}
 	
 	/**
@@ -112,21 +113,21 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
 	 * 
 	 * @throws NullPointerException if pred is null.
 	 */
-	public void iterate(Predicate<E> pred) {
-		CollectionUtils.iterate(this, pred);
+	public void forEach(Predicate<E> pred) {
+		IteratorUtils.forEach(this, pred);
 	}
 	
 	/**
 	 * Iterates over this list, removing any element for which the specified
 	 * predicate returns true.
 	 * 
-	 * <p>This method is identical to {@link #iterate(Predicate)}, but is
+	 * <p>This method is identical to {@link #forEach(Predicate)}, but is
 	 * provided as to make code more readable in some cases.
 	 * 
 	 * @throws NullPointerException if pred is null.
 	 */
 	public void remove(Predicate<E> pred) {
-		iterate(pred);
+		forEach(pred);
 	}
 	
 	@Override

@@ -3,7 +3,6 @@ package com.stabilise.world;
 import static com.stabilise.world.World.*;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,6 +15,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.Unguarded;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.collect.IteratorUtils;
 import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.maths.AbstractPoint;
 import com.stabilise.util.maths.MutablePoint;
@@ -98,6 +98,7 @@ public class HostWorld extends AbstractWorld {
 		regionCache.prepare(loader);
 	}
 	
+	@NotThreadSafe
 	@Override
 	public void prepare() {
 		if(prepared)
@@ -180,45 +181,35 @@ public class HostWorld extends AbstractWorld {
 	}
 	
 	@Override
-	public void update() {
-		super.update();
+	public boolean update() {
+		doUpdate();
+		return numRegions.get() == 0;
+	}
+	
+	@Override
+	protected void doUpdate() {
+		super.doUpdate();
 		
 		profiler.start("sliceMap"); // root.update.game.world.sliceMap
 		for(SliceMap m : sliceMaps)
 			m.update();
 		
 		profiler.next("region"); // root.update.game.world.region
-		Iterator<Region> i = regions.values().iterator();
-		while(i.hasNext()) {
-			Region r = i.next();
-			profiler.start("update"); // root.update.game.world.region.update
+		IteratorUtils.forEach(regions.values(), r -> {
 			r.update(this);
-			profiler.next("unload"); // root.update.game.world.region.unload
 			if(r.unload) {
 				// To unload the region we use unloadRegion() to stick in into
 				// the cache, and then we remove it from our map of regions.
 				unloadRegion(r);
-				i.remove();
+				return true;
 			}
-			profiler.end(); // root.update.game.world.region
-		}
+			return false;
+		});
 		
 		profiler.end(); // root.update.game.world
 		
 		// Uncache any regions which may have been cached during this tick.
 		regionCache.uncacheAll();
-	}
-	
-	/**
-	 * Updates this world as per {@link #update()}, then checks for whether or
-	 * not it has fallen out of use.
-	 * 
-	 * @return {@code true} if there are no regions loaded in this world;
-	 * {@code false} if it is still in use.
-	 */
-	public boolean updateAndCheck() {
-		update();
-		return numRegions.get() == 0;
 	}
 	
 	/**

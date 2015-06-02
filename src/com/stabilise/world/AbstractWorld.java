@@ -83,7 +83,7 @@ public abstract class AbstractWorld implements World {
 	/** Stores all particles in the world. This should remain empty if this is
 	 * a server world. */
 	protected final LightLinkedList<Particle> particles =
-			new LightLinkedList<Particle>();
+			new LightLinkedList<>();
 	/** The total number of particles which have existed during the lifetime of
 	 * the world. */
 	protected int particleCount = 0;
@@ -147,7 +147,7 @@ public abstract class AbstractWorld implements World {
 	 * tile entities, etc).
 	 */
 	@UserThread("MainThread")
-	public void update() {
+	protected void doUpdate() {
 		dimension.info.age++;
 		
 		profiler.start("entity"); // root.update.game.world.entity

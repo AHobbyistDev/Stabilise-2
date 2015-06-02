@@ -18,7 +18,6 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
-import com.stabilise.util.Checkable;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.concurrent.TaskTracker;
@@ -37,7 +36,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 /**
  * Defines methods which summarise a world implementation.
  */
-public interface World extends Checkable {
+public interface World {
 	
 	/** The file name of the world info file. */
 	public static final String FILE_INFO = "info";
@@ -54,6 +53,15 @@ public interface World extends Checkable {
 	 * <p>TODO: Arbitrary, and probably temporary. */
 	public static final int HOSTILE_MOB_CAP = 100;
 	
+	
+	/**
+	 * Updates this World, and returns {@code true} if it has unloaded and
+	 * should be disowned.
+	 * 
+	 * @return {@code true} if this World is unloaded and should be removed
+	 * ASAP; {@code false} otherwise.
+	 */
+	boolean update();
 	
 	/**
 	 * Adds an entity to the world. The entity's ID is assigned automatically.

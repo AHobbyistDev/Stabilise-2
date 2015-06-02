@@ -132,7 +132,7 @@ public enum Protocol {
 			id = in.read(); // ID is always first byte
 		} catch(EOFException e) {
 			// Since InflaterInputStream and prefers to throw an EOFException
-			// EOFrather than return -1 when the stream ends, we'll have to
+			// rather than return -1 when the stream ends, we'll have to
 			// catch this.
 			return null;
 		}

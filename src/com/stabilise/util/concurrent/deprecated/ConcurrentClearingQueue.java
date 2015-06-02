@@ -1,4 +1,4 @@
-package com.stabilise.util.concurrent;
+package com.stabilise.util.concurrent.deprecated;
 
 import static com.stabilise.util.TheUnsafe.unsafe;
 
@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import com.stabilise.util.annotation.ThreadSafe;
+import com.stabilise.util.concurrent.ClearingQueue;
+import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 
 /**
  * A {@link ClearingQueue} which does not utilise locking, and instead offers

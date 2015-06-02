@@ -1,8 +1,23 @@
-- Move the game to networking (client-server) architecture (again)
-- Implement character creation
-- Add mobs with proper AIs
-- Implement entity saving for worlds
-- Add gameplay features
+TOP PRIORITY
+- Menus
+- Get both singleplayer and multiplayer architecture working
+- Implement structure generation
+
+HIGH PRIORITY
+- Refactor everything in com.stabilise.entity
+- Entity saving in worlds.
+
+TODO EVENTUALLY
+- Gameplay!!!
+- Character creation
+- Mob AIs
+- Modding & Mod API
+
+BACKGROUND OBJECTIVES
+- Maximise extensibility for modding
+
+
+-------------------------------------------------------------------------------
 
 DONE
 - Refactor WorldLoader and WorldGenerator such that they use ExecutorService for thread delegation

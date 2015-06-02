@@ -11,7 +11,7 @@ public class TheUnsafe {
 	
 	private TheUnsafe() {}
 	
-	/** The Unsafe instance. */
+	/** The Unsafe instance. Use at your own risk. */
 	public static final Unsafe unsafe;
 	
 	static {

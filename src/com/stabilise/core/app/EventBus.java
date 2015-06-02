@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import com.stabilise.util.annotation.ThreadSafe;
-import com.stabilise.util.collect.CollectionUtils;
+import com.stabilise.util.collect.IteratorUtils;
 import com.stabilise.util.collect.LightArrayList;
 import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.concurrent.SynchronizedClearingQueue;
@@ -154,7 +154,7 @@ public class EventBus {
 	public void clear(boolean nonPersistentOnly) {
 		if(!nonPersistentOnly)
 			handlers.clear();
-		CollectionUtils.iterate(handlers.entrySet(), e -> {
+		IteratorUtils.forEach(handlers.entrySet(), e -> {
 			synchronized(lockFor(e.getKey())) {
 				e.getValue().remove(l -> !l.persistent);
 				return e.getValue().isEmpty();

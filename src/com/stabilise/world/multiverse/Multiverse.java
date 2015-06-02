@@ -12,9 +12,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
-import com.stabilise.util.Checkable;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
+import com.stabilise.util.collect.IteratorUtils;
 import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.World;
@@ -130,7 +130,7 @@ public abstract class Multiverse<W extends AbstractWorld> {
 	 * Updates all worlds.
 	 */
 	public void update() {
-		Checkable.updateCheckables(dimensions.values());
+		IteratorUtils.forEach(dimensions.values(), World::update);
 	}
 	
 	/**

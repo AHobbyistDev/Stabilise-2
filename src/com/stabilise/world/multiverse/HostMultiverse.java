@@ -164,6 +164,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
 	/**
 	 * Stores the world-local data of a player.
 	 * 
+	 * <p>TODO outdated docs
 	 * <p>An instance of this class should be {@link PlayerData#dispose()
 	 * disposed} of when it is no longer needed.
 	 */

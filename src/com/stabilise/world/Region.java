@@ -60,9 +60,8 @@ public class Region {
 	/** The function to use to hash region coordinates for keys in a hash map. */
 	// This method of hashing eliminates higher-order bits, but nearby regions
 	// will never collide.
-	private static final IntBinaryOperator COORD_HASHER = (x,y) -> {
-		return (x << 16) | (y & 0xFFFF);
-	};
+	private static final IntBinaryOperator COORD_HASHER = (x,y) ->
+		(x << 16) | (y & 0xFFFF);
 	
 	/** The factory with which to generate a region's {@link #loc} member. */
 	private static final PointFactory LOC_FACTORY = new PointFactory((x,y) -> {

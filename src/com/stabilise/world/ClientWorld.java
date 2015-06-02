@@ -48,7 +48,7 @@ public class ClientWorld extends AbstractWorld {
 	}
 	
 	@Override
-	public boolean updateAndCheck() {
+	public boolean update() {
 		return false;
 	}
 	

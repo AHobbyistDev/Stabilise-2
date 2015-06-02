@@ -1,4 +1,4 @@
-package com.stabilise.util.concurrent;
+package com.stabilise.util.concurrent.deprecated;
 
 import static com.stabilise.util.TheUnsafe.unsafe;
 
