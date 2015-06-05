@@ -1,5 +1,6 @@
 package com.stabilise.util.maths;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
@@ -99,6 +100,32 @@ public class Matrix2 {
 	}
 	
 	/**
+	 * Gets the determinant of this matrix.
+	 */
+	public float det() {
+		return val[M00] * val[M11] - val[M01] * val[M10];
+	}
+	
+	/**
+	 * Gets the inverse of this matrix.
+	 * 
+	 * @throws ArithmeticException if this matrix does not have an inverse.
+	 */
+	public Matrix2 inverse() {
+		float det = det();
+		if(det == 0)
+			throw new ArithmeticException("Determinant is zero");
+		return doInverse(1 / det);
+	}
+	
+	private Matrix2 doInverse(float invDet) {
+		return new Matrix2(
+				invDet * val[M11],  -invDet * val[M01],
+				-invDet * val[M10], invDet * val[M00]
+		);
+	}
+	
+	/**
 	 * Postmultiplies this matrix (A) with the specified matrix (B) and stores
 	 * the result in this matrix. i.e. A = AB.
 	 * 
@@ -129,8 +156,8 @@ public class Matrix2 {
 	 * @return This matrix, for chaining operations.
 	 */
 	public Matrix2 setToRotation(float rad) {
-		float cos = (float)Math.cos(rad);
-		float sin = (float)Math.sin(rad);
+		float cos = MathUtils.cos(rad); //(float)Math.cos(rad);
+		float sin = MathUtils.sin(rad); //(float)Math.sin(rad);
 		return set(cos, -sin, sin, cos);
 	}
 	

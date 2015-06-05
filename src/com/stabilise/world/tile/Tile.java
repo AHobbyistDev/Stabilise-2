@@ -217,6 +217,11 @@ public class Tile {
 		return name + " [" + id + "]";
 	}
 	
+	@Override
+	public boolean equals(Object o) {
+		return o == this;
+	}
+	
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------

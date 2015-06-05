@@ -1,7 +1,10 @@
 package com.stabilise.util.shape;
 
+import static com.badlogic.gdx.math.MathUtils.*;
+
+import java.util.function.Function;
+
 import com.stabilise.util.annotation.NotThreadSafe;
-import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.Vec2;
 
 /**
@@ -51,34 +54,23 @@ public class Polygon extends AbstractPolygon {
 	protected Polygon() {}
 	
 	@Override
-	public Polygon transform(Matrix2 matrix) {
-		return newInstance(getTransformedVertices(matrix));
+	public Polygon transform(Function<Vec2, Vec2> f) {
+		return newInstance(transformVertices(f));
 	}
 	
 	@Override
-	public Polygon rotate(float rotation) {
-		float cos = (float)Math.cos(rotation);
-		float sin = (float)Math.sin(rotation);
-		Vec2[] verts = new Vec2[vertices.length];
-		for(int i = 0; i < vertices.length; i++)
-			verts[i] = vertices[i].rotate(cos, sin);
-		return newInstance(verts);
+	public Polygon rotate(float rads) {
+		return transform(v -> v.rotate(cos(rads), sin(rads)));
 	}
 	
 	@Override
 	public Polygon translate(float x, float y) {
-		Vec2[] verts = new Vec2[vertices.length];
-		for(int i = 0; i < vertices.length; i++)
-			verts[i] = new Vec2(vertices[i].x + x, vertices[i].y + y);
-		return newInstance(verts);
+		return transform(v -> new Vec2(v.x + x, v.y + y));
 	}
 	
 	@Override
 	public Polygon reflect() {
-		Vec2[] verts = new Vec2[vertices.length];
-		for(int i = 0; i < vertices.length; i++)
-			verts[i] = new Vec2(-vertices[i].x, vertices[i].y);
-		return newInstance(verts);
+		return transform(v -> new Vec2(-v.x, v.y));
 	}
 	
 	@Override

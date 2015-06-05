@@ -55,7 +55,7 @@ public class Region {
 	/** A dummy Region object to use when a Region object is required for API
 	 * reasons but isn't actually used. This region's {@link #loc} member will
 	 * return {@code false} for all {@code equals()}. */
-	public static final Region DUMMY_REGION = new Region();
+	//public static final Region DUMMY_REGION = new Region();
 	
 	/** The function to use to hash region coordinates for keys in a hash map. */
 	// This method of hashing eliminates higher-order bits, but nearby regions
@@ -97,7 +97,8 @@ public class Region {
 	private static final int STATE_NEW = 0,
 			STATE_LOADING = 1,
 			STATE_GENERATING = 2,
-			STATE_ACTIVE = 3;
+			STATE_ACTIVE = 3,
+			STATE_INACTIVE = 4;
 	
 	/** Values for a region's "save state". These are separate from the main
 	 * state in an effort to reduce complexity, as each save state can overlap
@@ -129,12 +130,17 @@ public class Region {
 	 * indicates that this region is still considered anchored and the unload
 	 * countdown is not active. */
 	private int ticksToUnload = -1;
-	/** Whether or not the region should be unloaded from the world. */
-	public boolean unload = false;
 	/** The number of slices anchored due to having been loaded by a client
 	 * within the region. Used to determine whether the region should begin the
 	 * 'unload countdown'. */
-	private final AtomicInteger anchoredSlices = new AtomicInteger(0);
+	private int anchoredSlices = 0;
+	
+	/** Whether or not this region is active. */
+	public boolean active = false;
+	/** Number of adjacent regions which are active. We do not unload a region
+	 * unless it has no active neighbours. This is modified only by the main
+	 * thread, and so does not need to be atomic. */
+	public volatile int activeNeighbours = 0;
 	
 	/** The slices contained by this region.
 	 * <i>Note slices are indexed in the form <b>[y][x]</b>; {@link
@@ -172,6 +178,7 @@ public class Region {
 	/**
 	 * Private since this creates an ordinarily-invalid region.
 	 */
+	/*
 	private Region() {
 		offsetX = offsetY = Integer.MIN_VALUE;
 		loc = new Point(0, 0) {
@@ -179,6 +186,7 @@ public class Region {
 			public int hashCode() { return Integer.MIN_VALUE; }
 		};
 	}
+	*/
 	
 	/**
 	 * Creates a new region.
@@ -202,18 +210,21 @@ public class Region {
 	 * Updates the region.
 	 * 
 	 * @param world This region's parent world.
+	 * 
+	 * @return {@code true} if this region should be unloaded; {@code false}
+	 * if it should remain in memory.
 	 */
-	public void update(HostWorld world) {
+	public boolean update(HostWorld world) {
 		if(!isActive())
-			return;
+			return false; // TODO
 		
-		if(anchoredSlices.get() == 0) {
+		if(anchoredSlices == 0) {
 			if(ticksToUnload > 0)
 				ticksToUnload--;
 			else if(ticksToUnload == -1)
 				ticksToUnload = REGION_UNLOAD_TICK_BUFFER;
 			else
-				unload = true;
+				return true;
 		} else {
 			ticksToUnload = -1;
 			
@@ -234,6 +245,8 @@ public class Region {
 		}
 		
 		implantStructures(world.regionCache);
+		
+		return false;
 	}
 	
 	/**
@@ -274,23 +287,22 @@ public class Region {
 	 * 
 	 * <p>Anchored slices will not be reset when a region is loaded or
 	 * generated.
-	 * 
-	 * <p>This method is thread-safe.
 	 */
-	@UserThread({"MainThread", "WorldGenThread"})
+	@UserThread("MainThread")
+	@NotThreadSafe
 	public void anchorSlice() {
-		anchoredSlices.getAndIncrement();
+		anchoredSlices++;
 	}
 	
 	/**
 	 * De-anchors a slice; it is no longer loaded. This method is the reverse
 	 * of {@link #anchorSlice()}, and invocations of these methods should be
 	 * paired to ensure an equilibrium.
-	 * 
-	 * <p>This method is thread-safe.
 	 */
+	@UserThread("MainThread")
+	@NotThreadSafe
 	public void deAnchorSlice() {
-		anchoredSlices.getAndDecrement();
+		anchoredSlices--;
 	}
 	
 	/**
@@ -303,9 +315,11 @@ public class Region {
 	 * 
 	 * @return The number of anchored slices.
 	 */
+	/*
 	public int getAnchoredSlices() {
-		return anchoredSlices.get();
+		return anchoredSlices;
 	}
+	*/
 	
 	/**
 	 * @param world This region's parent world.

@@ -18,7 +18,7 @@ public class TileAir extends Tile {
 	@Override
 	public void update(World world, int x, int y) {
 		Tile t = world.getTileAt(x, y-1);
-		if(t.solid && t.getID() != Tiles.BEDROCK_INVISIBLE.getID()) {
+		if(t.isSolid() && !t.equals(Tiles.BEDROCK_INVISIBLE)) {
 			// spawn a guy
 			//if(world.rng.nextFloat() < 1.0f/*0.002f*/)
 			

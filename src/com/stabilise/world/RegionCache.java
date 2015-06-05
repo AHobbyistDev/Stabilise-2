@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.stabilise.util.Log;
@@ -69,7 +68,7 @@ public class RegionCache {
 			ThreadLocal.withInitial(() -> new LightLinkedList<>());
 	
 	// Lock and its associated Condition to wait on in waitUntilDone().
-	private final Lock doneLock = new ReentrantLock();
+	private final ReentrantLock doneLock = new ReentrantLock();
 	private final Condition emptyCondition = doneLock.newCondition();
 	
 	private final Log log;
@@ -231,8 +230,8 @@ public class RegionCache {
 		
 		// We notify any thread which may be waiting in waitUntilDone().
 		if(removed && regions.isEmpty()) {
+			doneLock.lock();
 			try {
-				doneLock.lock();
 				emptyCondition.signalAll();
 			} finally {
 				doneLock.unlock();

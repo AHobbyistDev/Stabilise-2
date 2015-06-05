@@ -1,5 +1,7 @@
 package com.stabilise.util.shape;
 
+import java.util.function.Function;
+
 import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.Vec2;
 
@@ -20,6 +22,8 @@ public abstract class Shape {
 	 * shape, in preference to a null pointer. */
 	public static final Shape NO_SHAPE = new NoShape();
 	
+	private static final Matrix2 MAT_REFLECT = new Matrix2(-1, 0, 0, 1);
+	
 	
 	
 	/**
@@ -30,19 +34,26 @@ public abstract class Shape {
 	 * </a> the the given transformation matrix by said vertex's representative
 	 * 2D vector.
 	 * 
-	 * <p>For example, for a rotation transformation, the matrix takes the
-	 * form:
-	 * 
-	 * <pre>
-	 * | cosθ  -sinθ |
-	 * | sinθ  cosθ  |</pre>
-	 * where θ is the angle by which to rotate the shape, in radians.
-	 * 
 	 * @param matrix The transformation matrix.
 	 * 
 	 * @return The transformed shape.
+	 * @throws NullPointerException if {@code matrix} is {@code null}.
 	 */
-	public abstract Shape transform(Matrix2 matrix);
+	public Shape transform(Matrix2 matrix) {
+		return transform(v -> matrix.transform(v));
+	}
+	
+	/**
+	 * Transforms this shape by applying the given transformation function to
+	 * each of its vertices, where applicable, and returns the transformed
+	 * shape.
+	 * 
+	 * @param f The transformation function.
+	 * 
+	 * @return The transformed shape.
+	 * @throws NullPointerException if {@code f} is {@code null}.
+	 */
+	public abstract Shape transform(Function<Vec2, Vec2> f);
 	
 	/**
 	 * Gets the vertices of this shape if it were transformed using the given
@@ -58,14 +69,24 @@ public abstract class Shape {
 	 * 
 	 * @return The transformed vertices. 
 	 */
-	protected Vec2[] getTransformedVertices(Matrix2 matrix) {
-		Vec2[] verts = getVertices();
-		for(int i = 0; i < verts.length; i++) {
-			Vec2 before = verts[i];
-			verts[i] = matrix.transform(verts[i]);
-			Vec2 after = verts[i];
-			System.out.println("transformed " + before + " into " + after);
-		}
+	protected Vec2[] transformVertices(Matrix2 matrix) {
+		return transformVertices(v -> matrix.transform(v));
+	}
+	
+	/**
+	 * Gets the vertices of this shape if it were transformed using the given
+	 * function. The returned array is the same length as, and ordered the same
+	 * as, the vertices returned by {@link #getVertices()}.
+	 * 
+	 * @param f The transformation function.
+	 * 
+	 * @return The transformed vertices. 
+	 */
+	protected Vec2[] transformVertices(Function<Vec2, Vec2> f) {
+		final Vec2[] verts = getVertices();
+		Vec2[] newVerts = new Vec2[verts.length];
+		for(int i = 0; i < verts.length; i++)
+			newVerts[i] = f.apply(verts[i]);
 		return verts;
 	}
 	
@@ -97,9 +118,17 @@ public abstract class Shape {
 	/**
 	 * Clones this shape and reflects the clone about the y-axis.
 	 * 
+	 * <p>The default implementation subjects this shape to the matrix:
+	 * 
+	 * <pre>
+	 * | -1  0 |
+	 * |  0  1 |</pre>
+	 * 
 	 * @return The reflected clone of this shape.
 	 */
-	public abstract Shape reflect();
+	public Shape reflect() {
+		return transform(MAT_REFLECT);
+	}
 	
 	/**
 	 * Calculates whether or not this shape intersects with another.
@@ -336,6 +365,7 @@ public abstract class Shape {
 	 */
 	private static final class NoShape extends Shape {
 		@Override public Shape transform(Matrix2 matrix) { return this; }
+		@Override public Shape transform(Function<Vec2,Vec2> f) { return this; }
 		@Override public Shape translate(float x, float y) { return this; }
 		@Override protected Vec2[] getVertices() { return new Vec2[0]; }
 		@Override protected Vec2[] getAxes() { return new Vec2[0]; }

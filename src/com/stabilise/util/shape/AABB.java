@@ -1,5 +1,7 @@
 package com.stabilise.util.shape;
 
+import java.util.function.Function;
+
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.Vec2;
@@ -15,6 +17,11 @@ import com.stabilise.util.maths.Vec2;
  * optimisations.
  */
 public class AABB extends AbstractPolygon {
+	
+	/** An array containing the unit vectors {@link #VEC_X} and {@link #VEC_Y}. */
+	private static final Vec2[] UNIT_VECTORS = new Vec2[] {
+		Maths.VEC_X, Maths.VEC_Y
+	};
 	
 	/** The min and max vertices of this AABB. */
 	public final Vec2 v00, v11;
@@ -58,6 +65,11 @@ public class AABB extends AbstractPolygon {
 				matrix.transform(v00),
 				matrix.transform(v11)
 		);
+	}
+	
+	@Override
+	public AABB transform(Function<Vec2, Vec2> f) {
+		return new AABB(f.apply(v00), f.apply(v11));
 	}
 	
 	@Override
@@ -152,7 +164,7 @@ public class AABB extends AbstractPolygon {
 	
 	@Override
 	protected Vec2[] getAxes() {
-		return Maths.UNIT_VECTORS;
+		return UNIT_VECTORS;
 	}
 	
 	@Override

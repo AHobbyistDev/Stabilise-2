@@ -1,5 +1,6 @@
 package com.stabilise.util.maths;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.annotation.Immutable;
 
 /**
@@ -60,7 +61,8 @@ public class Vec2 {
 	 * @return The new rotated vector.
 	 */
 	public Vec2 rotate(float radians) {
-		return rotate((float)Math.cos(radians), (float)Math.sin(radians));
+		//return rotate((float)Math.cos(radians), (float)Math.sin(radians));
+		return rotate(MathUtils.cos(radians), MathUtils.sin(radians));
 	}
 	
 	/**

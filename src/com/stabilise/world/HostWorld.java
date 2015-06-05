@@ -58,7 +58,7 @@ public class HostWorld extends AbstractWorld {
 			new ConcurrentHashMap<>();
 	/** Tracks the number of loaded regions, in preference to invoking
 	 * regions.size(), which is not a constant-time operation. */
-	private final AtomicInteger numRegions = new AtomicInteger(0);
+	private int numRegions = 0;
 	/** Dummy key for {@link #regions} whose mutability may be abused for
 	 * reusability ONLY on the main thread. */
 	@Unguarded
@@ -183,7 +183,7 @@ public class HostWorld extends AbstractWorld {
 	@Override
 	public boolean update() {
 		doUpdate();
-		return numRegions.get() == 0;
+		return numRegions == 0;
 	}
 	
 	@Override
@@ -195,20 +195,13 @@ public class HostWorld extends AbstractWorld {
 			m.update();
 		
 		profiler.next("region"); // root.update.game.world.region
-		IteratorUtils.forEach(regions.values(), r -> {
-			r.update(this);
-			if(r.unload) {
-				// To unload the region we use unloadRegion() to stick in into
-				// the cache, and then we remove it from our map of regions.
-				unloadRegion(r);
-				return true;
-			}
-			return false;
-		});
+		IteratorUtils.forEach(regions.values(),
+				r -> r.update(this) && unloadRegion(r));
 		
 		profiler.end(); // root.update.game.world
 		
 		// Uncache any regions which may have been cached during this tick.
+		// TODO: Once a tick might be too often, since this can be expensive.
 		regionCache.uncacheAll();
 	}
 	
@@ -250,7 +243,7 @@ public class HostWorld extends AbstractWorld {
 	 */
 	@UserThread("MainThread")
 	@NotThreadSafe
-	public Region loadRegion(int x, int y) {
+	private Region loadRegion(int x, int y) {
 		// Get the region if it is already loaded
 		Region r = regions.get(dummyLoc.set(x, y));
 		if(r != null)
@@ -265,11 +258,75 @@ public class HostWorld extends AbstractWorld {
 			regions.put(r.loc, r);
 		}
 		
-		numRegions.getAndIncrement();
+		numRegions++;
 		
 		loader.loadRegion(r, true);
 		
 		return r;
+	}
+	
+	private Region loadRegion(int x, int y, boolean primary) {
+		// Get the region if it is already loaded
+		Region r = regions.get(dummyLoc.set(x, y));
+		if(r != null) {
+			if(primary)
+				setPrimary(r);
+			return r;
+		}
+		
+		// If it is not loaded directly, try getting it from the cache.
+		// Synchronised to make this atomic. See RegionCache.cacheRegion()
+		synchronized(regionCache.getLock(x, y)) {
+			r = regionCache.get(dummyLoc); // dummyLoc is already (x,y)
+			if(r == null) // if it's not cached, create it
+				r = new Region(x, y, getAge());
+			regions.put(r.loc, r);
+		}
+		
+		numRegions++;
+		
+		loader.loadRegion(r, true);
+		
+		if(primary)
+			setPrimary(r);
+		
+		return r;
+	}
+	
+	private void setPrimary(Region r) {
+		if(r.active)
+			return;
+		r.active = true;
+		
+		// Load all 8 regions adjacent to r.
+		for(int x = r.x() - 1; x <= r.x() + 1; x++) {
+			for(int y = r.y() - 1; y <= r.y() + 1; y++) {
+				if(x != r.x() && y != r.y())
+					loadRegion(x, y, false).activeNeighbours++;
+			}
+		}
+	}
+	
+	private void unsetPrimary(Region r) {
+		if(!r.active)
+			return;
+		r.active = false;
+		
+		// Unload all 8 regions adjacent to r.
+		for(int x = r.x() - 1; x <= r.x() + 1; x++) {
+			for(int y = r.y() - 1; y <= r.y() + 1; y++) {
+				if(x != r.x() && y != r.y()) {
+					try {
+						getRegionAt(x,y).activeNeighbours--;
+					} catch(NullPointerException e) {
+						// Theoretically the region should never ever be null,
+						// but better safe than sorry.
+						log.postWarning("Region at (" + x + "," + y + ") is "
+								+ "null? src: unsetPrimary");
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -280,8 +337,10 @@ public class HostWorld extends AbstractWorld {
 	 * after this method returns.
 	 * 
 	 * @param r The region.
+	 * 
+	 * @return true always.
 	 */
-	private void unloadRegion(Region r) {
+	private boolean unloadRegion(Region r) {
 		// Now unload entities in the region as well...
 		int minX = r.loc.x * Region.REGION_SIZE_IN_TILES;
 		int maxX = minX + Region.REGION_SIZE_IN_TILES;
@@ -296,11 +355,13 @@ public class HostWorld extends AbstractWorld {
 				e.destroy();
 		}
 		
-		numRegions.getAndDecrement();
+		numRegions--;
 		
 		// Finally, we submit the region to the cache and let it manage saving
 		// and then unloading.
 		regionCache.saveRegion(r);
+		
+		return true;
 	}
 	
 	/**
@@ -348,6 +409,8 @@ public class HostWorld extends AbstractWorld {
 	 * @param x The x-coordinate of the slice, in slice lengths.
 	 * @param y The y-coordinate of the slice, in slice lengths.
 	 */
+	@UserThread("MainThread")
+	@NotThreadSafe
 	public void loadSlice(int x, int y) {
 		loadRegion(
 				regionCoordFromSliceCoord(x),

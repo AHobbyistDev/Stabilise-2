@@ -22,8 +22,6 @@ public class Maths {
 	public static final Vec2 VEC_Y = new Vec2(0f, 1f);
 	/** A vector with components (1, 1). */
 	public static final Vec2 VEC_1_1 = new Vec2(1f, 1f);
-	/** An array containing the unit vectors {@link #VEC_X} and {@link #VEC_Y}. */
-	public static final Vec2[] UNIT_VECTORS = new Vec2[] { VEC_X, VEC_Y };
 	
 	/** The maximum value which can be held by an unsigned byte
 	 * (<tt>2<sup><font size=-1>8</font></sup>-1</tt>). */

@@ -1,5 +1,7 @@
 package com.stabilise.util.shape;
 
+import java.util.function.Function;
+
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.Vec2;
@@ -59,15 +61,23 @@ public class Circle extends Shape {
 		return this;
 	}
 	
+	@Override
+	public Circle transform(Matrix2 matrix) {
+		// TODO: Proper transformation functionality.
+		return (Circle)super.transform(matrix);
+	}
+	
 	/**
-	 * This currently returns this circle, as fancier shapes have yet to be
-	 * implemented.
+	 * {@inheritDoc}
+	 * 
+	 * <p>Note that only the centrepoint of this circle is transformed as per
+	 * the function.
 	 */
 	@Override
 	@Incomplete
-	public Circle transform(Matrix2 matrix) {
-		// TODO: Scale/skew/etc matrices are a no-go for now
-		return this;
+	public Circle transform(Function<Vec2, Vec2> f) {
+		// TODO: Wasteful as this results in the instantiation of two Vec2s.
+		return new Circle(f.apply(new Vec2(x,y)), radius);
 	}
 	
 	@Override
@@ -96,6 +106,7 @@ public class Circle extends Shape {
 	 */
 	@Override
 	public boolean intersects(Shape s) {
+		if(radius == 0) return false;
 		if(s instanceof Circle)
 			return intersects((Circle)s);
 		return s.intersects(this);
@@ -108,6 +119,7 @@ public class Circle extends Shape {
 	 * otherwise.
 	 */
 	public boolean intersects(Circle c) {
+		if(radius == 0) return false;
 		float dx = this.x - c.x;
 		float dy = this.y - c.y;
 		float radii = radius + c.radius;

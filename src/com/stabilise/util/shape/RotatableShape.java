@@ -1,5 +1,7 @@
 package com.stabilise.util.shape;
 
+import java.util.function.Function;
+
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.Vec2;
@@ -58,6 +60,20 @@ public class RotatableShape<T extends Shape> extends Shape {
 	@Override
 	public T transform(Matrix2 matrix) {
 		return (T)rotatedShape.transform(matrix);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * <p>
+	 * Invoking this method is equivalent to invoking
+	 * <pre>get().transform(f)</pre>
+	 * </p>
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public T transform(Function<Vec2, Vec2> f) {
+		return (T)rotatedShape.transform(f);
 	}
 	
 	/**

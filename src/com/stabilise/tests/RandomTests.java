@@ -23,6 +23,7 @@ import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.SimplexNoise;
 import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.Polygon;
+import com.stabilise.util.shape.Shape;
 
 /**
  * This class contains an assortment of tests I have conducted, primarily to
@@ -693,7 +694,7 @@ public class RandomTests {
 		System.out.println("3: " + p1.intersects(p3) + ", " + p1.contains(p3));
 		verts = p1.getVertices();
 		System.out.println(verts[0]);
-		Polygon p4 = p1.transform(new Matrix2(0f, -1, 1, 0));
+		Shape p4 = p1.transform(new Matrix2(0f, -1, 1, 0));
 		System.out.println(p4);
 	}
 	
