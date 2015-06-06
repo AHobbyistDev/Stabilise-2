@@ -330,7 +330,8 @@ public abstract class AppDriver implements Runnable {
 	 * @throws NullPointerException if either {@code drivable} or {@code log}
 	 * are {@code null}.
 	 */
-	public static AppDriver getDriverFor(Drivable drivable, int tps, int fps, Log log, int ticksPerFlush) {
+	public static AppDriver getDriverFor(Drivable drivable, int tps, int fps,
+			Log log, int ticksPerFlush) {
 		return new DelegatedDriver(drivable, tps, fps, log, ticksPerFlush);
 	}
 	

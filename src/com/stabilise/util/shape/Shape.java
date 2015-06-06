@@ -2,6 +2,7 @@ package com.stabilise.util.shape;
 
 import java.util.function.Function;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.Vec2;
 
@@ -22,31 +23,13 @@ public abstract class Shape {
 	 * shape, in preference to a null pointer. */
 	public static final Shape NO_SHAPE = new NoShape();
 	
-	private static final Matrix2 MAT_REFLECT = new Matrix2(-1, 0, 0, 1);
+	//private static final Matrix2 MAT_REFLECT = new Matrix2(-1, 0, 0, 1);
 	
-	
-	
-	/**
-	 * Transforms this shape by applying the given transformation matrix to
-	 * each of its vertices, where applicable, and returns the transformed
-	 * shape. Each vertex is transformed by
-	 * <a href=http://en.wikipedia.org/wiki/Matrix_multiplication> multiplying
-	 * </a> the the given transformation matrix by said vertex's representative
-	 * 2D vector.
-	 * 
-	 * @param matrix The transformation matrix.
-	 * 
-	 * @return The transformed shape.
-	 * @throws NullPointerException if {@code matrix} is {@code null}.
-	 */
-	public Shape transform(Matrix2 matrix) {
-		return transform(v -> matrix.transform(v));
-	}
 	
 	/**
 	 * Transforms this shape by applying the given transformation function to
-	 * each of its vertices, where applicable, and returns the transformed
-	 * shape.
+	 * each of its vertices, and returns the transformed shape. This shape is
+	 * unmodified.
 	 * 
 	 * @param f The transformation function.
 	 * 
@@ -54,24 +37,6 @@ public abstract class Shape {
 	 * @throws NullPointerException if {@code f} is {@code null}.
 	 */
 	public abstract Shape transform(Function<Vec2, Vec2> f);
-	
-	/**
-	 * Gets the vertices of this shape if it were transformed using the given
-	 * matrix. The returned array is the same length as, and ordered the same
-	 * as, the vertices returned by {@link #getVertices()}.
-	 * 
-	 * <p>Each vertex is transformed by
-	 * <a href=http://en.wikipedia.org/wiki/Matrix_multiplication> multiplying
-	 * </a> the the given transformation matrix by said vertex's representative
-	 * 2D vector.
-	 * 
-	 * @param matrix The transformation matrix.
-	 * 
-	 * @return The transformed vertices. 
-	 */
-	protected Vec2[] transformVertices(Matrix2 matrix) {
-		return transformVertices(v -> matrix.transform(v));
-	}
 	
 	/**
 	 * Gets the vertices of this shape if it were transformed using the given
@@ -87,7 +52,24 @@ public abstract class Shape {
 		Vec2[] newVerts = new Vec2[verts.length];
 		for(int i = 0; i < verts.length; i++)
 			newVerts[i] = f.apply(verts[i]);
-		return verts;
+		return newVerts;
+	}
+	
+	/**
+	 * Transforms this shape by applying the given transformation matrix to
+	 * each of its vertices, where applicable, and returns the transformed
+	 * shape. Each vertex is transformed by
+	 * <a href=http://en.wikipedia.org/wiki/Matrix_multiplication> multiplying
+	 * </a> the the given transformation matrix by said vertex's representative
+	 * 2D vector. This shape is unmodified.
+	 * 
+	 * @param matrix The transformation matrix.
+	 * 
+	 * @return The transformed shape.
+	 * @throws NullPointerException if {@code matrix} is {@code null}.
+	 */
+	public Shape transform(Matrix2 matrix) {
+		return transform(v -> matrix.transform(v));
 	}
 	
 	/**
@@ -95,14 +77,17 @@ public abstract class Shape {
 	 * The shape's vertices, where applicable, will be rotated about the point
 	 * (0,0) appropriately.
 	 * 
-	 * @param rotation The angle by which to rotate the shape anticlockwise, in
+	 * @param rads The angle by which to rotate the shape anticlockwise, in
 	 * radians.
 	 * 
 	 * @return The rotated shape.
 	 * @throws UnsupportedOperationException if this shape is an {@code AABB}.
 	 */
-	public Shape rotate(float rotation) {
-		return transform(new Matrix2().setToRotation(rotation));
+	public Shape rotate(float rads) {
+		//return transform(new Matrix2().setToRotation(rotation));
+		final float cos = MathUtils.cos(rads);
+		final float sin = MathUtils.sin(rads);
+		return transform(v -> v.rotate(cos, sin));
 	}
 	
 	/**
@@ -113,21 +98,17 @@ public abstract class Shape {
 	 * 
 	 * @return The new translated shape.
 	 */
-	public abstract Shape translate(float x, float y);
+	public Shape translate(float x, float y) {
+		return transform(v -> new Vec2(v.x + x, v.y + y));
+	}
 	
 	/**
 	 * Clones this shape and reflects the clone about the y-axis.
 	 * 
-	 * <p>The default implementation subjects this shape to the matrix:
-	 * 
-	 * <pre>
-	 * | -1  0 |
-	 * |  0  1 |</pre>
-	 * 
 	 * @return The reflected clone of this shape.
 	 */
 	public Shape reflect() {
-		return transform(MAT_REFLECT);
+		return transform(v -> new Vec2(-v.x, v.y));
 	}
 	
 	/**

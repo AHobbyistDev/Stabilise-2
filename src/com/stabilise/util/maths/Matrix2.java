@@ -148,29 +148,6 @@ public class Matrix2 {
 	}
 	
 	/**
-	 * Sets this matrix to a rotation matrix, which will rotate a vector
-	 * anticlockwise about (0,0).
-	 * 
-	 * @param rad The angle, in radians.
-	 * 
-	 * @return This matrix, for chaining operations.
-	 */
-	public Matrix2 setToRotation(float rad) {
-		float cos = MathUtils.cos(rad); //(float)Math.cos(rad);
-		float sin = MathUtils.sin(rad); //(float)Math.sin(rad);
-		return set(cos, -sin, sin, cos);
-	}
-	
-	/**
-	 * @return The determinant of this matrix.
-	 */
-	/*
-	public float det() {
-		return val[M00]*val[M11] - val[M01]*val[M10];
-	}
-	*/
-	
-	/**
 	 * Transforms the specified vector (V) by this matrix (M) and returns the
 	 * resulting vector. The supplied vector will not be modified.
 	 * 
@@ -184,6 +161,20 @@ public class Matrix2 {
 				val[M00]*vec.x + val[M01]*vec.y,
 				val[M10]*vec.x + val[M11]*vec.y
 		);
+	}
+	
+	/**
+	 * Sets this matrix to a rotation matrix, which will rotate a vector
+	 * anticlockwise about (0,0).
+	 * 
+	 * @param rad The angle, in radians.
+	 * 
+	 * @return This matrix, for chaining operations.
+	 */
+	public Matrix2 setToRotation(float rad) {
+		float cos = MathUtils.cos(rad); //(float)Math.cos(rad);
+		float sin = MathUtils.sin(rad); //(float)Math.sin(rad);
+		return set(cos, -sin, sin, cos);
 	}
 	
 	/**

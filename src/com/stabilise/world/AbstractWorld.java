@@ -2,7 +2,6 @@ package com.stabilise.world;
 
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +21,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.Array;
 import com.stabilise.util.collect.ClearingLinkedList;
+import com.stabilise.util.collect.IteratorUtils;
 import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.concurrent.SynchronizedClearingQueue;
@@ -192,10 +192,7 @@ public abstract class AbstractWorld implements World {
 	 * true}.
 	 */
 	protected <E extends GameObject> void updateObjects(Iterable<E> objects) {
-		Iterator<E> i = objects.iterator();
-		while(i.hasNext())
-			if(i.next().updateAndCheck(this))
-				i.remove();
+		IteratorUtils.forEach(objects, o -> o.updateAndCheck(this));
 	}
 	
 	/**
@@ -466,7 +463,7 @@ public abstract class AbstractWorld implements World {
 		 * null}.
 		 */
 		public ParticleSource getSource(Particle templateParticle) {
-			return new ParticleSource(this, templateParticle);
+			return new ParticleSource(world, poolFor(templateParticle));
 		}
 		
 		/**
@@ -631,12 +628,12 @@ public abstract class AbstractWorld implements World {
 	@NotThreadSafe
 	public static class ParticleSource {
 		
-		private final ParticleManager manager;
+		private final World world;
 		private final ParticlePool pool;
 		
-		ParticleSource(ParticleManager manager, Particle template) {
-			this.manager = manager;
-			pool = manager.poolFor(template);
+		ParticleSource(World world, ParticlePool pool) {
+			this.world = world;
+			this.pool = pool;
 		}
 		
 		/**
@@ -646,7 +643,7 @@ public abstract class AbstractWorld implements World {
 		 */
 		public Particle create() {
 			Particle p = pool.get();
-			manager.world.addParticle(p);
+			world.addParticle(p);
 			return p;
 		}
 		
@@ -657,7 +654,7 @@ public abstract class AbstractWorld implements World {
 		 */
 		public Particle createAt(double x, double y) {
 			Particle p = pool.get();
-			manager.world.addParticle(p, x, y);
+			world.addParticle(p, x, y);
 			return p;
 		}
 		
@@ -683,7 +680,7 @@ public abstract class AbstractWorld implements World {
 		 */
 		public void createBurst(int numParticles, double x, double y,
 				float minV, float maxV, float minAngle, float maxAngle) {
-			Random rnd = manager.world.getRnd();
+			Random rnd = world.getRnd();
 			for(int i = 0; i < numParticles; i++)
 				createBurstParticle(rnd, x, y, minV, maxV, minAngle, maxAngle);
 		}
@@ -702,7 +699,7 @@ public abstract class AbstractWorld implements World {
 		public void createBurst(int numParticles, double x, double y,
 				float minV, float maxV, float minAngle, float maxAngle,
 				AABB aabb) {
-			Random rnd = manager.world.getRnd();
+			Random rnd = world.getRnd();
 			for(int i = 0; i < numParticles; i++)
 				createBurstParticle(rnd,
 						x + aabb.v00.x + rnd.nextFloat() * aabb.width(),
@@ -732,7 +729,7 @@ public abstract class AbstractWorld implements World {
 		 */
 		public void createBurstOnTile(int numParticles, int x, int y,
 				float minV, float maxV, float minAngle, float maxAngle) {
-			Random rnd = manager.world.getRnd();
+			Random rnd = world.getRnd();
 			createBurst(numParticles, x + rnd.nextDouble(), y + rnd.nextDouble(),
 					minV, maxV, minAngle, maxAngle);
 		}
@@ -748,9 +745,9 @@ public abstract class AbstractWorld implements World {
 				ParticlePhysical p0 = (ParticlePhysical)p;
 				p0.dx = dx;
 				p0.dy = dy;
-				manager.world.addParticle(p0, x, y);
+				world.addParticle(p0, x, y);
 			} else {
-				manager.world.addParticle(p, x + dx, y + dy);
+				world.addParticle(p, x + dx, y + dy);
 			}
 		}
 		

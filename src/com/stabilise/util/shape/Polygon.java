@@ -1,7 +1,5 @@
 package com.stabilise.util.shape;
 
-import static com.badlogic.gdx.math.MathUtils.*;
-
 import java.util.function.Function;
 
 import com.stabilise.util.annotation.NotThreadSafe;
@@ -56,21 +54,6 @@ public class Polygon extends AbstractPolygon {
 	@Override
 	public Polygon transform(Function<Vec2, Vec2> f) {
 		return newInstance(transformVertices(f));
-	}
-	
-	@Override
-	public Polygon rotate(float rads) {
-		return transform(v -> v.rotate(cos(rads), sin(rads)));
-	}
-	
-	@Override
-	public Polygon translate(float x, float y) {
-		return transform(v -> new Vec2(v.x + x, v.y + y));
-	}
-	
-	@Override
-	public Polygon reflect() {
-		return transform(v -> new Vec2(-v.x, v.y));
 	}
 	
 	@Override

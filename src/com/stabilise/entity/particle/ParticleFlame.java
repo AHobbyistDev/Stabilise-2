@@ -20,7 +20,7 @@ public class ParticleFlame extends ParticlePhysical {
 	//--------------------==========--------------------
 	
 	/** The opacity of the particle. */
-	public float opacity = 1.0f;
+	public float opacity;
 	
 	
 	public void update(World world) {
@@ -37,6 +37,12 @@ public class ParticleFlame extends ParticlePhysical {
 	@Override
 	public void render(WorldRenderer renderer) {
 		renderer.renderFlame(this);
+	}
+	
+	@Override
+	public void reset() {
+		super.reset();
+		opacity = 1.0f;
 	}
 	
 	@Override

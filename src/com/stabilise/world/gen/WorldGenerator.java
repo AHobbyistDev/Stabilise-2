@@ -435,8 +435,6 @@ public abstract class WorldGenerator {
 	}
 	*/
 	
-
-	
 	/**
 	 * Instructs the WorldGenerator to shut down.
 	 */

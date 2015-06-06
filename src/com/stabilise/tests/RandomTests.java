@@ -682,8 +682,8 @@ public class RandomTests {
 				new Vec2(0f, 0.5f)
 		);
 		Vec2[] verts = p1.getVertices();
-		Polygon p2 = p1.translate(1f, 1f);
-		Polygon p3 = p2.translate(-1f, -1f);
+		Shape p2 = p1.translate(1f, 1f);
+		Shape p3 = p2.translate(-1f, -1f);
 		System.out.println(p1);
 		System.out.println(p2);
 		System.out.println(p3);

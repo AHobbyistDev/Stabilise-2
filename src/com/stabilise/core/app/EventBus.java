@@ -169,9 +169,9 @@ public class EventBus {
 	private static final class Listener {
 		private final Consumer<Event> handler;
 		private final boolean persistent;
-		private int uses;
+		private long uses;
 		
-		public Listener(Consumer<Event> handler, boolean persistent, int uses) {
+		public Listener(Consumer<Event> handler, boolean persistent, long uses) {
 			this.handler = Objects.requireNonNull(handler);
 			this.persistent = persistent;
 			this.uses = uses;

@@ -10,7 +10,7 @@ import com.stabilise.world.World;
 public abstract class Particle extends FreeGameObject {
 	
 	/** The age of the particle, in ticks. */
-	public int age = 0;
+	public int age;
 	
 	/** The pool to which this particle belongs. May be {@code null}. */
 	public ParticlePool pool;
@@ -20,7 +20,7 @@ public abstract class Particle extends FreeGameObject {
 	 * Creates a new Particle.
 	 */
 	public Particle() {
-		super();
+		reset();
 	}
 	
 	@Override

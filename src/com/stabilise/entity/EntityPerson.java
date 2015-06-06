@@ -63,13 +63,13 @@ public class EntityPerson extends EntityMob {
 	public static final Polygon ATTACK_SIDE_AIR_HITBOX_1 =
 			new Polygon(new Vec2(2.72f,1.29f), new Vec2(0.96f,0.98f),
 					new Vec2(-0.45f,2.56f), new Vec2(1.29f,2.35f));
-	public static final Polygon ATTACK_SIDE_AIR_HITBOX_1_FLIPPED =
+	public static final Shape ATTACK_SIDE_AIR_HITBOX_1_FLIPPED =
 			ATTACK_SIDE_AIR_HITBOX_1.reflect();
 	public static final int ATTACK_SIDE_AIR_FRAME_3_BEGIN = 8;
 	public static final Polygon ATTACK_SIDE_AIR_HITBOX_2 =
 			new Polygon(new Vec2(2.72f,1.29f), new Vec2(1.44f,-0.41f),
 					new Vec2(0.45f,0.45f), new Vec2(0.96f,0.98f));
-	public static final Polygon ATTACK_SIDE_AIR_HITBOX_2_FLIPPED =
+	public static final Shape ATTACK_SIDE_AIR_HITBOX_2_FLIPPED =
 			ATTACK_SIDE_AIR_HITBOX_2.reflect();
 	
 	// Up attack (air)
@@ -78,18 +78,18 @@ public class EntityPerson extends EntityMob {
 	public static final Polygon ATTACK_UP_AIR_HITBOX_1_1 =
 			new Polygon(new Vec2(2.72f,1.51f), new Vec2(1.22f,-0.45f),
 					new Vec2(0.8f,0.75f), new Vec2(0.89f,1.38f));
-	public static final Polygon ATTACK_UP_AIR_HITBOX_1_1_FLIPPED =
+	public static final Shape ATTACK_UP_AIR_HITBOX_1_1_FLIPPED =
 			ATTACK_UP_AIR_HITBOX_1_1.reflect();
 	public static final Polygon ATTACK_UP_AIR_HITBOX_1_2 =
 			new Polygon(new Vec2(2.69f,1.95f), new Vec2(0.84f,1.49f),
 					new Vec2(0.27f,2.05f), new Vec2(0.58f,3.33f));
-	public static final Polygon ATTACK_UP_AIR_HITBOX_1_2_FLIPPED =
+	public static final Shape ATTACK_UP_AIR_HITBOX_1_2_FLIPPED =
 			ATTACK_UP_AIR_HITBOX_1_2.reflect();
 	public static final int ATTACK_UP_AIR_FRAME_3_BEGIN = 8;
 	public static final Polygon ATTACK_UP_AIR_HITBOX_2 =
 			new Polygon(new Vec2(-0.8f,1.4f), new Vec2(-1.65f,2.4f),
 					new Vec2(0.6f,3.35f), new Vec2(0.29f,2.04f));
-	public static final Polygon ATTACK_UP_AIR_HITBOX_2_FLIPPED =
+	public static final Shape ATTACK_UP_AIR_HITBOX_2_FLIPPED =
 			ATTACK_UP_AIR_HITBOX_2.reflect();
 	
 	// Down attack (air)
@@ -98,18 +98,18 @@ public class EntityPerson extends EntityMob {
 	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_1 =
 			new Polygon(new Vec2(0.78f,0.91f), new Vec2(0.0f,1.63f),
 					new Vec2(1.91f,-0.15f), new Vec2(0.6f,0.65f));
-	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED =
+	public static final Shape ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED =
 			ATTACK_DOWN_AIR_HITBOX_1_1.reflect();
 	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_2 =
 			new Polygon(new Vec2(0.6f,0.65f), new Vec2(1.91f,-0.15f),
 					new Vec2(0.44f,-0.87f), new Vec2(0.25f,0.42f));
-	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_2_FLIPPED =
+	public static final Shape ATTACK_DOWN_AIR_HITBOX_1_2_FLIPPED =
 			ATTACK_DOWN_AIR_HITBOX_1_2.reflect();
 	public static final int ATTACK_DOWN_AIR_FRAME_3_BEGIN = 8;
 	public static final Polygon ATTACK_DOWN_AIR_HITBOX_2 =
 			new Polygon(new Vec2(0.25f,0.42f), new Vec2(0.44f,-0.87f),
 					new Vec2(-1.47f,0.11f), new Vec2(-0.31f,0.69f));
-	public static final Polygon ATTACK_DOWN_AIR_HITBOX_2_FLIPPED =
+	public static final Shape ATTACK_DOWN_AIR_HITBOX_2_FLIPPED =
 			ATTACK_DOWN_AIR_HITBOX_2.reflect();
 	
 	// Specials

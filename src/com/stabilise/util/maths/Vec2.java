@@ -69,7 +69,7 @@ public class Vec2 {
 	 * Rotates this vector.
 	 * 
 	 * <p>This method is faster than {@link #rotate(float)}, as values for cos
-	 * and sine - obviously - do not need to be computed.
+	 * and sine obviously do not need to be computed.
 	 * 
 	 * @param cos The cosine of the angle by which to rotate this vector.
 	 * @param sin The sine of the angle by which to rotate this vector.

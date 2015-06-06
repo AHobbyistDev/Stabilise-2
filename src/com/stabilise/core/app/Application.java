@@ -2,6 +2,7 @@ package com.stabilise.core.app;
 
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.Supplier;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
@@ -395,6 +396,34 @@ public abstract class Application {
 	//--------------------==========--------------------
 	//------------=====Static Functions=====------------
 	//--------------------==========--------------------
+	
+	/**
+	 * Creates the Application.
+	 * 
+	 * <p>This method is offered as a simpler alternative to subclassing this
+	 * class when providing an initial state is the only extended functionality
+	 * needed.
+	 * 
+	 * @param ticksPerSecond The number of update ticks per second.
+	 * @param initialState The supplier of the initial state.
+	 * 
+	 * @return The Application.
+	 * @throws IllegalStateException if an Application is already running (i.e.
+	 * an Application instance has already been created).
+	 * @throws IllegalArgumentException if {@code ticksPerSecond < 1}.
+	 * @throws NullPointerException if {@code initialState} is {@code null}.
+	 */
+	public static Application create(int ticksPerSecond, Supplier<State> initialState) {
+		Objects.requireNonNull(initialState);
+		return new Application(ticksPerSecond) {
+			
+			@Override
+			protected State getInitialState() {
+				return initialState.get();
+			}
+			
+		};
+	}
 	
 	/**
 	 * Gets a reference to the Application.
