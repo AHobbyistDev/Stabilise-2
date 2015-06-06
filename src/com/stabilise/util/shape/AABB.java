@@ -214,6 +214,20 @@ public class AABB extends AbstractPolygon {
 	}
 	
 	/**
+	 * Gets the x-coordinate of the top-right vertex of this AABB.
+	 */
+	public float getMaxX() {
+		return v11.x;
+	}
+	
+	/**
+	 * Gets the y-coordinate of the top-right vertex of this AABB.
+	 */
+	public float getMaxY() {
+		return v11.y;
+	}
+	
+	/**
 	 * Calculates and returns the width of this AABB.
 	 */
 	public float width() {

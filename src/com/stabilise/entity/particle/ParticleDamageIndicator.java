@@ -79,7 +79,7 @@ public class ParticleDamageIndicator extends Particle {
 		this(text);
 		
 		x = e.x;
-		y = e.y + e.boundingBox.height();
+		y = e.y + e.boundingBox.getMaxY();
 	}
 	
 	@Override

@@ -204,10 +204,20 @@ public class LightLinkedList<E> extends AbstractCollection<E> implements List<E>
 	 */
 	private E unlink(Node<E> prev, Node<E> node) {
 		size--;
-		if(prev == null) // i.e. node == head
+		if(node == head) // i.e. prev == null
 			head = node.next;
 		else
 			prev.next = node.next;
+		if(node == tail)
+			tail = prev;
+		return node.e;
+	}
+	
+	private E deepUnlink(Node<E> prev, Node<E> node) {
+		size--;
+		if(node == head) // i.e. prev == null
+			head = node.next;
+		prev.next = node.next; // needed for proper iterator removal
 		if(node == tail)
 			tail = prev;
 		return node.e;
@@ -350,12 +360,15 @@ public class LightLinkedList<E> extends AbstractCollection<E> implements List<E>
 	 */
 	protected abstract class AbstractItr implements Iterator<E> {
 		
+		/** Points to head node. We maintain a reference so we don't need to
+		 * keep reconstructing a node every time the iterator is reset. */
+		private Node<E> headWrapper;
 		/** The element most recently returned by {@link #next()}. */
 		Node<E> lastReturned;
 		
 		
 		protected AbstractItr() {
-			// nothing to see here, move along
+			headWrapper = new Node<E>(head);
 		}
 		
 		/**
@@ -363,7 +376,8 @@ public class LightLinkedList<E> extends AbstractCollection<E> implements List<E>
 		 * List#iterator()}.
 		 */
 		protected void reset() {
-			lastReturned = new Node<E>(head);
+			headWrapper.next = head;
+			lastReturned = headWrapper;
 		}
 		
 		@Override
@@ -380,12 +394,13 @@ public class LightLinkedList<E> extends AbstractCollection<E> implements List<E>
 		
 		/** The element preceding {@link #lastReturned}. */
 		Node<E> prev;
-		boolean removed = false;
+		boolean removed;
 		
 		
 		@Override
 		protected void reset() {
 			super.reset();
+			removed = true;
 		}
 		
 		@Override
@@ -403,13 +418,8 @@ public class LightLinkedList<E> extends AbstractCollection<E> implements List<E>
 			if(removed)
 				throw new IllegalStateException();
 			removed = true;
-			size--;
-			if(lastReturned == head)
-				head = head.next;
-			else
-				prev.next = lastReturned.next;
-			if(lastReturned == tail)
-				tail = prev;
+			deepUnlink(prev, lastReturned);
+			lastReturned = prev;
 		}
 		
 	}

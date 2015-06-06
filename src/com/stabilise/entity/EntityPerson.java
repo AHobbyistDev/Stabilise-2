@@ -1,5 +1,6 @@
 package com.stabilise.entity;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.particle.ParticleFlame;
@@ -519,23 +520,23 @@ public class EntityPerson extends EntityMob {
 	 * @param originPoint The point from which the storm is to originate.
 	 */
 	private void fireballStorm(World world, int manaCost, Vec2 originPoint) {
+		double px = facingRight ? x + originPoint.x : x - originPoint.x;
+		
 		if(useMana(manaCost)) {
 			int max = 30 + world.getRnd().nextInt(11);
-			double px = facingRight ? x + originPoint.x : x - originPoint.x;
 			for(int i = 0; i < max; i++) {
-				double angle = (world.getRnd().nextFloat() * 0.47f + 0.03f) * Math.PI;
+				float angle = (world.getRnd().nextFloat() * 0.47f + 0.03f) * MathUtils.PI;
 				float velocity = 18.5f + world.getRnd().nextFloat() * 6.5f;
 				boolean right = world.getRnd().nextBoolean();
 				EntityProjectile e = new EntityFireball(world, this, world.getRnd().nextInt(3) + 5);
-				e.dx = (float) (right ? Math.cos(angle) * velocity : -Math.cos(angle) * velocity);
-				e.dy = (float) (Math.sin(angle)*velocity);
+				e.dx = right ? MathUtils.cos(angle) * velocity : -MathUtils.cos(angle) * velocity;
+				e.dy = MathUtils.sin(angle)*velocity;
 				e.facingRight = right;
 				world.addEntity(e, px, y + originPoint.y);
 			}
 		} else {
-			double px = facingRight ? x + originPoint.x : x - originPoint.x;
 			particleSrc.createBurst(6, px, y + originPoint.y,
-					0.03f, 0.08f, (float)Math.PI / 3f, (float)Math.PI * 0.6666f);
+					0.03f, 0.08f, MathUtils.PI / 3f, MathUtils.PI * 0.6666f);
 		}
 	}
 	

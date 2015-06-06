@@ -159,8 +159,8 @@ public abstract class AbstractWorld implements World {
 		profiler.next("particle"); // root.update.game.world.particle
 		updateObjects(getParticles());
 		
-		// Do a particle cleanup every 10 seconds
-		if(getAge() % 600 == 0)
+		// Do a particle cleanup every 5 seconds
+		if(getAge() % 300 == 0)
 			particleManager.cleanup();
 		
 		// Now, add all queued entities
@@ -463,7 +463,8 @@ public abstract class AbstractWorld implements World {
 		 * null}.
 		 */
 		public ParticleSource getSource(Particle templateParticle) {
-			return new ParticleSource(world, poolFor(templateParticle));
+			return new ParticleSource(world, poolFor(templateParticle),
+					templateParticle instanceof ParticlePhysical);
 		}
 		
 		/**
@@ -479,6 +480,7 @@ public abstract class AbstractWorld implements World {
 			} else {
 				// We don't want p to go to waste so we may as well put it in
 				// the pool.
+				p.pool = pool;
 				pool.put(p);
 			}
 			return pool;
@@ -584,8 +586,9 @@ public abstract class AbstractWorld implements World {
 		 * -->
 		 */
 		public void reclaim(Particle p) {
-			if(pool.length() < CAPACITY_MAX &&
-					activeParticles-- > expansionLoad) {
+			if(activeParticles-- > expansionLoad && pool.length() < CAPACITY_MAX) {
+				//System.out.println("Resizing the pool from " + pool.length()
+				//		+ " to " + (pool.length() * EXPANSION));
 				pool.resize(EXPANSION * pool.length());
 				expansionLoad = pool.length() * LOAD_FACTOR;
 			}
@@ -609,6 +612,8 @@ public abstract class AbstractWorld implements World {
 			// the pool.
 			if(pool.length() > CAPACITY_INITIAL &&
 					activeParticles < pool.length() / LOAD_FACTOR) {
+				//System.out.println("Shrinking the pool from " + pool.length()
+				//		+ " to " + (pool.length() / EXPANSION));
 				pool.resize(pool.length() / EXPANSION);
 				expansionLoad = pool.length() * LOAD_FACTOR;
 			}
@@ -630,10 +635,12 @@ public abstract class AbstractWorld implements World {
 		
 		private final World world;
 		private final ParticlePool pool;
+		private final boolean physical;
 		
-		ParticleSource(World world, ParticlePool pool) {
+		ParticleSource(World world, ParticlePool pool, boolean physical) {
 			this.world = world;
 			this.pool = pool;
+			this.physical = physical;
 		}
 		
 		/**
@@ -741,7 +748,7 @@ public abstract class AbstractWorld implements World {
 			float dx = v * MathUtils.cos(angle);
 			float dy = v * MathUtils.sin(angle);
 			Particle p = pool.get();
-			if(p instanceof ParticlePhysical) {
+			if(physical) {
 				ParticlePhysical p0 = (ParticlePhysical)p;
 				p0.dx = dx;
 				p0.dy = dy;

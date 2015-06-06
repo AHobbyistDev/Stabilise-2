@@ -17,6 +17,8 @@ import javax.imageio.ImageIO;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.StringUtil;
+import com.stabilise.util.collect.IteratorUtils;
+import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.Point;
 import com.stabilise.util.maths.Maths;
@@ -698,6 +700,25 @@ public class RandomTests {
 		System.out.println(p4);
 	}
 	
+	protected static void lightLinkedList() {
+		LightLinkedList<Integer> list = new LightLinkedList<>();
+		System.out.println(list);
+		for(int i = 0; i <= 10; i++)
+			list.add(i);
+		System.out.println(list);
+		list.remove(3);
+		System.out.println(list);
+		IteratorUtils.forEach(list, i -> {
+			System.out.println("Iterating over " + i);
+			if(i.intValue() % 2 == 0) {
+				System.out.println("Removing " + i);
+				return true;
+			}
+			return false;
+		});
+		System.out.println(list);
+	}
+	
 	// ---------- TIMER ----------
 	
 	private static long prev;
@@ -800,7 +821,8 @@ public class RandomTests {
 		//hashPointCollisions();
 		//hashPointCollisions2();
 		//autoboxing();
-		shapeTests();
+		//shapeTests();
+		lightLinkedList();
 		
 		//String s = "abcxyzABCXYZ a()a_a-a*a/a\\a.a'a\"";
 		//System.out.println(s + "\n" + IOUtil.getLegalString(s));
