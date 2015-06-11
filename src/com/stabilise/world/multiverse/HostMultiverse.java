@@ -144,11 +144,23 @@ public class HostMultiverse extends Multiverse<HostWorld> {
 		
 		for(HostWorld dim : dimensions.values())
 			dim.save();
+		
+		for(PlayerData p : players.values()) {
+			p.lastX = p.playerMob.x;
+			p.lastY = p.playerMob.y;
+			try {
+				p.save();
+			} catch(IOException e) {
+				throw new RuntimeException("Could not save player!", e);
+			}
+		}
 	}
 	
 	@Override
 	protected void closeExtra() {
 		for(PlayerData p : players.values()) {
+			p.lastX = p.playerMob.x;
+			p.lastY = p.playerMob.y;
 			try {
 				p.save();
 			} catch(IOException e) {
@@ -174,10 +186,12 @@ public class HostMultiverse extends Multiverse<HostWorld> {
 		/** The player's global data. */
 		public final CharacterData data;
 		
+		public EntityMob playerMob;
+		
 		private final FileHandle file;
 		
 		/** Whether or not the character is new to the world. */
-		public boolean newToWorld;
+		public boolean newToWorld = true;
 		/** The dimension the player is in. */
 		@ExportToNBT
 		public String dimension;

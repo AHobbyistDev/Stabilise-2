@@ -370,42 +370,8 @@ public class EntityPerson extends EntityMob {
 				}
 				break;
 			case SPECIAL_SIDE_GROUND:
-				if(stateTicks == SPECIAL_SIDE_GROUND_FRAME_2_BEGIN) {
-					if(useMana(SPECIAL_SIDE_GROUND_COST_MANA)) {
-						EntityFireball e = new EntityFireball(world, this,
-								world.getRnd().nextInt(3) + 5);
-						
-						if(facingRight) {
-							e.x = x + SPECIAL_SIDE_GROUND_ORIGIN.x;
-							e.dx = 0.95f + world.getRnd().nextFloat() * 0.3f;
-						} else {
-							e.x = x - SPECIAL_SIDE_GROUND_ORIGIN.x;
-							e.dx = -0.95f - world.getRnd().nextFloat() * 0.3f;
-						}
-						
-						e.y = y + SPECIAL_SIDE_GROUND_ORIGIN.y;
-						e.dy = 0.12f + world.getRnd().nextFloat() * 0.02f;
-						
-						e.facingRight = facingRight;
-						
-						world.addEntity(e);
-					} else {
-						double minAngle, maxAngle, px;
-						
-						if(facingRight) {
-							px = x + SPECIAL_SIDE_GROUND_ORIGIN.x;
-							minAngle = -Math.PI / 6.0D;
-							maxAngle = Math.PI / 6.0D;
-						} else {
-							px = x - SPECIAL_SIDE_GROUND_ORIGIN.x;
-							minAngle = Math.PI * 5.0D / 6.0D;
-							maxAngle = Math.PI * 7.0D / 7.0D;
-						}
-						
-						particleSrc.createBurst(6, px, y + SPECIAL_SIDE_GROUND_ORIGIN.y,
-								0.03f, 0.08f, (float)minAngle, (float)maxAngle);
-					}
-				}
+				if(stateTicks == SPECIAL_SIDE_GROUND_FRAME_2_BEGIN)
+					fireball(world, SPECIAL_SIDE_GROUND_COST_MANA, SPECIAL_SIDE_GROUND_ORIGIN);
 				break;
 			case SPECIAL_UP_GROUND:
 				if(stateTicks == SPECIAL_UP_GROUND_FRAME_2_BEGIN)
@@ -433,49 +399,15 @@ public class EntityPerson extends EntityMob {
 						h2.effect = new EffectFire(300);
 						world.addHitbox(h2, x, y);
 						
-						particleSrc.createBurst(30, x, y, 0.03f, 0.08f, 0, (float)Math.PI);
+						particleSrc.createBurst(300, x, y, 0.001f, 0.10f, 0, (float)Math.PI);
 					} else {
-						particleSrc.createBurst(10, x, y, 0.03f, 0.08f, 0, (float)Math.PI);
+						particleSrc.createBurst(100, x, y, 0.0001f, 0.08f, 0, (float)Math.PI);
 					}
 				}
 				break;
 			case SPECIAL_SIDE_AIR:
-				if(stateTicks == SPECIAL_SIDE_AIR_FRAME_2_BEGIN) {
-					if(useMana(SPECIAL_SIDE_AIR_COST_MANA)) {
-						EntityFireball e = new EntityFireball(world, this,
-								world.getRnd().nextInt(3) + 5);
-						
-						if(facingRight) {
-							e.x = x + SPECIAL_SIDE_AIR_ORIGIN.x;
-							e.dx = 0.95f + world.getRnd().nextFloat() * 0.3f;
-						} else {
-							e.x = x - SPECIAL_SIDE_AIR_ORIGIN.x;
-							e.dx = -0.95f - world.getRnd().nextFloat() * 0.3f;
-						}
-						
-						e.y = y + SPECIAL_SIDE_AIR_ORIGIN.y;
-						e.dy = 0.12f + world.getRnd().nextFloat() * 0.02f;
-						
-						e.facingRight = facingRight;
-						
-						world.addEntity(e);
-					} else {
-						double minAngle, maxAngle, px;
-						
-						if(facingRight) {
-							px = x + SPECIAL_SIDE_AIR_ORIGIN.x;
-							minAngle = -Math.PI / 6.0D;
-							maxAngle = Math.PI / 6.0D;
-						} else {
-							px = x - SPECIAL_SIDE_AIR_ORIGIN.x;
-							minAngle = Math.PI * 5.0D / 6.0D;
-							maxAngle = Math.PI * 7.0D / 7.0D;
-						}
-						
-						particleSrc.createBurst(6, px, y + SPECIAL_SIDE_AIR_ORIGIN.y,
-								0.03f, 0.08f, (float)minAngle, (float)maxAngle);
-					}
-				}
+				if(stateTicks == SPECIAL_SIDE_AIR_FRAME_2_BEGIN)
+					fireball(world, SPECIAL_SIDE_AIR_COST_MANA, SPECIAL_SIDE_AIR_ORIGIN);
 				break;
 			case SPECIAL_UP_AIR:
 				if(stateTicks == SPECIAL_UP_AIR_FRAME_2_BEGIN)
@@ -510,6 +442,43 @@ public class EntityPerson extends EntityMob {
 			default:
 				// nothing here
 				break;
+		}
+	}
+	
+	private void fireball(World world, int manaCost, Vec2 originPoint) {
+		if(useMana(manaCost)) {
+			EntityFireball e = new EntityFireball(world, this,
+					world.getRnd().nextInt(3) + 5);
+			
+			if(facingRight) {
+				e.x = x + originPoint.x;
+				e.dx = 30f + world.getRnd().nextFloat() * 10f;
+			} else {
+				e.x = x - originPoint.x;
+				e.dx = -30f - world.getRnd().nextFloat() * 10f;
+			}
+			
+			e.y = y + originPoint.y;
+			e.dy = 1.0f + world.getRnd().nextFloat() * 1.8f;
+			
+			e.facingRight = facingRight;
+			
+			world.addEntity(e);
+		} else {
+			double minAngle, maxAngle, px;
+			
+			if(facingRight) {
+				px = x + originPoint.x;
+				minAngle = -Math.PI / 6.0D;
+				maxAngle = Math.PI / 6.0D;
+			} else {
+				px = x - originPoint.x;
+				minAngle = Math.PI * 5.0D / 6.0D;
+				maxAngle = Math.PI * 7.0D / 7.0D;
+			}
+			
+			particleSrc.createBurst(6, px, y + originPoint.y,
+					0.03f, 0.08f, (float)minAngle, (float)maxAngle);
 		}
 	}
 	

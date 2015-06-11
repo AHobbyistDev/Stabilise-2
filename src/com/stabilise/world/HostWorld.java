@@ -5,7 +5,6 @@ import static com.stabilise.world.World.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.entity.Entity;
@@ -132,6 +131,7 @@ public class HostWorld extends AbstractWorld {
 	 */
 	public EntityMob addPlayer(PlayerData data) {
 		EntityPlayer p = new EntityPlayer();
+		data.playerMob = p;
 		if(data.newToWorld) {
 			data.newToWorld = false;
 			// TODO: For now I'm placing the character at (0,0) of the spawn
@@ -170,7 +170,7 @@ public class HostWorld extends AbstractWorld {
 	@Override
 	public boolean isLoaded() {
 		for(Region r : regions.values()) {
-			if(!r.isActive()) {
+			if(!r.isPrepared()) {
 				//log.postInfo("Not all regions loaded (" + r + ": "
 				//		+ r.isLoaded() + ", " + r.isGenerated() + ")");
 				return false;
@@ -265,12 +265,12 @@ public class HostWorld extends AbstractWorld {
 		return r;
 	}
 	
-	private Region loadRegion(int x, int y, boolean primary) {
+	private Region loadRegion(int x, int y, boolean makeActive) {
 		// Get the region if it is already loaded
 		Region r = regions.get(dummyLoc.set(x, y));
 		if(r != null) {
-			if(primary)
-				setPrimary(r);
+			if(makeActive)
+				setRegionActive(r);
 			return r;
 		}
 		
@@ -287,13 +287,13 @@ public class HostWorld extends AbstractWorld {
 		
 		loader.loadRegion(r, true);
 		
-		if(primary)
-			setPrimary(r);
+		if(makeActive)
+			setRegionActive(r);
 		
 		return r;
 	}
 	
-	private void setPrimary(Region r) {
+	private void setRegionActive(Region r) {
 		if(r.active)
 			return;
 		r.active = true;
@@ -307,7 +307,7 @@ public class HostWorld extends AbstractWorld {
 		}
 	}
 	
-	private void unsetPrimary(Region r) {
+	private void setRegionInactive(Region r) {
 		if(!r.active)
 			return;
 		r.active = false;

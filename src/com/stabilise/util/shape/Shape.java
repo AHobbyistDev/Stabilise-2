@@ -168,6 +168,17 @@ public abstract class Shape {
 	protected abstract Vec2[] getVertices();
 	
 	/**
+	 * Gets this shape's vertices.
+	 * 
+	 * <p>The vertices are returned in the order they physically connect - that
+	 * is, consecutive vertices in the array (first and last are considered
+	 * consecutive) are joined by edges.
+	 */
+	public final ImmutableArray<Vec2> vertices() {
+		return new ImmutableArray<>(getVertices());
+	}
+	
+	/**
 	 * Gets the axes upon which to project the shape for collision detection.
 	 * 
 	 * <p>A shape's projection axes are a set of vectors orthogonal to each of
@@ -354,6 +365,35 @@ public abstract class Shape {
 		@Override public boolean contains(Shape s) { return false; }
 		@Override public boolean containsPoint(float x, float y) { return false; }
 		@Override public Shape reflect() { return this; }
+	}
+	
+	/**
+	 * A class which wraps an array as to not permit structural modification.
+	 */
+	public static final class ImmutableArray<E> {
+		
+		private final E[] arr;
+		
+		ImmutableArray(E[] arr) {
+			this.arr = arr;
+		}
+		
+		/**
+		 * Gets the element in the array at the specified index.
+		 * 
+		 * @throws ArrayIndexOutOfBoundsException
+		 */
+		public E get(int index) {
+			return arr[index];
+		}
+		
+		/**
+		 * @return The length of the array.
+		 */
+		public int length() {
+			return arr.length;
+		}
+		
 	}
 	
 }

@@ -1,5 +1,8 @@
 package com.stabilise.opengl.render;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -10,11 +13,15 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.stabilise.core.Game;
 import com.stabilise.core.Resources;
 import com.stabilise.core.app.Application;
 import com.stabilise.entity.*;
+import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleExplosion;
@@ -25,6 +32,10 @@ import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.maths.Maths;
+import com.stabilise.util.maths.Vec2;
+import com.stabilise.util.shape.AABB;
+import com.stabilise.util.shape.Shape;
+import com.stabilise.util.shape.Shape.ImmutableArray;
 import com.stabilise.world.World;
 import com.stabilise.world.Slice;
 
@@ -82,6 +93,13 @@ public class WorldRenderer implements Renderer {
 	
 	ModelPlayer personModel;
 	
+	// Shape renderer for debug
+	ShapeRenderer shapes;
+	public boolean renderHitboxes = false;
+	
+	// List for automatic resource disposal
+	private List<Disposable> disposables = new ArrayList<>();
+	
 	private final Profiler profiler = Application.get().profiler;
 	
 	
@@ -107,40 +125,37 @@ public class WorldRenderer implements Renderer {
 	
 	@Override
 	public void loadResources() {
-		shader = new ColourEffectShader();
+		shader = register(new ColourEffectShader());
 		if(!shader.isCompiled())
 			throw new RuntimeException("Shader could not compile: " + shader.getLog());
 		
 		camera = new OrthographicCamera();
 		viewport = new ScreenViewport(camera);
-		batch = new SpriteBatch(512);
+		batch = register(new SpriteBatch(512));
 		
 		FreeTypeFontParameter param = new FreeTypeFontParameter();
 		param.size = 16;
-		font = Resources.font("arialbd", param);
+		font = register(Resources.font("arialbd", param));
 		
-		personModel = new ModelPlayer();
+		personModel = register(new ModelPlayer());
 		
-		texEnemy = Resources.texture("enemy");
+		texEnemy = register(Resources.texture("enemy"));
 		texEnemy.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-		//texEnemy.setPivot(texEnemy.getTextureWidth() / 2, 0);
 		
 		//arrowSprite = new Sprite("arrow");
 		//arrowSprite.setPivot(arrowSprite.getTextureWidth() * 3 / 4, arrowSprite.getTextureHeight() / 2);
 		//arrowSprite.filter(Texture.NEAREST);
 		
-		texFireball = Resources.texture("fireball");
+		texFireball = register(Resources.texture("fireball"));
 		texFireball.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-		//texFireball.setPivot(texFireball.getTextureWidth(), texFireball.getTextureHeight() / 2);
 		
-		texExplosion = Resources.texture("explosion");
+		texExplosion = register(Resources.texture("explosion"));
 		texExplosion.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		//texExplosion.setPivot(texExplosion.getTextureWidth()/2, texExplosion.getTextureHeight()/2);
 		
-		shtItems = TextureSheet.sequentiallyOptimised(Resources.texture("sheets/items"), 8, 8);
+		shtItems = register(TextureSheet.sequentiallyOptimised(Resources.texture("sheets/items"), 8, 8));
 		shtItems.texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
 		
-		shtParticles = TextureSheet.sequentiallyOptimised(Resources.texture("sheets/particles"), 8, 8);
+		shtParticles = register(TextureSheet.sequentiallyOptimised(Resources.texture("sheets/particles"), 8, 8));
 		shtParticles.texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
 		
 		//background = new Rectangle(screen.getWidth(), screen.getHeight());
@@ -150,24 +165,20 @@ public class WorldRenderer implements Renderer {
 		
 		//hudRenderer.loadResources();
 		
+		shapes = register(new ShapeRenderer());
+		
 		setPixelsPerTile(pixelsPerTile, false); // kickstarts things
+	}
+	
+	private <T extends Disposable> T register(T d) {
+		disposables.add(d);
+		return d;
 	}
 
 	@Override
 	public void unloadResources() {
-		shader.dispose();
-		batch.dispose();
-		
-		font.dispose();
-		
-		texEnemy.dispose();
-		texFireball.dispose();
-		texExplosion.dispose();
-		
-		shtItems.dispose();
-		shtParticles.dispose();
-		
-		personModel.dispose();
+		for(Disposable d : disposables)
+			d.dispose();
 		
 		tileRenderer.unloadResources();
 		//hudRenderer.unloadResources();
@@ -192,6 +203,7 @@ public class WorldRenderer implements Renderer {
 	public void resize(int width, int height) {
 		viewport.update(width, height);
 		batch.setProjectionMatrix(viewport.getCamera().combined);
+		shapes.setProjectionMatrix(viewport.getCamera().combined);
 		
 		tilesHorizontal = (int)(width / (2 * pixelsPerTile)) + 1;
 		tilesVertical = (int)(height / (2 * pixelsPerTile)) + 1;
@@ -214,6 +226,7 @@ public class WorldRenderer implements Renderer {
 		camera.position.set((float)playerCamera.x, (float)playerCamera.y, 0f);
 		camera.update();
 		batch.setProjectionMatrix(camera.combined);
+		shapes.setProjectionMatrix(camera.combined);
 		
 		profiler.end(); // root.update.renderer
 	}
@@ -246,12 +259,25 @@ public class WorldRenderer implements Renderer {
 		for(Particle p : world.getParticles())
 			p.render(this);
 		
+		batch.end();
+		
+		profiler.next("hitboxes"); // root.render.hitboxes
+		if(renderHitboxes) {
+			shapes.begin(ShapeType.Line);
+			shapes.setColor(Color.BLUE);
+			for(Entity e : world.getEntities())
+				renderAABB(e.boundingBox, (float)e.x, (float)e.y);
+			shapes.setColor(Color.RED);
+			for(Hitbox h : world.getHitboxes())
+				renderShape(h.boundingBox, (float)h.x, (float)h.y);
+			shapes.end();
+		}
+		
 		profiler.next("hud"); // root.render.hud
 		//hudRenderer.render();
 		
 		profiler.end(); // root.render
 		
-		batch.end();
 	}
 	
 	// ----------Entity rendering----------
@@ -334,18 +360,18 @@ public class WorldRenderer implements Renderer {
 				texFireball, // texture
 				(float)e.x, // x
 				(float)e.y, // y
-				0.75f, // originX
-				0.5f, // originY
+				0.25f, // originX
+				0f, // originY
 				1f, // width
 				0.5f, // height
 				1f, // scaleX
 				1f, // scaleY
-				(float)Math.toDegrees(e.rotation), // rotation
+				Maths.toDegrees(e.rotation), // rotation
 				0, // srcX
 				0, // srcY
 				texFireball.getWidth(), // srcWidth
 				texFireball.getHeight(), // srcHeight
-				false,//!e.facingRight, // flipX
+				false, //!e.facingRight, // flipX
 				false // flipY
 		);
 	}
@@ -462,6 +488,27 @@ public class WorldRenderer implements Renderer {
 				1f, // scaleY
 				0f // rotation
 		);
+	}
+	
+	// Shape rendering --------------------------------------------------------
+	
+	private void renderAABB(AABB aabb, float x, float y) {
+		shapes.rect(
+				aabb.getOriginX() + x, // x
+				aabb.getOriginY() + y, // y
+				aabb.width(), // width
+				aabb.height() // height
+		);
+	}
+	
+	private void renderShape(Shape s, float x, float y) {
+		ImmutableArray<Vec2> verts = s.vertices();
+		float[] v = new float[verts.length() * 2];
+		for(int i = 0; i < verts.length(); i++) {
+			v[2*i] = verts.get(i).x + x;
+			v[2*i + 1] = verts.get(i).y + y;
+		}
+		shapes.polygon(v);
 	}
 	
 }

@@ -254,13 +254,11 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	 * 
 	 * <pre>
 	 * class MyServer extends Server {
-	 *     public MyServer() {
-	 *         super((s) -> {
-	 *             return new TCPConnection(s, true, (c,p) -> {
-	 *                 handleProtocolSwitch(c,p);
-	 *             }); 
-	 *         });
-	 *     }
+	 * public MyServer() {
+	 *     super((s) ->
+	 *         new TCPConnection(s, true, (c,p) -> handleProtocolSwitch(c,p));
+	 *     });
+	 * }
 	 * }</pre>
 	 * 
 	 * <p>This method does nothing in the default implementation.

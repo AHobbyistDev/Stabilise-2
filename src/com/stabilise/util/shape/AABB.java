@@ -3,7 +3,6 @@ package com.stabilise.util.shape;
 import java.util.function.Function;
 
 import com.stabilise.util.maths.Maths;
-import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.Vec2;
 
 /**
@@ -52,37 +51,17 @@ public class AABB extends AbstractPolygon {
 		this.v11 = v11;
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p>Note that as a AABB is defined in terms of two vertices, the
-	 * returned AABB will retain the properties of an AABB, but its min
-	 * and max vertices will be transformed as per the matrix.
-	 */
-	@Override
-	public AABB transform(Matrix2 matrix) {
-		return new AABB(
-				matrix.transform(v00),
-				matrix.transform(v11)
-		);
-	}
-	
 	@Override
 	public AABB transform(Function<Vec2, Vec2> f) {
 		return new AABB(f.apply(v00), f.apply(v11));
 	}
 	
+	/**
+	 * @throws UnsupportedOperationException
+	 */
 	@Override
 	public AABB rotate(float rotation) {
 		throw new UnsupportedOperationException("Cannot rotate an AABB!");
-	}
-	
-	@Override
-	public AABB translate(float x, float y) {
-		return new AABB(
-				new Vec2(v00.x + x, v00.y + y),
-				new Vec2(v11.x + x, v11.y + y)
-		);
 	}
 	
 	@Override
@@ -95,7 +74,7 @@ public class AABB extends AbstractPolygon {
 	
 	/*
 	private Vec2[] genVertices() {
-				return new Vec2[] {
+		return new Vec2[] {
 				v00,
 				new Vec2(v11.x, v00.y),//v10
 				v11,
@@ -106,8 +85,14 @@ public class AABB extends AbstractPolygon {
 	
 	@Override
 	protected Vec2[] getVertices() {
-		throw new UnsupportedOperationException("AABB should have no need "
-				+ "for getVertices()!");
+		//throw new UnsupportedOperationException("AABB should have no need "
+		//		+ "for getVertices()!");
+		return new Vec2[] {
+				v00,
+				new Vec2(v11.x, v00.y),//v10
+				v11,
+				new Vec2(v00.x, v11.y) //v01
+		};
 	}
 	
 	@Override

@@ -6,6 +6,7 @@ import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.maths.Maths;
+import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Rectangle;
 import com.stabilise.world.AbstractWorld.ParticleSource;
 import com.stabilise.world.World;
@@ -20,7 +21,8 @@ public class EntityFireball extends EntityProjectile {
 	//--------------------==========--------------------
 	
 	/** The fireball hitbox template. */
-	private static final Rectangle FIREBALL_BOUNDING_BOX = new Rectangle(-0.05f, -0.05f, 0.1f, 0.1f);
+	private static final AABB FIREBALL_BOUNDING_BOX = new AABB(-0.05f, -0.05f, 0.1f, 0.1f);
+	private static final Rectangle FIREBALL_HITBOX = new Rectangle(-0.25f, -0.25f, 0.5f, 0.5f);
 	/** Default fireball damage. */
 	private static final int DEFAULT_FIREBALL_DAMAGE = 10;
 	
@@ -54,11 +56,18 @@ public class EntityFireball extends EntityProjectile {
 	 * @param damage The fireball's damage.
 	 */
 	public EntityFireball(World world, Entity owner, int damage) {
-		super(world, owner, new LinkedHitbox(owner, FIREBALL_BOUNDING_BOX, damage));
+		super(world, owner, new LinkedHitbox(owner, FIREBALL_HITBOX, damage));
 		((LinkedHitbox)hitbox).linkedEntity = this;
 		hitbox.force = 0.3f;
 		hitbox.effect = new EffectFire(300);
+		hitbox.hits = 1000; // TODO: temporary for fun
+		hitbox.persistenceTimer = -1;
 		particleSrc = world.getParticleManager().getSource(new ParticleFlame());
+	}
+	
+	@Override
+	protected AABB getAABB() {
+		return FIREBALL_BOUNDING_BOX;
 	}
 	
 	@Override
@@ -86,9 +95,9 @@ public class EntityFireball extends EntityProjectile {
 		
 		if(tileCollision) {		// Since it removes itself with an entity collision
 			if(Settings.settingParticlesAll())
-				addImpactParticles(world, 15);
+				addImpactParticles(world, 500);
 			else if(Settings.settingParticlesReduced())
-				addImpactParticles(world, 8);
+				addImpactParticles(world, 25);
 		}
 	}
 	
@@ -102,7 +111,7 @@ public class EntityFireball extends EntityProjectile {
 	 * @param particles The number of particles to create.
 	 */
 	private void addImpactParticles(World world, int particles) {
-		particleSrc.createBurst(particles, x, y, 0.08f, 0.15f, 0f, (float)Maths.TAU);
+		particleSrc.createBurst(particles, x, y, 0.0001f, 0.11f, 0f, (float)Maths.TAU);
 	}
 	
 	@Override

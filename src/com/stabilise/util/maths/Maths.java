@@ -1,5 +1,7 @@
 package com.stabilise.util.maths;
 
+import com.badlogic.gdx.math.MathUtils;
+
 /**
  * This class provides some utility methods and fields with mathematical
  * purpose.
@@ -407,6 +409,20 @@ public class Maths {
 	 */
 	public static int square(int x) {
 		return x*x;
+	}
+	
+	/**
+	 * Converts radians to degrees.
+	 */
+	public static float toDegrees(float rads) {
+		return rads * MathUtils.radiansToDegrees;
+	}
+	
+	/**
+	 * Converts degrees to radians.
+	 */
+	public static float toRadians(float deg) {
+		return deg * MathUtils.degreesToRadians;
 	}
 	
 }

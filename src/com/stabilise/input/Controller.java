@@ -52,7 +52,9 @@ public class Controller implements InputProcessor {
 		ZOOM_OUT("zoomout", Keys.MINUS, true),
 		ZOOM_IN("zoomin", Keys.EQUALS, true),
 		INTERACT("interact", Keys.I, true),
-		TEST_RANDOM_THING("testrandomthing", Keys.NUM_0, true);
+		TEST_RANDOM_THING("testrandomthing", Keys.NUM_0, true),
+		ADVANCE_TICK("forceTick", Keys.NUM_1, true),
+		TOGGLE_HITBOX_RENDERING("toggleHitboxRender", Keys.H, true);
 		
 		/** The field's name in the config file. */
 		public final String fieldName;
@@ -254,7 +256,8 @@ public class Controller implements InputProcessor {
 	 */
 	public static void setupConfig() {
 		if(!loadConfig()) {
-			Log.get().postWarning("Controls config could not be loaded - resetting to default values.");
+			Log.get().postWarning("Controls config could not be loaded - "
+					+ "resetting to default values.");
 			defaultConfig();
 			saveConfig();
 		}

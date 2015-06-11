@@ -142,6 +142,15 @@ public abstract class AbstractWorld implements World {
 	public abstract boolean isLoaded();
 	
 	/**
+	 * Updates this world, and returns {@code true} if it has unloaded and
+	 * should be disowned.
+	 * 
+	 * @return {@code true} if this World is unloaded and should be removed
+	 * ASAP; {@code false} otherwise.
+	 */
+	public abstract boolean update();
+	
+	/**
 	 * Updates the world by executing a single tick of game logic. In general,
 	 * all GameObjects in the world will be updated (i.e. entities, hitboxes,
 	 * tile entities, etc).

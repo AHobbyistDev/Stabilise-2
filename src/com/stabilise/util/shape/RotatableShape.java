@@ -3,7 +3,6 @@ package com.stabilise.util.shape;
 import java.util.function.Function;
 
 import com.stabilise.util.annotation.NotThreadSafe;
-import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.Vec2;
 
 /**
@@ -17,16 +16,14 @@ import com.stabilise.util.maths.Vec2;
  * 
  * <p>This class extends {@code Shape} such that a RotatableShape instance may
  * be used in place of a standard Shape without necessitating much refactoring.
- * 
- * @param <T> The type of shape.
  */
 @NotThreadSafe
-public class RotatableShape<T extends Shape> extends Shape {
+public class RotatableShape extends Shape {
 	
 	/** The original, or template, shape. */
-	private final T baseShape;
+	private final Shape baseShape;
 	/** The rotated shape, which is treated as the actual shape. */
-	private T rotatedShape;
+	private Shape rotatedShape;
 	/** Rotation, in radians. */
 	private float rotation;
 	
@@ -38,7 +35,7 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 * 
 	 * @throws IllegalArgumentException if {@code shape} is an AABB.
 	 */
-	public RotatableShape(T shape) {
+	public RotatableShape(Shape shape) {
 		if(shape instanceof AABB)
 			throw new IllegalArgumentException("Cannot wrap an AABB in a "
 					+ "RotatableShape since it may not be rotated!");
@@ -53,27 +50,12 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 * 
 	 * <p>
 	 * Invoking this method is equivalent to invoking
-	 * <pre>get().transform(matrix)</pre>
-	 * </p>
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public T transform(Matrix2 matrix) {
-		return (T)rotatedShape.transform(matrix);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p>
-	 * Invoking this method is equivalent to invoking
 	 * <pre>get().transform(f)</pre>
 	 * </p>
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	public T transform(Function<Vec2, Vec2> f) {
-		return (T)rotatedShape.transform(f);
+	public Shape transform(Function<Vec2, Vec2> f) {
+		return rotatedShape.transform(f);
 	}
 	
 	/**
@@ -81,7 +63,7 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 * 
 	 * @return The shape.
 	 */
-	public T get() {
+	public Shape get() {
 		return rotatedShape;
 	}
 	
@@ -105,7 +87,7 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 * @return The rotated shape.
 	 */
 	@Override
-	public T rotate(float rotation) {
+	public Shape rotate(float rotation) {
 		return setRotation(this.rotation + rotation);
 	}
 	
@@ -118,26 +100,18 @@ public class RotatableShape<T extends Shape> extends Shape {
 	 * 
 	 * @return The rotated shape.
 	 */
-	@SuppressWarnings("unchecked")
-	public T setRotation(float rotation) {
+	public Shape setRotation(float rotation) {
 		if(rotation == 0f)
 			return rotatedShape = baseShape;
 		if(this.rotation == rotation)
 			return rotatedShape;
 		this.rotation = rotation;
-		return rotatedShape = (T)baseShape.rotate(rotation);
+		return rotatedShape = baseShape.rotate(rotation);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public T translate(float x, float y) {
-		return (T)rotatedShape.translate(x, y);
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public T reflect() {
-		return (T)rotatedShape.reflect();
+	public Shape translate(float x, float y) {
+		return rotatedShape.translate(x, y);
 	}
 	
 	@Override

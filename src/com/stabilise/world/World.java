@@ -55,15 +55,6 @@ public interface World {
 	
 	
 	/**
-	 * Updates this World, and returns {@code true} if it has unloaded and
-	 * should be disowned.
-	 * 
-	 * @return {@code true} if this World is unloaded and should be removed
-	 * ASAP; {@code false} otherwise.
-	 */
-	boolean update();
-	
-	/**
 	 * Adds an entity to the world. The entity's ID is assigned automatically.
 	 * 
 	 * <p>The entity is not added to the map of entities immediately; rather,

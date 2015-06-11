@@ -130,7 +130,7 @@ public abstract class Multiverse<W extends AbstractWorld> {
 	 * Updates all worlds.
 	 */
 	public void update() {
-		IteratorUtils.forEach(dimensions.values(), World::update);
+		IteratorUtils.forEach(dimensions.values(), AbstractWorld::update);
 	}
 	
 	/**

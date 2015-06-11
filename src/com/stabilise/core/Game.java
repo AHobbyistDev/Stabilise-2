@@ -5,11 +5,13 @@ import static com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.stabilise.core.app.Application;
 import com.stabilise.core.state.LoadingState;
+import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.controller.PlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
+import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.HostWorld;
@@ -26,6 +28,9 @@ public class Game implements Controllable, InputProcessor {
 	public boolean running = true;
 	/** Whether or not the game is currently paused. */
 	public boolean paused = false;
+	
+	/** True if a single game tick should be run despite the game being paused. */
+	private boolean advanceTick = false;
 	
 	private final HostMultiverse provider;
 	/** The game's world instance. */
@@ -95,6 +100,10 @@ public class Game implements Controllable, InputProcessor {
 				profiler.next("world"); // root.update.game.world
 				if(!paused)
 					provider.update();
+				else if(advanceTick) {
+					advanceTick = false;
+					provider.update();
+				}
 				profiler.end(); // root.update.game
 			} catch(Exception e) {
 				log.postSevere("Game encountered error!", e);
@@ -175,14 +184,37 @@ public class Game implements Controllable, InputProcessor {
 		provider.save();
 	}
 	
+	public void pause() {
+		paused = true;
+	}
+	
+	public void unpause() {
+		paused = false;
+	}
+	
+	public void togglePause() {
+		paused = !paused;
+	}
+	
+	public void advanceTick() {
+		advanceTick = true;
+	}
+	
 	@Override
 	public boolean handleControlPress(Control control) {
 		switch(control) {
 			case PAUSE:
-				openPauseMenu();
+				togglePause();
+				break;
+			case ADVANCE_TICK:
+				advanceTick();
 				break;
 			case DEBUG:
 				debug = !debug;
+				break;
+			case TOGGLE_HITBOX_RENDERING:
+				WorldRenderer r = ((SingleplayerState)Application.get().getState()).renderer;
+				r.renderHitboxes = !r.renderHitboxes;
 				break;
 			default:
 				return playerController.handleControlPress(control);

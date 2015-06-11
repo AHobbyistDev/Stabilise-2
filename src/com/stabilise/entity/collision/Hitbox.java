@@ -17,10 +17,10 @@ public class Hitbox extends FreeGameObject {
 	/** The entity which owns the hitbox. */
 	public Entity owner;
 	/** Whether or not the hitbox is to persist for longer than a tick. */
-	public boolean persistent = false;
+	public boolean persistent = true;
 	/** The number of ticks the hitbox should persist for, if it is persistent.
 	 * A value of -1 indicates an indefinite length of time. */
-	public int persistenceTimer = -1;
+	public int persistenceTimer = 2;
 	/** The hitbox's bounding volume. */
 	public Shape boundingBox;
 	/** The number of entities the hitbox may hit. A value less than 0 means
