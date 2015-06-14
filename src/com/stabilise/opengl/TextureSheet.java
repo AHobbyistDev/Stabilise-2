@@ -168,6 +168,25 @@ public class TextureSheet implements Disposable {
 			return getRegion(x * cols + y);
 		}
 		
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("TextureSheet:{");
+			for(TextureRegion r : regions) {
+				sb.append("\n\tTextureRegion:[");
+				sb.append(r.getU());
+				sb.append(',');
+				sb.append(r.getU2());
+				sb.append(',');
+				sb.append(r.getV());
+				sb.append(',');
+				sb.append(r.getV2());
+				sb.append(']');
+			}
+			sb.append("\n}");
+			return sb.toString();
+		}
+		
 	}
 	
 	private static class TextureSheetMultidimensional extends TextureSheet {

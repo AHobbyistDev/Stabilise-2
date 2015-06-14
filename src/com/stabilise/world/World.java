@@ -25,6 +25,7 @@ import com.stabilise.util.concurrent.TrackableFuture;
 import com.stabilise.util.io.IOUtil;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.AbstractWorld.ParticleManager;
+import com.stabilise.world.multiverse.ClientMultiverse;
 import com.stabilise.world.multiverse.HostMultiverse;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.multiverse.HostMultiverse.PlayerBundle;
@@ -1160,19 +1161,19 @@ public interface World {
 		/** The multiverse. This should be cast to a {@link HostMultiverse}
 		 * if a host was built, or a {@link ClientMultiverse} if a client was
 		 * built. */
-		public final Multiverse<?> multiverse;
+		private final Multiverse<?> multiverse;
 		/** The world in which the integrated player has been placed. This
 		 * should be cast to a {@link HostWorld} if a host was built, and
 		 * to a {@link ClientWorld} if a client was built. This is {@code null}
 		 * if the world was built without setting an integrated player (i.e. if
 		 * a server was constructed). */
-		public final AbstractWorld world;
+		private final AbstractWorld world;
 		/** The player entity. This is {@code null} if no player was
 		 * specified. */
-		public final EntityMob playerEntity;
+		private final EntityMob playerEntity;
 		/** The world-specific player data. This is non-null iff a host was
 		 * built with an integrated player specified. */
-		public final PlayerData playerData;
+		private final PlayerData playerData;
 		
 		protected WorldBundle(Multiverse<?> multiverse, AbstractWorld world,
 				EntityMob playerEntity, PlayerData playerData) {
@@ -1181,6 +1182,81 @@ public interface World {
 			this.playerEntity = playerEntity;
 			this.playerData = playerData;
 		}
+		
+		/**
+		 * Gets this bundle's HostMultiverse.
+		 * 
+		 * @throws IllegalStateException if this is a client bundle.
+		 */
+		public HostMultiverse getHostMultiverse() {
+			if(!(multiverse instanceof HostMultiverse))
+				throw new IllegalStateException("Not a host bundle!");
+			return (HostMultiverse)multiverse;
+		}
+		
+		/**
+		 * Gets this bundle's ClientMultiverse.
+		 * 
+		 * @throws IllegalStateException if this is a host bundle.
+		 */
+		public ClientMultiverse getClientMultiverse() {
+			if(!(multiverse instanceof ClientMultiverse))
+				throw new IllegalStateException("Not a client bundle!");
+			return (ClientMultiverse)multiverse;
+		}
+		
+		/**
+		 * Gets the integrated player's initial world.
+		 * 
+		 * @throws IllegalStateException if there is no integrated player, or
+		 * this is a client bundle.
+		 */
+		public HostWorld getHostWorld() {
+			if(world == null)
+				throw new IllegalStateException("No integrated player!");
+			if(!(world instanceof HostWorld))
+				throw new IllegalStateException("Not a host bundle!");
+			return (HostWorld)world;
+		}
+		
+		/**
+		 * Gets the integrated player's initial world.
+		 * 
+		 * @throws IllegalStateException if there is no integrated player, or
+		 * this is a host bundle.
+		 */
+		public ClientWorld getClientWorld() {
+			if(world == null)
+				throw new IllegalStateException("No integrated player!");
+			if(!(world instanceof ClientWorld))
+				throw new IllegalStateException("Not a client bundle!");
+			return (ClientWorld)world;
+		}
+		
+		/**
+		 * Gets the integrated player's PlayerData, for use by a host.
+		 * 
+		 * @throws IllegalStateException if there is no integrated player, or
+		 * this is a client bundle.
+		 */
+		public PlayerData getPlayerData() {
+			if(playerData == null)
+				throw new IllegalStateException("Either no integrated player or"
+						+ "this is not a host bundle.");
+			return playerData;
+		}
+		
+		/**
+		 * Gets the integrated player's in-game entity.
+		 * 
+		 * @throws IllegalStateException if there is no integrated player.
+		 */
+		public EntityMob getPlayerEntity() {
+			if(playerEntity == null)
+				throw new IllegalStateException("Not integrated player!");
+			return playerEntity;
+		}
+		
 	}
 	
 }

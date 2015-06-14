@@ -619,7 +619,7 @@ public class RandomTests {
 		int len = 20;
 		for(int x = -len; x <= len; x++)
 			for(int y = -len; y <= len; y++)
-				points.add(new Point(x, y));
+				points.add(Point.mutable(x, y));
 		
 		List<Point> hashCollisions = new LinkedList<Point>();
 		while(points.size() > 0) {
@@ -643,13 +643,13 @@ public class RandomTests {
 		final int width = 1024;
 		final int height = 1024;
 		int[] pixels = new int[width*height];
-		Point p = new Point(0, 0);
+		Point p = Point.mutable(0, 0);
 		final int collisionYes = 0xFFFF0000;
 		final int collisionNo = 0xFFFFFFFF;
 		
 		for(int y = 0; y < height; y++) {
 			for(int x = 0; x < width; x++) {
-				boolean collision = p.hashCode() == new Point(x-width/2,y-height/2).hashCode();
+				boolean collision = p.hashCode() == Point.mutable(x-width/2,y-height/2).hashCode();
 				pixels[y*height+x] = collision ? collisionYes : collisionNo;
 			}
 		}

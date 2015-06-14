@@ -521,6 +521,7 @@ public class EntityPerson extends EntityMob {
 							setState(State.LAND_CROUCH, false, 20);
 						else
 							stateLockDuration = 0;
+						break;
 					case ATTACK_UP_AIR:
 						if(ATTACK_UP_AIR_DURATION - stateTicks > 10)
 							setState(State.LAND_CROUCH, false, 20);

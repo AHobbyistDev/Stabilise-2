@@ -8,7 +8,7 @@ import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
-import com.stabilise.world.RegionCache.CachedRegion;
+import com.stabilise.world.RegionStore.CachedRegion;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.multiverse.Multiverse;
 

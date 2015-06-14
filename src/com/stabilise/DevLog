@@ -251,6 +251,8 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 19/05/15
 	- WorldProvider -> Multiverse
 11/06/15
-	- Debug key to display hitboxes in-game
+	- Debug key to display hitboxes in-game by their outlines.
+13/06/15
+	- RegionCache is now RegionStore and is now in charge of managing all regions.
 
 	

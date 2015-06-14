@@ -43,6 +43,8 @@ public class TileRenderer implements Renderer {
 	public void loadResources() {
 		tiles = TextureSheet.sequentiallyOptimised(Resources.texture("sheets/tiles"), 8, 8);
 		tiles.texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+		
+		//System.out.println(tiles);
 	}
 	
 	@Override

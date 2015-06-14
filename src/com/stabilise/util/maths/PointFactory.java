@@ -5,11 +5,12 @@ import java.util.function.IntBinaryOperator;
 
 import com.stabilise.util.annotation.Immutable;
 import com.stabilise.util.annotation.ThreadSafe;
+import com.stabilise.util.maths.Point.ImmutablePoint;
+import com.stabilise.util.maths.Point.MutablePoint;
 
 /**
- * A {@code PointFactory} produces {@code Point} and {@code MutablePoint}
- * objects which use a specified hash function to generate their hash codes
- * instead of the default hash function.
+ * A {@code PointFactory} produces {@code Points} which use a specified hash
+ * function to generate their hash codes instead of the default hash function.
  * 
  * <p>Note that points created by a PointFactory may not necessarily produce
  * the same hash codes as points instantiated normally, or those produced by a
@@ -17,6 +18,7 @@ import com.stabilise.util.annotation.ThreadSafe;
  * 'breeds' of points.
  */
 @Immutable
+@ThreadSafe
 public class PointFactory {
 	
 	final IntBinaryOperator hasher;
@@ -34,33 +36,30 @@ public class PointFactory {
 	}
 	
 	/**
-	 * Creates a new Point with the specified components.
+	 * Creates a new immutable Point with the specified components.
 	 */
-	@ThreadSafe
-	public Point newPoint(int x, int y) {
-		return new OwnedPoint(x, y);
+	public Point newImmutablePoint(int x, int y) {
+		return new OwnedImmutablePoint(x, y);
 	}
 	
 	/**
-	 * Creates a new MutablePoint with the specified components.
+	 * Creates a new mutable Point with the specified components.
 	 */
-	@ThreadSafe
 	public MutablePoint newMutablePoint(int x, int y) {
 		return new OwnedMutablePoint(x, y);
 	}
 	
 	/**
-	 * Creates a new MutablePoint with components (0,0).
+	 * Creates a new mutable Point with components (0,0).
 	 */
-	@ThreadSafe
 	public MutablePoint newMutablePoint() {
 		return newMutablePoint(0, 0);
 	}
 	
 	// Nested classes ---------------------------------------------------------
 	
-	private class OwnedPoint extends Point {
-		private OwnedPoint(int x, int y) { super(x,y); }
+	private class OwnedImmutablePoint extends ImmutablePoint {
+		private OwnedImmutablePoint(int x, int y) { super(x,y); }
 		@Override protected int genHash() { return hasher.applyAsInt(x, y); }
 	}
 	
@@ -68,5 +67,5 @@ public class PointFactory {
 		private OwnedMutablePoint(int x, int y) { super(x,y); }
 		@Override protected int genHash() { return hasher.applyAsInt(x, y); }
 	}
-
+	
 }

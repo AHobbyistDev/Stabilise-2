@@ -11,7 +11,6 @@ import com.stabilise.core.app.Application;
 import com.stabilise.entity.EntityPerson;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.StringUtil;
-import com.stabilise.util.maths.MutablePoint;
 
 /**
  * Renders the in-game HUD.

@@ -12,8 +12,7 @@ import java.util.Objects;
 import com.stabilise.entity.GameObject;
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.annotation.NotThreadSafe;
-import com.stabilise.util.maths.AbstractPoint;
-import com.stabilise.util.maths.MutablePoint;
+import com.stabilise.util.maths.Point;
 import com.stabilise.util.maths.PointFactory;
 
 /**
@@ -35,10 +34,10 @@ public class SliceMapClient implements Iterable<Slice> {
 		return (x << 20) | (y & 0b1111);
 	});
 	/** Dummy point to use for hash table getters. */
-	private final MutablePoint dummyPoint = pointFactory.newMutablePoint();
+	private final Point dummyPoint = pointFactory.newMutablePoint();
 	
 	/** Holds slices. Maps slice location -> slice. */
-	private final Map<AbstractPoint, Slice> slices = new HashMap<>(MAX_LOADED_SLICES);
+	private final Map<Point, Slice> slices = new HashMap<>(MAX_LOADED_SLICES);
 	
 	private final ClientWorld world;
 	private GameObject target;
@@ -87,7 +86,7 @@ public class SliceMapClient implements Iterable<Slice> {
 	public boolean putSlice(int x, int y, Slice slice) {
 		if(!sliceInRange(slice))
 			return false;
-		slices.put(pointFactory.newPoint(x, y), slice);
+		slices.put(pointFactory.newImmutablePoint(x, y), slice);
 		return true;
 	}
 	

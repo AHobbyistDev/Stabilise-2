@@ -16,7 +16,6 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 import com.stabilise.util.concurrent.Task;
-import com.stabilise.util.maths.MutablePoint;
 import com.stabilise.util.maths.Point;
 import com.stabilise.util.maths.PointFactory;
 
@@ -148,7 +147,7 @@ public class Region {
 	
 	/** The region's location, whose components are in region-lengths. This
 	 * should be used as this region's key in any map implementation. This
-	 * object is always created by {@link #createLoc(int, int)}. */
+	 * object is always created by {@link #createImmutableLoc(int, int)}. */
 	public final Point loc;
 	
 	/** The coordinate offsets on the x and y-axes due to the coordinates of
@@ -193,11 +192,9 @@ public class Region {
 	 * @param x The region's x-coordinate, in region lengths.
 	 * @param y The region's y-coordinate, in region lengths.
 	 * @param worldAge The age of the world.
-	 * 
-	 * @throws NullPointerException if {@code world} is {@code null}.
 	 */
-	public Region(int x, int y, long worldAge) {
-		loc = createLoc(x, y);
+	Region(int x, int y, long worldAge) {
+		loc = createImmutableLoc(x, y);
 		
 		offsetX = x * REGION_SIZE;
 		offsetY = y * REGION_SIZE;
@@ -213,7 +210,7 @@ public class Region {
 	 * @return {@code true} if this region should be unloaded; {@code false}
 	 * if it should remain in memory.
 	 */
-	public boolean update(HostWorld world) {
+	public boolean update(HostWorld world, RegionStore store) {
 		if(!isPrepared())
 			return false; // TODO
 		
@@ -239,11 +236,11 @@ public class Region {
 			// which distributes the IO overhead nicely.
 			// N.B. loc.y & 7 == loc.y % 8
 			if(world.getAge() % (8*8 * Constants.TICKS_PER_SECOND) ==
-					(((loc.y & 7) * 8 + (loc.x & 7)) * Constants.TICKS_PER_SECOND))
+					(((loc.y() & 7) * 8 + (loc.x() & 7)) * Constants.TICKS_PER_SECOND))
 				world.saveRegion(this);
 		}
 		
-		implantStructures(world.regionCache);
+		implantStructures(store);
 		
 		return false;
 	}
@@ -326,7 +323,7 @@ public class Region {
 	 * @return This region's file.
 	 */
 	public FileHandle getFile(HostWorld world) {
-		return world.getWorldDir().child("r_" + loc.x + "_" + loc.y + ".region");
+		return world.getWorldDir().child("r_" + loc.x() + "_" + loc.y() + ".region");
 	}
 	
 	/**
@@ -351,7 +348,7 @@ public class Region {
 		structures.add(Objects.requireNonNull(struct));
 	}
 	
-	private void doAddStructure(QueuedStructure s, RegionCache regionCache) {
+	private void doAddStructure(QueuedStructure s, RegionStore regionCache) {
 		//s.add(world);
 	}
 	
@@ -376,7 +373,7 @@ public class Region {
 	 * Implants all structures queued to be added to this region.
 	 */
 	@NotThreadSafe
-	public void implantStructures(RegionCache cache) {
+	public void implantStructures(RegionStore cache) {
 		for(QueuedStructure s : structures) // clears the queue
 			doAddStructure(s, cache);
 	}
@@ -437,7 +434,8 @@ public class Region {
 	
 	/**
 	 * Attempts to obtain the permit to load this region. If this returns
-	 * {@code true}, the caller may generate the region.
+	 * {@code true}, the caller may load the region. This method is provided
+	 * for WorldLoader use only.
 	 */
 	public boolean getLoadPermit() {
 		// We can load only when this region is newly-created, so the only
@@ -447,7 +445,8 @@ public class Region {
 	
 	/**
 	 * Attempts to obtain the permit to generate this region. If this returns
-	 * {@code true}, the caller may generate this region.
+	 * {@code true}, the caller may generate this region. This method is
+	 * provided for WorldGenerator use only.
 	 */
 	public boolean getGenerationPermit() {
 		return state.compareAndSet(STATE_LOADING, STATE_GENERATING);
@@ -460,36 +459,35 @@ public class Region {
 	 * <p>Note that this method may block for a while if this region is
 	 * currently being saved.
 	 */
-	public boolean getSavePermit() {
-		// We synchronise on state to make this atomic. This is much less
+	public synchronized boolean getSavePermit() {
+		// We synchronise on this region to make this atomic. This is much less
 		// painful than trying to work with an atomic variable.
-		synchronized(state) {
-			if(saveState == SAVESTATE_IDLE) {
-				// If we're in IDLE, we switch to SAVING and save.
-				saveState = SAVESTATE_SAVING;
-				return true;
-			} else if(saveState == SAVESTATE_SAVING) {
-				// If we're in SAVING, this means another thread is currently
-				// saving this region. However, since we have no guarantee that
-				// it is saving up-to-date data, we wait for it to finish and
-				// then save again on this thread.
-				saveState = SAVESTATE_WAITING;
-				Task.waitOnUntil(state, () -> saveState == SAVESTATE_IDLE
-								|| saveState == SAVESTATE_IDLE_WAITER);
-				saveState = SAVESTATE_SAVING;
-				return true;
-			} else if(saveState == SAVESTATE_WAITING ||
-					saveState == SAVESTATE_IDLE_WAITER) {
-				// As above, except another thread is waiting to save the
-				// updated state. We abort and let that thread do it.
-				// 
-				// As an added bonus, since we just grabbed the sync lock,
-				// we've established a happens-before with the waiter and thus
-				// provided it with a more recent batch of region state. Yay!
-				return false;
-			} else {
-				throw new IllegalStateException("Invalid save state " + saveState);
-			}
+		
+		if(saveState == SAVESTATE_IDLE) {
+			// If we're in IDLE, we switch to SAVING and save.
+			saveState = SAVESTATE_SAVING;
+			return true;
+		} else if(saveState == SAVESTATE_SAVING) {
+			// If we're in SAVING, this means another thread is currently
+			// saving this region. However, since we have no guarantee that it
+			// is saving up-to-date data, we wait for it to finish and then
+			// save again on this thread.
+			saveState = SAVESTATE_WAITING;
+			Task.waitOnUntil(this, () -> saveState == SAVESTATE_IDLE
+							|| saveState == SAVESTATE_IDLE_WAITER);
+			saveState = SAVESTATE_SAVING;
+			return true;
+		} else if(saveState == SAVESTATE_WAITING ||
+				saveState == SAVESTATE_IDLE_WAITER) {
+			// As above, except another thread is waiting to save the updated
+			// state. We abort and let that thread do it.
+			// 
+			// As an added bonus, since we just grabbed the sync lock, we've
+			// established a happens-before with the waiter and thus provided
+			// it with a more recent batch of region state. Yay!
+			return false;
+		} else {
+			throw new IllegalStateException("Invalid save state " + saveState);
 		}
 	}
 	
@@ -498,13 +496,11 @@ public class Region {
 	 * notifying relevant threads.
 	 */
 	@UserThread("WorldLoaderThread")
-	public void finishSaving() {
-		synchronized(state) {
-			saveState = saveState == SAVESTATE_WAITING
-					? SAVESTATE_IDLE_WAITER
-					: SAVESTATE_IDLE;
-			state.notifyAll();
-		}
+	public synchronized void finishSaving() {
+		saveState = saveState == SAVESTATE_WAITING
+				? SAVESTATE_IDLE_WAITER
+				: SAVESTATE_IDLE;
+		this.notifyAll();
 	}
 	
 	/**
@@ -513,9 +509,7 @@ public class Region {
 	 * set when this method returns.
 	 */
 	public void waitUntilSaved() {
-		synchronized(state) {
-			Task.waitOnUntil(state, () -> saveState == SAVESTATE_IDLE);
-		}
+		Task.waitOnUntil(this, () -> saveState == SAVESTATE_IDLE);
 	}
 	
 	/**
@@ -535,14 +529,14 @@ public class Region {
 	 * @return This region's x-coordinate, in region-lengths.
 	 */
 	public int x() {
-		return loc.x;
+		return loc.x();
 	}
 	
 	/**
 	 * @return This region's y-coordinate, in region-lengths.
 	 */
 	public int y() {
-		return loc.y;
+		return loc.y();
 	}
 	
 	/**
@@ -558,12 +552,12 @@ public class Region {
 	@Override
 	public int hashCode() {
 		// Use the broader hash than the default loc hash.
-		return COORD_HASHER.applyAsInt(loc.x, loc.y);
+		return COORD_HASHER.applyAsInt(loc.x(), loc.y());
 	}
 	
 	@Override
 	public String toString() {
-		return "Region[" + loc.x + "," + loc.y + "]";
+		return "Region[" + loc.x() + "," + loc.y() + "]";
 	}
 	
 	/**
@@ -573,9 +567,9 @@ public class Region {
 	public String toStringDebug() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Region[");
-		sb.append(loc.x);
+		sb.append(loc.x());
 		sb.append(',');
-		sb.append(loc.y);
+		sb.append(loc.y());
 		sb.append(": ");
 		sb.append(stateToString());
 		sb.append('/');
@@ -602,7 +596,7 @@ public class Region {
 	
 	private String saveStateToString() {
 		int s;
-		synchronized(state) {
+		synchronized(this) {
 			s = saveState;
 		}
 		switch(s) {
@@ -627,17 +621,18 @@ public class Region {
 	 * Creates a {@code Point} object equivalent to a region with identical
 	 * coordinates' {@link #loc} member.
 	 */
-	public static Point createLoc(int x, int y) {
-		return LOC_FACTORY.newPoint(x, y);
+	public static Point createImmutableLoc(int x, int y) {
+		return LOC_FACTORY.newImmutablePoint(x, y);
 	}
 	
 	/**
 	 * Creates a mutable variant of a point returned by {@link
-	 * #createLoc(int, int)}. This method should not be invoked carelessly as
-	 * the sole purpose of creating mutable points should be to avoid needless
-	 * object creation in scenarios where thread safety is guaranteed.
+	 * #createImmutableLoc(int, int)}. This method should not be invoked
+	 * carelessly as the sole purpose of creating mutable points should be to
+	 * avoid needless object creation in scenarios where thread safety is
+	 * guaranteed.
 	 */
-	public static MutablePoint createMutableLoc() {
+	public static Point createMutableLoc() {
 		return LOC_FACTORY.newMutablePoint();
 	}
 	

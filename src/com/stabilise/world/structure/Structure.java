@@ -3,7 +3,7 @@ package com.stabilise.world.structure;
 import com.stabilise.util.collect.DuplicatePolicy;
 import com.stabilise.util.collect.InstantiationRegistry;
 import com.stabilise.world.Region;
-import com.stabilise.world.RegionCache;
+import com.stabilise.world.RegionStore;
 
 /**
  * A schematic is a structure blueprint.
@@ -42,7 +42,7 @@ public class Structure {
 	 * @param addToNeighbours true if this schematic should add itself to the
 	 * region's neighbours.
 	 */
-	public void add(RegionCache regions, Region r,
+	public void add(RegionStore regions, Region r,
 			int x, int y, long seed, boolean addToNeighbours) {
 		StructureBuilder builder = new StructureBuilder(
 				this,
@@ -80,14 +80,14 @@ public class Structure {
 	protected static class StructureBuilder {
 		
 		private final Structure structure;
-		private final RegionCache cache;
+		private final RegionStore cache;
 		private final Region r;
 		private final int x, y;
 		private final int ox, oy;
 		private final long seed;
 		private final boolean progenitor;
 		
-		private StructureBuilder(Structure structure, RegionCache cache,
+		private StructureBuilder(Structure structure, RegionStore cache,
 				Region r, int x, int y, long seed, boolean progenitor) {
 			this.structure = structure;
 			this.cache = cache;

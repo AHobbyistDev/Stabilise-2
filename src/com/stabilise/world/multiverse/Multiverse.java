@@ -263,10 +263,6 @@ public abstract class Multiverse<W extends AbstractWorld> {
 		@Override
 		public Thread newThread(Runnable r) {
 			Thread t = new Thread(r, "WorldThread" + threadNumber.incrementAndGet());
-			if(t.isDaemon())
-				t.setDaemon(false);
-			if(t.getPriority() != Thread.NORM_PRIORITY)
-				t.setPriority(Thread.NORM_PRIORITY);
 			t.setUncaughtExceptionHandler((th, e) -> 
 				log.postSevere("Worker thread \"" + th.getName() + "\" died!", e)
 			);

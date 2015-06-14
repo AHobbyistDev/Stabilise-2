@@ -66,10 +66,10 @@ public class Game implements Controllable, InputProcessor {
 	 * @throws NullPointerException if {@code worldBundle} is {@code null}.
 	 */
 	public Game(WorldBundle worldBundle) {
-		this.provider = (HostMultiverse)worldBundle.multiverse;
-		this.world = (HostWorld)worldBundle.world;
-		this.playerData = worldBundle.playerData;
-		this.player = worldBundle.playerEntity;
+		this.provider = worldBundle.getHostMultiverse();
+		this.world = worldBundle.getHostWorld();
+		this.playerData = worldBundle.getPlayerData();
+		this.player = worldBundle.getPlayerEntity();
 		
 		log.postInfo("Initiating game...");
 		

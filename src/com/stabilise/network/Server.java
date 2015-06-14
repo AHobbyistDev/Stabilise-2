@@ -16,6 +16,7 @@ import com.stabilise.util.AppDriver.Drivable;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.LightLinkedList;
+import com.stabilise.util.concurrent.Task;
 
 
 /**
@@ -381,10 +382,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 		
 		log.postInfo("Shut down.");
 		
-		synchronized(state) {
-			state.set(STATE_TERMINATED);
-			state.notifyAll();
-		}
+		Task.doThenNotify(state, () -> state.set(STATE_TERMINATED));
 	}
 	
 	@Override
@@ -413,10 +411,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
 	 * @throws InterruptedException
 	 */
 	public void waitUntilTerminated() throws InterruptedException {
-		synchronized(state) {
-			while(!isTerminated())
-				state.wait();
-		}
+		Task.waitOnInterruptibly(state, () -> isTerminated());
 	}
 	
 	/**

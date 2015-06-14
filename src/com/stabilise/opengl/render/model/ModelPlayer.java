@@ -8,7 +8,7 @@ import com.stabilise.core.Resources;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPerson;
 import com.stabilise.opengl.TextureSheet;
-import com.stabilise.util.maths.MutablePoint;
+import com.stabilise.util.maths.Point;
 
 /**
  * The player model.
@@ -26,18 +26,18 @@ public class ModelPlayer extends Model {
 	private static final int NUM_COLS = 8, NUM_ROWS = 8;
 	
 	/** The dimensions of the model, in tile-lengths. */
-	public static final MutablePoint DIMENSIONS = new MutablePoint(1, 2);
+	public static final Point DIMENSIONS = Point.mutable(1, 2);
 	
 	/** The template dimensions for each sprite. */
-	private static final MutablePoint TEMPLATE_DIMENSIONS = new MutablePoint(256,256);
+	private static final Point TEMPLATE_DIMENSIONS = Point.mutable(256,256);
 	
 	/** The number of pixels per tile, using the template dimensions. */
 	private static final int PIXELS_PER_TILE = 55;
 	
 	/** Cell dimensions, in tile-lengths. */
 	private static final Vector2 CELL_DIMENSIONS_TILES = new Vector2(
-			TEMPLATE_DIMENSIONS.x / PIXELS_PER_TILE,
-			TEMPLATE_DIMENSIONS.y / PIXELS_PER_TILE
+			TEMPLATE_DIMENSIONS.x() / PIXELS_PER_TILE,
+			TEMPLATE_DIMENSIONS.y() / PIXELS_PER_TILE
 	);
 	
 	/** The origin point for each sprite. */
@@ -46,51 +46,51 @@ public class ModelPlayer extends Model {
 			49f / PIXELS_PER_TILE // 56
 	);		
 	
-	private static final MutablePoint
-		SPRITE_IDLE = new MutablePoint(0, 0),
-		SPRITE_RUN_1 = new MutablePoint(1, 0),
-		SPRITE_RUN_2 = new MutablePoint(2, 0),
-		SPRITE_RUN_3 = new MutablePoint(3, 0),
-		SPRITE_RUN_4 = new MutablePoint(4, 0),
-		SPRITE_CROUCH = new MutablePoint(5, 0),
-		SPRITE_JUMP = new MutablePoint(6, 0),
-		SPRITE_FALL = new MutablePoint(7, 0),
+	private static final Point
+		SPRITE_IDLE = Point.mutable(0, 0),
+		SPRITE_RUN_1 = Point.mutable(1, 0),
+		SPRITE_RUN_2 = Point.mutable(2, 0),
+		SPRITE_RUN_3 = Point.mutable(3, 0),
+		SPRITE_RUN_4 = Point.mutable(4, 0),
+		SPRITE_CROUCH = Point.mutable(5, 0),
+		SPRITE_JUMP = Point.mutable(6, 0),
+		SPRITE_FALL = Point.mutable(7, 0),
 	/*
-		SPRITE_BLOCK = new MutablePoint(0, 1),
-		SPRITE_AIRDODGE = new MutablePoint(1, 1),
-		SPRITE_HITSTUN = new MutablePoint(2, 1),
-		SPRITE_AIRHITSTUN = new MutablePoint(3, 1),
-		SPRITE_SIDESTEP = new MutablePoint(4, 1),
+		SPRITE_BLOCK = Point.mutable(0, 1),
+		SPRITE_AIRDODGE = Point.mutable(1, 1),
+		SPRITE_HITSTUN = Point.mutable(2, 1),
+		SPRITE_AIRHITSTUN = Point.mutable(3, 1),
+		SPRITE_SIDESTEP = Point.mutable(4, 1),
 	*/
-		SPRITE_SLIDE_FORWARD = new MutablePoint(5, 1),
-		SPRITE_SLIDE_BACKWARD = new MutablePoint(6, 1),
-		SPRITE_ATTACK_GROUND_SIDE_1 = new MutablePoint(7, 1),
-		SPRITE_ATTACK_GROUND_SIDE_2 = new MutablePoint(0, 2),
-		SPRITE_ATTACK_GROUND_SIDE_3 = new MutablePoint(1, 2),
-		SPRITE_ATTACK_GROUND_UP_1 = new MutablePoint(2, 2),
-		SPRITE_ATTACK_GROUND_UP_2 = new MutablePoint(3, 2),
-		SPRITE_ATTACK_GROUND_DOWN_1 = new MutablePoint(4, 2),
-		SPRITE_SPECIAL_GROUND_SIDE_1 = new MutablePoint(5, 2),
-		SPRITE_SPECIAL_GROUND_SIDE_2 = new MutablePoint(6, 2),
-		SPRITE_SPECIAL_GROUND_UP_1 = new MutablePoint(7, 2),
-		SPRITE_SPECIAL_GROUND_UP_2 = new MutablePoint(0, 3),
-		SPRITE_SPECIAL_GROUND_DOWN_1 = new MutablePoint(1, 3),
-		SPRITE_SPECIAL_GROUND_DOWN_2 = new MutablePoint(2, 3),
-		SPRITE_ATTACK_AIR_SIDE_1 = new MutablePoint(3, 3),
-		SPRITE_ATTACK_AIR_SIDE_2 = new MutablePoint(4, 3),
-		SPRITE_ATTACK_AIR_SIDE_3 = new MutablePoint(5, 3),
-		SPRITE_ATTACK_AIR_UP_1 = new MutablePoint(6, 3),
-		SPRITE_ATTACK_AIR_UP_2 = new MutablePoint(7, 3),
-		SPRITE_ATTACK_AIR_UP_3 = new MutablePoint(0, 4),
-		SPRITE_ATTACK_AIR_DOWN_1 = new MutablePoint(1, 4),
-		SPRITE_ATTACK_AIR_DOWN_2 = new MutablePoint(2, 4),
-		SPRITE_ATTACK_AIR_DOWN_3 = new MutablePoint(3, 4),
-		SPRITE_SPECIAL_AIR_SIDE_1 = new MutablePoint(4, 4),
-		SPRITE_SPECIAL_AIR_SIDE_2 = new MutablePoint(5, 4),
-		SPRITE_SPECIAL_AIR_UP_1 = new MutablePoint(6, 4),
-		SPRITE_SPECIAL_AIR_UP_2 = new MutablePoint(7, 4),
-		SPRITE_SPECIAL_AIR_DOWN_1 = new MutablePoint(0, 5),
-		SPRITE_SPECIAL_AIR_DOWN_2 = new MutablePoint(1, 5);
+		SPRITE_SLIDE_FORWARD = Point.mutable(5, 1),
+		SPRITE_SLIDE_BACKWARD = Point.mutable(6, 1),
+		SPRITE_ATTACK_GROUND_SIDE_1 = Point.mutable(7, 1),
+		SPRITE_ATTACK_GROUND_SIDE_2 = Point.mutable(0, 2),
+		SPRITE_ATTACK_GROUND_SIDE_3 = Point.mutable(1, 2),
+		SPRITE_ATTACK_GROUND_UP_1 = Point.mutable(2, 2),
+		SPRITE_ATTACK_GROUND_UP_2 = Point.mutable(3, 2),
+		SPRITE_ATTACK_GROUND_DOWN_1 = Point.mutable(4, 2),
+		SPRITE_SPECIAL_GROUND_SIDE_1 = Point.mutable(5, 2),
+		SPRITE_SPECIAL_GROUND_SIDE_2 = Point.mutable(6, 2),
+		SPRITE_SPECIAL_GROUND_UP_1 = Point.mutable(7, 2),
+		SPRITE_SPECIAL_GROUND_UP_2 = Point.mutable(0, 3),
+		SPRITE_SPECIAL_GROUND_DOWN_1 = Point.mutable(1, 3),
+		SPRITE_SPECIAL_GROUND_DOWN_2 = Point.mutable(2, 3),
+		SPRITE_ATTACK_AIR_SIDE_1 = Point.mutable(3, 3),
+		SPRITE_ATTACK_AIR_SIDE_2 = Point.mutable(4, 3),
+		SPRITE_ATTACK_AIR_SIDE_3 = Point.mutable(5, 3),
+		SPRITE_ATTACK_AIR_UP_1 = Point.mutable(6, 3),
+		SPRITE_ATTACK_AIR_UP_2 = Point.mutable(7, 3),
+		SPRITE_ATTACK_AIR_UP_3 = Point.mutable(0, 4),
+		SPRITE_ATTACK_AIR_DOWN_1 = Point.mutable(1, 4),
+		SPRITE_ATTACK_AIR_DOWN_2 = Point.mutable(2, 4),
+		SPRITE_ATTACK_AIR_DOWN_3 = Point.mutable(3, 4),
+		SPRITE_SPECIAL_AIR_SIDE_1 = Point.mutable(4, 4),
+		SPRITE_SPECIAL_AIR_SIDE_2 = Point.mutable(5, 4),
+		SPRITE_SPECIAL_AIR_UP_1 = Point.mutable(6, 4),
+		SPRITE_SPECIAL_AIR_UP_2 = Point.mutable(7, 4),
+		SPRITE_SPECIAL_AIR_DOWN_1 = Point.mutable(0, 5),
+		SPRITE_SPECIAL_AIR_DOWN_2 = Point.mutable(1, 5);
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -276,8 +276,8 @@ public class ModelPlayer extends Model {
 	 * 
 	 * @param p The sprite's position within the spritesheet.
 	 */
-	private void setSprite(MutablePoint p) {
-		cell = texSheet.getRegion(p.x, p.y);
+	private void setSprite(Point p) {
+		cell = texSheet.getRegion(p.x(), p.y());
 	}
 	
 	@Override

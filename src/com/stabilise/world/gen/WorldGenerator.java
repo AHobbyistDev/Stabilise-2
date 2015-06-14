@@ -13,7 +13,7 @@ import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
-import com.stabilise.world.RegionCache;
+import com.stabilise.world.RegionStore;
 import com.stabilise.world.Slice;
 import com.stabilise.world.loader.WorldLoader.DimensionLoader;
 import com.stabilise.world.multiverse.Multiverse;
@@ -23,6 +23,17 @@ import com.stabilise.world.tile.Tiles;
 /**
  * The {@code WorldGenerator} class provides the mechanism for generating the
  * terrain of a world.
+ * 
+ * <h3>Usage Guidelines</h3>
+ * 
+ * <p>Firstly, a {@code WorldGenerator} must be prepared via {@link
+ * #prepare(DimensionLoader, RegionStore) prepare()} before it can be used.
+ * 
+ * <p>
+ * 
+ * <h3>Implementation Guidelines</h3>
+ * 
+ * 
  * 
  * <h3>Standard Usage Guidelines - OUT OF DATE</h3>
  * 
@@ -90,7 +101,7 @@ public abstract class WorldGenerator {
 	/** Whether or not the generator has been shut down. This is volatile. */
 	private volatile boolean isShutdown = false;
 	
-	private RegionCache regionCache;
+	private RegionStore regionStore;
 	
 	protected final Log log = Log.getAgent("GENERATOR");
 	
@@ -112,17 +123,17 @@ public abstract class WorldGenerator {
 	
 	/**
 	 * Prepares this WorldGenerator by providing it with references to the
-	 * world loader and region cache of the world.
+	 * world loader and the world's region store.
 	 * 
 	 * @throws IllegalStateException if this generator has already been
 	 * prepared.
 	 * @throws NullPointerException if either argument is null.
 	 */
-	public void prepare(DimensionLoader loader, RegionCache cache) {
-		if(this.regionCache != null || this.loader != null)
+	public void prepare(DimensionLoader loader, RegionStore regions) {
+		if(this.regionStore != null || this.loader != null)
 			throw new IllegalStateException("Already prepared");
 		this.loader = Objects.requireNonNull(loader);
-		this.regionCache = Objects.requireNonNull(cache);
+		this.regionStore = Objects.requireNonNull(regions);
 	}
 	
 	/**
@@ -192,8 +203,8 @@ public abstract class WorldGenerator {
 				for(int y = 0; y < REGION_SIZE; y++) {
 					for(int x = 0; x < REGION_SIZE; x++) {
 						r.slices[y][x] = new Slice(
-								x + r.loc.x * REGION_SIZE,
-								y + r.loc.y * REGION_SIZE,
+								x + r.x() * REGION_SIZE,
+								y + r.y() * REGION_SIZE,
 								// all values are 0 == Tiles.AIR
 								new int[SLICE_SIZE][SLICE_SIZE]
 						);
@@ -206,7 +217,7 @@ public abstract class WorldGenerator {
 			
 			// After normal generation processes have been completed, add any
 			// queued schematics.
-			r.implantStructures(regionCache);
+			r.implantStructures(regionStore);
 			
 			/*
 			for(Region.QueuedSchematic s : r.getSchematics(true)) {
@@ -236,7 +247,7 @@ public abstract class WorldGenerator {
 			return;
 		} finally {
 			// We always clean up all regions cached during generation.
-			regionCache.uncacheAll();
+			regionStore.uncacheAll();
 		}
 	}
 	
