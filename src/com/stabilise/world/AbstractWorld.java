@@ -242,8 +242,12 @@ public abstract class AbstractWorld implements World {
 		hitboxes.add(Objects.requireNonNull(h));
 	}
 	
-	@Override
-	public void addParticle(Particle p) {
+	/**
+	 * Adds a particle to the world.
+	 * 
+	 * @throws NullPointerException if {@code p} is {@code null}.
+	 */
+	protected void addParticle(Particle p) {
 		particleCount++;
 		particles.add(Objects.requireNonNull(p));
 	}
@@ -447,7 +451,7 @@ public abstract class AbstractWorld implements World {
 		private final AbstractWorld world;
 		/** Caches all the particle pools used and shared by each
 		 * ParticleSource. */
-		private final Map<Class<? extends Particle>, ParticlePool> pools =
+		private final Map<Class<? extends Particle>, ParticleSource> sources =
 				new IdentityHashMap<>();
 		
 		
@@ -455,44 +459,40 @@ public abstract class AbstractWorld implements World {
 			this.world = world;
 		}
 		
+		/*
 		public void addParticle(Particle p) {
 			if(world.isClient()) {
 				world.addParticle(p);
 			}
 		}
+		*/
 		
 		/**
 		 * Returns a generator, or <i>source</i>, of particles of the same type
 		 * as the specified particle.
 		 * 
 		 * @param templateParticle The particle to use as the template for all
-		 * particles created by the returned {@code ParticleSource}>
+		 * particles created by the returned {@code ParticleSource}.
 		 * 
 		 * @throws NullPointerException if {@code templateParticle} is {@code
 		 * null}.
 		 */
 		public ParticleSource getSource(Particle templateParticle) {
-			return new ParticleSource(world, poolFor(templateParticle),
-					templateParticle instanceof ParticlePhysical);
-		}
-		
-		/**
-		 * Gets a pool for particles of the same class as {@code p}.
-		 * 
-		 * @throws NullPointerException if {@code p} is {@code null}.
-		 */
-		ParticlePool poolFor(Particle p) {
-			ParticlePool pool = pools.get(p.getClass());
-			if(pool == null) {
-				pool = new ParticlePool(p);
-				pools.put(p.getClass(), pool);
+			ParticleSource source = sources.get(templateParticle.getClass());
+			if(source == null) {
+				source = new ParticleSource(
+						world,
+						new ParticlePool(templateParticle),
+						templateParticle instanceof ParticlePhysical
+				);
+				sources.put(templateParticle.getClass(), source);
 			} else {
-				// We don't want p to go to waste so we may as well put it in
-				// the pool.
-				p.pool = pool;
-				pool.put(p);
+				// We don't want the particle to go to waste so we may as well
+				// put it in the pool.
+				templateParticle.pool = source.pool;
+				source.pool.put(templateParticle);
 			}
-			return pool;
+			return source;
 		}
 		
 		/**
@@ -500,8 +500,8 @@ public abstract class AbstractWorld implements World {
 		 * in order to free up memory.
 		 */
 		void cleanup() {
-			for(ParticlePool pool : pools.values())
-				pool.flush();
+			for(ParticleSource src : sources.values())
+				src.pool.flush();
 		}
 		
 	}
@@ -642,14 +642,20 @@ public abstract class AbstractWorld implements World {
 	@NotThreadSafe
 	public static class ParticleSource {
 		
-		private final World world;
+		private final AbstractWorld world;
 		private final ParticlePool pool;
 		private final boolean physical;
 		
-		ParticleSource(World world, ParticlePool pool, boolean physical) {
+		ParticleSource(AbstractWorld world, ParticlePool pool, boolean physical) {
 			this.world = world;
 			this.pool = pool;
 			this.physical = physical;
+		}
+		
+		private void addParticle(Particle p, double x, double y) {
+			p.x = x;
+			p.y = y;
+			world.addParticle(p);
 		}
 		
 		/**
@@ -670,7 +676,7 @@ public abstract class AbstractWorld implements World {
 		 */
 		public Particle createAt(double x, double y) {
 			Particle p = pool.get();
-			world.addParticle(p, x, y);
+			addParticle(p, x, y);
 			return p;
 		}
 		
@@ -761,9 +767,9 @@ public abstract class AbstractWorld implements World {
 				ParticlePhysical p0 = (ParticlePhysical)p;
 				p0.dx = dx;
 				p0.dy = dy;
-				world.addParticle(p0, x, y);
+				addParticle(p0, x, y);
 			} else {
-				world.addParticle(p, x + dx, y + dy);
+				addParticle(p, x + dx, y + dy);
 			}
 		}
 		

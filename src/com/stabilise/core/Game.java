@@ -15,7 +15,7 @@ import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.HostWorld;
-import com.stabilise.world.World.WorldBundle;
+import com.stabilise.world.Worlds.WorldBundle;
 import com.stabilise.world.multiverse.HostMultiverse;
 import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
 

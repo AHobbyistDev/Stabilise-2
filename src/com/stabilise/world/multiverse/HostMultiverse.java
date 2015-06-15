@@ -69,7 +69,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
 		
 		Dimension dim = Dimension.getDimension(info, name);
 		if(dim == null)
-			throw new IllegalArgumentException("Invalid dimension \"" + name + "\"");
+			throw new IllegalArgumentException("Invalid dim: \"" + name + "\"");
 		
 		try {
 			dim.loadData();

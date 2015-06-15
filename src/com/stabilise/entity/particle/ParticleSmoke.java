@@ -40,10 +40,11 @@ public class ParticleSmoke extends ParticlePhysical {
 	
 	@Override
 	public void update(World world) {
-		super.update(world);
-		
 		dx *= DX_MULT;
+		dy = 0.00f;
 		//dy *= DX_MULT;
+		
+		super.update(world);
 		
 		if(age == DESPAWN_TICKS)
 			destroy();

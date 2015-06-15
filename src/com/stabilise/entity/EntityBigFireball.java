@@ -49,12 +49,14 @@ public class EntityBigFireball extends EntityProjectile {
 	private int damage;
 	
 	private final ParticleSource particleSrc;
+	private final ParticleSource explosionSrc;
 	
 	
 	/** TODO: temporary. */
 	public EntityBigFireball() {
 		super(null, null, null);
 		particleSrc = null;
+		explosionSrc = null;
 	}
 	
 	/**
@@ -83,6 +85,7 @@ public class EntityBigFireball extends EntityProjectile {
 		this.damage = damage;
 		
 		particleSrc = world.getParticleManager().getSource(new ParticleFlame());
+		explosionSrc = world.getParticleManager().getSource(new ParticleExplosion(0.5f, 12));
 	}
 	
 	@Override
@@ -179,8 +182,7 @@ public class EntityBigFireball extends EntityProjectile {
 		world.addHitbox(h3, x, y);
 		world.addHitbox(h4, x, y);
 		
-		ParticleExplosion p = new ParticleExplosion(0.5f, 12);
-		world.addParticle(p, x, y);
+		explosionSrc.createAt(x, y);
 		
 		// Destroy some tiles about the explosion
 		float radius = 5.5f;

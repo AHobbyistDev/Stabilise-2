@@ -7,6 +7,7 @@ import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.item.Item;
 import com.stabilise.util.Direction;
+import com.stabilise.world.AbstractWorld.ParticleSource;
 import com.stabilise.world.World;
 
 /**
@@ -206,6 +207,9 @@ public abstract class EntityMob extends Entity {
 	
 	// Visual things
 	
+	protected ParticleSource srcDmgIndicator;
+	protected ParticleSource srcSmoke;
+	
 	/** Whether or not the mob has a tint. */
 	public boolean hasTint = false;
 	/** The strength of the mob's 'effect tint'. */
@@ -227,6 +231,11 @@ public abstract class EntityMob extends Entity {
 	
 	@Override
 	public void update(World world) {
+		if(srcDmgIndicator == null) {
+			srcDmgIndicator = world.getParticleManager().getSource(new ParticleDamageIndicator(0));
+			srcSmoke = world.getParticleManager().getSource(new ParticleSmoke());
+		}
+		
 		moving = false;
 		
 		controller.update();
@@ -235,6 +244,7 @@ public abstract class EntityMob extends Entity {
 			stateTicks++;
 		
 		if(state == State.DEAD && stateTicks == DEATH_TICKS) {
+			spawnSmokeParticles(world, 30);
 			destroy();
 			return;
 		}
@@ -422,7 +432,7 @@ public abstract class EntityMob extends Entity {
 		//tintStrength = 1.0f;
 		
 		if(damage > 0)
-			world.addParticle(new ParticleDamageIndicator(world, damage, this));
+			srcDmgIndicator.createAt(x, y);
 		
 		if(health <= 0) {
 			health = 0;
@@ -468,17 +478,8 @@ public abstract class EntityMob extends Entity {
 	 * 
 	 * @param quantity The quantity of smoke particles to spawn.
 	 */
-	@SuppressWarnings("unused")
 	private void spawnSmokeParticles(World world, int quantity) {
-		while(quantity-- != 0) {
-			ParticleSmoke p = new ParticleSmoke();
-			p.x = x;
-			p.y = y;
-			//ParticleGenerator.directParticle(p, 0.01f, 0.25f, 0D, Math.PI);
-			p.dx = (world.getRnd().nextFloat() * 0.4f) - 0.2f;
-			p.dy = world.getRnd().nextFloat() * 0.015f;
-			world.addParticle(p);
-		}
+		srcSmoke.createBurst(quantity, 0.01f, 0.25f, 0f, (float)Math.PI, this);
 	}
 	
 	/**

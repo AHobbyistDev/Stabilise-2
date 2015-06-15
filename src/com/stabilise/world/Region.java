@@ -168,7 +168,7 @@ public class Region {
 	//private List<QueuedSlice> queuedSlices;
 	
 	/** When a structure is added to this region, it is placed in this queue.
-	 * Schematics may be added by both the main thread and the world generator. */
+	 * structures may be added by both the main thread and the world generator. */
 	private final ClearingQueue<QueuedStructure> structures =
 			new SynchronizedClearingQueue<>();
 	
@@ -236,7 +236,7 @@ public class Region {
 			// which distributes the IO overhead nicely.
 			// N.B. loc.y & 7 == loc.y % 8
 			if(world.getAge() % (8*8 * Constants.TICKS_PER_SECOND) ==
-					(((loc.y() & 7) * 8 + (loc.x() & 7)) * Constants.TICKS_PER_SECOND))
+					(((y() & 7) * 8 + (x() & 7)) * Constants.TICKS_PER_SECOND))
 				world.saveRegion(this);
 		}
 		
@@ -323,7 +323,7 @@ public class Region {
 	 * @return This region's file.
 	 */
 	public FileHandle getFile(HostWorld world) {
-		return world.getWorldDir().child("r_" + loc.x() + "_" + loc.y() + ".region");
+		return world.getWorldDir().child("r_" + x() + "_" + y() + ".region");
 	}
 	
 	/**
@@ -417,7 +417,7 @@ public class Region {
 		//       generator can generate those structures concurrently.
 		//    b: There are no queued structures. We change to STATE_ACTIVE as
 		//       this region is now usable.
-		//
+		// 
 		// 2: The WorldGenerator just finished generating this region. We
 		//    change to STATE_ACTIVE as this region is now usable.
 		
@@ -673,37 +673,37 @@ public class Region {
 	}
 	
 	/**
-	 * The QueuedSchematic class contains information about a schematic queued
+	 * The QueuedStructure class contains information about a structure queued
 	 * to be generated within the region.
 	 * 
 	 * <p>TODO: Namechange
 	 */
 	public static class QueuedStructure {
 		
-		/** The name of the schematic queued to be added. */
-		public String schematicName;
-		/** The x/y-coordinates of the slice in which to place the schematic,
+		/** The name of the structure queued to be added. */
+		public String structureName;
+		/** The x/y-coordinates of the slice in which to place the structure,
 		 * relative to the region, in slice-lengths. */
 		public int sliceX, sliceY;
-		/** The x/y-coordinates of the tile in which to place the schematic,
+		/** The x/y-coordinates of the tile in which to place the structure,
 		 * relative to the slice in which it is in, in tile-lengths. */
 		public int tileX, tileY;
-		/** The x/y-offset of the schematic, in region-lengths. */
+		/** The x/y-offset of the structure, in region-lengths. */
 		public int offsetX, offsetY;
 		
 		
 		/**
-		 * Creates a new QueuedSchematic.
+		 * Creates a new Queuedstructure.
 		 */
 		public QueuedStructure() {
 			// nothing to see here, move along
 		}
 		
 		/**
-		 * Creates a new QueuedSchematic.
+		 * Creates a new Queuedstructure.
 		 */
-		public QueuedStructure(String schematicName, int sliceX, int sliceY, int tileX, int tileY, int offsetX, int offsetY) {
-			this.schematicName = schematicName;
+		public QueuedStructure(String structureName, int sliceX, int sliceY, int tileX, int tileY, int offsetX, int offsetY) {
+			this.structureName = structureName;
 			this.sliceX = sliceX;
 			this.sliceY = sliceY;
 			this.tileX = tileX;

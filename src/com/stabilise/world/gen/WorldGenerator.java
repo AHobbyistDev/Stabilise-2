@@ -17,7 +17,6 @@ import com.stabilise.world.RegionStore;
 import com.stabilise.world.Slice;
 import com.stabilise.world.loader.WorldLoader.DimensionLoader;
 import com.stabilise.world.multiverse.Multiverse;
-import com.stabilise.world.structure.Structure;
 import com.stabilise.world.tile.Tiles;
 
 /**
@@ -29,63 +28,16 @@ import com.stabilise.world.tile.Tiles;
  * <p>Firstly, a {@code WorldGenerator} must be prepared via {@link
  * #prepare(DimensionLoader, RegionStore) prepare()} before it can be used.
  * 
- * <p>
+ * <p>A {@code WorldGenerator} should be used exclusively by the {@code
+ * WorldLoader}, as region generation happens immediately after loading.
  * 
- * <h3>Implementation Guidelines</h3>
+ * <p>To generate a region, invoke {@link #generate(Region)}. When {@link
+ * Region#isPrepared()} returns {@code true}, generation of the region is
+ * complete, and it is safe to interact with it. {@link
+ * #generateSynchronously(Region)} is offered as a convenience alternative
+ * for all threads but the main thread.
  * 
- * 
- * 
- * <h3>Standard Usage Guidelines - OUT OF DATE</h3>
- * 
- * <p>To obtain the {@code WorldGenerator} instance to use for a world, simply
- * invoke {@link #getGenerator(WorldData)}.
- * 
- * <p>To generate a region, invoke {@link #generate(Region)} on the {@code
- * WorldGenerator} instance. When the specified region's {@link
- * Region#generated generated} flag is set to {@code true}, generation of the
- * region has completed and it is safe to interact with the region.
- * 
- * <p>{@link #generateSynchronously(Region)} is provided as a convenience
- * alternative to {@link #generate(Region)} if it is known that the thread
- * invoking it will not suffer from the prolonged blocking that generation
- * entails (as a rule of thumb, it is acceptable to invoke {@code
- * generateSynchronously} on any thread but the main thread).
- * 
- * <p>To shut down the {@code WorldGenerator}, invoke {@link #shutdown()} and
- * then {@code shutdown()} on {@link WorldData#executor data.executor}, where
- * {@code data} is the {@code WorldData} object passed to {@code getGenerator}.
- * 
- * <h3>Implementation Details - OUT OF DATE</h3>
- * 
- * <p>Each invocation of {@code generate} either creates a new thread or reuses
- * an existing thread created for generation, loading, or saving, depending on
- * the {@code ExecutorService} contained in the given {@code WorldData} object.
- * This ensures maximum generation throughput in that every region should be
- * able to generate concurrently.
- * 
- * <p>The generation of a region may entail that any number of other regions
- * are cached by the generator to enable inter-region generation, specifically
- * in the case of certain 'structures', or {@link Structure schematics}, which
- * may be generated across region boundaries. These regions are obtained from
- * the world via invocation of {@link HostWorld#getRegionAt(int, int)
- * getRegionAt}, and have a slice marked as per {@link Region#anchorSlice()} to
- * indicate that they are being used. {@link Region#deAnchorSlice()} is invoked
- * when the region is no longer being used. If {@code getRegionAt} returns
- * {@code null}, the WorldGenerator will instantiate the region itself. Cached
- * regions may be accessed through {@link #getCachedRegion(int, int)}, and it
- * is advisable for the world to invoke this before instantiating regions to
- * prevent duplicate and inconsistent regions from being created.
- * 
- * <p>Cached regions may have schematics implanted via {@link
- * Region#queueSchematic(String, int, int, int, int, int, int) queueSchematic},
- * and these schematics will be added to the cached region immediately if it
- * has already been generated, or as the region is being normally generated if
- * it has not yet been generated.
- * 
- * <h3>Guidelines for Subclasses of WorldGenerator</h3>
- * 
- * <p>Generators are advised to keep the landform within the range
- * {@code -256 < y < 256} at and around {@code x = 0} for spawning purposes.
+ * <p>To shut down the generator, invoke {@link #shutdown()}.
  */
 @ThreadSafe
 public abstract class WorldGenerator {
@@ -149,6 +101,8 @@ public abstract class WorldGenerator {
 	 */
 	@UserThread("MainThread")
 	public final void generate(final Region region) {
+		Objects.requireNonNull(region);
+		
 		world.stats.gen.requests.increment();
 		if(!isShutdown && region.getGenerationPermit())
 			executor.execute(() -> genRegion(region));
@@ -167,6 +121,8 @@ public abstract class WorldGenerator {
 	 */
 	@UserThread("WorkerThread")
 	public final void generateSynchronously(Region region) {
+		Objects.requireNonNull(region);
+		
 		world.stats.gen.requests.increment();
 		if(!isShutdown && region.getGenerationPermit())
 			genRegion(region);
@@ -175,12 +131,8 @@ public abstract class WorldGenerator {
 	}
 	
 	/**
-	 * Generates a region. The lock for the region must be obtained before this
-	 * method is invoked.
-	 * 
-	 * @param r The region to generate.
-	 * 
-	 * @throws NullPointerException if {@code r} is {@code null}.
+	 * Generates a region. The {@link Region#getGenerationPermit() generation
+	 * permit} for the region must be obtained before this method is invoked.
 	 */
 	@UserThread("WorkerThread")
 	private void genRegion(Region r) {

@@ -150,7 +150,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 				break;
 			case SUMMON_SWARM:
 				{
-					int max = 50 + game.world.getRnd().nextInt(25);
+					int max = 950 + game.world.getRnd().nextInt(25);
 					for(int i = 0; i < max; i++) {
 						EntityEnemy e = new EntityEnemy();
 						e.x = mob.x - 10 + game.world.getRnd().nextFloat() * 20;

@@ -107,19 +107,19 @@ public class SliceMap {
 		// slices may be double-counted. As such, we blanket-sweep columns with
 		// x, but tread carefully with y to make sure we don't double-count.
 		
+		// Double-count prevention limits
+		int minX = Math.max(oldMinX, minSliceX);
+		int maxX = Math.min(oldMaxX, maxSliceX);
+		
 		for(int x = minSliceX; x < oldMinX; x++) loadCol(x, minSliceY, maxSliceY);
 		for(int x = maxSliceX; x > oldMaxX; x--) loadCol(x, minSliceY, maxSliceY);
-		for(int y = minSliceY; y < oldMinY; y++)
-			loadRow(y, Math.max(oldMinX, minSliceX), Math.min(oldMaxX, maxSliceX));
-		for(int y = maxSliceY; y > oldMaxY; y--)
-			loadRow(y, Math.max(oldMinX, minSliceX), Math.min(oldMaxX, maxSliceX));
+		for(int y = minSliceY; y < oldMinY; y++) loadRow(y, minX, maxX);
+		for(int y = maxSliceY; y > oldMaxY; y--) loadRow(y, minX, maxX);
 		
 		for(int x = oldMinX; x < minSliceX; x++) unloadCol(x, oldMinY, oldMaxY);
 		for(int x = oldMaxX; x > maxSliceX; x--) unloadCol(x, oldMinY, oldMaxY);
-		for(int y = oldMinY; y < minSliceY; y++)
-			unloadRow(y, Math.max(oldMinX, minSliceX), Math.min(oldMaxX, maxSliceX));
-		for(int y = oldMaxY; y > maxSliceY; y--)
-			unloadRow(y, Math.max(oldMinX, minSliceX), Math.min(oldMaxX, maxSliceX));
+		for(int y = oldMinY; y < minSliceY; y++) unloadRow(y, minX, maxX);
+		for(int y = oldMaxY; y > maxSliceY; y--) unloadRow(y, minX, maxX);
 	}
 	
 	private void loadCol(int x, int minY, int maxY) {

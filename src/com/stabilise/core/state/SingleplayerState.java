@@ -6,7 +6,7 @@ import com.stabilise.core.Game;
 import com.stabilise.core.app.Application;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Profiler;
-import com.stabilise.world.World.WorldBundle;
+import com.stabilise.world.Worlds.WorldBundle;
 
 /**
  * The SingleplayerState is the state which will run while singleplayer

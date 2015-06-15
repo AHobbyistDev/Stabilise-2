@@ -74,19 +74,19 @@ public class PreAlphaWorldLoader extends WorldLoader {
 			}
 		}
 		
-		NBTTagList schematics = regionTag.getList("queuedSchematics");
+		NBTTagList structures = regionTag.getList("queuedStructures");
 		
-		if(schematics.size() != 0) {
-			for(int i = 0; i < schematics.size(); i++) {
-				NBTTagCompound schematic = (NBTTagCompound)schematics.getTagAt(i);
+		if(structures.size() != 0) {
+			for(int i = 0; i < structures.size(); i++) {
+				NBTTagCompound structure = (NBTTagCompound)structures.getTagAt(i);
 				QueuedStructure s = new Region.QueuedStructure();
-				s.schematicName = schematic.getString("schematicName");
-				s.sliceX = schematic.getInt("sliceX");
-				s.sliceY = schematic.getInt("sliceY");
-				s.tileX = schematic.getInt("tileX");
-				s.tileY = schematic.getInt("tileY");
-				s.offsetX = schematic.getInt("offsetX");
-				s.offsetY = schematic.getInt("offsetY");
+				s.structureName = structure.getString("structureName");
+				s.sliceX = structure.getInt("sliceX");
+				s.sliceY = structure.getInt("sliceY");
+				s.tileX = structure.getInt("tileX");
+				s.tileY = structure.getInt("tileY");
+				s.offsetX = structure.getInt("offsetX");
+				s.offsetY = structure.getInt("offsetY");
 				r.addStructure(s);
 			}
 			
@@ -134,20 +134,20 @@ public class PreAlphaWorldLoader extends WorldLoader {
 		}
 		
 		if(r.hasQueuedStructures()) {
-			NBTTagList schematics = new NBTTagList();
+			NBTTagList structures = new NBTTagList();
 			for(QueuedStructure s : r.getStructures()) {
-				NBTTagCompound schematic = new NBTTagCompound();
-				schematic.addString("schematicName", s.schematicName);
-				schematic.addInt("sliceX", s.sliceX);
-				schematic.addInt("sliceY", s.sliceY);
-				schematic.addInt("tileX", s.tileX);
-				schematic.addInt("tileY", s.tileY);
-				schematic.addInt("offsetX", s.offsetX);
-				schematic.addInt("offsetY", s.offsetY);
-				schematics.appendTag(schematic);
+				NBTTagCompound structure = new NBTTagCompound();
+				structure.addString("schematicName", s.structureName);
+				structure.addInt("sliceX", s.sliceX);
+				structure.addInt("sliceY", s.sliceY);
+				structure.addInt("tileX", s.tileX);
+				structure.addInt("tileY", s.tileY);
+				structure.addInt("offsetX", s.offsetX);
+				structure.addInt("offsetY", s.offsetY);
+				structures.appendTag(structure);
 			}
 			
-			regionTag.addList("queuedSchematics", schematics);
+			regionTag.addList("queuedStructures", structures);
 			
 			//log.postDebug("Saved " + schematics.size() + " schematics in " + r);
 		}

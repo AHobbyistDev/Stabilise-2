@@ -105,7 +105,7 @@ public class WorldInfo implements Comparable<WorldInfo> {
 	 * @return This world's filesystem directory.
 	 */
 	public FileHandle getWorldDir() {
-		return World.getWorldDir(fileSystemName);
+		return Worlds.getWorldDir(fileSystemName);
 	}
 	
 	/**

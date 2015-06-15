@@ -1,8 +1,6 @@
 package com.stabilise.core;
 
 import java.net.InetAddress;
-import java.util.Objects;
-import java.util.function.BiConsumer;
 
 import com.stabilise.character.CharacterData;
 import com.stabilise.network.Client;
@@ -15,8 +13,8 @@ import com.stabilise.network.protocol.login.IClientLogin;
 import com.stabilise.network.protocol.login.S000LoginRejected;
 import com.stabilise.util.concurrent.TrackableFuture;
 import com.stabilise.world.ClientWorld;
-import com.stabilise.world.World;
-import com.stabilise.world.World.WorldBundle;
+import com.stabilise.world.Worlds;
+import com.stabilise.world.Worlds.WorldBundle;
 import com.stabilise.world.multiverse.ClientMultiverse;
 
 
@@ -85,7 +83,7 @@ public class GameClient extends Client implements IClientHandshake, IClientLogin
 		if(loader != null || getConnection() == null
 				|| getConnection().getProtocol() != Protocol.LOGIN)
 			return null;
-		return loader = World.builder()
+		return loader = Worlds.builder()
 				.setClient(this, new WorldLoadHandle())
 				.setPlayer(this.player = player)
 				.buildClient();
