@@ -191,6 +191,7 @@ public class EntityPerson extends EntityMob {
 	@Override
 	protected AABB getAABB() {
 		return new AABB(-0.4f, 0f, 0.8f, 1.8f);
+		//return new AABB(-0.5f, 0f, 1.0f, 2.0f);
 	}
 	
 	@Override

@@ -273,7 +273,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 
 	@Override
 	public boolean scrolled(int amount) {
-		tileID = Maths.wrappedRem(tileID - amount, 20);
+		tileID = Maths.remainder(tileID - amount, 20);
 		return true;
 	}
 	

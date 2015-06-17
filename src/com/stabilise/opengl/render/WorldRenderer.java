@@ -30,12 +30,12 @@ import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.opengl.ColourEffectShader;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
+import com.stabilise.util.ArrayUtil.ImmutableArray;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Shape;
-import com.stabilise.util.shape.Shape.ImmutableArray;
 import com.stabilise.world.World;
 import com.stabilise.world.Slice;
 

@@ -652,10 +652,25 @@ public abstract class AbstractWorld implements World {
 			this.physical = physical;
 		}
 		
+		private int count(int baseCount) {
+			return baseCount;
+		}
+		
 		private void addParticle(Particle p, double x, double y) {
 			p.x = x;
 			p.y = y;
 			world.addParticle(p);
+		}
+		
+		private void create(double x, double y, float dx, float dy) {
+			if(physical) {
+				ParticlePhysical p = (ParticlePhysical)pool.get();
+				p.dx = dx;
+				p.dy = dy;
+				addParticle(p, x, y);
+			} else {
+				addParticle(pool.get(), x + dx, y + dy);
+			}
 		}
 		
 		/**
@@ -703,7 +718,7 @@ public abstract class AbstractWorld implements World {
 		public void createBurst(int numParticles, double x, double y,
 				float minV, float maxV, float minAngle, float maxAngle) {
 			Random rnd = world.getRnd();
-			for(int i = 0; i < numParticles; i++)
+			for(int i = 0; i < count(numParticles); i++)
 				createBurstParticle(rnd, x, y, minV, maxV, minAngle, maxAngle);
 		}
 		
@@ -722,7 +737,7 @@ public abstract class AbstractWorld implements World {
 				float minV, float maxV, float minAngle, float maxAngle,
 				AABB aabb) {
 			Random rnd = world.getRnd();
-			for(int i = 0; i < numParticles; i++)
+			for(int i = 0; i < count(numParticles); i++)
 				createBurstParticle(rnd,
 						x + aabb.v00.x + rnd.nextFloat() * aabb.width(),
 						y + aabb.v00.y + rnd.nextFloat() * aabb.height(),
@@ -762,15 +777,32 @@ public abstract class AbstractWorld implements World {
 			float angle = minAngle + rnd.nextFloat() * (maxAngle - minAngle);
 			float dx = v * MathUtils.cos(angle);
 			float dy = v * MathUtils.sin(angle);
-			Particle p = pool.get();
-			if(physical) {
-				ParticlePhysical p0 = (ParticlePhysical)p;
-				p0.dx = dx;
-				p0.dy = dy;
-				addParticle(p0, x, y);
-			} else {
-				addParticle(p, x + dx, y + dy);
+			create(x, y, dx, dy);
+		}
+		
+		public void createOutwardsBurst(int numParticles, double x, double y,
+				boolean burstX, boolean burstY, float maxX, float maxY,
+				AABB aabb) {
+			Random rnd = world.getRnd();
+			float w = aabb.width();
+			float h = aabb.height();
+			for(int i = 0; i < count(numParticles); i++) {
+				float xp = rnd.nextFloat();
+				float yp = rnd.nextFloat();
+				create(
+						x + w*xp,
+						y + h*yp,
+						burstX ? (2*xp - 1) * maxX : 0f,
+						burstY ? (2*yp - 1) * maxY : 0f
+				);
 			}
+		}
+		
+		public void createOutwardsBurst(int numParticles,
+				boolean burstX, boolean burstY, float maxX, float maxY,
+				Entity e) {
+			createOutwardsBurst(numParticles, e.x, e.y, burstX, burstY,
+					maxX, maxY, e.boundingBox);
 		}
 		
 	}

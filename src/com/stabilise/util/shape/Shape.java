@@ -3,6 +3,7 @@ package com.stabilise.util.shape;
 import java.util.function.Function;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.stabilise.util.ArrayUtil.ImmutableArray;
 import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.Vec2;
 
@@ -365,35 +366,6 @@ public abstract class Shape {
 		@Override public boolean contains(Shape s) { return false; }
 		@Override public boolean containsPoint(float x, float y) { return false; }
 		@Override public Shape reflect() { return this; }
-	}
-	
-	/**
-	 * A class which wraps an array as to not permit structural modification.
-	 */
-	public static final class ImmutableArray<E> {
-		
-		private final E[] arr;
-		
-		ImmutableArray(E[] arr) {
-			this.arr = arr;
-		}
-		
-		/**
-		 * Gets the element in the array at the specified index.
-		 * 
-		 * @throws ArrayIndexOutOfBoundsException
-		 */
-		public E get(int index) {
-			return arr[index];
-		}
-		
-		/**
-		 * @return The length of the array.
-		 */
-		public int length() {
-			return arr.length;
-		}
-		
 	}
 	
 }

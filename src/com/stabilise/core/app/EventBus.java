@@ -1,12 +1,13 @@
 package com.stabilise.core.app;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.collect.IteratorUtils;
-import com.stabilise.util.collect.LightArrayList;
 import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 
@@ -22,7 +23,7 @@ import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 @ThreadSafe
 public class EventBus {
 	
-	private final ConcurrentHashMap<Event, LightArrayList<Listener>> handlers =
+	private final ConcurrentHashMap<Event, List<Listener>> handlers =
 			new ConcurrentHashMap<>();
 	private final ClearingQueue<Event> pendingEvents =
 			new SynchronizedClearingQueue<>();
@@ -79,7 +80,7 @@ public class EventBus {
 	public void addListener(Event event, Consumer<Event> handler,
 			boolean persistent, boolean singleUse) {
 		synchronized(lockFor(event)) {
-			handlers.computeIfAbsent(event, k -> new LightArrayList<>(4, 1.5f)).add(
+			handlers.computeIfAbsent(event, k -> new ArrayList<>(4)).add(
 					new Listener(handler, persistent, singleUse ? 1 : -1)
 			);
 		}
@@ -96,12 +97,12 @@ public class EventBus {
 	public void removeListener(Event e, final Consumer<Event> handler) {
 		Objects.requireNonNull(handler);
 		
-		LightArrayList<Listener> listeners;
+		List<Listener> listeners;
 		synchronized(lockFor(e)) {
 			listeners = handlers.get(e);
 			if(listeners == null)
 				return;
-			listeners.remove(l -> l.handler.equals(handler));
+			IteratorUtils.forEach(listeners, l -> l.handler.equals(handler));
 			if(listeners.size() == 0)
 				handlers.remove(e);
 		}
@@ -126,10 +127,10 @@ public class EventBus {
 	
 	private void handle(Event e) {
 		synchronized(lockFor(e)) {
-			LightArrayList<Listener> listeners = handlers.get(e);
+			List<Listener> listeners = handlers.get(e);
 			if(listeners == null)
 				return;
-			listeners.remove(l -> {
+			IteratorUtils.forEach(listeners, l -> {
 				l.handler.accept(e);
 				return --l.uses == 0;
 			});
@@ -156,7 +157,7 @@ public class EventBus {
 			handlers.clear();
 		IteratorUtils.forEach(handlers.entrySet(), e -> {
 			synchronized(lockFor(e.getKey())) {
-				e.getValue().remove(l -> !l.persistent);
+				IteratorUtils.forEach(e.getValue(), l -> !l.persistent);
 				return e.getValue().isEmpty();
 			}
 		});

@@ -52,7 +52,7 @@ public class Polygon extends AbstractPolygon {
 	protected Polygon() {}
 	
 	@Override
-	public Polygon transform(Function<Vec2, Vec2> f) {
+	public Shape transform(Function<Vec2, Vec2> f) {
 		return newInstance(transformVertices(f));
 	}
 	

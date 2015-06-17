@@ -18,6 +18,16 @@ public class Maths {
 	/** Holds the value given by Math.PI / 2. */
 	public static final double PI_OVER_2 = Math.PI / 2;
 	
+	/** Holds the value given by Math.sqrt(2). */
+	public static final float SQRT_2f = (float)SQRT_2;
+	/** Holds the value given by Math.PI * 2. */
+	public static final float TAUf = (float)TAU;
+	/** Holds the value given by Math.PI / 2. */
+	public static final float PI_OVER_2f = (float)PI_OVER_2;
+	
+	/** Holds the value given by Math.PI. */
+	public static final float PIf = (float)Math.PI;
+	
 	/** The x-axis unit vector with components (1,0). */
 	public static final Vec2 VEC_X = new Vec2(1f, 0f);
 	/** The y-axis unit vector with components (0,1). */
@@ -57,7 +67,7 @@ public class Maths {
 	 * @return The wrapped remainder of {@code num % div}.
 	 * @throws ArithmeticException if {@code div == 0}.
 	 */
-	public static int wrappedRem(int num, int div) {
+	public static int remainder(int num, int div) {
 		num %= div;
 		return num >= 0 ? num : num + div;
 	}
@@ -72,7 +82,7 @@ public class Maths {
 	 * @return The wrapped remainder of {@code num % div}.
 	 * @throws ArithmeticException if {@code div == 0}.
 	 */
-	public static long wrappedRem(long num, long div) {
+	public static long remainder(long num, long div) {
 		num %= div;
 		return num >= 0 ? num : num + div;
 	}
@@ -87,7 +97,7 @@ public class Maths {
 	 * @return The wrapped remainder of {@code num % div}.
 	 * @throws ArithmeticException if {@code div == 0}.
 	 */
-	public static double wrappedRem(double num, double div) {
+	public static double remainder(double num, double div) {
 		num %= div;
 		return num >= 0 ? num : num + div;
 	}
@@ -97,7 +107,7 @@ public class Maths {
 	 * are wrapped as if by adding {@code div} to such remainders.
 	 * 
 	 * <p><b>Note</b>: This method is faster than {@link
-	 * #wrappedRem(int, int)}, but this only works if {@code div} is a
+	 * #remainder(int, int)}, but this only works if {@code div} is a
 	 * positive power of 2. As such, this method functions as a faster
 	 * alternative to the modulus operator for valid divisors.
 	 * 
@@ -107,7 +117,7 @@ public class Maths {
 	 * @return The wrapped remainder of {@code num % div}. If {@code div} is
 	 * not a power of 2, the result may be incorrect.
 	 */
-	public static int wrappedRem2(int num, int div) {
+	public static int remainder2(int num, int div) {
 		// This is a bit-level hack which uses a bitmask to get the wrapped
 		// remainder. Remember: this only works with powers of 2 since
 		// decrementing a Po2 results in a consistent set of 1s to the right
@@ -122,7 +132,7 @@ public class Maths {
 	 * are wrapped as if by adding {@code div} to such remainders.
 	 * 
 	 * <p><b>Note</b>: This method is faster than {@link
-	 * #wrappedRem(long, long)}, but this only works if {@code div} is a
+	 * #remainder(long, long)}, but this only works if {@code div} is a
 	 * positive power of 2. As such, this method functions as a faster
 	 * alternative to the modulus operator for valid divisors.
 	 * 
@@ -132,7 +142,7 @@ public class Maths {
 	 * @return The wrapped remainder of {@code num % div}. If {@code div} is
 	 * not a power of 2, the result may be incorrect.
 	 */
-	public static long wrappedRem2(long num, long div) {
+	public static long remainder2(long num, long div) {
 		return num & (div - 1);
 	}
 	
@@ -409,6 +419,14 @@ public class Maths {
 	 */
 	public static int square(int x) {
 		return x*x;
+	}
+	
+	/**
+	 * Returns the floor of the log to base 2 of {@code x}, for positive x.
+	 */
+	public static int log2(int x) {
+		if(x == 0) return 0;
+		return 31 - Integer.numberOfLeadingZeros(x);
 	}
 	
 	/**

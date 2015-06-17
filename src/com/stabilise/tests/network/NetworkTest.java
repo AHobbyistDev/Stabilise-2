@@ -17,7 +17,7 @@ public class NetworkTest implements Drivable {
 		server = new ServerImpl();
 		server.runConcurrently();
 		client = new ClientImpl();
-		driver = AppDriver.getDriverFor(this, 60, 60, Log.get());
+		driver = AppDriver.driverFor(this, 60, 60, Log.get());
 		driver.run();
 	}
 	

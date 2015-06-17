@@ -181,9 +181,13 @@ public class TCPConnection {
 	
 	/**
 	 * Opens this connection.
+	 * 
+	 * @throws IllegalStateException if this connection has already been
+	 * opened.
 	 */
 	void open() {
-		state.set(STATE_ACTIVE);
+		if(!state.compareAndSet(STATE_STARTING, STATE_ACTIVE))
+			throw new IllegalStateException("Already open!");
 		
 		readThread.start();
 		writeThread.start();

@@ -14,7 +14,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * 
  * <p>In the same way that a {@code Thread} may be passed a {@code Runnable} to
  * run instead of being overridden to implement {@code run()}, {@link
- * #getDriverFor(Drivable, int, int, Log) getDriverFor()} may be used to create
+ * #driverFor(Drivable, int, int, Log) getDriverFor()} may be used to create
  * an AppDriver which delegates to a {@link Drivable} in preference to
  * overriding this class to implement {@code update} and {@code render}.
  */
@@ -307,7 +307,7 @@ public abstract class AppDriver implements Runnable {
 	 * @throws NullPointerException if either {@code drivable} or {@code log}
 	 * are {@code null}.
 	 */
-	public static AppDriver getDriverFor(Drivable drivable, int tps, int fps, Log log) {
+	public static AppDriver driverFor(Drivable drivable, int tps, int fps, Log log) {
 		return new DelegatedDriver(drivable, tps, fps, log);
 	}
 	
@@ -330,7 +330,7 @@ public abstract class AppDriver implements Runnable {
 	 * @throws NullPointerException if either {@code drivable} or {@code log}
 	 * are {@code null}.
 	 */
-	public static AppDriver getDriverFor(Drivable drivable, int tps, int fps,
+	public static AppDriver driverFor(Drivable drivable, int tps, int fps,
 			Log log, int ticksPerFlush) {
 		return new DelegatedDriver(drivable, tps, fps, log, ticksPerFlush);
 	}
@@ -342,7 +342,7 @@ public abstract class AppDriver implements Runnable {
 	/**
 	 * Defines the methods {@code update} and {@code render}, which are invoked
 	 * by an AppDriver created by {@link
-	 * AppDriver#getDriverFor(Drivable, int, int, Log) getDriverFor()}.
+	 * AppDriver#driverFor(Drivable, int, int, Log) getDriverFor()}.
 	 */
 	public static interface Drivable {
 		

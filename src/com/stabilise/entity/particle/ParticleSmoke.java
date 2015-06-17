@@ -16,7 +16,9 @@ public class ParticleSmoke extends ParticlePhysical {
 	private static final int DESPAWN_TICKS = 120;
 	
 	/** The value by which a particle's dx is multiplied by each tick. */
-	private static final float DX_MULT = 0.9f;
+	private static final float DX_MULT = 0.92f;
+	
+	public float opacity;
 	
 	
 	/**
@@ -39,10 +41,15 @@ public class ParticleSmoke extends ParticlePhysical {
 	}
 	
 	@Override
+	public void reset() {
+		super.reset();
+		opacity = 1f;
+	}
+	
+	@Override
 	public void update(World world) {
 		dx *= DX_MULT;
-		dy = 0.00f;
-		//dy *= DX_MULT;
+		dy -= (dy - 0.01f) * 0.08f;
 		
 		super.update(world);
 		

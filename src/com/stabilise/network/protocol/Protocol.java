@@ -209,8 +209,7 @@ public enum Protocol {
 	 * size, and offset IDs by {@code -MAX_NORMAL_PACKET_ID - 1} when accessing
 	 * entries. */
 	private static final InstantiationRegistry<Packet> RESERVED_PACKETS =
-			new InstantiationRegistry<>(RESERVED_IDS,
-					THROW_EXCEPTION, Packet.class);
+			new InstantiationRegistry<>(RESERVED_IDS, THROW_EXCEPTION, Packet.class);
 	
 	static {
 		registerReservedPacket(255, P255Ping.class);

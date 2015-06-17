@@ -2,6 +2,7 @@ package com.stabilise.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Array-related utility functions.
@@ -76,6 +77,42 @@ public class ArrayUtil {
 		list.ensureCapacity(size); // prevents excessive arraycopies
 		while(list.size() < size)
 			list.add(null);
+	}
+	
+	/**
+	 * A class which wraps an array as to not permit structural modification.
+	 */
+	public static final class ImmutableArray<E> {
+		
+		private final E[] arr;
+		
+		/**
+		 * Creates a new immutable array.
+		 * 
+		 * @param arr The array to wrap.
+		 * 
+		 * @throws NullPointerException if {@code arr} is {@code null}.
+		 */
+		public ImmutableArray(E[] arr) {
+			this.arr = Objects.requireNonNull(arr);
+		}
+		
+		/**
+		 * Gets the element in the array at the specified index.
+		 * 
+		 * @throws ArrayIndexOutOfBoundsException
+		 */
+		public E get(int index) {
+			return arr[index];
+		}
+		
+		/**
+		 * @return The length of the array.
+		 */
+		public int length() {
+			return arr.length;
+		}
+		
 	}
 	
 }

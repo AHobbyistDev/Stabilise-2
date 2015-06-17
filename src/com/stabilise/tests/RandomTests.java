@@ -449,12 +449,12 @@ public class RandomTests {
 		
 		c1.start();
 		for(int i = 0; i < elements; i++) {
-			dump = Maths.wrappedRem(nums[i], divs[i]);
+			dump = Maths.remainder(nums[i], divs[i]);
 		}
 		c1.stop();
 		c2.start();
 		for(int i = 0; i < elements; i++) {
-			dump = Maths.wrappedRem2(nums[i], divs[i]);
+			dump = Maths.remainder2(nums[i], divs[i]);
 		}
 		c2.stop();
 		
@@ -463,8 +463,8 @@ public class RandomTests {
 		c1.printComparison(c2);
 		
 		for(int i = 0; i < elements; i++) {
-			if(Maths.wrappedRem(nums[i], divs[i]) != Maths.wrappedRem2(nums[i], divs[i]))
-				System.out.println(nums[i] + "/" + divs[i] + ": " + Maths.wrappedRem(nums[i], divs[i]) + "||" + Maths.wrappedRem2(nums[i], divs[i]));
+			if(Maths.remainder(nums[i], divs[i]) != Maths.remainder2(nums[i], divs[i]))
+				System.out.println(nums[i] + "/" + divs[i] + ": " + Maths.remainder(nums[i], divs[i]) + "||" + Maths.remainder2(nums[i], divs[i]));
 		}
 	}
 	
@@ -568,7 +568,7 @@ public class RandomTests {
 		System.out.println("Populating elements...");
 		for(int i = 0; i < elements; i++) {
 			nums[i] = rnd.nextInt(numDiff) - numMin;
-			divs[i] = divs[Maths.wrappedRem2(i, 32)];
+			divs[i] = divs[Maths.remainder2(i, 32)];
 		}
 		
 		final Runnable modulus = new Runnable() {
@@ -586,7 +586,7 @@ public class RandomTests {
 				@SuppressWarnings("unused")
 				int dump;
 				for(int i = 0; i < elements; i++) {
-					dump = Maths.wrappedRem(nums[i], divs[i]);
+					dump = Maths.remainder(nums[i], divs[i]);
 				}
 			}
 		};
@@ -596,7 +596,7 @@ public class RandomTests {
 				@SuppressWarnings("unused")
 				int dump;
 				for(int i = 0; i < elements; i++) {
-					dump = Maths.wrappedRem2(nums[i], divs[i]);
+					dump = Maths.remainder2(nums[i], divs[i]);
 				}
 			}
 		};

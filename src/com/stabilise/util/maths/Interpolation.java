@@ -2,6 +2,7 @@ package com.stabilise.util.maths;
 
 import java.util.Objects;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.annotation.Immutable;
 
 
@@ -72,21 +73,6 @@ import com.stabilise.util.annotation.Immutable;
  * here</a> and <a href=http://www.robertpenner.com/easing/>here</a>.
  */
 public interface Interpolation {
-	
-	/**
-	 * The different interpolation types.
-	 */
-	public static enum Type {
-		/** Ease in interpolation, as defined by the contract of
-		 * {@link Interpolation#easeIn(float, float, float)}. */
-		EASE_IN,
-		/** Ease out interpolation, as defined by the contract of
-		 * {@link Interpolation#easeOut(float, float, float)}. */
-		EASE_OUT,
-		/** Ease in-out interpolation, as defined by the contract of
-		 * {@link Interpolation#easeInOut(float, float, float)}. */
-		EASE_IN_OUT;
-	}
 	
 	/**
 	 * Linear interpolation provides straightforward {@code start} to
@@ -167,9 +153,9 @@ public interface Interpolation {
 	 */
 	public static final All SINUSOIDAL = newInterpolation(
 			// f(x) = 1 - cos(x*pi/2)
-			x -> 1 - (float)Math.cos(x * Maths.PI_OVER_2),
-			x -> (float)Math.sin(x * Maths.PI_OVER_2),
-			x -> (1 - (float)Math.cos(x * Math.PI)) / 2
+			x -> 1 - MathUtils.cos(x * Maths.PI_OVER_2f),
+			x -> MathUtils.sin(x * Maths.PI_OVER_2f),
+			x -> (1 - MathUtils.cos(x * Maths.PIf)) / 2
 	);
 	
 	/**
@@ -336,7 +322,7 @@ public interface Interpolation {
 			default:
 				if(degree < 1)
 					throw new IllegalArgumentException("degree < 1");
-				final int n = degree;
+				final double n = (double)degree;
 				return newInterpolation(
 						x -> (float)Math.pow(x, n),
 						x -> 1 + (float)Math.pow(1-x, n),
@@ -616,54 +602,6 @@ public interface Interpolation {
 		@Override
 		public float transform(float x) {
 			return easeInOutTransform(x);
-		}
-		
-		/**
-		 * Interpolates between two values using the specified interpolation type.
-		 * 
-		 * @param start The start value.
-		 * @param end The end value.
-		 * @param x The position between the start and end values, between
-		 * {@code 0.0} and {@code 1.0} (inclusive).
-		 * @param type The type of interpolation to use.
-		 * 
-		 * @return A value interpolated between {@code start} and {@code end}.
-		 */
-		public final float apply(float start, float end, float x, Type type) {
-			switch(type) {
-				case EASE_IN:
-					return easeIn(start, end, x);
-				case EASE_OUT:
-					return easeOut(start, end, x);
-				case EASE_IN_OUT:
-					return easeInOut(start, end, x);
-			}
-			throw new AssertionError();
-		}
-		
-		/**
-		 * Transforms the given position using the specified transformation
-		 * function.
-		 * 
-		 * <p>Invoking this method is equivalent to invoking:
-		 * <pre>{@link
-		 * #apply(float, float, float, Type) apply(0f, 1f, x, type)}</pre>
-		 * 
-		 * @param x The position, between {@code 0.0} and {@code 1.0} (inclusive).
-		 * @param type The type of interpolation to use.
-		 *  
-		 * @return The transformed position.
-		 */
-		public final float transform(float x, Type type) {
-			switch(type) {
-				case EASE_IN:
-					return easeInTransform(x);
-				case EASE_OUT:
-					return easeOutTransform(x);
-				case EASE_IN_OUT:
-					return easeInOutTransform(x);
-			}
-			throw new AssertionError();
 		}
 		
 		/**

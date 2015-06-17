@@ -244,7 +244,7 @@ public abstract class EntityMob extends Entity {
 			stateTicks++;
 		
 		if(state == State.DEAD && stateTicks == DEATH_TICKS) {
-			spawnSmokeParticles(world, 30);
+			spawnSmokeParticles();
 			destroy();
 			return;
 		}
@@ -475,11 +475,10 @@ public abstract class EntityMob extends Entity {
 	
 	/**
 	 * Spawns smoke particles at the Mob's location.
-	 * 
-	 * @param quantity The quantity of smoke particles to spawn.
 	 */
-	private void spawnSmokeParticles(World world, int quantity) {
-		srcSmoke.createBurst(quantity, 0.01f, 0.25f, 0f, (float)Math.PI, this);
+	private void spawnSmokeParticles() {
+		//srcSmoke.createBurst(30, 0.01f, 0.25f, 0f, (float)Math.PI, this);
+		srcSmoke.createOutwardsBurst(30, true, true, 0.25f, 0.05f, this);
 	}
 	
 	/**

@@ -23,7 +23,7 @@ public class Item {
 	/** An item which should be used as a placeholder to indicate the lack of
 	 * an item, in preference to using a null pointer.
 	 * <p>The name and max stack size are arbitrary, and the ID is 0, the
-	 * 'default' ID.  */
+	 * 'default' ID. */
 	public static final Item NO_ITEM = new Item(0, "", 1) {
 		@Override
 		public ItemStack stackOf(int quantity) {
@@ -184,7 +184,7 @@ public class Item {
 	 * 
 	 * @return The item with the specified ID, or {@link #NO_ITEM} if no such
 	 * item exists.
-	 * @thros IndexOutOfBoundsException if {@code id < 0}.
+	 * @throws IndexOutOfBoundsException if {@code id < 0}.
 	 */
 	public static Item getItem(int id) {
 		Item item = ITEMS.get(id);

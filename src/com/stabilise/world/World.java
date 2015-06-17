@@ -538,9 +538,10 @@ public interface World {
 	 * slice-lengths, relative to its parent region.
 	 */
 	public static int sliceCoordRelativeToRegionFromTileCoord(int c) {
-		//return Maths.wrappedRem(c, Region.REGION_SIZE);
-		//return Maths.wrappedRem2(c, Region.REGION_SIZE);				// Way faster
-		return sliceCoordFromTileCoord(c) & Region.REGION_SIZE_MINUS_ONE;	// One less instruction
+		//return Maths.remainder2(c, Region.REGION_SIZE);
+		
+		// One less instruction:
+		return sliceCoordFromTileCoord(c) & Region.REGION_SIZE_MINUS_ONE;
 	}
 	
 	/**
@@ -556,9 +557,10 @@ public interface World {
 	 * parent region.
 	 */
 	public static int sliceCoordRelativeToRegionFromSliceCoord(int c) {
-		//return Maths.wrappedRem(c, Region.REGION_SIZE);
-		//return Maths.wrappedRem2(c, Region.REGION_SIZE);		// Way faster
-		return c & Region.REGION_SIZE_MINUS_ONE;				// One less instruction
+		//return Maths.remainder2(c, Region.REGION_SIZE);
+		
+		// One less instruction:
+		return c & Region.REGION_SIZE_MINUS_ONE;
 	}
 	
 	/**
@@ -606,9 +608,10 @@ public interface World {
 	 * parent slice.
 	 */
 	public static int tileCoordRelativeToSliceFromTileCoord(int c) {
-		//return Maths.wrappedRem(c, Slice.SLICE_SIZE);
-		//return Maths.wrappedRem2(c, Slice.SLICE_SIZE);		// Way faster
-		return c & Slice.SLICE_SIZE_MINUS_ONE;					// One less instruction
+		//return Maths.remainder2(c, Slice.SLICE_SIZE);
+		
+		// One less instruction:
+		return c & Slice.SLICE_SIZE_MINUS_ONE;
 	}
 	
 	/**
@@ -624,9 +627,10 @@ public interface World {
 	 * parent region.
 	 */
 	public static int tileCoordRelativeToRegionFromTileCoord(int c) {
-		//return Maths.wrappedRem(c, Region.REGION_SIZE_IN_TILES);
-		//return Maths.wrappedRem2(c, Region.REGION_SIZE_IN_TILES);		// Way faster
-		return c & Region.REGION_SIZE_IN_TILES_MINUS_ONE;				// One less instruction
+		//return Maths.remainder2(c, Region.REGION_SIZE_IN_TILES);
+		
+		// One less instruction:
+		return c & Region.REGION_SIZE_IN_TILES_MINUS_ONE;
 	}
 	
 	/**
@@ -640,6 +644,18 @@ public interface World {
 	 */
 	public static int tileCoordFreeToTileCoordFixed(double c) {
 		return Maths.floor(c);
+	}
+	
+	/**
+	 * Converts a fixed - or integer - coordinate to a free - or floating point
+	 * - coordinate.
+	 * 
+	 * @param c The coordinate, in tile-lengths.
+	 * 
+	 * @return The coordinate, in tile-lengths.
+	 */
+	public static double tileCoordFixedToTileCoordFree(int c) {
+		return (double)c;
 	}
 	
 }

@@ -42,21 +42,25 @@ public class IteratorUtils {
 	/**
 	 * Returns an iterator over {@code col} which filters out any null
 	 * elements. The returned iterator does not support remove.
+	 * 
+	 * @throws NullPointerException if col is null.
 	 */
 	public static <T> Iterator<T> iteratorNullsFiltered(Iterable<T> col) {
 		return iteratorNullsFiltered(col.iterator());
 	}
 	
 	/**
-	 * Returns an iterator wrapping {@code ire} which filters out any null
+	 * Returns an iterator wrapping {@code itr} which filters out any null
 	 * elements. The returned iterator does not support remove.
+	 * 
+	 * @throws NullPointerException if itr is null.
 	 */
 	public static <T> Iterator<T> iteratorNullsFiltered(Iterator<T> itr) {
 		return Iterators.filter(itr, Predicates.notNull());
 	}
 	
 	/**
-	 * Wraps the specified Enumeration in an iterable.
+	 * Wraps the specified Enumeration in an Iterable.
 	 * 
 	 * @throws NullPointerException if e is null.
 	 */
@@ -65,7 +69,7 @@ public class IteratorUtils {
 	}
 	
 	/**
-	 * Converts the specified Enumeration to an iterable.
+	 * Converts the specified Enumeration to an Iterator.
 	 * 
 	 * @throws NullPointerException if e is null.
 	 */

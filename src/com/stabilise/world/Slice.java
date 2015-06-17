@@ -2,6 +2,7 @@ package com.stabilise.world;
 
 import java.util.Objects;
 
+import com.stabilise.util.maths.Maths;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
@@ -17,9 +18,9 @@ public class Slice {
 	/** The length of an edge of the square of tiles in a slice. */
 	public static final int SLICE_SIZE = 16;
 	/** {@link SLICE_SIZE} - 1; minor optimisation purposes. */
-	public static final int SLICE_SIZE_MINUS_ONE = 15;
+	public static final int SLICE_SIZE_MINUS_ONE = SLICE_SIZE - 1;
 	/** The power of 2 of {@link SLICE_SIZE}; minor optimisation purposes. */
-	public static final int SLICE_SIZE_SHIFT = 4;
+	public static final int SLICE_SIZE_SHIFT = Maths.log2(SLICE_SIZE);
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------

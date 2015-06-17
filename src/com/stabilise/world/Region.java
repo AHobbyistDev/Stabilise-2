@@ -16,6 +16,7 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 import com.stabilise.util.concurrent.Task;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
 import com.stabilise.util.maths.PointFactory;
 
@@ -40,16 +41,16 @@ public class Region {
 	/** The length of an edge of the square of slices in a region. */
 	public static final int REGION_SIZE = 16;
 	/** {@link REGION_SIZE} - 1; minor optimisation purposes. */
-	public static final int REGION_SIZE_MINUS_ONE = 15;
+	public static final int REGION_SIZE_MINUS_ONE = REGION_SIZE - 1;
 	/** The power of 2 of {@link REGION_SIZE}; minor optimisation purposes. */
-	public static final int REGION_SIZE_SHIFT = 4;
+	public static final int REGION_SIZE_SHIFT = Maths.log2(REGION_SIZE);
 	/** The length of an edge of the square of tiles in a region. */
-	public static final int REGION_SIZE_IN_TILES = 256;//Slice.SLICE_SIZE * REGION_SIZE;
+	public static final int REGION_SIZE_IN_TILES = Slice.SLICE_SIZE * REGION_SIZE;
 	/** {@link REGION_SIZE_IN_TILES} - 1; minor optimisation purposes. */
-	public static final int REGION_SIZE_IN_TILES_MINUS_ONE = 255;
+	public static final int REGION_SIZE_IN_TILES_MINUS_ONE = REGION_SIZE_IN_TILES - 1;
 	/** The power of 2 of {@link REGION_SIZE_IN_TILES}; minor optimisation
 	 * purposes. */
-	public static final int REGION_SIZE_IN_TILES_SHIFT = 8;
+	public static final int REGION_SIZE_IN_TILES_SHIFT = Maths.log2(REGION_SIZE_IN_TILES);
 	
 	/** A dummy Region object to use when a Region object is required for API
 	 * reasons but isn't actually used. This region's {@link #loc} member will
@@ -65,8 +66,8 @@ public class Region {
 	/** The factory with which to generate a region's {@link #loc} member. */
 	private static final PointFactory LOC_FACTORY = new PointFactory((x,y) -> {
 		// This focuses most hashing into the lowest 4 bits. See comments for
-		// HostWorld.regions for why this is done (short answer is table size is
-		// almost always 16).
+		// RegionStore.regions for why this is done (short answer is table size
+		// isalmost always 16).
 		// 
 		// We shift by 18 since ConcurrentHashMap likes to transform hashes by:
 		// hash = hash ^ (hash >>> 16);
@@ -551,7 +552,7 @@ public class Region {
 	 */
 	@Override
 	public int hashCode() {
-		// Use the broader hash than the default loc hash.
+		// Use the broader hash rather than the default loc hash.
 		return COORD_HASHER.applyAsInt(loc.x(), loc.y());
 	}
 	
