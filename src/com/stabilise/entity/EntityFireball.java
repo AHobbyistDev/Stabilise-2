@@ -60,7 +60,7 @@ public class EntityFireball extends EntityProjectile {
 		((LinkedHitbox)hitbox).linkedEntity = this;
 		hitbox.force = 0.3f;
 		hitbox.effect = new EffectFire(300);
-		hitbox.hits = 1000; // TODO: temporary for fun
+		hitbox.hits = 1000000; // TODO: temporary for fun
 		hitbox.persistenceTimer = -1;
 		particleSrc = world.getParticleManager().getSource(new ParticleFlame());
 	}

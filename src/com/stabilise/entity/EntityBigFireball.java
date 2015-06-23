@@ -30,13 +30,13 @@ public class EntityBigFireball extends EntityProjectile {
 	
 	// These hitboxes roughtly construct the four quadrants of a circle of radius 4 tiles
 	/** The first hitbox produced by the fireball. */
-	public static final Polygon HITBOX_1 = new Polygon(new Vec2(0f,0f), new Vec2(0f,4f), new Vec2(3f,3f), new Vec2(4f,0f));
+	public static final Polygon HITBOX_1 = new Polygon(Vec2.immutable(0f,0f), Vec2.immutable(0f,4f), Vec2.immutable(3f,3f), Vec2.immutable(4f,0f));
 	/** The second hitbox produced by the fireball. */
-	public static final Polygon HITBOX_2 = new Polygon(new Vec2(0f,0f), new Vec2(0f,4f), new Vec2(-3f,3f), new Vec2(-4f,0f));
+	public static final Polygon HITBOX_2 = new Polygon(Vec2.immutable(0f,0f), Vec2.immutable(0f,4f), Vec2.immutable(-3f,3f), Vec2.immutable(-4f,0f));
 	/** The third hitbox produced by the fireball. */
-	public static final Polygon HITBOX_3 = new Polygon(new Vec2(0f,0f), new Vec2(0f,-4f), new Vec2(-3f,-3f), new Vec2(-4f,0f));
+	public static final Polygon HITBOX_3 = new Polygon(Vec2.immutable(0f,0f), Vec2.immutable(0f,-4f), Vec2.immutable(-3f,-3f), Vec2.immutable(-4f,0f));
 	/** The fourth hitbox produced by the fireball. */
-	public static final Polygon HITBOX_4 = new Polygon(new Vec2(0f,0f), new Vec2(0f,-4f), new Vec2(3f,-3f), new Vec2(4f,0f));
+	public static final Polygon HITBOX_4 = new Polygon(Vec2.immutable(0f,0f), Vec2.immutable(0f,-4f), Vec2.immutable(3f,-3f), Vec2.immutable(4f,0f));
 	
 	/** The number of ticks after which a fireball despawns. */
 	private static final int DESPAWN_TICKS = 600;

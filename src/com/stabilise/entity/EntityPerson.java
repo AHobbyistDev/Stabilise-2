@@ -62,14 +62,14 @@ public class EntityPerson extends EntityMob {
 	public static final int ATTACK_SIDE_AIR_DURATION = 30;
 	public static final int ATTACK_SIDE_AIR_FRAME_2_BEGIN = 6;
 	public static final Polygon ATTACK_SIDE_AIR_HITBOX_1 =
-			new Polygon(new Vec2(2.72f,1.29f), new Vec2(0.96f,0.98f),
-					new Vec2(-0.45f,2.56f), new Vec2(1.29f,2.35f));
+			new Polygon(Vec2.immutable(2.72f,1.29f), Vec2.immutable(0.96f,0.98f),
+					Vec2.immutable(-0.45f,2.56f), Vec2.immutable(1.29f,2.35f));
 	public static final Shape ATTACK_SIDE_AIR_HITBOX_1_FLIPPED =
 			ATTACK_SIDE_AIR_HITBOX_1.reflect();
 	public static final int ATTACK_SIDE_AIR_FRAME_3_BEGIN = 8;
 	public static final Polygon ATTACK_SIDE_AIR_HITBOX_2 =
-			new Polygon(new Vec2(2.72f,1.29f), new Vec2(1.44f,-0.41f),
-					new Vec2(0.45f,0.45f), new Vec2(0.96f,0.98f));
+			new Polygon(Vec2.immutable(2.72f,1.29f), Vec2.immutable(1.44f,-0.41f),
+					Vec2.immutable(0.45f,0.45f), Vec2.immutable(0.96f,0.98f));
 	public static final Shape ATTACK_SIDE_AIR_HITBOX_2_FLIPPED =
 			ATTACK_SIDE_AIR_HITBOX_2.reflect();
 	
@@ -77,19 +77,19 @@ public class EntityPerson extends EntityMob {
 	public static final int ATTACK_UP_AIR_DURATION = 30;
 	public static final int ATTACK_UP_AIR_FRAME_2_BEGIN = 6;
 	public static final Polygon ATTACK_UP_AIR_HITBOX_1_1 =
-			new Polygon(new Vec2(2.72f,1.51f), new Vec2(1.22f,-0.45f),
-					new Vec2(0.8f,0.75f), new Vec2(0.89f,1.38f));
+			new Polygon(Vec2.immutable(2.72f,1.51f), Vec2.immutable(1.22f,-0.45f),
+					Vec2.immutable(0.8f,0.75f), Vec2.immutable(0.89f,1.38f));
 	public static final Shape ATTACK_UP_AIR_HITBOX_1_1_FLIPPED =
 			ATTACK_UP_AIR_HITBOX_1_1.reflect();
 	public static final Polygon ATTACK_UP_AIR_HITBOX_1_2 =
-			new Polygon(new Vec2(2.69f,1.95f), new Vec2(0.84f,1.49f),
-					new Vec2(0.27f,2.05f), new Vec2(0.58f,3.33f));
+			new Polygon(Vec2.immutable(2.69f,1.95f), Vec2.immutable(0.84f,1.49f),
+					Vec2.immutable(0.27f,2.05f), Vec2.immutable(0.58f,3.33f));
 	public static final Shape ATTACK_UP_AIR_HITBOX_1_2_FLIPPED =
 			ATTACK_UP_AIR_HITBOX_1_2.reflect();
 	public static final int ATTACK_UP_AIR_FRAME_3_BEGIN = 8;
 	public static final Polygon ATTACK_UP_AIR_HITBOX_2 =
-			new Polygon(new Vec2(-0.8f,1.4f), new Vec2(-1.65f,2.4f),
-					new Vec2(0.6f,3.35f), new Vec2(0.29f,2.04f));
+			new Polygon(Vec2.immutable(-0.8f,1.4f), Vec2.immutable(-1.65f,2.4f),
+					Vec2.immutable(0.6f,3.35f), Vec2.immutable(0.29f,2.04f));
 	public static final Shape ATTACK_UP_AIR_HITBOX_2_FLIPPED =
 			ATTACK_UP_AIR_HITBOX_2.reflect();
 	
@@ -97,19 +97,19 @@ public class EntityPerson extends EntityMob {
 	public static final int ATTACK_DOWN_AIR_DURATION = 30;
 	public static final int ATTACK_DOWN_AIR_FRAME_2_BEGIN = 6;
 	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_1 =
-			new Polygon(new Vec2(0.78f,0.91f), new Vec2(0.0f,1.63f),
-					new Vec2(1.91f,-0.15f), new Vec2(0.6f,0.65f));
+			new Polygon(Vec2.immutable(0.78f,0.91f), Vec2.immutable(0.0f,1.63f),
+					Vec2.immutable(1.91f,-0.15f), Vec2.immutable(0.6f,0.65f));
 	public static final Shape ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED =
 			ATTACK_DOWN_AIR_HITBOX_1_1.reflect();
 	public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_2 =
-			new Polygon(new Vec2(0.6f,0.65f), new Vec2(1.91f,-0.15f),
-					new Vec2(0.44f,-0.87f), new Vec2(0.25f,0.42f));
+			new Polygon(Vec2.immutable(0.6f,0.65f), Vec2.immutable(1.91f,-0.15f),
+					Vec2.immutable(0.44f,-0.87f), Vec2.immutable(0.25f,0.42f));
 	public static final Shape ATTACK_DOWN_AIR_HITBOX_1_2_FLIPPED =
 			ATTACK_DOWN_AIR_HITBOX_1_2.reflect();
 	public static final int ATTACK_DOWN_AIR_FRAME_3_BEGIN = 8;
 	public static final Polygon ATTACK_DOWN_AIR_HITBOX_2 =
-			new Polygon(new Vec2(0.25f,0.42f), new Vec2(0.44f,-0.87f),
-					new Vec2(-1.47f,0.11f), new Vec2(-0.31f,0.69f));
+			new Polygon(Vec2.immutable(0.25f,0.42f), Vec2.immutable(0.44f,-0.87f),
+					Vec2.immutable(-1.47f,0.11f), Vec2.immutable(-0.31f,0.69f));
 	public static final Shape ATTACK_DOWN_AIR_HITBOX_2_FLIPPED =
 			ATTACK_DOWN_AIR_HITBOX_2.reflect();
 	
@@ -119,40 +119,40 @@ public class EntityPerson extends EntityMob {
 	public static final int SPECIAL_SIDE_GROUND_COST_MANA = 50;
 	public static final int SPECIAL_SIDE_GROUND_DURATION = 40;
 	public static final int SPECIAL_SIDE_GROUND_FRAME_2_BEGIN = 16;
-	public static final Vec2 SPECIAL_SIDE_GROUND_ORIGIN = new Vec2(1.09f, 1.25f);
+	public static final Vec2 SPECIAL_SIDE_GROUND_ORIGIN = Vec2.immutable(1.09f, 1.25f);
 	
 	// Up special (ground)
 	public static final int SPECIAL_UP_GROUND_COST_MANA = 100;
 	public static final int SPECIAL_UP_GROUND_DURATION = 40;
 	public static final int SPECIAL_UP_GROUND_FRAME_2_BEGIN = 16;
-	public static final Vec2 SPECIAL_UP_GROUND_ORIGIN = new Vec2(0.25f,2.25f);
+	public static final Vec2 SPECIAL_UP_GROUND_ORIGIN = Vec2.immutable(0.25f,2.25f);
 	
 	// Down special (ground)
 	public static final int SPECIAL_DOWN_GROUND_COST_MANA = 100;
 	public static final int SPECIAL_DOWN_GROUND_DURATION = 40;
 	public static final int SPECIAL_DOWN_GROUND_FRAME_2_BEGIN = 16;
 	public static final Polygon SPECIAL_DOWN_GROUND_HITBOX_1 =
-			new Polygon(new Vec2(3f,0f), new Vec2(0f,0f), new Vec2(0f,2f), new Vec2(1.5f,2f));
+			new Polygon(Vec2.immutable(3f,0f), Vec2.immutable(0f,0f), Vec2.immutable(0f,2f), Vec2.immutable(1.5f,2f));
 	public static final Polygon SPECIAL_DOWN_GROUND_HITBOX_2 =
-			new Polygon(new Vec2(0f,0f), new Vec2(-3f,0f), new Vec2(-1.5f,2f), new Vec2(0f,2f));
+			new Polygon(Vec2.immutable(0f,0f), Vec2.immutable(-3f,0f), Vec2.immutable(-1.5f,2f), Vec2.immutable(0f,2f));
 	
 	// Side special (air)
 	public static final int SPECIAL_SIDE_AIR_COST_MANA = 50;
 	public static final int SPECIAL_SIDE_AIR_DURATION = 30;
 	public static final int SPECIAL_SIDE_AIR_FRAME_2_BEGIN = 10;
-	public static final Vec2 SPECIAL_SIDE_AIR_ORIGIN = new Vec2(1.02f,1.33f);
+	public static final Vec2 SPECIAL_SIDE_AIR_ORIGIN = Vec2.immutable(1.02f,1.33f);
 	
 	// Up special (air)
 	public static final int SPECIAL_UP_AIR_COST_MANA = 100;
 	public static final int SPECIAL_UP_AIR_DURATION = 30;
 	public static final int SPECIAL_UP_AIR_FRAME_2_BEGIN = 10;
-	public static final Vec2 SPECIAL_UP_AIR_ORIGIN = new Vec2(0.27f,2.18f);
+	public static final Vec2 SPECIAL_UP_AIR_ORIGIN = Vec2.immutable(0.27f,2.18f);
 	
 	// Down special (air)
 	public static final int SPECIAL_DOWN_AIR_COST_MANA = 100;
 	public static final int SPECIAL_DOWN_AIR_DURATION = 30;
 	public static final int SPECIAL_DOWN_AIR_FRAME_2_BEGIN = 10;
-	public static final Vec2 SPECIAL_DOWN_AIR_ORIGIN = new Vec2(0.33f,0.36f);
+	public static final Vec2 SPECIAL_DOWN_AIR_ORIGIN = Vec2.immutable(0.33f,0.36f);
 		
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -418,9 +418,9 @@ public class EntityPerson extends EntityMob {
 				if(stateTicks == SPECIAL_DOWN_AIR_FRAME_2_BEGIN) {
 					if(useMana(SPECIAL_DOWN_AIR_COST_MANA)) {
 						EntityBigFireball f = new EntityBigFireball(world, this);
-						f.x = x + (facingRight ? SPECIAL_DOWN_AIR_ORIGIN.x
-								: -SPECIAL_DOWN_AIR_ORIGIN.x);
-						f.y = y + SPECIAL_DOWN_AIR_ORIGIN.y;
+						f.x = x + (facingRight ? SPECIAL_DOWN_AIR_ORIGIN.x()
+								: -SPECIAL_DOWN_AIR_ORIGIN.x());
+						f.y = y + SPECIAL_DOWN_AIR_ORIGIN.y();
 						f.dy = world.getRnd().nextFloat() * 0.05f - 0.25f;
 						world.addEntity(f);
 					} else {
@@ -430,12 +430,12 @@ public class EntityPerson extends EntityMob {
 						maxAngle = -2.0D * Math.PI / 3.0D;
 						
 						if(facingRight) {
-							px = x + SPECIAL_DOWN_AIR_ORIGIN.x;
+							px = x + SPECIAL_DOWN_AIR_ORIGIN.x();
 						} else {
-							px = x - SPECIAL_DOWN_AIR_ORIGIN.x;
+							px = x - SPECIAL_DOWN_AIR_ORIGIN.x();
 						}
 						
-						particleSrc.createBurst(6, px, y + SPECIAL_DOWN_AIR_ORIGIN.y,
+						particleSrc.createBurst(6, px, y + SPECIAL_DOWN_AIR_ORIGIN.y(),
 								0.03f, 0.08f, (float)minAngle, (float)maxAngle);
 					}
 				}
@@ -452,14 +452,14 @@ public class EntityPerson extends EntityMob {
 					world.getRnd().nextInt(3) + 5);
 			
 			if(facingRight) {
-				e.x = x + originPoint.x;
+				e.x = x + originPoint.x();
 				e.dx = 30f + world.getRnd().nextFloat() * 10f;
 			} else {
-				e.x = x - originPoint.x;
+				e.x = x - originPoint.x();
 				e.dx = -30f - world.getRnd().nextFloat() * 10f;
 			}
 			
-			e.y = y + originPoint.y;
+			e.y = y + originPoint.y();
 			e.dy = 1.0f + world.getRnd().nextFloat() * 1.8f;
 			
 			e.facingRight = facingRight;
@@ -469,16 +469,16 @@ public class EntityPerson extends EntityMob {
 			double minAngle, maxAngle, px;
 			
 			if(facingRight) {
-				px = x + originPoint.x;
+				px = x + originPoint.x();
 				minAngle = -Math.PI / 6.0D;
 				maxAngle = Math.PI / 6.0D;
 			} else {
-				px = x - originPoint.x;
+				px = x - originPoint.x();
 				minAngle = Math.PI * 5.0D / 6.0D;
 				maxAngle = Math.PI * 7.0D / 7.0D;
 			}
 			
-			particleSrc.createBurst(6, px, y + originPoint.y,
+			particleSrc.createBurst(6, px, y + originPoint.y(),
 					0.03f, 0.08f, (float)minAngle, (float)maxAngle);
 		}
 	}
@@ -490,7 +490,7 @@ public class EntityPerson extends EntityMob {
 	 * @param originPoint The point from which the storm is to originate.
 	 */
 	private void fireballStorm(World world, int manaCost, Vec2 originPoint) {
-		double px = facingRight ? x + originPoint.x : x - originPoint.x;
+		double px = facingRight ? x + originPoint.x() : x - originPoint.x();
 		
 		if(useMana(manaCost)) {
 			int max = 30 + world.getRnd().nextInt(11);
@@ -502,10 +502,10 @@ public class EntityPerson extends EntityMob {
 				e.dx = right ? MathUtils.cos(angle) * velocity : -MathUtils.cos(angle) * velocity;
 				e.dy = MathUtils.sin(angle)*velocity;
 				e.facingRight = right;
-				world.addEntity(e, px, y + originPoint.y);
+				world.addEntity(e, px, y + originPoint.y());
 			}
 		} else {
-			particleSrc.createBurst(6, px, y + originPoint.y,
+			particleSrc.createBurst(6, px, y + originPoint.y(),
 					0.03f, 0.08f, MathUtils.PI / 3f, MathUtils.PI * 0.6666f);
 		}
 	}

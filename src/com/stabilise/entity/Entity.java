@@ -241,7 +241,7 @@ public abstract class Entity extends FreeGameObject {
 	private boolean horizontalCollisions(World world, double xp, double yp) {
 		if(dx == 0) return false;
 		
-		float leadingEdge = dxp ? boundingBox.v11.x : boundingBox.v00.x;
+		float leadingEdge = dxp ? boundingBox.v11.x() : boundingBox.v00.x();
 		
 		xp += leadingEdge;
 		
@@ -253,10 +253,10 @@ public abstract class Entity extends FreeGameObject {
 		// Check the vertical wall of tiles to the left/right of the entity
 		
 		//double max = dyp ? Math.ceil(yp + boundingBox.p11.y) : Math.ceil(yp + boundingBox.p11.y);
-		double max = Math.ceil(yp + boundingBox.v11.y);
+		double max = Math.ceil(yp + boundingBox.v11.y());
 		
 		// TODO: < vs <= - watch out for this, it may cause problems in the future
-		for(double v = yp + boundingBox.v00.y; v < max; v++) {
+		for(double v = yp + boundingBox.v00.y(); v < max; v++) {
 			if(world.getTileAt(xp, v).isSolid() && rowValid(world, xp, v)) {
 				//x = dxp ? Math.floor(xp) - boundingBox.p11.x : Math.ceil(xp) - boundingBox.p00.x;
 				// Alternatively... (doesn't really matter though)
@@ -280,7 +280,7 @@ public abstract class Entity extends FreeGameObject {
 	private boolean verticalCollisions(World world, double xp, double yp) {
 		if(dyi == 0.0f) return false;
 		
-		float leadingEdge = dyp ? boundingBox.v11.y : boundingBox.v00.y;
+		float leadingEdge = dyp ? boundingBox.v11.y() : boundingBox.v00.y();
 		
 		yp += leadingEdge;
 		
@@ -292,10 +292,10 @@ public abstract class Entity extends FreeGameObject {
 		// Check the horizontal wall of tiles at the top/bottom of the entity
 		
 		//double max = dxp ? Math.ceil(xp + boundingBox.p11.x) : Math.ceil(xp + boundingBox.p11.x);
-		double max = Math.ceil(xp + boundingBox.v11.x);
+		double max = Math.ceil(xp + boundingBox.v11.x());
 		
 		// TODO: < vs <= - watch out for this, it may cause problems in the future
-		for(double h = xp + boundingBox.v00.x; h < max; h++) {
+		for(double h = xp + boundingBox.v00.x(); h < max; h++) {
 			if(world.getTileAt(h, yp).isSolid() && columnValid(world, h, yp)) {
 				//y = dyp ? Math.floor(yp) - boundingBox.p11.y : Math.ceil(yp) - boundingBox.p00.y;
 				//onGround = dy < 0;
@@ -365,9 +365,9 @@ public abstract class Entity extends FreeGameObject {
 		dx = dxi = 0;
 		
 		if(direction == Direction.RIGHT) {
-			x = Math.floor(xp) - boundingBox.v11.x;
+			x = Math.floor(xp) - boundingBox.v11.x();
 		} else {
-			x = Math.ceil(xp) - boundingBox.v00.x;
+			x = Math.ceil(xp) - boundingBox.v00.x();
 		}
 	}
 	
@@ -385,9 +385,9 @@ public abstract class Entity extends FreeGameObject {
 		dy = dyi = 0;
 		
 		if(direction == Direction.UP) {
-			y = Math.floor(yp) - boundingBox.v11.y;
+			y = Math.floor(yp) - boundingBox.v11.y();
 		} else {
-			y = Math.ceil(yp) - boundingBox.v00.y;
+			y = Math.ceil(yp) - boundingBox.v00.y();
 			
 			// TODO: Find a better way of doing this
 			int tx = Maths.floor(x);

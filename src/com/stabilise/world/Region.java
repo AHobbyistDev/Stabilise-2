@@ -64,17 +64,7 @@ public class Region {
 		(x << 16) | (y & 0xFFFF);
 	
 	/** The factory with which to generate a region's {@link #loc} member. */
-	private static final PointFactory LOC_FACTORY = new PointFactory((x,y) -> {
-		// This focuses most hashing into the lowest 4 bits. See comments for
-		// RegionStore.regions for why this is done (short answer is table size
-		// isalmost always 16).
-		// 
-		// We shift by 18 since ConcurrentHashMap likes to transform hashes by:
-		// hash = hash ^ (hash >>> 16);
-		// This would practically cancel out shifting x by only 16, so we shift
-		// by 2 more to preserve those bits for y.
-		return (x << 18) ^ y; // (x << 2) | (y & 0b11);
-	});
+	private static final PointFactory LOC_FACTORY = new PointFactory(16, true);
 	
 	/** Values for a region's state.
 	 * 

@@ -96,7 +96,7 @@ public class Polygon extends AbstractPolygon {
 		for(int i = 0; i < axes.length; i++)
 			projections[i] = getProjection(axes[i]);
 	}
-
+	
 	@Override
 	protected Vec2[] getAxes() {
 		return axes == null ? genAxes() : axes;

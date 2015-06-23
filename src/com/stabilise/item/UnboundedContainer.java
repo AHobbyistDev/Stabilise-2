@@ -44,7 +44,7 @@ public class UnboundedContainer extends Container {
 		ItemStack stack = items.remove(slot);
 		// If this was the last slot, remove any null entries between it and
 		// the next occupied slot.
-		while(items.removeLast(ItemStack.NO_STACK));
+		while(items.removeLast(ItemStack.NO_STACK)) {}
 		return stack;
 	}
 	

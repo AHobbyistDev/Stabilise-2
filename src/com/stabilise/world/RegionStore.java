@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.IntBinaryOperator;
+import java.util.function.IntFunction;
 
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.GuardedBy;
@@ -16,6 +18,7 @@ import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.IteratorUtils;
 import com.stabilise.util.collect.LightLinkedList;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
 import com.stabilise.world.loader.WorldLoader.DimensionLoader;
 
@@ -66,6 +69,12 @@ public class RegionStore {
 	/** Wait time in seconds for {@link #waitUntilDone()}. */
 	private static final int WAIT_TIME = 5;
 	
+	/** The number of locks to stripe {@Link #cacheLocks} and {@link
+	 * #storeLocks} into. */
+	private static final int STRIPE_FACTOR = 8;
+	private static final IntBinaryOperator STRIPE_HASHER =
+			Maths.generateHashingFunction(STRIPE_FACTOR, false);
+	
 	private final HostWorld world;
 	private DimensionLoader loader = null;
 	
@@ -88,16 +97,32 @@ public class RegionStore {
 	private final ConcurrentMap<Point, CachedRegion> cache =
 			new ConcurrentHashMap<>();
 	
-	/** Locks used for lock striping when managing cached regions. */
-	private final Object[] locks;
-	private static final int LOCKS = 4; // Do not modify without checking getLock()
+	/** Locks to use for managing cache-local data. These locks double as
+	 * mutable points for convenience, which should only be used while
+	 * synchronised on themselves. */
+	private final Striper<Point> cacheLocks =
+			new Striper<>(i -> Region.createMutableLoc());
+	/** Locks to synchronise on when adding/removing from storage. These locks
+	 * are designed to be used to ensure mutual exclusion between the two
+	 * following operations:
+	 * 
+	 * <ul>
+	 * <li>In <i>loadRegion()</i>:
+	 *     <ul>
+	 *     <li>Try to get a region from the cache.
+	 *     <li>If it is not in the cache, create it and add it to main storage.
+	 *     </ul>
+	 * <li>In <i>cache()</i>:
+	 *     <ul>
+	 *     <li>Try to get a region from main storage.
+	 *     <li>If it is not in main storage, create it an add it to the cache.
+	 *     </ul>
+	 * </ul> */
+	private final Striper<Object> storeLocks = new Striper<>(i -> new Object());
 	
 	/** Dummy key for {@link #regions} whose mutability may be abused for on
 	 * the main thread. */
-	private final Point unsafeDummyLoc = Region.createMutableLoc();
-	/** Dummy key for {@link #regions} which is guarded by {@link #locks}. */
-	@GuardedBy("locks")
-	private final Point safeDummyloc = Region.createMutableLoc();
+	private final Point unguardedDummyLoc = Region.createMutableLoc();
 	
 	/** Regions which have been cached by the current worker thread. */
 	// Note: Sometime in the future it might be a good idea to switch from a
@@ -125,10 +150,6 @@ public class RegionStore {
 	RegionStore(HostWorld world, Consumer<Region> unloadHandler) {
 		this.world = Objects.requireNonNull(world);
 		this.unloadHandler = Objects.requireNonNull(unloadHandler);
-		
-		locks = new Object[LOCKS];
-		for(int i = 0; i < LOCKS; i++)
-			locks[i] = new Object();
 		
 		log = Log.getAgent(world.getDimensionName() + "RegionCache");
 	}
@@ -175,7 +196,7 @@ public class RegionStore {
 	@UserThread("MainThread")
 	@NotThreadSafe
 	public Region getRegionAt(int x, int y) {
-		return regions.get(unsafeDummyLoc.set(x, y));
+		return regions.get(unguardedDummyLoc.set(x, y));
 	}
 	
 	/**
@@ -205,14 +226,14 @@ public class RegionStore {
 	@Deprecated
 	public Region loadRegion(int x, int y) {
 		// Get the region if it is already loaded
-		Region r = regions.get(unsafeDummyLoc.set(x, y));
+		Region r = regions.get(unguardedDummyLoc.set(x, y));
 		if(r != null)
 			return r;
 		
 		// If it is not loaded directly, try getting it from the cache.
 		// Synchronised to make this atomic. See cacheRegion()
-		synchronized(getLock(x, y)) {
-			r = getFromCache(unsafeDummyLoc); // unsafeDummyLoc is already (x,y)
+		synchronized(storeLocks.get(x, y)) {
+			r = getFromCache(unguardedDummyLoc); // unsafeDummyLoc is already (x,y)
 			if(r == null) // if it's not cached, create it
 				r = new Region(x, y, world.getAge());
 			regions.put(r.loc, r);
@@ -229,7 +250,7 @@ public class RegionStore {
 	@NotThreadSafe
 	public Region loadRegion(int x, int y, boolean makeActive) {
 		// Get the region if it is already loaded
-		Region r = regions.get(unsafeDummyLoc.set(x, y));
+		Region r = regions.get(unguardedDummyLoc.set(x, y));
 		if(r != null) {
 			if(makeActive)
 				setRegionActive(r);
@@ -238,8 +259,8 @@ public class RegionStore {
 		
 		// If it is not loaded directly, try getting it from the cache.
 		// Synchronised to make this atomic. See cache()
-		synchronized(getLock(x, y)) {
-			CachedRegion c = cache.get(unsafeDummyLoc); // dummy is already (x,y)
+		synchronized(storeLocks.get(x, y)) {
+			CachedRegion c = cache.get(unguardedDummyLoc); // dummy is (x,y)
 			r = c != null ? c.region : new Region(x, y, world.getAge());
 			regions.put(r.loc, r);
 		}
@@ -305,7 +326,7 @@ public class RegionStore {
 						// Theoretically the region should never ever be null,
 						// but better safe than sorry.
 						log.postWarning("Region at (" + x + "," + y + ") is "
-								+ "null? src: unsetPrimary");
+								+ "null? src: setRegionInactive");
 					}
 				}
 			}
@@ -335,23 +356,25 @@ public class RegionStore {
 				return r;
 		}
 		
-		// Otherwise, if the region is cached, we local-cache and return it.
+		// Otherwise, if the region is cached, we locally cache it, and then
+		// return it.
 		
 		CachedRegion regionHandle;
+		Point p = cacheLocks.get(x, y);
 		
 		// Synchronised to make the put-if-absent atomic
-		synchronized(this) {
-			regionHandle = cache.get(Region.createImmutableLoc(x, y));
+		synchronized(p) {
+			regionHandle = cache.get(p.set(x, y));
 			
 			// If the region isn't in the cache, we check to see if the world
 			// has it.
 			if(regionHandle == null) {
 				// Synchronised to make this atomic. See loadRegion().
-				synchronized(getLock(x, y)) {
+				synchronized(storeLocks.get(x, y)) {
 					// If the region is in primary storage, we take it and put
 					// it in the cache. If it isn't, we create the region in
 					// the cache.
-					Region region = getRegionAt(safeDummyloc.set(x,y));
+					Region region = getRegionAt(p); // p is (x,y)
 					if(region == null)
 						region = new Region(x, y, world.getAge());
 					regionHandle = new CachedRegion(region);
@@ -405,7 +428,7 @@ public class RegionStore {
 		// in the cache until saving is complete, and then we remove it. To do
 		// this, we simply instruct the WorldLoader to invoke dispose() on the
 		// handle once it has finished saving.
-		synchronized(this) {
+		synchronized(cacheLocks.get(r.x(), r.y())) {
 			CachedRegion cacheHandle = cache.get(r.loc); // never null
 			if(cacheHandle.removeMarking())
 				loader.saveRegion(r, cacheHandle);
@@ -427,7 +450,7 @@ public class RegionStore {
 		// only to have us suddenly remove it. However, we don't care if this
 		// happens since it doesn't have any effect.
 		boolean removed = false;
-		synchronized(this) {
+		synchronized(cacheLocks.get(r.region.x(), r.region.y())) {
 			// Remove the region unless it has been re-cached.
 			if(r.tryFinalise()) {
 				cache.remove(r.region.loc);
@@ -465,29 +488,6 @@ public class RegionStore {
 	}
 	
 	/**
-	 * Gets the lock upon which to synchronise when accessing a cached region.
-	 * The returned lock is designed to ensure mutual exclusion between the two
-	 * following operations:
-	 * 
-	 * <ul>
-	 * <li>In <i>loadRegion()</i>:
-	 *     <ul>
-	 *     <li>Try to get a region from the cache.
-	 *     <li>If it is not in the cache, create it and add it to main storage.
-	 *     </ul>
-	 * <li>In <i>cache()</i>:
-	 *     <ul>
-	 *     <li>Try to get a region from main storage.
-	 *     <li>If it is not in main storage, create it an add it to the cache.
-	 *     </ul>
-	 * </ul>
-	 */
-	private Object getLock(int x, int y) {
-		// We use the lowest bit in both x and y to return one of 4 locks.
-		return locks[((x & 1) << 1) | (y & 1)];
-	}
-	
-	/**
 	 * Safely saves a region. This is done through the following steps:
 	 * 
 	 * <ul>
@@ -508,7 +508,7 @@ public class RegionStore {
 		// We pretty much dupe the functionality of cache() and uncache() here.
 		
 		// Synchronised to make the put-if-absent atomic
-		synchronized(this) {
+		synchronized(cacheLocks.get(region.x(), region.y())) {
 			handle = cache.get(region.loc);
 			// If the region isn't already in the cache, stick it in.
 			if(handle == null) {
@@ -600,14 +600,14 @@ public class RegionStore {
 	 * Container class for cached regions.
 	 * 
 	 * <p>All methods of this class should only be invoked while the monitor
-	 * lock on {@link RegionStore#cache} is held.
+	 * lock on one of the {@link RegionStore#cacheLocks} is held.
 	 */
 	public class CachedRegion {
 		
 		/** The region. */
 		private final Region region;
 		/** The number of times the region has been cached. */
-		@GuardedBy("RegionStore") private int timesCached = 0;
+		private int timesCached = 0;
 		
 		
 		/**
@@ -622,7 +622,6 @@ public class RegionStore {
 		/**
 		 * Marks the region as cached by the current thread.
 		 */
-		@GuardedBy("RegionStore")
 		private void mark() {
 			timesCached++;
 		}
@@ -631,7 +630,6 @@ public class RegionStore {
 		 * Removes the current thread's marking, and returns {@code true} if
 		 * the region is no longer considered marked and should be saved.
 		 */
-		@GuardedBy("RegionStore")
 		private boolean removeMarking() {
 			// If this is the last mark, we don't remove it; rather, we let the
 			// WorldLoader save the region (see uncache()), and then have the
@@ -650,7 +648,6 @@ public class RegionStore {
 		 * thread and may be removed; {@code false} if the region is still in
 		 * use.
 		 */
-		@GuardedBy("RegionStore")
 		private boolean tryFinalise() {
 			return --timesCached == 0;
 		}
@@ -662,6 +659,25 @@ public class RegionStore {
 		@UserThread("WorldLoaderThread")
 		public void dispose() {
 			finaliseUncaching(this);
+		}
+		
+	}
+	
+	/**
+	 * Convenience class which extends {@link
+	 * com.stabilise.util.concurrent.Striper} to provide {@code get(x, y)}.
+	 */
+	private class Striper<T> extends com.stabilise.util.concurrent.Striper<T> {
+		
+		public Striper(IntFunction<T> supplier) {
+			super(STRIPE_FACTOR, supplier);
+		}
+		
+		/**
+		 * Gets the object corresponding to the specified x and y coordinates.
+		 */
+		public T get(int x, int y) {
+			return get(STRIPE_HASHER.applyAsInt(x, y));
 		}
 		
 	}

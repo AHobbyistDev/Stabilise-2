@@ -21,7 +21,7 @@ import com.stabilise.util.maths.Point.MutablePoint;
 @ThreadSafe
 public class PointFactory {
 	
-	final IntBinaryOperator hasher;
+	private final IntBinaryOperator hasher;
 	
 	
 	/**
@@ -33,6 +33,14 @@ public class PointFactory {
 	 */
 	public PointFactory(IntBinaryOperator hasher) {
 		this.hasher = Objects.requireNonNull(hasher);
+	}
+	
+	/**
+	 * Creates a new point factory with a hasher returned by {@link
+	 * Maths#generateHashingFunction(int, boolean)}.
+	 */
+	public PointFactory(int maxElements, boolean negateHashMapShift) {
+		hasher = Maths.generateHashingFunction(maxElements, negateHashMapShift);
 	}
 	
 	/**

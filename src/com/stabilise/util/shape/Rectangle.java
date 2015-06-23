@@ -64,10 +64,10 @@ public class Rectangle extends Polygon {
 	 */
 	public Rectangle(float x, float y, float width, float height) {
 		vertices = new Vec2[] {
-				new Vec2(x, y),
-				new Vec2(x, y + height),
-				new Vec2(x + width, y + height),
-				new Vec2(x + width, y)
+				Vec2.immutable(x, y),
+				Vec2.immutable(x, y + height),
+				Vec2.immutable(x + width, y + height),
+				Vec2.immutable(x + width, y)
 		};
 	}
 	

@@ -89,6 +89,9 @@ public abstract class Container implements Iterable<ItemStack>, Sendable {
 		if(stack == null)
 			throw new NullPointerException("stack is null");
 		
+		if(!isBounded())
+			return true;
+		
 		for(int i = 0; i < size(); i++) {
 			if(getStack(i).accepts(stack))
 				return true;
@@ -359,7 +362,7 @@ public abstract class Container implements Iterable<ItemStack>, Sendable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Container of size [");
+		sb.append("Container[");
 		sb.append(size());
 		sb.append("]: {");
 		
@@ -370,7 +373,7 @@ public abstract class Container implements Iterable<ItemStack>, Sendable {
 			
 			sb.append("\n\t[");
 			sb.append(i);
-			sb.append("] ");
+			sb.append("]: ");
 			sb.append(s);
 		}
 		

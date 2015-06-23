@@ -57,7 +57,7 @@ public class ShapeTest {
 		double angle = 0D;
 		for(int i = 1; i < vertices; i++) {
 			angle += increments;
-			verts[i] = new Vec2((float)Math.cos(angle), (float)Math.sin(angle));
+			verts[i] = Vec2.immutable((float)Math.cos(angle), (float)Math.sin(angle));
 		}
 		return new Polygon(verts);
 	}

@@ -1,5 +1,7 @@
 package com.stabilise.util.maths;
 
+import java.util.function.IntBinaryOperator;
+
 import com.badlogic.gdx.math.MathUtils;
 
 /**
@@ -29,11 +31,11 @@ public class Maths {
 	public static final float PIf = (float)Math.PI;
 	
 	/** The x-axis unit vector with components (1,0). */
-	public static final Vec2 VEC_X = new Vec2(1f, 0f);
+	public static final Vec2 VEC_X = Vec2.immutable(1f, 0f);
 	/** The y-axis unit vector with components (0,1). */
-	public static final Vec2 VEC_Y = new Vec2(0f, 1f);
+	public static final Vec2 VEC_Y = Vec2.immutable(0f, 1f);
 	/** A vector with components (1, 1). */
-	public static final Vec2 VEC_1_1 = new Vec2(1f, 1f);
+	public static final Vec2 VEC_1_1 = Vec2.immutable(1f, 1f);
 	
 	/** The maximum value which can be held by an unsigned byte
 	 * (<tt>2<sup><font size=-1>8</font></sup>-1</tt>). */
@@ -381,40 +383,6 @@ public class Maths {
 	}
 	
 	/**
-	 * Compacts two integer values into one, as if by:
-	 * <pre>(x << 16) | (y & 0xFFFF)</pre>
-	 * 
-	 * <p>The returned value is susceptible to collisions for any values 
-	 * {@code x0}, {@code y0} and {@code x1}, {@code y1} of {@code x} and
-	 * {@code y} which satisfy:
-	 * 
-	 * <pre>
-	 * wrappedRem(x0, 65536) == wrappedRem(x1, 65536) &&
-	 * wrappedRem(y0, 65536) == wrappedRem(y1, 65536)</pre>
-	 * 
-	 * @param x The first value.
-	 * @param y The second value.
-	 * 
-	 * @return The compacted value.
-	 */
-	public static int compactInt(int x, int y) {
-		return (x << 16) | (y & 0xFFFF);
-	}
-	
-	/**
-	 * Compacts two integer values into a long, as if by:
-	 * <pre>(x << 32) | y</pre>
-	 * 
-	 * @param x The first value.
-	 * @param y The second value.
-	 * 
-	 * @return The compacted value.
-	 */
-	public static long compactLong(int x, int y) {
-		return ((long)x << 32) | (long)y;
-	}
-	
-	/**
 	 * Returns {@code x*x}.
 	 */
 	public static int square(int x) {
@@ -441,6 +409,70 @@ public class Maths {
 	 */
 	public static float toRadians(float deg) {
 		return deg * MathUtils.degreesToRadians;
+	}
+	
+	/**
+	 * Returns a hashing function designed to evenly compress two integers into
+	 * a hash for a hash table accommodating up to {@code maxElements}-many
+	 * elements.
+	 * 
+	 * <p>The returned hashing function works best when the average table size
+	 * is equal to {@code maxElements}, and may degrade if {@code
+	 * negateHashMapShift} is {@code true} and the real max table size turns
+	 * out to be greater than 2<font size=-1><sup>16</sup></font> while {@code
+	 * maxElements} is specified to be less.
+	 * 
+	 * @param maxElements The maximum number of elements which are expected to
+	 * appear in the table.
+	 * @param negateHashMapShift Whether or not to negate a background shift
+	 * performed by certain map implementations.
+	 * 
+	 * @throws IllegalArgumentException if {@code maxElements <= 0}.
+	 */
+	public static IntBinaryOperator generateHashingFunction(int maxElements,
+			boolean negateHashMapShift) {
+		if(maxElements <= 0)
+			throw new IllegalArgumentException("maxElements <= 0");
+		
+		// We create a hasher which combines the lowest bits of x and y into a
+		// single hash code, aiming to fit as much hash data as we can into a
+		// table which will hold up to maxElements many elements.
+		// 
+		// e.g., if maxElements is 999, the table size will be 1024, with 10
+		// usable hash bits. So, we take the lowest 5 bits from x and y:
+		//     x = xxxxxxxxxxxxxxxxxxxxxxxxxxxXXXXX
+		//     y = yyyyyyyyyyyyyyyyyyyyyyyyyyyYYYYY
+		// and combine them into the hash as such:
+		//     hash = xxxxxxxxxxxxxxxxxxxxxxXXXXXYYYYY.
+		// We keep x's higher bits for the hash rather than indiscriminately
+		// setting the higher hash bits to 0, just in case the table expands.
+		//
+		// Since HashMap, ConcurrentHashMap and co. like to further transform a
+		// hash by
+		//     hash = hash ^ (hash >>> 16);
+		// we offer the option negate this in order to eliminate interference
+		// which would be created by higher-order bits. If the user chooses to
+		// do so, our hash in the above example would instead be:
+		//     hash = xxxxxxXXXXX0000000000000000YYYYY,
+		// which will be transformed into
+		//     hash = 0000000000000000xxxxxxXXXXXYYYYY
+		// by HashMap/ConcurrentHashMap, which is the same as our desired hash
+		// for the lower 16 bits. However, if our table size ends up being
+		// large enough, we lose information as the 0s become incorporated into
+		// the hash, and so for larger tables we don't apply this shift.
+		
+		int tableSize = MathUtils.nextPowerOfTwo(maxElements);
+		int sizeLog = log2(tableSize) / 2;
+		boolean usesLessThan16Bits = sizeLog <= 8;
+		// Amount by which to shift x left to make room for y
+		int xShift = sizeLog +
+				(negateHashMapShift && usesLessThan16Bits ? 16 : 0);
+		int yMask = (1 << sizeLog) - 1;
+		
+		//System.out.println("for maxElements " + maxElements + ": " + xShift
+		//		+ ", " + yMask);
+		
+		return (x,y) -> (x << xShift) | (y & yMask);
 	}
 	
 }

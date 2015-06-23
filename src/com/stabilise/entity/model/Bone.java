@@ -50,7 +50,7 @@ public class Bone {
 	 * from its originally-defined position, in radians.
 	 */
 	public void setRotation(float rotation) {
-		rotationMatrix.setToRotation(rotation);
+		//rotationMatrix.setToRotation(rotation);
 		rotatedHitbox = baseHitbox.transform(rotationMatrix);
 	}
 	

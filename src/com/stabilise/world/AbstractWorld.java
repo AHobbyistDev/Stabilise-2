@@ -403,10 +403,10 @@ public abstract class AbstractWorld implements World {
 		if(!inRange)
 			return;
 		
-		int minX = Maths.floor(x + mob.boundingBox.v00.x);
-		int maxX = Maths.ceil(x + mob.boundingBox.v11.x);
-		int minY = Maths.floor(y + mob.boundingBox.v00.y);
-		int maxY = Maths.ceil(y + mob.boundingBox.v11.y);
+		int minX = Maths.floor(x + mob.boundingBox.v00.x());
+		int maxX = Maths.ceil(x + mob.boundingBox.v11.x());
+		int minY = Maths.floor(y + mob.boundingBox.v00.y());
+		int maxY = Maths.ceil(y + mob.boundingBox.v11.y());
 		
 		// Check to see if the mob would be spawning in any tiles
 		for(int tileX = minX; tileX < maxX; tileX++)
@@ -739,8 +739,8 @@ public abstract class AbstractWorld implements World {
 			Random rnd = world.getRnd();
 			for(int i = 0; i < count(numParticles); i++)
 				createBurstParticle(rnd,
-						x + aabb.v00.x + rnd.nextFloat() * aabb.width(),
-						y + aabb.v00.y + rnd.nextFloat() * aabb.height(),
+						x + aabb.v00.x() + rnd.nextFloat() * aabb.width(),
+						y + aabb.v00.y() + rnd.nextFloat() * aabb.height(),
 						minV, maxV, minAngle, maxAngle);
 		}
 		

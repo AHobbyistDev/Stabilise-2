@@ -12,6 +12,7 @@ import java.util.Objects;
 import com.stabilise.entity.GameObject;
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
 import com.stabilise.util.maths.PointFactory;
 
@@ -23,16 +24,7 @@ import com.stabilise.util.maths.PointFactory;
 @NotThreadSafe
 public class SliceMapClient implements Iterable<Slice> {
 	
-	private final PointFactory pointFactory = new PointFactory((x,y) -> {
-		// Now, the theoretical maximum number of loaded slices is 169, so the
-		// hash table size should always be at least 256, which leaves us with
-		// 8 hash bits.
-		// Since HashMap manually transforms each key hash as if by
-		// k ^= k >>> 16,
-		// we'll shift x left by 20 so that it appropriately occupies the 8th-
-		// 5th leftmost bits in the hash, while leaving the 4th-1st bits for y.
-		return (x << 20) | (y & 0b1111);
-	});
+	private final PointFactory pointFactory = new PointFactory(MAX_LOADED_SLICES, true);
 	/** Dummy point to use for hash table getters. */
 	private final Point dummyPoint = pointFactory.newMutablePoint();
 	

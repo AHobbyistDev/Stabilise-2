@@ -505,8 +505,8 @@ public class WorldRenderer implements Renderer {
 		ImmutableArray<Vec2> verts = s.vertices();
 		float[] v = new float[verts.length() * 2];
 		for(int i = 0; i < verts.length(); i++) {
-			v[2*i] = verts.get(i).x + x;
-			v[2*i + 1] = verts.get(i).y + y;
+			v[2*i] = verts.get(i).x() + x;
+			v[2*i + 1] = verts.get(i).y() + y;
 		}
 		shapes.polygon(v);
 	}

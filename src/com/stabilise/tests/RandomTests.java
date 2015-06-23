@@ -676,12 +676,12 @@ public class RandomTests {
 	
 	protected static void shapeTests() {
 		Polygon p1 = new Polygon(
-				new Vec2(0f, 0f),
-				new Vec2(0.5f, 0f),
-				new Vec2(1f, 0.5f),
-				new Vec2(1f, 1f),
-				new Vec2(0.5f, 1f),
-				new Vec2(0f, 0.5f)
+				Vec2.immutable(0f, 0f),
+				Vec2.immutable(0.5f, 0f),
+				Vec2.immutable(1f, 0.5f),
+				Vec2.immutable(1f, 1f),
+				Vec2.immutable(0.5f, 1f),
+				Vec2.immutable(0f, 0.5f)
 		);
 		Vec2[] verts = p1.getVertices();
 		Shape p2 = p1.translate(1f, 1f);

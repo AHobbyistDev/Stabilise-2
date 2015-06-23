@@ -226,10 +226,10 @@ public class HostWorld extends AbstractWorld {
 		int maxY = minY + Region.REGION_SIZE_IN_TILES;
 		
 		for(Entity e : getEntities()) {
-			if(e.x + e.boundingBox.v11.x >= minX
-					&& e.x + e.boundingBox.v00.x <= maxX
-					&& e.y + e.boundingBox.v11.y >= minY
-					&& e.y + e.boundingBox.v00.y <= maxY)
+			if(e.x + e.boundingBox.v11.x() >= minX
+					&& e.x + e.boundingBox.v00.x() <= maxX
+					&& e.y + e.boundingBox.v11.y() >= minY
+					&& e.y + e.boundingBox.v00.y() <= maxY)
 				e.destroy();
 		}
 	}

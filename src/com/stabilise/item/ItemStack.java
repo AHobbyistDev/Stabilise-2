@@ -191,8 +191,7 @@ public class ItemStack {
 	
 	@Override
 	public int hashCode() {
-		assert false : "hashCode not designed";
-		return 1;
+		throw new AssertionError("ItemStack designed for mutability - no hashCode");
 	}
 	
 	@Override

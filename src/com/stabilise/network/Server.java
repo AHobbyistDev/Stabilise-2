@@ -28,7 +28,7 @@ import com.stabilise.util.concurrent.Task;
  * 
  * <ul>
  * <li>Invoke {@link #start()} to start the server, and then manually invoke
- *     {@link #update()} and {@code #render()} repeatedly at your convenience.
+ *     {@link #update()} and {@link #render()} repeatedly at your convenience.
  *     That is, {@code update} and {@code render} should be invoked from within
  *     a preexisting driver loop.
  * <li>Invoke {@link #run()}, which constructs an {@link AppDriver} linked to
