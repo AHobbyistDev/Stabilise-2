@@ -107,7 +107,7 @@ public class SliceMap {
 		// slices may be double-counted. As such, we blanket-sweep columns with
 		// x, but tread carefully with y to make sure we don't double-count.
 		
-		// Double-count prevention limits
+		// 'Double-count'-prevention limits
 		int minX = Math.max(oldMinX, minSliceX);
 		int maxX = Math.min(oldMaxX, maxSliceX);
 		

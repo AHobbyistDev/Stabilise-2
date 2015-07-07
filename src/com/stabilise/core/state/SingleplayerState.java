@@ -48,7 +48,7 @@ public class SingleplayerState implements State {
 		renderer = new WorldRenderer(game, game.getWorld(), game.player);
 		//game.hudRenderer = renderer.hudRenderer;
 		
-		//profiler.enable();
+		profiler.enable();
 	}
 	
 	@Override

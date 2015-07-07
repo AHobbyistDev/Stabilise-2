@@ -44,4 +44,5 @@ public enum DuplicatePolicy {
 	 * policy.
 	 */
 	abstract boolean handle(Log log, String msg);
+	
 }

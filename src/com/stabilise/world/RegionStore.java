@@ -69,6 +69,9 @@ public class RegionStore {
 	/** Wait time in seconds for {@link #waitUntilDone()}. */
 	private static final int WAIT_TIME = 5;
 	
+	/** Number of regions */
+	private static final int NEIGHBOUR_LOAD_RADIUS = 1;
+	
 	/** The number of locks to stripe {@Link #cacheLocks} and {@link
 	 * #storeLocks} into. */
 	private static final int STRIPE_FACTOR = 8;
@@ -82,7 +85,7 @@ public class RegionStore {
 	 * any unload logic as required by the world. */
 	private final Consumer<Region> unloadHandler;
 	
-	// VERY IMPORTANT IMPLEMENTATION DETAILS:
+	// VERY IMPORTANT IMPLEMENTATION DETAILS (TODO outdated):
 	// Empirical testing has revealed that the table size for region maps in
 	// HostWorld is usually 16, but can grow to 32. This means the number of
 	// valid hash bits is either 4 or 5 (all higher bits are masked out), so we
@@ -120,8 +123,8 @@ public class RegionStore {
 	 * </ul> */
 	private final Striper<Object> storeLocks = new Striper<>(i -> new Object());
 	
-	/** Dummy key for {@link #regions} whose mutability may be abused for on
-	 * the main thread. */
+	/** Dummy key for {@link #regions} whose mutability may be abused for
+	 * optimisation purposes on the main thread. */
 	private final Point unguardedDummyLoc = Region.createMutableLoc();
 	
 	/** Regions which have been cached by the current worker thread. */
@@ -161,7 +164,7 @@ public class RegionStore {
 	 * @throws IllegalStateException if this cache has already been prepared.
 	 * @throws NullPointerException if loader is null.
 	 */
-	public void prepare(DimensionLoader loader) {
+	void prepare(DimensionLoader loader) {
 		if(this.loader != null)
 			throw new IllegalStateException("Loader already set");
 		this.loader = Objects.requireNonNull(loader);
@@ -171,7 +174,7 @@ public class RegionStore {
 	 * Updates all regions.
 	 */
 	@UserThread("MainThread")
-	public void updateRegions() {
+	void updateRegions() {
 		IteratorUtils.forEach(regions.values(), r ->
 				r.update(world, this) && unloadRegion(r));
 	}
@@ -189,13 +192,13 @@ public class RegionStore {
 	*/
 	
 	/**
-	 * Gets a region at the given coordinates, in region-lengths.
+	 * Gets a region at the given coordinates, which are in region-lengths.
 	 * 
 	 * @return The region, or {@code null} if no such region exists.
 	 */
 	@UserThread("MainThread")
 	@NotThreadSafe
-	public Region getRegionAt(int x, int y) {
+	Region getRegionAt(int x, int y) {
 		return regions.get(unguardedDummyLoc.set(x, y));
 	}
 	
@@ -223,39 +226,11 @@ public class RegionStore {
 	 */
 	@UserThread("MainThread")
 	@NotThreadSafe
-	@Deprecated
-	public Region loadRegion(int x, int y) {
+	private Region loadRegion(int x, int y) {
 		// Get the region if it is already loaded
 		Region r = regions.get(unguardedDummyLoc.set(x, y));
 		if(r != null)
 			return r;
-		
-		// If it is not loaded directly, try getting it from the cache.
-		// Synchronised to make this atomic. See cacheRegion()
-		synchronized(storeLocks.get(x, y)) {
-			r = getFromCache(unguardedDummyLoc); // unsafeDummyLoc is already (x,y)
-			if(r == null) // if it's not cached, create it
-				r = new Region(x, y, world.getAge());
-			regions.put(r.loc, r);
-		}
-		
-		numRegions++;
-		
-		loader.loadRegion(r, true);
-		
-		return r;
-	}
-	
-	@UserThread("MainThread")
-	@NotThreadSafe
-	public Region loadRegion(int x, int y, boolean makeActive) {
-		// Get the region if it is already loaded
-		Region r = regions.get(unguardedDummyLoc.set(x, y));
-		if(r != null) {
-			if(makeActive)
-				setRegionActive(r);
-			return r;
-		}
 		
 		// If it is not loaded directly, try getting it from the cache.
 		// Synchronised to make this atomic. See cache()
@@ -269,9 +244,6 @@ public class RegionStore {
 		
 		loader.loadRegion(r, true);
 		
-		if(makeActive)
-			setRegionActive(r);
-		
 		return r;
 	}
 	
@@ -279,7 +251,7 @@ public class RegionStore {
 	 * Manages unloading a region. This method invokes {@link #unloadHandler}
 	 * and ports the region to the cache in order to save it.
 	 * 
-	 * @return true always.
+	 * @return {@code true} always.
 	 */
 	@UserThread("MainThread")
 	private boolean unloadRegion(Region r) {
@@ -295,39 +267,54 @@ public class RegionStore {
 		return true;
 	}
 	
+	/**
+	 * Anchors a region and loads its surrounding neighbours appropriately. If
+	 * any of the regions are not already loaded, they are loaded and
+	 * generated.
+	 * 
+	 * @param x The x-coordinate of the region, in region-lengths.
+	 * @param y The y-coordinate of the region, in region-lengths.
+	 */
 	@UserThread("MainThread")
-	private void setRegionActive(Region r) {
-		if(r.active)
-			return;
-		r.active = true;
+	void anchorRegion(int x, int y) {
+		Region r = loadRegion(x, y);
 		
-		// Load all 8 regions adjacent to r.
-		for(int x = r.x() - 1; x <= r.x() + 1; x++) {
-			for(int y = r.y() - 1; y <= r.y() + 1; y++) {
-				if(x != r.x() && y != r.y())
-					loadRegion(x, y, false).activeNeighbours++;
+		if(r.anchor()) {
+			r.addNeighbour(); // r counts itself as a neighbour
+			
+			final int d = NEIGHBOUR_LOAD_RADIUS; // reducing verbosity
+			
+			// Load all regions adjacent to r.
+			for(x = r.x() - d; x <= r.x() + d; x++) {
+				for(y = r.y() - d; y <= r.y() + d; y++) {
+					if(!r.isAt(x, y))
+						loadRegion(x, y).addNeighbour();
+				}
 			}
 		}
 	}
 	
+	/**
+	 * De-anchors a region.
+	 * 
+	 * @param x The x-coordinate of the region, in region-lengths.
+	 * @param y The y-coordinate of the region, in region-lengths.
+	 */
 	@UserThread("MainThread")
-	private void setRegionInactive(Region r) {
-		if(!r.active)
-			return;
-		r.active = false;
+	void deAnchorRegion(int x, int y) {
+		Region r = getRegionAt(x, y); // shouldn't be null
 		
-		// Unload all 8 regions adjacent to r.
-		for(int x = r.x() - 1; x <= r.x() + 1; x++) {
-			for(int y = r.y() - 1; y <= r.y() + 1; y++) {
-				if(x != r.x() && y != r.y()) {
-					try {
-						getRegionAt(x,y).activeNeighbours--;
-					} catch(NullPointerException e) {
-						// Theoretically the region should never ever be null,
-						// but better safe than sorry.
-						log.postWarning("Region at (" + x + "," + y + ") is "
-								+ "null? src: setRegionInactive");
-					}
+		if(r.deAnchor()) {
+			r.removeNeighbour(); // r counts itself as a neighbour
+			
+			final int d = NEIGHBOUR_LOAD_RADIUS; // reducing verbosity
+			
+			// Unload all regions adjacent to r.
+			for(x = r.x() - d; x <= r.x() + d; x++) {
+				for(y = r.y() - d; y <= r.y() + d; y++) {
+					// n.b. we assume the surrounding regions are loaded
+					if(!r.isAt(x, y))
+						getRegionAt(x,y).removeNeighbour();
 				}
 			}
 		}
@@ -528,7 +515,7 @@ public class RegionStore {
 	/**
 	 * Saves all regions in primary storage.
 	 */
-	public void saveAll() {
+	void saveAll() {
 		// We could alternatively use this.saveRegion(), but I don't think it's
 		// necessary as of this writing.
 		regions.values().forEach(r -> loader.saveRegion(r, null));
@@ -538,7 +525,7 @@ public class RegionStore {
 	 * Returns true iff all regions in primary storage are {@link
 	 * Region#isPrepared() prepared}.
 	 */
-	public boolean isLoaded() {
+	boolean isLoaded() {
 		for(Region r : regions.values()) {
 			if(!r.isPrepared()) {
 				//log.postInfo("Not all regions loaded (" + r + ": "
@@ -555,7 +542,7 @@ public class RegionStore {
 	 */
 	@UserThread("MainThread")
 	@NotThreadSafe
-	public int numRegions() {
+	int numRegions() {
 		return numRegions;
 	}
 	
@@ -563,7 +550,7 @@ public class RegionStore {
 	 * Blocks the current thread until all regions in the cache have finished
 	 * saving.
 	 */
-	public void waitUntilDone() {
+	void waitUntilDone() {
 		try {
 			doneLock.lock();
 			

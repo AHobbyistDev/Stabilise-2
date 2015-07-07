@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.StringUtil;
@@ -719,6 +720,18 @@ public class RandomTests {
 		System.out.println(list);
 	}
 	
+	protected static void log2Ceil() {
+		int n = 20000;
+		int[] ints = new int[n];
+		Random rnd = new Random();
+		for(int i = 0; i < n; i++)
+			ints[i] = rnd.nextInt(Integer.MAX_VALUE);
+		for(int i : ints) {
+			if(Maths.log2Ceil(i) != Maths.log2(MathUtils.nextPowerOfTwo(i)))
+				System.out.println(i + " is a problem!");
+		}
+	}
+	
 	// ---------- TIMER ----------
 	
 	private static long prev;
@@ -822,7 +835,8 @@ public class RandomTests {
 		//hashPointCollisions2();
 		//autoboxing();
 		//shapeTests();
-		lightLinkedList();
+		//lightLinkedList();
+		log2Ceil();
 		
 		//String s = "abcxyzABCXYZ a()a_a-a*a/a\\a.a'a\"";
 		//System.out.println(s + "\n" + IOUtil.getLegalString(s));

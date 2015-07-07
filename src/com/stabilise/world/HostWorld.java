@@ -82,7 +82,7 @@ public class HostWorld extends AbstractWorld {
 			throw new IllegalStateException("World has already been prepared!");
 		
 		// Load the spawn regions if this is the default dimension
-		if(dimension.info.name.equals(Dimension.defaultDimensionName())) {
+		if(dimension.hasSpawnRegions()) {
 			// Ensure the 'spawn regions' are generated, and anchor them such that
 			// they're always loaded
 			// The spawn regions extend for -256 <= x,y <= 256 (this is arbitrary)
@@ -91,7 +91,7 @@ public class HostWorld extends AbstractWorld {
 					// This will induce a permanent anchorage imbalance which
 					// should never be rectified; the region will remain
 					// perpetually loaded
-					loadRegion(x, y).anchorSlice();
+					regions.anchorRegion(x, y);
 				}
 			}
 		}
@@ -164,7 +164,7 @@ public class HostWorld extends AbstractWorld {
 		for(SliceMap m : sliceMaps)
 			m.update();
 		
-		profiler.next("region"); // root.update.game.world.region
+		profiler.next("regions"); // root.update.game.world.regions
 		regions.updateRegions();
 		
 		profiler.end(); // root.update.game.world
@@ -189,27 +189,6 @@ public class HostWorld extends AbstractWorld {
 	}
 	
 	/**
-	 * Loads a region into memory. If the region has already been loaded, it
-	 * is returned.
-	 * 
-	 * @param x The x-coordinate of the region, in region-lengths.
-	 * @param y The y-coordinate of the region, in region-lengths.
-	 * 
-	 * @return The region.
-	 */
-	@SuppressWarnings("deprecation")
-	@UserThread("MainThread")
-	@NotThreadSafe
-	private Region loadRegion(int x, int y) {
-		return regions.loadRegion(x, y);
-	}
-	
-	@SuppressWarnings("unused")
-	private Region loadRegion(int x, int y, boolean makeActive) {
-		return regions.loadRegion(x, y, makeActive);
-	}
-	
-	/**
 	 * Ports the state of all entities located in a region to that region, and
 	 * then moves the region to the cache so that it may be saved.
 	 * 
@@ -219,7 +198,9 @@ public class HostWorld extends AbstractWorld {
 	 * @param r The region.
 	 */
 	private void unloadRegion(Region r) {
-		// Now unload entities in the region as well...
+		// TODO
+		
+		// Unload entities in the region...
 		int minX = r.x() * Region.REGION_SIZE_IN_TILES;
 		int maxX = minX + Region.REGION_SIZE_IN_TILES;
 		int minY = r.x() * Region.REGION_SIZE_IN_TILES;
@@ -274,7 +255,7 @@ public class HostWorld extends AbstractWorld {
 	
 	/**
 	 * Marks a slice as loaded. This will attempt to load and generate the
-	 * slice's parent region, as per {@link #loadRegion(int, int)}.
+	 * slice's parent region, if it is not already loaded.
 	 * 
 	 * @param x The x-coordinate of the slice, in slice lengths.
 	 * @param y The y-coordinate of the slice, in slice lengths.
@@ -282,10 +263,10 @@ public class HostWorld extends AbstractWorld {
 	@UserThread("MainThread")
 	@NotThreadSafe
 	public void loadSlice(int x, int y) {
-		loadRegion(
+		regions.anchorRegion(
 				regionCoordFromSliceCoord(x),
 				regionCoordFromSliceCoord(y)
-		).anchorSlice();
+		);
 	}
 	
 	/**
@@ -295,9 +276,10 @@ public class HostWorld extends AbstractWorld {
 	 * @param y The y-coordinate of the slice, in slice lengths.
 	 */
 	public void unloadSlice(int x, int y) {
-		Region r = getRegionFromSliceCoords(x, y);
-		if(r != null)
-			r.deAnchorSlice();
+		regions.deAnchorRegion(
+				regionCoordFromSliceCoord(x),
+				regionCoordFromSliceCoord(y)
+		);
 	}
 	
 	@Override

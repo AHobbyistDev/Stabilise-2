@@ -171,18 +171,6 @@ public abstract class WorldGenerator {
 			// queued schematics.
 			r.implantStructures(regionStore);
 			
-			/*
-			for(Region.QueuedSchematic s : r.getSchematics(true)) {
-				changes = true;
-				addSchematicAt(
-						r, s.schematicName,
-						s.sliceX, s.sliceY,
-						s.tileX, s.tileY,
-						SchematicParams.scheduledGenParams(s.offsetX, s.offsetY)
-				);
-			}
-			*/
-			
 			timer.stop();
 			log.postDebug(timer.getResult(TimeUnit.MILLISECONDS));
 			

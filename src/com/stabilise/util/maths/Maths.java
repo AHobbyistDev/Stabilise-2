@@ -398,6 +398,13 @@ public class Maths {
 	}
 	
 	/**
+	 * Returns the ceil of the log to base 2 of {@code x}, for positive x.
+	 */
+	public static int log2Ceil(int x) {
+		return 32 - Integer.numberOfLeadingZeros(x - 1);
+	}
+	
+	/**
 	 * Converts radians to degrees.
 	 */
 	public static float toDegrees(float rads) {
@@ -416,11 +423,34 @@ public class Maths {
 	 * a hash for a hash table accommodating up to {@code maxElements}-many
 	 * elements.
 	 * 
+	 * <p>The returned hashing function works best when the table size is equal
+	 * to {@link #log2Ceil(int) log2Ceil(maxElements)}, and may weight the two
+	 * input numbers unevenly in terms of their higher bits if the table size
+	 * exceeds this.
+	 * 
+	 * @param maxElements The maximum number of elements which are expected to
+	 * appear in the table.
+	 * 
+	 * @throws IllegalArgumentException if {@code maxElements <= 0}.
+	 */
+	public static IntBinaryOperator generateHashingFunction(int maxElements) {
+		return generateHashingFunction(maxElements, false);
+	}
+	
+	/**
+	 * Returns a hashing function designed to evenly compress two integers into
+	 * a hash for a hash table accommodating up to {@code maxElements}-many
+	 * elements.
+	 * 
 	 * <p>The returned hashing function works best when the average table size
-	 * is equal to {@code maxElements}, and may degrade if {@code
-	 * negateHashMapShift} is {@code true} and the real max table size turns
-	 * out to be greater than 2<font size=-1><sup>16</sup></font> while {@code
-	 * maxElements} is specified to be less.
+	 * is equal to {@code maxElements}, and may degrade if the table size
+	 * exceeds {@code maxElements}.
+	 * 
+	 * <p>The returned hashing function works best when the table size is equal
+	 * to {@link #log2Ceil(int) log2Ceil(maxElements)}, and may weight the two
+	 * input numbers unevenly in terms of their higher bits if the table size
+	 * exceeds this, or even degrade if {@code negateHashMapShift} is {@code
+	 * true} under certain circumstances.
 	 * 
 	 * @param maxElements The maximum number of elements which are expected to
 	 * appear in the table.
@@ -450,7 +480,7 @@ public class Maths {
 		// Since HashMap, ConcurrentHashMap and co. like to further transform a
 		// hash by
 		//     hash = hash ^ (hash >>> 16);
-		// we offer the option negate this in order to eliminate interference
+		// we offer the option to negate this in order to eliminate interference
 		// which would be created by higher-order bits. If the user chooses to
 		// do so, our hash in the above example would instead be:
 		//     hash = xxxxxxXXXXX0000000000000000YYYYY,
@@ -461,16 +491,11 @@ public class Maths {
 		// large enough, we lose information as the 0s become incorporated into
 		// the hash, and so for larger tables we don't apply this shift.
 		
-		int tableSize = MathUtils.nextPowerOfTwo(maxElements);
-		int sizeLog = log2(tableSize) / 2;
-		boolean usesLessThan16Bits = sizeLog <= 8;
-		// Amount by which to shift x left to make room for y
-		int xShift = sizeLog +
-				(negateHashMapShift && usesLessThan16Bits ? 16 : 0);
+		//int sizeLog = log2(MathUtils.nextPowerOfTwo(maxElements)) / 2;
+		int sizeLog = log2Ceil(maxElements) / 2; // simpler
+		// n.b. sizeLog <= 8 iff the hash uses less than 16 bits
+		int xShift = sizeLog + (negateHashMapShift && sizeLog <= 8 ? 16 : 0);
 		int yMask = (1 << sizeLog) - 1;
-		
-		//System.out.println("for maxElements " + maxElements + ": " + xShift
-		//		+ ", " + yMask);
 		
 		return (x,y) -> (x << xShift) | (y & yMask);
 	}

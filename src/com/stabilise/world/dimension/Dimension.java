@@ -94,6 +94,15 @@ public abstract class Dimension {
 			HostWorld world);
 	
 	/**
+	 * Returns {@code true} if this dimension should have perpetually-loaded
+	 * spawn regions; {@code false} otherwise.
+	 */
+	public boolean hasSpawnRegions() {
+		// For now, only the default dimension has spawn regions
+		return info.name.equals(defaultDimensionName());
+	}
+	
+	/**
 	 * Loads this dimension's info, if it exists on the filesystem.
 	 * 
 	 * @throws IOException if an I/O error occurs.
@@ -214,7 +223,7 @@ public abstract class Dimension {
 			return null;
 		// Hijack ReflectiveFactory from InstantiationRegistry to avoid needing
 		// to deal with reflection
-		return new ReflectiveFactory<Dimension>(dimClass, Info.class).create(info);
+		return new ReflectiveFactory<>(dimClass, Info.class).create(info);
 	}
 	
 	/**

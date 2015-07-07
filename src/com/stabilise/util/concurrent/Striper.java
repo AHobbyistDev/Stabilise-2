@@ -31,8 +31,8 @@ public class Striper<T> {
 	 * supplies any null objects.
 	 */
 	public Striper(int numObjects, IntFunction<T> supplier) {
-		if(numObjects < 0)
-			throw new IllegalArgumentException("numLocks < 0");
+		if(numObjects <= 0)
+			throw new IllegalArgumentException("numLocks <= 0");
 		if(!Maths.isPowerOfTwo(numObjects))
 			throw new IllegalArgumentException("numLocks not a power of 2");
 		
@@ -53,7 +53,7 @@ public class Striper<T> {
 	 * in the constructor.
 	 */
 	public T get(int i) {
-		return objects[i & mask];
+		return objects[i & mask]; // i & mask == i % numObjects
 	}
 	
 	

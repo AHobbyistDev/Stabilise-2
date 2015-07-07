@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.collect.IteratorUtils;
 import com.stabilise.util.concurrent.ClearingQueue;
+import com.stabilise.util.concurrent.Striper;
 import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 
 /**
@@ -28,16 +29,10 @@ public class EventBus {
 	private final ClearingQueue<Event> pendingEvents =
 			new SynchronizedClearingQueue<>();
 	
-	// Lock striping
-	private static final int numLocks = 16; // must be a power of two
-	private final Object[] locks;
+	private final Striper<Object> locks = Striper.generic(16);
 	
 	
-	EventBus() {
-		locks = new Object[numLocks];
-		for(int i = 0; i < numLocks; i++)
-			locks[i] = new Object();
-	}
+	EventBus() {} // Package-private constructor
 	
 	/**
 	 * Adds a non-persistent, single-use event listener.
@@ -164,7 +159,7 @@ public class EventBus {
 	}
 	
 	private Object lockFor(Event e) {
-		return locks[e.hashCode() & (numLocks-1)];
+		return locks.get(e.hashCode());
 	}
 	
 	private static final class Listener {
@@ -172,6 +167,9 @@ public class EventBus {
 		private final boolean persistent;
 		private long uses;
 		
+		/**
+		 * @throws NullPointerException if handler is null
+		 */
 		public Listener(Consumer<Event> handler, boolean persistent, long uses) {
 			this.handler = Objects.requireNonNull(handler);
 			this.persistent = persistent;

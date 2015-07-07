@@ -4,6 +4,7 @@ package com.stabilise.util;
  * The Direction enum allows for the representation of all four cardinal
  * directions and compound directions.
  */
+// TODO deprecate this sometime
 public enum Direction {
 	
 	UP((byte)(Bit.VERTICAL_BIT | Bit.UP_BIT)),			// 0101

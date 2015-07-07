@@ -16,8 +16,3 @@ TODO EVENTUALLY
 BACKGROUND OBJECTIVES
 - Maximise extensibility for modding
 
-
--------------------------------------------------------------------------------
-
-DONE
-- Refactor WorldLoader and WorldGenerator such that they use ExecutorService for thread delegation
