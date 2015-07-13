@@ -8,10 +8,8 @@ public class TileOre extends Tile {
 	/**
 	 * Creates an ore tile.
 	 */
-	TileOre() {
-		super();
-		
-		setHardness(Tile.H_STONE);
+	TileOre(TileBuilder b) {
+		super(b);
 	}
 	
 }

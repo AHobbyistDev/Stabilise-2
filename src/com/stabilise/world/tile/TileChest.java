@@ -14,10 +14,8 @@ public class TileChest extends Tile {
 	/**
 	 * Creates a chest tile.
 	 */
-	TileChest() {
-		super();
-		
-		setHardness(Tile.H_WOOD);
+	TileChest(TileBuilder b) {
+		super(b);
 	}
 	
 	@Override

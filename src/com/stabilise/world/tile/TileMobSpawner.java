@@ -10,9 +10,8 @@ import com.stabilise.world.tile.tileentity.TileEntityMobSpawner;
  */
 public class TileMobSpawner extends Tile {
 	
-	public TileMobSpawner() {
-		super();
-		setHardness(Tile.H_STONE);
+	public TileMobSpawner(TileBuilder b) {
+		super(b);
 	}
 	
 	@Override

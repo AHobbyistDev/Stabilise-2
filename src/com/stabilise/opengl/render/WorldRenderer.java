@@ -358,10 +358,10 @@ public class WorldRenderer implements Renderer {
 	public void renderFireball(EntityProjectile e) {
 		batch.draw(
 				texFireball, // texture
-				(float)e.x, // x
-				(float)e.y, // y
-				0.25f, // originX
-				0f, // originY
+				(float)e.x - 0.75f, // x
+				(float)e.y - 0.25f, // y
+				0.75f, // originX
+				0.25f, // originY
 				1f, // width
 				0.5f, // height
 				1f, // scaleX
@@ -457,8 +457,8 @@ public class WorldRenderer implements Renderer {
 		batch.setColor(1f, 1f, 1f, p.opacity);
 		batch.draw(
 				shtParticles.getRegion(2), // region
-				(float)p.x, // x
-				(float)p.y, // y
+				(float)p.x - 0.125f, // x
+				(float)p.y - 0.125f, // y
 				0.25f, // originX
 				0.25f, // originY
 				0.25f, // width
@@ -478,8 +478,8 @@ public class WorldRenderer implements Renderer {
 	public void renderSmoke(ParticleSmoke p) {
 		batch.draw(
 				shtParticles.getRegion(0), // region
-				(float)p.x, // x
-				(float)p.y, // y
+				(float)p.x - 0.25f, // x
+				(float)p.y - 0.25f, // y
 				0.25f, // originX
 				0.25f, // originY
 				0.25f, // width

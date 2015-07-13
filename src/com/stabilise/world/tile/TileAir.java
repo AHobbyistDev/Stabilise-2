@@ -10,9 +10,8 @@ public class TileAir extends Tile {
 	/**
 	 * Creates an air tile.
 	 */
-	TileAir() {
-		super();
-		solid = false;
+	TileAir(TileBuilder b) {
+		super(b.solid(false));
 	}
 	
 	@Override

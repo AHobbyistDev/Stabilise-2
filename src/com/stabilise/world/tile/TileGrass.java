@@ -10,8 +10,8 @@ public class TileGrass extends Tile {
 	/**
 	 * Creates a new grass tile.
 	 */
-	TileGrass() {
-		super();
+	TileGrass(TileBuilder b) {
+		super(b);
 	}
 	
 	@Override

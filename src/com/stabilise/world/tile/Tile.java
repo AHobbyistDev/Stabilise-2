@@ -1,9 +1,12 @@
 package com.stabilise.world.tile;
 
+import static com.stabilise.world.tile.TileBuilder.Template.*;
+
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.util.collect.RegistryNamespacedDefaulted;
 import com.stabilise.world.World;
+import com.stabilise.world.tile.TileBuilder.Template;
 
 /**
  * The fundamental building block of a world.
@@ -19,6 +22,8 @@ public class Tile {
 	private static final RegistryNamespacedDefaulted<Tile> TILES =
 			new RegistryNamespacedDefaulted<>("TileRegistry", "stabilise", "air", 32);
 	
+	private static TileBuilder builder;
+	
 	/** Template hardness values for different tile types. */
 	protected static final float
 			H_DIRT = 1.0f,
@@ -31,23 +36,27 @@ public class Tile {
 	//--------------------==========--------------------
 	
 	/** The tile's ID. */
-	private int id;
+	private final int id;
 	/** The tile's name. */
-	private String name;
+	private final String name;
 	
 	/** Whether or not the tile is solid. */
-	protected boolean solid = true;
+	protected final boolean solid;
 	/** The tile's hardness. */
-	protected float hardness = H_STONE;
+	protected final float hardness;
 	/** The tile's frictive force, from 0 to 1. */
-	protected float friction = 0.15f;			// TODO arbitrary default friction value
+	protected final float friction;
 	
 	
 	/**
 	 * Creates a tile.
 	 */
-	protected Tile() {
-		// nothing to see here, move along
+	protected Tile(TileBuilder builder) {
+		id = builder.id;
+		name = builder.name;
+		solid = builder.solid;
+		hardness = builder.hardness;
+		friction = builder.friction;
 	}
 	
 	/**
@@ -151,31 +160,6 @@ public class Tile {
 	}
 	
 	/**
-	 * Sets the tile's friction value.
-	 * 
-	 * @param friction The tile's desired friction value.
-	 * 
-	 * @return The tile, for chaining operations.
-	 */
-	protected Tile setFriction(float friction) {
-		this.friction = friction;
-		return this;
-	}
-	
-	/**
-	 * Sets the tile's hardness value.
-	 * 
-	 * @param hardness The tile's desired hardness value.
-	 * 
-	 * @return The tile, for chaining operations.
-	 */
-	protected Tile setHardness(float hardness) {
-		this.hardness = hardness;
-		return this;
-	}
-	
-	
-	/**
 	 * Gets this tile's ID.
 	 */
 	public int getID() {
@@ -248,29 +232,42 @@ public class Tile {
 	 * @throws IllegalStateException if this method has already been invoked.
 	 */
 	public static void registerTiles() {
-		registerTile(0, "air",			new TileAir());
-		registerTile(1, "void",			new Tile().setHardness(H_INVULNERABLE));
-		registerTile(2, "bedrock",		new Tile().setHardness(H_INVULNERABLE));
-		registerTile(3, "invisibleBedrock", new Tile().setHardness(H_INVULNERABLE));
-		registerTile(4, "stone",		new Tile().setHardness(H_STONE));
-		registerTile(5, "dirt",			new Tile().setHardness(H_DIRT));
-		registerTile(6, "grass",		new TileGrass().setHardness(H_DIRT));
-		registerTile(7, "wood",			new Tile().setHardness(H_WOOD));
-		registerTile(8, "leaves",		new Tile().setHardness(H_DIRT));
-		registerTile(9, "planks",		new Tile().setHardness(H_WOOD));
-		registerTile(10, "water",		new TileFluid().setViscosity(0.12f));
-		registerTile(11, "lava",		new TileFluid().setViscosity(0.8f));
-		registerTile(12, "ice",			new Tile().setHardness(H_DIRT).setFriction(0.008f));
-		registerTile(13, "stoneBrick",	new Tile().setHardness(H_STONE));
-		registerTile(14, "oreIron",		new TileOre().setHardness(H_STONE));
-		registerTile(15, "oreCopper",	new TileOre().setHardness(H_STONE));
-		registerTile(16, "oreGold",		new TileOre().setHardness(H_STONE));
-		registerTile(17, "oreSilver",	new TileOre().setHardness(H_STONE));
-		registerTile(18, "oreDiamond",	new TileOre().setHardness(H_STONE));
-		registerTile(19, "chest",		new TileChest().setHardness(H_WOOD));
-		registerTile(20, "mobSpawner",	new TileMobSpawner());
+		builder = new TileBuilder();
+		
+		register(AIR,   0, "air");
+		register(AIR,   1, "void");
+		register(INVUL, 2, "bedrock");
+		register(INVUL, 3, "invisibleBedrock");
+		register(STONE, 4, "stone");
+		register(DIRT,  5, "dirt");
+		register(GRASS, 6, "grass");
+		register(WOOD,  7, "wood");
+		register(DIRT,  8, "leaves");
+		register(WOOD,  9, "planks");
+		register(WATER, 10, "water");
+		register(LAVA,  11, "lava");
+		register(ICE,   12, "ice");
+		register(STONE, 13, "stoneBrick");
+		register(ORE,   14, "oreIron");
+		register(ORE,   15, "oreCopper");
+		register(ORE,   16, "oreGold");
+		register(ORE,   17, "oreSilver");
+		register(ORE,   18, "oreDiamond").hardness(50f);
+		register(CHEST, 19, "chest");
+		register(SPWNR, 20, "mobSpawner");
+		
+		builder.end();
+		builder = null;
 		
 		TILES.lock();
+	}
+	
+	/**
+	 * Returns a builder with which to begin building a tile with the specified
+	 * template, ID and name.
+	 */
+	private static TileBuilder register(Template t, int id, String name) {
+		return builder.begin(t, id, name);
 	}
 	
 	/**
@@ -278,15 +275,13 @@ public class Tile {
 	 * the game.
 	 * 
 	 * @param id The ID with which to register the tile.
-	 * @param name The name of the tile.
-	 * @param tile The tile.
 	 * 
+	 * @throws IndexOutOfBoundsException if {@code id < 0}.
+	 * @throws NullPointerException if the tile or its name is {@code null}.
 	 * @throws IllegalStateException if no more tiles may be registered.
 	 */
-	private static void registerTile(int id, String name, Tile tile) {
-		TILES.register(id, name, tile);
-		tile.id = id;
-		tile.name = name;
+	static void registerTile(Tile t) {
+		TILES.register(t.id, t.name, t);
 	}
 	
 	/**

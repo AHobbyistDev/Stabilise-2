@@ -6,27 +6,15 @@ package com.stabilise.world.tile;
 public class TileFluid extends Tile {
 	
 	/** The tile's viscosity. */
-	private float viscosity;
+	private final float viscosity;
 	
 	
 	/**
 	 * Creates a new fluid tile.
 	 */
-	public TileFluid() {
-		super();
-		solid = false;
-	}
-	
-	/**
-	 * Sets the tile's viscosity.
-	 * 
-	 * @param viscosity The viscosity.
-	 * 
-	 * @return The tile, for chain construction.
-	 */
-	Tile setViscosity(float viscosity) {
-		this.viscosity = viscosity;
-		return this;
+	public TileFluid(TileBuilder b) {
+		super(b);
+		this.viscosity = b.viscosity;
 	}
 	
 	/**
