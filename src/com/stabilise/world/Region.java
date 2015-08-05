@@ -15,7 +15,6 @@ import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.concurrent.ClearingQueue;
-import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
@@ -154,7 +153,7 @@ public class Region {
 	/** When a structure is added to this region, it is placed in this queue.
 	 * structures may be added by both the main thread and the world generator. */
 	private final ClearingQueue<QueuedStructure> structures =
-			new SynchronizedClearingQueue<>();
+			ClearingQueue.create();
 	
 	
 	/**

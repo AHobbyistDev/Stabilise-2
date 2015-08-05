@@ -53,10 +53,13 @@ public class Task implements Runnable {
 	}
 	
 	private void onSubtaskCompletion() {
+		boolean done = false; // don't finish() in the synchronized block
 		synchronized(subtasks) {
 			if(--remainingSubtasks == 0)
-				;
+				done = true;
 		}
+		if(done)
+			finish();
 	}
 	
 	public void run() {

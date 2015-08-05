@@ -3,16 +3,14 @@ package com.stabilise.mod;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Resources;
 import com.stabilise.util.Log;
+import com.stabilise.util.collect.IteratorUtils;
 import com.stabilise.util.collect.LightArrayList;
 
 
@@ -48,7 +46,7 @@ public class ModLoader {
 			URL[] url = { new URL("jar:file:" + file.file().getAbsolutePath() + "!/") };
 			URLClassLoader cl = URLClassLoader.newInstance(url);
 			List<Class<?>> classes = new ArrayList<>();
-			for(JarEntry je : toItr(jarFile.entries())) {
+			for(JarEntry je : IteratorUtils.toIterable(jarFile.entries())) {
 				if(je.isDirectory() || !je.getName().endsWith(".class"))
 					continue;
 				
@@ -62,32 +60,6 @@ public class ModLoader {
 		} finally {
 			jarFile.close();
 		}
-	}
-	
-	private static final <E> Iterable<E> toItr(Enumeration<E> e) {
-		return new EnumIterable<E>(e);
-	}
-	
-	private static final class EnumIterable<E> implements Iterable<E> {
-		
-		private final Enumeration<E> e;
-		private EnumIterable(Enumeration<E> e) {
-			this.e = Objects.requireNonNull(e);
-		}
-		
-		public Iterator<E> iterator() {
-			return new Iterator<E>() {
-				@Override
-				public boolean hasNext() {
-					return e.hasMoreElements();
-				}
-				@Override
-				public E next() {
-					return e.nextElement();
-				}
-			};
-		}
-		
 	}
 	
 }

@@ -74,6 +74,7 @@ public class LineCounter {
 	public static void main(String[] args) throws IOException {
 		new LineCounter(
 				"C:/Users/Adam/Documents/GitHub/Stabilise-2/Stabilise 2/core/src",
+				//"C:/Users/Administrator/Documents/Java/Stabilise II/core/src",
 				new String[] {
 						"com/stabilise/tests",
 						"com/stabilise/screen/menu",

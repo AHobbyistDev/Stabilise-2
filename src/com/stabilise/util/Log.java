@@ -166,7 +166,9 @@ public class Log {
 		level.checkAllowable();
 		synchronized(entries) {
 			DATE.setTime(System.currentTimeMillis());
-			add(level, logLevel, DATE.toString() + " - " + level.tag + tag + msg);
+			add(level, logLevel, DATE.toString() + " - [" +
+					Thread.currentThread().getName() + "] - " + level.tag + tag
+					+ msg);
 			if(entries.size() > LOG_CAPACITY)
 				entries.remove(0);
 		}
@@ -192,7 +194,8 @@ public class Log {
 		
 		synchronized(entries) {
 			DATE.setTime(System.currentTimeMillis());
-			prefix = DATE.toString() + " - " + level.tag + tag;
+			prefix = DATE.toString() + " - [" +
+					Thread.currentThread().getName() + "] - " + level.tag + tag;
 			add(level, outputLevel, prefix + msg);
 			add(level, outputLevel, prefix + t.toString());
 			prefix += "    at ";

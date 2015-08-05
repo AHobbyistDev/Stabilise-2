@@ -24,7 +24,7 @@ public abstract class Entity extends FreeGameObject {
 	
 	/** The entity registry. */
 	private static final InstantiationRegistry<Entity> ENTITIES =
-			new InstantiationRegistry<>(8, THROW_EXCEPTION, Entity.class);
+			new InstantiationRegistry<>(8, THROW_EXCEPTION, "EntityRegistry");
 	
 	// Register all entity types.
 	static {

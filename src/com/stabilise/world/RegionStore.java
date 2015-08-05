@@ -118,7 +118,7 @@ public class RegionStore {
 	 * <li>In <i>cache()</i>:
 	 *     <ul>
 	 *     <li>Try to get a region from main storage.
-	 *     <li>If it is not in main storage, create it an add it to the cache.
+	 *     <li>If it is not in main storage, create it and add it to the cache.
 	 *     </ul>
 	 * </ul> */
 	private final Striper<Object> storeLocks = new Striper<>(i -> new Object());

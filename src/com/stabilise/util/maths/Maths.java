@@ -485,7 +485,7 @@ public class Maths {
 		// do so, our hash in the above example would instead be:
 		//     hash = xxxxxxXXXXX0000000000000000YYYYY,
 		// which will be transformed into
-		//     hash = 0000000000000000xxxxxxXXXXXYYYYY
+		//     hash = xxxxxxXXXXX00000xxxxxxXXXXXYYYYY
 		// by HashMap/ConcurrentHashMap, which is the same as our desired hash
 		// for the lower 16 bits. However, if our table size ends up being
 		// large enough, we lose information as the 0s become incorporated into
@@ -498,6 +498,24 @@ public class Maths {
 		int yMask = (1 << sizeLog) - 1;
 		
 		return (x,y) -> (x << xShift) | (y & yMask);
+	}
+	
+	/**
+	 * Returns {@code true} iff the points specified by (x1, y1) and (x2, y2)
+	 * are within the specified range of each other.
+	 */
+	public static boolean pointsInRange(float x1, float y1, float x2, float y2,
+			float range) {
+		return (x2 -= x1)*x2 + (y2 -= y1)*y2 <= range*range;
+	}
+	
+	/**
+	 * Returns {@code true} iff the points specified by (x1, y1) and (x2, y2)
+	 * are within the specified range of each other.
+	 */
+	public static boolean pointsInRange(double x1, double y1, double x2,
+			double y2, float range) {
+		return (x2 -= x1)*x2 + (y2 -= y1)*y2 <= range*range;
 	}
 	
 }

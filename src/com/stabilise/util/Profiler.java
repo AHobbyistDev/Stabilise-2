@@ -298,7 +298,7 @@ public class Profiler {
 	public void verify(int level, String stack) {
 		if(isEnabled() && getStackLevel() != level && !getStackName().equals(stack))
 			throw new IllegalStateException("Profiler stack is \"" + getStackName()
-					+ "\" (it should be \"" + stack + "\")");
+					+ "\" (expected \"" + stack + "\")");
 	}
 	
 	/**

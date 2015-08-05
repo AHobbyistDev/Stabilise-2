@@ -14,8 +14,7 @@ import com.stabilise.util.annotation.Immutable;
  * values {@code start} and {@code end} by performing a linear interpolation
  * at a point {@code x}, which is transformed using a transformation function
  * {@code f(x)}. That is, the interpolation is performed as if by
- * {@link #lerp(float, float, float)
- * interpolateLinear(start, end, f(x))}.
+ * {@link #lerp(float, float, float) lerp(start, end, f(x))}.
  * 
  * <p>There are three typical modes of interpolation, {@link EaseIn ease in},
  * {@link EaseOut ease out}, and {@link EaseInOut ease in-out}. Each of these
@@ -27,25 +26,23 @@ import com.stabilise.util.annotation.Immutable;
  * be defined in terms of this function as such:
  * 
  * <ul>
- * <li><b>{@link EaseIn Ease in}:</b>
+ * <li><b>Ease in:</b>
  *     <ul>
  *     <li>{@code f(x)}
  *     </ul>
- * <li><b>{@link EaseOut Ease out}:</b>
+ * <li><b>Ease out:</b>
  *     <ul>
  *     <li>{@code g(x) = 1 - f(1-x)}
  *     </ul>
- * <li><b>{@link EaseInOut Ease in-out}:</b> (Note that ease in-out is a piecewise function
+ * <li><b>Ease in-out:</b> (Note that ease in-out is a piecewise function
  *     composed of two functions in such a way that it is continuous and
- *     differentiable at all points.
- *     <!--, provided {@code f(x)} is continuous and differentiable for
- *     {@code 0 <= x <= 1}.-->)
+ *     differentiable at all points.)
  *     <ul>
- *     <li><b>Ease in portion ({@code 0 <= x < 0.5})</b>
+ *     <li><b>Ease in portion (x ∈ [0,0.5))</b>
  *         <ul>
  *         <li>{@code h(x) = f(2x) / 2}
  *         </ul>
- *     <li><b>Ease out portion ({@code 0.5 <= x <= 1})</b>
+ *     <li><b>Ease out portion (x ∈ [0.5,1])</b>
  *         <ul>
  *         <li>{@code i(x) = (1 + g(2x-1)) / 2}
  *         <li>{@code i(x) = 1 - f(2-2x) / 2}
@@ -146,7 +143,7 @@ public interface Interpolation {
 	 * methods.
 	 * 
 	 * <p>The standard function for sinusoidal interpolation is:
-	 * <pre>f(x) = 1 - cos(x * π/2)</pre>
+	 * <pre>f(x) = 1 - cos(x * Ï€/2)</pre>
 	 * Note, however, rather than modifying this function for {@code easeOut}
 	 * and {@code easeInOut}, sine and cosine functions with varying arguments
 	 * are appropriately used instead.
@@ -244,22 +241,20 @@ public interface Interpolation {
 	
 	
 	/**
-	 * Transforms the given value using this Interpolation object's
-	 * transformation function. This method may produce undefined results for
-	 * {@code x} outside the range {@code 0 <= x <= 1}.
+	 * Transforms {@code x} using this object's transformation function. The
+	 * result is undefined if x ∉ [0,1].
 	 * 
 	 * <p>The returned value is equivalent to:
 	 * <pre>{@link #apply(float, float, float) apply(0f, 1f, x)}</pre>
 	 * 
-	 * @param x The value, between 0.0 and 1.0 (inclusive).
+	 * @param x The value, in the range [0,1].
 	 * @return The transformed value.
 	 */
 	float transform(float x);
 	
 	/**
 	 * Interpolates between {@code start} and {@code end} using this
-	 * Interpolation object's transformation function. This method may produce
-	 * undefined results for {@code x} outside the range {@code 0 <= x <= 1}.
+	 * object's transformation function. The result is undefined if x ∉ [0,1].
 	 * 
 	 * <p>The returned value is equivalent to:
 	 * <pre>{@link #lerp(float, float, float)
@@ -285,8 +280,8 @@ public interface Interpolation {
 	 * 
 	 * @param start The start value.
 	 * @param end The end value.
-	 * @param x The position between the start and end values, between
-	 * {@code 0.0} and {@code 1.0} (inclusive).
+	 * @param x ∈ [0,1] - the position between the start and end values. Values
+	 * not in [0,1] are extrapolated to.
 	 * 
 	 * @return A value interpolated between {@code start} and {@code end}.
 	 */

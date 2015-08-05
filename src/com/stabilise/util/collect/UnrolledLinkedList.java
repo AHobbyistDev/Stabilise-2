@@ -27,7 +27,7 @@ public class UnrolledLinkedList<E> extends AbstractCollection<E> implements List
 	private final int nodeSize;
 	/** Number of nodes. */
 	private int numNodes = 0;
-	/** Head node. Never null. It's {@code elems} is always a 0-length awway.
+	/** Head node. Never null. It's {@code elems} is always a 0-length array.
 	 * If {@code next} is null then the list is empty. */
 	private Node head;
 	/** Tail node. Never null. Equal to {@code head} if the list is empty. This
@@ -74,6 +74,10 @@ public class UnrolledLinkedList<E> extends AbstractCollection<E> implements List
 		return null;
 	}
 	
+	/**
+	 * Returns the number of elements in this list. This is not a constant-time
+	 * operation.
+	 */
 	@Override
 	public int size() {
 		int size = 0;
@@ -211,7 +215,7 @@ public class UnrolledLinkedList<E> extends AbstractCollection<E> implements List
 		public E next() {
 			try {
 				return node.elems[i++];
-			} catch(NullPointerException e) {
+			} catch(Exception e) {
 				throw new NoSuchElementException();
 			}
 		}

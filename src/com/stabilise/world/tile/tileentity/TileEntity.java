@@ -19,7 +19,7 @@ public abstract class TileEntity extends FixedGameObject {
 	
 	/** The tile entity registry. */
 	private static final InstantiationRegistry<TileEntity> TILE_ENTITIES =
-			new InstantiationRegistry<>(4, THROW_EXCEPTION, TileEntity.class,
+			new InstantiationRegistry<>(4, THROW_EXCEPTION, "TileEntities",
 					Integer.TYPE, Integer.TYPE);
 	
 	// Register all tile entity types.

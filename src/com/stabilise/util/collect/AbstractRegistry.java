@@ -17,7 +17,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
 abstract class AbstractRegistry<E> implements Iterable<E> {
 	
 	/** The name of this registry. */
-	public final String name;
+	private final String name;
 	protected final DuplicatePolicy dupePolicy;
 	protected final Log log;
 	

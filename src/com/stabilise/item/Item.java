@@ -161,8 +161,8 @@ public class Item {
 	
 	@Override
 	public int hashCode() {
-		assert false : "hashCode not designed";
-		return -1;
+		//throw new AssertionError("hashCode not designed");
+		return id;
 	}
 	
 	@Override

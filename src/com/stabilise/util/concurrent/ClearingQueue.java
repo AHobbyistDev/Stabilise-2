@@ -1,6 +1,7 @@
 package com.stabilise.util.concurrent;
 
 import java.util.Iterator;
+import java.util.function.Consumer;
 
 import com.stabilise.util.annotation.ThreadSafe;
 
@@ -43,6 +44,33 @@ public interface ClearingQueue<E> extends Iterable<E> {
 	 * reads that element from an iterator.
 	 */
 	void add(E e);
+	
+	/**
+	 * Performs the given action for each element of the queue, and clears the
+	 * queue (since this is after all a ClearingQueue).
+	 * 
+	 * <p>This method is functionally equivalent to {@link #forEach(Consumer)},
+	 * however, usage of this method may offer more clarity on inspection as to
+	 * the fact that iteration clears the queue. For example, in the following:
+	 * 
+	 * <pre>
+	 * for(Object o : queue)
+	 *     doSomething(o);</pre>
+	 * 
+	 * <p>it is not readily apparent that the action of iteration clears the
+	 * queue, whereas
+	 * 
+	 * <pre>queue.consume(o -> doSomething(o));</pre>
+	 * 
+	 * <p>is more suggestive of the clearing nature of the queue.
+	 * 
+	 * @param consumer The action to be performed for each element.
+	 * 
+	 * @throws NullPointerException if {@code consumer} is {@code null}.
+	 */
+	default void consume(Consumer<? super E> consumer) {
+		forEach(consumer);
+	}
 	
 	/**
 	 * Returns an iterator over the elements in this queue, and clears this
@@ -95,6 +123,17 @@ public interface ClearingQueue<E> extends Iterable<E> {
 	 */
 	default Iterable<E> asIterable(final boolean clearing) {
 		return clearing ? this : asNonClearing();
+	}
+	
+	/**
+	 * Returns a new {@code ClearingQueue}.
+	 * 
+	 * <p>This convenience method is offered to make implementation switching
+	 * easier in the event that a better/faster implementation than {@link
+	 * SynchronizedClearingQueue} is devised.
+	 */
+	public static <E> ClearingQueue<E> create() {
+		return new SynchronizedClearingQueue<>();
 	}
 	
 }

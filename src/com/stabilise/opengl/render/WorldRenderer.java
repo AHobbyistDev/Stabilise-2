@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.stabilise.core.Game;
@@ -174,7 +175,7 @@ public class WorldRenderer implements Renderer {
 		disposables.add(d);
 		return d;
 	}
-
+	
 	@Override
 	public void unloadResources() {
 		for(Disposable d : disposables)
@@ -209,6 +210,13 @@ public class WorldRenderer implements Renderer {
 		tilesVertical = (int)(height / (2 * pixelsPerTile)) + 1;
 		slicesHorizontal = Maths.ceil((float)tilesHorizontal / Slice.SLICE_SIZE);
 		slicesVertical = Maths.ceil((float)tilesVertical / Slice.SLICE_SIZE);
+	}
+	
+	/**
+	 * Gets the world coordinates over which the mouse is hovering.
+	 */
+	public Vector2 mouseCoords() {
+		return viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 	}
 	
 	@Override
@@ -273,8 +281,15 @@ public class WorldRenderer implements Renderer {
 			shapes.end();
 		}
 		
+		batch.begin();
+		
 		profiler.next("hud"); // root.render.hud
+		
+		renderCursorItem();
+		
 		//hudRenderer.render();
+		
+		batch.end();
 		
 		profiler.end(); // root.render
 		
@@ -488,6 +503,24 @@ public class WorldRenderer implements Renderer {
 				1f, // scaleY
 				0f // rotation
 		);
+	}
+	
+	private void renderCursorItem() {
+		Vector2 coords = mouseCoords();
+		batch.setColor(1f, 1f, 1f, 0.5f);
+		batch.draw(
+				shtItems.getRegion(0), // region
+				coords.x - 0.5f, // x
+				coords.y - 0.5f, // y
+				0.5f, // originX
+				0.5f, // originY
+				1f, // width
+				1f, // height
+				1f, // scaleX
+				1f, // scaleY
+				0f // rotation
+		);
+		batch.setColor(DEFAULT_COL);
 	}
 	
 	// Shape rendering --------------------------------------------------------

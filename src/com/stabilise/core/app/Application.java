@@ -2,16 +2,23 @@ package com.stabilise.core.app;
 
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.LifecycleListener;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.stabilise.core.state.State;
 import com.stabilise.util.AppDriver;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.annotation.ThreadSafe;
+import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 
 /**
  * An {@code Application} is designed to form the basis of any program which
@@ -24,12 +31,12 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * <pre>
  * public class MyProgram extends Application {
  *     public MyProgram() {
- *         super(60); // Arbitrary TPS value	
+ *         super(60); // example ticks-per-second value	
  *     }
  *     
  *     &#64;Override
  *     protected State getInitialState() {
- *         return new MyState(); // Implementor of State; does whatever
+ *         return new MyState(); // implements State
  *     }
  * }</pre>
  * 
@@ -80,6 +87,8 @@ public abstract class Application {
 	private State state;
 	private State newState = null;
 	
+	/** The application's background executor. */
+	private final ExecutorService executor;
 	/** The event bus. */
 	private final EventBus eventBus = new EventBus();
 	
@@ -121,6 +130,8 @@ public abstract class Application {
 		listener = new InternalAppListener();
 		lcListener = new InternalLCListener();
 		
+		executor = createExecutor();
+		
 		state = getInitialState();
 		if(state == null)
 			crash(new NullPointerException("Initial state is null"));
@@ -148,11 +159,25 @@ public abstract class Application {
 	protected abstract State getInitialState();
 	
 	/**
+	 * Creates the application's background executor. This may be overridden to
+	 * set a custom executor implementation.
+	 */
+	protected ExecutorService createExecutor() {
+		return new BoundedThreadPoolExecutor(
+				0, Runtime.getRuntime().availableProcessors(),
+				30L, TimeUnit.SECONDS,
+				new LinkedBlockingQueue<>(),
+				new ThreadFactoryBuilder().setNameFormat("AppThread%d").build()
+		);
+	}
+	
+	/**
 	 * Creates the Application - delegated from {@link
 	 * InternalAppListener#create()}.
 	 */
 	private void create() {
 		if(!stopped) {
+			Thread.currentThread().setName("MainThread");
 			Gdx.app.addLifecycleListener(lcListener);
 			driver.running = true;
 			init();
@@ -256,6 +281,8 @@ public abstract class Application {
 		} catch(Throwable t) {
 			crash(t);
 		}
+		
+		executor.shutdownNow();
 	}
 	
 	/**
@@ -387,8 +414,23 @@ public abstract class Application {
 	}
 	
 	/**
+	 * Gets this Application's executor.
+	 * 
+	 * <p>The returned executor may be used as a general-purpose utility
+	 * executor for running background tasks. Tasks which run indefinitely can
+	 * block up the executor and put it in a state where it is unable to
+	 * execute new tasks; users should utilise a separate executor if they wish
+	 * to create long-running tasks.
+	 */
+	@ThreadSafe
+	public final Executor getExecutor() {
+		return executor;
+	}
+	
+	/**
 	 * Gets this Application's event bus.
 	 */
+	@ThreadSafe
 	public final EventBus getEvents() {
 		return eventBus;
 	}
@@ -433,6 +475,19 @@ public abstract class Application {
 	 */
 	public static Application get() {
 		return instance;
+	}
+	
+	/**
+	 * Gets the current Application's executor, as by {@link #getExecutor()}.
+	 * 
+	 * @throws IllegalStateException if an Application is not running.
+	 */
+	public static Executor executor() {
+		try {
+			return instance.getExecutor();
+		} catch(NullPointerException e) {
+			throw new IllegalStateException("An application does not exist!");
+		}
 	}
 	
 	/**

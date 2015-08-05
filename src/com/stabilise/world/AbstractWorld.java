@@ -24,7 +24,6 @@ import com.stabilise.util.collect.ClearingLinkedList;
 import com.stabilise.util.collect.IteratorUtils;
 import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.concurrent.ClearingQueue;
-import com.stabilise.util.concurrent.SynchronizedClearingQueue;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.dimension.Dimension;
@@ -53,8 +52,7 @@ public abstract class AbstractWorld implements World {
 	/** Entities queued to be added to the world at the end of the tick.
 	 * <p>This is a ClearingQueue as entities may be added to a world from
 	 * from another dimension, which can be hosted on another thread. */
-	private final ClearingQueue<Entity> entitiesToAdd =
-			new SynchronizedClearingQueue<>();
+	private final ClearingQueue<Entity> entitiesToAdd = ClearingQueue.create();
 	/** Entities queued to be removed from the world at the end of the tick.
 	 * <p>Implementation detail: Though it would be cleaner to invoke {@code
 	 * destroy()} on entities and let them self-remove while being iterated
@@ -177,11 +175,11 @@ public abstract class AbstractWorld implements World {
 		profiler.start("add"); // root.update.game.world.entity.add
 		
 		if(!entitiesToAdd.isEmpty()) {
-			for(Entity e : entitiesToAdd) {
+			entitiesToAdd.consume(e -> {
 				e.id = ++entityCount;
-				e.onAdd(); 
+				e.onAdd();
 				entities.put(e.id, e);
-			}
+			});
 		}
 		
 		profiler.next("remove"); // root.update.game.world.entity.remove

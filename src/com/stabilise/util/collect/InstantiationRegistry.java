@@ -15,27 +15,22 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * <h3>Usage Example</h3>
  * 
  * <pre>
- * public static class MyClass {} // generic superclass
+ * static class MyClass {} // generic superclass
  * 
- * public static class MyOtherClass extends MyClass {
+ * static class MyOtherClass extends MyClass {
  *     public MyOtherClass(int x, int y) {}
  * }
- * public static class YetAnotherClass extends MyClass {
+ * static class YetAnotherClass extends MyClass {
  *     public YetAnotherClass(String foo) {}
  * }
  * 
- * public static final InstantiationRegistry{@code <MyClass>} registry =
- *     new InstantiationRegistry{@code <>}(2, DuplicatePolicy.THROW_EXCEPTION, MyClass.class);
+ * static final InstantiationRegistry{@code <MyClass>} registry =
+ *     new InstantiationRegistry{@code <>}(2, DuplicatePolicy.THROW_EXCEPTION);
  * 
  * static {
  *     registry.register(0, MyOtherClass.class, Integer.TYPE, Integer.TYPE);
- *     registry.register(1, YetAnotherClass.class,
- *         new InstantiationRegistry.Factory{@code <YetAnotherClass>}() {
- *             &#64;Override
- *             public YetAnotherClass create(Object... args) {
- *                 return new YetAnotherClass((String)args[0]);
- *             }
- *         });
+ *     registry.register(1, YetAnotherClass.class, args ->
+ *         new YetAnotherClass((String)args[0]));
  *         
  *     {@code // Henceforth the following blocks of code are equivalent:}
  *     
@@ -80,11 +75,13 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 * @throws IllegalArgumentException if {@code capacity < 0}.
 	 * @see DuplicatePolicy
 	 */
+	/*
 	public InstantiationRegistry(int capacity, DuplicatePolicy dupePolicy,
 			Class<E> baseClass, Class<?>... defaultArgs) {
 		this(capacity, dupePolicy, baseClass.getSimpleName() + "InstRegistry",
 				defaultArgs);
 	}
+	*/
 	
 	/**
 	 * Creates a new instantiation registry.
@@ -129,9 +126,7 @@ public class InstantiationRegistry<E> extends AbstractRegistry<Class<? extends E
 	 * <p>Invoking this method is equivalent to invoking {@link
 	 * #register(int, String, Class, Class...)
 	 * register(id, name, objClass, defaultArgs)}, where {@code defaultArgs}
-	 * is specified in the {@link
-	 * #InstantiationRegistry(int, DuplicatePolicy, Class, Class...)
-	 * constructor}.
+	 * is specified in the constructor.
 	 * 
 	 * @param id The ID of the object type.
 	 * @param objClass The objects' class.
