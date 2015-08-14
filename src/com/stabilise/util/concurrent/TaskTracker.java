@@ -210,6 +210,13 @@ public class TaskTracker implements Tracker {
 		return (float)extractPartsCompleted(s) / extractParts(s);
 	}
 	
+	/*
+	private int percent() {
+		long s = state.get();
+		return 100 * extractPartsCompleted(s) / extractParts(s);
+	}
+	*/
+	
 	private void checkDone(long state) {
 		if(extractDone(state))
 			throw new IllegalStateException("Task already done!");

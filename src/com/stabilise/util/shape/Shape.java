@@ -1,6 +1,6 @@
 package com.stabilise.util.shape;
 
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.ArrayUtil.ImmutableArray;
@@ -37,7 +37,7 @@ public abstract class Shape {
 	 * @return The transformed shape.
 	 * @throws NullPointerException if {@code f} is {@code null}.
 	 */
-	public abstract Shape transform(Function<Vec2, Vec2> f);
+	public abstract Shape transform(UnaryOperator<Vec2> f);
 	
 	/**
 	 * Gets the vertices of this shape if it were transformed using the given
@@ -48,7 +48,7 @@ public abstract class Shape {
 	 * 
 	 * @return The transformed vertices. 
 	 */
-	protected Vec2[] transformVertices(Function<Vec2, Vec2> f) {
+	protected Vec2[] transformVertices(UnaryOperator<Vec2> f) {
 		final Vec2[] verts = getVertices();
 		Vec2[] newVerts = new Vec2[verts.length];
 		for(int i = 0; i < verts.length; i++)
@@ -358,7 +358,7 @@ public abstract class Shape {
 	 */
 	private static final class NoShape extends Shape {
 		@Override public Shape transform(Matrix2 matrix) { return this; }
-		@Override public Shape transform(Function<Vec2,Vec2> f) { return this; }
+		@Override public Shape transform(UnaryOperator<Vec2> f) { return this; }
 		@Override public Shape translate(float x, float y) { return this; }
 		@Override protected Vec2[] getVertices() { return new Vec2[0]; }
 		@Override protected Vec2[] getAxes() { return new Vec2[0]; }

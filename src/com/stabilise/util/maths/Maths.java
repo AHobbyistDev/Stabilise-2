@@ -44,7 +44,7 @@ public class Maths {
 	 * (<tt>2<sup><font size=-1>16</font></sup>-1</tt>). */
 	public static final int USHORT_MAX_VALUE = 0xFFFF; //(1 << Short.SIZE) - 1;
 	/** The maximum value which can be held by an unsigned int
-	 * (<tt>2<sup><font size=-1>16</font></sup>-1</tt>). */
+	 * (<tt>2<sup><font size=-1>32</font></sup>-1</tt>). */
 	public static final int UINT_MAX_VALUE = 0xFFFFFFFF; //(int)((1L << Integer.SIZE) - 1);
 	
 	
@@ -506,7 +506,9 @@ public class Maths {
 	 */
 	public static boolean pointsInRange(float x1, float y1, float x2, float y2,
 			float range) {
-		return (x2 -= x1)*x2 + (y2 -= y1)*y2 <= range*range;
+		x2 -= x1;
+		y2 -= y1;
+		return x2*x2 + y2*y2 <= range*range;
 	}
 	
 	/**
@@ -515,7 +517,9 @@ public class Maths {
 	 */
 	public static boolean pointsInRange(double x1, double y1, double x2,
 			double y2, float range) {
-		return (x2 -= x1)*x2 + (y2 -= y1)*y2 <= range*range;
+		x2 -= x1;
+		y2 -= y1;
+		return x2*x2 + y2*y2 <= range*range;
 	}
 	
 }

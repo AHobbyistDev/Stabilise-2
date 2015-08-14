@@ -1,5 +1,6 @@
 package com.stabilise.core.main;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import com.stabilise.core.Constants;
@@ -31,12 +32,16 @@ public class Stabilise extends Application {
 	
 	/**
 	 * Creates the game.
+	 * 
+	 * @param args Command-line arguments.
 	 */
-	public Stabilise() {
+	public Stabilise(String[] args) {
 		super(Constants.TICKS_PER_SECOND);
 		Log.setLogLevel(Constants.DEV_VERSION ? Log.Level.ALL : Log.Level.INFO);
 		profiler.setResetOnFlush(false);
 		driver.setTicksPerProfilerFlush(60);
+		
+		Log.get().postInfo("Program args: " + Arrays.toString(args));
 	}
 	
 	@Override

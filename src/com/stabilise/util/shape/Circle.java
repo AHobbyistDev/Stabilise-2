@@ -1,6 +1,6 @@
 package com.stabilise.util.shape;
 
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.maths.Matrix2;
@@ -75,7 +75,7 @@ public class Circle extends Shape {
 	 */
 	@Override
 	@Incomplete
-	public Circle transform(Function<Vec2, Vec2> f) {
+	public Circle transform(UnaryOperator<Vec2> f) {
 		// TODO: Wasteful as this results in the instantiation of two Vec2s.
 		return new Circle(f.apply(Vec2.immutable(x,y)), radius);
 	}

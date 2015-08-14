@@ -1,6 +1,6 @@
 package com.stabilise.util.shape;
 
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Vec2;
@@ -52,7 +52,7 @@ public class AABB extends AbstractPolygon {
 	}
 	
 	@Override
-	public AABB transform(Function<Vec2, Vec2> f) {
+	public AABB transform(UnaryOperator<Vec2> f) {
 		return new AABB(f.apply(v00), f.apply(v11));
 	}
 	

@@ -56,6 +56,14 @@ public class Striper<T> {
 		return objects[i & mask]; // i & mask == i % numObjects
 	}
 	
+	/**
+	 * Gets an object, as if by {@link #get(int) get(o.hashCode())}. If {@code
+	 * o} is {@code null}, {@code get(0)} is invoked instead.
+	 */
+	public T get(Object o) {
+		return get(Objects.hashCode(o));
+	}
+	
 	
 	/**
 	 * Creates and returns a striper for generic objects.

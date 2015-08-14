@@ -24,7 +24,7 @@ import com.stabilise.util.io.IOUtil;
  * NBTTagCompound tag = ...
  * 
  * // Input/Loading
- * NBTTagCompound tag = {@link #read(File) NBTIO.read(myNBTFile)};
+ * tag = {@link #read(File) NBTIO.read(myNBTFile)};
  * // Output/Saving
  * {@link #write(File, NBTTagCompound) NBTIO.write(myNBTFile, tag)};
  * 

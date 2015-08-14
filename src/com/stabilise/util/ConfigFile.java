@@ -446,10 +446,7 @@ public class ConfigFile {
 	 * attempting to save the config file.
 	 */
 	public void safeSave() throws IOException {
-		FileHandle file = getFile();
-		FileHandle tempFile = IOUtil.safelySaveFile1(file);
-		save(tempFile);
-		IOUtil.safelySaveFile2(file);
+		IOUtil.safelySaveFile(getFile(), this::save);
 	}
 	
 	/**

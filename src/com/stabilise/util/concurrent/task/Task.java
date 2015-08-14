@@ -1,88 +1,77 @@
 package com.stabilise.util.concurrent.task;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
 
 
 public class Task implements Runnable {
+	
+	//--------------------==========--------------------
+	//-----=====Static Constants and Variables=====-----
+	//--------------------==========--------------------
+	
+	protected static final Executor EXEC_CURR_THREAD = r -> r.run();
+	
+	/**
+	 * Different states the task may occupy.
+	 */
+	protected static enum TaskState {
+		/** Indicates that the task has yet to be performed. */
+		UNSTARTED,
+		/** Indicates that the task is currently being performed. */
+		RUNNING,
+		/** Indicates that the task has stopped. */
+		STOPPED,
+		/** Indicates that the task has completed successfully, and
+		 * has stopped running. */
+		COMPLETED;
+	};
 	
 	public enum StopType {
 		CANCEL, EXCEPTION;
 	}
 	
-	private AtomicBoolean started = new AtomicBoolean(false);
+	protected final AtomicReference<TaskState> state =
+			new AtomicReference<>(TaskState.UNSTARTED);
 	
-	private Task parentTask = null;
-	private Consumer<TaskHandle> thisTask = null;
-	private Task nextTask = null;
+	protected final TaskTracker tracker;
 	
-	private Executor executor = null;
+	protected Task parentTask = null;
+	protected Runnable thisTask = null;
+	protected Task nextTask = null;
 	
-	private boolean hasSubtasks = false;
-	private List<Task> subtasks = null;
-	private int remainingSubtasks = 0;
-	private Lock subtaskLock = null;
-	private Condition subtaskCondition = null;
+	protected Executor executor = null;
 	
-	private final Lock doneLock = new ReentrantLock();
-	private final Condition doneCondition = doneLock.newCondition();
+	protected final Lock doneLock = new ReentrantLock();
+	protected final Condition doneCondition = doneLock.newCondition();
 	
-	public Task() {
-		
-	}
+	/** The thread on which this task is executing. */
+	protected volatile Thread thread = null;
 	
-	private void addSubtask(Task t) {
-		if(started.get())
-			throw new IllegalStateException();
-		
-		if(!hasSubtasks) {
-			hasSubtasks = true;
-			subtasks = new ArrayList<>();
-			subtaskLock = new ReentrantLock();
-			subtaskCondition = subtaskLock.newCondition();
-		}
-		
-		subtasks.add(t);
-		remainingSubtasks++;
-	}
+	private volatile boolean cancelled = false;
 	
-	private void onSubtaskCompletion() {
-		boolean done = false; // don't finish() in the synchronized block
-		synchronized(subtasks) {
-			if(--remainingSubtasks == 0)
-				done = true;
-		}
-		if(done)
-			finish();
+	public Task(String status, int parts) {
+		this.tracker = new TaskTracker(status, parts);
 	}
 	
 	public void run() {
-		if(!started.compareAndSet(false, true))
-			throw new IllegalStateException("already started");
+		//if(!started.compareAndSet(false, true))
+		//	throw new IllegalStateException("already started");
 		
-		if(thisTask != null)
-			thisTask.accept(new TaskHandle());
-		
-		if(hasSubtasks) {
-			if(executor == null)
-				executor = currentThreadExecutor();
-			
-			for(Task t : subtasks) {
-				t.parentTask = this;
-				executor.execute(t);
-			}
-		} else {
+		if(execute())
 			finish();
-		}
 	}
 	
-	private void finish() {
+	protected boolean execute() {
+		if(thisTask != null)
+			thisTask.run();
+		return true;
+	}
+	
+	protected void finish() {
 		if(nextTask != null) {
 			nextTask.parentTask = this;
 			nextTask.run();
@@ -90,28 +79,21 @@ public class Task implements Runnable {
 	}
 	
 	public void cancel() {
-		
+		cancelled = true;
+		interrupt();
+	}
+	
+	protected void interrupt() {
+		if(!Thread.currentThread().equals(thread) && thread != null)
+			thread.interrupt();
+	}
+	
+	protected void checkCancel() throws InterruptedException {
+		if(cancelled)
+			throw new InterruptedException("Task cancelled");
 	}
 	
 	public void waitForAll() {
-		
-	}
-	
-	private static Executor currentThreadExecutor() {
-		return r -> r.run();
-	}
-	
-	public class TaskHandle {
-		
-		private TaskHandle() {}
-		
-	}
-	
-	public static class TaskBuilder {
-		
-		private boolean bubbleExceptionsToParentTask = false;
-		
-		private TaskBuilder() {}
 		
 	}
 	

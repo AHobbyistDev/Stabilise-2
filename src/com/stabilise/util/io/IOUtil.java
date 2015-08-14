@@ -1,6 +1,7 @@
 package com.stabilise.util.io;
 
 import java.io.File;
+import java.io.IOException;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.google.common.io.Files;
@@ -154,6 +155,34 @@ public class IOUtil {
 	}
 	
 	/**
+	 * This method ensures a file is safely saved by writing the data to a
+	 * temporary file and then renaming the temp file to the desired file name.
+	 * This is done as to ensure data is not lost if for some reason the save
+	 * process is interrupted and it is desirable to retain the earlier version
+	 * of the file.
+	 * 
+	 * <p>Invoking this method is equivalent to the following:
+	 * 
+	 * <pre>
+	 * saveOperation.accept(safelySaveFile1(file));
+	 * safelySaveFile2(file);</pre>
+	 * 
+	 * @param file The destination file.
+	 * @param saveOperation The save operation itself. It should write to the
+	 * file passed to it.
+	 * 
+	 * @throws NullPointerException if {@code file} is {@code null}.
+	 * @throws GdxRuntimeException if {@code file} is an internal or classpath
+	 * file.
+	 * @throws IOException if an I/O error occurs.
+	 */
+	public static void safelySaveFile(FileHandle file,
+			IOConsumer<FileHandle> saveOperation) throws IOException {
+		saveOperation.accept(safelySaveFile1(file));
+		safelySaveFile2(file);
+	}
+	
+	/**
 	 * Performs the first part of a safe file save operation by preparing and
 	 * then returning the temporary file to which to write to. This should be
 	 * used together with {@link #safelySaveFile2(FileHandle)} as in a manner
@@ -212,11 +241,28 @@ public class IOUtil {
 	 */
 	public static void safelySaveFile2(FileHandle file) {
 		if(file.exists() && !file.delete())
-			// A checked IOException may be annoying, so use an unchecked RuntimeException
+			// A checked IOException may be annoying, so use an unchecked
+			// RuntimeException
 			//throw new IOException("Failed to delete " + file);
 			throw new RuntimeException("Failed to delete " + file);
 		else
 			file.sibling(file.name() + "_tmp").file().renameTo(file.file());
+	}
+	
+	/**
+	 * A alternative utility interface to {@link java.util.function.Consumer
+	 * Consumer} which may throw an IOException.
+	 */
+	@FunctionalInterface
+	public static interface IOConsumer<T> {
+		
+		/**
+		 * Performs an action on the given parameter.
+		 * 
+		 * @throws IOException if an I/O error occurred.
+		 */
+		public void accept(T t) throws IOException;
+		
 	}
 
 }

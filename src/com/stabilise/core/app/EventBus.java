@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.collect.IteratorUtils;
@@ -29,11 +30,13 @@ import com.stabilise.util.concurrent.Striper;
 @ThreadSafe
 public class EventBus {
 	
+	private static final int CONCURRENCY_LEVEL = 4;
+	
 	private final ConcurrentHashMap<Event, List<Listener>> handlers =
 			new ConcurrentHashMap<>();
 	private final ClearingQueue<Event> pendingEvents = ClearingQueue.create();
 	
-	private final Striper<Object> locks = Striper.generic(8);
+	private final Striper<Object> locks = Striper.generic(CONCURRENCY_LEVEL);
 	
 	
 	EventBus() {} // Package-private constructor
@@ -206,9 +209,22 @@ public class EventBus {
 		});
 	}
 	
-	private Object lockFor(Event e) {
-		return locks.get(e.hashCode());
+	void clear(Predicate<Listener> condition) {
+		IteratorUtils.forEach(handlers.entrySet(), e -> {
+			synchronized(lockFor(e.getKey())) {
+				IteratorUtils.forEach(e.getValue(), condition);
+				return e.getValue().isEmpty();
+			}
+		});
 	}
+	
+	private Object lockFor(Event e) {
+		return locks.get(e);
+	}
+	
+	//--------------------==========--------------------
+	//-------------=====Nested Classes=====-------------
+	//--------------------==========--------------------
 	
 	/**
 	 * Holds all data about an event listener. Extends Runnable for convenience

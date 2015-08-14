@@ -212,7 +212,8 @@ public abstract class Application {
 	}
 	
 	/**
-	 * Executes the main loop.
+	 * Manages the execution of the main loop. This is invoked by {@link
+	 * InternalAppListener#render()}.
 	 */
 	private void mainLoop() {
 		// Don't let the main loop run until the application has been properly
@@ -593,5 +594,22 @@ public abstract class Application {
 		}
 		
 	}
+	
+	/*
+	private static class AppThreadExecutor implements Executor {
+		
+		private ClearingQueue<Runnable> queue = ClearingQueue.create();
+		
+		@Override
+		public void execute(Runnable command) {
+			queue.add(Objects.requireNonNull(command));
+		}
+		
+		public void runAll() {
+			queue.consume(r -> r.run());
+		}
+		
+	}
+	*/
 	
 }

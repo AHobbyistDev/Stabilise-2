@@ -19,7 +19,9 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.stabilise.character.CharacterData;
 import com.stabilise.core.Resources;
 import com.stabilise.core.app.Application;
+import com.stabilise.core.app.Event;
 import com.stabilise.core.main.Stabilise;
+import com.stabilise.util.Log;
 import com.stabilise.util.concurrent.TrackableFuture;
 import com.stabilise.world.Worlds;
 import com.stabilise.world.Worlds.WorldBundle;
@@ -60,6 +62,13 @@ public class LoadingState implements State {
 	
 	@Override
 	public void start() {
+		// Testing events
+		application.getEvents().addListener(
+				new Event("test"),
+				e -> Log.get().postInfo("Event received!"),
+				true, true, false); // persistent, single-use, async
+		// End test
+		
 		viewport = new ScreenViewport();
 		
 		batch = new SpriteBatch(64);
@@ -90,6 +99,10 @@ public class LoadingState implements State {
 				.buildHost();
 	}
 	
+	public void consumeEvent(Event e) {
+		
+	}
+	
 	@Override
 	public void predispose() {
 		
@@ -97,6 +110,10 @@ public class LoadingState implements State {
 	
 	@Override
 	public void dispose() {
+		// EventBus testing
+		application.getEvents().post(new Event("test"));
+		// end testing
+		
 		batch.dispose();
 		
 		texSplash.dispose();

@@ -1,6 +1,6 @@
 package com.stabilise.util.shape;
 
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.maths.Vec2;
@@ -54,7 +54,7 @@ public class RotatableShape extends Shape {
 	 * </p>
 	 */
 	@Override
-	public Shape transform(Function<Vec2, Vec2> f) {
+	public Shape transform(UnaryOperator<Vec2> f) {
 		return rotatedShape.transform(f);
 	}
 	

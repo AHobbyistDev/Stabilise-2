@@ -29,7 +29,7 @@ public class Event {
 	@Override
 	public boolean equals(Object o) {
 		if(o == this) return true;
-		if(!(o instanceof Event)) return false;
+		if(!(o instanceof Event)) return false; // filters nulls
 		if(getClass() != o.getClass()) return false;
 		Event e = (Event)o;
 		return name.equals(e.name);
