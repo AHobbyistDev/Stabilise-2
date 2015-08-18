@@ -33,9 +33,35 @@ public class IteratorUtils {
 	 * @throws NullPointerException if either argument is null.
 	 */
 	public static <T> void forEach(Iterator<T> i, Predicate<T> pred) {
+		Objects.requireNonNull(pred); // fail-fast
 		while(i.hasNext()) {
 			if(pred.test(i.next()))
 				i.remove();
+		}
+	}
+	
+	/**
+	 * Removes the first item in {@code i} which satisfies the given predicate.
+	 * 
+	 * @throws NullPointerException if either argument is null.
+	 */
+	public static <T> void removeFirst(Iterable<T> i, Predicate<T> pred) {
+		removeFirst(i.iterator(), pred);
+	}
+	
+	/**
+	 * Removes the first item from {@code i} which satisfies the given
+	 * predicate.
+	 * 
+	 * @throws NullPointerException if either argument is null.
+	 */
+	public static <T> void removeFirst(Iterator<T> i, Predicate<T> pred) {
+		Objects.requireNonNull(pred); // fail-fast
+		while(i.hasNext()) {
+			if(pred.test(i.next())) {
+				i.remove();
+				return;
+			}
 		}
 	}
 	

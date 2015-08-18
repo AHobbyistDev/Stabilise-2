@@ -34,6 +34,7 @@ public class IntHashMap<V> {
 	private int mask;
 	private int size = 0;
 	private int buckets = 0;
+	@SuppressWarnings("unused")
 	private final float loadFactor;
 	private int resizeTrigger;
 	

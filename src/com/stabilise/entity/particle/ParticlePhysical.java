@@ -8,10 +8,8 @@ import com.stabilise.world.World;
  */
 public abstract class ParticlePhysical extends Particle {
 	
-	/** The particle's velocity along the x-axis. */
-	public float dx;
-	/** The particle's velocity along the y-axis. */
-	public float dy;
+	/** The particle's velocity along the x/y-axes. */
+	public float dx, dy;
 	
 	
 	@Override

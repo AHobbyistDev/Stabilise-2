@@ -1,6 +1,6 @@
 package com.stabilise.util.concurrent.task;
 
-import com.stabilise.core.app.Event;
+import com.stabilise.util.concurrent.event.Event;
 
 public class TaskEvent extends Event {
 	

@@ -16,25 +16,25 @@ public class ShapeTest {
 		final AABB b1 = new AABB(-0.5f, -0.5f, 1f, 1f);
 		final AABB b2 = new AABB(-2f, -2f, 4f, 1f);
 		
-		int collisions = 16384*512;
+		int cols = 16384*512; // collisions
 		
-		time(print, "1 i 1 as AbstractPolygon", collisions, () -> result = b1.intersectsPolygon(b1));
-		time(print, "2 i 2 as AbstractPolygon", collisions, () -> result = b2.intersectsPolygon(b2));
-		time(print, "1 i 2 as AbstractPolygon", collisions, () -> result = b1.intersectsPolygon(b2));
-		time(print, "2 i 1 as AbstractPolygon", collisions, () -> result = b2.intersectsPolygon(b1));
-		time(print, "1 i 1 as AABB", collisions, () -> result = b1.intersectsAABB(b1));
-		time(print, "2 i 2 as AABB", collisions, () -> result = b2.intersectsAABB(b2));
-		time(print, "1 i 2 as AABB", collisions, () -> result = b1.intersectsAABB(b2));
-		time(print, "2 i 1 as AABB", collisions, () -> result = b2.intersectsAABB(b1));
+		time(print, "1 i 1 as AbstractPolygon", cols, () -> result = b1.intersectsPolygon(b1));
+		time(print, "2 i 2 as AbstractPolygon", cols, () -> result = b2.intersectsPolygon(b2));
+		time(print, "1 i 2 as AbstractPolygon", cols, () -> result = b1.intersectsPolygon(b2));
+		time(print, "2 i 1 as AbstractPolygon", cols, () -> result = b2.intersectsPolygon(b1));
+		time(print, "1 i 1 as AABB", cols, () -> result = b1.intersectsAABB(b1));
+		time(print, "2 i 2 as AABB", cols, () -> result = b2.intersectsAABB(b2));
+		time(print, "1 i 2 as AABB", cols, () -> result = b1.intersectsAABB(b2));
+		time(print, "2 i 1 as AABB", cols, () -> result = b2.intersectsAABB(b1));
 		
-		time(print, "1 c 1 as AbstractPolygon", collisions, () -> result = b1.contains(b1));
-		time(print, "2 c 2 as AbstractPolygon", collisions, () -> result = b2.contains(b2));
-		time(print, "1 c 2 as AbstractPolygon", collisions, () -> result = b1.contains(b2));
-		time(print, "2 c 1 as AbstractPolygon", collisions, () -> result = b2.contains(b1));
-		time(print, "1 c 1 as AABB", collisions, () -> result = b1.containsAABB(b1));
-		time(print, "2 c 2 as AABB", collisions, () -> result = b2.containsAABB(b2));
-		time(print, "1 c 2 as AABB", collisions, () -> result = b1.containsAABB(b2));
-		time(print, "2 c 1 as AABB", collisions, () -> result = b2.containsAABB(b1));
+		time(print, "1 c 1 as AbstractPolygon", cols, () -> result = b1.contains(b1));
+		time(print, "2 c 2 as AbstractPolygon", cols, () -> result = b2.contains(b2));
+		time(print, "1 c 2 as AbstractPolygon", cols, () -> result = b1.contains(b2));
+		time(print, "2 c 1 as AbstractPolygon", cols, () -> result = b2.contains(b1));
+		time(print, "1 c 1 as AABB", cols, () -> result = b1.containsAABB(b1));
+		time(print, "2 c 2 as AABB", cols, () -> result = b2.containsAABB(b2));
+		time(print, "1 c 2 as AABB", cols, () -> result = b1.containsAABB(b2));
+		time(print, "2 c 1 as AABB", cols, () -> result = b2.containsAABB(b1));
 		
 	}
 	

@@ -1,10 +1,10 @@
-package com.stabilise.core.app;
+package com.stabilise.util.concurrent.event;
 
 import java.util.Objects;
 
 /**
  * An Event represents an occurrence which may be distributed to listeners via
- * an {@link EventBus}.
+ * an {@link EventDispatcher}.
  */
 public class Event {
 	

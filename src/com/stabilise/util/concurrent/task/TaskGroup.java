@@ -15,7 +15,7 @@ public class TaskGroup extends Task {
 	private Condition subtaskCondition = null;
 	
 	public TaskGroup() {
-		
+		super("", 0);
 	}
 	
 	@Override

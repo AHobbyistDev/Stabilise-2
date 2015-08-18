@@ -89,8 +89,6 @@ public abstract class Application {
 	
 	/** The application's background executor. */
 	private final ExecutorService executor;
-	/** The event bus. */
-	private final EventBus eventBus = new EventBus();
 	
 	/** {@code true} if the application has been shut down. */
 	private boolean stopped = false;
@@ -230,7 +228,6 @@ public abstract class Application {
 	
 	private void update() {
 		tick();
-		eventBus.update();
 		state.update();
 		doSetState();
 	}
@@ -378,7 +375,6 @@ public abstract class Application {
 		if(stopped || newState == null)
 			return;
 		state.predispose();
-		eventBus.clear(true); // clear state-local events
 		newState.start();
 		newState.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		state.dispose();
@@ -426,14 +422,6 @@ public abstract class Application {
 	@ThreadSafe
 	public final Executor getExecutor() {
 		return executor;
-	}
-	
-	/**
-	 * Gets this Application's event bus.
-	 */
-	@ThreadSafe
-	public final EventBus getEvents() {
-		return eventBus;
 	}
 	
 	//--------------------==========--------------------
@@ -488,19 +476,6 @@ public abstract class Application {
 			return instance.getExecutor();
 		} catch(NullPointerException e) {
 			throw new IllegalStateException("An application does not exist!");
-		}
-	}
-	
-	/**
-	 * Gets the current Application's event bus.
-	 * 
-	 * @throws IllegalStateException if an Application is not running.
-	 */
-	public static EventBus events() {
-		try {
-			return instance.getEvents();
-		} catch(NullPointerException e) {
-			throw new IllegalStateException("An Application does not exist!");
 		}
 	}
 	
