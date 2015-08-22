@@ -1,7 +1,10 @@
 package com.stabilise.entity;
 
+import java.util.Random;
+
 import com.stabilise.item.ItemStack;
 import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
 /**
@@ -14,21 +17,18 @@ public class EntityItem extends Entity {
 	//--------------------==========--------------------
 	
 	/** The number of ticks after which an item despawns. */
-	private static final int DESPAWN_TICKS = 3600;
+	private static final int DESPAWN_TICKS = 600;
 	
 	/** The range from which a player may attract the item. */
 	private static final float ATTRACTION_RANGE = 5.0f;
 	/** The attraction range squared. */
-	@SuppressWarnings("unused")
 	private static final float ATTRACTION_RANGE_SQUARED = ATTRACTION_RANGE * ATTRACTION_RANGE;
 	/** The range from which a player may pick up the item. */
 	private static final float PICKUP_RANGE = 0.5f;
 	/** The pickup range squared. */
-	@SuppressWarnings("unused")
 	private static final float PICKUP_RANGE_SQUARED = PICKUP_RANGE * PICKUP_RANGE;
 	/** The speed at which items accelerate towards a player. */
-	@SuppressWarnings("unused")
-	private static final float ATTRACTION_SPEED = 0.05f;
+	private static final float ATTRACTION_SPEED = 0.8f;
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -53,6 +53,18 @@ public class EntityItem extends Entity {
 		this.stack = stack;
 	}
 	
+	/**
+	 * Adds some velocity to the item to give it a nice popping effect.
+	 */
+	public void pop(Random rnd) {
+		dx = rnd.nextFloat() * 4.0f - 2f;
+		dy = 4f + rnd.nextFloat() * 2f;
+	}
+	
+	protected AABB getAABB() {
+		return new AABB(-0.4f, 0f, 0.8f, 0.8f);
+	}
+	
 	@Override
 	public void update(World world) {
 		super.update(world);
@@ -60,21 +72,17 @@ public class EntityItem extends Entity {
 		if(age == DESPAWN_TICKS)
 			destroy();
 		
-		// Note: Won't work if uncommented.
-		/*
-		for(EntityMob m : world.players.values()) {
+		for(EntityMob m : world.getPlayers()) {
 			if(!(m instanceof EntityPlayer)) continue;
 			EntityPlayer p = (EntityPlayer)m;
-			if(p.inventory.canAddItem(item)) {
+			if(p.inventory.canAddStack(stack)) {
 				float distX = (float) (x - p.x);
 				float distY = (float) (y - p.y);
 				float distSquared = distX*distX + distY*distY;
 				if(distSquared < PICKUP_RANGE_SQUARED) {
 					// TODO: player picks the item up
-					count = p.inventory.addItem(item, count);
-					if(count == 0) {
-						destroyed = true;
-						world.removeEntity(id);
+					if(p.inventory.addStack(stack)) {
+						destroy();
 						break;
 					}
 				} else if(distSquared <= ATTRACTION_RANGE_SQUARED) {
@@ -96,7 +104,6 @@ public class EntityItem extends Entity {
 				}
 			}
 		}
-		*/
 	}
 	
 	@Override

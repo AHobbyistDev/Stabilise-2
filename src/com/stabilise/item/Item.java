@@ -137,6 +137,17 @@ public class Item {
 	}
 	
 	/**
+	 * Creates a new ItemStack encapsulating this item, as per {@link
+	 * #stackOf(int)}.
+	 * 
+	 * @param quantity Stack quantity.
+	 * @param data Item data.
+	 */
+	ItemStack stackOf(int quantity, int data) {
+		return new ItemStack(this, quantity, data);
+	}
+	
+	/**
 	 * Creates a new ItemStack encapsulating this Item. The provided quantity
 	 * is clamped to this Item's {@link #getMaxStackSize() max stack size}.
 	 * 
@@ -228,7 +239,7 @@ public class Item {
 			throw new IllegalStateException("Items have already been registered!");
 		
 		registerItem(0, "",			NO_ITEM);
-		registerItem(1, "tile",		new Item()); // TODO: ItemTile
+		registerItem(1, "tile",		new ItemTile());
 		registerItem(2, "sword",	new Item());
 		registerItem(3, "apple",	new Item());
 		registerItem(4, "arrow",	new Item());

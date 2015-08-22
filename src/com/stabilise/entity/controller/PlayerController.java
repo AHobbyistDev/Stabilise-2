@@ -2,6 +2,7 @@ package com.stabilise.entity.controller;
 
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.math.Vector2;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Game;
 import com.stabilise.core.app.Application;
@@ -31,7 +32,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 	private WorldRenderer worldRenderer;
 	
 	/** The ID of the tile currently selected. */
-	private int tileID = 1;
+	public int tileID = 1;
 	
 	
 	/**
@@ -97,6 +98,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 	 * @return The x-coordinate of the tile the mouse is pointing at, in
 	 * tile-lengths.
 	 */
+	@SuppressWarnings("unused")
 	private int mouseXToWorldSpace(int x) {
 		return Maths.floor(((x + worldRenderer.playerCamera.x) / worldRenderer.getPixelsPerTile()));
 	}
@@ -110,6 +112,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 	 * @return The y-coordinate of the tile the mouse is pointing at, in
 	 * tile-lengths.
 	 */
+	@SuppressWarnings("unused")
 	private int mouseYToWorldSpace(int y) {
 		return Maths.floor(((y + worldRenderer.playerCamera.y) / worldRenderer.getPixelsPerTile()));
 	}
@@ -179,7 +182,8 @@ public class PlayerController extends MobController implements Controllable, Inp
 						double xDiff = mob.x - tx;
 						double yDiff = mob.y - ty;
 						if(xDiff*xDiff + yDiff*yDiff <= radiusSquared)
-							game.world.setTileAt(tx, ty, 0);
+							game.world.breakTileAt(tx, ty);
+							//game.world.setTileAt(tx, ty, 0);
 							//game.world.blowUpTile(tx, ty, 12);
 					}
 				}
@@ -245,8 +249,9 @@ public class PlayerController extends MobController implements Controllable, Inp
 	@Override
 	public boolean touchDown(int x, int y, int pointer, int button) {
 		if(button < 2) {
-			x = mouseXToWorldSpace(x);
-			y = mouseYToWorldSpace(y);
+			Vector2 wc = worldRenderer.mouseCoords();
+			x = Maths.floor(wc.x);
+			y = Maths.floor(wc.y);
 			
 			if(button == 0)
 				game.getWorld().breakTileAt(x, y);
@@ -273,7 +278,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 
 	@Override
 	public boolean scrolled(int amount) {
-		tileID = Maths.remainder(tileID - amount, 20);
+		tileID = Maths.remainder(tileID + amount, 20);
 		return true;
 	}
 	

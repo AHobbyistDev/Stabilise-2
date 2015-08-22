@@ -493,8 +493,7 @@ public abstract class EntityMob extends Entity {
 		if(world.getRnd().nextFloat() > chance)
 			return;
 		EntityItem e = new EntityItem(Item.getItem(id).stackOf(count));
-		e.dx = world.getRnd().nextFloat() * 0.4f - 0.2f;
-		e.dy = 0.1f + world.getRnd().nextFloat() * 0.2f;
+		e.pop(world.getRnd());
 		world.addEntity(e, x, y);
 	}
 	

@@ -121,6 +121,10 @@ public class EventDispatcher {
 	/**
 	 * Removes an event listener, if it exists.
 	 * 
+	 * <p>Note that this method generally does not interact nicely with
+	 * lambdas as they aren't designed for equality testing. As such, when
+	 * using this method, ensure you're properly unregistering a listener!
+	 * 
 	 * @param e The event being listened for.
 	 * @param handler The handler to remove.
 	 * 

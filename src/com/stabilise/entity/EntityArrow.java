@@ -91,8 +91,8 @@ public class EntityArrow extends EntityProjectile {
 	}
 	
 	@Override
-	protected float getXFriction() {
-		return flying ? super.getXFriction() : 1;
+	protected float getXFriction(World world) {
+		return flying ? super.getXFriction(world) : 1;
 	}
 	
 	@Override

@@ -174,7 +174,7 @@ public abstract class Entity extends FreeGameObject {
 			
 			dy += world.getGravityIncrement(); // apply after updating y
 			
-			dx *= getXFriction();
+			dx *= getXFriction(world);
 			dy *= getYFriction();
 		}
 	}
@@ -184,18 +184,10 @@ public abstract class Entity extends FreeGameObject {
 	 * 
 	 * @return The frictive force.
 	 */
-	protected float getXFriction() {
-		return 0.98f;
-		/*
-		// TODO: may be overlapping with multiple tiles
-		Tile tileIn = world.getTileAt(x, y);
-		
-		if(tileIn instanceof TileFluid) {
-			return ((TileFluid)tileIn).getViscosity();
-		} else {
-			return getAirFriction() + getTileFriction();
-		}
-		*/
+	protected float getXFriction(World world) {
+		// TODO: soooooooooo temporary
+		Tile groundTile = world.getTileAt(x, y - 0.01);
+		return 1 - groundTile.getFriction();
 	}
 	
 	/**

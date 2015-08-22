@@ -3,7 +3,10 @@ package com.stabilise.world.tile;
 import static com.stabilise.world.tile.TileBuilder.Template.*;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.EntityItem;
 import com.stabilise.entity.EntityMob;
+import com.stabilise.item.ItemStack;
+import com.stabilise.item.Items;
 import com.stabilise.util.collect.RegistryNamespacedDefaulted;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.TileBuilder.Template;
@@ -103,12 +106,11 @@ public class Tile {
 	public void handleBreak(World world, int x, int y) {
 		handleRemove(world, x, y);
 		
-		/*
-		EntityItem e = new EntityItem(world, item, 1);
-		e.dx = world.rng.nextFloat() * 0.4f - 0.2f;
-		e.dy = 0.1f + world.rng.nextFloat() * 0.2f;
-		world.addEntity(e, x + 0.5, y + 0.5);
-		*/
+		if(isSolid()) {
+			EntityItem e = new EntityItem(createStack(1));
+			e.pop(world.getRnd());
+			world.addEntity(e, x + 0.5, y + 0.1);
+		}
 	}
 	
 	/**
@@ -194,6 +196,15 @@ public class Tile {
 	 */
 	public float getHardness() {
 		return hardness;
+	}
+	
+	/**
+	 * Creates an ItemStack encapsulating this tile.
+	 * 
+	 * @param quantity The quantity of tiles in the stack.
+	 */
+	public ItemStack createStack(int quantity) {
+		return Items.TILE.stackOf(this, quantity);
 	}
 	
 	@Override

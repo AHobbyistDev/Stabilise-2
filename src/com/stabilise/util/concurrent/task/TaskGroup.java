@@ -15,7 +15,7 @@ public class TaskGroup extends Task {
 	private Condition subtaskCondition = null;
 	
 	public TaskGroup() {
-		super("", 0);
+		super(null, "", 0);
 	}
 	
 	@Override
@@ -54,6 +54,11 @@ public class TaskGroup extends Task {
 				return;
 		}
 		finish();
+	}
+	
+	@Override
+	protected void interrupt() {
+		
 	}
 	
 }

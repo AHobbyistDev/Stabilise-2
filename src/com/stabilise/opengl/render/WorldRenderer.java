@@ -11,10 +11,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -23,11 +25,13 @@ import com.stabilise.core.Resources;
 import com.stabilise.core.app.Application;
 import com.stabilise.entity.*;
 import com.stabilise.entity.collision.Hitbox;
+import com.stabilise.entity.controller.PlayerController;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
+import com.stabilise.item.Items;
 import com.stabilise.opengl.ColourEffectShader;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
@@ -50,9 +54,6 @@ public class WorldRenderer implements Renderer {
 	//-----=====Static Constants and Variables=====-----
 	//--------------------==========--------------------
 	
-	/** The font style used for the loading screen. */
-	//private static final FontStyle STYLE_LOADING_SCREEN = new FontStyle(36, Colour.BLACK, FontStyle.Alignment.CENTRE, 4, 0);
-	
 	@SuppressWarnings("unused")
 	private static final float COL_WHITE = Color.WHITE.toFloatBits();
 	private static final float DEFAULT_COL = new Color(1f, 1f, 1f, 1f).toFloatBits();
@@ -67,6 +68,8 @@ public class WorldRenderer implements Renderer {
 	public final World world;
 	/** The camera. */
 	public final GameCamera playerCamera;
+	public final EntityPlayer player;
+	public final PlayerController controller;
 	
 	//public final HUDRenderer hudRenderer;
 	
@@ -80,7 +83,9 @@ public class WorldRenderer implements Renderer {
 	
 	SpriteBatch batch;
 	OrthographicCamera camera;
+	OrthographicCamera hudCamera;
 	ScreenViewport viewport;
+	ScreenViewport hudViewport;
 	ShaderProgram shader;
 	
 	BitmapFont font;
@@ -111,12 +116,14 @@ public class WorldRenderer implements Renderer {
 	 * @param world The game world.
 	 * @param player The player entity.
 	 */
-	public WorldRenderer(Game game, World world, EntityMob player) {
+	public WorldRenderer(Game game, World world, EntityMob player, PlayerController controller) {
 		super();
 		
 		this.world = world;
 		
+		this.player = (EntityPlayer)player;
 		playerCamera = new GameCamera(player);
+		this.controller = controller;
 		
 		tileRenderer = new TileRenderer(this);
 		//hudRenderer = new HUDRenderer(game, this);
@@ -131,7 +138,9 @@ public class WorldRenderer implements Renderer {
 			throw new RuntimeException("Shader could not compile: " + shader.getLog());
 		
 		camera = new OrthographicCamera();
+		hudCamera = new OrthographicCamera();
 		viewport = new ScreenViewport(camera);
+		hudViewport = new ScreenViewport(hudCamera);
 		batch = register(new SpriteBatch(512));
 		
 		FreeTypeFontParameter param = new FreeTypeFontParameter();
@@ -203,13 +212,21 @@ public class WorldRenderer implements Renderer {
 	@Override
 	public void resize(int width, int height) {
 		viewport.update(width, height);
-		batch.setProjectionMatrix(viewport.getCamera().combined);
-		shapes.setProjectionMatrix(viewport.getCamera().combined);
+		hudViewport.update(width, height);
+		
 		
 		tilesHorizontal = (int)(width / (2 * pixelsPerTile)) + 1;
 		tilesVertical = (int)(height / (2 * pixelsPerTile)) + 1;
 		slicesHorizontal = Maths.ceil((float)tilesHorizontal / Slice.SLICE_SIZE);
 		slicesVertical = Maths.ceil((float)tilesVertical / Slice.SLICE_SIZE);
+	}
+	
+	private void updateMatrices(boolean hud) {
+		Matrix4 m = hud
+				? hudViewport.getCamera().combined
+				: viewport.getCamera().combined;
+		batch.setProjectionMatrix(m);
+		shapes.setProjectionMatrix(m);
 	}
 	
 	/**
@@ -245,6 +262,8 @@ public class WorldRenderer implements Renderer {
 		Color bCol = new Color(0x92D1E4FF); // RGBA is annoying in this case: ARGB > RGBA
 		Gdx.gl.glClearColor(bCol.r, bCol.g, bCol.b, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		
+		updateMatrices(false);
 		
 		batch.begin();
 		
@@ -286,6 +305,8 @@ public class WorldRenderer implements Renderer {
 		profiler.next("hud"); // root.render.hud
 		
 		renderCursorItem();
+		
+		updateMatrices(true);
 		
 		//hudRenderer.render();
 		
@@ -397,18 +418,19 @@ public class WorldRenderer implements Renderer {
 	 * @param e The item entity.
 	 */
 	public void renderItem(EntityItem e) {
+		if(e.stack.getItem().equals(Items.TILE))
+			renderOn(tileRenderer.tiles.getRegion(7 + e.stack.getData()), e);
+		else
+			renderOn(shtItems.getRegion(e.stack.getItem().getID() - 1), e);
+	}
+	
+	private void renderOn(TextureRegion tex, Entity e) {
 		batch.draw(
-				shtItems.getRegion(e.stack.getItem().getID() - 1), // region
-				(float)e.x, // x
-				(float)e.y, // y
-				0.5f, // originX
-				0f, // originY
-				1f, // width
-				1f, // height
-				1f, // scaleX
-				1f, // scaleY
-				0f, // rotation
-				false // clockwise
+				tex, // region
+				(float)e.x + e.boundingBox.getOriginX(), // x
+				(float)e.y + e.boundingBox.getOriginY(), // y
+				e.boundingBox.width(), // width
+				e.boundingBox.height() // height
 		);
 	}
 	
@@ -506,20 +528,36 @@ public class WorldRenderer implements Renderer {
 	}
 	
 	private void renderCursorItem() {
-		Vector2 coords = mouseCoords();
 		batch.setColor(1f, 1f, 1f, 0.5f);
+		Vector2 coords = mouseCoords();
 		batch.draw(
-				shtItems.getRegion(0), // region
-				coords.x - 0.5f, // x
-				coords.y - 0.5f, // y
-				0.5f, // originX
-				0.5f, // originY
+				tileRenderer.tiles.getRegion(7 + controller.tileID), // region
+				World.tileCoordFreeToTileCoordFixed(coords.x), // x
+				World.tileCoordFreeToTileCoordFixed(coords.y), // y
 				1f, // width
-				1f, // height
-				1f, // scaleX
-				1f, // scaleY
-				0f // rotation
+				1f // height
 		);
+		/*
+		ItemStack stack = player.inventory.getStack(player.curSlot);
+		if(stack == ItemStack.NO_STACK)
+			return;
+		if(stack.getItem().equals(Items.TILE))
+			batch.draw(
+					tileRenderer.tiles.getRegion(7 + stack.getData()), // region
+					coords.x - 0.5f, // x
+					coords.y - 0.5f, // y
+					1f, // width
+					1f // height
+			);
+		else
+			batch.draw(
+					shtItems.getRegion(stack.getItem().getID() - 1), // region
+					coords.x - 0.5f, // x
+					coords.y - 0.5f, // y
+					1f, // width
+					1f // height
+			);
+		*/
 		batch.setColor(DEFAULT_COL);
 	}
 	

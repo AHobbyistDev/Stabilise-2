@@ -355,7 +355,8 @@ public class Maths {
 	 * @return A value linearly interpolated between all four vertices at the
 	 * given point.
 	 */
-	public static double interpolateBilinear(double z00, double z01, double z10, double z11, double x, double y) {
+	public static double interpolateBilinear(double z00, double z01, double z10,
+			double z11, double x, double y) {
 		double z0 = interpolateLinear(z00, z10, x);
 		double z1 = interpolateLinear(z01, z11, x);
 		return interpolateLinear(z0, z1, y);
@@ -376,7 +377,8 @@ public class Maths {
 	 * @return A value sinusoidally interpolated between all four vertices at
 	 * the given point.
 	 */
-	public static double interpolateBisinusoidal(double z00, double z01, double z10, double z11, double x, double y) {
+	public static double interpolateBisinusoidal(double z00, double z01,
+			double z10, double z11, double x, double y) {
 		double z0 = interpolateSinusoidal(z00, z10, x);
 		double z1 = interpolateSinusoidal(z01, z11, x);
 		return interpolateSinusoidal(z0, z1, y);
@@ -491,8 +493,7 @@ public class Maths {
 		// large enough, we lose information as the 0s become incorporated into
 		// the hash, and so for larger tables we don't apply this shift.
 		
-		//int sizeLog = log2(MathUtils.nextPowerOfTwo(maxElements)) / 2;
-		int sizeLog = log2Ceil(maxElements) / 2; // simpler
+		int sizeLog = log2Ceil(maxElements) / 2;
 		// n.b. sizeLog <= 8 iff the hash uses less than 16 bits
 		int xShift = sizeLog + (negateHashMapShift && sizeLog <= 8 ? 16 : 0);
 		int yMask = (1 << sizeLog) - 1;

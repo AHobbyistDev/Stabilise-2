@@ -24,8 +24,6 @@ public abstract class Shape {
 	 * shape, in preference to a null pointer. */
 	public static final Shape NO_SHAPE = new NoShape();
 	
-	//private static final Matrix2 MAT_REFLECT = new Matrix2(-1, 0, 0, 1);
-	
 	
 	/**
 	 * Transforms this shape by applying the given transformation function to

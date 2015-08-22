@@ -31,6 +31,8 @@ public class Hw1 {
 		Polygon tri = new Polygon(v1, v2, v3);
 		Vec2 p = Vec2.mutable(0, 0);
 		
+		tri.containsPoint(0, 0); // precompute its stuff
+		
 		float unitX = (max.x() - min.x()) / (cols - 1);
 		float unitY = (max.y() - min.y()) / (rows - 1);
 		

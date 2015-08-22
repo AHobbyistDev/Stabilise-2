@@ -485,12 +485,7 @@ public interface Interpolation {
 	 * 
 	 * <pre>
 	 * Interpolation cubic = Interpolation.newInterpolation(
-	 *     new Interpolation.EaseIn() {
-	 *         &#64;Override
-	 *         public float transform(float x) {
-	 *             return x*x*x;
-	 *         }
-	 *     }
+	 *     x -> x*x*x
 	 * );</pre>
 	 * 
 	 * @param easeIn The transformation function {@code f(x)}.

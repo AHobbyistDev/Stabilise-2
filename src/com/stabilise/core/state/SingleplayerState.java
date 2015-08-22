@@ -45,7 +45,7 @@ public class SingleplayerState implements State {
 		input.addProcessor(game.playerController);
 		Gdx.input.setInputProcessor(input);
 		
-		renderer = new WorldRenderer(game, game.getWorld(), game.player);
+		renderer = new WorldRenderer(game, game.getWorld(), game.player, game.playerController);
 		//game.hudRenderer = renderer.hudRenderer;
 		
 		profiler.enable();

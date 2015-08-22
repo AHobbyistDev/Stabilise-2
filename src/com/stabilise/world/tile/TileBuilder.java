@@ -17,8 +17,9 @@ class TileBuilder {
 			H_INVUL = Float.MAX_VALUE;
 	/** Default friction. */
 	private static final float
-			F_DEF = 0.15f,
-			F_ICE = 0.008f;
+			F_DEF = 0.07f,
+			F_ICE = 0.008f,
+			F_AIR = 0.001f;
 	
 	
 	/**
@@ -52,7 +53,7 @@ class TileBuilder {
 			builder = b -> new TileAir(b);
 			solid = false;
 			hardness = 0f;
-			friction = 0f;
+			friction = F_AIR;
 			viscosity = 0f;
 		}
 		

@@ -25,15 +25,14 @@ public class ItemStack {
 	
 	/** The stack's underlying item. */
 	private final Item item;
+	/** The item data. */
+	private int data;
 	/** The number of items in the stack. */
 	private int quantity;
 	
 	
 	/**
-	 * Creates a new ItemStack.
-	 * 
-	 * <p>Note that quantities above the item's max stack size are technically
-	 * permitted, as are negative quantities.
+	 * Creates a new ItemStack. No checking is performed on the arguments.
 	 * 
 	 * <p>This constructor should be used exclusively by {@link
 	 * Item#stackOf(int)}.
@@ -42,8 +41,20 @@ public class ItemStack {
 	 * @param quantity The number of items in the stack.
 	 */
 	ItemStack(Item item, int quantity) {
+		this(item, quantity, 0);
+	}
+	
+	/**
+	 * Creates a new ItemStack. No checking is performed on the arguments.
+	 * 
+	 * @param item The stack's underlying item.
+	 * @param quantity The number of items in the stack.
+	 * @param data The item's data value. Use only for special items.
+	 */
+	ItemStack(Item item, int quantity, int data) {
 		this.item = item;
 		this.quantity = quantity;
+		this.data = data;
 	}
 	
 	/**
@@ -75,7 +86,8 @@ public class ItemStack {
 	 * @throws NullPointerException if {@code stack} is {@code null}.
 	 */
 	public boolean accepts(ItemStack stack) {
-		return holds(stack.item) && quantity < item.getMaxStackSize();
+		return holds(stack.item) && data == stack.data &&
+				quantity < item.getMaxStackSize();
 	}
 	
 	/**
@@ -109,6 +121,14 @@ public class ItemStack {
 	 */
 	public Item getItem() {
 		return item;
+	}
+	
+	/**
+	 * Returns the item's data value. The meaning of the data value depends on
+	 * the item, but for an ordinary boring item it's usually 0.
+	 */
+	public int getData() {
+		return data;
 	}
 	
 	/**
@@ -186,6 +206,9 @@ public class ItemStack {
 	public NBTTagCompound toNBT() {
 		NBTTagCompound tag = item.toNBT();
 		tag.addInt("count", quantity);
+		// Don't write if it's 0 to save space.
+		if(data != 0)
+			tag.addInt("data", data);
 		return tag;
 	}
 	
@@ -224,7 +247,8 @@ public class ItemStack {
 		if(item == Item.NO_ITEM)
 			return NO_STACK;
 		int quantity = tag.getInt("count");
-		return item.stackOf(quantity);
+		int data = tag.getInt("data");
+		return item.stackOf(quantity, data);
 	}
 	
 	//--------------------==========--------------------

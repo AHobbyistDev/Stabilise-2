@@ -48,8 +48,7 @@ public class TileEntityChest extends TileEntity {
 	public void handleRemove(World world, int x, int y) {
 		for(ItemStack s : items) {
 			EntityItem e = new EntityItem(s);
-			e.dx = world.getRnd().nextFloat() * 0.4f - 0.2f;
-			e.dy = 0.1f + world.getRnd().nextFloat() * 0.2f;
+			e.pop(world.getRnd());
 			world.addEntity(e, x + 0.5f, y + 0.5f);
 		}
 	}

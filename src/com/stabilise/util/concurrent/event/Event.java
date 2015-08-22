@@ -35,6 +35,11 @@ public class Event {
 		return name.equals(e.name);
 	}
 	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + name + "]";
+	}
+	
 	/**
 	 * Identical to new Event(name);
 	 */

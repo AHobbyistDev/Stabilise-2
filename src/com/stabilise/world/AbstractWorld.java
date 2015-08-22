@@ -41,7 +41,7 @@ public abstract class AbstractWorld implements World {
 	protected final Dimension dimension;
 	
 	/** All players in the world. Maps IDs -> players' EntityMobs. */
-	protected final Map<Integer, EntityMob> players = new HashMap<>(2);
+	protected final Map<Integer, EntityMob> players = new HashMap<>(4);
 	/** The map of loaded entities in the world. Maps IDs -> Entities.
 	 * This is a LinkedHashMap as to allow for consistent iteration. */
 	protected final Map<Integer, Entity> entities = new LinkedHashMap<>(64);

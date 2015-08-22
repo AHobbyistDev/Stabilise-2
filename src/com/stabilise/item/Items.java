@@ -26,7 +26,7 @@ public class Items {
 	}
 	
 	public static final Item NO_ITEM = Item.NO_ITEM;
-	public static final Item TILE = Item.ITEMS.get("tile");
+	public static final ItemTile TILE = (ItemTile)Item.ITEMS.get("tile");
 	public static final Item SWORD = Item.ITEMS.get("sword");
 	public static final Item APPLE = Item.ITEMS.get("apple");
 	public static final Item ARROW = Item.ITEMS.get("arrow");

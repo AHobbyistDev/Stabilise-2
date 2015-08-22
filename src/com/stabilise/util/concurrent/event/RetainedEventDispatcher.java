@@ -73,7 +73,7 @@ public class RetainedEventDispatcher extends EventDispatcher {
 				handle(l);
 			} else {
 				if(listeners == null)
-					listeners = new ArrayList<>(8);
+					listeners = new ArrayList<>(4);
 				listeners.add(l);
 			}
 		}
@@ -92,8 +92,10 @@ public class RetainedEventDispatcher extends EventDispatcher {
 		
 		@Override
 		public void post(Event e) {
+			// We ignore duplicate events rather than complain as to adhere to
+			// the contract of post() in EventDispatcher.
 			if(this.e != null)
-				return; // just ignore it
+				return;
 				//throw new IllegalStateException("Event already posted!");
 			this.e = e;
 			if(listeners != null) {
