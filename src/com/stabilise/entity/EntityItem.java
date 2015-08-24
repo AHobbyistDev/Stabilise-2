@@ -2,6 +2,8 @@ package com.stabilise.entity;
 
 import java.util.Random;
 
+import com.stabilise.core.Constants;
+import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.item.ItemStack;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
@@ -17,7 +19,7 @@ public class EntityItem extends Entity {
 	//--------------------==========--------------------
 	
 	/** The number of ticks after which an item despawns. */
-	private static final int DESPAWN_TICKS = 600;
+	private static final int DESPAWN_TICKS = 30*Constants.TICKS_PER_SECOND;
 	
 	/** The range from which a player may attract the item. */
 	private static final float ATTRACTION_RANGE = 5.0f;
@@ -28,7 +30,7 @@ public class EntityItem extends Entity {
 	/** The pickup range squared. */
 	private static final float PICKUP_RANGE_SQUARED = PICKUP_RANGE * PICKUP_RANGE;
 	/** The speed at which items accelerate towards a player. */
-	private static final float ATTRACTION_SPEED = 0.8f;
+	private static final float ATTRACTION_SPEED = 2.0f;
 	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
@@ -79,27 +81,24 @@ public class EntityItem extends Entity {
 				float distX = (float) (x - p.x);
 				float distY = (float) (y - p.y);
 				float distSquared = distX*distX + distY*distY;
+				if(distSquared == 0)
+					distSquared = 0.0001f;
 				if(distSquared < PICKUP_RANGE_SQUARED) {
 					// TODO: player picks the item up
 					if(p.inventory.addStack(stack)) {
+						SingleplayerState.pop.play(1f, 1.7f, 0f);
 						destroy();
 						break;
 					}
 				} else if(distSquared <= ATTRACTION_RANGE_SQUARED) {
-					if(distX > 0) {
-						//dx -= ATTRACTION_SPEED / (ATTRACTION_RANGE - distX)*(ATTRACTION_RANGE - distX);
-						dx -= ATTRACTION_SPEED;
-					} else {
-						//dx += ATTRACTION_SPEED / (ATTRACTION_RANGE + distX)*(ATTRACTION_RANGE + distX);
-						dx += ATTRACTION_SPEED;
-					}
-					if(distY > 0) {
-						//dy -= ATTRACTION_SPEED / (ATTRACTION_RANGE - distY)*(ATTRACTION_RANGE - distY);
-						dy -= ATTRACTION_SPEED;
-					} else {
-						//dy += ATTRACTION_SPEED / (ATTRACTION_RANGE + distY)*(ATTRACTION_RANGE + distY);
-						dy += ATTRACTION_SPEED;
-					}
+					if(distX > 0)
+						dx -= ATTRACTION_SPEED / distSquared;
+					else
+						dx += ATTRACTION_SPEED / distSquared;
+					if(distY > 0)
+						dy -= ATTRACTION_SPEED / distSquared;
+					else
+						dy += ATTRACTION_SPEED  / distSquared;
 					break;
 				}
 			}

@@ -62,12 +62,23 @@ public class TextureSheet implements Disposable {
 	 * < }{@link #cols}; {@code 0 <= y < }{@link #rows}.
 	 */
 	public TextureRegion getRegion(int x, int y) {
+		/*
 		return new TextureRegion(
 				texture,
 				cellWidth * x,
 				cellHeight * y,
 				cellWidth,
 				cellHeight
+		);
+		*/
+		float invWidth = 1f / texture.getWidth();
+		float invHeight = 1f / texture.getHeight();
+		float u = (x*cellWidth + 0.5f) * invWidth;
+		float v = (y*cellHeight + 0.5f) * invHeight;
+		float u2 = u + cellWidth*invWidth;
+		float v2 = v + cellHeight*invHeight;
+		return new TextureRegion(
+				texture, u, v, u2, v2
 		);
 	}
 	
@@ -148,7 +159,20 @@ public class TextureSheet implements Disposable {
 		private TextureSheetSequential(Texture texture, int cols, int rows) {
 			super(texture, cols, rows);
 			regions = new TextureRegion[cols*rows];
-			for(int i = 0; i < regions.length; i++)
+			float off = 0.5e-5f;
+			for(int i = 0; i < regions.length; i++) {
+				///*
+				float invWidth = 1f / texture.getWidth();
+				float invHeight = 1f / texture.getHeight();
+				float u = ((i % rows)*cellWidth + off) * invWidth;
+				float v = ((i / cols)*cellHeight + off) * invHeight;
+				float u2 = u + (cellWidth - 2*off)*invWidth;
+				float v2 = v + (cellHeight - 2*off)*invHeight;
+				regions[i] = new TextureRegion(
+						texture, u, v, u2, v2
+				);
+				//*/
+				/*
 				regions[i] = new TextureRegion(
 						texture,
 						cellWidth * (i % rows),
@@ -156,6 +180,8 @@ public class TextureSheet implements Disposable {
 						cellWidth,
 						cellHeight
 				);
+				//*/
+			}
 		}
 		
 		@Override

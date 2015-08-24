@@ -125,6 +125,21 @@ public class Resources {
 	}
 	
 	/**
+	 * Creates a texture from a .png image of the specified name in the {@link
+	 * #IMAGE_DIR image directory}. The texture will be generated with mipmaps.
+	 * 
+	 * <p>Usage example:
+	 * <pre>Texture myTexture = Resources.texture("myTexture");</pre>
+	 * 
+	 * @param name The name of the texture source on the filesystem.
+	 * 
+	 * @return The created texture.
+	 */
+	public static Texture textureMipmaps(String name) {
+		return new Texture(IMAGE_DIR.child(name + ".png"), true);
+	}
+	
+	/**
 	 * Generates a BitmapFont from the source file relative to the {@link
 	 * FONT_DIR font directory}.
 	 * 

@@ -545,8 +545,6 @@ public abstract class AbstractWorld implements World {
 		 * Creates a new pool with the specified template particle. The
 		 * particle will henceforth be used as a component of this pool, and
 		 * should no longer be used for anything else.
-		 * 
-		 * @throws NullPointerException if {@code template} is {@code null}.
 		 */
 		private ParticlePool(Particle template) {
 			this.template = template;

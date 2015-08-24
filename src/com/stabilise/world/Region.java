@@ -203,7 +203,8 @@ public class Region {
 				return true;
 		} else if(isAnchored()) {
 			// Tick any number of random tiles in the region each tick
-			tickTile(world);
+			tickSlice(world, 8);
+			//tickTile(world);
 			//tickTile(world);
 			//tickTile(world);
 			//tickTile(world);
@@ -229,6 +230,7 @@ public class Region {
 	 * <p>Given there are 65536 tiles in a region, a tile will, on average, be
 	 * updated once every 18 minutes if this is invoked once per tick.
 	 */
+	@SuppressWarnings("unused")
 	private void tickTile(HostWorld world) {
 		int sx = world.rnd.nextInt(REGION_SIZE);
 		int sy = world.rnd.nextInt(REGION_SIZE);
@@ -237,6 +239,21 @@ public class Region {
 		getSliceAt(sx, sy).getTileAt(tx, ty).update(world,
 				(offsetX + sx) * Slice.SLICE_SIZE + tx,
 				(offsetY + sy) * Slice.SLICE_SIZE + ty);
+	}
+	
+	/**
+	 * Ticks {@code tiles}-many tiles in a random slice.
+	 */
+	private void tickSlice(HostWorld world, int tiles) {
+		int sx = world.rnd.nextInt(REGION_SIZE);
+		int sy = world.rnd.nextInt(REGION_SIZE);
+		while(tiles-- > 0) {
+			int tx = world.rnd.nextInt(Slice.SLICE_SIZE);
+			int ty = world.rnd.nextInt(Slice.SLICE_SIZE);
+			getSliceAt(sx, sy).getTileAt(tx, ty).update(world,
+					(offsetX + sx) * Slice.SLICE_SIZE + tx,
+					(offsetY + sy) * Slice.SLICE_SIZE + ty);
+		}
 	}
 	
 	/** 

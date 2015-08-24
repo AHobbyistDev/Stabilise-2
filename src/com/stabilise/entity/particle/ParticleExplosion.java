@@ -22,6 +22,9 @@ public class ParticleExplosion extends Particle {
 	/** The final colour of the explosion. */
 	private static final Color COLOUR_FINAL = new Color(0xFF660000); //0xAAFFA200
 	
+	private static final Interpolation interpCol = Interpolation.CIRCULAR.EASE_IN;
+	private static final Interpolation interpSize = Interpolation.CIRCULAR.EASE_OUT;
+	
 	//--------------------==========--------------------
 	//-------------=====Member Variables=====-----------
 	//--------------------==========--------------------
@@ -58,12 +61,12 @@ public class ParticleExplosion extends Particle {
 		
 		float ratio = (float)age/DESPAWN_TICKS;
 		
-		colour.r = Interpolation.lerp(COLOUR_INIT.r, COLOUR_FINAL.r, ratio);
-		colour.g = Interpolation.lerp(COLOUR_INIT.g, COLOUR_FINAL.g, ratio);
-		colour.b = Interpolation.lerp(COLOUR_INIT.b, COLOUR_FINAL.b, ratio);
-		colour.a = Interpolation.lerp(COLOUR_INIT.a, COLOUR_FINAL.a, ratio);
+		colour.r = interpCol.apply(COLOUR_INIT.r, COLOUR_FINAL.r, ratio);
+		colour.g = interpCol.apply(COLOUR_INIT.g, COLOUR_FINAL.g, ratio);
+		colour.b = interpCol.apply(COLOUR_INIT.b, COLOUR_FINAL.b, ratio);
+		colour.a = interpCol.apply(COLOUR_INIT.a, COLOUR_FINAL.a, ratio);
 		
-		radius = Interpolation.lerp(radiusInit, radiusFinal, ratio);
+		radius = interpSize.apply(radiusInit, radiusFinal, ratio);
 		
 		if(age == DESPAWN_TICKS)
 			destroy();

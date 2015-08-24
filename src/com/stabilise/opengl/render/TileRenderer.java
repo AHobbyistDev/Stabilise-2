@@ -1,6 +1,7 @@
 package com.stabilise.opengl.render;
 
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.stabilise.core.Resources;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.world.World;
@@ -41,8 +42,9 @@ public class TileRenderer implements Renderer {
 	
 	@Override
 	public void loadResources() {
-		tiles = TextureSheet.sequentiallyOptimised(Resources.texture("sheets/tiles"), 8, 8);
-		tiles.texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+		tiles = TextureSheet.sequentiallyOptimised(Resources.textureMipmaps("sheets/tiles"), 8, 8);
+		tiles.texture.setFilter(TextureFilter.MipMapNearestLinear, TextureFilter.Nearest);
+		tiles.texture.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
 		
 		//System.out.println(tiles);
 	}
@@ -64,6 +66,7 @@ public class TileRenderer implements Renderer {
 
 	@Override
 	public void render() {
+		//worldRenderer.batch.disableBlending();
 		slicesRendered = 0;
 		for(int c = worldRenderer.playerCamera.sliceX - worldRenderer.slicesHorizontal;
 				c <= worldRenderer.playerCamera.sliceX + worldRenderer.slicesHorizontal;
@@ -72,6 +75,7 @@ public class TileRenderer implements Renderer {
 					r <= worldRenderer.playerCamera.sliceY + worldRenderer.slicesVertical;
 					r++)
 				renderSlice(c, r);
+		//worldRenderer.batch.enableBlending();
 		//System.out.println(slicesRendered + " slices rendered");
 	}
 	

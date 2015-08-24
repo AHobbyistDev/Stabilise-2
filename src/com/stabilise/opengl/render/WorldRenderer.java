@@ -32,7 +32,6 @@ import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.item.Items;
-import com.stabilise.opengl.ColourEffectShader;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
 import com.stabilise.util.ArrayUtil.ImmutableArray;
@@ -133,15 +132,15 @@ public class WorldRenderer implements Renderer {
 	
 	@Override
 	public void loadResources() {
-		shader = register(new ColourEffectShader());
-		if(!shader.isCompiled())
-			throw new RuntimeException("Shader could not compile: " + shader.getLog());
+		//shader = register(new BetterShader());
+		//if(!shader.isCompiled())
+		//	throw new RuntimeException("Shader could not compile: " + shader.getLog());
 		
 		camera = new OrthographicCamera();
 		hudCamera = new OrthographicCamera();
 		viewport = new ScreenViewport(camera);
 		hudViewport = new ScreenViewport(hudCamera);
-		batch = register(new SpriteBatch(512));
+		batch = register(new SpriteBatch(1024));
 		
 		FreeTypeFontParameter param = new FreeTypeFontParameter();
 		param.size = 16;
@@ -214,7 +213,6 @@ public class WorldRenderer implements Renderer {
 		viewport.update(width, height);
 		hudViewport.update(width, height);
 		
-		
 		tilesHorizontal = (int)(width / (2 * pixelsPerTile)) + 1;
 		tilesVertical = (int)(height / (2 * pixelsPerTile)) + 1;
 		slicesHorizontal = Maths.ceil((float)tilesHorizontal / Slice.SLICE_SIZE);
@@ -225,6 +223,7 @@ public class WorldRenderer implements Renderer {
 		Matrix4 m = hud
 				? hudViewport.getCamera().combined
 				: viewport.getCamera().combined;
+		//System.out.println(m.toString() + " :: " + hud);
 		batch.setProjectionMatrix(m);
 		shapes.setProjectionMatrix(m);
 	}

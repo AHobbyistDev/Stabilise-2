@@ -1,6 +1,8 @@
 package com.stabilise.entity.controller;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.Vector2;
 import com.stabilise.core.Constants;
@@ -84,6 +86,14 @@ public class PlayerController extends MobController implements Controllable, Inp
 			// TODO: Temporary way of grabbing the renderer
 			worldRenderer = ((SingleplayerState)Application.get().getState()).renderer;
 		}
+		
+		Vector2 wc = worldRenderer.mouseCoords();
+		int x = Maths.floor(wc.x);
+		int y = Maths.floor(wc.y);
+		if(Gdx.input.isButtonPressed(Buttons.LEFT))
+			game.getWorld().breakTileAt(x, y);
+		else if(Gdx.input.isButtonPressed(Buttons.RIGHT))
+			game.getWorld().setTileAt(x, y, tileID);
 	}
 	
 	/**
@@ -278,7 +288,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 
 	@Override
 	public boolean scrolled(int amount) {
-		tileID = Maths.remainder(tileID + amount, 20);
+		tileID = 1 + Maths.remainder(tileID + amount - 1, 20);
 		return true;
 	}
 	

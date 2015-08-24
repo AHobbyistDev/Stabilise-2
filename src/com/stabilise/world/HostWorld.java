@@ -203,7 +203,7 @@ public class HostWorld extends AbstractWorld {
 		// Unload entities in the region...
 		int minX = r.x() * Region.REGION_SIZE_IN_TILES;
 		int maxX = minX + Region.REGION_SIZE_IN_TILES;
-		int minY = r.x() * Region.REGION_SIZE_IN_TILES;
+		int minY = r.y() * Region.REGION_SIZE_IN_TILES;
 		int maxY = minY + Region.REGION_SIZE_IN_TILES;
 		
 		for(Entity e : getEntities()) {
@@ -357,7 +357,7 @@ public class HostWorld extends AbstractWorld {
 			int tileY = tileCoordRelativeToSliceFromTileCoord(y);
 			
 			if(s.getTileAt(tileX, tileY).getHardness() < explosionPower) {
-				s.getTileAt(tileX, tileY).handleRemove(this, x, y);
+				s.getTileAt(tileX, tileY).handleBreak(this, x, y);
 				
 				s.setTileAt(tileX, tileY, Tiles.AIR);
 				

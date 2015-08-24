@@ -421,7 +421,7 @@ public class EntityPerson extends EntityMob {
 						f.x = x + (facingRight ? SPECIAL_DOWN_AIR_ORIGIN.x()
 								: -SPECIAL_DOWN_AIR_ORIGIN.x());
 						f.y = y + SPECIAL_DOWN_AIR_ORIGIN.y();
-						f.dy = world.getRnd().nextFloat() * 0.05f - 0.25f;
+						f.dy = Math.min(0f, dy + world.getRnd().nextFloat() * 3.0f - 10f);
 						world.addEntity(f);
 					} else {
 						double minAngle, maxAngle, px;
@@ -727,4 +727,5 @@ public class EntityPerson extends EntityMob {
 	public void render(WorldRenderer renderer) {
 		renderer.renderPerson(this);
 	}
+	
 }

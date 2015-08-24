@@ -2,7 +2,9 @@ package com.stabilise.core.state;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.audio.Sound;
 import com.stabilise.core.Game;
+import com.stabilise.core.Resources;
 import com.stabilise.core.app.Application;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Profiler;
@@ -22,6 +24,9 @@ public class SingleplayerState implements State {
 	
 	/** The profiler. */
 	public Profiler profiler = Application.get().profiler;
+	
+	/** temporary public sound effect */
+	public static Sound pop;
 	
 	
 	/**
@@ -46,7 +51,8 @@ public class SingleplayerState implements State {
 		Gdx.input.setInputProcessor(input);
 		
 		renderer = new WorldRenderer(game, game.getWorld(), game.player, game.playerController);
-		//game.hudRenderer = renderer.hudRenderer;
+		
+		pop = Gdx.audio.newSound(Resources.SOUND_DIR.child("pop.mp3"));
 		
 		profiler.enable();
 	}
@@ -68,6 +74,8 @@ public class SingleplayerState implements State {
 		
 		renderer.unloadResources();
 		renderer = null;
+		
+		pop.dispose();
 		
 		// Try to garbage collect everything which has been unloaded
 		//game = null;		// <-- No-can-do, crashes in update() at if(!game.running)
