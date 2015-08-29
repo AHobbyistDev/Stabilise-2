@@ -19,6 +19,7 @@ import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
 import com.stabilise.util.maths.Maths;
+import com.stabilise.world.tile.Tiles;
 
 /**
  * A PlayerController is a MobController which is managed by player input.
@@ -34,7 +35,7 @@ public class PlayerController extends MobController implements Controllable, Inp
 	private WorldRenderer worldRenderer;
 	
 	/** The ID of the tile currently selected. */
-	public int tileID = 1;
+	public int tileID = Tiles.STONE.getID();
 	
 	
 	/**
@@ -221,6 +222,12 @@ public class PlayerController extends MobController implements Controllable, Inp
 				Runtime r = Runtime.getRuntime();
 				Log.get().postDebug(r.freeMemory()/(1024*1024) + "/" + r.totalMemory()/(1024*1024) + "/" + r.maxMemory()/(1024*1024));
 				System.out.println(game.profiler.getData().toString());
+				break;
+			case PREV_TILE:
+				scrolled(-1);
+				break;
+			case NEXT_TILE:
+				scrolled(1);
 				break;
 			default:
 				return false;

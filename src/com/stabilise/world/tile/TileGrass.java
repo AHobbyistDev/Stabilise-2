@@ -1,5 +1,7 @@
 package com.stabilise.world.tile;
 
+import com.stabilise.item.ItemStack;
+import com.stabilise.item.Items;
 import com.stabilise.world.World;
 
 /**
@@ -34,6 +36,11 @@ public class TileGrass extends Tile {
 					world.setTileAt(tx, ty, getID());
 			}
 		}
+	}
+	
+	@Override
+	public ItemStack createStack(int quantity) {
+		return Items.TILE.stackOf(Tiles.DIRT, quantity);
 	}
 	
 }

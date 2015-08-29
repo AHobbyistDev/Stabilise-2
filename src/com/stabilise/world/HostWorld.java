@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
@@ -305,7 +306,10 @@ public class HostWorld extends AbstractWorld {
 			int tileY = tileCoordRelativeToSliceFromTileCoord(y);
 			
 			// TODO: remove this when I make sure one can't set a tile over another
-			s.getTileAt(tileX, tileY).handleRemove(this, x, y);
+			Tile old = s.getTileAt(tileX, tileY);
+			old.handleRemove(this, x, y);
+			if(old.getID() != id)
+				SingleplayerState.pop.play(1f, 0.75f, 0f);
 			
 			s.setTileAt(tileX, tileY, id);
 			
@@ -321,7 +325,11 @@ public class HostWorld extends AbstractWorld {
 			int tileX = tileCoordRelativeToSliceFromTileCoord(x);
 			int tileY = tileCoordRelativeToSliceFromTileCoord(y);
 			
-			s.getTileAt(tileX, tileY).handleBreak(this, x, y);
+			Tile old = s.getTileAt(tileX, tileY);
+			old.handleBreak(this, x, y);
+			
+			if(old != Tiles.AIR)
+				SingleplayerState.pop.play(1f, 1.7f, 0f);
 			
 			s.setTileAt(tileX, tileY, Tiles.AIR);
 		}

@@ -5,11 +5,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Resources;
-import com.stabilise.util.collect.LightLinkedList;
+import com.stabilise.util.collect.RingBuffer;
 import com.stabilise.util.io.IOUtil;
 
 /**
@@ -25,8 +24,7 @@ import com.stabilise.util.io.IOUtil;
  * <p>This class and its instances are thread-safe, and hence may be used by
  * multiple threads.
  * 
- * <!-- TODO: Would it not be more effective to funnel System.out into a file?
- * -->
+ * <!-- TODO: Make a better Log class :P-->
  */
 public class Log {
 	
@@ -38,8 +36,9 @@ public class Log {
 	 * entries. */
 	private static final int LOG_CAPACITY = 256;
 	
-	/** Stores the log entries. Access to this list should be synchronised. */
-	private static final List<String> entries = new LightLinkedList<>();
+	/** Stores the log entries. Access to this should be synchronised. */
+	private static final RingBuffer<String> entries =
+			new RingBuffer<>(LOG_CAPACITY);
 	
 	/** A cache of the untagged logging agent to save on processor time. */
 	private static final Log defaultAgent = new Log("");
@@ -166,11 +165,13 @@ public class Log {
 		level.checkAllowable();
 		synchronized(entries) {
 			DATE.setTime(System.currentTimeMillis());
-			add(level, logLevel, DATE.toString() + " - [" +
-					Thread.currentThread().getName() + "] - " + level.tag + tag
-					+ msg);
-			if(entries.size() > LOG_CAPACITY)
-				entries.remove(0);
+			add(
+				level,
+				logLevel,
+				DATE.toString()
+					+ " - [" + Thread.currentThread().getName() + "] - "
+					+ level.tag + tag + msg
+			);
 		}
 	}
 	
@@ -194,15 +195,14 @@ public class Log {
 		
 		synchronized(entries) {
 			DATE.setTime(System.currentTimeMillis());
-			prefix = DATE.toString() + " - [" +
-					Thread.currentThread().getName() + "] - " + level.tag + tag;
+			prefix = DATE.toString()
+					+ " - [" + Thread.currentThread().getName() + "] - "
+					+ level.tag + tag;
 			add(level, outputLevel, prefix + msg);
 			add(level, outputLevel, prefix + t.toString());
 			prefix += "    at ";
 			for(StackTraceElement e : stackTrace)
 				add(level, outputLevel, prefix + e.toString());
-			while(entries.size() > LOG_CAPACITY)
-				entries.remove(0);
 		}
 	}
 	
@@ -215,7 +215,7 @@ public class Log {
 	 * @param msg The message.
 	 */
 	private void add(Level level, Level outputLevel, String msg) {
-		entries.add(msg);
+		entries.push(msg);
 		level.printIfAble(outputLevel, msg);
 	}
 	

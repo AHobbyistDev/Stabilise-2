@@ -184,15 +184,26 @@ class TaskTracker {
 	 * been stopped.
 	 */
 	public void increment(int parts) {
-		Checks.testMin(parts, 1);
-		doIncrement(parts, true);
+		updateParent(doIncrement(parts, true));
 	}
 	
 	/**
-	 * Increments the number of parts completed. If check is true this will
-	 * throw an ISE if the task hasn't started or has already been stopped.
+	 * Increments the number of parts completed.
+	 * 
+	 * @param parts Number by which to increment partsCompleted
+	 * @param check if true, this method will throw an IAE if parts < 1. Also,
+	 * {@link #checkRunning(long)} will be checked.
+	 * 
+	 * @return The number of parts which were successfully incremented, in the
+	 * range [0,parts].
+	 * @throws IllegalArgumentException if {@code parts <= 0} (if check is
+	 * true).
+	 * @throws IllegalStateException if the task hasn't started or has already
+	 * been stopped (if check is true).
 	 */
-	private void doIncrement(int parts, boolean check) {
+	private int doIncrement(int parts, boolean check) {
+		if(check)
+			Checks.testMin(parts, 1);
 		long s;
 		int p, c, u; // parts, completed, updated
 		do {
@@ -206,7 +217,7 @@ class TaskTracker {
 				c = p;
 			u = c - u;
 		} while(!state.compareAndSet(s, setPartsCompleted(s, c)));
-		updateParent(u);
+		return u;
 	}
 	
 	/**
@@ -225,15 +236,18 @@ class TaskTracker {
 	 * Invokes {@link #increment(int) increment(parts)} and then {@link
 	 * #setStatus(String) setStatus(status)}.
 	 * 
+	 * @throws IllegalArgumentException if {@code parts <= 0}.
 	 * @throws IllegalStateException if the task hasn't started or has already
 	 * been stopped.
 	 * @throws NullPointerException if {@code status} is {@code null}.
 	 */
 	public void next(int parts, String status) {
+		int u;
 		synchronized(state) {
-			increment(parts);
+			u = doIncrement(parts, true);
 			setStatus(status);
 		}
+		updateParent(u, status);
 	}
 	
 	/**
@@ -351,7 +365,7 @@ class TaskTracker {
 			s = state.get();
 			checkRunning(s);
 		} while(!state.compareAndSet(s, setCompleted(s, success)));
-		doIncrement(Integer.MAX_VALUE, false); // set parts to partsCompleted
+		updateParent(doIncrement(Integer.MAX_VALUE, false));
 	}
 	
 	/**
@@ -428,6 +442,11 @@ class TaskTracker {
 	protected void updateParent(int parts) {
 		if(parent != null)
 			parent.increment(parts);
+	}
+	
+	protected void updateParent(int parts, String status) {
+		if(parent != null)
+			parent.next(parts, status);
 	}
 	
 	/**

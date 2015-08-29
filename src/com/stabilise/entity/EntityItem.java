@@ -86,7 +86,7 @@ public class EntityItem extends Entity {
 				if(distSquared < PICKUP_RANGE_SQUARED) {
 					// TODO: player picks the item up
 					if(p.inventory.addStack(stack)) {
-						SingleplayerState.pop.play(1f, 1.7f, 0f);
+						SingleplayerState.pop.play(1f, 1.2f, 0f);
 						destroy();
 						break;
 					}

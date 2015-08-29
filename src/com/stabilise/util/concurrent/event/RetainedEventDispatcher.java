@@ -94,9 +94,11 @@ public class RetainedEventDispatcher extends EventDispatcher {
 		public void post(Event e) {
 			// We ignore duplicate events rather than complain as to adhere to
 			// the contract of post() in EventDispatcher.
-			if(this.e != null)
+			if(this.e != null) {
 				return;
 				//throw new IllegalStateException("Event already posted!");
+			}
+			
 			this.e = e;
 			if(listeners != null) {
 				for(Listener l : listeners)

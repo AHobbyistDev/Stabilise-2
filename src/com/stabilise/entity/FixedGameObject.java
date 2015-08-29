@@ -6,8 +6,7 @@ import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.world.World;
 
 /**
- * A FixedGameObject is a game object whose coordinates are constrained to the
- * coordinate grid of the world, and typically do not move.
+ * A FixedGameObject is a game object with fixed grid coordinates.
  */
 public class FixedGameObject extends GameObject {
 	

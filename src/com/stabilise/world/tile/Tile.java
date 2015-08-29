@@ -106,11 +106,8 @@ public class Tile {
 	public void handleBreak(World world, int x, int y) {
 		handleRemove(world, x, y);
 		
-		if(isSolid()) {
-			EntityItem e = new EntityItem(createStack(1));
-			e.pop(world.getRnd());
-			world.addEntity(e, x + 0.5, y + 0.1);
-		}
+		if(isSolid())
+			createItemEntity(world, x, y, createStack(1));
 	}
 	
 	/**
@@ -159,6 +156,18 @@ public class Tile {
 	 */
 	public void handleInteract(World world, int x, int y, EntityMob mob) {
 		// nothing in the default implementation
+	}
+	
+	/**
+	 * Creates an item entity on this tile. Does nothing if {@code stack} is
+	 * {@link ItemStack#NO_STACK}.
+	 */
+	protected void createItemEntity(World world, int x, int y, ItemStack stack) {
+		if(stack != ItemStack.NO_STACK) {
+			EntityItem e = new EntityItem(createStack(1));
+			e.pop(world.getRnd());
+			world.addEntity(e, x + 0.5, y + 0.1);
+		}
 	}
 	
 	/**

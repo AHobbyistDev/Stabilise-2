@@ -54,7 +54,9 @@ public class Controller implements InputProcessor {
 		INTERACT("interact", Keys.I, true),
 		TEST_RANDOM_THING("testrandomthing", Keys.NUM_0, true),
 		ADVANCE_TICK("forceTick", Keys.NUM_1, true),
-		TOGGLE_HITBOX_RENDERING("toggleHitboxRender", Keys.H, true);
+		TOGGLE_HITBOX_RENDERING("toggleHitboxRender", Keys.H, true),
+		NEXT_TILE("nextTile", Keys.PERIOD, true),
+		PREV_TILE("prevTile", Keys.COMMA, true);
 		
 		/** The field's name in the config file. */
 		public final String fieldName;

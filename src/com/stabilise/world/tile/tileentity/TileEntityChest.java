@@ -24,7 +24,7 @@ public class TileEntityChest extends TileEntity {
 	//--------------------==========--------------------
 	
 	/** The chest's contents. */
-	public Container items;
+	public final Container items;
 	
 	
 	/**
