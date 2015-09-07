@@ -7,9 +7,9 @@ package com.stabilise.world.event;
  * <p>TODO
  */
 public class EventBus {
-	
-	public EventBus() {
-		
-	}
-	
+    
+    public EventBus() {
+        
+    }
+    
 }

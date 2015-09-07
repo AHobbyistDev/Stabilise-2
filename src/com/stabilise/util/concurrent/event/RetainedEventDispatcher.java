@@ -19,105 +19,105 @@ import com.stabilise.util.collect.IteratorUtils;
  * #addListener(Event, EventHandler, boolean)} is redundant.
  */
 public class RetainedEventDispatcher extends EventDispatcher {
-	
-	/**
-	 * Creates a new RetainedEventDispatcher powered by the {@link
-	 * Application#executor() application executor}.
-	 */
-	public RetainedEventDispatcher() {
-		super();
-	}
-	
-	/**
-	 * Creates a new RetainedEventDispatcher.
-	 * 
-	 * @param executor The executor with which to run event handlers.
-	 * 
-	 * @throws NullPointerException if {@code executor} is {@code null}.
-	 */
-	public RetainedEventDispatcher(Executor executor) {
-		super(executor);
-	}
-	
-	@Override
-	ListenerBucket newBucket() {
-		return new RetainedListenerBucket();
-	}
-	
-	@Override
-	void doPost(Event e) {
-		synchronized(lockFor(e)) {
-			ListenerBucket b = handlers.get(e);
-			if(b == null)
-				handlers.put(e, b = newBucket());
-			b.post(e);
-		}
-	}
-	
-	/**
-	 * Retainer bucket impl. We store registered listeners in a list, and run
-	 * all of them when an event is received. Once an event is received, a
-	 * bucket takes note of that and henceforth immediately runs handlers when
-	 * they are registered.
-	 */
-	private class RetainedListenerBucket implements ListenerBucket {
-		
-		/** Lazily initialised when needed, and then reset to null when the
-		 * event is received. */
-		private List<Listener> listeners = null;
-		private Event e = null;
-		
-		@Override
-		public void addListener(Listener l) {
-			if(e != null) {
-				handle(l);
-			} else {
-				if(listeners == null)
-					listeners = new ArrayList<>(4);
-				listeners.add(l);
-			}
-		}
-		
-		@Override
-		public void removeListener(Predicate<Listener> pred) {
-			if(listeners != null)
-				IteratorUtils.removeFirst(listeners, pred);
-		}
-		
-		@Override
-		public void removeListeners(Predicate<Listener> pred) {
-			if(listeners != null)
-				IteratorUtils.forEach(listeners, pred);
-		}
-		
-		@Override
-		public void post(Event e) {
-			// We ignore duplicate events rather than complain as to adhere to
-			// the contract of post() in EventDispatcher.
-			if(this.e != null) {
-				return;
-				//throw new IllegalStateException("Event already posted!");
-			}
-			
-			this.e = e;
-			if(listeners != null) {
-				for(Listener l : listeners)
-					handle(l);
-				listeners = null;
-			}
-		}
-		
-		private void handle(Listener l) {
-			RetainedEventDispatcher.this.executor.execute(() -> l.accept(e));
-		}
-		
-		@Override
-		public boolean isEmpty() {
-			// Only ever considered empty if a listener was added and
-			// subsequently removed.
-			return e == null && (listeners == null || listeners.isEmpty());
-		}
-		
-	}
-	
+    
+    /**
+     * Creates a new RetainedEventDispatcher powered by the {@link
+     * Application#executor() application executor}.
+     */
+    public RetainedEventDispatcher() {
+        super();
+    }
+    
+    /**
+     * Creates a new RetainedEventDispatcher.
+     * 
+     * @param executor The executor with which to run event handlers.
+     * 
+     * @throws NullPointerException if {@code executor} is {@code null}.
+     */
+    public RetainedEventDispatcher(Executor executor) {
+        super(executor);
+    }
+    
+    @Override
+    ListenerBucket newBucket() {
+        return new RetainedListenerBucket();
+    }
+    
+    @Override
+    void doPost(Event e) {
+        synchronized(lockFor(e)) {
+            ListenerBucket b = handlers.get(e);
+            if(b == null)
+                handlers.put(e, b = newBucket());
+            b.post(e);
+        }
+    }
+    
+    /**
+     * Retainer bucket impl. We store registered listeners in a list, and run
+     * all of them when an event is received. Once an event is received, a
+     * bucket takes note of that and henceforth immediately runs handlers when
+     * they are registered.
+     */
+    private class RetainedListenerBucket implements ListenerBucket {
+        
+        /** Lazily initialised when needed, and then reset to null when the
+         * event is received. */
+        private List<Listener> listeners = null;
+        private Event e = null;
+        
+        @Override
+        public void addListener(Listener l) {
+            if(e != null) {
+                handle(l);
+            } else {
+                if(listeners == null)
+                    listeners = new ArrayList<>(4);
+                listeners.add(l);
+            }
+        }
+        
+        @Override
+        public void removeListener(Predicate<Listener> pred) {
+            if(listeners != null)
+                IteratorUtils.removeFirst(listeners, pred);
+        }
+        
+        @Override
+        public void removeListeners(Predicate<Listener> pred) {
+            if(listeners != null)
+                listeners.removeIf(pred);
+        }
+        
+        @Override
+        public void post(Event e) {
+            // We ignore duplicate events rather than complain as to adhere to
+            // the contract of post() in EventDispatcher.
+            if(this.e != null) {
+                return;
+                //throw new IllegalStateException("Event already posted!");
+            }
+            
+            this.e = e;
+            if(listeners != null) {
+                for(Listener l : listeners)
+                    handle(l);
+                listeners = null;
+            }
+        }
+        
+        private void handle(Listener l) {
+            RetainedEventDispatcher.this.executor.execute(() -> l.accept(e));
+        }
+        
+        @Override
+        public boolean isEmpty() {
+            // Only ever considered empty if a listener was added and
+            // subsequently removed.
+            return e == null && (listeners == null || listeners.isEmpty());
+        }
+        
+    }
+    
 }

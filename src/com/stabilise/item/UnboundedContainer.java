@@ -13,103 +13,103 @@ import com.stabilise.util.collect.LightArrayList;
  * when adding item stacks to restrict unbounded heap growth and wasted memory.
  */
 public class UnboundedContainer extends Container {
-	
-	/** The container's items. */
-	private LightArrayList<ItemStack> items = new LightArrayList<>();
-	
-	
-	/**
-	 * Creates a new UnboundedContainer.
-	 */
-	public UnboundedContainer() {
-		// nothing to see here, move along
-	}
-	
-	@Override
-	public int size() {
-		return items.size();
-	}
-	
-	@Override
-	public ItemStack getStack(int slot) {
-		if(slot >= items.size())
-			return ItemStack.NO_STACK;
-		return items.get(slot);
-	}
-	
-	@Override
-	public ItemStack removeStack(int slot) {
-		if(slot >= items.size())
-			return ItemStack.NO_STACK;
-		ItemStack stack = items.remove(slot);
-		// If this was the last slot, remove any null entries between it and
-		// the next occupied slot.
-		while(items.removeLast(ItemStack.NO_STACK)) {}
-		return stack;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p><b>Note</b>: this operation always succeeds and hence always returns
-	 * {@code 0} for an UnboundedContainer.
-	 * 
-	 * @throws NullPointerException if {@code item} is {@code null}.
-	 * @throws IllegalArgumentException if {@code quantity <= 0}.
-	 */
-	@Override
-	public int addItem(Item item, int quantity) {
-		// Add it in the normal way...
-		quantity = super.addItem(item, quantity);
-		
-		// Create new slots if more items are yet to be added
-		if(quantity > 0) {
-			while(quantity > item.getMaxStackSize()) {
-				items.add(item.stackOf(item.getMaxStackSize()));
-				quantity -= item.getMaxStackSize();
-			}
-			items.add(item.stackOf(quantity));
-		}
-		return 0;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * <p><b>Note</b>: this operation always succeeds and hence always returns
-	 * {@code true} for an UnboundedContainer.
-	 */
-	@Override
-	public boolean addStack(ItemStack stack) {
-		// Basically the same as a standard Container, but add a new slot
-		// if there are no other available slots.
-		if(!super.addStack(stack))
-			items.add(stack);
-		return true;
-	}
-	
-	@Override
-	protected void setSlot(int slot, ItemStack stack) {
-		getAndSetSlot(slot, stack);
-	}
-	
-	@Override
-	protected ItemStack getAndSetSlot(int slot, ItemStack stack) {
-		// add intermediates
-		items.ensureInternalLength(slot + 1);
-		while(items.size() <= slot)
-			items.add(ItemStack.NO_STACK);
-		return items.set(slot, stack);
-	}
-	
-	@Override
-	public void clear() {
-		items.clear();
-	}
-	
-	@Override
-	public void sort(Comparator<ItemStack> comparator) {
-		Collections.sort(items, comparator);
-	}
-	
+    
+    /** The container's items. */
+    private LightArrayList<ItemStack> items = new LightArrayList<>();
+    
+    
+    /**
+     * Creates a new UnboundedContainer.
+     */
+    public UnboundedContainer() {
+        // nothing to see here, move along
+    }
+    
+    @Override
+    public int size() {
+        return items.size();
+    }
+    
+    @Override
+    public ItemStack getStack(int slot) {
+        if(slot >= items.size())
+            return ItemStack.NO_STACK;
+        return items.get(slot);
+    }
+    
+    @Override
+    public ItemStack removeStack(int slot) {
+        if(slot >= items.size())
+            return ItemStack.NO_STACK;
+        ItemStack stack = items.remove(slot);
+        // If this was the last slot, remove any null entries between it and
+        // the next occupied slot.
+        while(items.removeLast(ItemStack.NO_STACK)) {}
+        return stack;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * 
+     * <p><b>Note</b>: this operation always succeeds and hence always returns
+     * {@code 0} for an UnboundedContainer.
+     * 
+     * @throws NullPointerException if {@code item} is {@code null}.
+     * @throws IllegalArgumentException if {@code quantity <= 0}.
+     */
+    @Override
+    public int addItem(Item item, int quantity) {
+        // Add it in the normal way...
+        quantity = super.addItem(item, quantity);
+        
+        // Create new slots if more items are yet to be added
+        if(quantity > 0) {
+            while(quantity > item.getMaxStackSize()) {
+                items.add(item.stackOf(item.getMaxStackSize()));
+                quantity -= item.getMaxStackSize();
+            }
+            items.add(item.stackOf(quantity));
+        }
+        return 0;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * 
+     * <p><b>Note</b>: this operation always succeeds and hence always returns
+     * {@code true} for an UnboundedContainer.
+     */
+    @Override
+    public boolean addStack(ItemStack stack) {
+        // Basically the same as a standard Container, but add a new slot
+        // if there are no other available slots.
+        if(!super.addStack(stack))
+            items.add(stack);
+        return true;
+    }
+    
+    @Override
+    protected void setSlot(int slot, ItemStack stack) {
+        getAndSetSlot(slot, stack);
+    }
+    
+    @Override
+    protected ItemStack getAndSetSlot(int slot, ItemStack stack) {
+        // add intermediates
+        items.ensureInternalLength(slot + 1);
+        while(items.size() <= slot)
+            items.add(ItemStack.NO_STACK);
+        return items.set(slot, stack);
+    }
+    
+    @Override
+    public void clear() {
+        items.clear();
+    }
+    
+    @Override
+    public void sort(Comparator<ItemStack> comparator) {
+        Collections.sort(items, comparator);
+    }
+    
 }

@@ -8,15 +8,15 @@ import com.stabilise.world.multiverse.Multiverse;
  * The private player-local client-only dimension.
  */
 public class DimPrivate extends Dimension {
-	
-	public DimPrivate(Info info) {
-		super(info);
-	}
-	
-	@Override
-	public WorldGenerator generatorFor(Multiverse<?> multiverse, 
-			HostWorld world) {
-		return null;
-	}
-	
+    
+    public DimPrivate(Info info) {
+        super(info);
+    }
+    
+    @Override
+    public WorldGenerator generatorFor(Multiverse<?> multiverse, 
+            HostWorld world) {
+        return null;
+    }
+    
 }

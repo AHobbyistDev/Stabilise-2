@@ -9,20 +9,20 @@ import com.stabilise.util.shape.Rectangle;
  */
 @Incomplete
 public class Weapon extends Item {
-	
-	/** The mass of the weapon. */
-	public int mass;
-	/** The weapon's hitboxes. */
-	public Rectangle[] hitboxes;
-	/** The weapon's base damage. */
-	public int damage;
-	
-	
-	/**
-	 * Creates a new Weapon.
-	 */
-	Weapon() {
-		super();
-	}
-	
+    
+    /** The mass of the weapon. */
+    public int mass;
+    /** The weapon's hitboxes. */
+    public Rectangle[] hitboxes;
+    /** The weapon's base damage. */
+    public int damage;
+    
+    
+    /**
+     * Creates a new Weapon.
+     */
+    Weapon() {
+        super();
+    }
+    
 }

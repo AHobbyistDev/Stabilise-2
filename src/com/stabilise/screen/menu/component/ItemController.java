@@ -6,23 +6,23 @@
 // * repositioning.
 // */
 //public abstract class ItemController {
-//	
-//	/** The controller's linked item. */
-//	public MenuItem item;
-//	
-//	
-//	/**
-//	 * Creates a new ItemController.
-//	 * 
-//	 * @param item The menu item to control.
-//	 */
-//	public ItemController(MenuItem item) {
-//		this.item = item;
-//	}
-//	
-//	/**
-//	 * Updates the item controller.
-//	 */
-//	public abstract void update();
-//	
+//    
+//    /** The controller's linked item. */
+//    public MenuItem item;
+//    
+//    
+//    /**
+//     * Creates a new ItemController.
+//     * 
+//     * @param item The menu item to control.
+//     */
+//    public ItemController(MenuItem item) {
+//        this.item = item;
+//    }
+//    
+//    /**
+//     * Updates the item controller.
+//     */
+//    public abstract void update();
+//    
 //}

@@ -26,86 +26,86 @@ import java.util.Iterator;
  */
 @NotThreadSafe
 public class BiObjectIntMap<V> implements Iterable<V> {
-	
-	/** Maps Values -> Keys */
-	IdentityHashMap<V, Integer> map;
-	/** Maps Keys -> Values */
-	Array<V> list;
-	
-	
-	/**
-	 * Creates a new BiObjectIntMap.
-	 * 
-	 * @param capacity The initial entry capacity.
-	 * 
-	 * @throws IllegalArgumentException if {@code capacity < 0}.
-	 */
-	public BiObjectIntMap(int capacity) {
-		map = new IdentityHashMap<>(capacity);
-		list = new Array<>(capacity);
-	}
-	
-	/**
-	 * Maps an integer key to an object.
-	 * 
-	 * @param key The key.
-	 * @param value The object.
-	 * 
-	 * @throws IndexOutOfBoundsException if {@code key < 0}.
-	 * @throws NullPointerException if {@code value} is {@code null}.
-	 */
-	public void put(int key, V value) {
-		if(key < 0)
-			throw new IndexOutOfBoundsException("key is negative!");
-		if(value == null)
-			throw new NullPointerException("value is null!");
-		
-		map.put(value, Integer.valueOf(key));
-		list.setWithExpand(key, value, 1.25f);
-	}
-	
-	/**
-	 * Gets the integer key to which the specified value is mapped.
-	 * 
-	 * @param value The value.
-	 * 
-	 * @return The object's mapped key, or {@code -1} if {@code value} lacks an
-	 * associated key.
-	 */
-	public int getKey(Object value) {
-		Integer val = map.get(value);
-		return val == null ? -1 : val.intValue();
-	}
-	
-	/**
-	 * Gets the object to which the specified key is mapped.
-	 * 
-	 * @param key The integer key.
-	 * 
-	 * @return The object, or {@code null} if {@code key} lacks a mapping.
-	 * @throws IndexOutOfBoundsException if {@code key < 0}.
-	 */
-	public V getObject(int key) {
-		return list.getSemiSafe(key);
-	}
-	
-	/**
-	 * Checks for whether or not a value is mapped to the specified key.
-	 * 
-	 * @return {@code true} if the key has a mapping; {@code false} otherwise.
-	 * @throws IndexOutOfBoundsException if {@code key < 0}.
-	 */
-	public boolean containsKey(int key) {
-		return getObject(key) != null;
-	}
-	
-	/**
-	 * Gets the iterator for all the mapped objects. The returned iterator does
-	 * not support {@code remove()}.
-	 */
-	@Override
-	public Iterator<V> iterator() {
-		return list.iteratorNullsFiltered();
-	}
-	
+    
+    /** Maps Values -> Keys */
+    IdentityHashMap<V, Integer> map;
+    /** Maps Keys -> Values */
+    Array<V> list;
+    
+    
+    /**
+     * Creates a new BiObjectIntMap.
+     * 
+     * @param capacity The initial entry capacity.
+     * 
+     * @throws IllegalArgumentException if {@code capacity < 0}.
+     */
+    public BiObjectIntMap(int capacity) {
+        map = new IdentityHashMap<>(capacity);
+        list = new Array<>(capacity);
+    }
+    
+    /**
+     * Maps an integer key to an object.
+     * 
+     * @param key The key.
+     * @param value The object.
+     * 
+     * @throws IndexOutOfBoundsException if {@code key < 0}.
+     * @throws NullPointerException if {@code value} is {@code null}.
+     */
+    public void put(int key, V value) {
+        if(key < 0)
+            throw new IndexOutOfBoundsException("key is negative!");
+        if(value == null)
+            throw new NullPointerException("value is null!");
+        
+        map.put(value, Integer.valueOf(key));
+        list.setWithExpand(key, value, 1.25f);
+    }
+    
+    /**
+     * Gets the integer key to which the specified value is mapped.
+     * 
+     * @param value The value.
+     * 
+     * @return The object's mapped key, or {@code -1} if {@code value} lacks an
+     * associated key.
+     */
+    public int getKey(Object value) {
+        Integer val = map.get(value);
+        return val == null ? -1 : val.intValue();
+    }
+    
+    /**
+     * Gets the object to which the specified key is mapped.
+     * 
+     * @param key The integer key.
+     * 
+     * @return The object, or {@code null} if {@code key} lacks a mapping.
+     * @throws IndexOutOfBoundsException if {@code key < 0}.
+     */
+    public V getObject(int key) {
+        return list.getSemiSafe(key);
+    }
+    
+    /**
+     * Checks for whether or not a value is mapped to the specified key.
+     * 
+     * @return {@code true} if the key has a mapping; {@code false} otherwise.
+     * @throws IndexOutOfBoundsException if {@code key < 0}.
+     */
+    public boolean containsKey(int key) {
+        return getObject(key) != null;
+    }
+    
+    /**
+     * Gets the iterator for all the mapped objects. The returned iterator does
+     * not support {@code remove()}.
+     */
+    @Override
+    public Iterator<V> iterator() {
+        return list.iteratorNullsFiltered();
+    }
+    
 }

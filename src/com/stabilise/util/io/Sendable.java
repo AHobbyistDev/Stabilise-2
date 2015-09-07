@@ -13,21 +13,21 @@ import java.io.IOException;
  * obj1.equals(obj2)} should return {@code true}.
  */
 public interface Sendable {
-	
-	/**
-	 * Reads this object's data from the given DataInStream.
-	 * 
-	 * @throws NullPointerException if {@code in} is {@code null}.
-	 * @throws IOException if an I/O error occurs.
-	 */
-	void readData(DataInStream in) throws IOException;
-	
-	/**
-	 * Writes this object's data to the given DataOutStream.
-	 * 
-	 * @throws NullPointerException if {@code out} is {@code null}.
-	 * @throws IOException if an I/O error occurs.
-	 */
-	void writeData(DataOutStream out) throws IOException;
-	
+    
+    /**
+     * Reads this object's data from the given DataInStream.
+     * 
+     * @throws NullPointerException if {@code in} is {@code null}.
+     * @throws IOException if an I/O error occurs.
+     */
+    void readData(DataInStream in) throws IOException;
+    
+    /**
+     * Writes this object's data to the given DataOutStream.
+     * 
+     * @throws NullPointerException if {@code out} is {@code null}.
+     * @throws IOException if an I/O error occurs.
+     */
+    void writeData(DataOutStream out) throws IOException;
+    
 }

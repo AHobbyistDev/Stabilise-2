@@ -7,23 +7,23 @@ import com.stabilise.world.World;
  * dy.
  */
 public abstract class ParticlePhysical extends Particle {
-	
-	/** The particle's velocity along the x/y-axes. */
-	public float dx, dy;
-	
-	
-	@Override
-	public void update(World world) {
-		super.update(world);
-		
-		x += dx;
-		y += dy;
-	}
-	
-	@Override
-	public void reset() {
-		super.reset();
-		dx = dy = 0f;
-	}
-	
+    
+    /** The particle's velocity along the x/y-axes. */
+    public float dx, dy;
+    
+    
+    @Override
+    public void update(World world) {
+        super.update(world);
+        
+        x += dx;
+        y += dy;
+    }
+    
+    @Override
+    public void reset() {
+        super.reset();
+        dx = dy = 0f;
+    }
+    
 }

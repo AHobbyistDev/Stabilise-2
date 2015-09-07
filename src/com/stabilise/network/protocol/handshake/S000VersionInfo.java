@@ -15,31 +15,31 @@ import com.stabilise.util.io.DataOutStream;
  * is outdated.
  */
 public class S000VersionInfo extends C000VersionInfo {
-	
-	/** {@code true} if the client can proceed to log in to the server. */
-	public boolean canLogin;
-	
-	public S000VersionInfo() {}
-	
-	public S000VersionInfo(boolean canLogin) {
-		this.canLogin = canLogin;
-	}
-	
-	@Override
-	public void readData(DataInStream in) throws IOException {
-		super.readData(in);
-		canLogin = in.readBoolean();
-	}
-	
-	@Override
-	public void writeData(DataOutStream out) throws IOException {
-		super.writeData(out);
-		out.writeBoolean(canLogin);
-	}
-	
-	@Override
-	public void handle(PacketHandler handler, TCPConnection con) {
-		((IClientHandshake)handler).handleVersionInfo(this, con);
-	}
-	
+    
+    /** {@code true} if the client can proceed to log in to the server. */
+    public boolean canLogin;
+    
+    public S000VersionInfo() {}
+    
+    public S000VersionInfo(boolean canLogin) {
+        this.canLogin = canLogin;
+    }
+    
+    @Override
+    public void readData(DataInStream in) throws IOException {
+        super.readData(in);
+        canLogin = in.readBoolean();
+    }
+    
+    @Override
+    public void writeData(DataOutStream out) throws IOException {
+        super.writeData(out);
+        out.writeBoolean(canLogin);
+    }
+    
+    @Override
+    public void handle(PacketHandler handler, TCPConnection con) {
+        ((IClientHandshake)handler).handleVersionInfo(this, con);
+    }
+    
 }

@@ -7,57 +7,57 @@
 // * navigating the main menu.
 // */
 //public class MainMenuState implements State {
-//	
-//	/** The main menu. */
-//	public MainMenu menu;
-//	
-//	
-//	/**
-//	 * Creates a new MainMenuState instance.
-//	 */
-//	public MainMenuState() {
-//		super();
-//	}
-//	
-//	@Override
-//	public void resize(int width, int height) {
-//		// meh
-//	}
+//    
+//    /** The main menu. */
+//    public MainMenu menu;
+//    
+//    
+//    /**
+//     * Creates a new MainMenuState instance.
+//     */
+//    public MainMenuState() {
+//        super();
+//    }
+//    
+//    @Override
+//    public void resize(int width, int height) {
+//        // meh
+//    }
 //
-//	@Override
-//	public void update() {
-//		menu.update();
-//	}
+//    @Override
+//    public void update() {
+//        menu.update();
+//    }
 //
-//	@Override
-//	public void render(float delta) {
-//		menu.render();
-//	}
+//    @Override
+//    public void render(float delta) {
+//        menu.render();
+//    }
 //
-//	@Override
-//	public void start() {
-//		menu = new MainMenu();
-//	}
-//	
-//	@Override
-//	public void pause() {
-//		// nothing to see here, move along
-//	}
+//    @Override
+//    public void start() {
+//        menu = new MainMenu();
+//    }
+//    
+//    @Override
+//    public void pause() {
+//        // nothing to see here, move along
+//    }
 //
-//	@Override
-//	public void resume() {
-//		// nothing to see here, move along
-//	}
+//    @Override
+//    public void resume() {
+//        // nothing to see here, move along
+//    }
 //
-//	@Override
-//	public void dispose() {
-//		menu.unloadResources();
-//	}
+//    @Override
+//    public void dispose() {
+//        menu.unloadResources();
+//    }
 //
-//	@Override
-//	public void predispose() {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//	
+//    @Override
+//    public void predispose() {
+//        // TODO Auto-generated method stub
+//        
+//    }
+//    
 //}

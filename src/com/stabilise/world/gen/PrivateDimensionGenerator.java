@@ -5,15 +5,15 @@ package com.stabilise.world.gen;
  */
 /*
 public class PrivateDimensionGenerator extends WorldGenerator {
-	
-	public PrivateDimensionGenerator(WorldProvider<?> worldProv, HostWorld world) {
-		super(worldProv, world);
-	}
-	
-	@Override
-	protected void generateRegion(Region r) {
-		
-	}
-	
+    
+    public PrivateDimensionGenerator(WorldProvider<?> worldProv, HostWorld world) {
+        super(worldProv, world);
+    }
+    
+    @Override
+    protected void generateRegion(Region r) {
+        
+    }
+    
 }
 */

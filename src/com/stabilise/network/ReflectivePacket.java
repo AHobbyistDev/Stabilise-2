@@ -13,15 +13,15 @@ import com.stabilise.util.nbt.export.NBTExporter;
  * connection.
  */
 public abstract class ReflectivePacket extends Packet {
-	
-	@Override
-	public void readData(DataInStream in) throws IOException {
-		NBTExporter.importCompletely(this, NBTTagCompound.read(in));
-	}
-	
-	@Override
-	public void writeData(DataOutStream out) throws IOException {
-		NBTExporter.exportCompletely(this).writeData(out);
-	}
-	
+    
+    @Override
+    public void readData(DataInStream in) throws IOException {
+        NBTExporter.importCompletely(this, NBTTagCompound.read(in));
+    }
+    
+    @Override
+    public void writeData(DataOutStream out) throws IOException {
+        NBTExporter.exportCompletely(this).writeData(out);
+    }
+    
 }

@@ -27,81 +27,81 @@
 // * </ul>
 // */
 //public abstract class SubMenu extends Menu {
-//	
-//	//--------------------==========--------------------
-//	//-----=====Static Constants and Variables=====-----
-//	//--------------------==========--------------------
-//	
-//	/** The value for the {@code action} variable of a SubMenu which indicates
-//	 * the lack of an action. */
-//	public static final int NO_ACTION = -1;
-//	/** The value for the {@code action} variable of a SubMenu which indicates
-//	 * that the SubMenu is to be exited. */
-//	//public static final int ACTION_EXIT = getActionID();
-//	
-//	//--------------------==========--------------------
-//	//-------------=====Member Variables=====-----------
-//	//--------------------==========--------------------
-//	
-//	/** The Menu to which the sub-menu belongs. */
-//	protected SubMenuBasedMenu menu;
-//	
-//	/** The action being performed by the sub-menu, which serves as a mode of
-//	 * state communication between the sub-menu and its parent menu. This
-//	 * value is reset to {@link #NO_ACTION} at the start of each update tick. */
-//	public int action = NO_ACTION;
-//	/** An additional parameter associated with an action, for sending
-//	 * additional data to the sub-menu's parent menu during an action. */
-//	public Object parameter;
-//	
-//	
-//	/**
-//	 * Creates a new SubMenu, which sets itself as the focus of the
-//	 * InputManager.
-//	 * 
-//	 * @param menu The SubMenu's parent menu.
-//	 */
-//	public SubMenu(SubMenuBasedMenu menu) {
-//		super(true);
-//		
-//		this.menu = menu;
-//	}
-//	
-//	/**
-//	 * Creates a new SubMenu, which sets itself as the focus of the
-//	 * InputManager.
-//	 * 
-//	 * @param menu The SubMenu's parent menu.
-//	 * @param parameter The SubMenu's parameter, to determine circumstantial
-//	 * behaviour.
-//	 */
-//	public SubMenu(SubMenuBasedMenu menu, Object parameter) {
-//		this(menu);
-//	}
-//	
-//	@Override
-//	public void update() {
-//		if(action != NO_ACTION) {
-//			action = NO_ACTION;
-//			parameter = null;
-//		}
-//		
-//		super.update();
-//	}
-//	
-//	//--------------------==========--------------------
-//	//------------=====Static Functions=====------------
-//	//--------------------==========--------------------
-//	
-//	/** The last ID that was handed out. */
-//	private static int lastID = NO_ACTION;
-//	
-//	/**
-//	 * Generates a unique ID for a submenu action.
-//	 * 
-//	 * @return The action ID.
-//	 */
-//	protected static int getActionID() {
-//		return ++lastID;
-//	}
+//    
+//    //--------------------==========--------------------
+//    //-----=====Static Constants and Variables=====-----
+//    //--------------------==========--------------------
+//    
+//    /** The value for the {@code action} variable of a SubMenu which indicates
+//     * the lack of an action. */
+//    public static final int NO_ACTION = -1;
+//    /** The value for the {@code action} variable of a SubMenu which indicates
+//     * that the SubMenu is to be exited. */
+//    //public static final int ACTION_EXIT = getActionID();
+//    
+//    //--------------------==========--------------------
+//    //-------------=====Member Variables=====-----------
+//    //--------------------==========--------------------
+//    
+//    /** The Menu to which the sub-menu belongs. */
+//    protected SubMenuBasedMenu menu;
+//    
+//    /** The action being performed by the sub-menu, which serves as a mode of
+//     * state communication between the sub-menu and its parent menu. This
+//     * value is reset to {@link #NO_ACTION} at the start of each update tick. */
+//    public int action = NO_ACTION;
+//    /** An additional parameter associated with an action, for sending
+//     * additional data to the sub-menu's parent menu during an action. */
+//    public Object parameter;
+//    
+//    
+//    /**
+//     * Creates a new SubMenu, which sets itself as the focus of the
+//     * InputManager.
+//     * 
+//     * @param menu The SubMenu's parent menu.
+//     */
+//    public SubMenu(SubMenuBasedMenu menu) {
+//        super(true);
+//        
+//        this.menu = menu;
+//    }
+//    
+//    /**
+//     * Creates a new SubMenu, which sets itself as the focus of the
+//     * InputManager.
+//     * 
+//     * @param menu The SubMenu's parent menu.
+//     * @param parameter The SubMenu's parameter, to determine circumstantial
+//     * behaviour.
+//     */
+//    public SubMenu(SubMenuBasedMenu menu, Object parameter) {
+//        this(menu);
+//    }
+//    
+//    @Override
+//    public void update() {
+//        if(action != NO_ACTION) {
+//            action = NO_ACTION;
+//            parameter = null;
+//        }
+//        
+//        super.update();
+//    }
+//    
+//    //--------------------==========--------------------
+//    //------------=====Static Functions=====------------
+//    //--------------------==========--------------------
+//    
+//    /** The last ID that was handed out. */
+//    private static int lastID = NO_ACTION;
+//    
+//    /**
+//     * Generates a unique ID for a submenu action.
+//     * 
+//     * @return The action ID.
+//     */
+//    protected static int getActionID() {
+//        return ++lastID;
+//    }
 //}

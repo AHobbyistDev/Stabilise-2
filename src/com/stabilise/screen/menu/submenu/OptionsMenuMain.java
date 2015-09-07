@@ -15,51 +15,51 @@
 // * parameter = new Integer(ACTION_EXIT);</pre>
 // */
 //public class OptionsMenuMain extends SubMenu {
-//	
-//	//--------------------==========--------------------
-//	//-----=====Static Constants and Variables=====-----
-//	//--------------------==========--------------------
-//	
-//	/** The value for the {@code action} variable of an OptionsMenuMain
-//	 * instance which indicates that the OptionsMenuMain is to be exited. */
-//	public static final int ACTION_EXIT = getActionID();
-//	
-//	//--------------------==========--------------------
-//	//-------------=====Member Variables=====-----------
-//	//--------------------==========--------------------
-//	
-//	public OptionsMenuMain(SubMenuBasedMenu menu) {
-//		super(menu);
-//	}
-//	
-//	public OptionsMenuMain(SubMenuBasedMenu menu, Object parameter) {
-//		super(menu, parameter);
-//	}
-//	
-//	@Override
-//	protected void loadResources() {
-//		// TODO
-//	}
-//	
-//	@Override
-//	protected void rescale(int width, int height) {
-//		super.rescale(width, height);
-//		// TODO
-//	}
-//	
-//	@Override
-//	public void performAction(int action, Object parameter) {
-//		// TODO
-//	}
-//	
-//	@Override
-//	public void handleKeyPress(int key) {
-//		super.handleKeyPress(key);
-//		
-//		if(key == Keyboard.KEY_ESCAPE) {
-//			action = ACTION_EXIT;
-//			parameter = new Integer(ACTION_EXIT);
-//		}
-//	}
-//	
+//    
+//    //--------------------==========--------------------
+//    //-----=====Static Constants and Variables=====-----
+//    //--------------------==========--------------------
+//    
+//    /** The value for the {@code action} variable of an OptionsMenuMain
+//     * instance which indicates that the OptionsMenuMain is to be exited. */
+//    public static final int ACTION_EXIT = getActionID();
+//    
+//    //--------------------==========--------------------
+//    //-------------=====Member Variables=====-----------
+//    //--------------------==========--------------------
+//    
+//    public OptionsMenuMain(SubMenuBasedMenu menu) {
+//        super(menu);
+//    }
+//    
+//    public OptionsMenuMain(SubMenuBasedMenu menu, Object parameter) {
+//        super(menu, parameter);
+//    }
+//    
+//    @Override
+//    protected void loadResources() {
+//        // TODO
+//    }
+//    
+//    @Override
+//    protected void rescale(int width, int height) {
+//        super.rescale(width, height);
+//        // TODO
+//    }
+//    
+//    @Override
+//    public void performAction(int action, Object parameter) {
+//        // TODO
+//    }
+//    
+//    @Override
+//    public void handleKeyPress(int key) {
+//        super.handleKeyPress(key);
+//        
+//        if(key == Keyboard.KEY_ESCAPE) {
+//            action = ACTION_EXIT;
+//            parameter = new Integer(ACTION_EXIT);
+//        }
+//    }
+//    
 //}

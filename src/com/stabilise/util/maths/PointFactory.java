@@ -20,60 +20,60 @@ import com.stabilise.util.maths.Point.MutablePoint;
 @Immutable
 @ThreadSafe
 public class PointFactory {
-	
-	private final IntBinaryOperator hasher;
-	
-	
-	/**
-	 * Creates a new point factory.
-	 * 
-	 * @param hasher The function with which to produce a point's hash code.
-	 * 
-	 * @throws NullPointerException if {@code hasher} is {@code null}.
-	 */
-	public PointFactory(IntBinaryOperator hasher) {
-		this.hasher = Objects.requireNonNull(hasher);
-	}
-	
-	/**
-	 * Creates a new point factory with a hasher returned by {@link
-	 * Maths#generateHashingFunction(int, boolean)}.
-	 */
-	public PointFactory(int maxElements, boolean negateHashMapShift) {
-		hasher = Maths.generateHashingFunction(maxElements, negateHashMapShift);
-	}
-	
-	/**
-	 * Creates a new immutable Point with the specified components.
-	 */
-	public Point newImmutablePoint(int x, int y) {
-		return new OwnedImmutablePoint(x, y);
-	}
-	
-	/**
-	 * Creates a new mutable Point with the specified components.
-	 */
-	public MutablePoint newMutablePoint(int x, int y) {
-		return new OwnedMutablePoint(x, y);
-	}
-	
-	/**
-	 * Creates a new mutable Point with components (0,0).
-	 */
-	public MutablePoint newMutablePoint() {
-		return newMutablePoint(0, 0);
-	}
-	
-	// Nested classes ---------------------------------------------------------
-	
-	private class OwnedImmutablePoint extends ImmutablePoint {
-		private OwnedImmutablePoint(int x, int y) { super(x,y); }
-		@Override protected int genHash() { return hasher.applyAsInt(x, y); }
-	}
-	
-	private class OwnedMutablePoint extends MutablePoint {
-		private OwnedMutablePoint(int x, int y) { super(x,y); }
-		@Override protected int genHash() { return hasher.applyAsInt(x, y); }
-	}
-	
+    
+    private final IntBinaryOperator hasher;
+    
+    
+    /**
+     * Creates a new point factory.
+     * 
+     * @param hasher The function with which to produce a point's hash code.
+     * 
+     * @throws NullPointerException if {@code hasher} is {@code null}.
+     */
+    public PointFactory(IntBinaryOperator hasher) {
+        this.hasher = Objects.requireNonNull(hasher);
+    }
+    
+    /**
+     * Creates a new point factory with a hasher returned by {@link
+     * Maths#generateHashingFunction(int, boolean)}.
+     */
+    public PointFactory(int maxElements, boolean negateHashMapShift) {
+        hasher = Maths.generateHashingFunction(maxElements, negateHashMapShift);
+    }
+    
+    /**
+     * Creates a new immutable Point with the specified components.
+     */
+    public Point newImmutablePoint(int x, int y) {
+        return new OwnedImmutablePoint(x, y);
+    }
+    
+    /**
+     * Creates a new mutable Point with the specified components.
+     */
+    public MutablePoint newMutablePoint(int x, int y) {
+        return new OwnedMutablePoint(x, y);
+    }
+    
+    /**
+     * Creates a new mutable Point with components (0,0).
+     */
+    public MutablePoint newMutablePoint() {
+        return newMutablePoint(0, 0);
+    }
+    
+    // Nested classes ---------------------------------------------------------
+    
+    private class OwnedImmutablePoint extends ImmutablePoint {
+        private OwnedImmutablePoint(int x, int y) { super(x,y); }
+        @Override protected int genHash() { return hasher.applyAsInt(x, y); }
+    }
+    
+    private class OwnedMutablePoint extends MutablePoint {
+        private OwnedMutablePoint(int x, int y) { super(x,y); }
+        @Override protected int genHash() { return hasher.applyAsInt(x, y); }
+    }
+    
 }

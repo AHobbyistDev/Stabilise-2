@@ -8,27 +8,27 @@ package com.stabilise.item;
  * {@link Item#registerItems()}.
  */
 public class Items {
-	
-	// non-instantiable
-	public Items() {}
-	
-	/** Invoking this loads this class into memory but otherwise does nothing. */
-	public static void poke() {}
-	
-	// Invoked when this class is loaded into memory
-	static {
-		// ...funnily enough, invoking this in fact loads Item into memory.
-		if(!Item.isRegistered())
-			throw new IllegalStateException(
-					Items.class.toString() + " loaded into memory before"
-							+ "Item.registerItems() was invoked!"
-			);
-	}
-	
-	public static final Item NO_ITEM = Item.NO_ITEM;
-	public static final ItemTile TILE = (ItemTile)Item.ITEMS.get("tile");
-	public static final Item SWORD = Item.ITEMS.get("sword");
-	public static final Item APPLE = Item.ITEMS.get("apple");
-	public static final Item ARROW = Item.ITEMS.get("arrow");
-	
+    
+    // non-instantiable
+    public Items() {}
+    
+    /** Invoking this loads this class into memory but otherwise does nothing. */
+    public static void poke() {}
+    
+    // Invoked when this class is loaded into memory
+    static {
+        // ...funnily enough, invoking this in fact loads Item into memory.
+        if(!Item.isRegistered())
+            throw new IllegalStateException(
+                    Items.class.toString() + " loaded into memory before"
+                            + "Item.registerItems() was invoked!"
+            );
+    }
+    
+    public static final Item NO_ITEM = Item.NO_ITEM;
+    public static final ItemTile TILE = (ItemTile)Item.ITEMS.get("tile");
+    public static final Item SWORD = Item.ITEMS.get("sword");
+    public static final Item APPLE = Item.ITEMS.get("apple");
+    public static final Item ARROW = Item.ITEMS.get("arrow");
+    
 }
