@@ -11,6 +11,9 @@ import com.google.common.io.Files;
  */
 public class IOUtil {
     
+    /** Regex for illegal filename characters. */
+    public static final String ILLEGAL_FILENAME_REGEX = "[^a-zA-Z0-9\\u0020().'-]";
+    
     // non-instantiable
     private IOUtil() {}
     

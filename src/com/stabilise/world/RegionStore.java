@@ -71,7 +71,7 @@ public class RegionStore {
     /** Number of regions */
     private static final int NEIGHBOUR_LOAD_RADIUS = 1;
     
-    /** The number of locks to stripe {@Link #cacheLocks} and {@link
+    /** The number of locks to stripe {@link #cacheLocks} and {@link
      * #storeLocks} into. */
     private static final int STRIPE_FACTOR = 8;
     private static final IntBinaryOperator STRIPE_HASHER =

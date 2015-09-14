@@ -21,7 +21,8 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * {@link #clear() clear} operations.
  */
 @NotThreadSafe
-public class UnrolledLinkedList<E> extends AbstractCollection<E> implements List<E> {
+@Deprecated
+class UnrolledLinkedList<E> extends AbstractCollection<E> implements List<E> {
     
     /** Array size for each node. */
     private final int nodeSize;

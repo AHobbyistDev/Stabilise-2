@@ -20,8 +20,9 @@ public class CollisionTest {
             System.out.println("Doing warmup " + warmup);
         else
             System.out.println("Doing test...");
+        print = true;
         
-        final int times = 512*8;
+        final int times = 512*256;
         final int verts = 32;
         final float dx = 0.5f;
         final float dy = 0.5f;
@@ -33,7 +34,7 @@ public class CollisionTest {
         TaskTimer t2 = run("[v2]", times, print, () -> p2.intersects(p2.translate(dx, dy)));
         TaskTimer t3  = run("[v3]", times, print, () -> Collider.intersects(p3, p3, dx, dy));
         
-        if(warmup == 0) {
+        if(print) {
             t1.printComparison(t2);
             t2.printComparison(t3);
             t3.printComparison(t1);
@@ -88,7 +89,7 @@ public class CollisionTest {
     
     public static void main(String[] args) {
         // Do warmups
-        int warmups = 5;
+        int warmups = 6;
         for(int i = 1; i <= warmups; i++)
             new CollisionTest(i);
         new CollisionTest(0);

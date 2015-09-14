@@ -7,7 +7,6 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.core.app.Application;
 import com.stabilise.util.annotation.GuardedBy;
 import com.stabilise.util.annotation.ThreadSafe;
@@ -40,7 +39,7 @@ public class EventDispatcher {
     // TODO: Perform a full analysis on the optimal concurrency level given a
     // specified number of processors.
     private static final int CONCURRENCY_LEVEL =
-            MathUtils.nextPowerOfTwo(Runtime.getRuntime().availableProcessors());
+           Runtime.getRuntime().availableProcessors();
     
     final ConcurrentHashMap<Event, ListenerBucket> handlers =
             new ConcurrentHashMap<>();

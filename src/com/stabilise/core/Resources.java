@@ -55,29 +55,24 @@ public class Resources {
         appName = "." + appName + "/";
         String dir = System.getProperty("user.home", ".");
         String os = System.getProperty("os.name").toLowerCase();
-        int osID = os.contains("windows") ? 0 : (os.contains("mac") ? 1 : (os.contains("linux") ? 2 : -1));
+        File appDir = null;
         
-        FileHandle appDir = null;
-        switch(osID) {
-            case 0:        // Windows
-                String appDataDir = System.getenv("APPDATA");
-                if(appDataDir != null)
-                    appDir = new FileHandle(new File(appDataDir, appName));
-                else
-                    appDir = new FileHandle(new File(dir, appName));
-                break;
-            case 1:        // Mac
-                appDir = new FileHandle(new File(dir, "Library/Application Support/" + appName));
-                break;
-            case 2:        // Linux
-                appDir = new FileHandle(new File(dir, appName));
-                break;
-            default:    // Other
-                Log.get().postSevere("OS not supported");
-                throw new InternalError("OS not supported");
+        if(os.contains("windows")) {
+            String appDataDir = System.getenv("APPDATA");
+            if(appDataDir != null)
+                appDir = new File(appDataDir, appName);
+            else
+                appDir = new File(dir, appName);
+        } else if(os.contains("mac")) {
+            appDir = new File(dir, "Library/Application Support/" + appName);
+        } else if(os.contains("linux")) {
+            appDir = new File(dir, appName);
+        } else {
+            Log.get().postSevere("OS not supported");
+            throw new InternalError("OS not supported");
         }
         
-        return IOUtil.createDir(appDir);
+        return IOUtil.createDir(new FileHandle(appDir));
     }
     
     /**

@@ -50,13 +50,13 @@ public class UnsafeTests {
     }
     
     public static void main(String[] args) {
-        HugeIntArray arr = new HugeIntArray(Integer.MAX_VALUE);
+        HugeIntArray arr = new HugeIntArray(Integer.MAX_VALUE / 4);
         System.out.println(arr.get(1));
         arr.set(1, 123456789);
         System.out.println(arr.get(1));
         
         try {
-            Thread.sleep(2L);
+            Thread.sleep(5000L);
         } catch(InterruptedException e) {
             e.printStackTrace();
         }

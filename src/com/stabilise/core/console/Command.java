@@ -5,14 +5,49 @@ import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
+import com.stabilise.world.World;
+
 public abstract class Command {
     
     private static final char cmdChar = '/';
     private static final char groupingChar = '"';
     private static final NavigableMap<String, Command> commands = new TreeMap<>();
     
-    public Command() {
-        
+    static { registerCommands(); }
+    
+    private static void registerCommands() {
+        register("test", new CmdTest());
+    }
+    
+    private static void register(String name, Command cmd) {
+        commands.put(name, cmd);
+    }
+    
+    Command() {
+        // nothing to see here, move along
+    }
+    
+    /**
+     * Executes this command.
+     * 
+     * @param world A reference to the world.
+     * @param args The arguments passed to this command. This command's name
+     * is always the first argument.
+     * 
+     * @return {@code true} if the command succeeded; {@code false} otherwise.
+     */
+    public abstract boolean exec(World world, String[] args);
+    
+    public static boolean execCommand(World world, String cmd) {
+        return execCommand(world, cmd.toCharArray());
+    }
+    
+    public static boolean execCommand(World world, char[] cmd) {
+        String[] args = interpret(cmd);
+        if(args.length == 0)
+            return false;
+        Command c = commands.get(args[0]);
+        return c != null ? c.exec(world, args) : false;
     }
     
     public static String[] interpret(char[] cmd) {

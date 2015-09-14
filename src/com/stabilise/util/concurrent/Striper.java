@@ -3,8 +3,9 @@ package com.stabilise.util.concurrent;
 import java.util.Objects;
 import java.util.function.IntFunction;
 
+import com.badlogic.gdx.math.MathUtils;
+import com.stabilise.util.Checks;
 import com.stabilise.util.annotation.Immutable;
-import com.stabilise.util.maths.Maths;
 
 /**
  * This class facilitates the implementation of an object striping strategy by
@@ -21,22 +22,20 @@ public class Striper<T> {
     /**
      * Creates a new object striper.
      * 
-     * @param numObjects The number of objects to split this striper into.
+     * @param numObjects The number of objects to split this striper into. This
+     * is rounded to the next power of two.
      * @param supplier A function to use to generate the objects. The integer
      * parameter is each object's index.
      * 
-     * @throws IllegalArgumentException if {@code numObjects} is negative, or
-     * is not a power of two.
+     * @throws IllegalArgumentException if {@code numObjects} is negative,.
      * @throws NullPointerException if {@code supplier} is {@code null}, or it
      * supplies any null objects.
      */
     public Striper(int numObjects, IntFunction<T> supplier) {
-        if(numObjects <= 0)
-            throw new IllegalArgumentException("numLocks <= 0");
-        if(!Maths.isPowerOfTwo(numObjects))
-            throw new IllegalArgumentException("numLocks not a power of 2");
-        
+        Checks.testMin(numObjects, 1);
         Objects.requireNonNull(supplier);
+        
+        numObjects = MathUtils.nextPowerOfTwo(numObjects);
         
         @SuppressWarnings("unchecked")
         T[] objs = (T[]) new Object[numObjects];
