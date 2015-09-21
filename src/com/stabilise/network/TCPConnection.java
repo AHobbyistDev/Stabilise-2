@@ -642,8 +642,8 @@ public class TCPConnection {
              */
             try {
                 while(isActive()) {
-                    writePacketWithBlock();    // wait for a packet
-                    while(writePacket()) {}    // empty the queue
+                    writePacketWithBlock(); // wait for a packet
+                    while(writePacket()) {} // empty the queue
                     out.flush();            // flush the batch of packets
                 }
             } catch(InterruptedException | IOException e) {

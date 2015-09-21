@@ -1,4 +1,4 @@
-package com.stabilise.util.shape;
+package com.stabilise.util.shape.old;
 
 /**
  * A shape projection represents the 1D 'shadow' cast by a shape when it is

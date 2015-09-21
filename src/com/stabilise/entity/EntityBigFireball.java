@@ -8,9 +8,7 @@ import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.maths.Maths;
-import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.Polygon;
-import com.stabilise.util.shape.Rectangle;
 import com.stabilise.world.World;
 import com.stabilise.world.AbstractWorld.ParticleSource;
 
@@ -24,19 +22,19 @@ public class EntityBigFireball extends EntityProjectile {
     //--------------------==========--------------------
     
     /** The fireball hitbox template. */
-    private static final Rectangle BIG_FIREBALL_BOUNDING_BOX = new Rectangle(-0.05f, -0.05f, 0.1f, 0.1f);
+    private static final Polygon BIG_FIREBALL_BOUNDING_BOX = Polygon.rectangle(-0.05f, -0.05f, 0.1f, 0.1f);
     /** Default fireball damage. */
     private static final int DEFAULT_FIREBALL_DAMAGE = 10;
     
     // These hitboxes roughtly construct the four quadrants of a circle of radius 4 tiles
     /** The first hitbox produced by the fireball. */
-    public static final Polygon HITBOX_1 = new Polygon(Vec2.immutable(0f,0f), Vec2.immutable(0f,4f), Vec2.immutable(3f,3f), Vec2.immutable(4f,0f));
+    public static final Polygon HITBOX_1 = new Polygon(0,0, 0,4, 3,3, 4,0);
     /** The second hitbox produced by the fireball. */
-    public static final Polygon HITBOX_2 = new Polygon(Vec2.immutable(0f,0f), Vec2.immutable(0f,4f), Vec2.immutable(-3f,3f), Vec2.immutable(-4f,0f));
+    public static final Polygon HITBOX_2 = new Polygon(0,0, 0,4, -3,3, -4,0);
     /** The third hitbox produced by the fireball. */
-    public static final Polygon HITBOX_3 = new Polygon(Vec2.immutable(0f,0f), Vec2.immutable(0f,-4f), Vec2.immutable(-3f,-3f), Vec2.immutable(-4f,0f));
+    public static final Polygon HITBOX_3 = new Polygon(0,0, 0,-4, -3,-3, -4,0);
     /** The fourth hitbox produced by the fireball. */
-    public static final Polygon HITBOX_4 = new Polygon(Vec2.immutable(0f,0f), Vec2.immutable(0f,-4f), Vec2.immutable(3f,-3f), Vec2.immutable(4f,0f));
+    public static final Polygon HITBOX_4 = new Polygon(0,0, 0,-4, 3,-3, 4,0);
     
     /** The number of ticks after which a fireball despawns. */
     private static final int DESPAWN_TICKS = 600;

@@ -7,11 +7,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Vec2;
+import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Polygon;
-import com.stabilise.util.shape2.Polygon2;
-import com.stabilise.util.shape3.Collider;
-import com.stabilise.util.shape3.Polygon3;
+import com.stabilise.util.shape.old.*;
 
+@SuppressWarnings("deprecation")
 public class CollisionTest {
     
     public CollisionTest(int warmup) {
@@ -24,20 +24,21 @@ public class CollisionTest {
         
         final int times = 512*256;
         final int verts = 32;
-        final float dx = 0.5f;
+        final float dx = 1.5f;
         final float dy = 0.5f;
-        Polygon p1 = circlePoly1(verts);
-        Polygon2 p2 = circlePoly2(verts);
-        Polygon3 p3 = circlePoly3(verts);
+        PolygonOld p1 = circlePoly1(verts);
+        AABBOld b1 = new AABBOld(0, 0, 1, 1);
+        Polygon p2 = circlePoly2(verts);
+        AABB b2 = new AABB(0, 0, 1, 1);
         
-        TaskTimer t1  = run("[v1]", times, print, () -> p1.intersects(p1.translate(dx, dy)));
-        TaskTimer t2 = run("[v2]", times, print, () -> p2.intersects(p2.translate(dx, dy)));
-        TaskTimer t3  = run("[v3]", times, print, () -> Collider.intersects(p3, p3, dx, dy));
+        TaskTimer t11  = run("[v1 1/2]", times, print, () -> p1.intersects(p1.translate(dx, dy)));
+        TaskTimer t21  = run("[v2 1/2]", times, print, () -> p2.intersects(p2, dx, dy));
+        TaskTimer t12  = run("[v1 2/2]", times, print, () -> p1.intersects(b1.translate(dx, dy)));
+        TaskTimer t22  = run("[v2 2/2]", times, print, () -> p2.intersects(b2, -dx, -dy));
         
         if(print) {
-            t1.printComparison(t2);
-            t2.printComparison(t3);
-            t3.printComparison(t1);
+            t11.printComparison(t21);
+            t12.printComparison(t22);
         }
     }
     
@@ -55,7 +56,7 @@ public class CollisionTest {
         return t;
     }
     
-    public static Polygon circlePoly1(int n) {
+    public static PolygonOld circlePoly1(int n) {
         Vec2[] verts = new Vec2[n];
         float angle = Maths.TAUf / n;
         for(int i = 0; i < n; i++) {
@@ -64,32 +65,22 @@ public class CollisionTest {
                     MathUtils.sin(i*angle)
             );
         }
+        return new PolygonOld(verts);
+    }
+    
+    public static Polygon circlePoly2(int n) {
+        float[] verts = new float[2*n];
+        float angle = Maths.TAUf / n;
+        for(int i = 0; i < n; i++) {
+            verts[2*i] = MathUtils.cos(i*angle);
+            verts[2*i+1] =  MathUtils.sin(i*angle);
+        }
         return new Polygon(verts);
-    }
-    
-    public static Polygon2 circlePoly2(int n) {
-        float[] verts = new float[2*n];
-        float angle = Maths.TAUf / n;
-        for(int i = 0; i < n; i++) {
-            verts[2*i] = MathUtils.cos(i*angle);
-            verts[2*i+1] =  MathUtils.sin(i*angle);
-        }
-        return new Polygon2(verts);
-    }
-    
-    public static Polygon3 circlePoly3(int n) {
-        float[] verts = new float[2*n];
-        float angle = Maths.TAUf / n;
-        for(int i = 0; i < n; i++) {
-            verts[2*i] = MathUtils.cos(i*angle);
-            verts[2*i+1] =  MathUtils.sin(i*angle);
-        }
-        return new Polygon3(verts);
     }
     
     public static void main(String[] args) {
         // Do warmups
-        int warmups = 6;
+        int warmups = 5;
         for(int i = 1; i <= warmups; i++)
             new CollisionTest(i);
         new CollisionTest(0);

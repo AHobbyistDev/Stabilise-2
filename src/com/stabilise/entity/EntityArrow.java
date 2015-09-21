@@ -3,7 +3,7 @@ package com.stabilise.entity;
 import com.stabilise.entity.collision.LinkedHitbox;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
-import com.stabilise.util.shape.Rectangle;
+import com.stabilise.util.shape.Polygon;
 import com.stabilise.world.World;
 
 /**
@@ -16,7 +16,7 @@ public class EntityArrow extends EntityProjectile {
     //--------------------==========--------------------
     
     /** The arrow hitbox template. */
-    private static final Rectangle ARROW_BOUNDING_BOX = new Rectangle(-0.005f, -0.005f, 0.01f, 0.01f);
+    private static final Polygon ARROW_BOUNDING_BOX = Polygon.rectangle(-0.005f, -0.005f, 0.01f, 0.01f);
     /** Default arrow damage. */
     private static final int DEFAULT_ARROW_DAMAGE = 10;
     

@@ -1,8 +1,9 @@
-package com.stabilise.util.shape2;
+package com.stabilise.util.shape.old;
 
-import java.util.Arrays;
+import java.util.function.UnaryOperator;
 
 import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.maths.Vec2;
 
 /**
  * A polygon is a shape with any number of vertices.
@@ -11,16 +12,17 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * with its number of vertices.
  */
 @NotThreadSafe
-public class Polygon2 extends AbstractPolygon {
+@Deprecated
+public class PolygonOld extends AbstractPolygon {
     
     /** The polygon's vertices. */
-    protected float[] vertices;
+    protected Vec2[] vertices;
     
     /** The projection axes - lazily initialised by getAxes(). */
-    protected float[] axes;
+    protected Vec2[] axes;
     /** The projections corresponding to each axis - lazily initialised by
      * getAxes(). */
-    protected float[] projections;
+    protected ShapeProjection[] projections;
     
     
     /**
@@ -30,16 +32,16 @@ public class Polygon2 extends AbstractPolygon {
      * that adjacent vertices are adjacent in the array, with the first vertex
      * also adjacent to the last vertex.
      * 
-     * @throws NullPointerException if {@code vertices} is {@code null}.
-     * @throws IllegalArgumentException if {@code vertices.length < 6}, or is
-     * an odd number.
+     * @throws NullPointerException if {@code vertices} or any of its elements
+     * are {@code null}.
+     * @throws IllegalArgumentException if {@code vertices.length < 3}.
      */
-    public Polygon2(float... vertices) {
-        if((vertices.length & 1) != 0)
-            throw new IllegalArgumentException("vertices must be an"
-                    + "even-numbered array");
-        if(vertices.length < 6)
-            throw new IllegalArgumentException("vertices.length < 6");
+    public PolygonOld(Vec2... vertices) {
+        if(vertices.length < 3)
+            throw new IllegalArgumentException("vertices.length < 3");
+        for(int i = 0; i < vertices.length; i++)
+            if(vertices[i] == null)
+                throw new NullPointerException("A vertex is null");
         
         this.vertices = vertices;
     }
@@ -48,30 +50,23 @@ public class Polygon2 extends AbstractPolygon {
      * Constructor to be used when checking the vertex array would be pointless
      * and wasteful.
      */
-    protected Polygon2() {}
+    protected PolygonOld() {}
     
     @Override
-    public Shape transform(VertexFunction f) {
+    public Shape transform(UnaryOperator<Vec2> f) {
         return newInstance(transformVertices(f));
     }
     
     @Override
-    public float[] getVertices() {
+    public Vec2[] getVertices() {
         return vertices;
     }
     
     // Precomputification -----------------------------------------------------
     
-    protected boolean projectionIntersects(int i, float min, float max) {
-        return projsIntersect(projections[i], projections[i+1], min, max);
-    }
-    
-    protected boolean projectionContains(int i, float min, float max) {
-        return projContains(projections[i], projections[i+1], min, max);
-    }
-    
-    protected boolean projectionContainsPoint(int i, float p) {
-        return projContainsPoint(projections[i], projections[i+1], p);
+    @Override
+    protected ShapeProjection getProjection(int i) {
+        return projections[i];
     }
     
     @Override
@@ -90,21 +85,21 @@ public class Polygon2 extends AbstractPolygon {
     }
     
     /** Gens the axes. */
-    protected float[] genAxes() {
-        axes = super.genAxes();
+    protected Vec2[] genAxes() {
+        axes = super.getAxes();
         genProjections();
         return axes;
     }
     
     /** Gens the projections. */
     protected void genProjections() {
-        projections = new float[axes.length];
-        for(int i = 0; i < axes.length; i += 2)
-            getProjection(projections, i, axes[i], axes[i+1]);
+        projections = new ShapeProjection[axes.length];
+        for(int i = 0; i < axes.length; i++)
+            projections[i] = getProjection(axes[i]);
     }
     
     @Override
-    protected float[] getAxes() {
+    protected Vec2[] getAxes() {
         return axes == null ? genAxes() : axes;
     }
     
@@ -114,8 +109,8 @@ public class Polygon2 extends AbstractPolygon {
      * Returns a new shape instance of the same class as this one, for
      * duplication in transformation purposes.
      */
-    protected Polygon2 newInstance() {
-        return new Polygon2();
+    protected PolygonOld newInstance() {
+        return new PolygonOld();
     }
     
     /**
@@ -125,8 +120,8 @@ public class Polygon2 extends AbstractPolygon {
      * <p>This method hooks on to {@link #newInstance()}, so override it
      * instead.
      */
-    protected Polygon2 newInstance(float[] vertices) {
-        Polygon2 p = newInstance();
+    protected PolygonOld newInstance(Vec2[] vertices) {
+        PolygonOld p = newInstance();
         p.vertices = vertices;
         return p;
     }
@@ -139,10 +134,13 @@ public class Polygon2 extends AbstractPolygon {
     
     @Override
     public boolean equals(Object o) {
-        if(!(o instanceof Polygon2)) return false;
-        Polygon2 p = (Polygon2)o;
+        if(!(o instanceof PolygonOld)) return false;
+        PolygonOld p = (PolygonOld)o;
         if(vertices.length != p.vertices.length) return false;
-        return Arrays.equals(vertices, p.vertices);
+        for(int i = 0; i < vertices.length; i++)
+            if(!vertices[i].equals(p.vertices[i]))
+                return false;
+        return true;
     }
     
     //--------------------==========--------------------
@@ -161,8 +159,8 @@ public class Polygon2 extends AbstractPolygon {
      * 
      * @return The new polygon.
      */
-    public static Polygon2 newPolygon(float[] vertices) {
-        Polygon2 p = new Polygon2();
+    public static PolygonOld newPolygon(Vec2[] vertices) {
+        PolygonOld p = new PolygonOld();
         p.vertices = vertices;
         return p;
     }

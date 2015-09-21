@@ -11,12 +11,8 @@ import javax.imageio.ImageIO;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.StringUtil;
-import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.Point;
 import com.stabilise.util.maths.Maths;
-import com.stabilise.util.maths.Vec2;
-import com.stabilise.util.shape.Polygon;
-import com.stabilise.util.shape.Shape;
 
 /**
  * This class contains an assortment of tests I have conducted, primarily to
@@ -244,32 +240,6 @@ public class RandomTests {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-    
-    protected static void shapeTests() {
-        Polygon p1 = new Polygon(
-                Vec2.immutable(0f, 0f),
-                Vec2.immutable(0.5f, 0f),
-                Vec2.immutable(1f, 0.5f),
-                Vec2.immutable(1f, 1f),
-                Vec2.immutable(0.5f, 1f),
-                Vec2.immutable(0f, 0.5f)
-        );
-        Vec2[] verts = p1.getVertices();
-        Shape p2 = p1.translate(1f, 1f);
-        Shape p3 = p2.translate(-1f, -1f);
-        System.out.println(p1);
-        System.out.println(p2);
-        System.out.println(p3);
-        System.out.println(p1.equals(p3) + " <=> " + p3.equals(p1));
-        System.out.println(p1.equals(p2) + " <=> " + p2.equals(p1));
-        System.out.println("1: " + p1.intersects(p1) + ", " + p1.contains(p1));
-        System.out.println("2: " + p1.intersects(p2) + ", " + p1.contains(p2));
-        System.out.println("3: " + p1.intersects(p3) + ", " + p1.contains(p3));
-        verts = p1.getVertices();
-        System.out.println(verts[0]);
-        Shape p4 = p1.transform(new Matrix2(0f, -1, 1, 0));
-        System.out.println(p4);
     }
     
     // ---------- MAIN ----------

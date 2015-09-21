@@ -27,7 +27,7 @@ public class Striper<T> {
      * @param supplier A function to use to generate the objects. The integer
      * parameter is each object's index.
      * 
-     * @throws IllegalArgumentException if {@code numObjects} is negative,.
+     * @throws IllegalArgumentException if {@code numObjects} is negative.
      * @throws NullPointerException if {@code supplier} is {@code null}, or it
      * supplies any null objects.
      */
@@ -67,10 +67,10 @@ public class Striper<T> {
     /**
      * Creates and returns a striper for generic objects.
      * 
-     * @param numObjects The number of objects to split the striper into.
+     * @param numObjects The number of objects to split this striper into. This
+     * is rounded to the next power of two.
      * 
-     * @throws IllegalArgumentException if {@code numObjects} is negative, or
-     * is not a power of two.
+     * @throws IllegalArgumentException if {@code numObjects} is negative.
      */
     public static Striper<Object> generic(int numObjects) {
         return new Striper<>(numObjects, i -> new Object());

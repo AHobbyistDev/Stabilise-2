@@ -1,4 +1,4 @@
-package com.stabilise.util.shape;
+package com.stabilise.util.shape.old;
 
 import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.Vec2;
@@ -7,10 +7,11 @@ import com.stabilise.util.maths.Vec2;
  * A rectangle is a quadrilateral with opposite sides parallel, and
  * right-angles between each side.
  */
-public class Rectangle extends Polygon {
+@Deprecated
+public class Rectangle extends PolygonOld {
     
     /** Array indices to use when referencing vertices in the {@link
-     * Polygon#vertices vertices} array. */
+     * PolygonOld#vertices vertices} array. */
     public static final int V00 = 0, V01 = 2, V10 = 3, V11 = 2;
     
     

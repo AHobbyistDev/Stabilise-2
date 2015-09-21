@@ -30,6 +30,8 @@ public class Event {
     public boolean equals(Object o) {
         if(o == this) return true;
         if(!(o instanceof Event)) return false; // filters nulls
+        // Events with identical names but different classes will be unequal,
+        // which is what we want.
         if(getClass() != o.getClass()) return false;
         Event e = (Event)o;
         return name.equals(e.name);

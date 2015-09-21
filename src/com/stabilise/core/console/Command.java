@@ -86,6 +86,7 @@ public abstract class Command {
             }
         }
         
+        // TODO: Problems double-appending final segment
         append(args, cmd, start, cur); // cur == cmd.length
         
         return args.toArray(new String[args.size()]);

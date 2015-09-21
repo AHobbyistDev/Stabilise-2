@@ -18,8 +18,7 @@ public class EntityEnemy extends EntityMob {
     };
     
     /** The AABB for enemy entities. */
-    private static final AABB ENEMY_AABB =
-            new AABB(-0.5f, 0, 1, 2);
+    private static final AABB ENEMY_AABB = new AABB(-0.5f, 0, 1, 2);
     
     /** The number of ticks for which the enemy is to continue its current
      * action.*/

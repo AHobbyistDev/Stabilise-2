@@ -1,7 +1,7 @@
 package com.stabilise.item;
 
 import com.stabilise.util.annotation.Incomplete;
-import com.stabilise.util.shape.Rectangle;
+import com.stabilise.util.shape.Shape;
 
 /**
  * [Insert a dictionary definition for weapon here along with other information
@@ -13,7 +13,7 @@ public class Weapon extends Item {
     /** The mass of the weapon. */
     public int mass;
     /** The weapon's hitboxes. */
-    public Rectangle[] hitboxes;
+    public Shape hitboxes;
     /** The weapon's base damage. */
     public int damage;
     

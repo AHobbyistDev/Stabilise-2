@@ -1,4 +1,6 @@
-package com.stabilise.util.shape2;
+package com.stabilise.util.shape.old;
+
+import com.stabilise.util.maths.Vec2;
 
 /**
  * A polygon is a shape with any number of vertices.
@@ -6,6 +8,7 @@ package com.stabilise.util.shape2;
  * <p>This class provides standard implementations of the SAT algorithm for
  * collision detection.
  */
+@Deprecated
 abstract class AbstractPolygon extends Shape {
     
     @Override
@@ -69,20 +72,9 @@ abstract class AbstractPolygon extends Shape {
      */
     protected boolean intersectsOnOwnAxes(Shape s) {
         System.out.println("intersectsOnOwnAxes SHOULD NOT BE A THING THAT IS USED");
-        /*
         Vec2[] axes = getAxes();
         for(Vec2 axis : axes) {
             if(!getProjection(axis).intersects(s.getProjection(axis)))
-                return false;
-        }
-        return true;
-        */
-        float[] axes = getAxes();
-        float[] proj = new float[4]; // min1, max1, min2, max2
-        for(int i = 0; i < axes.length; i += 2) {
-            getProjection(proj, 0, axes[i], axes[i+1]);
-            s.getProjection(proj, 2, axes[i], axes[i+1]);
-            if(!projsIntersect(proj[0], proj[1], proj[2], proj[3]))
                 return false;
         }
         return true;
@@ -98,19 +90,9 @@ abstract class AbstractPolygon extends Shape {
      * {@code false} if it does not.
      */
     protected boolean intersectsOnOwnAxesPrecomputed(Shape s) {
-        /*
         Vec2[] axes = getAxes();
         for(int i = 0; i < axes.length; i++) {
             if(!getProjection(i).intersects(s.getProjection(axes[i])))
-                return false;
-        }
-        return true;
-        */
-        float[] axes = getAxes();
-        float[] proj = new float[2]; // min, max
-        for(int i = 0; i < axes.length; i += 2) {
-            s.getProjection(proj, 0, axes[i], axes[i+1]);
-            if(!projectionIntersects(i, proj[0], proj[1]))
                 return false;
         }
         return true;
@@ -118,20 +100,9 @@ abstract class AbstractPolygon extends Shape {
     
     @Override
     public boolean contains(Shape s) {
-        /*
         Vec2[] axes = getAxes();
         for(Vec2 axis : axes) {
             if(!getProjection(axis).contains(s.getProjection(axis)))
-                return false;
-        }
-        return true;
-        */
-        float[] axes = getAxes();
-        float[] proj = new float[4]; // min1, max1, min2, max2
-        for(int i = 0; i < axes.length; i += 2) {
-            getProjection(proj, 0, axes[i], axes[i+1]);
-            s.getProjection(proj, 2, axes[i], axes[i+1]);
-            if(!projContains(proj[0], proj[1], proj[2], proj[3]))
                 return false;
         }
         return true;
@@ -144,19 +115,9 @@ abstract class AbstractPolygon extends Shape {
      * false} otherwise.
      */
     protected boolean containsPrecomputed(Shape s) {
-        /*
         Vec2[] axes = getAxes();
         for(int i = 0; i < axes.length; i++) {
             if(!getProjection(i).contains(s.getProjection(axes[i])))
-                return false;
-        }
-        return true;
-        */
-        float[] axes = getAxes();
-        float[] proj = new float[2]; // min, max
-        for(int i = 0; i < axes.length; i += 2) {
-            s.getProjection(proj, 0, axes[i], axes[i+1]);
-            if(!projectionContains(i, proj[0], proj[1]))
                 return false;
         }
         return true;
@@ -164,20 +125,9 @@ abstract class AbstractPolygon extends Shape {
     
     @Override
     public boolean containsPoint(float x, float y) {
-        /*
         Vec2[] axes = getAxes();
         for(Vec2 axis : axes) {
             if(!getProjection(axis).containsPoint(axis.dot(x, y)))
-                return false;
-        }
-        return true;
-        */
-        float[] axes = getAxes();
-        float[] proj = new float[3]; // min, max, p
-        for(int i = 0; i < axes.length; i += 2) {
-            getProjection(proj, 0, axes[i], axes[i+1]);
-            proj[2] = x*axes[i] + y*axes[i+1]; // dot product
-            if(!projContainsPoint(proj[0], proj[1], proj[2]))
                 return false;
         }
         return true;
@@ -191,17 +141,9 @@ abstract class AbstractPolygon extends Shape {
      * redirect it to this method if said subclass utilises precomputation.
      */
     protected boolean containsPointPrecomputed(float x, float y) {
-        /*
         Vec2[] axes = getAxes();
         for(int i = 0; i < axes.length; i++) {
             if(!getProjection(i).containsPoint(axes[i].dot(x, y)))
-                return false;
-        }
-        return true;
-        */
-        float[] axes = getAxes();
-        for(int i = 0; i < axes.length; i += 2) {
-            if(!projectionContainsPoint(i, x*axes[i] + y*axes[i+1]))
                 return false;
         }
         return true;

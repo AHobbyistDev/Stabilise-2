@@ -9,7 +9,6 @@ import com.stabilise.util.Direction;
 import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Polygon;
-import com.stabilise.util.shape.Rectangle;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
 import com.stabilise.world.AbstractWorld.ParticleSource;
@@ -29,14 +28,14 @@ public class EntityPerson extends EntityMob {
     public static final int ATTACK_SIDE_GROUND_DURATION = 40;
     public static final int ATTACK_SIDE_GROUND_FRAME_2_BEGIN = 16;
     public static final int ATTACK_SIDE_GROUND_FRAME_3_BEGIN = 20;
-    //public static final Rectangle ATTACK_SIDE_GROUND_FRAME_2_HITBOX;
-    public static final Rectangle ATTACK_SIDE_GROUND_HITBOX_1 =
-            Shape.rotate(new Rectangle(0.53f, 1.11f, 1.82f, 0.18f), 0.099483f);//.precomputed();
-    public static final Rectangle ATTACK_SIDE_GROUND_HITBOX_1_FLIPPED =
+    
+    public static final Shape ATTACK_SIDE_GROUND_HITBOX_1 =
+           Polygon.rectangle(0.53f, 1.11f, 1.82f, 0.18f).rotate(0.099483f);
+    public static final Shape ATTACK_SIDE_GROUND_HITBOX_1_FLIPPED =
             ATTACK_SIDE_GROUND_HITBOX_1.reflect();
-    public static final Rectangle ATTACK_SIDE_GROUND_HITBOX_2 =
-            Shape.rotate(new Rectangle(-1.87f, 1.16f, 2.25f, 0.18f), 0.15708f);//.precomputed();
-    public static final Rectangle ATTACK_SIDE_GROUND_HITBOX_2_FLIPPED =
+    public static final Shape ATTACK_SIDE_GROUND_HITBOX_2 =
+            Polygon.rectangle(-1.87f, 1.16f, 2.25f, 0.18f).rotate(0.15708f);
+    public static final Shape ATTACK_SIDE_GROUND_HITBOX_2_FLIPPED =
             ATTACK_SIDE_GROUND_HITBOX_2.reflect();
     public static final float ATTACK_SIDE_GROUND_FORCE = 3.2f;
     
@@ -52,9 +51,9 @@ public class EntityPerson extends EntityMob {
     // Down attack (ground)
     public static final int ATTACK_DOWN_GROUND_DURATION = 20;
     public static final int ATTACK_DOWN_GROUND_FRAME_2_BEGIN = 1;
-    public static final Rectangle ATTACK_DOWN_GROUND_HITBOX =
-            Shape.rotate(new Rectangle(0.49f, 0.34f, 1.43f, 0.16f), -0.116937f);//.precomputed();
-    public static final Rectangle ATTACK_DOWN_GROUND_HITBOX_FLIPPED =
+    public static final Shape ATTACK_DOWN_GROUND_HITBOX =
+            Polygon.rectangle(0.49f, 0.34f, 1.43f, 0.16f).rotate(-0.116937f);
+    public static final Shape ATTACK_DOWN_GROUND_HITBOX_FLIPPED =
             ATTACK_DOWN_GROUND_HITBOX.reflect();
     public static final float ATTACK_DOWN_GROUND_FORCE = 1.2f;
     
@@ -62,14 +61,12 @@ public class EntityPerson extends EntityMob {
     public static final int ATTACK_SIDE_AIR_DURATION = 30;
     public static final int ATTACK_SIDE_AIR_FRAME_2_BEGIN = 6;
     public static final Polygon ATTACK_SIDE_AIR_HITBOX_1 =
-            new Polygon(Vec2.immutable(2.72f,1.29f), Vec2.immutable(0.96f,0.98f),
-                    Vec2.immutable(-0.45f,2.56f), Vec2.immutable(1.29f,2.35f));
+            new Polygon(2.72f,1.29f, 0.96f,0.98f, -0.45f,2.56f, 1.29f,2.35f);
     public static final Shape ATTACK_SIDE_AIR_HITBOX_1_FLIPPED =
             ATTACK_SIDE_AIR_HITBOX_1.reflect();
     public static final int ATTACK_SIDE_AIR_FRAME_3_BEGIN = 8;
     public static final Polygon ATTACK_SIDE_AIR_HITBOX_2 =
-            new Polygon(Vec2.immutable(2.72f,1.29f), Vec2.immutable(1.44f,-0.41f),
-                    Vec2.immutable(0.45f,0.45f), Vec2.immutable(0.96f,0.98f));
+            new Polygon(2.72f,1.29f, 1.44f,-0.41f, 0.45f,0.45f, 0.96f,0.98f);
     public static final Shape ATTACK_SIDE_AIR_HITBOX_2_FLIPPED =
             ATTACK_SIDE_AIR_HITBOX_2.reflect();
     
@@ -77,19 +74,16 @@ public class EntityPerson extends EntityMob {
     public static final int ATTACK_UP_AIR_DURATION = 30;
     public static final int ATTACK_UP_AIR_FRAME_2_BEGIN = 6;
     public static final Polygon ATTACK_UP_AIR_HITBOX_1_1 =
-            new Polygon(Vec2.immutable(2.72f,1.51f), Vec2.immutable(1.22f,-0.45f),
-                    Vec2.immutable(0.8f,0.75f), Vec2.immutable(0.89f,1.38f));
+            new Polygon(2.72f,1.51f, 1.22f,-0.45f, 0.8f,0.75f, 0.89f,1.38f);
     public static final Shape ATTACK_UP_AIR_HITBOX_1_1_FLIPPED =
             ATTACK_UP_AIR_HITBOX_1_1.reflect();
     public static final Polygon ATTACK_UP_AIR_HITBOX_1_2 =
-            new Polygon(Vec2.immutable(2.69f,1.95f), Vec2.immutable(0.84f,1.49f),
-                    Vec2.immutable(0.27f,2.05f), Vec2.immutable(0.58f,3.33f));
+            new Polygon(2.69f,1.95f, 0.84f,1.49f, 0.27f,2.05f, 0.58f,3.33f);
     public static final Shape ATTACK_UP_AIR_HITBOX_1_2_FLIPPED =
             ATTACK_UP_AIR_HITBOX_1_2.reflect();
     public static final int ATTACK_UP_AIR_FRAME_3_BEGIN = 8;
     public static final Polygon ATTACK_UP_AIR_HITBOX_2 =
-            new Polygon(Vec2.immutable(-0.8f,1.4f), Vec2.immutable(-1.65f,2.4f),
-                    Vec2.immutable(0.6f,3.35f), Vec2.immutable(0.29f,2.04f));
+            new Polygon(-0.8f,1.4f, -1.65f,2.4f, 0.6f,3.35f, 0.29f,2.04f);
     public static final Shape ATTACK_UP_AIR_HITBOX_2_FLIPPED =
             ATTACK_UP_AIR_HITBOX_2.reflect();
     
@@ -97,19 +91,16 @@ public class EntityPerson extends EntityMob {
     public static final int ATTACK_DOWN_AIR_DURATION = 30;
     public static final int ATTACK_DOWN_AIR_FRAME_2_BEGIN = 6;
     public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_1 =
-            new Polygon(Vec2.immutable(0.78f,0.91f), Vec2.immutable(0.0f,1.63f),
-                    Vec2.immutable(1.91f,-0.15f), Vec2.immutable(0.6f,0.65f));
+            new Polygon(0.78f,0.91f, 0.0f,1.63f, 1.91f,-0.15f, 0.6f,0.65f);
     public static final Shape ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED =
             ATTACK_DOWN_AIR_HITBOX_1_1.reflect();
     public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_2 =
-            new Polygon(Vec2.immutable(0.6f,0.65f), Vec2.immutable(1.91f,-0.15f),
-                    Vec2.immutable(0.44f,-0.87f), Vec2.immutable(0.25f,0.42f));
+            new Polygon(0.6f,0.65f, 1.91f,-0.15f, 0.44f,-0.87f, 0.25f,0.42f);
     public static final Shape ATTACK_DOWN_AIR_HITBOX_1_2_FLIPPED =
             ATTACK_DOWN_AIR_HITBOX_1_2.reflect();
     public static final int ATTACK_DOWN_AIR_FRAME_3_BEGIN = 8;
     public static final Polygon ATTACK_DOWN_AIR_HITBOX_2 =
-            new Polygon(Vec2.immutable(0.25f,0.42f), Vec2.immutable(0.44f,-0.87f),
-                    Vec2.immutable(-1.47f,0.11f), Vec2.immutable(-0.31f,0.69f));
+            new Polygon(0.25f,0.42f, 0.44f,-0.87f, -1.47f,0.11f, -0.31f,0.69f);
     public static final Shape ATTACK_DOWN_AIR_HITBOX_2_FLIPPED =
             ATTACK_DOWN_AIR_HITBOX_2.reflect();
     
@@ -132,9 +123,9 @@ public class EntityPerson extends EntityMob {
     public static final int SPECIAL_DOWN_GROUND_DURATION = 40;
     public static final int SPECIAL_DOWN_GROUND_FRAME_2_BEGIN = 16;
     public static final Polygon SPECIAL_DOWN_GROUND_HITBOX_1 =
-            new Polygon(Vec2.immutable(3f,0f), Vec2.immutable(0f,0f), Vec2.immutable(0f,2f), Vec2.immutable(1.5f,2f));
+            new Polygon(3f,0f, 0f,0f, 0f,2f, 1.5f,2f);
     public static final Polygon SPECIAL_DOWN_GROUND_HITBOX_2 =
-            new Polygon(Vec2.immutable(0f,0f), Vec2.immutable(-3f,0f), Vec2.immutable(-1.5f,2f), Vec2.immutable(0f,2f));
+            new Polygon(0f,0f, -3f,0f, -1.5f,2f, 0f,2f);
     
     // Side special (air)
     public static final int SPECIAL_SIDE_AIR_COST_MANA = 50;

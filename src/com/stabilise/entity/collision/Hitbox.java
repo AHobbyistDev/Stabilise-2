@@ -75,8 +75,7 @@ public class Hitbox extends FreeGameObject {
         for(Entity e : world.getEntities()) {
             if(e.id == owner.id || e.invulnerable) continue;
             // TODO: broadphase
-            //if(boundingBox.translate((float)(x-e.x), (float)(y-e.y)).intersects(e.boundingBox)) {
-            if(e.boundingBox.translate((float)(e.x-x), (float)(e.y-y)).intersects(boundingBox)) {
+            if(e.boundingBox.intersects(boundingBox, (float)(e.x-x), (float)(e.y-y))) {
                 hit(world, e);
                 if(hits == 0)
                     break;

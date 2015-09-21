@@ -1,10 +1,7 @@
 package com.stabilise.util.shape;
 
-import java.util.function.UnaryOperator;
-
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.maths.Matrix2;
-import com.stabilise.util.maths.Vec2;
 
 /**
  * For the uninitiated: <i>A circle is a simple shape of Euclidean geometry
@@ -13,10 +10,11 @@ import com.stabilise.util.maths.Vec2;
  * centre is called the radius. It can also be defined as the locus of a point
  * equidistant from a fixed point.</i>
  */
-public class Circle extends Shape {
+@Incomplete
+class Circle extends Shape {
     
     /** The coordinates of the centre of the circle. */
-    public final float x, y;
+    public final float[] c;
     /** The circle's radius. */
     public final float radius;
 
@@ -26,7 +24,7 @@ public class Circle extends Shape {
      * 
      * @param centre The centre of the circle.
      */
-    public Circle(Vec2 centre) {
+    public Circle(float[] centre) {
         this(centre, 0);
     }
     
@@ -36,8 +34,9 @@ public class Circle extends Shape {
      * @param centre The circle's centre.
      * @param radius The circle's radius.
      */
-    public Circle(Vec2 centre, float radius) {
-        this(centre.x(), centre.y(), radius);
+    public Circle(float[] centre, float radius) {
+        c = centre;
+        this.radius = radius;
     }
     
     /**
@@ -48,9 +47,15 @@ public class Circle extends Shape {
      * @param radius The circle's radius.
      */
     public Circle(float x, float y, float radius) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
+        this(new float[] {x, y}, radius);
+    }
+    
+    public float x() {
+        return c[0];
+    }
+    
+    public float y() {
+        return c[1];
     }
     
     /**
@@ -75,14 +80,10 @@ public class Circle extends Shape {
      */
     @Override
     @Incomplete
-    public Circle transform(UnaryOperator<Vec2> f) {
-        // TODO: Wasteful as this results in the instantiation of two Vec2s.
-        return new Circle(f.apply(Vec2.immutable(x,y)), radius);
-    }
-    
-    @Override
-    public Shape translate(float x, float y) {
-        return new Circle(this.x + x, this.y + y, radius);
+    public Circle transform(VertexFunction f) {
+        float[] newC = new float[2];
+        f.apply(newC, 0, c[0], c[1]);
+        return new Circle(newC, radius);
     }
     
     /**
@@ -94,22 +95,8 @@ public class Circle extends Shape {
     }
     
     @Override
-    protected Vec2[] getVertices() {
-        return new Vec2[] {Vec2.immutable(x, y)};
-    }
-    
-    /**
-     * {@inheritDoc}
-     * 
-     * <p>The current implementation redirects the test, as if by:
-     * <pre>s.intersects(this)</pre>
-     */
-    @Override
-    public boolean intersects(Shape s) {
-        if(radius == 0) return false;
-        if(s instanceof Circle)
-            return intersects((Circle)s);
-        return s.intersects(this);
+    protected float[] getVertices() {
+        return c;
     }
     
     /**
@@ -120,17 +107,10 @@ public class Circle extends Shape {
      */
     public boolean intersects(Circle c) {
         if(radius == 0) return false;
-        float dx = this.x - c.x;
-        float dy = this.y - c.y;
+        float dx = x() - c.x();
+        float dy = y() - c.y();
         float radii = radius + c.radius;
         return dx*dx + dy*dy <= radii*radii;
-    }
-    
-    @Override
-    public boolean contains(Shape s) {
-        if(s instanceof Circle)
-            return contains((Circle)s);
-        return s.contains(this);
     }
     
     /**
@@ -140,34 +120,40 @@ public class Circle extends Shape {
      * otherwise.
      */
     public boolean contains(Circle c) {
-        float dx = this.x - c.x;
-        float dy = this.y - c.y;
+        float dx = x() - c.x();
+        float dy = y() - c.y();
         return radius >= dx*dx + dy*dy + c.radius;
     }
     
     @Override
     public boolean containsPoint(float x, float y) {
-        float dx = this.x - x;
-        float dy = this.y - y;
+        float dx = x() - x;
+        float dy = y() - y;
         return dx*dx + dy*dy <= radius*radius;
     }
     
-    @Override
-    protected ShapeProjection getProjection(Vec2 axis) {
+    protected void getProjection(float[] dest, int offset, float x, float y) {
         // A circle, being a uniform shape, is of constant width for all axes
-        float mid = axis.dot(x, y);
+        float mid = x()*x + y()*y;
         // TODO + or - radius doesn't work unless be divide by |axis|
-        return new ShapeProjection(mid - radius, mid + radius);
+        dest[offset]   = mid - radius;
+        dest[offset+1] = mid + radius;
     }
     
-    @Override
-    protected ShapeProjection getHorizontalProjection() {
-        return new ShapeProjection(x - radius, x + radius);
+    protected void getHorizontalProjection(float[] dest, int offset) {
+        dest[offset]   = x() - radius;
+        dest[offset+1] = x() + radius;
     }
     
+    protected void getVerticalProjection(float[] dest, int offset) {
+        dest[offset]   = y() - radius;
+        dest[offset+1] = y() + radius;
+    }
+
     @Override
-    protected ShapeProjection getVerticalProjection() {
-        return new ShapeProjection(y - radius, y + radius);
+    int getKey() {
+        // TODO Auto-generated method stub
+        return 0;
     }
     
 }

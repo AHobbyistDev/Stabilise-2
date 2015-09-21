@@ -34,10 +34,8 @@ import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.item.Items;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
-import com.stabilise.util.ArrayUtil.ImmutableArray;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.maths.Maths;
-import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
@@ -426,8 +424,8 @@ public class WorldRenderer implements Renderer {
     private void renderOn(TextureRegion tex, Entity e) {
         batch.draw(
                 tex, // region
-                (float)e.x + e.boundingBox.getOriginX(), // x
-                (float)e.y + e.boundingBox.getOriginY(), // y
+                (float)e.x + e.boundingBox.minX(), // x
+                (float)e.y + e.boundingBox.minY(), // y
                 e.boundingBox.width(), // width
                 e.boundingBox.height() // height
         );
@@ -564,21 +562,20 @@ public class WorldRenderer implements Renderer {
     
     private void renderAABB(AABB aabb, float x, float y) {
         shapes.rect(
-                aabb.getOriginX() + x, // x
-                aabb.getOriginY() + y, // y
+                aabb.minX() + x, // x
+                aabb.minY() + y, // y
                 aabb.width(), // width
                 aabb.height() // height
         );
     }
     
     private void renderShape(Shape s, float x, float y) {
-        ImmutableArray<Vec2> verts = s.vertices();
-        float[] v = new float[verts.length() * 2];
-        for(int i = 0; i < verts.length(); i++) {
-            v[2*i] = verts.get(i).x() + x;
-            v[2*i + 1] = verts.get(i).y() + y;
+        float[] verts = s.cpyVertices();
+        for(int i = 0; i < verts.length; i += 2) {
+            verts[i]   += x;
+            verts[i+1] += y;
         }
-        shapes.polygon(v);
+        shapes.polygon(verts);
     }
     
 }

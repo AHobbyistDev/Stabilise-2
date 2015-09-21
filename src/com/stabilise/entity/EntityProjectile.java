@@ -2,7 +2,7 @@ package com.stabilise.entity;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.entity.collision.Hitbox;
-import com.stabilise.util.shape.RotatableShape;
+import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
 
 /**
@@ -19,6 +19,7 @@ public abstract class EntityProjectile extends Entity {
     /** The projectile's hitbox. */
     public Hitbox hitbox;
     
+    private final Shape baseShape;
     /** The rotation of the projectile. */
     public float rotation = 0;            // TODO: Is this necessary for /all/ projectile types?
     
@@ -41,7 +42,7 @@ public abstract class EntityProjectile extends Entity {
         //hitbox.y = y;
         
         // Since projectiles typically rotate...
-        hitbox.boundingBox = new RotatableShape(hitbox.boundingBox);
+        this.baseShape = hitbox.boundingBox;
         hitbox.persistent = true;
         
         world.addHitbox(hitbox, x, y);
@@ -68,7 +69,7 @@ public abstract class EntityProjectile extends Entity {
         rotation = MathUtils.atan2(dy, dx); //(float)Math.atan2(dy, dx);
         
         if(hitbox != null)
-            ((RotatableShape)hitbox.boundingBox).setRotation(rotation);
+            hitbox.boundingBox = baseShape.rotate(rotation);
         
         setFacingRight(dx > 0);
     }

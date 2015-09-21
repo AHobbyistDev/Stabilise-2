@@ -178,9 +178,9 @@ public class TaskTimer {
         if(duration == other.duration)
             return name + " was equally as fast as " + other.name + "!";
         else if(duration > other.duration)
-            return other.name + " was " + percentage(other, this) + "% faster than " + name + "!";
+            return other.name + " was " + percentage(other, this) + "x faster than " + name + "!";
         else
-            return name + " was " + percentage(this, other) + "% faster than " + other.name + "!";
+            return name + " was " + percentage(this, other) + "x faster than " + other.name + "!";
     }
     
     /**
@@ -235,7 +235,8 @@ public class TaskTimer {
      */
     private static String percentage(TaskTimer faster, TaskTimer slower) {
         return StringUtil.cullFP(
-                100 * (((double)slower.duration / (double)faster.duration) - 1),
+                //100 * (((double)slower.duration / (double)faster.duration) - 1),
+                (double)slower.duration / (double)faster.duration,
                 2
         );
     }

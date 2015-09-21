@@ -32,6 +32,8 @@ public class EntityItem extends Entity {
     /** The speed at which items accelerate towards a player. */
     private static final float ATTRACTION_SPEED = 2.0f;
     
+    private static final AABB ENT_AABB = new AABB(-0.4f, 0f, 0.8f, 0.8f);
+    
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
     //--------------------==========--------------------
@@ -64,7 +66,7 @@ public class EntityItem extends Entity {
     }
     
     protected AABB getAABB() {
-        return new AABB(-0.4f, 0f, 0.8f, 0.8f);
+        return ENT_AABB;
     }
     
     @Override

@@ -1,29 +1,29 @@
 package com.stabilise.util.shape;
 
-import java.util.function.UnaryOperator;
+
+import java.util.Arrays;
 
 import com.badlogic.gdx.math.MathUtils;
-import com.stabilise.util.ArrayUtil.ImmutableArray;
+import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.maths.Matrix2;
-import com.stabilise.util.maths.Vec2;
 
 /**
  * A shape is a 2D object usually consisting of a number of vertices, which may
  * be used to represent such things as collision areas.
  * 
  * <p>Classes in the {@code Shape} hierarchy are immutable, but may be {@link
- * #transform(Matrix2) transformed} to generate a new shape.
+ * #transform(VertexFunction) transformed} to generate a new shape.
  * 
  * <p>These classes use the <a
  * href=http://en.wikipedia.org/wiki/Hyperplane_separation_theorem> Separating
  * Axis Theorem/Hyperplane Separation Theorem</a> for collision detection.
+ * 
+ * <p>A shape which does not yet have its collision data generated is not safe
+ * for multithreaded use. If you wish to use a shape across multiple threads,
+ * make sure you invoke {@link #genCollisionData()} before sharing it to ensure
+ * correct behaviour.
  */
 public abstract class Shape {
-    
-    /** A Shape which should be used as a placeholder to indicate the lack of a
-     * shape, in preference to a null pointer. */
-    public static final Shape NO_SHAPE = new NoShape();
-    
     
     /**
      * Transforms this shape by applying the given transformation function to
@@ -35,23 +35,27 @@ public abstract class Shape {
      * @return The transformed shape.
      * @throws NullPointerException if {@code f} is {@code null}.
      */
-    public abstract Shape transform(UnaryOperator<Vec2> f);
+    public abstract Shape transform(VertexFunction f);
+    
+    /*
+    public Shape transformSelf(VertexFunction f) {
+        float[] verts = getVertices();
+        transformVerts(verts, verts, f);
+        return this;
+    }
+    */
     
     /**
-     * Gets the vertices of this shape if it were transformed using the given
-     * function. The returned array is the same length as, and ordered the same
-     * as, the vertices returned by {@link #getVertices()}.
+     * Gets the vertices of this shape, transformed using the given function.
+     * The returned array is the same length as (and ordered the same as) the
+     * vertices returned by {@link #getVertices()}.
      * 
      * @param f The transformation function.
      * 
-     * @return The transformed vertices. 
+     * @return The transformed vertices.
      */
-    protected Vec2[] transformVertices(UnaryOperator<Vec2> f) {
-        final Vec2[] verts = getVertices();
-        Vec2[] newVerts = new Vec2[verts.length];
-        for(int i = 0; i < verts.length; i++)
-            newVerts[i] = f.apply(verts[i]);
-        return newVerts;
+    protected float[] transformVertices(VertexFunction f) {
+        return transformVerts(getVertices(), f);
     }
     
     /**
@@ -62,13 +66,16 @@ public abstract class Shape {
      * </a> the the given transformation matrix by said vertex's representative
      * 2D vector. This shape is unmodified.
      * 
-     * @param matrix The transformation matrix.
+     * @param m The transformation matrix.
      * 
      * @return The transformed shape.
-     * @throws NullPointerException if {@code matrix} is {@code null}.
+     * @throws NullPointerException if {@code m} is {@code null}.
      */
-    public Shape transform(Matrix2 matrix) {
-        return transform(v -> matrix.transform(v));
+    public Shape transform(Matrix2 m) {
+        return transform((dest,o,x,y) -> {
+            dest[o]   = m.m00*x + m.m01*y;
+            dest[o+1] = m.m10*x + m.m10*y;
+        });
     }
     
     /**
@@ -83,22 +90,27 @@ public abstract class Shape {
      * @throws UnsupportedOperationException if this shape is an {@code AABB}.
      */
     public Shape rotate(float rads) {
-        //return transform(new Matrix2().setToRotation(rotation));
         final float cos = MathUtils.cos(rads);
         final float sin = MathUtils.sin(rads);
-        return transform(v -> v.rotate(cos, sin));
+        return transform((dest,o,x,y) -> {
+            dest[o]   = x*cos - y*sin;
+            dest[o+1] = x*sin + y*cos;
+        });
     }
     
     /**
-     * Gets a new shape object identical to this one, but translated.
+     * Gets a new shape identical to this one, but translated.
      * 
-     * @param x The translation along x-axis.
+     * @param x The translation along the x-axis.
      * @param y The translation along the y-axis.
      * 
      * @return The new translated shape.
      */
     public Shape translate(float x, float y) {
-        return transform(v -> Vec2.immutable(v.x() + x, v.y() + y));
+        return transform((dest,o,x0,y0) -> {
+            dest[o]   = x0 + x;
+            dest[o+1] = y0 + y;
+        });
     }
     
     /**
@@ -107,7 +119,10 @@ public abstract class Shape {
      * @return The reflected clone of this shape.
      */
     public Shape reflect() {
-        return transform(v -> Vec2.immutable(-v.x(), v.y()));
+        return transform((dest,o,x,y) -> {
+            dest[o]   = -x;
+            dest[o+1] = y;
+        });
     }
     
     /**
@@ -117,7 +132,21 @@ public abstract class Shape {
      * false} otherwise.
      * @throws NullPointerException if {@code s} is {@code null}.
      */
-    public abstract boolean intersects(Shape s);
+    public final boolean intersects(Shape s) {
+        return Collider.intersects(this, s);
+    }
+    
+    /**
+     * Calculates whether or not this shape, translated by <tt>(dx,dy)</tt>,
+     * intersects with another.
+     * 
+     * @return {@code true} if this shape intersects with {@code s}; {@code
+     * false} otherwise.
+     * @throws NullPointerException if {@code s} is {@code null}.
+     */
+    public final boolean intersects(Shape s, float dx, float dy) {
+        return Collider.intersects(this, s, dx, dy);
+    }
     
     /**
      * Calculates whether or this shape contains the specified shape.
@@ -126,7 +155,7 @@ public abstract class Shape {
      * otherwise.
      * @throws NullPointerException if {@code s} is {@code null}.
      */
-    public abstract boolean contains(Shape s);
+    //public abstract boolean contains(Shape s);
     
     /**
      * Calculates whether or not a point is within the bounds of the shape.
@@ -155,7 +184,7 @@ public abstract class Shape {
      * @return {@code true} if this shape contains the point; {@code false}
      * otherwise.
      */
-    public abstract boolean containsPoint(float x, float y);
+    public boolean containsPoint(float x, float y) { return false; }
     
     /**
      * Gets this shape's vertices.
@@ -164,145 +193,46 @@ public abstract class Shape {
      * is, consecutive vertices in the array (first and last are considered
      * consecutive) are joined by edges.
      */
-    protected abstract Vec2[] getVertices();
+    protected abstract float[] getVertices();
     
     /**
-     * Gets this shape's vertices.
-     * 
-     * <p>The vertices are returned in the order they physically connect - that
-     * is, consecutive vertices in the array (first and last are considered
-     * consecutive) are joined by edges.
+     * Returns a copy of this shape's vertices.
      */
-    public final ImmutableArray<Vec2> vertices() {
-        return new ImmutableArray<>(getVertices());
+    public final float[] cpyVertices() {
+        float[] v = getVertices();
+        return Arrays.copyOf(v, v.length);
     }
     
     /**
-     * Gets the axes upon which to project the shape for collision detection.
+     * Forces this shape to generate its collision data, if it has not been
+     * generated already.
      * 
-     * <p>A shape's projection axes are a set of vectors orthogonal to each of
-     * its edges. This such such that projection of object (via dot product)
-     * onto said axis allows for easy testing as to whether or not that object
-     * appears to lie (however partially) within the shape from the viewpoint
-     * of that axis.
-     * 
-     * @return The shape's projection axes.
+     * <p>A shape which does not yet have its collision data generated is not
+     * safe for multithreaded use. If you wish to use a shape across multiple
+     * threads, make sure you invoke this method before sharing it to ensure
+     * correct behaviour.
      */
-    protected Vec2[] getAxes() {
-        Vec2[] verts = getVertices();
-        Vec2[] axes = new Vec2[verts.length];
-        for(int i = 0; i < verts.length; i++)
-            axes[i] = getAxis(verts[i], verts[i+1 == verts.length ? 0 : i+1]);
-        return axes;
+    @NotThreadSafe
+    public void genCollisionData() {
+       // nothing to see here in the default implementation; move along 
     }
     
-    /**
-     * Gets the shape's projection for a given axis.
-     * 
-     * @param axis The axis upon which to project the shape.
-     * 
-     * @return The shape's projection.
-     * @throws NullPointerException if {@code axis} is {@code null}.
-     */
-    protected ShapeProjection getProjection(Vec2 axis) {
-        Vec2[] vertices = getVertices();
-        
-        float min = axis.dot(vertices[0]);
-        float max = min;
-        
-        for(int i = 1; i < vertices.length; i++) {
-            float p = axis.dot(vertices[i]);
-            if(p < min)
-                min = p;
-            else if(p > max)
-                max = p;
-        }
-        
-        return new ShapeProjection(min, max);
-    }
-    
-    /**
-     * Gets this shape's projection on its own i<font size="-1"><sup>th</sup>
-     * </font> axis.
-     * 
-     * @param i The axis number.
-     * 
-     * @return The shape's projection.
-     * @throws ArrayIndexOutOfBoundsException if {@code i} is negative or
-     * greater than {@code n-1}, where {@code n} is the shape's number of
-     * projection axes as returned by {@link #getAxes()} (that is, {@code n ==
-     * getAxes().length}).
-     */
-    protected ShapeProjection getProjection(int i) {
-        //System.out.println("WARNING: Using getProjection(int) without precomputation!");
-        return getProjection(getAxes()[i]);
-    }
-    
-    /**
-     * Gets the horizontal projection for this shape.
-     * 
-     * <p>The returned ShapeProjection is equivalent to the one returned as if
-     * by:
-     * 
-     * <pre>
-     * {@link #getProjection(Vec2) getProjection(new Vec2(1f, 0f))}
-     * </pre>
-     * 
-     * @return The horizontal projection.
-     */
-    ShapeProjection getHorizontalProjection() {
-        Vec2[] vertices = getVertices();
-        
-        float min = vertices[0].x();
-        float max = min;
-        
-        for(int i = 1; i < vertices.length; i++) {
-            if(vertices[i].x() < min)
-                min = vertices[i].x();
-            else if(vertices[i].x() > max)
-                max = vertices[i].x();
-        }
-        
-        return new ShapeProjection(min, max);
-    }
-    
-    /**
-     * Gets the vertical projection for this shape.
-     * 
-     * <p>The returned ShapeProjection is equivalent to the one returned as if
-     * by:
-     * 
-     * <pre>
-     * {@link #getProjection(Vec2) getProjection(new Vec2(0f, 1f))}
-     * </pre>
-     * 
-     * @return The vertical projection.
-     */
-    ShapeProjection getVerticalProjection() {
-        Vec2[] vertices = getVertices();
-        
-        float min = vertices[0].y();
-        float max = min;
-        
-        for(int i = 1; i < vertices.length; i++) {
-            if(vertices[i].y() < min)
-                min = vertices[i].y();
-            else if(vertices[i].y() > max)
-                max = vertices[i].y();
-        }
-        
-        return new ShapeProjection(min, max);
-    }
+    /** For use by {@link Collider}. */
+    abstract int getKey();
     
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getClass().getSimpleName());
         sb.append('{');
-        Vec2[] verts = getVertices();
+        float[] verts = getVertices();
         if(verts != null) {
-            for(int i = 0; i < verts.length; i++) {
-                sb.append(verts[i].toString());
+            for(int i = 0; i < verts.length; i += 2) {
+                sb.append('[');
+                sb.append(verts[i]);
+                sb.append(',');
+                sb.append(verts[i+1]);
+                sb.append(']');
                 if(i < verts.length - 1)
                     sb.append(',');
             }
@@ -331,20 +261,139 @@ public abstract class Shape {
     }
     
     /**
+     * Transforms the given array of vertices with {@code f} and returns the
+     * result. {@code verts} will not be modified.
+     * 
+     * @throws NullPointerException if either argument is null.
+     */
+    static float[] transformVerts(float[] verts, VertexFunction f) {
+        float[] dest = new float[verts.length];
+        transformVerts(verts, dest, f);
+        return dest;
+    }
+    
+    /**
+     * Transforms the given array of vertices with {@code f} and stores the
+     * result in {@code dest}. Unless {@code verts == dest}, verts will not be
+     * modified.
+     * 
+     * @throws NullPointerException if any argument is null.
+     * @throws ArrayIndexOutOfBoundsException if {@code dest.length <
+     * verts.length}.
+     */
+    static void transformVerts(float[] verts, float[] dest, VertexFunction f) {
+        for(int i = 0; i < verts.length; i += 2)
+            f.apply(dest, i, verts[i], verts[i+1]);
+    }
+    
+    /**
+     * Calculates the projection axes of {@code verts} and stores them in
+     * {@code dest}.
+     * 
+     * @throws NullPointerException if either argument is {@code null}.
+     * @throws ArrayIndexOutOfBoundsException if {@code dest.length <
+     * verts.length}
+     */
+    static void generateAxes(float[] verts, float[] dest) {
+        int n = verts.length - 2;
+        for(int i = 2; i < n; i += 2)
+            getAxis(dest, i, verts[i-2], verts[i-1], verts[i], verts[i+1]);
+        // Finally we add in the axis connecting the first and last vertices.
+        getAxis(dest, 0, verts[0], verts[1], verts[n], verts[n+1]);
+    }
+    
+    /**
      * Gets the projection axis for two adjacent vertices. This takes the form
      * of a vector perpendicular to the edge joining the vertices.
      * 
-     * @param v1 The first vertex.
-     * @param v2 The second vertex.
+     * @param dest The destination array.
+     * @param offset The array index offset for this axis.
+     * @param x1 The x-coordinate of the first vertex.
+     * @param y1 The y-coordinate of the first vertex.
+     * @param x2 The x-coordinate of the second vertex.
+     * @param y2 The y-coordinate of the second vertex.
      * 
-     * @return The projection axis.
-     * @throws NullPointerException if either argument is {@code null}.
+     * @throws NullPointerException if {@code dest} is {@code null}.
+     * @throws ArrayIndexOutOfBoundsException if {@code offset >=
+     * dest.length - 1}.
      */
-    protected static Vec2 getAxis(Vec2 v1, Vec2 v2) {
+    private static void getAxis(float[] dest, int offset, float x1, float y1,
+            float x2, float y2) {
         // This is what we're really doing:
-        //return v1.sub(v2).rotate90Degrees();
+        // v1.sub(v2).rotate90Degrees();
         // However, if we simplify that algebraically, we get:
-        return Vec2.immutable(v2.y() - v1.y(), v1.x() - v2.x());
+        dest[offset]   = y2 - y1;
+        dest[offset+1] = x1 - x2;
+    }
+    
+    /**
+     * This is O(n<font size=-1><sup>2</sup></font>).
+     */
+    static void genProjections(float[] verts, float[] axes, float[] dest) {
+        for(int i = 0; i < axes.length; i += 2)
+            getProjection(verts, axes[i], axes[i+1], dest, i);
+    }
+    
+    static void getProjection(float[] verts, float x, float y, float[] dest, int offset) {
+        /*
+         * It is worth noting that for projecting a shape onto one of its own
+         * axes, the two vertices which generated said axis will have identical
+         * projections, and thus we could potentially save computation time by
+         * only projecting one of them. However, such an "optimisation" will
+         * likely only produce unnecessary overhead and complexity, and so it's
+         * not worth bothering with. Besides, projection of a single vertex is
+         * pretty cheap already.
+         */
+        
+        float min = x*verts[0] + y*verts[1]; // dot product <=> projection
+        float max = min;
+        float p;
+        
+        for(int i = 2; i < verts.length; i += 2) {
+            p = x*verts[i] + y*verts[i+1]; // dot product <=> projection
+            if(p < min)
+                min = p;
+            else if(p > max)
+                max = p;
+        }
+        
+        dest[offset]   = min;
+        dest[offset+1] = max;
+    }
+    
+    static boolean projectionsOverlap(float[] verts, float x, float y,
+            float projMin, float projMax) {
+        /*
+         * Note: This function is identical to (and thus duplicated from)
+         * getProjection() asides from the final part, where we test for
+         * overlap with another projection rather than dump the resultant data
+         * into an array.
+         */
+        
+        float min = x*verts[0] + y*verts[1]; // dot product <=> projection
+        float max = min;
+        float p;
+        
+        for(int i = 2; i < verts.length; i += 2) {
+            p = x*verts[i] + y*verts[i+1]; // dot product <=> projection
+            if(p < min)
+                min = p;
+            else if(p > max)
+                max = p;
+        }
+        
+        return min <= projMax && max >= projMin;
+    }
+    
+    static boolean projectionsOverlapAABB(float[] verts, float x, float y,
+            float projMin, float projMax) {
+        float p1 = x*verts[AABB.XMIN] + y*verts[AABB.YMIN];
+        float p2 = x*verts[AABB.XMAX] + y*verts[AABB.YMIN];
+        float p3 = x*verts[AABB.XMAX] + y*verts[AABB.YMAX];
+        float p4 = x*verts[AABB.XMIN] + y*verts[AABB.YMAX];
+        
+        return Math.min(Math.min(p1, p2), Math.min(p3, p4)) <= projMax
+            && Math.max(Math.max(p1, p2), Math.max(p3, p4)) >= projMin;
     }
     
     //--------------------==========--------------------
@@ -352,18 +401,69 @@ public abstract class Shape {
     //--------------------==========--------------------
     
     /**
-     * A blank implementation of Shape used by {@link #NO_SHAPE}.
+     * A VertexFunction is a special function 
      */
-    private static final class NoShape extends Shape {
-        @Override public Shape transform(Matrix2 matrix) { return this; }
-        @Override public Shape transform(UnaryOperator<Vec2> f) { return this; }
-        @Override public Shape translate(float x, float y) { return this; }
-        @Override protected Vec2[] getVertices() { return new Vec2[0]; }
-        @Override protected Vec2[] getAxes() { return new Vec2[0]; }
-        @Override public boolean intersects(Shape s) { return false; }
-        @Override public boolean contains(Shape s) { return false; }
-        @Override public boolean containsPoint(float x, float y) { return false; }
-        @Override public Shape reflect() { return this; }
+    @FunctionalInterface
+    public static interface VertexFunction {
+        
+        /**
+         * Transforms a vertex. The resultant {@code x} should be placed in
+         * {@code dest[offset]}, and the resultant {@code y} should be placed
+         * in {@code dest[offset+1]}. Alternatively, you can use {@link
+         * #set(float[], int, float, float)} to set the resultant x and y, if
+         * you wish to avoid interacting with the destination array directly.
+         * 
+         * @param dest The destination array in which to store the result.
+         * @param offset The destination array offset.
+         * @param x The x component of the input vertex.
+         * @param y The y component of the input vertex.
+         */
+        public void apply(float[] dest, int offset, float x, float y);
+        
+        /**
+         * Sets the resultant x and y in the destination array. This should
+         * only be invoked from within {@link #apply(float[],int,float,float)
+         * apply}, with the {@code dest} and {@code offset} args forwarded to
+         * this methd.
+         * 
+         * @param dest The destination array in which to store the result.
+         * @param offset The destination array offset.
+         * @param x The x component of the output vertex.
+         * @param y The y component of the output vertex.
+         */
+        default void set(float[] dest, int offset, float x, float y) {
+            dest[offset]   = x;
+            dest[offset+1] = y;
+        }
+        
+        /**
+         * Sets the resultant x in the destination array. This should only be
+         * invoked from within {@link #apply(float[], int, float, float)
+         * apply}, with the {@code dest} and {@code offset} args forwarded to
+         * this methd.
+         * 
+         * @param dest The destination array in which to store the result.
+         * @param offset The destination array offset.
+         * @param x The x component of the output vertex.
+         */
+        default public void setX(float[] dest, int offset, float x) {
+            dest[offset] = x;
+        }
+        
+        /**
+         * Sets the resultant y in the destination array. This should only be
+         * invoked from within {@link #apply(float[], int, float, float)
+         * apply}, with the {@code dest} and {@code offset} args forwarded to
+         * this methd.
+         * 
+         * @param dest The destination array in which to store the result.
+         * @param offset The destination array offset.
+         * @param x The y component of the output vertex.
+         */
+        default public void setY(float[] dest, int offset, float y) {
+            dest[offset+1] = y;
+        }
+        
     }
     
 }

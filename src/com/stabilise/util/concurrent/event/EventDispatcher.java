@@ -18,7 +18,7 @@ import com.stabilise.util.concurrent.Striper;
  * An EventDispatcher allows users to register event listeners and dispatch
  * events to these listeners. To register an event listener via {@link
  * #addListener(Event, EventHandler)}, users specify the event to listen for
- * and the <i>callback function</i> or <i>handler</i>, which is invoked when
+ * and the <i>callback function</i> - or <i>handler</i> - which is invoked when
  * the event is posted.
  * 
  * <p>Handlers are posted to an {@code Executor} specified in an {@code
@@ -30,6 +30,10 @@ import com.stabilise.util.concurrent.Striper;
  * <p>By default, listeners are single-use - that is, they are automatically
  * removed when they receive an event. To register a persistent listener, use
  * {@link #addListener(Event, EventHandler, boolean)}.
+ * 
+ * <p>Event equality is determined using the {@link Event#equals(Object)}
+ * method such that a listener will be invoked when an event which
+ * <tt>equals</tt> its registered event is posted.
  * 
  * <p>This class may be subclassed if desired.
  */
@@ -153,7 +157,7 @@ public class EventDispatcher {
     
     /**
      * Actually posts an event. Package-private impl. method as {@link
-     * #post(Event)} must be public final.
+     * #post(Event)} must be public final. {@code e} is never null.
      */
     void doPost(Event e) {
         ListenerBucket b;
@@ -175,7 +179,7 @@ public class EventDispatcher {
     /**
      * Clears any listeners satisfying the specified predicate. This is
      * exposed for subclasses to utilise if they wish; however it is not a
-     * part of the public API for simplicity's sake.
+     * part of the public API for obvious reasons.
      * 
      * @throws NullPointerException if {@code pred} is {@code null}.
      */
