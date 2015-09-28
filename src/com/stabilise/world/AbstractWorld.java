@@ -24,7 +24,7 @@ import com.stabilise.util.collect.FragList;
 import com.stabilise.util.collect.IntList;
 import com.stabilise.util.collect.IteratorUtils;
 import com.stabilise.util.collect.UnorderedArrayList;
-import com.stabilise.util.collect.SimpleIterable;
+import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.collect.SimpleList;
 import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.maths.Maths;
@@ -45,9 +45,13 @@ public abstract class AbstractWorld implements World {
     
     /** All players in the world. Maps IDs -> players' EntityMobs. */
     protected final Map<Integer, EntityMob> players = new HashMap<>(4);
+    private final FunctionalIterable<EntityMob> itrPlayers =
+            FunctionalIterable.wrap(players.values());
     /** The map of loaded entities in the world. Maps IDs -> Entities.
      * This is a LinkedHashMap as to allow for consistent iteration. */
     protected final Map<Integer, Entity> entities = new LinkedHashMap<>(64);
+    private final FunctionalIterable<Entity> itrEntities =
+            FunctionalIterable.wrap(entities.values());
     /** The total number of entities which have existed during the lifetime of
      * the world. When a new entity is created this is incremented and set as
      * its ID. */
@@ -70,7 +74,9 @@ public abstract class AbstractWorld implements World {
      * need not exist in this list if it does not require updates. */
     protected final SimpleList<TileEntity> tileEntities = new UnorderedArrayList<>();
     
-    /** The list of hitboxes in the world. */
+    /** The list of hitboxes in the world.
+     * <p>Implementation note: This is an {@link UnorderedArrayList} as
+     * internal hitbox ordering is unimportant. */
     protected final SimpleList<Hitbox> hitboxes = new UnorderedArrayList<>();
     /** The total number of hitboxes which have existed during the lifetime of
      * the world. */
@@ -79,7 +85,10 @@ public abstract class AbstractWorld implements World {
     /** This world's particle manager. */
     public final ParticleManager particleManager = new ParticleManager(this);
     /** Stores all particles in the world. This should remain empty if this is
-     * a server world. */
+     * a server world.
+     * <p>Implementation note: This is a FragList as we want to maintain local
+     * render order between any two pairs of particles, but we don't really
+     * care if new particles are spawned between any two. */
     protected final SimpleList<Particle> particles = new FragList<>();
     /** The total number of particles which have existed during the lifetime of
      * the world. */
@@ -195,7 +204,7 @@ public abstract class AbstractWorld implements World {
      * collection by the iterator if {@code updateAndCheck()} returns {@code
      * true}.
      */
-    protected <E extends GameObject> void updateObjects(Iterable<E> objects) {
+    protected void updateObjects(Iterable<? extends GameObject> objects) {
         IteratorUtils.forEach(objects, o -> o.updateAndCheck(this));
     }
     
@@ -205,8 +214,8 @@ public abstract class AbstractWorld implements World {
      * collection by the iterator if {@code updateAndCheck()} returns {@code
      * true}.
      */
-    protected <E extends GameObject> void updateObjects(SimpleIterable<E> objects) {
-        objects.forEach(o -> o.updateAndCheck(this));
+    protected void updateObjects(FunctionalIterable<? extends GameObject> objects) {
+        objects.iterate(o -> o.updateAndCheck(this));
     }
     
     /**
@@ -271,27 +280,27 @@ public abstract class AbstractWorld implements World {
     // ==========Collection getters==========
     
     @Override
-    public Iterable<EntityMob> getPlayers() {
-        return players.values();
+    public FunctionalIterable<EntityMob> getPlayers() {
+        return itrPlayers;
     }
     
     @Override
-    public Iterable<Entity> getEntities() {
-        return entities.values();
+    public FunctionalIterable<Entity> getEntities() {
+        return itrEntities;
     }
     
     @Override
-    public SimpleIterable<Hitbox> getHitboxes() {
+    public FunctionalIterable<Hitbox> getHitboxes() {
         return hitboxes;
     }
     
     @Override
-    public SimpleIterable<TileEntity> getTileEntities() {
+    public FunctionalIterable<TileEntity> getTileEntities() {
         return tileEntities;
     }
     
     @Override
-    public SimpleIterable<Particle> getParticles() {
+    public FunctionalIterable<Particle> getParticles() {
         return particles;
     }
     

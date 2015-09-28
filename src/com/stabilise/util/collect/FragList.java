@@ -1,7 +1,9 @@
 package com.stabilise.util.collect;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -20,7 +22,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * <p>FragList accepts a parameter {@code flattenThreshold}, which determines
  * how often the list is automatically flattened. When the percentage of nulls
  * throughout the list exceeds the threshold, the list is flattened upon an
- * invocation of {@link #forEach(Predicate) forEach}() to eliminate those
+ * invocation of {@link #iterate(Predicate) forEach}() to eliminate those
  * nulls. A lower threshold means a FragList will be flattened more often,
  * which helps preserve data locality but can incur significant overhead. A
  * higher threshold results in less frequent flattening, but may result in the
@@ -54,7 +56,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * [ A, B, C, D, E, F, G, _ ] : size = 7
  * </pre>
  * 
- * <p>Suppose we then iterated over the list using {@link #forEach(Predicate)}
+ * <p>Suppose we then iterated over the list using {@link #iterate(Predicate)}
  * and removed elements A, C and D. Assuming the list isn't flattened, it would
  * now look like:
  * 
@@ -115,7 +117,7 @@ public class FragList<E> implements SimpleList<E> {
      * @param capacity The initial internal array length.
      * @param flattenThreshold When the percentage of nulls in this list
      * exceeds this threshold, this list will be automatically flattened upon
-     * an invocation of {@link #forEach(Predicate)}.
+     * an invocation of {@link #iterate(Predicate)}.
      * 
      * @throws NegativeArraySizeException if {@code capacity} is negative.
      * @throws IllegalArgumentException if flattenThreshold < 0 ||
@@ -163,35 +165,55 @@ public class FragList<E> implements SimpleList<E> {
     }
     
     @Override
-    public void forEach(Predicate<? super E> action) {
+    public Iterator<E> iterator() {
+        return new Itr();
+    }
+    
+    @Override
+    public void iterate(Predicate<? super E> action) {
         Objects.requireNonNull(action); // fail-fast
         
         for(int i = 0; i <= lastElement; i++) {
-            if(data[i] != null && action.test(data[i])) {
-                data[i] = null;
-                size--;
-                if(i == lastElement) {
-                    // This was the last element, so we keep decrementing
-                    // lastElement until we land on something non-null.
-                    while(lastElement > 0 && data[--lastElement] == null) {}
-                    if(firstNull > lastElement)
-                        firstNull = lastElement + 1;
-                } else if(i < firstNull) {
-                    firstNull = i;
-                }
-            }
+            if(data[i] != null && action.test(data[i]))
+                remove(i);
         }
         
         flatten(flattenThreshold);
     }
     
+    private void remove(int i) {
+        data[i] = null;
+        size--;
+        if(i == lastElement) {
+            // This was the last element, so we keep decrementing
+            // lastElement until we land on something non-null.
+            while(lastElement > 0 && data[--lastElement] == null) {}
+            if(firstNull > lastElement)
+                firstNull = lastElement + 1;
+        } else if(i < firstNull) {
+            firstNull = i;
+        }
+    }
+    
     @Override
-    public void iterate(Consumer<? super E> cons) {
+    public void forEach(Consumer<? super E> cons) {
         Objects.requireNonNull(cons);
         
         for(int i = 0; i <= lastElement; i++) {
             if(data[i] != null)
                 cons.accept(data[i]);
+        }
+        
+        // No flattening here since element removal does not occur.
+    }
+    
+    @Override
+    public void forEachUntil(Predicate<? super E> pred) {
+        Objects.requireNonNull(pred);
+        
+        for(int i = 0; i <= lastElement; i++) {
+            if(data[i] != null && pred.test(data[i]))
+                return;
         }
         
         // No flattening here since element removal does not occur.
@@ -283,6 +305,44 @@ public class FragList<E> implements SimpleList<E> {
         sb.append("}");
         
         return sb.toString();
+    }
+    
+    private class Itr implements Iterator<E> {
+        
+        private int cursor = -1;
+        private int next = -1;
+        
+        /** returns next; -2 if no more */
+        private int peek() {
+            next = cursor + 1;
+            while(next <= FragList.this.lastElement) {
+                if(FragList.this.data[next] != null)
+                    return next;
+                next++;
+            }
+            next = -1;
+            return -1;
+        }
+        
+        @Override
+        public boolean hasNext() {
+            return next != -1 || peek() != -1;
+        }
+        
+        @Override
+        public E next() {
+            if(!hasNext())
+                throw new NoSuchElementException();
+            cursor = next;
+            next = -1;
+            return FragList.this.data[cursor];
+        }
+        
+        @Override
+        public void remove() {
+            FragList.this.remove(cursor);
+        }
+        
     }
     
 }

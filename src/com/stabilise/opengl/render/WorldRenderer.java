@@ -266,19 +266,23 @@ public class WorldRenderer implements Renderer {
         tileRenderer.render();
         
         profiler.next("entities"); // root.render.entities
+        
         // Temporary way of ensuring the player is rendered on top
         Entity playerEntity = null;
-        for(EntityMob e : world.getPlayers()) {
+        for(Entity e : world.getPlayers()) {
             playerEntity = e;
             break;
         }
-        for(Entity e : world.getEntities())
+        
+        for(Entity e : world.getEntities()) {
             if(e != playerEntity)
                 e.render(this);
-        playerEntity.render(this);
+        }
+        
+        playerEntity.render(this); // render the player on top
         
         profiler.next("particles"); // root.render.particles
-        world.getParticles().iterate(p -> p.render(this));
+        world.getParticles().forEach(p -> p.render(this));
         
         batch.end();
         
@@ -286,10 +290,13 @@ public class WorldRenderer implements Renderer {
         if(renderHitboxes) {
             shapes.begin(ShapeType.Line);
             shapes.setColor(Color.BLUE);
-            for(Entity e : world.getEntities())
-                renderAABB(e.boundingBox, (float)e.x, (float)e.y);
+            world.getEntities().forEach(
+                    e -> renderAABB(e.boundingBox, (float)e.x, (float)e.y)
+            );
             shapes.setColor(Color.RED);
-            world.getHitboxes().iterate(h -> renderShape(h.boundingBox, (float)h.x, (float)h.y));
+            world.getHitboxes().forEach(
+                    h -> renderShape(h.boundingBox, (float)h.x, (float)h.y)
+            );
             shapes.end();
         }
         

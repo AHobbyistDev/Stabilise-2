@@ -327,11 +327,10 @@ public class Array<E> implements Iterable<E> {
         
         @Override
         public E next() {
-            try {
+            if(hasNext())
                 return data[cursor++];
-            } catch(ArrayIndexOutOfBoundsException e) {
-                throw new NoSuchElementException(e.getMessage());
-            }
+            else
+                throw new NoSuchElementException();
         }
         
         @Override

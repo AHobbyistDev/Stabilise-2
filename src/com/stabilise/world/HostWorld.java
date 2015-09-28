@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.state.SingleplayerState;
-import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
 import com.stabilise.util.annotation.NotThreadSafe;
@@ -207,13 +206,13 @@ public class HostWorld extends AbstractWorld {
         int minY = r.y() * Region.REGION_SIZE_IN_TILES;
         int maxY = minY + Region.REGION_SIZE_IN_TILES;
         
-        for(Entity e : getEntities()) {
+        getEntities().forEach(e -> {
             if(e.x + e.boundingBox.maxX() >= minX
                     && e.x + e.boundingBox.minX() <= maxX
                     && e.y + e.boundingBox.maxY() >= minY
                     && e.y + e.boundingBox.minY() <= maxY)
                 e.destroy();
-        }
+        });
     }
     
     /**

@@ -10,7 +10,6 @@ import javax.imageio.ImageIO;
 
 import com.badlogic.gdx.utils.ObjectMap;
 import com.stabilise.util.TaskTimer;
-import com.stabilise.util.StringUtil;
 import com.stabilise.util.maths.Point;
 import com.stabilise.util.maths.Maths;
 
@@ -90,44 +89,6 @@ public class RandomTests {
         c2.stop();
         
         c1.printComparison(c2);
-    }
-    
-    /**
-     * simple storage class of a double and an int
-     */
-    private static class DoubleIntPair {
-        private final double d;
-        private final int i;
-        private DoubleIntPair(double d, int i) {
-            this.d = d;
-            this.i = i;
-        }
-    }
-    
-    // old and deprecated code from StringUtil or MathUtil - I can't remember
-    private static String oldAbb(double n, int places) {
-        return Double.toString(Math.round(n * places * 10) / ((double)places * 10D));
-    }
-    
-    /**
-     * Just making sure the new abbreviation method works well and good
-     */
-    @SuppressWarnings("unused")
-    private static void doubleAbbreviations() {
-        int someUnusedNumber;
-        
-        DoubleIntPair[] nums = new DoubleIntPair[] {
-                new DoubleIntPair(1.2345678D, 3),
-                new DoubleIntPair(1.2345678D, 12),
-                new DoubleIntPair(4, 3),
-                new DoubleIntPair(1.2345678D, 0),
-                new DoubleIntPair(1.2345678D, 300),
-                new DoubleIntPair(1.23D, 3)
-        };
-        
-        for(DoubleIntPair p : nums) {
-            System.out.println(StringUtil.cullFP(p.d, p.i) + " : " + oldAbb(p.d, p.i));
-        }
     }
     
     protected static void testHashes() {

@@ -6,7 +6,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
-import com.stabilise.util.collect.SimpleIterable;
+import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.AbstractWorld.ParticleManager;
 import com.stabilise.world.tile.Tile;
@@ -134,17 +134,17 @@ public interface World {
      * player is an entity, every element in the returned collection is also
      * a member of the one returned by {@link #getEntities()}.
      */
-    Iterable<EntityMob> getPlayers();
+    FunctionalIterable<EntityMob> getPlayers();
     
     /**
      * @return The collection of entities in the world.
      */
-    Iterable<Entity> getEntities();
+    FunctionalIterable<Entity> getEntities();
     
     /**
      * @return The collection of hitboxes in the world.
      */
-    SimpleIterable<Hitbox> getHitboxes();
+    FunctionalIterable<Hitbox> getHitboxes();
     
     /**
      * @return The collection of particles in the world, or {@code null} if
@@ -152,12 +152,12 @@ public interface World {
      * this would be the case if this is a server's world, as particles are
      * purely aesthetic and a server doesn't concern itself with them).
      */
-    SimpleIterable<Particle> getParticles();
+    FunctionalIterable<Particle> getParticles();
     
     /**
      * @return The collection of tile entities in the world.
      */
-    SimpleIterable<TileEntity> getTileEntities();
+    FunctionalIterable<TileEntity> getTileEntities();
     
     /**
      * Gets this world's particle manager.

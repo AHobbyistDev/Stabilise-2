@@ -36,28 +36,26 @@ public abstract class FragListTest {
         if(warmup)
             System.out.println("----------WARMUP----------");
         else
-            System.out.println("----------TEST----------");
+            System.out.println("-----------TEST-----------");
         new TestLinkedList().test();
-        new TestFragListNoShift().test();
-        new TestFragListNoShiftFlatten().test();
+        new TestFragList().test();
         new TestUnorderedArrayList().test();
         if(warmup)
             System.out.println("----------END WARMUP----------");
         else
-            System.out.println("----------END TEST----------");
+            System.out.println("-----------END TEST-----------");
     }
     
     // --------------------------------------
     
     public void test() {
         final int spawnerWaves = 256*256*4;
-        final int entitiesPerWave = 20;
+        final int entitiesPerWave = 25;
         final int finalWaves = 0;
         int id = 0;
         int generation = 0;
         final int killMask = 0b0101010101;
         final IntBox hash = new IntBox(hashGen(generation));
-        int remaining = 0;
         Predicate<Entity> pred = e -> ((e.hash ^ hash.get()) & killMask) == killMask;
         final TaskTimer t = timer();
         t.start();
@@ -77,10 +75,8 @@ public abstract class FragListTest {
             hash.set(hashGen(generation));
         }
         
-        remaining = size();
-        
         t.stop();
-        System.out.print(remaining + ": ");
+        System.out.print(size() + ": ");
         t.printResult(TimeUnit.MILLISECONDS);
     }
     
@@ -98,21 +94,12 @@ public abstract class FragListTest {
         @Override int size() { return list.size(); }
     }
     
-    static final class TestFragListNoShift extends FragListTest {
-        final FragList<Entity> list = new FragList<>(2048, 1f);
+    static final class TestFragList extends FragListTest {
+        final FragList<Entity> list = new FragList<>(2048, 0.22f);
         
         @Override TaskTimer timer() { return new TaskTimer("FragList"); }
         @Override void add(Entity e) { list.put(e); }
-        @Override void iterate(Predicate<Entity> pred) { list.forEach(pred); }
-        @Override int size() { return list.size(); }
-    }
-    
-    static final class TestFragListNoShiftFlatten extends FragListTest {
-        final FragList<Entity> list = new FragList<>(2048, 0.25f);
-        
-        @Override TaskTimer timer() { return new TaskTimer("FragListFlatten"); }
-        @Override void add(Entity e) { list.put(e); }
-        @Override void iterate(Predicate<Entity> pred) { list.forEach(pred); }
+        @Override void iterate(Predicate<Entity> pred) { list.iterate(pred); }
         @Override int size() { return list.size(); }
     }
     
@@ -121,11 +108,9 @@ public abstract class FragListTest {
         
         @Override TaskTimer timer() { return new TaskTimer("UnorderedArrayList"); }
         @Override void add(Entity e) { list.add(e); }
-        @Override void iterate(Predicate<Entity> pred) { list.forEach(pred); }
+        @Override void iterate(Predicate<Entity> pred) { list.iterate(pred); }
         @Override int size() { return list.size(); }
     }
-    
-    
     
     // --------------------------------------------
     

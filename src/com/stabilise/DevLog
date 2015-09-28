@@ -256,5 +256,7 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- RegionCache is now RegionStore and is now in charge of managing all regions.
 21/09/15
 	- Game now uses the updated floatarray hitboxes.
+28/09/15
+	- Added FragList and improved general collections classes
 
 	

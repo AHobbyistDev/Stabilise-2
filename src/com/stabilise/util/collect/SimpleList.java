@@ -5,7 +5,7 @@ package com.stabilise.util.collect;
  * implementations designed for element addition, iteration, and element
  * removal during iteration.
  */
-public interface SimpleList<E> extends SimpleIterable<E> {
+public interface SimpleList<E> extends FunctionalIterable<E> {
     
     /**
      * Adds an element to this list.

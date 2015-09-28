@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -100,7 +101,8 @@ public class UnorderedArrayList<E>
     }
     
     @Override
-    public void forEach(Predicate<? super E> pred) {
+    public void iterate(Predicate<? super E> pred) {
+        Objects.requireNonNull(pred); // fail-fast
         for(int i = 0; i < size; i++) {
             if(pred.test(data[i])) {
                 doRemove(i);
@@ -110,9 +112,19 @@ public class UnorderedArrayList<E>
     }
     
     @Override
-    public void iterate(Consumer<? super E> cons) {
+    public void forEach(Consumer<? super E> cons) {
+        Objects.requireNonNull(cons); // fail-fast
         for(int i = 0; i < size; i++)
             cons.accept(data[i]);
+    }
+    
+    @Override
+    public void forEachUntil(Predicate<? super E> pred) {
+        Objects.requireNonNull(pred); // fail-fast
+        for(int i = 0; i < size; i++) {
+            if(pred.test(data[i]))
+                return;
+        }
     }
     
     @Override
