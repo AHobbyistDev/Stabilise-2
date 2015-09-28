@@ -442,12 +442,12 @@ public abstract class Container implements Iterable<ItemStack>, Sendable {
      */
     public abstract void sort(Comparator<ItemStack> comparator);
     
-    /**
+    /*
      * compresses matching adjacent stacks into one stack if possible
      * 
      * TODO: finish
      */
-    @SuppressWarnings("unused")
+    /*
     private void compact() {
         if(size() == 0)
             return;
@@ -477,6 +477,7 @@ public abstract class Container implements Iterable<ItemStack>, Sendable {
         if(!isBounded())
             ; // clean up excess unbounded slots
     }
+    */
     
     @Override
     public Iterator<ItemStack> iterator() {

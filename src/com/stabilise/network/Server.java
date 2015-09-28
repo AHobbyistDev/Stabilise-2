@@ -15,7 +15,7 @@ import com.stabilise.util.AppDriver;
 import com.stabilise.util.AppDriver.Drivable;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.LightLinkedList;
+import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.util.concurrent.Task;
 
 
@@ -92,7 +92,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
     /** The list of client connections. Does not contain {@code null} elements.
      * This list should be manually synchronised on when being iterated over. */
     protected final List<TCPConnection> connections =
-            Collections.synchronizedList(new LightLinkedList<>());
+            Collections.synchronizedList(new UnorderedArrayList<>());
     
     private Thread clientListenerThread;
     
@@ -411,7 +411,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
      * @throws InterruptedException
      */
     public void waitUntilTerminated() throws InterruptedException {
-        Task.waitOnInterruptibly(state, () -> isTerminated());
+        Task.waitInterruptibly(state, () -> isTerminated());
     }
     
     /**

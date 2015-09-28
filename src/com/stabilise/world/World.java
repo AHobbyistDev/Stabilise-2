@@ -6,6 +6,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
+import com.stabilise.util.collect.SimpleIterable;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.AbstractWorld.ParticleManager;
 import com.stabilise.world.tile.Tile;
@@ -143,7 +144,7 @@ public interface World {
     /**
      * @return The collection of hitboxes in the world.
      */
-    Iterable<Hitbox> getHitboxes();
+    SimpleIterable<Hitbox> getHitboxes();
     
     /**
      * @return The collection of particles in the world, or {@code null} if
@@ -151,12 +152,12 @@ public interface World {
      * this would be the case if this is a server's world, as particles are
      * purely aesthetic and a server doesn't concern itself with them).
      */
-    Iterable<Particle> getParticles();
+    SimpleIterable<Particle> getParticles();
     
     /**
      * @return The collection of tile entities in the world.
      */
-    Iterable<TileEntity> getTileEntities();
+    SimpleIterable<TileEntity> getTileEntities();
     
     /**
      * Gets this world's particle manager.

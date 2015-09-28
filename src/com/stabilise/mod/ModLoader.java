@@ -11,7 +11,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Resources;
 import com.stabilise.util.Log;
 import com.stabilise.util.collect.IteratorUtils;
-import com.stabilise.util.collect.LightArrayList;
+import com.stabilise.util.collect.UnorderedArrayList;
 
 
 public class ModLoader {
@@ -30,7 +30,7 @@ public class ModLoader {
     
     public static FileHandle[] findModCandidates() {
         FileHandle[] fileList = Resources.MODS_DIR.list();
-        LightArrayList<FileHandle> jarFiles = new LightArrayList<>();
+        UnorderedArrayList<FileHandle> jarFiles = new UnorderedArrayList<>();
         for(FileHandle f : fileList) {
             if(f.isDirectory())
                 continue;

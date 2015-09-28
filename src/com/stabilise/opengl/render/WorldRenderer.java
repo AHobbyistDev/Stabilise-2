@@ -24,9 +24,7 @@ import com.stabilise.core.Game;
 import com.stabilise.core.Resources;
 import com.stabilise.core.app.Application;
 import com.stabilise.entity.*;
-import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.controller.PlayerController;
-import com.stabilise.entity.particle.Particle;
 import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
@@ -280,8 +278,7 @@ public class WorldRenderer implements Renderer {
         playerEntity.render(this);
         
         profiler.next("particles"); // root.render.particles
-        for(Particle p : world.getParticles())
-            p.render(this);
+        world.getParticles().iterate(p -> p.render(this));
         
         batch.end();
         
@@ -292,8 +289,7 @@ public class WorldRenderer implements Renderer {
             for(Entity e : world.getEntities())
                 renderAABB(e.boundingBox, (float)e.x, (float)e.y);
             shapes.setColor(Color.RED);
-            for(Hitbox h : world.getHitboxes())
-                renderShape(h.boundingBox, (float)h.x, (float)h.y);
+            world.getHitboxes().iterate(h -> renderShape(h.boundingBox, (float)h.x, (float)h.y));
             shapes.end();
         }
         

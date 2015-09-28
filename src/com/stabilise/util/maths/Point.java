@@ -8,17 +8,19 @@ package com.stabilise.util.maths;
  */
 public abstract class Point {
     
+    protected int x, y;
+    
     protected Point() {}
     
     /**
      * Returns the x component of this point.
      */
-    public abstract int x();
+    public final int x() { return x; }
     
     /**
      * Returns the y component of this point.
      */
-    public abstract int y();
+    public final int y() { return y; }
     
     /**
      * Sets the components of this point, and returns this point.
@@ -122,22 +124,12 @@ public abstract class Point {
     
     static class ImmutablePoint extends Point {
         
-        final int x, y, hash;
+        private final int hash;
         
         ImmutablePoint(int x, int y) {
             this.x = x;
             this.y = y;
             this.hash = genHash();
-        }
-        
-        @Override
-        public int x() {
-            return x;
-        }
-        
-        @Override
-        public int y() {
-            return y;
         }
         
         @Override
@@ -154,21 +146,9 @@ public abstract class Point {
     
     static class MutablePoint extends Point {
         
-        int x, y;
-        
         MutablePoint(int x, int y) {
             this.x = x;
             this.y = y;
-        }
-        
-        @Override
-        public int x() {
-            return x;
-        }
-        
-        @Override
-        public int y() {
-            return y;
         }
         
         @Override

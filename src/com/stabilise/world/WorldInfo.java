@@ -122,9 +122,7 @@ public class WorldInfo implements Comparable<WorldInfo> {
      */
     @Override
     public int compareTo(WorldInfo world) {
-        if(lastPlayedDate > world.lastPlayedDate) return -1;
-        if(lastPlayedDate < world.lastPlayedDate) return 1;
-        return 0;
+        return Long.compare(world.lastPlayedDate, lastPlayedDate);
     }
     
     //--------------------==========--------------------

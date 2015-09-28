@@ -2,7 +2,14 @@ package com.stabilise.util;
 
 /**
  * This class provides simple and concise ways for testing indices and throwing
- * appropriate IndexOutOfBoundsExceptions or IllegalArgumentExceptions.
+ * appropriate IndexOutOfBoundsExceptions or IllegalArgumentExceptions, and
+ * additionally provides convenience methods for throwing exceptions to reduce
+ * verbosity at expense of clarity.
+ * 
+ * <p>Exposed functions may be inconsistently duplicated for different
+ * primitive data types, and this is simply done on a basis of convenience. If
+ * a method must be duplicated for use with another primitive data type, feel
+ * free to add it.
  */
 public class Checks {
     
@@ -79,6 +86,23 @@ public class Checks {
      * 
      * @param val The value being tested.
      * @param min The minimum legal value (inclusive).
+     * @param max The maximum legal value (inclusive).
+     * 
+     * @return val
+     * @throws IllegalArgumentException if {@code val < min || val > max}.
+     */
+    public static float test(float val, float min, float max) {
+        if(val < min || val > max)
+            throw new IllegalArgumentException("Illegal value " + val +
+                    "; it should be in the range [" + min + ", " + max + "]");
+        return val;
+    }
+    
+    /**
+     * Tests a value.
+     * 
+     * @param val The value being tested.
+     * @param min The minimum legal value (inclusive).
      * 
      * @return val
      * @throws IllegalArgumentException if {@code val < min}.
@@ -104,6 +128,34 @@ public class Checks {
             throw new IllegalArgumentException("Illegal value " + val +
                     "; it should not be greater than " + max);
         return val;
+    }
+    
+    /**
+     * Throws an AssertionError.
+     */
+    public static void badAssert() {
+        throw new AssertionError();
+    }
+    
+    /**
+     * Throws an AssertionError with the specified message.
+     */
+    public static void badAssert(String msg) {
+        throw new AssertionError(msg);
+    }
+    
+    /**
+     * Throws an UnsupportedOperationException.
+     */
+    public static void unsupported() {
+        throw new UnsupportedOperationException();
+    }
+    
+    /**
+     * Throws an UnsupportedOperationException with the specified message.
+     */
+    public static void unsupported(String msg) {
+        throw new UnsupportedOperationException(msg);
     }
     
 }

@@ -2,6 +2,7 @@ package com.stabilise.util.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.google.common.io.Files;
@@ -11,8 +12,12 @@ import com.google.common.io.Files;
  */
 public class IOUtil {
     
+    /** Regex source for illegal filename characters. */
+    // Allows only lowercase+uppercase letters, all numbers, spaces (\u0020),
+    // parentheses, periods, dashes, and inverted commas 
+    public static final String ILLEGAL_FILENAME_REGEX_SRC = "[^a-zA-Z0-9\\u0020().'-]";
     /** Regex for illegal filename characters. */
-    public static final String ILLEGAL_FILENAME_REGEX = "[^a-zA-Z0-9\\u0020().'-]";
+    public static final Pattern ILLEGAL_FILENAME_REGEX = Pattern.compile(ILLEGAL_FILENAME_REGEX_SRC);
     
     // non-instantiable
     private IOUtil() {}
@@ -152,9 +157,9 @@ public class IOUtil {
      * @throws NullPointerException if {@code str} is {@code null}.
      */
     public static String getLegalString(String str) {
-        // Allows lowercase+uppercase letters, all numbers, spaces (\u0020),
-        // parentheses, periods, dashes, and inverted commas 
-        return str.replaceAll("[^a-zA-Z0-9\\u0020().'-]", "_");
+        // See String#replaceAll() - I just pulled the regex out to avoid
+        // needing to repeatedly recompile.
+        return ILLEGAL_FILENAME_REGEX.matcher(str).replaceAll("_");
     }
     
     /**
@@ -163,12 +168,6 @@ public class IOUtil {
      * This is done as to ensure data is not lost if for some reason the save
      * process is interrupted and it is desirable to retain the earlier version
      * of the file.
-     * 
-     * <p>Invoking this method is equivalent to the following:
-     * 
-     * <pre>
-     * saveOperation.accept(safelySaveFile1(file));
-     * safelySaveFile2(file);</pre>
      * 
      * @param file The destination file.
      * @param saveOperation The save operation itself. It should write to the
@@ -181,75 +180,14 @@ public class IOUtil {
      */
     public static void safelySaveFile(FileHandle file,
             IOConsumer<FileHandle> saveOperation) throws IOException {
-        saveOperation.accept(safelySaveFile1(file));
-        safelySaveFile2(file);
-    }
-    
-    /**
-     * Performs the first part of a safe file save operation by preparing and
-     * then returning the temporary file to which to write to. This should be
-     * used together with {@link #safelySaveFile2(FileHandle)} as in a manner
-     * similar to:
-     * 
-     * <pre>
-     * FileHandle tempFile = IOUtil.safelySaveFile1(someFile);
-     * saveTheFile(tempFile);
-     * IOUtil.safelySaveFile2(someFile);</pre>
-     * 
-     * <p>This together with {@code safelySaveFile2(FileHandle)} ensures that
-     * a file is safely saved by writing the data to a temporary file and then
-     * renaming the temporary file to the desired file name. This is done as to
-     * ensure data is not lost if for some reason the save process is
-     * interrupted and it is desirable to retain the earlier version of the
-     * file.
-     * 
-     * @param file The file.
-     * 
-     * @return The temporary file to which to write.
-     * @throws NullPointerException if {@code file} is {@code null}.
-     * @throws GdxRuntimeException if {@code file} is an internal or classpath
-     * file.
-     */
-    public static FileHandle safelySaveFile1(FileHandle file) {
         FileHandle tmp = file.sibling(file.name() + "_tmp");
         if(tmp.exists())
             tmp.delete();
-        return tmp;
-    }
-    
-    /**
-     * Performs the second part of a safe file save operation by deleting the
-     * original file and renaming the temporary file to which the data was
-     * written to the name of the original file. This should be used together
-     * with {@link #safelySaveFile1(FileHandle)} as in a manner similar to:
-     * 
-     * <pre>
-     * FileHandle tempFile = IOUtil.safelySaveFile1(someFile);
-     * saveTheFile(tempFile);
-     * IOUtil.safelySaveFile2(someFile);</pre>
-     * 
-     * <p>This together with {@code safelySaveFile1(FileHandle)} ensures that
-     * a file is safely saved by writing the data to a temporary file and then
-     * renaming the temporary file to the desired file name. This is done as to
-     * ensure data is not lost if for some reason the save process is
-     * interrupted and it is desirable to retain the earlier version of the
-     * file.
-     * 
-     * @param file The file.
-     * 
-     * @throws NullPointerException if {@code file} is {@code null}.
-     * @throws RuntimeException if the original file was not deleted.
-     * @throws GdxRuntimeException if {@code file} is an internal or classpath
-     * file.
-     */
-    public static void safelySaveFile2(FileHandle file) {
+        saveOperation.accept(tmp);
         if(file.exists() && !file.delete())
-            // A checked IOException may be annoying, so use an unchecked
-            // RuntimeException
-            //throw new IOException("Failed to delete " + file);
-            throw new RuntimeException("Failed to delete " + file);
-        else
-            file.sibling(file.name() + "_tmp").file().renameTo(file.file());
+            throw new IOException("Failed to delete " + file);
+        else if(!tmp.file().renameTo(file.file()))
+            throw new IOException("Failed to rename " + tmp);
     }
     
     /**

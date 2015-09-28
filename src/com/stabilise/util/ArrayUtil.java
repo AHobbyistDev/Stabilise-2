@@ -1,7 +1,5 @@
 package com.stabilise.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -47,6 +45,7 @@ public class ArrayUtil {
      * that of the specified minimum length, or {@code null} if the array
      * parameter is {@code null}.
      */
+    /*
     public static <T> T[] setMinArrayLength(T[] array, int minLength) {
         if(array == null)
             return null;
@@ -54,6 +53,7 @@ public class ArrayUtil {
             return array;
         return Arrays.copyOf(array, minLength);
     }
+    */
     
     /**
      * Gets the index of an object in an array.
@@ -64,20 +64,24 @@ public class ArrayUtil {
      * @return The object's index, or -1 if the object is not in the array, or
      * the array is {@code null}.
      */
+    /*
     public static <T> int indexOf(T[] array, Object object) {
         return Arrays.asList(array).indexOf(object);
     }
+    */
     
     /**
      * Ensures that that size of the specified {@code ArrayList} is at least
      * that of the specified {@code size} parameter; expanding {@code list}
      * with {@code null} entries if necessary.
      */
+    /*
     public static void ensureSize(ArrayList<?> list, int size) {
         list.ensureCapacity(size); // prevents excessive arraycopies
         while(list.size() < size)
             list.add(null);
     }
+    */
     
     /**
      * A class which wraps an array as to not permit structural modification.

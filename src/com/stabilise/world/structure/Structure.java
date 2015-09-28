@@ -19,6 +19,8 @@ public class Structure {
     
     static {
         STRUCTURES.register(0, SchematicHouse.class);
+        
+        STRUCTURES.lock();
     }
     
     public static Structure getStructure(int id) {

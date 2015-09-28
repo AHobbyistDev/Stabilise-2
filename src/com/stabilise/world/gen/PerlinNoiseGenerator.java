@@ -50,19 +50,19 @@ public class PerlinNoiseGenerator extends WorldGenerator {
         
         // Landform                             WAVELENGTH    AMPLITUDE
         private PerlinNoise1D noise1D_1;    //    128            64
-        private PerlinNoise1D noise1D_2;    //    64            32
-        private PerlinNoise1D noise1D_3;    //    32            16
-        private PerlinNoise1D noise1D_4;    //    16            8
-        private PerlinNoise1D noise1D_5;    //    8            4
-        private PerlinNoise1D noise1D_6;    //    4            2
+        private PerlinNoise1D noise1D_2;    //    64             32
+        private PerlinNoise1D noise1D_3;    //    32             16
+        private PerlinNoise1D noise1D_4;    //    16             8
+        private PerlinNoise1D noise1D_5;    //    8              4
+        private PerlinNoise1D noise1D_6;    //    4              2
         
-        // Caves                                SCALE        AMPLITUDE
-        private SimplexNoise simplex128;    //    128            2
-        private SimplexNoise simplex64;        //    64            8
-        private SimplexNoise simplex32;        //    32            4
-        private SimplexNoise simplex16;        //    16            1
+        // Caves                                SCALE         AMPLITUDE
+        private SimplexNoise simplex128;    //    128             2
+        private SimplexNoise simplex64;     //    64              8
+        private SimplexNoise simplex32;     //    32              4
+        private SimplexNoise simplex16;     //    16              1
         
-        private SimplexNoise simplex512;    // 512            1
+        private SimplexNoise simplex512;    //    512             1
         
         private PerlinRegionGenerator() {
             noise1D_1 = new PerlinNoise1D(seed, 128f);

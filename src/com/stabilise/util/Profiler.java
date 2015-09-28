@@ -1,13 +1,12 @@
 package com.stabilise.util;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-
-import com.stabilise.util.collect.LightLinkedList;
 
 /**
  * A Profiler object is used to gauge the amount of processing time which is
@@ -109,7 +108,7 @@ public class Profiler {
             if(section == null)
                 throw new NullPointerException("section is null");
             
-            List<Section> curConstituents = stack.getLast().constituents;
+            List<Section> curConstituents = stack.getLast().getConstituents();
             
             // Somewhat inefficient, but check to see if such a section already
             // exists.
@@ -359,8 +358,9 @@ public class Profiler {
         private long duration = 0L;
         /** true if we're currently timing. */
         private boolean active = false;
-        /** The sections's constituent sections. */
-        private final List<Section> constituents = new LightLinkedList<>();
+        /** The sections's constituent sections. Lazily initialised by
+         * getConstituents(); null by default. */
+        private List<Section> constituents;
         
         
         /**
@@ -400,6 +400,12 @@ public class Profiler {
             }
         }
         
+        public List<Section> getConstituents() {
+            return constituents == null
+                    ? constituents = new ArrayList<>()
+                    : constituents;
+        }
+        
         /**
          * Gets this section's data, and treats it as a root section.
          * 
@@ -429,11 +435,12 @@ public class Profiler {
             parentName = !parentName.equals("") ? parentName + "." + name : name;
             
             // Imitating ArrayList functionality here
-            SectionData[] children = new SectionData[constituents.size() + 1];
-            int childCount = 0;
+            int len = constituents == null ? 0 : constituents.size();
+            SectionData[] children = new SectionData[len+1];
             
             long unspecified = duration; // time not specified by any constituents
-            for(Section s : constituents) {
+            for(int i = 0; i < len; i++) {
+                Section s = constituents.get(i);
                 s.updateDuration(currentTime);
                 
                 unspecified -= s.duration;
@@ -442,7 +449,7 @@ public class Profiler {
                     ((float)s.duration / duration);
                 float totPercent = locPercent * totalPercent;
                 
-                children[childCount++] = s.getData(parentName, 100*locPercent, totPercent,
+                children[i] = s.getData(parentName, 100*locPercent, totPercent,
                         currentTime);
             }
             
@@ -450,7 +457,7 @@ public class Profiler {
             float locPercent = duration == 0L ? 0f :
                 ((float)unspecified / duration);
             float totPercent = locPercent * totalPercent;
-            children[childCount] = new SectionDataUnspecified(parentName, unspecified,
+            children[len] = new SectionDataUnspecified(parentName, unspecified,
                     100*locPercent, totPercent);
             //}
             
@@ -558,9 +565,6 @@ public class Profiler {
         @Override
         public int compareTo(SectionData s) {
             return Float.compare(s.localPercent, localPercent);
-            //if(localPercent > s.localPercent) return -1;
-            //if(localPercent < s.localPercent) return 1;
-            //return 0;
         }
         
     }

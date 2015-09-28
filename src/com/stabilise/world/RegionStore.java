@@ -1,5 +1,6 @@
 package com.stabilise.world;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,7 +17,6 @@ import com.stabilise.util.annotation.GuardedBy;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.LightLinkedList;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
 import com.stabilise.world.loader.WorldLoader.DimensionLoader;
@@ -131,7 +131,7 @@ public class RegionStore {
     // List to a Map, especially if some implementation decides to rapid-fire
     // on cache() to fetch tons of different regions.
     private final ThreadLocal<List<Region>> localCachedRegions =
-            ThreadLocal.withInitial(() -> new LightLinkedList<>());
+            ThreadLocal.withInitial(() -> new ArrayList<>());
     
     // A Lock and its associated Condition to wait on in waitUntilDone().
     private final ReentrantLock doneLock = new ReentrantLock();
@@ -285,6 +285,8 @@ public class RegionStore {
             // Load all regions adjacent to r.
             for(x = r.x() - d; x <= r.x() + d; x++) {
                 for(y = r.y() - d; y <= r.y() + d; y++) {
+                    // We don't anchor r here as to avoid a superfluous
+                    // invocation of loadRegion()
                     if(!r.isAt(x, y))
                         loadRegion(x, y).addNeighbour();
                 }
@@ -516,7 +518,8 @@ public class RegionStore {
     void saveAll() {
         // We could alternatively use this.saveRegion(), but I don't think it's
         // necessary as of this writing.
-        regions.values().forEach(r -> loader.saveRegion(r, null));
+        //regions.values().forEach(r -> loader.saveRegion(r, null));
+        regions.values().forEach(r -> saveRegion(r));
     }
     
     /**
@@ -545,8 +548,8 @@ public class RegionStore {
     }
     
     /**
-     * Blocks the current thread until all regions in the cache have finished
-     * saving.
+     * Blocks the current thread until all regions have finished saving and all
+     * cached regions have been uncached.
      */
     void waitUntilDone() {
         try {
@@ -652,7 +655,7 @@ public class RegionStore {
      * Convenience class which extends {@link
      * com.stabilise.util.concurrent.Striper} to provide {@code get(x, y)}.
      */
-    private class Striper<T> extends com.stabilise.util.concurrent.Striper<T> {
+    private static class Striper<T> extends com.stabilise.util.concurrent.Striper<T> {
         
         public Striper(IntFunction<T> supplier) {
             super(STRIPE_FACTOR, supplier);

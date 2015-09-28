@@ -1,9 +1,9 @@
 package com.stabilise.item;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import com.stabilise.util.collect.LightArrayList;
 
 /**
  * An UnboundedContainer is a Container which may contain a large number of
@@ -15,7 +15,7 @@ import com.stabilise.util.collect.LightArrayList;
 public class UnboundedContainer extends Container {
     
     /** The container's items. */
-    private LightArrayList<ItemStack> items = new LightArrayList<>();
+    private ArrayList<ItemStack> items = new ArrayList<>();
     
     
     /**
@@ -44,7 +44,8 @@ public class UnboundedContainer extends Container {
         ItemStack stack = items.remove(slot);
         // If this was the last slot, remove any null entries between it and
         // the next occupied slot.
-        while(items.removeLast(ItemStack.NO_STACK)) {}
+        while(items.size() > 0 && items.get(items.size() - 1) == ItemStack.NO_STACK)
+            items.remove(items.size() - 1);
         return stack;
     }
     
@@ -96,7 +97,7 @@ public class UnboundedContainer extends Container {
     @Override
     protected ItemStack getAndSetSlot(int slot, ItemStack stack) {
         // add intermediates
-        items.ensureInternalLength(slot + 1);
+        items.ensureCapacity(slot + 1);
         while(items.size() <= slot)
             items.add(ItemStack.NO_STACK);
         return items.set(slot, stack);

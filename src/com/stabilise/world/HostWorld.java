@@ -12,7 +12,7 @@ import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.LightLinkedList;
+import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.loader.WorldLoader.DimensionLoader;
@@ -43,7 +43,7 @@ public class HostWorld extends AbstractWorld {
     private final WorldGenerator generator;
     
     /** Holds all player slice maps. */
-    private final List<SliceMap> sliceMaps = new LightLinkedList<>();
+    private final List<SliceMap> sliceMaps = new UnorderedArrayList<>(4, 2);
     
     /** Whether or not the world has been {@link #prepare() prepared}. */
     private boolean prepared = false;

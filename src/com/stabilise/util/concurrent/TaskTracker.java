@@ -264,12 +264,12 @@ public class TaskTracker implements Tracker {
     
     @Override
     public void waitUntilDone() throws InterruptedException {
-        Task.waitOnInterruptibly(this, () -> stopped());
+        Task.waitInterruptibly(this, () -> stopped());
     }
     
     @Override
     public void waitUninterruptibly() {
-        Task.waitOnUntil(this, () -> stopped());
+        Task.waitUntil(this, () -> stopped());
     }
     
     /**

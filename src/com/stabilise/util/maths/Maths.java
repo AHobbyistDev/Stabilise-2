@@ -295,7 +295,7 @@ public class Maths {
      */
     /*
     public static float invSqrt(float x) {
-        float xhalf = 0.5f*x;
+        float xhalf = x/2;
         int i = Float.floatToIntBits(x);
         i = 0x5f3759df - (i>>1);
         x = Float.intBitsToFloat(i);

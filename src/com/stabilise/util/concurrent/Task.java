@@ -238,7 +238,7 @@ public abstract class Task implements Runnable {
      */
     public final void waitUntilStopped() throws InterruptedException, ExecutionException {
         if(canWait()) {
-            waitOnInterruptibly(this, () -> !state.equals(TaskState.RUNNING));
+            waitInterruptibly(this, () -> !state.equals(TaskState.RUNNING));
             throwExcecutionException();
         }
     }
@@ -260,7 +260,7 @@ public abstract class Task implements Runnable {
      */
     public final void waitUninterruptibly() throws ExecutionException {
         if(canWait()) {
-            waitOnUntil(this, () -> state.equals(TaskState.RUNNING));
+            waitUntil(this, () -> state.equals(TaskState.RUNNING));
             throwExcecutionException();
         }
     }
@@ -364,7 +364,7 @@ public abstract class Task implements Runnable {
      * 
      * @throws NullPointerException if either argument is {@code null}.
      */
-    public static void waitOnUntil(Object o, BooleanSupplier endCondition) {
+    public static void waitUntil(Object o, BooleanSupplier endCondition) {
         boolean interrupted = false;
         synchronized(o) {
             while(!endCondition.getAsBoolean()) {
@@ -390,7 +390,7 @@ public abstract class Task implements Runnable {
      * @throws InterruptedException if the current thread received an
      * interrupt while waiting.
      */
-    public static void waitOnInterruptibly(Object o, BooleanSupplier endCondition)
+    public static void waitInterruptibly(Object o, BooleanSupplier endCondition)
             throws InterruptedException {
         synchronized(o) {
             while(!endCondition.getAsBoolean())
@@ -414,6 +414,29 @@ public abstract class Task implements Runnable {
         synchronized(o) {
             if(task != null) task.run();
             o.notifyAll();
+        }
+    }
+    
+    /**
+     * If the specified condition returns {@code true}, invokes {@code
+     * notifyAll()} on {@code o}.
+     * 
+     * @param syncCondition If true, the condition will be invoked while
+     * synchronized on {@code o}.
+     * 
+     * @throws NullPointerException if either argument is {@code null}.
+     */
+    public static void notifyIf(Object o, BooleanSupplier condition,
+            boolean syncCondition) {
+        if(syncCondition) {
+            synchronized(o) {
+                if(condition.getAsBoolean())
+                    o.notifyAll();
+            }
+        } else {
+            if(condition.getAsBoolean()) {
+                synchronized(o) { o.notifyAll(); }
+            }
         }
     }
     

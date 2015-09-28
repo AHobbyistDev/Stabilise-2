@@ -84,11 +84,11 @@ public abstract class WorldLoader {
     }
     
     @UserThread("Any")
-    private void saveRegion(HostWorld world, Region region,
+    private void saveRegion(DimensionLoader handle, Region region,
             CachedRegion cacheHandle) {
-        world.stats.save.requests.increment();
-        executor.execute(new RegionSaver(world, region, cacheHandle));
-        region.lastSaved = world.getAge();
+        handle.world.stats.save.requests.increment();
+        executor.execute(new RegionSaver(handle, region, cacheHandle));
+        region.lastSaved = handle.world.getAge();
     }
     
     /**
@@ -123,7 +123,6 @@ public abstract class WorldLoader {
         private final HostWorld world;
         private WorldGenerator generator = null;
         private volatile boolean cancelLoadOperations = false;
-        
         
         private DimensionLoader(WorldLoader loader, HostWorld world) {
             this.loader = loader;
@@ -172,7 +171,7 @@ public abstract class WorldLoader {
          */
         @UserThread("Any")
         public void saveRegion(Region region, CachedRegion cacheHandle) {
-            loader.saveRegion(world, region, cacheHandle);
+            loader.saveRegion(this, region, cacheHandle);
         }
         
         /**
@@ -195,14 +194,14 @@ public abstract class WorldLoader {
      */
     private abstract class RegionIO implements Runnable {
         
+        protected final DimensionLoader worldHandle;
         protected final HostWorld world;
         protected final Region r;
         
-        /**
-         * @throws NPE if world is null
-         */
-        protected RegionIO(HostWorld world, Region r) {
-            this.world = Objects.requireNonNull(world);
+        
+        protected RegionIO(DimensionLoader worldHandle, Region r) {
+            this.worldHandle = worldHandle;
+            this.world = worldHandle.world;
             this.r = r;
         }
         
@@ -214,24 +213,23 @@ public abstract class WorldLoader {
      */
     private class RegionLoader extends RegionIO {
         
-        private final DimensionLoader loader;
+        
         private final WorldGenerator generator;
         /** True if the region should be generated, if it is not already. */
         private final boolean generate;
         
         
-        public RegionLoader(DimensionLoader loader, Region r, boolean generate) {
-            super(loader.world, r);
-            this.loader = loader;
+        public RegionLoader(DimensionLoader worldHandle, Region r, boolean generate) {
+            super(worldHandle, r);
             this.generate = generate;
-            this.generator = loader.generator;
+            this.generator = worldHandle.generator;
         }
         
         @Override
         public void run() {
             world.stats.load.started.increment();
             
-            if(loader.cancelLoadOperations) {
+            if(worldHandle.cancelLoadOperations) {
                 world.stats.load.aborted.increment();
                 return;
             }
@@ -264,15 +262,14 @@ public abstract class WorldLoader {
         /**
          * Creates a new RegionSaver.
          * 
-         * @param world The region's host world.
          * @param r The region to save.
          * @param cache The handle to the region's cache entry. null is
          * allowed.
          * 
          * @throws NullPointerException if {@code world} is {@code null}.
          */
-        public RegionSaver(HostWorld world, Region r, CachedRegion cache) {
-            super(world, r);
+        public RegionSaver(DimensionLoader worldHandle, Region r, CachedRegion cache) {
+            super(worldHandle, r);
             this.cacheHandle = cache;
         }
         

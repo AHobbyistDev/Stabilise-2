@@ -8,22 +8,23 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.RandomAccess;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
  * An alternative ArrayList implementation with some design adjustments and
- * additional features.
+ * additional features. As this list is unordered, we avoid memory copies on
+ * element removal, which can drastically increase performance.
  * 
  * <p>This class permits list modification during iteration, and as such
  * iterators will not throw {@code ConcurrentModificationExceptions}.
- * 
- * <p>An unordered list variant is available through {@link
- * #unordered(int, float)}, which avoids memory copies on element removal,
- * which can improve performance.
  */
 @NotThreadSafe
-public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
+public class UnorderedArrayList<E>
+        extends AbstractList<E>
+        implements SimpleList<E>, RandomAccess {
     
     /** The backing array.
      * Invariant: length >= size */
@@ -40,7 +41,7 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
      * Creates a new LightArrayList with an initial capacity of 16 and a scaling
      * factor of {@code 1.5}.
      */
-    public LightArrayList() {
+    public UnorderedArrayList() {
         this(16, 1.5f);
     }
     
@@ -55,7 +56,7 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
      * @throws NegativeArraySizeException if {@code capacity} is negative.
      * @throws IllegalArgumentException if {@code scaleFactor < 1.0}.
      */
-    public LightArrayList(int capacity, float scaleFactor) {
+    public UnorderedArrayList(int capacity, float scaleFactor) {
         @SuppressWarnings("unchecked")
         final E[] arr = (E[])new Object[capacity];
         data = arr;
@@ -98,12 +99,20 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
         return new Itr();
     }
     
-    /**
-     * Returns an {@code Iterator} which filters out any {@code null} array
-     * elements. The returned iterator does not support {@code remove()}.
-     */
-    public Iterator<E> iteratorNullsFiltered() {
-        return IteratorUtils.iteratorNullsFiltered(this);
+    @Override
+    public void forEach(Predicate<? super E> pred) {
+        for(int i = 0; i < size; i++) {
+            if(pred.test(data[i])) {
+                doRemove(i);
+                i--;
+            }
+        }
+    }
+    
+    @Override
+    public void iterate(Consumer<? super E> cons) {
+        for(int i = 0; i < size; i++)
+            cons.accept(data[i]);
     }
     
     @Override
@@ -125,10 +134,15 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
     
     @Override
     public boolean add(E e) {
+        put(e);
+        return true;
+    }
+    
+    @Override
+    public void put(E e) {
         if(data.length == size) // length is never < size
             expand();
         data[size++] = e;
-        return true;
     }
     
     @Override
@@ -194,8 +208,17 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
     public E remove(int index) {
         rangeCheckUpper(index);
         E e = data[index];
-        shrinkAndShift(index, 1);
+        doRemove(index);
         return e;
+    }
+    
+    /**
+     * Removes the element at the specified index. Decrements size.
+     */
+    private void doRemove(int index) {
+        //shrinkAndShift(index, 1); // for ordered variant
+        data[index] = data[--size];
+        data[size] = null;
     }
     
     /**
@@ -229,7 +252,7 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
      * any elements to their right left (subtracting {@code amount} from their
      * indices).
      * 
-     * <p>Note that even for an unordered list, this method uses an array copy.
+     * <p>Note that this method requires an array copy.
      * 
      * @param index The index of the first element to remove.
      * @param amount The number of elements to remove.
@@ -346,8 +369,10 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
      */
     private void shrinkAndShift(int index, int amount) {
         size -= amount;
-        System.arraycopy(data, index+amount, data, index, size-index); //size-index == oldsize-index-amount
-        Arrays.fill(data, size, size+amount, null);
+        //size-index == oldsize-index-amount
+        System.arraycopy(data, index+amount, data, index, size-index);
+        for(int i = size; i < size + amount; i++)
+            data[i] = null;
     }
     
     protected void rangeCheck(int index) {
@@ -358,30 +383,6 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
     protected void rangeCheckUpper(int index) {
         if(index >= size)
             throw new ArrayIndexOutOfBoundsException("Invalid index " + index);
-    }
-    
-    //--------------------==========--------------------
-    //------------=====Static Functions=====------------
-    //--------------------==========--------------------
-    
-    /**
-     * Creates a new unordered LightArrayList.
-     * 
-     * <p>The returned LightArrayList is identical to an ordinary one with the
-     * exception that remove operations do not involve an array copy; the last
-     * element of the array is simply moved to the position of the removed
-     * element.
-     * 
-     * @param capacity The initial internal array length.
-     * @param scaleFactor The number by which the internal array length is
-     * multiplied when it needs to be expanded to accommodate new elements. If
-     * this is {@code 1.0}, the array length is increased by only {@code 1}.
-     * 
-     * @throws NegativeArraySizeException if {@code capacity} is negative.
-     * @throws IllegalArgumentException if {@code scaleFactor < 1.0}.
-     */
-    public static <E> LightArrayList<E> unordered(int capacity, float scaleFactor) {
-        return new Unordered<E>(capacity, scaleFactor);
     }
     
     //--------------------==========--------------------
@@ -399,16 +400,15 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
         
         @Override
         public E next() {
-            try {
+            if(hasNext())
                 return data[cursor++];
-            } catch(ArrayIndexOutOfBoundsException e) {
-                throw new NoSuchElementException(e.getMessage());
-            }
+            else
+                throw new NoSuchElementException();
         }
         
         @Override
         public void remove() {
-            LightArrayList.this.remove(cursor - 1);
+            UnorderedArrayList.this.doRemove(--cursor);
         }
         
     }
@@ -456,33 +456,16 @@ public class LightArrayList<E> extends AbstractList<E> implements RandomAccess {
         public void set(E e) {
             if(lastRet == -1)
                 throw new IllegalStateException();
-            LightArrayList.this.data[lastRet] = e;
+            UnorderedArrayList.this.data[lastRet] = e;
         }
         
         @Override
         public void add(E e) {
             if(lastRet == -1)
                 throw new IllegalStateException();
-            LightArrayList.this.add(lastRet, e);
+            UnorderedArrayList.this.add(lastRet, e);
             cursor++;
             lastRet = -1;
-        }
-        
-    }
-    
-    private static class Unordered<E> extends LightArrayList<E> {
-        
-        public Unordered(int capacity, float scaleFactor) {
-            super(capacity, scaleFactor);
-        }
-        
-        @Override
-        public E remove(int index) {
-            rangeCheckUpper(index);
-            E e = data[index];
-            data[index] = data[--size];
-            data[size] = null;
-            return e;
         }
         
     }

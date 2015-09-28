@@ -11,7 +11,7 @@ import com.stabilise.core.app.Application;
 import com.stabilise.util.annotation.GuardedBy;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.collect.IteratorUtils;
-import com.stabilise.util.collect.LightArrayList;
+import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.util.concurrent.Striper;
 
 /**
@@ -162,10 +162,11 @@ public class EventDispatcher {
     void doPost(Event e) {
         ListenerBucket b;
         synchronized(lockFor(e)) {
-            if((b = handlers.get(e)) != null)
+            if((b = handlers.get(e)) != null) {
                 b.post(e);
-            if(b.isEmpty())
-                handlers.remove(e);
+                if(b.isEmpty())
+                    handlers.remove(e);
+            }
         }
     }
     
@@ -296,7 +297,7 @@ public class EventDispatcher {
      */
     private class StandardListenerBucket implements ListenerBucket {
         
-        private final List<Listener> listeners = LightArrayList.unordered(4, 2f);
+        private final List<Listener> listeners = new UnorderedArrayList<>(4, 2f);
         
         @Override
         public void addListener(Listener l) {

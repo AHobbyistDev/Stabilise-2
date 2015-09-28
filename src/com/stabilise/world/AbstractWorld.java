@@ -20,9 +20,12 @@ import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.Array;
-import com.stabilise.util.collect.ClearingLinkedList;
+import com.stabilise.util.collect.FragList;
+import com.stabilise.util.collect.IntList;
 import com.stabilise.util.collect.IteratorUtils;
-import com.stabilise.util.collect.LightLinkedList;
+import com.stabilise.util.collect.UnorderedArrayList;
+import com.stabilise.util.collect.SimpleIterable;
+import com.stabilise.util.collect.SimpleList;
 import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
@@ -59,19 +62,16 @@ public abstract class AbstractWorld implements World {
      * over, this does not work when moving an entity to another dimension: if
      * {@code destroy()} is invoked, this would also invalidate its position in
      * the dimension it is being moved to. */
-    private final ClearingLinkedList<Integer> entitiesToRemove =
-            new ClearingLinkedList<>();
+    private final IntList entitiesToRemove = new IntList();
     /** The number of hostile mobs in the world. */
     protected int hostileMobCount = 0;
     
     /** Stores tile entities for iteration and updating. A loaded tile entity
      * need not exist in this list if it does not require updates. */
-    protected final LightLinkedList<TileEntity> tileEntities =
-            new LightLinkedList<>();
+    protected final SimpleList<TileEntity> tileEntities = new UnorderedArrayList<>();
     
     /** The list of hitboxes in the world. */
-    protected final LightLinkedList<Hitbox> hitboxes =
-            new LightLinkedList<>();
+    protected final SimpleList<Hitbox> hitboxes = new UnorderedArrayList<>();
     /** The total number of hitboxes which have existed during the lifetime of
      * the world. */
     protected int hitboxCount = 0;
@@ -80,8 +80,7 @@ public abstract class AbstractWorld implements World {
     public final ParticleManager particleManager = new ParticleManager(this);
     /** Stores all particles in the world. This should remain empty if this is
      * a server world. */
-    protected final LightLinkedList<Particle> particles =
-            new LightLinkedList<>();
+    protected final SimpleList<Particle> particles = new FragList<>();
     /** The total number of particles which have existed during the lifetime of
      * the world. */
     protected int particleCount = 0;
@@ -184,9 +183,7 @@ public abstract class AbstractWorld implements World {
         
         profiler.next("remove"); // root.update.game.world.entity.remove
         
-        if(!entitiesToRemove.isEmpty())
-            for(Integer id : entitiesToRemove)
-                entities.remove(id);
+        entitiesToRemove.clear(id -> entities.remove(id));
         
         profiler.end(); // root.update.game.world.entity
         profiler.end(); // root.update.game.world
@@ -200,6 +197,16 @@ public abstract class AbstractWorld implements World {
      */
     protected <E extends GameObject> void updateObjects(Iterable<E> objects) {
         IteratorUtils.forEach(objects, o -> o.updateAndCheck(this));
+    }
+    
+    /**
+     * Iterates over the specified collection of GameObjects as per {@link
+     * GameObject#updateAndCheck(World)}. GameObjects are removed from the
+     * collection by the iterator if {@code updateAndCheck()} returns {@code
+     * true}.
+     */
+    protected <E extends GameObject> void updateObjects(SimpleIterable<E> objects) {
+        objects.forEach(o -> o.updateAndCheck(this));
     }
     
     /**
@@ -237,7 +244,7 @@ public abstract class AbstractWorld implements World {
     @Override
     public void addHitbox(Hitbox h) {
         hitboxCount++;
-        hitboxes.add(Objects.requireNonNull(h));
+        hitboxes.put(Objects.requireNonNull(h));
     }
     
     /**
@@ -247,13 +254,13 @@ public abstract class AbstractWorld implements World {
      */
     protected void addParticle(Particle p) {
         particleCount++;
-        particles.add(Objects.requireNonNull(p));
+        particles.put(Objects.requireNonNull(p));
     }
     
     @Override
     public void addTileEntity(TileEntity t) {
         if(t.requiresUpdates())
-            tileEntities.add(t);
+            tileEntities.put(t);
     }
     
     @Override
@@ -274,17 +281,17 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
-    public Iterable<Hitbox> getHitboxes() {
+    public SimpleIterable<Hitbox> getHitboxes() {
         return hitboxes;
     }
     
     @Override
-    public Iterable<TileEntity> getTileEntities() {
+    public SimpleIterable<TileEntity> getTileEntities() {
         return tileEntities;
     }
     
     @Override
-    public Iterable<Particle> getParticles() {
+    public SimpleIterable<Particle> getParticles() {
         return particles;
     }
     

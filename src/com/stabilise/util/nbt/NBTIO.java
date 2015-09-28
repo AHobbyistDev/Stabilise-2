@@ -261,9 +261,7 @@ public class NBTIO {
      * @throws IOException if an I/O error occurs.
      */
     public static void safeWrite(FileHandle file, NBTTagCompound tag) throws IOException {
-        FileHandle tempFile = IOUtil.safelySaveFile1(file);
-        write(tempFile, tag);
-        IOUtil.safelySaveFile2(file);
+        IOUtil.safelySaveFile(file, f -> write(f, tag));
     }
     
     /**
@@ -278,9 +276,7 @@ public class NBTIO {
      * @throws IOException if an I/O error occurs.
      */
     public static void safeWriteCompressed(FileHandle file, NBTTagCompound tag) throws IOException {
-        FileHandle tempFile = IOUtil.safelySaveFile1(file);
-        writeCompressed(tempFile, tag);
-        IOUtil.safelySaveFile2(file);
+        IOUtil.safelySaveFile(file, f -> writeCompressed(f, tag));
     }
     
 }

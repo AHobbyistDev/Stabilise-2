@@ -263,9 +263,9 @@ public abstract class Dimension {
         
         DIMENSIONS.lock();
         if(defaultDim == null)
-            throw new RuntimeException("A default dimension must be set!");
+            throw new IllegalStateException("A default dimension must be set!");
         if(privateDim == null)
-            throw new RuntimeException("The private dimension must be set!");
+            throw new IllegalStateException("The private dimension must be set!");
     }
     
     /**

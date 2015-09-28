@@ -425,7 +425,7 @@ class TaskTracker {
      * waiting.
      */
     public void waitUntilStopped() throws InterruptedException {
-        Task.waitOnInterruptibly(this, () -> stopped());
+        Task.waitInterruptibly(this, () -> stopped());
     }
     
     /**
@@ -436,7 +436,7 @@ class TaskTracker {
      * interrupt flag will be set when this method returns.
      */
     public void waitUninterruptibly() {
-        Task.waitOnUntil(this, () -> stopped());
+        Task.waitUntil(this, () -> stopped());
     }
     
     protected void updateParent(int parts) {

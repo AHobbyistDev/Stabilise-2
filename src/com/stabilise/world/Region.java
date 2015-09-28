@@ -10,10 +10,11 @@ import java.util.function.IntBinaryOperator;
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Constants;
 import com.stabilise.util.Log;
-import com.stabilise.util.annotation.GuardedBy;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.box.Box;
+import com.stabilise.util.box.Boxes;
 import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.concurrent.Task;
 import com.stabilise.util.maths.Maths;
@@ -31,6 +32,8 @@ import com.stabilise.util.maths.PointFactory;
  * 
  * <h4>Saving</h4>
  * <p>We take a very loose approach to saving regions.
+ * 
+ * <!--wow such detail-->
  */
 public class Region {
     
@@ -140,7 +143,9 @@ public class Region {
     /** The state of this region. See the documentation for {@link #State.NEW}
      * and all other states. */
     private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
-    @GuardedBy("this") private SaveState saveState = SaveState.IDLE;
+    /** Save state. Encapsulated in a Box so it can be safely passed off to
+     * the lambda in getSavePermit(). */
+    private final Box<SaveState> saveState = Boxes.box(SaveState.IDLE);
     /** Whether or not this region has been generated. */
     private boolean generated = false;
     
@@ -478,34 +483,36 @@ public class Region {
      * <p>Note that this method may block for a while if this region is
      * currently being saved.
      */
-    public synchronized boolean getSavePermit() {
-        // We synchronise on this region to make this atomic. This is much less
-        // painful than trying to work with an atomic variable.
-        
-        switch(saveState) {
-            case IDLE:
-                // If we're in IDLE, we switch to SAVING and save.
-                saveState = SaveState.SAVING;
-                return true;
-            case SAVING:
-                // If we're in SAVING, this means another thread is currently
-                // saving this region. However, since we have no guarantee that
-                // it is saving up-to-date data, we wait for it to finish and
-                // then save again on this thread.
-                saveState = SaveState.WAITING;
-                Task.waitOnUntil(this, () -> saveState == SaveState.IDLE
-                                || saveState == SaveState.IDLE_WAITER);
-                saveState = SaveState.SAVING;
-                return true;
-            case WAITING:
-            case IDLE_WAITER:
-                // As above, except another thread is waiting to save the updated
-                // state. We abort and let that thread do it.
-                // 
-                // As an added bonus, since we just grabbed the sync lock, we've
-                // established a happens-before with the waiter and thus provided
-                // it with a more recent batch of region state. Yay!
-                return false;
+    public boolean getSavePermit() {
+        synchronized(saveState) {
+            // We synchronise on this region to make this atomic. This is much
+            // less painful than trying to work with an atomic variable.
+            
+            switch(saveState.get()) {
+                case IDLE:
+                    // If we're in IDLE, we switch to SAVING and save.
+                    saveState.set(SaveState.SAVING);
+                    return true;
+                case SAVING:
+                    // If we're in SAVING, this means another thread is
+                    // currently saving this region. However, since we have no
+                    // guarantee that it is saving up-to-date data, we wait for
+                    // it to finish and then save again on this thread.
+                    saveState.set(SaveState.WAITING);
+                    Task.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE
+                                    || saveState.get() == SaveState.IDLE_WAITER);
+                    saveState.set(SaveState.SAVING);
+                    return true;
+                case WAITING:
+                case IDLE_WAITER:
+                    // As above, except another thread is waiting to save the
+                    // updated state. We abort and let that thread do it.
+                    // 
+                    // As an added bonus, since we just grabbed the sync lock,
+                    // we've established a happens-before with the waiter and thus
+                    // provided it with a more recent batch of region state. Yay!
+                    return false;
+            }
         }
         
         throw new AssertionError(); // impossible
@@ -516,11 +523,13 @@ public class Region {
      * notifying relevant threads.
      */
     @UserThread("WorldLoaderThread")
-    public synchronized void finishSaving() {
-        saveState = saveState == SaveState.WAITING
-                ? SaveState.IDLE_WAITER
-                : SaveState.IDLE;
-        this.notifyAll();
+    public void finishSaving() {
+        synchronized(saveState) {
+            saveState.set(saveState.get() == SaveState.WAITING
+                    ? SaveState.IDLE_WAITER
+                    : SaveState.IDLE);
+            saveState.notifyAll();
+        }
     }
     
     /**
@@ -530,7 +539,7 @@ public class Region {
      */
     @SuppressWarnings("unused")
     private void waitUntilSaved() {
-        Task.waitOnUntil(this, () -> saveState == SaveState.IDLE);
+        Task.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE);
     }
     
     /**
