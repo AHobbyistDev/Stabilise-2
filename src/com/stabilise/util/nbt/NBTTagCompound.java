@@ -91,6 +91,16 @@ public class NBTTagCompound extends NBTTag {
     }
     
     /**
+     * Checks for whether or not this compound contains the specified tag.
+     * 
+     * @return {@code true} if this compound contains {@code tag}; {@code
+     * false} otherwise.
+     */
+    public boolean hasTag(NBTTag tag) {
+        return data.get(tag.name) == tag;
+    }
+    
+    /**
      * Removes a tag from the tag compound.
      * 
      * @param The name of the tag to remove from the compound.
@@ -257,9 +267,12 @@ public class NBTTagCompound extends NBTTag {
      */
     public byte getByte(String tagName) {
         try {
-            return hasTag(tagName) ? ((NBTTagByte)data.get(tagName)).data : 0;
+            return hasTag(tagName)
+                    ? ((NBTTagByte)data.get(tagName)).data
+                    : 0;
         } catch(ClassCastException e) {
-            Log.get().postWarning("Error reading byte \"" + tagName + "\" from compound tag \"" + name + "\"!");
+            Log.get().postWarning("Error reading byte \"" + tagName
+                    + "\" from compound tag \"" + name + "\"!");
             return 0;
         }
     }
@@ -274,9 +287,12 @@ public class NBTTagCompound extends NBTTag {
      */
     public boolean getBoolean(String tagName) {
         try {
-            return hasTag(tagName) ? (((NBTTagByte)data.get(tagName)).data == 1 ? true : false) : false;
+            return hasTag(tagName)
+                    ? (((NBTTagByte)data.get(tagName)).data == 1 ? true : false)
+                    : false;
         } catch(ClassCastException e) {
-            Log.get().postWarning("Error reading byte \"" + tagName + "\" from compound tag \"" + name + "\"!");
+            Log.get().postWarning("Error reading byte \"" + tagName
+                    + "\" from compound tag \"" + name + "\"!");
             return false;
         }
     }
@@ -291,9 +307,12 @@ public class NBTTagCompound extends NBTTag {
      */
     public byte[] getByteArray(String tagName) {
         try {
-            return hasTag(tagName) ? ((NBTTagByteArray)data.get(tagName)).data : new byte[0];
+            return hasTag(tagName)
+                    ? ((NBTTagByteArray)data.get(tagName)).data
+                    : new byte[0];
         } catch(ClassCastException e) {
-            Log.get().postWarning("Error reading byte array \"" + tagName + "\" from compound tag \"" + name + "\"!");
+            Log.get().postWarning("Error reading byte array \"" + tagName
+                    + "\" from compound tag \"" + name + "\"!");
             return new byte[0];
         }
     }
@@ -308,9 +327,12 @@ public class NBTTagCompound extends NBTTag {
      */
     public short getShort(String tagName) {
         try {
-            return hasTag(tagName) ? ((NBTTagShort)data.get(tagName)).data : 0;
+            return hasTag(tagName)
+                    ? ((NBTTagShort)data.get(tagName)).data
+                    : 0;
         } catch(ClassCastException e) {
-            Log.get().postWarning("Error reading short \"" + tagName + "\" from compound tag \"" + name + "\"!");
+            Log.get().postWarning("Error reading short \"" + tagName
+                    + "\" from compound tag \"" + name + "\"!");
             return 0;
         }
     }
@@ -325,9 +347,12 @@ public class NBTTagCompound extends NBTTag {
      */
     public int getInt(String tagName) {
         try {
-            return hasTag(tagName) ? ((NBTTagInt)data.get(tagName)).data : 0;
+            return hasTag(tagName)
+                    ? ((NBTTagInt)data.get(tagName)).data
+                    : 0;
         } catch(ClassCastException e) {
-            Log.get().postWarning("Error reading int \"" + tagName + "\" from compound tag \"" + name + "\"!");
+            Log.get().postWarning("Error reading int \"" + tagName
+                    + "\" from compound tag \"" + name + "\"!");
             return 0;
         }
     }
@@ -342,9 +367,12 @@ public class NBTTagCompound extends NBTTag {
      */
     public int[] getIntArray(String tagName) {
         try {
-            return hasTag(tagName) ? ((NBTTagIntArray)data.get(tagName)).data : new int[0];
+            return hasTag(tagName)
+                    ? ((NBTTagIntArray)data.get(tagName)).data
+                    : new int[0];
         } catch(ClassCastException e) {
-            Log.get().postWarning("Error reading int array \"" + tagName + "\" from compound tag \"" + name + "\"!");
+            Log.get().postWarning("Error reading int array \"" + tagName
+                    + "\" from compound tag \"" + name + "\"!");
             return new int[0];
         }
     }
@@ -359,9 +387,12 @@ public class NBTTagCompound extends NBTTag {
      */
     public long getLong(String tagName) {
         try {
-            return hasTag(tagName) ? ((NBTTagLong)data.get(tagName)).data : 0L;
+            return hasTag(tagName)
+                    ? ((NBTTagLong)data.get(tagName)).data
+                    : 0L;
         } catch(ClassCastException e) {
-            Log.get().postWarning("Error reading long \"" + tagName + "\" from compound tag \"" + name + "\"!");
+            Log.get().postWarning("Error reading long \"" + tagName
+                    + "\" from compound tag \"" + name + "\"!");
             return 0L;
         }
     }
@@ -376,10 +407,13 @@ public class NBTTagCompound extends NBTTag {
      */
     public float getFloat(String tagName) {
         try {
-            return hasTag(tagName) ? ((NBTTagFloat)data.get(tagName)).data : 0.0F;
+            return hasTag(tagName)
+                    ? ((NBTTagFloat)data.get(tagName)).data
+                    : 0.0f;
         } catch(ClassCastException e) {
-            Log.get().postWarning("Error reading float \"" + tagName + "\" from compound tag \"" + name + "\"!");
-            return 0.0F;
+            Log.get().postWarning("Error reading float \"" + tagName
+                    + "\" from compound tag \"" + name + "\"!");
+            return 0.0f;
         }
     }
     
@@ -393,9 +427,12 @@ public class NBTTagCompound extends NBTTag {
      */
     public double getDouble(String tagName) {
         try {
-            return hasTag(tagName) ? ((NBTTagDouble)data.get(tagName)).data : 0.0D;
+            return hasTag(tagName)
+                    ? ((NBTTagDouble)data.get(tagName)).data
+                    : 0.0D;
         } catch(ClassCastException e) {
-            Log.get().postWarning("Error reading double \"" + tagName + "\" from compound tag \"" + name + "\"!");
+            Log.get().postWarning("Error reading double \"" + tagName
+                    + "\" from compound tag \"" + name + "\"!");
             return 0.0D;
         }
     }
@@ -410,9 +447,12 @@ public class NBTTagCompound extends NBTTag {
      */
     public String getString(String tagName) {
         try {
-            return hasTag(tagName) ? ((NBTTagString)data.get(tagName)).data : "";
+            return hasTag(tagName)
+                    ? ((NBTTagString)data.get(tagName)).data
+                    : "";
         } catch(ClassCastException e) {
-            Log.get().postWarning("Error reading string \"" + tagName + "\" from compound tag \"" + name + "\"!");
+            Log.get().postWarning("Error reading string \"" + tagName
+                    + "\" from compound tag \"" + name + "\"!");
             return "";
         }
     }
@@ -427,9 +467,12 @@ public class NBTTagCompound extends NBTTag {
      */
     public NBTTagList getList(String tagName) {
         try {
-            return hasTag(tagName) ? ((NBTTagList)data.get(tagName)) : new NBTTagList(tagName);
+            return hasTag(tagName)
+                    ? ((NBTTagList)data.get(tagName))
+                    : new NBTTagList(tagName);
         } catch(ClassCastException e) {
-            Log.get().postWarning("Error reading list \"" + tagName + "\" from compound tag \"" + name + "\"!");
+            Log.get().postWarning("Error reading list \"" + tagName
+                    + "\" from compound tag \"" + name + "\"!");
             return new NBTTagList(tagName);
         }
     }
@@ -444,9 +487,12 @@ public class NBTTagCompound extends NBTTag {
      */
     public NBTTagCompound getCompound(String tagName) {
         try {
-            return hasTag(tagName) ? ((NBTTagCompound)data.get(tagName)) : new NBTTagCompound(tagName);
+            return hasTag(tagName)
+                    ? ((NBTTagCompound)data.get(tagName))
+                    : new NBTTagCompound(tagName);
         } catch(ClassCastException e) {
-            Log.get().postWarning("Error reading compound \"" + tagName + "\" from compound tag \"" + name + "\"!");
+            Log.get().postWarning("Error reading compound \"" + tagName
+                    + "\" from compound tag \"" + name + "\"!");
             return new NBTTagCompound(tagName);
         }
     }

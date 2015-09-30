@@ -86,17 +86,19 @@ public class Constants {
      * <i>2.10.172</i>.
      */
     @Immutable
-    public static class Version implements Comparable<Version> {
+    public static final class Version implements Comparable<Version> {
         
-        public final int release, patchMajor, patchMinor;
-        private final int build, revision;
+        private static final String[] tags = { "rel", "pMjr", "pMnr", "bld", "rev" };
+        
+        /** release, patchMajor, patchMinor, build, revision */
+        private final int[] data = new int[5];
         private String str; // lazy-initialised toString value
         
         public Version(int release, int patchMajor, int patchMinor) {
-            this.release = release;
-            this.patchMajor = patchMajor;
-            this.patchMinor = patchMinor;
-            build = revision = -1;
+            data[0] = release;
+            data[1] = patchMajor;
+            data[2] = patchMinor;
+            data[3] = data[4] = -1;
         }
         
         /**
@@ -108,12 +110,18 @@ public class Constants {
          * has been compiled.
          */
         private Version(int release, int patchMajor, int patchMinor, int build) {
-            this.release = release;
-            this.patchMajor = patchMajor;
-            this.patchMinor = patchMinor;
-            this.build = build;
-            this.revision = getRevision();
+            data[0] = release;
+            data[1] = patchMajor;
+            data[2] = patchMinor;
+            data[3] = build;
+            data[4] = getRevision();
         }
+        
+        public  int release()    { return data[0]; }
+        public  int patchMajor() { return data[1]; }
+        public  int patchMinor() { return data[2]; }
+        private int build()      { return data[3]; }
+        private int revision()   { return data[4]; }
         
         /**
          * Returns 1 if this is a newer version than v, 0 if this and v are the
@@ -121,19 +129,19 @@ public class Constants {
          */
         @Override
         public int compareTo(Version v) {
-            if(release > v.release) return 1;
-            if(release < v.release) return -1;
-            if(patchMajor > v.patchMajor) return 1;
-            if(patchMajor < v.patchMajor) return -1;
-            if(patchMinor > v.patchMinor) return 1;
-            if(patchMinor < v.patchMinor) return -1;
+            if(release() > v.release()) return 1;
+            if(release() < v.release()) return -1;
+            if(patchMajor() > v.patchMajor()) return 1;
+            if(patchMajor() < v.patchMajor()) return -1;
+            if(patchMinor() > v.patchMinor()) return 1;
+            if(patchMinor() < v.patchMinor()) return -1;
             // We don't care about build and revision numbers unless we're
             // comparing strictly dev versions.
-            if(build == -1 || v.build == -1) return 0;
-            if(build > v.build) return 1;
-            if(build < v.build) return -1;
-            if(revision > v.revision) return 1;
-            if(revision < v.revision) return -1;
+            if(build() == -1 || v.build() == -1) return 0;
+            if(build() > v.build()) return 1;
+            if(build() < v.build()) return -1;
+            if(revision() > v.revision()) return 1;
+            if(revision() < v.revision()) return -1;
             return 0;
         }
         
@@ -147,8 +155,10 @@ public class Constants {
         }
         
         private String genStr() {
-            return release + "." + patchMajor + "." + patchMinor + (DEV_VERSION ?
-                    " (build " + build + ", rev " + revision + ")" : "");
+            return release() + "." + patchMajor() + "." + patchMinor()
+                    + (DEV_VERSION
+                       ? " (build " + build() + ", rev " + revision() + ")"
+                       : "");
         }
         
         @Override
@@ -158,8 +168,7 @@ public class Constants {
         
         @Override
         public int hashCode() {
-            assert false : "hashCode not designed";
-            return -1;
+            throw new AssertionError("hashCode not designed");
         }
         
         @Override
@@ -189,52 +198,11 @@ public class Constants {
                     } catch(IOException e) {
                         // File doesn't appear to exist - we'll have to create it.
                         tag = new NBTTagCompound("versions");
-                        tag.addInt("compilations", 1);
-                        tag.addCompound("Release " + release, createReleaseTag(new NBTTagCompound()));
-                        NBTIO.write(file, tag);
-                        
-                        // Throw an exception so we skip the to the end of the method body
-                        throw new Exception("Revision tracker file not found - generated new one. ("
-                        + e.getClass().getSimpleName() + ")");
                     }
                     
-                    NBTTagCompound releaseTag, patchMajorTag, patchMinorTag, buildTag;
-                    
+                    tag.addInt("comp", tag.getInt("comp") + 1);
+                    int buildCompilations = buildTags(tag, 0);
                     //System.out.println(tag.toString());
-                    
-                    tag.addInt("compilations", tag.getInt("compilations") + 1);
-                    
-                    int buildCompilations = 1;
-                    
-                    releaseTag = tag.getCompound("Release " + release);
-                    if(!releaseTag.isEmpty()) {
-                        releaseTag.addInt("compilations", releaseTag.getInt("compilations") + 1);
-                        patchMajorTag = releaseTag.getCompound("Major Patch " + patchMajor);
-                        if(!patchMajorTag.isEmpty()) {
-                            patchMajorTag.addInt("compilations", patchMajorTag.getInt("compilations") + 1);
-                            patchMinorTag = patchMajorTag.getCompound("Minor Patch " + patchMinor);
-                            if(!patchMinorTag.isEmpty()) {
-                                patchMinorTag.addInt("compilations", patchMinorTag.getInt("compilations") + 1);
-                                buildTag = patchMinorTag.getCompound("Build " + build);
-                                if(!buildTag.isEmpty()) {
-                                    buildCompilations = buildTag.getInt("compilations") + 1;
-                                    buildTag.addInt("compilations", buildCompilations);
-                                } else {
-                                    buildTag = createBuildTag(new NBTTagCompound());
-                                    patchMinorTag.addCompound(buildTag.getName(), buildTag);
-                                }
-                            } else {
-                                patchMinorTag = createPatchMinorTag(new NBTTagCompound());
-                                patchMajorTag.addCompound(patchMinorTag.getName(), patchMinorTag);
-                            }
-                        } else {
-                            patchMajorTag = createPatchMajorTag(new NBTTagCompound());
-                            releaseTag.addCompound(patchMajorTag.getName(), patchMajorTag);
-                        }
-                    } else {
-                        releaseTag = createReleaseTag(new NBTTagCompound());
-                        tag.addCompound(releaseTag.getName(), releaseTag);
-                    }
                     
                     NBTIO.safeWrite(file, tag);
                     
@@ -249,49 +217,19 @@ public class Constants {
         }
         
         /**
-         * Creates an NBT tag compound for the current release for the revision
-         * tracker file.
+         * Recursively builds the version compilation data tags.
+         * 
+         * @return The number of builds of the current version.
          */
-        private NBTTagCompound createReleaseTag(NBTTagCompound releaseTag) {
-            releaseTag.setName("Release " + release);
-            releaseTag.addInt("compilations", 1);
-            NBTTagCompound patchMajorTag = createPatchMajorTag(new NBTTagCompound());
-            releaseTag.addCompound(patchMajorTag.getName(), patchMajorTag);
-            return releaseTag;
-        }
-        
-        /**
-         * Creates an NBT tag compound for the current major patch for the revision
-         * tracker file.
-         */
-        private NBTTagCompound createPatchMajorTag(NBTTagCompound patchMajorTag) {
-            patchMajorTag.setName("Major Patch " + patchMajor);
-            patchMajorTag.addInt("compilations", 1);
-            NBTTagCompound patchMinorTag = createPatchMinorTag(new NBTTagCompound());
-            patchMajorTag.addCompound(patchMinorTag.getName(), patchMinorTag);
-            return patchMajorTag;
-        }
-        
-        /**
-         * Creates an NBT tag compound for the current minor patch for the revision
-         * tracker file.
-         */
-        private NBTTagCompound createPatchMinorTag(NBTTagCompound patchMinorTag) {
-            patchMinorTag.setName("Minor Patch " + patchMinor);
-            patchMinorTag.addInt("compilations", 1);
-            NBTTagCompound buildTag = createBuildTag(new NBTTagCompound());
-            patchMinorTag.addCompound(buildTag.getName(), buildTag);
-            return patchMinorTag;
-        }
-        
-        /**
-         * Creates an NBT tag compound for the current build for the revision
-         * tracker file.
-         */
-        private NBTTagCompound createBuildTag(NBTTagCompound buildTag) {
-            buildTag.setName("Build " + build);
-            buildTag.addInt("compilations", 1);
-            return buildTag;
+        private int buildTags(NBTTagCompound parent, int i) {
+            NBTTagCompound tag = parent.getCompound(tags[i] + data[i]);
+            if(!parent.hasTag(tag))
+                parent.addCompound(tag.getName(), tag);
+            tag.addInt("comp", tag.getInt("comp") + 1);
+            if(++i < data.length) // we are not build
+                return buildTags(tag, i); // recursively get children
+            else // we are build!
+                return tag.getInt("comp");
         }
         
     }

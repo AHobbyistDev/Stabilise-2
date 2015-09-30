@@ -118,6 +118,22 @@ public class Checks {
      * Tests a value.
      * 
      * @param val The value being tested.
+     * @param min The minimum legal value (inclusive).
+     * 
+     * @return val
+     * @throws IllegalArgumentException if {@code val < min}.
+     */
+    public static float testMin(float val, float min) {
+        if(val < min)
+            throw new IllegalArgumentException("Illegal value " + val +
+                    "; it should not be less than " + min);
+        return val;
+    }
+    
+    /**
+     * Tests a value.
+     * 
+     * @param val The value being tested.
      * @param max The maximum legal value (inclusive).
      * 
      * @return val

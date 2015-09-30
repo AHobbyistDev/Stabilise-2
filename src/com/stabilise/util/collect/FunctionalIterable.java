@@ -12,15 +12,25 @@ import java.util.function.Predicate;
  * {@link #iterate(Predicate)} or {@link #forEach(Consumer)} in preference to
  * a typical iterator as implementors may be able to make optimisations which
  * would otherwise be difficult or impossible using a standard iterator
- * implementation (e.g. fast iteration of an ArrayList (see the documentation
- * for {@link java.util.RandomAccess})).
+ * implementation (e.g. fast iteration of an ArrayList - see the documentation
+ * for {@link java.util.RandomAccess}).
  */
+@FunctionalInterface
 public interface FunctionalIterable<E> extends Iterable<E> {
     
     /**
      * Iterates over all elements, removing those for which
      * <tt>pred.{@link Predicate#test(Object) test}()</tt> returns {@code
      * true}.
+     * 
+     * <p>The default implementation behaves as if by:
+     * 
+     * <pre>
+     * for(Iterator<E> i = iterator(); i.hasNext();) {
+     *     if(pred.test(i.next()))
+     *         i.remove();
+     * }
+     * </pre>
      * 
      * @throws NullPointerException if {@code pred} is {@code null}.
      */
@@ -29,20 +39,6 @@ public interface FunctionalIterable<E> extends Iterable<E> {
         for(Iterator<E> i = iterator(); i.hasNext();) {
             if(pred.test(i.next()))
                 i.remove();
-        }
-    }
-    
-    /**
-     * Iterates over this iterable's elements, stopping only once {@code pred}
-     * returns {@code true} or the number of elements is exhausted.
-     * 
-     * @throws NullPointerException if {@code pred} is {@code null}.
-     */
-    default void forEachUntil(Predicate<? super E> pred) {
-        Objects.requireNonNull(pred); // fail-fast
-        for(Iterator<E> i = iterator(); i.hasNext();) {
-            if(pred.test(i.next()))
-                return;
         }
     }
     
@@ -57,9 +53,7 @@ public interface FunctionalIterable<E> extends Iterable<E> {
      */
     public static <T> FunctionalIterable<T> wrap(final Iterable<T> itr) {
         Objects.requireNonNull(itr); // fail-fast
-        return new FunctionalIterable<T>() {
-            @Override public Iterator<T> iterator() { return itr.iterator(); }
-        };
+        return () -> itr.iterator();
     }
     
 }

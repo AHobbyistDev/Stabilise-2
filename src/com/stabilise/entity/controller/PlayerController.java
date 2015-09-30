@@ -214,7 +214,7 @@ public class PlayerController extends MobController implements Controllable, Inp
             case INTERACT:
                 game.world.getTileAt(mob.x, mob.y-1).handleInteract(game.world, Maths.floor(mob.x), Maths.floor(mob.y-1), mob);
                 break;
-            case TEST_RANDOM_THING:
+            case TEST_RANDOM:
                 //mob.x = 0;
                 //mob.y = 0;
                 //game.getWorld().camera.snapToFocus();

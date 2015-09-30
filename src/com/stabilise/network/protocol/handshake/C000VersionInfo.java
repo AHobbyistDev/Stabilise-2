@@ -33,12 +33,12 @@ public class C000VersionInfo extends Packet {
     
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        out.writeInt(senderVersion.release);
-        out.writeInt(senderVersion.patchMajor);
-        out.writeInt(senderVersion.patchMinor);
-        out.writeInt(senderBackwardsVersion.release);
-        out.writeInt(senderBackwardsVersion.patchMajor);
-        out.writeInt(senderBackwardsVersion.patchMinor);
+        out.writeInt(senderVersion.release());
+        out.writeInt(senderVersion.patchMajor());
+        out.writeInt(senderVersion.patchMinor());
+        out.writeInt(senderBackwardsVersion.release());
+        out.writeInt(senderBackwardsVersion.patchMajor());
+        out.writeInt(senderBackwardsVersion.patchMinor());
     }
     
     /**

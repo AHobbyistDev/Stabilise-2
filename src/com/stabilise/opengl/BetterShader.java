@@ -2,7 +2,7 @@ package com.stabilise.opengl;
 
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
-
+/** not actually. just testing */
 public class BetterShader extends ShaderProgram {
     
     static String vertexShader = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //

@@ -540,9 +540,9 @@ public class Profiler {
          */
         private String toString(String prefix) {
             StringBuilder sb = new StringBuilder(prefix);
-            sb.append(StringUtil.cullFP(totalPercent, 2));
+            sb.append(String.format("%.2f", totalPercent));
             sb.append("% ");
-            sb.append(StringUtil.cullFP(localPercent, 2));
+            sb.append(String.format("%.2f", localPercent));
             sb.append("% ");
             sb.append(name);
             sb.append(" (");

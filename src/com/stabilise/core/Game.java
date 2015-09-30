@@ -212,7 +212,7 @@ public class Game implements Controllable, InputProcessor {
             case DEBUG:
                 debug = !debug;
                 break;
-            case TOGGLE_HITBOX_RENDERING:
+            case TOG_HITBOX_RENDER:
                 WorldRenderer r = ((SingleplayerState)Application.get().getState()).renderer;
                 r.renderHitboxes = !r.renderHitboxes;
                 break;

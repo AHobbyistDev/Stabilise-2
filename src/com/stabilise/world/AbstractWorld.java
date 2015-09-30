@@ -22,7 +22,6 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.Array;
 import com.stabilise.util.collect.FragList;
 import com.stabilise.util.collect.IntList;
-import com.stabilise.util.collect.IteratorUtils;
 import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.collect.SimpleList;
@@ -201,17 +200,7 @@ public abstract class AbstractWorld implements World {
     /**
      * Iterates over the specified collection of GameObjects as per {@link
      * GameObject#updateAndCheck(World)}. GameObjects are removed from the
-     * collection by the iterator if {@code updateAndCheck()} returns {@code
-     * true}.
-     */
-    protected void updateObjects(Iterable<? extends GameObject> objects) {
-        IteratorUtils.forEach(objects, o -> o.updateAndCheck(this));
-    }
-    
-    /**
-     * Iterates over the specified collection of GameObjects as per {@link
-     * GameObject#updateAndCheck(World)}. GameObjects are removed from the
-     * collection by the iterator if {@code updateAndCheck()} returns {@code
+     * collection by the iterable if {@code updateAndCheck()} returns {@code
      * true}.
      */
     protected void updateObjects(FunctionalIterable<? extends GameObject> objects) {

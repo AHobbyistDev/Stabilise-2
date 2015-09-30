@@ -26,37 +26,37 @@ public class Controller implements InputProcessor {
     
     /** Game controls. */
     public static enum Control {
-        LEFT("left", Keys.LEFT),
-        RIGHT("right", Keys.RIGHT),
-        UP("up", Keys.UP),
-        DOWN("down", Keys.DOWN),
-        JUMP("jump", Keys.SPACE),
-        ATTACK("attack", Keys.F),
-        SPECIAL("special", Keys.G),
+        LEFT            ("left",         Keys.LEFT),
+        RIGHT           ("right",        Keys.RIGHT),
+        UP              ("up",           Keys.UP),
+        DOWN            ("down",         Keys.DOWN),
+        JUMP            ("jump",         Keys.SPACE),
+        ATTACK          ("attack",       Keys.F),
+        SPECIAL         ("special",      Keys.G),
         
-        PAUSE("pause", Keys.ESCAPE),
-        DEBUG("debug", Keys.F3),
+        PAUSE           ("pause",        Keys.ESCAPE),
+        DEBUG           ("debug",        Keys.F3),
         
         // Dev controls
         
-        SAVE_LOG("savelog", Keys.L, true),
-        RESTORE("restore", Keys.R, true),
-        SUMMON("summon", Keys.T, true),
-        SUMMON_SWARM("summonswarm", Keys.Y, true),
-        KILL_MOBS("killallmobs", Keys.K, true),
-        FLYLEFT("flyleft", Keys.A, true),
-        FLYRIGHT("flyright", Keys.D, true),
-        FLYUP("flyup", Keys.W, true),
-        FLYDOWN("flydown", Keys.S, true),
-        DESTROY_TILES("destroytiles", Keys.Q, true),
-        ZOOM_OUT("zoomout", Keys.MINUS, true),
-        ZOOM_IN("zoomin", Keys.EQUALS, true),
-        INTERACT("interact", Keys.I, true),
-        TEST_RANDOM_THING("testrandomthing", Keys.NUM_0, true),
-        ADVANCE_TICK("forceTick", Keys.NUM_1, true),
-        TOGGLE_HITBOX_RENDERING("toggleHitboxRender", Keys.H, true),
-        NEXT_TILE("nextTile", Keys.PERIOD, true),
-        PREV_TILE("prevTile", Keys.COMMA, true);
+        SAVE_LOG        ("savelog",      Keys.L,       true),
+        RESTORE         ("restore",      Keys.R,       true),
+        SUMMON          ("summon",       Keys.T,       true),
+        SUMMON_SWARM    ("summonswarm",  Keys.Y,       true),
+        KILL_MOBS       ("killallmobs",  Keys.K,       true),
+        FLYLEFT         ("flyleft",      Keys.A,       true),
+        FLYRIGHT        ("flyright",     Keys.D,       true),
+        FLYUP           ("flyup",        Keys.W,       true),
+        FLYDOWN         ("flydown",      Keys.S,       true),
+        DESTROY_TILES   ("destroytiles", Keys.Q,       true),
+        ZOOM_OUT        ("zoomout",      Keys.MINUS,   true),
+        ZOOM_IN         ("zoomin",       Keys.EQUALS,  true),
+        INTERACT        ("interact",     Keys.I,       true),
+        TEST_RANDOM     ("testrandthing",Keys.NUM_0,   true),
+        ADVANCE_TICK    ("forceTick",    Keys.NUM_1,   true),
+        TOG_HITBOX_RENDER("togHbRender", Keys.H,       true),
+        NEXT_TILE       ("nextTile",     Keys.PERIOD,  true),
+        PREV_TILE       ("prevTile",     Keys.COMMA,   true);
         
         /** The field's name in the config file. */
         public final String fieldName;

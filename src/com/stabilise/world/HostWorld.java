@@ -167,11 +167,11 @@ public class HostWorld extends AbstractWorld {
         profiler.next("regions"); // root.update.game.world.regions
         regions.updateRegions();
         
-        profiler.end(); // root.update.game.world
-        
         // Uncache any regions which may have been cached during this tick.
         // TODO: Once a tick might be too often, since this can be expensive.
         regions.uncacheAll();
+        
+        profiler.end(); // root.update.game.world
     }
     
     /**

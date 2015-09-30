@@ -12,6 +12,7 @@ import java.util.RandomAccess;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import com.stabilise.util.Checks;
 import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
@@ -39,7 +40,7 @@ public class UnorderedArrayList<E>
     
     
     /**
-     * Creates a new LightArrayList with an initial capacity of 16 and a scaling
+     * Creates a new UnorderedArrayList with an initial capacity of 16 and a scaling
      * factor of {@code 1.5}.
      */
     public UnorderedArrayList() {
@@ -47,7 +48,7 @@ public class UnorderedArrayList<E>
     }
     
     /**
-     * Creates a new LightArrayList.
+     * Creates a new UnorderedArrayList.
      * 
      * @param capacity The initial internal array length.
      * @param scaleFactor The number by which the internal array length is
@@ -61,9 +62,7 @@ public class UnorderedArrayList<E>
         @SuppressWarnings("unchecked")
         final E[] arr = (E[])new Object[capacity];
         data = arr;
-        if(scaleFactor < 1.0f)
-            throw new IllegalArgumentException("Scale factor must be >= 1.0!");
-        this.scaleFactor = scaleFactor;
+        this.scaleFactor = Checks.testMin(scaleFactor, 1f);
     }
     
     @Override
@@ -116,15 +115,6 @@ public class UnorderedArrayList<E>
         Objects.requireNonNull(cons); // fail-fast
         for(int i = 0; i < size; i++)
             cons.accept(data[i]);
-    }
-    
-    @Override
-    public void forEachUntil(Predicate<? super E> pred) {
-        Objects.requireNonNull(pred); // fail-fast
-        for(int i = 0; i < size; i++) {
-            if(pred.test(data[i]))
-                return;
-        }
     }
     
     @Override

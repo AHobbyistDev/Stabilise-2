@@ -32,10 +32,7 @@ public class AABB extends Shape {
     }
     
     /**
-     * Creates a new AABB.
-     * 
-     * @param v00 The min vertex (i.e. bottom left) of the AABB.
-     * @param v11 The max vertex (i.e. top right) of the AABB.
+     * Creates a new AABB. No checking is done on the provided vertex array.
      */
     public AABB(float[] verts) {
         this.verts = verts;
@@ -70,8 +67,6 @@ public class AABB extends Shape {
     
     @Override
     protected float[] getVertices() {
-        //throw new UnsupportedOperationException("AABB should have no need "
-        //        + "for getVertices()!");
         return new float[] {
                 verts[XMIN], verts[YMIN], //v00
                 verts[XMAX], verts[YMIN], //v10

@@ -91,7 +91,7 @@ public class EntityPerson extends EntityMob {
     public static final int ATTACK_DOWN_AIR_DURATION = 30;
     public static final int ATTACK_DOWN_AIR_FRAME_2_BEGIN = 6;
     public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_1 =
-            new Polygon(0.78f,0.91f, 0.0f,1.63f, 1.91f,-0.15f, 0.6f,0.65f);
+            new Polygon(0.78f,0.91f, 1.8f,1.63f, 1.91f,-0.15f, 0.6f,0.65f);
     public static final Shape ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED =
             ATTACK_DOWN_AIR_HITBOX_1_1.reflect();
     public static final Polygon ATTACK_DOWN_AIR_HITBOX_1_2 =

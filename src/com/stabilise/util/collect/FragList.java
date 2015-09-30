@@ -38,11 +38,10 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * that the specialised uses for this class extend beyond an ordinary list, and
  * most List methods are hence useless for a FragList.
  * 
- * <h1><b>Example Scenario</b></h1>
+ * <h3><b>Example Scenario</b></h3>
  * 
  * <p>Consider the following FragList, where A-F represent generic elements and
- * an underscore represents an unused position in the list (i.e. a null
- * element):
+ * an underscore represents an unused position in the list (i.e. a null):
  * 
  * <pre>
  * [ A, B, C, D, E, F, _, _ ] : size = 6
@@ -138,6 +137,8 @@ public class FragList<E> implements SimpleList<E> {
     @Override
     public void put(E e) {
         /*
+        // This one just appends to the end, and doesn't try looking for the
+        // first null.
         Objects.requireNonNull(e);
         if(++lastElement == data.length)
             expand();
@@ -181,6 +182,8 @@ public class FragList<E> implements SimpleList<E> {
         flatten(flattenThreshold);
     }
     
+    /** Removes the element at index i and decrements size. Adjusts firstNull
+     * and lastElement if appropriate. */
     private void remove(int i) {
         data[i] = null;
         size--;
@@ -202,18 +205,6 @@ public class FragList<E> implements SimpleList<E> {
         for(int i = 0; i <= lastElement; i++) {
             if(data[i] != null)
                 cons.accept(data[i]);
-        }
-        
-        // No flattening here since element removal does not occur.
-    }
-    
-    @Override
-    public void forEachUntil(Predicate<? super E> pred) {
-        Objects.requireNonNull(pred);
-        
-        for(int i = 0; i <= lastElement; i++) {
-            if(data[i] != null && pred.test(data[i]))
-                return;
         }
         
         // No flattening here since element removal does not occur.
@@ -312,7 +303,7 @@ public class FragList<E> implements SimpleList<E> {
         private int cursor = -1;
         private int next = -1;
         
-        /** returns next; -2 if no more */
+        /** returns next; -1 if no more */
         private int peek() {
             next = cursor + 1;
             while(next <= FragList.this.lastElement) {

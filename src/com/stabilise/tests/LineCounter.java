@@ -62,13 +62,7 @@ public class LineCounter {
         br.close();
         isr.close();
         fis.close();
-        StringBuilder sb = new StringBuilder();
-        sb.append(lines);
-        while(sb.length() < 5)
-            sb.append(' ');
-        sb.append("- ");
-        sb.append(path.replace(dir, ""));
-        System.out.println(sb.toString());
+        System.out.println(String.format("%4d - %s", lines, path.replace(dir, "")));
     }
     
     public static void main(String[] args) throws IOException {
