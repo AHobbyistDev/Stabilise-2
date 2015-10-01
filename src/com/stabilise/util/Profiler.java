@@ -17,7 +17,7 @@ import java.util.Objects;
  * invocations control these sections:
  * 
  * <pre>
- * new Profiler(true) // flush() is invoked on construction
+ * new Profiler() // flush() is invoked on construction
  * > start("Section1")
  *     > start("Subsection1.1")
  *     > next("Subsection1.2")
@@ -429,8 +429,8 @@ public class Profiler {
          * 
          * @return The data.
          */
-        private SectionData getData(String parentName, float localPercent, float totalPercent,
-                final long currentTime) {
+        private SectionData getData(String parentName, float localPercent,
+                float totalPercent, final long currentTime) {
             // Make parentName function as absoluteName
             parentName = !parentName.equals("") ? parentName + "." + name : name;
             
@@ -463,7 +463,8 @@ public class Profiler {
             
             Arrays.sort(children);
             
-            return new SectionDataNormal(name, parentName, duration, localPercent, totalPercent, children);
+            return new SectionDataNormal(name, parentName, duration,
+                    localPercent, totalPercent, children);
         }
         
     }
@@ -605,7 +606,8 @@ public class Profiler {
         
         private SectionDataUnspecified(String parentName,
                 long duration, float localPercent, float totalPercent) {
-            super("unspecified", parentName + ".unspecified", duration, localPercent, totalPercent);
+            super("unspecified", parentName + ".unspecified", duration,
+                    localPercent, totalPercent);
         }
         
         @Override

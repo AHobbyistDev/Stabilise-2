@@ -17,6 +17,8 @@ import com.stabilise.util.collect.IteratorUtils;
  * <p>Whether or not a listener is single-use is irrelevant for a retained
  * dispatcher since any particular event may only be posted once, so {@link
  * #addListener(Event, EventHandler, boolean)} is redundant.
+ * 
+ * <p>This class may be subclassed if desired.
  */
 public class RetainedEventDispatcher extends EventDispatcher {
     

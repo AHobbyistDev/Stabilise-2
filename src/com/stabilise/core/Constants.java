@@ -44,8 +44,8 @@ public class Constants {
      * completely arbitrary. */
     public static final int DEFAULT_PORT = 8224;
     
-    /** true if different dimensions of the world should be hosted on different
-     * threads. */ // This may be temporary
+    /** True if different dimensions of the world should be hosted on different
+     * threads if possible. */ // This may be temporary
     public static final boolean CONCURRENT_DIMENSIONS = true;
     
     /** The half-length of an edge of the square of loaded slices around the

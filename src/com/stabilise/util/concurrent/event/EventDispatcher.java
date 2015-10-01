@@ -42,12 +42,11 @@ public class EventDispatcher {
     
     // TODO: Perform a full analysis on the optimal concurrency level given a
     // specified number of processors.
-    private static final int CONCURRENCY_LEVEL =
-           Runtime.getRuntime().availableProcessors();
+    private static final int NCPU = Runtime.getRuntime().availableProcessors();
     
     final ConcurrentHashMap<Event, ListenerBucket> handlers =
             new ConcurrentHashMap<>();
-    final Striper<Object> locks = Striper.generic(CONCURRENCY_LEVEL);
+    final Striper<Object> locks = Striper.generic(NCPU);
     final Executor executor;
     
     

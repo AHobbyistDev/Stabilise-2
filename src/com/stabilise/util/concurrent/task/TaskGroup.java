@@ -6,13 +6,12 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class TaskGroup extends Task {
+public class TaskGroup extends TaskUnit {
     
-    private boolean hasSubtasks = false;
-    private List<Task> subtasks = null;
+    private final List<TaskUnit> subtasks = new ArrayList<>();
     private int remainingSubtasks = 0;
-    private Lock subtaskLock = null;
-    private Condition subtaskCondition = null;
+    private final Lock subtaskLock = new ReentrantLock();
+    private final Condition subtaskCondition = subtaskLock.newCondition();
     
     public TaskGroup() {
         super(null, "", 0);
@@ -20,32 +19,18 @@ public class TaskGroup extends Task {
     
     @Override
     protected boolean execute() {
-        if(executor == null)
-            executor = EXEC_CURR_THREAD;
-        
-        for(Task t : subtasks) {
-            t.parentTask = this;
+        for(TaskUnit t : subtasks) {
+            t.parent = this;
             executor.execute(t);
         }
         
-        
-        return executor == EXEC_CURR_THREAD;
+        return remainingSubtasks == 0;
     }
     
-    private void addSubtask(Task t) {
-        //if(started.get())
-        //    throw new IllegalStateException();
-        
-        if(!hasSubtasks) {
-            // Lazily initialise
-            hasSubtasks = true;
-            subtasks = new ArrayList<>();
-            subtaskLock = new ReentrantLock();
-            subtaskCondition = subtaskLock.newCondition();
-        }
-        
+    private TaskGroup addSubtask(TaskUnit t) {
         subtasks.add(t);
         remainingSubtasks++;
+        return this;
     }
     
     private void onSubtaskCompletion() {
@@ -54,11 +39,6 @@ public class TaskGroup extends Task {
                 return;
         }
         finish();
-    }
-    
-    @Override
-    protected void interrupt() {
-        
     }
     
 }

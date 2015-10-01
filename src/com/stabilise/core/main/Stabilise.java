@@ -13,6 +13,7 @@ import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.tile.Tile;
+import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
  * The game.
@@ -103,6 +104,7 @@ public class Stabilise extends Application {
                 Tile.registerTiles();
                 Item.registerItems();
                 Dimension.registerDimensions();
+                TileEntity.poke();
                 
                 Settings.initialise();
                 Controller.poke();

@@ -30,6 +30,8 @@ public abstract class TileEntity extends FixedGameObject {
         TILE_ENTITIES.lock();
     }
     
+    public static void poke() {}
+    
     
     /**
      * Creates a new tile entity.

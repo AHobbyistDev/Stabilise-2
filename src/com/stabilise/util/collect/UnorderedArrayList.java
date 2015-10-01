@@ -437,11 +437,10 @@ public class UnorderedArrayList<E>
         
         @Override
         public E previous() {
-            try {
+            if(hasPrevious())
                 return data[lastRet = --cursor];
-            } catch(ArrayIndexOutOfBoundsException e) {
-                throw new NoSuchElementException(e.getMessage());
-            }
+            else
+                throw new NoSuchElementException();
         }
         
         @Override

@@ -17,6 +17,7 @@ import com.stabilise.core.Resources;
 import com.stabilise.item.BoundedContainer;
 import com.stabilise.item.Container;
 import com.stabilise.util.Log;
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.IOUtil;
@@ -27,6 +28,7 @@ import com.stabilise.util.nbt.NBTTagCompound;
 /**
  * Data about a character.
  */
+@Incomplete
 public class CharacterData implements Sendable {
     
     //--------------------==========--------------------

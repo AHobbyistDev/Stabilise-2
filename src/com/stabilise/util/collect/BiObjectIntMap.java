@@ -27,6 +27,7 @@ import java.util.Iterator;
 @NotThreadSafe
 public class BiObjectIntMap<V> implements Iterable<V> {
     
+    // Package-private so RegistryNamespaced can interact with these directly.
     /** Maps Values -> Keys */
     IdentityHashMap<V, Integer> map;
     /** Maps Keys -> Values */

@@ -17,7 +17,7 @@ import com.stabilise.util.concurrent.Task;
  * <p>As is implied, this class is thread-safe.
  */
 @ThreadSafe
-class TaskTracker {
+public class TaskTracker {
     
     private static final long MASK_DONE =            0x8000000000000000L;
     private static final long MASK_COMPLETED =       0x4000000000000000L;
@@ -25,10 +25,10 @@ class TaskTracker {
     private static final long MASK_PARTS_COMPLETED = 0x000000007FFFFFFFL;
     private static final long MASK_UNSTARTED =       MASK_DONE | MASK_COMPLETED;
     private static final long VAL_UNSTARTED =        MASK_COMPLETED;
-    //private static final int SHIFT_DONE =            63;
-    //private static final int SHIFT_COMPLETED =       62;
+  //private static final int SHIFT_DONE =            63;
+  //private static final int SHIFT_COMPLETED =       62;
     private static final int SHIFT_PARTS =           31;
-    //private static final int SHIFT_PARTS_COMPLETED = 0;
+  //private static final int SHIFT_PARTS_COMPLETED = 0;
     
     /** Task status. Never null. */
     private volatile String status;
@@ -37,10 +37,10 @@ class TaskTracker {
      * lowest bit:
      * 
      * <ul>
-     * <li><b>1</b> - (1 bit) if the task is done, 0 if not. A task which is
+     * <li><b>1</b> (1 bit) - if the task is done, 0 if not. A task which is
      *     done may not necessarily have been completed; for example, it may
      *     have been cancelled.
-     * <li><b>2</b> - (1 bit) if the task is completed, 0 if not.
+     * <li><b>2</b> (1 bit) - if the task is completed, 0 if not.
      * <li><b>3-33</b> (31 bits) - the total number of parts in the task.
      * <li><b>34-64</b> (31 bits) - the number of parts which have been
      *     completed. Always less than the total number of parts.
@@ -110,9 +110,11 @@ class TaskTracker {
     }
     
     /**
-     * Adds to the total number of parts to this task.
+     * Adds to the total number of parts to this task and its parent, if
+     * applicable.
      * 
-     * @throws IllegalStateException if the task has been started.
+     * @throws IllegalStateException if the task or its parent has been
+     * started.
      */
     private void addParts(int parts) {
         Checks.testMin(parts, 1);
@@ -127,6 +129,8 @@ class TaskTracker {
                 p = Integer.MAX_VALUE;
             n = setParts(s, p);
         } while(!state.compareAndSet(s, n));
+        if(parent != null)
+            parent.addParts(parts);
     }
     
     /**
