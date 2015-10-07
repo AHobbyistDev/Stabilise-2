@@ -4,6 +4,9 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.concurrent.Tasks;
+import com.stabilise.util.concurrent.event.Event;
+import com.stabilise.util.concurrent.event.EventDispatcher.EventHandler;
 
 @NotThreadSafe
 public class TaskBuilder {
@@ -15,8 +18,8 @@ public class TaskBuilder {
     private TaskUnit first = null;
     private TaskUnit tail = null;
     
-    private TaskUnit curFocus = null;
-    private TaskGroup curGroup = null;
+    private TaskUnit focus = null;
+    private TaskGroup group = null;
     
     private boolean built = false;
     
@@ -25,74 +28,88 @@ public class TaskBuilder {
         this.startName = Objects.requireNonNull(startName);
     }
     
+    public TaskBuilder andThen(Runnable r) {
+        return andThen(Tasks.wrap(r));
+    }
+    
     public TaskBuilder andThen(TaskRunnable t) {
-        checkState();
-        return this;
+        return andThen(t, "", 1, false);
     }
     
     public TaskBuilder andThen(TaskRunnable t, int parts) {
+        return andThen(t, "", parts, true);
+    }
+    
+    private TaskBuilder andThen(TaskRunnable t, String name, int parts,
+            boolean partsSpecified) {
+        checkState();
+        if(group != null && focus == null)
+            throw new IllegalStateException("can't do a task after nothing in a group!");
+        TaskUnit unit = new TaskUnit(executor, t, name, parts, partsSpecified);
+        if(focus != null)
+            focus.next = unit;
+        focus = unit;
+        if(group != null)
+            unit.group = group;
+        else
+            tail = unit;
         return this;
     }
     
-    public TaskBuilder onStop(Runnable r) {
+    public <E extends Event> TaskBuilder onEvent(E e, EventHandler<? super E> h) {
         checkState();
         requireFocus();
-        return this;
-    }
-    
-    public TaskBuilder onComplete(Runnable r) {
-        checkState();
-        requireFocus();
-        return this;
-    }
-    
-    public TaskBuilder onCancel(Runnable r) {
-        checkState();
-        requireFocus();
-        return this;
-    }
-    
-    public TaskBuilder onFail(Runnable r) {
-        checkState();
-        requireFocus();
+        focus.addListener(e, h);
         return this;
     }
     
     public TaskBuilder andThenGroup() {
         checkState();
-        if(curGroup != null)
-            throw new IllegalStateException("already grouped");
-        curGroup = new TaskGroup();
-        return this;
-    }
-    
-    public TaskBuilder subtask(TaskRunnable t) {
-        checkState();
-        if(curGroup == null)
-            throw new IllegalStateException("group not started");
-        return this;
-    }
-    
-    public TaskBuilder subTask(TaskRunnable t, int parts) {
-        checkState();
-        if(curGroup == null)
-            throw new IllegalStateException("group not started");
+        requireNoGroup();
+        group = new TaskGroup(executor);
+        if(tail != null) {
+            tail.next = group;
+            tail = group;
+        }
+        focus = null;
         return this;
     }
     
     public TaskBuilder endGroup() {
         checkState();
-        if(curGroup == null)
-            throw new IllegalStateException("group not started");
+        requireGroup();
+        focus = group;
+        group = null;
+        return this;
+    }
+    
+    public TaskBuilder subtask(Runnable r) {
+        return subtask(Tasks.wrap(r));
+    }
+    
+    public TaskBuilder subtask(TaskRunnable t) {
+        return subtask(t, "", 1, false);
+    }
+    
+    public TaskBuilder subtask(TaskRunnable t, int parts) {
+        return subtask(t, "", parts, true);
+    }
+    
+    private TaskBuilder subtask(TaskRunnable t, String name, int parts,
+            boolean partsSpecified) {
+        checkState();
+        requireGroup();
+        TaskUnit unit = new TaskUnit(executor, t, name, parts, partsSpecified);
+        group.addSubtask(unit);
+        focus = unit;
         return this;
     }
     
     public Task build() {
         checkState();
+        requireNoGroup();
         if(first == null)
             throw new IllegalStateException("no task units");
-        if(curGroup != null)
-            throw new IllegalStateException("group not ended");
         
         built = true;
         return new Task();
@@ -106,12 +123,18 @@ public class TaskBuilder {
     
     /** @throws IllegalStateException if no focus. */
     private void requireFocus() {
-        if(curFocus == null)
+        if(focus == null)
             throw new IllegalStateException();
     }
     
-    public static Task exec(Executor executor, String name, TaskRunnable t) {
-        return new TaskBuilder(executor, name).andThen(t).build();
+    private void requireGroup() {
+        if(group == null)
+            throw new IllegalStateException("group not started");
+    }
+    
+    private void requireNoGroup() {
+        if(group != null)
+            throw new IllegalStateException("group already started");
     }
     
 }

@@ -72,7 +72,7 @@ public class SliceMap {
         
         // If the target has moved very far, opt to refresh instead.
         if(Math.abs(sliceX - centreX) >= REFRESH_BOUNDARY ||
-                Math.abs(sliceY - centreY) >= REFRESH_BOUNDARY) {
+           Math.abs(sliceY - centreY) >= REFRESH_BOUNDARY) {
             refresh();
             return;
         }

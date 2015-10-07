@@ -1,4 +1,4 @@
-package com.stabilise.util.concurrent.event;
+package com.stabilise.util.concurrent.event.old;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 
 import com.stabilise.core.app.Application;
 import com.stabilise.util.collect.IteratorUtils;
+import com.stabilise.util.concurrent.event.Event;
 
 /**
  * A {@code RetainedEventDispatcher} is a specialised form of event dispatcher
@@ -42,22 +43,21 @@ public class RetainedEventDispatcher extends EventDispatcher {
     }
     
     @Override
-    ListenerBucket<?> newBucket() {
-        return new RetainedListenerBucket<>();
+    ListenerBucket newBucket() {
+        return new RetainedListenerBucket();
     }
     
-    @SuppressWarnings("unchecked")
     @Override
-    <E extends Event> void doPost(E e) {
-        Listener<? super E>[] ls = null;
+    void doPost(Event e) {
+        Listener[] ls = null;
         synchronized(lockFor(e)) {
-            ListenerBucket<E> b = (ListenerBucket<E>) handlers.get(e);
+            ListenerBucket b = handlers.get(e);
             if(b == null)
-                handlers.put(e, b = (ListenerBucket<E>) newBucket());
+                handlers.put(e, b = newBucket());
             ls = b.post(e);
         }
         if(ls != null) {
-            for(Listener<? super E> l : ls) {
+            for(Listener l : ls) {
                 execute(e, l);
             }
         }
@@ -69,40 +69,39 @@ public class RetainedEventDispatcher extends EventDispatcher {
      * bucket takes note of that and henceforth immediately runs handlers when
      * they are registered.
      */
-    private class RetainedListenerBucket<E extends Event> implements ListenerBucket<E> {
+    private class RetainedListenerBucket implements ListenerBucket {
         
         /** Lazily initialised when needed, and then reset to null when the
          * event is received. */
-        private List<Listener<? super E>> listeners = null;
+        private List<Listener> listeners = null;
         private Event e = null;
         
-        @SuppressWarnings("unchecked")
         @Override
-        public boolean addListener(Listener<?> l) {
+        public boolean addListener(Listener l) {
             if(e != null) {
                 return false;
             } else {
                 if(listeners == null)
                     listeners = new ArrayList<>(4);
-                listeners.add((Listener<? super E>) l);
+                listeners.add(l);
                 return true;
             }
         }
         
         @Override
-        public void removeListener(Predicate<Listener<?>> pred) {
+        public void removeListener(Predicate<Listener> pred) {
             if(listeners != null)
                 IteratorUtils.removeFirst(listeners, pred);
         }
         
         @Override
-        public void removeListeners(Predicate<Listener<?>> pred) {
+        public void removeListeners(Predicate<Listener> pred) {
             if(listeners != null)
                 listeners.removeIf(pred);
         }
         
         @Override
-        public Listener<? super E>[] post(Event e) {
+        public Listener[] post(Event e) {
             // We ignore duplicate events rather than complain as to adhere to
             // the contract of post() in EventDispatcher.
             if(this.e != null) {
@@ -112,8 +111,7 @@ public class RetainedEventDispatcher extends EventDispatcher {
             
             this.e = e;
             if(listeners != null) {
-                @SuppressWarnings("unchecked")
-                Listener<? super E>[] arr = listeners.toArray(new Listener[listeners.size()]);
+                Listener[] arr = listeners.toArray(new Listener[listeners.size()]);
                 listeners = null;
                 return arr;
             }

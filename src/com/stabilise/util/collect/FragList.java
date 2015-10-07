@@ -2,6 +2,7 @@ package com.stabilise.util.collect;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -12,31 +13,34 @@ import com.stabilise.util.Checks;
 import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
- * A FragList is a variant on an ArrayList which replaces removed elements with
- * {@code null} in preference to filling up the gap. This reduces overhead of
- * removal operations, but at the cost of fragmenting the list with nulls which
- * must be skipped over during iteration. A FragList may be {@link #flatten()
- * flattened} to eliminate such nulls, but this can be a costly operation and
- * so should not be performed frequently.
+ * A FragList (or "fragmented list") is a variant on an ArrayList which
+ * replaces removed elements with {@code null} in preference to filling up the
+ * gap. This reduces overhead of removal operations at the cost of fragmenting
+ * the list with nulls which must be skipped over during iteration. A FragList
+ * may be {@link #flatten() flattened} to eliminate such nulls, but this can be
+ * a costly operation and so should not be performed frequently.
  * 
  * <p>FragList accepts a parameter {@code flattenThreshold}, which determines
  * how often the list is automatically flattened. When the percentage of nulls
  * throughout the list exceeds the threshold, the list is flattened upon an
  * invocation of {@link #iterate(Predicate) forEach}() to eliminate those
  * nulls. A lower threshold means a FragList will be flattened more often,
- * which helps preserve data locality but can incur significant overhead. A
- * higher threshold results in less frequent flattening, but may result in the
- * internal array being intermediated with too many nulls. Note that flattening
- * is less useful if elements are frequently added to a FragList, as new
- * elements will fill up the nulls on their own.
+ * which helps preserve data locality and reduce iteration overhead, but can
+ * incur significant overhead. A higher threshold results in less frequent
+ * flattening, but may result in the internal array being intermediated with
+ * too many nulls. Flattening becomes less useful if elements are frequently
+ * added to a FragList, as new elements will fill up the nulls on their own.
  * 
  * <p>A FragList does not preserve the insertion order of elements, but
  * guarantees that the relative ordering of any two elements never changes
  * (i.e. if element A precedes element B in the list, this will never change).
+ * The primary purpose of a FragList is (try to) to offer a compromise between
+ * the highly performant {@link UnorderedArrayList} and slower but
+ * order-preserving lists such as {@link LinkedList}.
  * 
- * <p>This class does not implement the {@link List} interface due to the fact
- * that the specialised uses for this class extend beyond an ordinary list, and
- * most List methods are hence useless for a FragList.
+ * <p>This class does not implement the {@link List} interface as a FragList
+ * generally isn't useful as an ordinary list, and the only operations for
+ * which one comes in handy are those provided by {@link SimpleList}.
  * 
  * <h3><b>Example Scenario</b></h3>
  * 
@@ -134,6 +138,11 @@ public class FragList<E> implements SimpleList<E> {
         return size;
     }
     
+    /**
+     * {@inheritDoc}
+     * 
+     * @throws NullPointerException if {@code e} is {@code null}.
+     */
     @Override
     public void put(E e) {
         /*
@@ -227,7 +236,8 @@ public class FragList<E> implements SimpleList<E> {
     
     /**
      * Flattens this list if the percentage of nulls is greater than the
-     * specified threshold.
+     * specified threshold (that is, {@code threshold} should be between 0 and
+     * 1).
      */
     public void flatten(float threshold) {
         if(size > 0 && 1f - (float)size / lastElement > threshold)
@@ -261,6 +271,8 @@ public class FragList<E> implements SimpleList<E> {
         return (int)(data.length << 1) + 1;
     }
     
+    /** Traverses the list starting from the current value of firstNull until
+     * either another null is found or the end of the list is reached. */
     private void findNextNull() {
         do {
             firstNull++;

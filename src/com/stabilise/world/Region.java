@@ -16,7 +16,7 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.box.Box;
 import com.stabilise.util.box.Boxes;
 import com.stabilise.util.concurrent.ClearingQueue;
-import com.stabilise.util.concurrent.Task;
+import com.stabilise.util.concurrent.Tasks;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
 import com.stabilise.util.maths.PointFactory;
@@ -499,7 +499,7 @@ public class Region {
                     // guarantee that it is saving up-to-date data, we wait for
                     // it to finish and then save again on this thread.
                     saveState.set(SaveState.WAITING);
-                    Task.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE
+                    Tasks.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE
                                     || saveState.get() == SaveState.IDLE_WAITER);
                     saveState.set(SaveState.SAVING);
                     return true;
@@ -539,7 +539,7 @@ public class Region {
      */
     @SuppressWarnings("unused")
     private void waitUntilSaved() {
-        Task.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE);
+        Tasks.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE);
     }
     
     /**

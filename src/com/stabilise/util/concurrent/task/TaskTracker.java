@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.stabilise.util.Checks;
 import com.stabilise.util.ObjectIntFunction;
 import com.stabilise.util.annotation.ThreadSafe;
-import com.stabilise.util.concurrent.Task;
+import com.stabilise.util.concurrent.Tasks;
 
 /**
  * A TaskTracker is designed to provide a means of communication between
@@ -17,7 +17,7 @@ import com.stabilise.util.concurrent.Task;
  * <p>As is implied, this class is thread-safe.
  */
 @ThreadSafe
-public class TaskTracker {
+class TaskTracker {
     
     private static final long MASK_DONE =            0x8000000000000000L;
     private static final long MASK_COMPLETED =       0x4000000000000000L;
@@ -353,14 +353,14 @@ public class TaskTracker {
      * @throws IllegalStateException if the task is already done.
      */
     public void setCompleted() {
-        Task.doThenNotify(this, () -> setCompletionStatus(true));
+        Tasks.doThenNotify(this, () -> setCompletionStatus(true));
     }
     
     /**
      * Sets the task as failed.
      */
     public void setFailed() {
-        Task.doThenNotify(this, () -> setCompletionStatus(false));
+        Tasks.doThenNotify(this, () -> setCompletionStatus(false));
     }
     
     private void setCompletionStatus(boolean success) {
@@ -429,7 +429,7 @@ public class TaskTracker {
      * waiting.
      */
     public void waitUntilStopped() throws InterruptedException {
-        Task.waitInterruptibly(this, () -> stopped());
+        Tasks.waitInterruptibly(this, () -> stopped());
     }
     
     /**
@@ -440,7 +440,7 @@ public class TaskTracker {
      * interrupt flag will be set when this method returns.
      */
     public void waitUninterruptibly() {
-        Task.waitUntil(this, () -> stopped());
+        Tasks.waitUntil(this, () -> stopped());
     }
     
     protected void updateParent(int parts) {

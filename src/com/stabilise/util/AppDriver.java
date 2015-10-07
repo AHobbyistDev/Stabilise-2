@@ -269,19 +269,17 @@ public abstract class AppDriver implements Runnable {
      * @throws IllegalArgumentException if {@code fps < -1}.
      */
     public void setFPS(int fps) {
-        if(fps < -1)
-            throw new IllegalArgumentException("fps < -1");
-        this.fps = fps;
+        this.fps = Checks.testMin(fps, -1);
         nsPerFrame = fps == 0 ? 0 : 1000000000 / fps;
     }
     
     /**
      * Sets the number of update ticks between which to flush the profiler.
+     * 
+     * @throws IllegalArgumentException if {@code ticksPerFlush < 1}.
      */
     public void setTicksPerProfilerFlush(int ticksPerFlush) {
-        if(ticksPerFlush < 1)
-            throw new IllegalArgumentException("ticksPerFlush < 1");
-        this.ticksPerFlush = ticksPerFlush;
+        this.ticksPerFlush = Checks.testMin(ticksPerFlush, 1);
     }
     
     //--------------------==========--------------------

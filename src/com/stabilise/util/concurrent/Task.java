@@ -1,7 +1,6 @@
 package com.stabilise.util.concurrent;
 
 import java.util.concurrent.ExecutionException;
-import java.util.function.BooleanSupplier;
 
 import com.stabilise.util.annotation.ThreadSafe;
 
@@ -112,7 +111,7 @@ public abstract class Task implements Runnable {
      * #waitUninterruptibly()}.
      */
     private void ceaseRunning(TaskState newState) {
-        doThenNotify(this, () -> state = newState);
+        Tasks.doThenNotify(this, () -> state = newState);
     }
     
     /**
@@ -238,7 +237,7 @@ public abstract class Task implements Runnable {
      */
     public final void waitUntilStopped() throws InterruptedException, ExecutionException {
         if(canWait()) {
-            waitInterruptibly(this, () -> !state.equals(TaskState.RUNNING));
+            Tasks.waitInterruptibly(this, () -> !state.equals(TaskState.RUNNING));
             throwExcecutionException();
         }
     }
@@ -260,7 +259,7 @@ public abstract class Task implements Runnable {
      */
     public final void waitUninterruptibly() throws ExecutionException {
         if(canWait()) {
-            waitUntil(this, () -> state.equals(TaskState.RUNNING));
+            Tasks.waitUntil(this, () -> state.equals(TaskState.RUNNING));
             throwExcecutionException();
         }
     }
@@ -348,96 +347,6 @@ public abstract class Task implements Runnable {
     @Override
     public String toString() {
         return tracker.toString();
-    }
-    
-    //--------------------==========--------------------
-    //------------=====Static Functions=====------------
-    //--------------------==========--------------------
-    
-    /**
-     * Waits on the specified object's monitor lock until the specified
-     * condition returns {@code true}. If the current thread was interrupted
-     * while waiting, the interrupt flag will be set when this method returns.
-     * 
-     * @param o The object to wait on.
-     * @param endCondition The condition on which to wait.
-     * 
-     * @throws NullPointerException if either argument is {@code null}.
-     */
-    public static void waitUntil(Object o, BooleanSupplier endCondition) {
-        boolean interrupted = false;
-        synchronized(o) {
-            while(!endCondition.getAsBoolean()) {
-                try {
-                    o.wait();
-                } catch(InterruptedException retry) {
-                    interrupted = true;
-                }
-            }
-        }
-        if(interrupted)
-            Thread.currentThread().interrupt();
-    }
-    
-    /**
-     * Waits on the specified object's monitor lock until the specified
-     * condition returns {@code true}.
-     * 
-     * @param o The object to wait on.
-     * @param endCondition The condition on which to wait.
-     * 
-     * @throws NullPointerException if either argument is {@code null}.
-     * @throws InterruptedException if the current thread received an
-     * interrupt while waiting.
-     */
-    public static void waitInterruptibly(Object o, BooleanSupplier endCondition)
-            throws InterruptedException {
-        synchronized(o) {
-            while(!endCondition.getAsBoolean())
-                o.wait();
-        }
-    }
-    
-    /**
-     * Synchronises on {@code o}, then runs {@code task}, and then invokes
-     * {@code notifyAll()} on {@code o} as such:
-     * 
-     * <pre>
-     * synchronized(o) {
-     *     if(task != null) task.run();
-     *     o.notifyAll();
-     * }</pre>
-     * 
-     * @throws NullPointerException if {@code o} is {@code null}.
-     */
-    public static void doThenNotify(Object o, Runnable task) {
-        synchronized(o) {
-            if(task != null) task.run();
-            o.notifyAll();
-        }
-    }
-    
-    /**
-     * If the specified condition returns {@code true}, invokes {@code
-     * notifyAll()} on {@code o}.
-     * 
-     * @param syncCondition If true, the condition will be invoked while
-     * synchronized on {@code o}.
-     * 
-     * @throws NullPointerException if either argument is {@code null}.
-     */
-    public static void notifyIf(Object o, BooleanSupplier condition,
-            boolean syncCondition) {
-        if(syncCondition) {
-            synchronized(o) {
-                if(condition.getAsBoolean())
-                    o.notifyAll();
-            }
-        } else {
-            if(condition.getAsBoolean()) {
-                synchronized(o) { o.notifyAll(); }
-            }
-        }
     }
     
 }

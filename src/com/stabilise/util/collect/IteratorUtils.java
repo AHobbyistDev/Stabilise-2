@@ -22,7 +22,7 @@ public class IteratorUtils {
      * @throws NullPointerException if either argument is null.
      * @see java.util.Collection#removeIf(Predicate)
      */
-    public static <T> void forEach(Iterable<T> col, Predicate<T> pred) {
+    public static <T> void forEach(Iterable<T> col, Predicate<? super T> pred) {
         forEach(col.iterator(), pred);
     }
     
@@ -34,7 +34,7 @@ public class IteratorUtils {
      * @throws NullPointerException if either argument is null.
      * @see java.util.Collection#removeIf(Predicate)
      */
-    public static <T> void forEach(Iterator<T> i, Predicate<T> pred) {
+    public static <T> void forEach(Iterator<T> i, Predicate<? super T> pred) {
         Objects.requireNonNull(pred); // fail-fast
         while(i.hasNext()) {
             if(pred.test(i.next()))
@@ -47,7 +47,7 @@ public class IteratorUtils {
      * 
      * @throws NullPointerException if either argument is null.
      */
-    public static <T> void removeFirst(Iterable<T> i, Predicate<T> pred) {
+    public static <T> void removeFirst(Iterable<T> i, Predicate<? super T> pred) {
         removeFirst(i.iterator(), pred);
     }
     
@@ -57,7 +57,7 @@ public class IteratorUtils {
      * 
      * @throws NullPointerException if either argument is null.
      */
-    public static <T> void removeFirst(Iterator<T> i, Predicate<T> pred) {
+    public static <T> void removeFirst(Iterator<T> i, Predicate<? super T> pred) {
         Objects.requireNonNull(pred); // fail-fast
         while(i.hasNext()) {
             if(pred.test(i.next())) {

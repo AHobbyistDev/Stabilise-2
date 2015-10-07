@@ -235,11 +235,6 @@ public class TaskTimer {
      */
     private static String percentage(TaskTimer faster, TaskTimer slower) {
         return String.format("%.2f", (double)slower.duration / faster.duration);
-        //return StringUtil.cullFP(
-        //        //100 * (((double)slower.duration / (double)faster.duration) - 1),
-        //        (double)slower.duration / (double)faster.duration,
-        //        2
-        //);
     }
     
     /**

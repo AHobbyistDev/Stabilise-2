@@ -72,7 +72,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @see ThreadPoolExecutor
  */
 public class BoundedThreadPoolExecutor extends AbstractExecutorService {
-       /**
+    /**
      * The main pool control state, ctl, is an atomic integer packing
      * two conceptual fields
      *   workerCount, indicating the effective number of threads
@@ -1125,7 +1125,7 @@ public class BoundedThreadPoolExecutor extends AbstractExecutorService {
             reject(command);
         */
         int c = ctl.get();
-        // TODO [using a todo because it marks this line in the eclipse editor]
+        // TODO [using a todo because it marks this line in eclipse]
         // The difference between this and ThreadPoolExecutor is the following
         // conditional: ThreadPoolExecutor checks < corePoolSize, and this
         // checks for < maximumPoolSize

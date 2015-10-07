@@ -1,5 +1,6 @@
 package com.stabilise.util.collect;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -31,6 +32,10 @@ public interface FunctionalIterable<E> extends Iterable<E> {
      *         i.remove();
      * }
      * </pre>
+     * 
+     * <p>This method is equivalent to {@link Collection#removeIf(Predicate)}
+     * (though without the return value) - but frankly {@code removeIf} should
+     * have been added to {@code Iterable} rather than {@code Collection}.
      * 
      * @throws NullPointerException if {@code pred} is {@code null}.
      */

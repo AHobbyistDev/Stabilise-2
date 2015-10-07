@@ -41,7 +41,7 @@ public class Boxes {
         
         public ABox(T value) { this.value = value; }
         
-        @Override public T get() { return value; }
+        @Override public T get()       { return value; }
         @Override public void set(T t) { value = t; }
     }
     
@@ -50,7 +50,7 @@ public class Boxes {
         
         public AVolatileBox(T value) { this.value = value; }
         
-        @Override public T get() { return value; }
+        @Override public T get()       { return value; }
         @Override public void set(T t) { value = t; }
     }
     
