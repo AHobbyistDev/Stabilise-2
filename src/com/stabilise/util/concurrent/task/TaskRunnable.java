@@ -5,4 +5,6 @@ public interface TaskRunnable {
     
     void run(TaskHandle handle) throws Exception;
     
+    default long calculateParts() { return 0; }
+    
 }

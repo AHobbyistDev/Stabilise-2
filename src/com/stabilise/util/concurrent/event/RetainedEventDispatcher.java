@@ -6,6 +6,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
 import com.stabilise.core.app.Application;
+import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.collect.IteratorUtils;
 
 /**
@@ -20,6 +21,7 @@ import com.stabilise.util.collect.IteratorUtils;
  * 
  * <p>This class may be subclassed if desired.
  */
+@ThreadSafe
 public class RetainedEventDispatcher extends EventDispatcher {
     
     /**

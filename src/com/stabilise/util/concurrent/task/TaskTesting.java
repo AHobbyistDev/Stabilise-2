@@ -29,7 +29,7 @@ class TaskTesting {
                     .andThen(t -> blah(t))
             .endGroup()
             .build();
-        task.waitUninterruptibly();
+        task.awaitUninterruptibly();
     }
     
 }

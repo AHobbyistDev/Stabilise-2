@@ -19,15 +19,15 @@ import com.stabilise.util.concurrent.Tasks;
 @ThreadSafe
 class TaskTracker {
     
-    private static final long MASK_DONE =            0x8000000000000000L;
-    private static final long MASK_COMPLETED =       0x4000000000000000L;
-    private static final long MASK_PARTS =           0x3FFFFFFF80000000L;
+    private static final long MASK_DONE            = 0x8000000000000000L;
+    private static final long MASK_COMPLETED       = 0x4000000000000000L;
+    private static final long MASK_PARTS           = 0x3FFFFFFF80000000L;
     private static final long MASK_PARTS_COMPLETED = 0x000000007FFFFFFFL;
-    private static final long MASK_UNSTARTED =       MASK_DONE | MASK_COMPLETED;
-    private static final long VAL_UNSTARTED =        MASK_COMPLETED;
-  //private static final int SHIFT_DONE =            63;
-  //private static final int SHIFT_COMPLETED =       62;
-    private static final int SHIFT_PARTS =           31;
+    private static final long MASK_UNSTARTED       = MASK_DONE | MASK_COMPLETED;
+    private static final long VAL_UNSTARTED        = MASK_COMPLETED;
+  //private static final int SHIFT_DONE            = 63;
+  //private static final int SHIFT_COMPLETED       = 62;
+    private static final int SHIFT_PARTS           = 31;
   //private static final int SHIFT_PARTS_COMPLETED = 0;
     
     /** Task status. Never null. */
@@ -70,19 +70,19 @@ class TaskTracker {
     /**
      * Creates a new TaskTracker.
      * 
+     * @param parts The number of parts to complete. This value is
+     * unrestricted, so checking must be done by TaskBuilder.
      * @param status The initial status of the task.
-     * @param parts The number of parts to complete.
      * 
      * @throws NullPointerException if {@code status} is {@code null}.
-     * @throws IllegalArgumentException if {@code parts <= 0}.
      */
-    public TaskTracker(String status, int parts) {
+    public TaskTracker(int parts, String status) {
         this(status, parts, null);
     }
     
     private TaskTracker(String status, int parts, TaskTracker parent) {
         this.status = Objects.requireNonNull(status);
-        state = new AtomicLong(setUnstarted(setParts(0L, Checks.testMin(parts, 1))));
+        state = new AtomicLong(setParts(VAL_UNSTARTED, parts));
         this.parent = parent;
     }
     
@@ -103,7 +103,7 @@ class TaskTracker {
      * @throws IllegalArgumentException if {@code parts <= 0}.
      * @throws IllegalStateException if this task has already been started.
      */
-    public TaskTracker child(String status, int parts) {
+    TaskTracker child(String status, int parts) {
         TaskTracker child = new TaskTracker(status, parts, this);
         addParts(parts);
         return child;
@@ -118,6 +118,9 @@ class TaskTracker {
      */
     private void addParts(int parts) {
         Checks.testMin(parts, 1);
+        // We don't need to do a CAS loop since TaskBuilder ensures this method
+        // is only ever invoked when a Task is being built by a single thread.
+        /*
         long s, n;
         int p;
         do {
@@ -129,6 +132,12 @@ class TaskTracker {
                 p = Integer.MAX_VALUE;
             n = setParts(s, p);
         } while(!state.compareAndSet(s, n));
+        */
+        long s = state.get();
+        int p = extractParts(s) + parts;
+        if(p < 0) // overflow, so we cap at MAX_VALUE
+            p = Integer.MAX_VALUE;
+        state.set(setParts(s, p));
         if(parent != null)
             parent.addParts(parts);
     }
@@ -512,13 +521,6 @@ class TaskTracker {
     
     private static int extractPartsCompleted(long state) {
         return (int)(state & MASK_PARTS_COMPLETED);
-    }
-    
-    private static long setUnstarted(long state) {
-        // We don't bother bitmasking to ensure top two bits are defaulted to
-        // 00 since this is only invoked upon construction and hence there's no
-        // need to worry about something else messing with this.
-        return state | VAL_UNSTARTED;
     }
     
     private static long setStarted(long state) {

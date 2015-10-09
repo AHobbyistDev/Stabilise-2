@@ -1,21 +1,32 @@
 package com.stabilise.util.concurrent.task;
 
+import java.util.concurrent.Executor;
+
 
 public class Task {
     
-    public Task() {
-        
+    final TaskTracker tracker;
+    private TaskUnit unit;
+    
+    public Task(TaskTracker tracker, TaskUnit firstUnit) {
+        this.tracker = tracker;
+        this.unit = firstUnit;
+    }
+    
+    Task start(Executor exec) {
+        exec.execute(unit);
+        return this;
     }
     
     public void cancel() {
         
     }
     
-    public void waitUnilDone() throws InterruptedException {
+    public void await() throws InterruptedException {
         
     }
     
-    public void waitUninterruptibly() {
+    public void awaitUninterruptibly() {
         
     }
     

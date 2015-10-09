@@ -13,7 +13,7 @@ public class TaskBuilder {
     
     private final Executor executor;
     
-    private final String startName;
+    private final TaskTracker tracker;
     
     private TaskUnit first = null;
     private TaskUnit tail = null;
@@ -25,7 +25,7 @@ public class TaskBuilder {
     
     public TaskBuilder(Executor executor, String startName) {
         this.executor = Objects.requireNonNull(executor);
-        this.startName = Objects.requireNonNull(startName);
+        this.tracker = new TaskTracker(0, Objects.requireNonNull(startName));
     }
     
     public TaskBuilder andThen(Runnable r) {
@@ -112,7 +112,7 @@ public class TaskBuilder {
             throw new IllegalStateException("no task units");
         
         built = true;
-        return new Task();
+        return new Task(tracker, first).start(executor);
     }
     
     /** @throws IllegalStateException if already built. */

@@ -26,6 +26,7 @@ class TaskUnit implements Runnable, TaskHandle {
     protected TaskRunnable task = null;
     
     protected final Executor executor;
+    private Thread thread;
     
     protected final Lock doneLock = new ReentrantLock();
     protected final Condition doneCondition = doneLock.newCondition();
@@ -49,12 +50,14 @@ class TaskUnit implements Runnable, TaskHandle {
             boolean partsSpecified) {
         this.executor = exec;
         this.task = task;
-        this.tracker = new TaskTracker(status, parts);
+        this.tracker = new TaskTracker(parts, status);
         this.events = new EventDispatcher(exec);
     }
     
     @Override
     public void run() {
+        thread = Thread.currentThread();
+        
         boolean success = false;
         events.post(TaskEvent.START);
         try {

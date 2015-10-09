@@ -16,7 +16,7 @@ import com.stabilise.util.concurrent.Striper;
 import com.stabilise.util.concurrent.event.Event;
 
 // This class is an older version of EventDispatcher that doesn't involve
-// generics, just in case something went really really wrong with the generic
+// generics, just in case something went relaly really wrong with the generic
 // version.
 
 /**
