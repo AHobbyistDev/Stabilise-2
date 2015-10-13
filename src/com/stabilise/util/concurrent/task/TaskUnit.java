@@ -17,6 +17,7 @@ class TaskUnit implements Runnable, TaskHandle {
     //--------------------==========--------------------
     
     protected final TaskTracker tracker;
+    protected final ReportStrategy reportStrategy;
     private boolean partsSpecified;
     
     protected Task owner = null;
@@ -46,12 +47,13 @@ class TaskUnit implements Runnable, TaskHandle {
      * are {@code null}.
      * @throws IllegalArgumentException if {@code parts <= 0}.
      */
-    public TaskUnit(Executor exec, TaskRunnable task, String status, int parts,
-            boolean partsSpecified) {
+    public TaskUnit(Executor exec, TaskRunnable task, String status, long parts,
+            boolean partsSpecified, ReportStrategy reportStrategy) {
         this.executor = exec;
         this.task = task;
-        this.tracker = new TaskTracker(parts, status);
+        this.tracker = new TaskTracker((int)parts, status);
         this.events = new EventDispatcher(exec);
+        this.reportStrategy = reportStrategy;
     }
     
     @Override

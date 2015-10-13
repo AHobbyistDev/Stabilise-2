@@ -1,7 +1,7 @@
 package com.stabilise.core.main;
 
 import java.util.Arrays;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
@@ -83,7 +83,7 @@ public class Stabilise extends Application {
                 "No refunds!"
         };
         
-        return titles[new Random().nextInt(titles.length)];
+        return titles[ThreadLocalRandom.current().nextInt(titles.length)];
     }
     
     /**

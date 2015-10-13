@@ -1,10 +1,10 @@
 package com.stabilise.core.app;
 
 import java.util.Objects;
-import java.util.Random;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -327,7 +327,7 @@ public abstract class Application {
                 "All your stack trace are belong to us",
                 "No cause was given for the crash :("
         };
-        return msgs[new Random().nextInt(msgs.length)];
+        return msgs[ThreadLocalRandom.current().nextInt(msgs.length)];
     }
     
     /**

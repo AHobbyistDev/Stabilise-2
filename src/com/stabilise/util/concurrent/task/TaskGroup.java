@@ -13,9 +13,12 @@ class TaskGroup extends TaskUnit {
     private int remainingSubtasks = 0;
     private final Lock subtaskLock = new ReentrantLock();
     private final Condition subtaskCondition = subtaskLock.newCondition();
+    private final ReportStrategy subtaskReportStrategy;
     
-    public TaskGroup(Executor exec) {
-        super(exec, null, "", 0, false);
+    public TaskGroup(Executor exec, ReportStrategy reportStrategy,
+            ReportStrategy subtaskReportStrategy) {
+        super(exec, null, "", 0, false, reportStrategy);
+        this.subtaskReportStrategy = subtaskReportStrategy;
     }
     
     @Override

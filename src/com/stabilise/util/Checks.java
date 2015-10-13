@@ -91,6 +91,23 @@ public class Checks {
      * @return val
      * @throws IllegalArgumentException if {@code val < min || val > max}.
      */
+    public static long test(long val, long min, long max) {
+        if(val < min || val > max)
+            throw new IllegalArgumentException("Illegal value " + val +
+                    "; it should be in the range [" + min + ", " + max + "]");
+        return val;
+    }
+    
+    /**
+     * Tests a value.
+     * 
+     * @param val The value being tested.
+     * @param min The minimum legal value (inclusive).
+     * @param max The maximum legal value (inclusive).
+     * 
+     * @return val
+     * @throws IllegalArgumentException if {@code val < min || val > max}.
+     */
     public static float test(float val, float min, float max) {
         if(val < min || val > max)
             throw new IllegalArgumentException("Illegal value " + val +
@@ -140,7 +157,39 @@ public class Checks {
      * @return val
      * @throws IllegalArgumentException if {@code val < min}.
      */
+    public static long testMin(long val, long min) {
+        if(val < min)
+            throw new IllegalArgumentException("Illegal value " + val +
+                    "; it should not be less than " + min);
+        return val;
+    }
+    
+    /**
+     * Tests a value.
+     * 
+     * @param val The value being tested.
+     * @param min The minimum legal value (inclusive).
+     * 
+     * @return val
+     * @throws IllegalArgumentException if {@code val < min}.
+     */
     public static float testMin(float val, float min) {
+        if(val < min)
+            throw new IllegalArgumentException("Illegal value " + val +
+                    "; it should not be less than " + min);
+        return val;
+    }
+    
+    /**
+     * Tests a value.
+     * 
+     * @param val The value being tested.
+     * @param min The minimum legal value (inclusive).
+     * 
+     * @return val
+     * @throws IllegalArgumentException if {@code val < min}.
+     */
+    public static double testMin(double val, double min) {
         if(val < min)
             throw new IllegalArgumentException("Illegal value " + val +
                     "; it should not be less than " + min);

@@ -95,7 +95,7 @@ public abstract class FragListTest {
     }
     
     static final class TestFragList extends FragListTest {
-        final FragList<Entity> list = new FragList<>(2048, 0.22f);
+        final FragList<Entity> list = new FragList<>(1024, 0.22f);
         
         @Override TaskTimer timer() { return new TaskTimer("FragList"); }
         @Override void add(Entity e) { list.put(e); }

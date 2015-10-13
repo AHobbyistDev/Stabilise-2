@@ -340,9 +340,9 @@ public interface World {
      * @throws NullPointerException if {@code t} is {@code null}.
      */
     default void removeTileEntity(TileEntity t) {
-        // Since it is expensive to directly remove an object from a
-        // LinkedList, simply set its destroyed flag to true and have it remove
-        // itself upon the next iteration.
+        // Since it is expensive to find and remove an object from a list,
+        // simply set its destroyed flag and have it remove itself upon the 
+        // next iteration.
         if(t.requiresUpdates()) // not actually a necessary check
             t.destroy();
     }

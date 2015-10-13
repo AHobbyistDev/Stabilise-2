@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
@@ -45,7 +45,7 @@ public class Worlds {
      * the world could not be created.
      */
     public static WorldInfo createWorld(String worldName) {
-        return createWorld(worldName, new Random().nextLong());
+        return createWorld(worldName, ThreadLocalRandom.current().nextLong());
     }
     
     /**
@@ -134,7 +134,7 @@ public class Worlds {
         }
         
         // Now, we convert the ArrayList to a conventional array
-        WorldInfo[] worldArr = worlds.toArray(new WorldInfo[0]);
+        WorldInfo[] worldArr = worlds.toArray(new WorldInfo[worlds.size()]);
         
         // Sort the worlds - uses Java's Comparable interface
         Arrays.sort(worldArr);
@@ -585,7 +585,7 @@ public class Worlds {
         public PlayerData getPlayerData() {
             if(playerData == null)
                 throw new IllegalStateException("Either no integrated player or"
-                        + "this is not a host bundle.");
+                        + " this is not a host bundle.");
             return playerData;
         }
         

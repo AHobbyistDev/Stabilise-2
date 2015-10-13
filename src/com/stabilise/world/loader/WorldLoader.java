@@ -44,7 +44,6 @@ public abstract class WorldLoader {
     protected final Multiverse<?> multiverse;
     private final Executor executor;
     
-    /** The world loader's log. */
     protected final Log log = Log.getAgent("WORLDLOADER");
     
     

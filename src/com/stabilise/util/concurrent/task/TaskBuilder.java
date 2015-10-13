@@ -12,6 +12,7 @@ import com.stabilise.util.concurrent.event.EventDispatcher.EventHandler;
 public class TaskBuilder {
     
     private final Executor executor;
+    private final ReportStrategy reportStrategy;
     
     private final TaskTracker tracker;
     
@@ -24,8 +25,13 @@ public class TaskBuilder {
     private boolean built = false;
     
     public TaskBuilder(Executor executor, String startName) {
+        this(executor, startName, ReportStrategy.all());
+    }
+    
+    public TaskBuilder(Executor executor, String startName, ReportStrategy reportStrategy) {
         this.executor = Objects.requireNonNull(executor);
         this.tracker = new TaskTracker(0, Objects.requireNonNull(startName));
+        this.reportStrategy = Objects.requireNonNull(reportStrategy);
     }
     
     public TaskBuilder andThen(Runnable r) {
@@ -36,16 +42,16 @@ public class TaskBuilder {
         return andThen(t, "", 1, false);
     }
     
-    public TaskBuilder andThen(TaskRunnable t, int parts) {
+    public TaskBuilder andThen(TaskRunnable t, long parts) {
         return andThen(t, "", parts, true);
     }
     
-    private TaskBuilder andThen(TaskRunnable t, String name, int parts,
+    private TaskBuilder andThen(TaskRunnable t, String name, long parts,
             boolean partsSpecified) {
         checkState();
         if(group != null && focus == null)
             throw new IllegalStateException("can't do a task after nothing in a group!");
-        TaskUnit unit = new TaskUnit(executor, t, name, parts, partsSpecified);
+        TaskUnit unit = new TaskUnit(executor, t, name, parts, partsSpecified, reportStrategy);
         if(focus != null)
             focus.next = unit;
         focus = unit;
@@ -64,9 +70,13 @@ public class TaskBuilder {
     }
     
     public TaskBuilder andThenGroup() {
+        return andThenGroup(reportStrategy);
+    }
+    
+    public TaskBuilder andThenGroup(ReportStrategy subtaskReportStrategy) {
         checkState();
         requireNoGroup();
-        group = new TaskGroup(executor);
+        group = new TaskGroup(executor, reportStrategy, subtaskReportStrategy);
         if(tail != null) {
             tail.next = group;
             tail = group;
@@ -99,7 +109,7 @@ public class TaskBuilder {
             boolean partsSpecified) {
         checkState();
         requireGroup();
-        TaskUnit unit = new TaskUnit(executor, t, name, parts, partsSpecified);
+        TaskUnit unit = new TaskUnit(executor, t, name, parts, partsSpecified, reportStrategy);
         group.addSubtask(unit);
         focus = unit;
         return this;

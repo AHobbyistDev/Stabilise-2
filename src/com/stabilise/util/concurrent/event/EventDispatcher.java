@@ -47,7 +47,7 @@ public class EventDispatcher {
      * - that is, so we can allow handlers to be generified to receive custom
      * event types rather than a standard Event.
      * 
-     * Even more clearly, without this generic mess, we'd need to do:
+     * i.e., without this generic mess, we'd need to do:
      *     dispatcher.addListener(new MyEvent(),
      *                            (Event e) -> doSomething((MyEvent)e));
      * whereas now we're allowed to do:

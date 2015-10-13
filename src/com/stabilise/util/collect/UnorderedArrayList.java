@@ -110,6 +110,21 @@ public class UnorderedArrayList<E>
         }
     }
     
+    // Same as iterate(pred), but with the silly return value
+    @Override
+    public boolean removeIf(Predicate<? super E> pred) {
+        Objects.requireNonNull(pred); // fail-fast
+        boolean removed = false;
+        for(int i = 0; i < size; i++) {
+            if(pred.test(data[i])) {
+                doRemove(i);
+                i--;
+                removed = true;
+            }
+        }
+        return removed;
+    }
+    
     @Override
     public void forEach(Consumer<? super E> cons) {
         Objects.requireNonNull(cons); // fail-fast

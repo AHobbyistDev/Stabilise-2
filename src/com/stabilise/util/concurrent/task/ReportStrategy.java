@@ -3,6 +3,8 @@ package com.stabilise.util.concurrent.task;
 import java.util.Objects;
 import java.util.function.LongUnaryOperator;
 
+import com.stabilise.util.Checks;
+
 /**
  * A task can generally be broken down into a number of small incremental
  * pieces, or "parts", which together constitute its entire operation. As a
@@ -31,11 +33,29 @@ import java.util.function.LongUnaryOperator;
  * 
  * <p>To remedy this problem, we introduce report strategies - that is,
  * strategies for determining how much of a subtask's parts count contributes
- * to the overall parts count (or is <i>reported</i>). 
+ * to the overall parts count (or how much is is <i>reported</i>). For each
+ * subtask, we apply a report strategy to determine how many parts it will
+ * contribute to the overall count. We offer 5 types of report strategies:
+ * 
+ * <ul>
+ * <li><b>{@link #none() none}</b> bubbles up no parts from a subtask.
+ * <li><b>{@link #all() all}</b> bubbles up all parts from a subtask.
+ * <li><b>{@link #constant(long) constant}</b> strategies force all subtasks to
+ *     contribute the same number of parts. A subtask's parts are scaled
+ *     appropriately when reported to the parent task (e.g. if a subtask has
+ *     completed 5/10 of its parts but is under a constant strategy of 500, it
+ *     will report 250 parts to its parent).
+ * <li><b>{@link #scale(double) scale}</b> strategies simply multiply a
+ *     subtask's parts by a specified amount before sending them to the parent
+ *     task.
+ * <li><b>{@link #manual(LongUnaryOperator) manual} strategies allow the user
+ *     to manually specify their own function which produces the number of
+ *     parts to report given a subtask's number of reports.
+ * </ul>
  */
 public final class ReportStrategy {
     
-    private static final ReportStrategy NONE = new ReportStrategy(l -> 0, true);
+    private static final ReportStrategy NONE = new ReportStrategy(l -> 0, false);
     private static final ReportStrategy ALL  = new ReportStrategy(l -> l, false);
     
     private final LongUnaryOperator func;
@@ -70,15 +90,43 @@ public final class ReportStrategy {
     public static ReportStrategy all()  { return ALL; }
     
     /**
+     * The "report this many" strategy - every subtask will report the
+     * specified number of parts to its parent under this strategy. This
+     * strategy, like {@link #none()} perfectly balances all tasks, and can be
+     * made sufficiently granular with a sufficiently large parts value.
      * 
-     * - scalingFunction should be a nondecreasing positive semidefinite function
+     * @throws IllegalArgumentException if parts < 0
      */
-    public static ReportStrategy scale(LongUnaryOperator scalingFunction) {
-        return new ReportStrategy(Objects.requireNonNull(scalingFunction), false);
+    public static ReportStrategy constant(long parts) {
+        Checks.testMin(parts, 0);
+        return new ReportStrategy(l -> parts, true);
     }
     
-    public static ReportStrategy constant(long value) {
-        return new ReportStrategy(l -> value, true);
+    /**
+     * The "scale reported parts by this much" strategy. Under this strategy
+     * the number of parts reported is equal to a task's total number of parts
+     * multiplied by scale.
+     * 
+     * @throws IllegalArgumentException if scale < 0
+     */
+    public static ReportStrategy scale(double scale) {
+        Checks.testMin(scale, 0);
+        return new ReportStrategy(l -> (long)(scale * l), false);
+    }
+    
+    /**
+     * Manually specifies a "report this many" function. The function takes a
+     * task's total parts number as its input and returns the number of parts
+     * to report to its parent.
+     * 
+     * <p>As the correctness of a function cannot be analysed at compile time,
+     * a {@link BadReportStrategyException} may be thrown at runtime if the
+     * function produces illegal values.
+     * 
+     * @throws NullPointerException if func is null
+     */
+    public static ReportStrategy manual(LongUnaryOperator func) {
+        return new ReportStrategy(Objects.requireNonNull(func), false);
     }
     
 }

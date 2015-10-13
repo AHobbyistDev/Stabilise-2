@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.google.common.base.Charsets;
@@ -126,11 +126,7 @@ public class CharacterData implements Sendable {
                .putString(System.getProperty("os.name"), Charsets.UTF_8)
                .putString(System.getProperty("os.version"), Charsets.UTF_8)
                .putString(System.getProperty("user.name"), Charsets.UTF_8)
-               // In Java 8, the seed of a newly-constructed Random is
-               // sensitive to prior Random constructions, so in this sense we
-               // allow the hash to be influenced by earlier actions of the
-               // user.
-               .putLong(new Random().nextLong())
+               .putLong(ThreadLocalRandom.current().nextLong()) // sensitive to prior user actions
                .hash();
         
         hash = hc.toString();
