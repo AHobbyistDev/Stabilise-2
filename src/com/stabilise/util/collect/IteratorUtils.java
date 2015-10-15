@@ -4,6 +4,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterators;
@@ -92,7 +93,7 @@ public class IteratorUtils {
      * 
      * @throws NullPointerException if e is null.
      */
-    public static final <T> Iterable<T> toIterable(Enumeration<T> e) {
+    public static <T> Iterable<T> toIterable(Enumeration<T> e) {
         Objects.requireNonNull(e); // fail-fast
         return () -> toIterator(e);
     }
@@ -102,7 +103,7 @@ public class IteratorUtils {
      * 
      * @throws NullPointerException if e is null.
      */
-    public static final <T> Iterator<T> toIterator(Enumeration<T> e) {
+    public static <T> Iterator<T> toIterator(Enumeration<T> e) {
         Objects.requireNonNull(e);
         
         return new Iterator<T>() {
@@ -115,6 +116,93 @@ public class IteratorUtils {
                 return e.nextElement();
             }
         };
+    }
+    
+    /**
+     * Builds an iterator from a specified initial element and a function which
+     * provides the next element. The input for {@code nextSupplier} is always
+     * the element that was last returned by {@link Iterator#next()}, and its
+     * return value is used as the next element. The iterator terminates when
+     * {@code nextSupplier} returns {@code null} (i.e. {@code hasNext() returns
+     * false}).
+     * 
+     * <p>Constructing an iterator as such may be preferable to invoking a
+     * function recursively, as in Java recursion can result in unbounded stack
+     * growth. For example, consider the following.
+     * 
+     * <pre>
+     * public class RecursiveClass {
+     *     // Nice and simple, but can result in unbounded stack growth!
+     *     public void work() {
+     *         ... // do some work
+     *         if(next != null)
+     *             next.work();
+     *     }
+     * }
+     * 
+     * public class IterativeClass extends MyClass {
+     *     private IterativeClass next;
+     *     
+     *     // Not quite as simple, but doesn't risk stack overflow!
+     *     public void work() {
+     *         IteratorUtils.buildIterator(this, obj -> obj.next)
+     *                 .forEachRemaining(obj -> obj.doWork());
+     *         
+     *         // which is equivalent to:
+     *         //for(IterativeClass obj = this; obj != null; obj = obj.next) {
+     *         //    obj.doWork();
+     *         //}
+     *     }
+     *     
+     *     private void doWork() { ... }
+     * }
+     * </pre>
+     * 
+     * @param initial The first element to return.
+     * @param nextSupplier A function to return the next element given the one
+     * preceding it.
+     * 
+     * @return An iterator.
+     */
+    public static <T> Iterator<T> buildIterator(T initial, UnaryOperator<T> nextSupplier) {
+        Objects.requireNonNull(initial);
+        Objects.requireNonNull(nextSupplier);
+        
+        return new Iterator<T>() {
+            T cur = initial;
+            T next = initial;
+            boolean polled = true;
+            
+            @Override
+            public boolean hasNext() {
+                poll();
+                return next != null;
+            }
+            
+            private void poll() {
+                if(!polled) {
+                    next = nextSupplier.apply(cur);
+                    polled = true;
+                }
+            }
+            
+            @Override
+            public T next() {
+                poll();
+                polled = false;
+                cur = next;
+                //next = null; // no need
+                return cur;
+            }
+            
+        };
+    }
+    
+    /**
+     * Wraps {@code itr} in an {@code iterable}.
+     */
+    public <T> Iterable<T> wrap(Iterator<T> itr) {
+        return () -> itr;
     }
     
 }

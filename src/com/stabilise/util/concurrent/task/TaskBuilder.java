@@ -12,9 +12,8 @@ import com.stabilise.util.concurrent.event.EventDispatcher.EventHandler;
 public class TaskBuilder {
     
     private final Executor executor;
-    private final ReportStrategy reportStrategy;
     
-    private final TaskTracker tracker;
+    private final PrototypeTracker tracker;
     
     private TaskUnit first = null;
     private TaskUnit tail = null;
@@ -28,10 +27,18 @@ public class TaskBuilder {
         this(executor, startName, ReportStrategy.all());
     }
     
+    /**
+     * 
+     * @param executor The executor with which to run the created task.
+     * @param startName The name of the task.
+     * @param reportStrategy 
+     * 
+     * @throws NullPointerException if either {@code executor} or {@code
+     * reportStrategy} are {@code null}.
+     */
     public TaskBuilder(Executor executor, String startName, ReportStrategy reportStrategy) {
         this.executor = Objects.requireNonNull(executor);
-        this.tracker = new TaskTracker(0, Objects.requireNonNull(startName));
-        this.reportStrategy = Objects.requireNonNull(reportStrategy);
+        this.tracker = new PrototypeTracker(0, startName, reportStrategy);
     }
     
     public TaskBuilder andThen(Runnable r) {
@@ -39,11 +46,11 @@ public class TaskBuilder {
     }
     
     public TaskBuilder andThen(TaskRunnable t) {
-        return andThen(t, "", 1, false);
+        return andThen(t, null, 0, false);
     }
     
     public TaskBuilder andThen(TaskRunnable t, long parts) {
-        return andThen(t, "", parts, true);
+        return andThen(t, null, parts, true);
     }
     
     private TaskBuilder andThen(TaskRunnable t, String name, long parts,
@@ -51,14 +58,19 @@ public class TaskBuilder {
         checkState();
         if(group != null && focus == null)
             throw new IllegalStateException("can't do a task after nothing in a group!");
-        TaskUnit unit = new TaskUnit(executor, t, name, parts, partsSpecified, reportStrategy);
+        TaskUnit unit;
+        if(group == null) {
+            unit = new TaskUnit(executor, t, tracker.child(parts, name));
+            tail = unit;
+        } else {
+            unit = new TaskUnit(executor, t, group.protoTracker.child(parts, name));
+            unit.group = group;
+        }
+        if(first == null)
+            first = unit;
         if(focus != null)
             focus.next = unit;
         focus = unit;
-        if(group != null)
-            unit.group = group;
-        else
-            tail = unit;
         return this;
     }
     
@@ -70,13 +82,15 @@ public class TaskBuilder {
     }
     
     public TaskBuilder andThenGroup() {
-        return andThenGroup(reportStrategy);
+        return andThenGroup(null, ReportStrategy.all());
     }
     
-    public TaskBuilder andThenGroup(ReportStrategy subtaskReportStrategy) {
+    public TaskBuilder andThenGroup(String status, ReportStrategy subtaskReportStrategy) {
         checkState();
         requireNoGroup();
-        group = new TaskGroup(executor, reportStrategy, subtaskReportStrategy);
+        group = new TaskGroup(executor, tracker.child(0, status));
+        if(first == null)
+            first = group;
         if(tail != null) {
             tail.next = group;
             tail = group;
@@ -109,7 +123,7 @@ public class TaskBuilder {
             boolean partsSpecified) {
         checkState();
         requireGroup();
-        TaskUnit unit = new TaskUnit(executor, t, name, parts, partsSpecified, reportStrategy);
+        TaskUnit unit = new TaskUnit(executor, t, group.protoTracker.child(parts, name));
         group.addSubtask(unit);
         focus = unit;
         return this;
@@ -120,9 +134,11 @@ public class TaskBuilder {
         requireNoGroup();
         if(first == null)
             throw new IllegalStateException("no task units");
-        
         built = true;
-        return new Task(tracker, first).start(executor);
+        
+        tracker.buildHeirarchy();
+        first.buildHierarchy();
+        return new Task(tracker.get(), first).start(executor);
     }
     
     /** @throws IllegalStateException if already built. */

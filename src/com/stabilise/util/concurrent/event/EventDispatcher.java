@@ -99,7 +99,7 @@ public class EventDispatcher {
     }
     
     /**
-     * Adds a single-use event listener.
+     * Adds a multi-use event listener.
      * 
      * @param event The event to listen for.
      * @param handler The handler to invoke when the specified event is posted.
@@ -107,7 +107,7 @@ public class EventDispatcher {
      * @throws NullPointerException if either argument is null.
      */
     public <E extends Event> void addListener(E event, EventHandler<? super E> handler) {
-        addListener(event, handler, true);
+        addListener(event, handler, false);
     }
     
     /**
@@ -195,7 +195,8 @@ public class EventDispatcher {
      */
     @SuppressWarnings("unchecked")
     <E extends Event> void doPost(E e) {
-        ListenerBucket<E> b; Listener<? super E>[] ls = null;
+        ListenerBucket<E> b;
+        Listener<? super E>[] ls = null;
         synchronized(lockFor(e)) {
             if((b = (ListenerBucket<E>) handlers.get(e)) != null) {
                 ls = b.post(e);

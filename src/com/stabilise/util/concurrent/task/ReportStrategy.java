@@ -55,23 +55,18 @@ import com.stabilise.util.Checks;
  */
 public final class ReportStrategy {
     
-    private static final ReportStrategy NONE = new ReportStrategy(l -> 0, false);
-    private static final ReportStrategy ALL  = new ReportStrategy(l -> l, false);
+    private static final ReportStrategy NONE = new ReportStrategy(l -> 0);
+    private static final ReportStrategy ALL  = new ReportStrategy(l -> l);
     
     private final LongUnaryOperator func;
-    private final boolean constant;
     
-    private ReportStrategy(LongUnaryOperator func, boolean constant) {
+    private ReportStrategy(LongUnaryOperator func) {
         this.func = func;
-        this.constant = constant;
     }
     
     long get(long parts) {
         return func.applyAsLong(parts); 
     }
-    
-    boolean isNone()     { return this == NONE; }
-    boolean isConstant() { return constant;     }
     
     /**
      * The "no-report" strategy - completed parts of a task will not be
@@ -99,7 +94,7 @@ public final class ReportStrategy {
      */
     public static ReportStrategy constant(long parts) {
         Checks.testMin(parts, 0);
-        return new ReportStrategy(l -> parts, true);
+        return new ReportStrategy(l -> parts);
     }
     
     /**
@@ -107,11 +102,14 @@ public final class ReportStrategy {
      * the number of parts reported is equal to a task's total number of parts
      * multiplied by scale.
      * 
-     * @throws IllegalArgumentException if scale < 0
+     * <p>We only allow scaling factors in the range 0-1 as to disallow
+     * negative results and preclude overflows.
+     * 
+     * @throws IllegalArgumentException if scale < 0 || scale > 1.
      */
     public static ReportStrategy scale(double scale) {
-        Checks.testMin(scale, 0);
-        return new ReportStrategy(l -> (long)(scale * l), false);
+        Checks.test(scale, 0, 1);
+        return new ReportStrategy(l -> (long)(scale * l));
     }
     
     /**
@@ -121,12 +119,14 @@ public final class ReportStrategy {
      * 
      * <p>As the correctness of a function cannot be analysed at compile time,
      * a {@link BadReportStrategyException} may be thrown at runtime if the
-     * function produces illegal values.
+     * function produces illegal values. Any negative returned value is
+     * considered illegal, whether it originated from an integer overflow or
+     * otherwise (so watch out for overflows!).
      * 
      * @throws NullPointerException if func is null
      */
     public static ReportStrategy manual(LongUnaryOperator func) {
-        return new ReportStrategy(Objects.requireNonNull(func), false);
+        return new ReportStrategy(Objects.requireNonNull(func));
     }
     
 }

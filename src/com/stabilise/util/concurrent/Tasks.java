@@ -2,6 +2,7 @@ package com.stabilise.util.concurrent;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.concurrent.locks.Lock;
 import java.util.function.BooleanSupplier;
 
 import com.stabilise.util.concurrent.task.Task;
@@ -121,6 +122,30 @@ public class Tasks {
             if(condition.getAsBoolean()) {
                 synchronized(o) { o.notifyAll(); }
             }
+        }
+    }
+    
+    /**
+     * Runs {@code r} while holding the lock on {@code l}. This method behaves
+     * as if by:
+     * 
+     * <pre>
+     * try {
+     *     l.lock();
+     *     r.run();
+     * } finally {
+     *     l.unlock();
+     * }
+     * </pre>
+     * 
+     * @throws NullPointerException if either argument is {@code null}.
+     */
+    public static void withLock(Lock l, Runnable r) {
+        try {
+            l.lock();
+            r.run();
+        } finally {
+            l.unlock();
         }
     }
     

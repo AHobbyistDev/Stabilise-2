@@ -1,16 +1,16 @@
 package com.stabilise.util.concurrent.task;
 
+import static com.stabilise.util.concurrent.task.TaskTracker.*;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 import com.stabilise.util.Checks;
 
-public class PrototypeTracker {
-    
-    static final long MIN_PARTS = 0;
-    static final long MAX_PARTS = Long.MAX_VALUE - 1;
+class PrototypeTracker {
     
     /** Initial status. Never null. */
     final String status;
@@ -20,59 +20,90 @@ public class PrototypeTracker {
     long parts;
     /** Parts count used if the count exceeds Long.MAX_VALUE. */
     private BigInteger bigParts = null;
-    /** If we have our own parts we can't have children. */
-    private final boolean hasOwnParts;
     
     /** Strategy to apply to children. */
     private final ReportStrategy strategy;
     /** List of children. null if no children. */
     private Collection<PrototypeTracker> children = null;
-    /** Parent. null if no parent. */
-    private PrototypeTracker parent = null;
     /** Number of parts to report to parent. Includes the completion part. 0 if
      * no parent. */
     long partsToReport = 0;
     
     /** The tracker we produce. null until built. */
-    private TaskTracker2 tracker = null;
+    private TaskTracker tracker = null;
     
     
+    /**
+     * Creates a new PrototypeTracker for a task.
+     * 
+     * @param parts The number of parts in the task. This should be 0 if the
+     * user did not specify a parts count for the task, or it is a group and
+     * hence does not have its own intrinsic count.
+     * @param status The initial status of the task. If this is null we use
+     * {@link TaskTracker#DEFAULT_STATUS}.
+     * @param strategy The report strategy to apply to children of this task.
+     * 
+     * @throws IllegalArgumentException if parts < 0 || parts == Long.MAX_VALUE
+     * @throws NullPointerException if {@code strategy == null}.
+     */
     public PrototypeTracker(long parts, String status, ReportStrategy strategy) {
         this.parts = Checks.test(parts, MIN_PARTS, MAX_PARTS) + 1;
-        this.status = status;
-        this.strategy = strategy;
-        this.hasOwnParts = parts != 1; // 1 = "completion" part
+        this.status = status == null ? DEFAULT_STATUS : status;
+        this.strategy = Objects.requireNonNull(strategy);
     }
     
-    public PrototypeTracker child(long childParts, String status) {
-        return child(childParts, status, strategy);
+    /**
+     * Creates a child prototype which inherits our ReportStrategy for its
+     * children.
+     * 
+     * @param parts The number of parts in the task. This should be 0 if the
+     * user did not specify a parts count for the task, or it is a group and
+     * hence does not have its own intrinsic count.
+     * @param status The initial status of the task. If this is null we use
+     * {@link TaskTracker#DEFAULT_STATUS}.
+     * 
+     * @return The child.
+     * @throws IllegalArgumentException if parts < 0 || parts == Long.MAX_VALUE
+     */
+    public PrototypeTracker child(long parts, String status) {
+        return child(parts, status, strategy);
     }
     
+    /**
+     * Creates a child prototype.
+     * 
+     * @param parts The number of parts in the task. This should be 0 if the
+     * user did not specify a parts count for the task, or it is a group and
+     * hence does not have its own intrinsic count.
+     * @param status The initial status of the task. If this is null we use
+     * {@link TaskTracker#DEFAULT_STATUS}.
+     * @param strategy The report strategy to apply to children of this task.
+     * 
+     * @return The child.
+     * @throws IllegalArgumentException if parts < 0 || parts == Long.MAX_VALUE
+     * @throws NullPointerException if {@code strategy == null}.
+     */
     public PrototypeTracker child(long childParts, String status, ReportStrategy strategy) {
-        if(hasOwnParts) {
-            // This should never happen in practice as everything is controlled
-            // by TaskBuilder.
-            throw new AssertionError("Cannot add a child to a task with"
-                    + " its own parts.");
-        }
-        
         PrototypeTracker child = new PrototypeTracker(childParts, status, strategy);
-        child.parent = this;
         if(children == null)
             children = new ArrayList<>();
         children.add(child);
         return child;
     }
     
+    /**
+     * Builds the hierarchy of trackers. This should only ever be invoked once
+     * on the root task. <!--Though in theory it wouldn't matter if this is
+     * invoked multiple times-->
+     */
     public void buildHeirarchy() {
-        if(parent != null)
-            throw new UnsupportedOperationException("Cannot build from a tracker"
-                    + " that is not the root tracker.");
-        if(tracker != null)
-            throw new IllegalStateException("Already built hierarchy!");
         build(ReportStrategy.all());
     }
     
+    /**
+     * Builds the actual tracker using the specified report strategy to
+     * determine the number of parts the tracker should report.
+     */
     private void build(ReportStrategy strat) {
         if(children != null) {
             // We begin by recursively building our children and collecting
@@ -83,16 +114,14 @@ public class PrototypeTracker {
                 if(bigParts == null) {
                     long p = parts + t.partsToReport;
                     
-                    if(p < parts) // overflow!
-                        // Upgrade to BigInteger
+                    if(p < parts) // overflow - upgrade to BigInteger
                         bigParts = BigInteger.valueOf(parts);
                     else
                         parts = p;
                 }
                 
-                if(bigParts != null) {
+                if(bigParts != null)
                     bigParts = bigParts.add(BigInteger.valueOf(t.partsToReport));
-                }
             }
         }
         
@@ -117,23 +146,28 @@ public class PrototypeTracker {
         // before normalising parts/bigParts to the valid range of longs, it's
         // simpler this way and doesn't require people to write functions
         // taking a BigInteger as the input parameter.
-        partsToReport = strat.get(parts - 1) + 1; // -1/+1 for completion part
+        // The -1/+1 is the completion part, which is temporarily pulled out as
+        // to avoid being scaled.
+        partsToReport = strat.get(parts - 1) + 1;
         if(partsToReport < 0) // either an overflow, or the strat did something stupid
             throw new BadReportStrategyException();
         
-        tracker = new TaskTracker2(this);
+        tracker = new TaskTracker(this);
         if(children != null)
-            children.forEach(t -> t.tracker.parent = tracker);
+            children.forEach(t -> t.tracker.setParent(tracker));
     }
     
+    /**
+     * Scales and returns partsToReport.
+     */
     private long scale(double scale) {
         partsToReport = (long)(scale * partsToReport);
         if(tracker != null)
-            tracker.partsToReport = partsToReport;
+            tracker.setPartsToReport(partsToReport);
         return partsToReport;
     }
     
-    public TaskTracker2 get() {
+    public TaskTracker get() {
         return tracker;
     }
     

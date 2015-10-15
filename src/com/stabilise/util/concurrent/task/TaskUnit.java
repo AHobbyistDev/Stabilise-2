@@ -1,36 +1,38 @@
 package com.stabilise.util.concurrent.task;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.stabilise.util.concurrent.event.Event;
 import com.stabilise.util.concurrent.event.EventDispatcher;
 import com.stabilise.util.concurrent.event.EventDispatcher.EventHandler;
+import com.stabilise.util.concurrent.task.Task.State;
 
 
 class TaskUnit implements Runnable, TaskHandle {
     
-    //--------------------==========--------------------
-    //-----=====Static Constants and Variables=====-----
-    //--------------------==========--------------------
+    /** Prototype tracker. Only ever used during construction; during operation
+     * this will always be null. */
+    PrototypeTracker protoTracker;
+    /** Tracker. Initially null, but set by {@link #build()} when the task
+     * hierarchy is built. */
+    protected TaskTracker tracker;
     
-    protected final TaskTracker tracker;
-    protected final ReportStrategy reportStrategy;
-    private boolean partsSpecified;
-    
+    /** The almighty owner task. This is set before run() is invoked by
+     * whatever gets this unit running. */
     protected Task owner = null;
+    /** The group we belong to. null if we don't belong to a group. */
     protected TaskGroup group = null;
+    /** The task queued to run when this one finishes. If null (and group is
+     * null), we are the last unit and need to clean up the main task. */
     protected TaskUnit next = null;
     
+    /** The actual task! Only null for dummy units (e.g. TaskGroup instances). */
     protected TaskRunnable task = null;
     
     protected final Executor executor;
+    /** The thread upon which this unit is executing. This is set in run()
+     * before this unit begins executing. Used as a target for interrupts. */
     private Thread thread;
-    
-    protected final Lock doneLock = new ReentrantLock();
-    protected final Condition doneCondition = doneLock.newCondition();
     
     private final EventDispatcher events;
     
@@ -38,36 +40,52 @@ class TaskUnit implements Runnable, TaskHandle {
     /**
      * Creates a new task.
      * 
-     * @param exec The executor with which to execute the task. This is never
-     * null thanks to {@link TaskBuilder}.
-     * @param status The initial task status.
-     * @param parts Initial task parts.
-     * 
-     * @throws NullPointerException if either {@code exec} or {@code status}
-     * are {@code null}.
-     * @throws IllegalArgumentException if {@code parts <= 0}.
+     * @param exec The executor with which to execute the task. Never null
+     * thanks to TaskBuilder.
+     * @param task The actual task to run. Never null thanks to TaskBuilder.
+     * @param protoTracker The prototype for our tracker. Never null thanks to
+     * TaskBuilder.
      */
-    public TaskUnit(Executor exec, TaskRunnable task, String status, long parts,
-            boolean partsSpecified, ReportStrategy reportStrategy) {
+    public TaskUnit(Executor exec, TaskRunnable task, PrototypeTracker protoTracker) {
         this.executor = exec;
         this.task = task;
-        this.tracker = new TaskTracker((int)parts, status);
+        this.protoTracker = protoTracker;
         this.events = new EventDispatcher(exec);
-        this.reportStrategy = reportStrategy;
+    }
+    
+    /**
+     * Builds the hierarchy of units underneath and including this one by
+     * getting our trackers from the prototype trackers.
+     */
+    void buildHierarchy() {
+        // Use iteration instead of recursion to avoid unbounded stack growth
+        for(TaskUnit u = this; u != null; u = u.next) {
+            u.build();
+        }
+    }
+    
+    protected void build() {
+        tracker = protoTracker.get();
+        protoTracker = null; // gc pls
     }
     
     @Override
     public void run() {
+        tracker.start(task);
         thread = Thread.currentThread();
+        
+        if(group == null) {
+            owner.setCurrent(this);
+        }
         
         boolean success = false;
         events.post(TaskEvent.START);
         try {
             success = execute();
         } catch(Exception e) {
-            // press f to pay respects
             events.post(TaskEvent.STOP);
             events.post(TaskEvent.FAIL);
+            owner.setState(State.FAILED);
         }
         if(success)
             finish();
@@ -80,31 +98,35 @@ class TaskUnit implements Runnable, TaskHandle {
     }
     
     protected void finish() {
+        owner.notifyOfComplete();
+        events.post(TaskEvent.STOP);
+        events.post(TaskEvent.COMPLETE);
         if(next != null) {
+            next.owner = owner;
             // Reuse current thread rather than submit to executor
             next.run();
-        } else {
-            // f
+        } else if(group == null) { // we're the last task
+            owner.setState(State.COMPLETED);
         }
+    }
+    
+    /**
+     * Sets the owner Task. This should be invoked by whatever runs or
+     * schedules this unit for runnning.
+     */
+    TaskUnit setTask(Task task) {
+        this.owner = task;
+        return this;
     }
     
     @Override
     public void setStatus(String status) {
-        
+        tracker.setStatus(status);
     }
     
     @Override
     public void increment(int parts) {
-        if(partsSpecified) {
-            tracker.increment(parts);
-        }
-    }
-    
-    @Override
-    public void next(int parts, String status) {
-        if(partsSpecified) {
-            tracker.next(parts, status);
-        }
+        tracker.increment(parts);
     }
     
     @Override
@@ -112,8 +134,33 @@ class TaskUnit implements Runnable, TaskHandle {
         events.post(e);
     }
     
-    public <E extends Event> void addListener(E e, EventHandler<? super E> h) {
+    /**
+     * Adds a multi-use event listener. For builder use only.
+     * 
+     * @see EventDispatcher#post(Event)
+     */
+    <E extends Event> void addListener(E e, EventHandler<? super E> h) {
         events.addListener(e, h);
+    }
+    
+    void cancel() {
+        thread.interrupt();
+    }
+    
+    @Override
+    public void checkCancel() throws InterruptedException {
+        if(isTaskThread() && thread.isInterrupted()) {
+            throw new InterruptedException();
+        }
+    }
+    
+    @Override
+    public boolean pollCancel() {
+        return isTaskThread() && thread.isInterrupted();
+    }
+    
+    private boolean isTaskThread() {
+        return Thread.currentThread().equals(thread);
     }
     
 }
