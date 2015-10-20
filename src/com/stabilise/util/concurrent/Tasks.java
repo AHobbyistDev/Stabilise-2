@@ -1,12 +1,15 @@
 package com.stabilise.util.concurrent;
 
 import java.util.Objects;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.function.BooleanSupplier;
 
+import com.stabilise.util.concurrent.task.ReturnBox;
+import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.util.concurrent.task.Task;
-import com.stabilise.util.concurrent.task.TaskBuilder;
 import com.stabilise.util.concurrent.task.TaskRunnable;
 
 /**
@@ -171,7 +174,8 @@ public class Tasks {
      * @throws NullPointerException if any argument is {@code null}.
      */
     public static Task exec(Executor executor, String name, TaskRunnable task) {
-        return new TaskBuilder(executor, name).andThen(task).build();
+        return Task.builder().executor(executor).name(name).begin()
+                .andThen(task).start();
     }
     
     /**
@@ -184,7 +188,7 @@ public class Tasks {
      * @throws NullPointerException if either argument is {@code null}.
      */
     public static Task exec(Executor executor, Runnable task) {
-        return exec(executor, "", wrap(task));
+        return exec(executor, null, wrap(task));
     }
     
     /**
@@ -194,6 +198,35 @@ public class Tasks {
      * @throws NullPointerException if {@code task} is {@code null}.
      */
     public static Task exec(Runnable task) {
+        return exec(newThreadExecutor(), task);
+    }
+    
+    /**
+     * Executes the given value-returning task through the given executor.
+     * 
+     * <p>Note the similarity of this function to {@link
+     * ExecutorService#submit(Callable)} - in fact, this is the equivalent for
+     * those who'd prefer the Task framework over Futures.
+     * 
+     * @param executor The executor through which to run the task.
+     * @param task The task.
+     * 
+     * @return A ReturnTask object encapsulating the task.
+     * @throws NullPointerException if either argument is {@code null}.
+     */
+    public static <T> ReturnTask<T> exec(Executor executor, Callable<T> task) {
+        ReturnBox<T> retBox = new ReturnBox<>();
+        return Task.builder().executor(executor).begin(retBox)
+            .andThen(h -> retBox.set(task.call())).start();
+    }
+    
+    /**
+     * Executes the given Callable on a new thread, and returns a ReturnTask
+     * encapsulating it and its return value.
+     * 
+     * @throws NullPointerException if {@code task} is {@code null}.
+     */
+    public static <T> ReturnTask<T> exec(Callable<T> task) {
         return exec(newThreadExecutor(), task);
     }
     

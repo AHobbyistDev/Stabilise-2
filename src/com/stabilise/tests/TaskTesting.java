@@ -1,7 +1,12 @@
-package com.stabilise.util.concurrent.task;
+package com.stabilise.tests;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import com.stabilise.util.concurrent.task.ReportStrategy;
+import com.stabilise.util.concurrent.task.Task;
+import com.stabilise.util.concurrent.task.TaskEvent;
+import com.stabilise.util.concurrent.task.TaskHandle;
 
 
 class TaskTesting {
@@ -12,7 +17,8 @@ class TaskTesting {
     }
     
     public static void test1() {
-        Task task = new TaskBuilder(Executors.newCachedThreadPool(), "Doing stuff")
+        ExecutorService exec = Executors.newCachedThreadPool();
+        Task task = Task.builder().executor(exec).name("Doing stuff").begin()
             .andThen(t -> blah(t))
             .andThen(t -> blah(t))
                 .onEvent(TaskEvent.STOP, (e) -> System.out.println("stop detected"))
@@ -25,7 +31,7 @@ class TaskTesting {
                 .subtask(t -> blah(t))
                     .andThen(t -> blah(t))
             .endGroup()
-            .build();
+            .start();
         task.awaitUninterruptibly();
     }
     
@@ -34,11 +40,19 @@ class TaskTesting {
     
     public static void test2() {
         ExecutorService exec = Executors.newCachedThreadPool();
-        Task task = new TaskBuilder(exec, "Task stuff")
+        Task task = Task.builder().executor(exec).name("Task stuff")
+            .strategy(ReportStrategy.constant(Integer.MAX_VALUE))
+            .begin()
             .andThen(t -> {})
             .andThen(t -> Thread.sleep(1000))
                 .onEvent(TaskEvent.COMPLETE, e -> System.out.println("Sleep ended: " + e))
-            .build();
+            .andThen(100, t -> {
+                for(int i = 0; i < 100; i++) {
+                    t.increment();
+                    Thread.sleep(25);
+                }
+            })
+            .start();
         while(true) {
             System.out.println(task);
             if(task.stopped()) {

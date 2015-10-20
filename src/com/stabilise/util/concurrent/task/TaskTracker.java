@@ -8,12 +8,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.stabilise.util.Checks;
 import com.stabilise.util.Log;
 
+/**
+ * A TaskTracker maintains the state of a task - status, parts completed, and
+ * number of parts reported to the parent.
+ */
 class TaskTracker {
     
     static final long MIN_PARTS = 0;
     static final long MAX_PARTS = Long.MAX_VALUE - 1;
     static final String DEFAULT_STATUS = "Working";
-    private static final long PERC_CUTOFF = Long.MAX_VALUE / 100;
     
     private volatile String status;
     /** Total number of parts. Includes the completion part. */
@@ -141,20 +144,6 @@ class TaskTracker {
      */
     double fractionCompleted() {
         return (double)parts.get() / totalParts;
-    }
-    
-    /**
-     * Returns the percentage of parts completed, from 0-100 (inclusive).
-     */
-    int percentCompleted() {
-        long p = parts.get();
-        // Cutoff required since 100*Long.MAX_VALUE won't end well.
-        // A flat "(int)(100 * fractionCompleted())" may work for all values,
-        // but I'm too lazy to test :P
-        if(p > PERC_CUTOFF)
-            return (int)(100 * fractionCompleted());
-        else
-            return (int)(100 * p / totalParts);
     }
     
     /**

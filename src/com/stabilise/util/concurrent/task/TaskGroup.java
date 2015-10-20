@@ -3,16 +3,11 @@ package com.stabilise.util.concurrent.task;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 class TaskGroup extends TaskUnit {
     
     private final List<TaskUnit> subtasks = new ArrayList<>();
     private int remainingSubtasks = 0;
-    private final Lock subtaskLock = new ReentrantLock();
-    private final Condition subtaskCondition = subtaskLock.newCondition();
     
     public TaskGroup(Executor exec, PrototypeTracker protoTracker) {
         super(exec, null, protoTracker);
@@ -40,12 +35,19 @@ class TaskGroup extends TaskUnit {
         return this;
     }
     
-    public void onSubtaskCompletion() {
+    public void onSubtaskFinish() {
         synchronized(subtasks) {
             if(--remainingSubtasks != 0)
                 return;
         }
         finish();
+    }
+    
+    @Override
+    void cancel() {
+        for(TaskUnit subtask : subtasks) {
+            subtask.cancel();
+        }
     }
     
 }

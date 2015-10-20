@@ -11,7 +11,7 @@ import com.stabilise.network.protocol.handshake.IClientHandshake;
 import com.stabilise.network.protocol.handshake.S000VersionInfo;
 import com.stabilise.network.protocol.login.IClientLogin;
 import com.stabilise.network.protocol.login.S000LoginRejected;
-import com.stabilise.util.concurrent.TrackableFuture;
+import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.world.ClientWorld;
 import com.stabilise.world.Worlds;
 import com.stabilise.world.Worlds.WorldBundle;
@@ -32,7 +32,7 @@ public class GameClient extends Client implements IClientHandshake, IClientLogin
     private ClientWorld world;
     private CharacterData player;
     
-    private TrackableFuture<WorldBundle> loader;
+    private ReturnTask<WorldBundle> loader;
     private WorldLoadHandle loadHandle;
     
     public GameClient(InetAddress address, int port) {
@@ -79,7 +79,7 @@ public class GameClient extends Client implements IClientHandshake, IClientLogin
      * in the login protocol, or we're currently loading the world from the
      * server.
      */
-    public TrackableFuture<WorldBundle> login(CharacterData player) {
+    public ReturnTask<WorldBundle> login(CharacterData player) {
         if(loader != null || getConnection() == null
                 || getConnection().getProtocol() != Protocol.LOGIN)
             return null;

@@ -7,6 +7,7 @@ import java.util.Objects;
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.box.*;
 
+@SuppressWarnings("unused")
 public class DataSender implements Closeable {
     
     public static enum Format {

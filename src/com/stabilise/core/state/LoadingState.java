@@ -19,8 +19,8 @@ import com.stabilise.character.CharacterData;
 import com.stabilise.core.Resources;
 import com.stabilise.core.app.Application;
 import com.stabilise.core.main.Stabilise;
-import com.stabilise.util.concurrent.TrackableFuture;
 import com.stabilise.util.concurrent.event.Event;
+import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.world.Worlds;
 import com.stabilise.world.Worlds.WorldBundle;
 import com.stabilise.world.WorldInfo;
@@ -47,7 +47,7 @@ public class LoadingState implements State {
     private ShapeRenderer shapes;
     
     //////////////////temp stuff
-    private TrackableFuture<WorldBundle> future;
+    private ReturnTask<WorldBundle> future;
     //////////////////end temp stuff
     
     
@@ -108,8 +108,8 @@ public class LoadingState implements State {
         
         shapes.dispose();
         
-        future.cancel(true);
-        future.waitUntilStopped();
+        future.cancel();
+        future.awaitUninterruptibly();
     }
     
     @Override
@@ -133,7 +133,7 @@ public class LoadingState implements State {
     
     @Override
     public void update() {
-        if(future.isDone()) {
+        if(future.stopped()) {
             try {
                 application.setState(new SingleplayerState(future.get()));
             } catch(InterruptedException | ExecutionException e) {

@@ -30,6 +30,7 @@ public class Waiter {
     
     private final long endTime;
     private final BooleanSupplier condition;
+    private WaitState last = WaitState.INCOMPLETE;
     
     
     /**
@@ -60,12 +61,12 @@ public class Waiter {
      * has not yet been fulfilled.
      */
     public WaitState poll() {
-        // Timeout test must come before condition test to ensure we return
-        // TIMEOUT continuously.
+        if(last != WaitState.INCOMPLETE)
+            return last;
         if(System.currentTimeMillis() >= endTime)
-            return WaitState.TIMEOUT;
+            return last = WaitState.TIMEOUT;
         if(condition.getAsBoolean())
-            return WaitState.COMPLETE;
+            return last = WaitState.COMPLETE;
         return WaitState.INCOMPLETE;
     }
     

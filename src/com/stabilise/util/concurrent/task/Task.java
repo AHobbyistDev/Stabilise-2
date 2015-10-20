@@ -2,48 +2,74 @@ package com.stabilise.util.concurrent.task;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.concurrent.Waiter;
 
 /**
- * A Task is essentially a {@code Runnable} with many other additional
- * facilities.
+ * A Task is essentially a {@code Runnable} with other additional facilities.
  * 
- * <p>To construct a task, use {@link TaskBuilder}.
+ * <p>The main entry point for creating a Task is {@link #builder()}.
  */
+@ThreadSafe
 public class Task {
     
     static enum State {
         // There's no point in an UNSTARTED state for a task since a TaskUnit's
         // state variable doesn't come into scope until the task has begun.
-        RUNNING, COMPLETED, FAILED;
+        RUNNING, CANCELLED, COMPLETED, FAILED;
     }
     
-    private final TaskTracker tracker;
-    private volatile TaskUnit curUnit;
+    private final Executor exec;
     
-    private final Lock lock = new ReentrantLock();
+    private final TaskTracker tracker;
+    private TaskUnit curUnit;
+    
+    private final AtomicBoolean started = new AtomicBoolean(false);
+    private volatile boolean cancelled = false;
+    
+    private final Lock      lock = new ReentrantLock();
     private final Condition cond = lock.newCondition();
     
-    public Task(TaskTracker tracker, TaskUnit firstUnit) {
+    
+    Task(Executor exec, TaskTracker tracker, TaskUnit firstUnit) {
+        this.exec = exec;
         this.tracker = tracker;
         this.curUnit = firstUnit;
     }
     
-    Task start(Executor exec) {
-        exec.execute(curUnit.setTask(this));
+    /**
+     * Starts this task.
+     * 
+     * @return This task.
+     * @throws IllegalStateException if this task has already been started.
+     */
+    public Task start() {
+        if(started.compareAndSet(false, true))
+            exec.execute(curUnit.setTask(this));
+        else
+            throw new IllegalStateException("Already started");
         return this;
     }
     
-    void setCurrent(TaskUnit unit) {
-        this.curUnit = unit;
-    }
-    
-    void notifyOfComplete() {
-        tracker.increment(1);
+    /**
+     * Notifies this task that the specified unit is now the current top-level
+     * one.
+     * 
+     * @return true if the new unit may run; false if this task has been
+     * cancelled.
+     */
+    boolean setCurrent(TaskUnit unit) {
+        synchronized(this) {
+            if(cancelled)
+                return false;
+            this.curUnit = unit;
+        }
+        return true;
     }
     
     void setState(State state) {
@@ -60,18 +86,54 @@ public class Task {
         }
     }
     
+    /**
+     * Cancels this task. The speed at which a Task actually stops following a
+     * cancellation request depends on the responsiveness of an implementation,
+     * but it is guaranteed that a new task unit will not begin following an
+     * invocation of this method. A Task which stops due to cancellation is
+     * considered to have {@link #failed() failed}.
+     */
     public void cancel() {
-        
+        synchronized(this) {
+            cancelled = true;
+            curUnit.cancel();
+        }
     }
     
+    /** Polls cancellation status. */
+    boolean cancelled() {
+        return cancelled;
+    }
+    
+    /**
+     * Returns {@code true} if this task has stopped, either due to completion
+     * or failure; {@code false} otherwise.
+     * 
+     * <p>An invocation of this is the atomic equivalent to {@code completed()
+     * || failed()}.
+     */
     public boolean stopped() {
         return tracker.getState() != State.RUNNING;
     }
     
+    /**
+     * Returns {@code true} if this task has been successfully completed;
+     * {@code false} otherwise.
+     * 
+     * <p>An invocation of this is the atomic equivalent to {@code stopped()
+     * && !failed()}.
+     */
     public boolean completed() {
         return tracker.getState() == State.COMPLETED;
     }
     
+    /**
+     * Returns {@code true} if this task has failed or was cancelled; {@code
+     * false} otherwise.
+     * 
+     * <p>An invocation of this is the atomic equivalent to {@code stopped()
+     * && !completed()}.
+     */
     public boolean failed() {
         return tracker.getState() == State.FAILED;
     }
@@ -123,8 +185,8 @@ public class Task {
      * @param time The maximum time to wait.
      * @param unit The unit of the {@code time} argument.
      * 
-     * @return {@code true} if the task successfully completed; {@code false}
-     * if it either failed or was cancelled.
+     * @return {@code true} if the task {@link #stopped() stopped}; {@code
+     * false} if the specified waiting time elapsed.
      * @throws InterruptedException if the current thread was interrupted while
      * waiting.
      */
@@ -166,10 +228,10 @@ public class Task {
     
     /**
      * Returns the percentage of this task which has been completed, from 0 to
-     * 100 (inclusive).
+     * 100 (inclusive). Equivalent to {@code (int)(100 * fractionCompleted())}.
      */
     public int percentCompleted() {
-        return tracker.percentCompleted();
+        return (int)(100 * fractionCompleted());
     }
     
     /**
@@ -182,17 +244,43 @@ public class Task {
     }
     
     /**
-     * Returns the total number of parts in this task.
-     * @return
+     * Returns the total number of parts in this task. This value never
+     * changes.
      */
     public long getTotalParts() {
         return tracker.getTotalParts();
     }
     
+    /**
+     * Returns a string representation of this task.
+     * 
+     * <p>This implementation behaves as if by:
+     * 
+     * <pre>
+     * return getStatus() + "... " + percentCompleted() + "% ("
+     *         + getPartsCompleted() + "/" + getTotalParts() + ")";
+     * </pre>
+     * 
+     * which returns a string of the form:
+     *
+     * <pre>"Working... 50% (256/512)"</pre>
+     */
     @Override
     public String toString() {
-        return getStatus() + "... " + percentCompleted() + " ("
+        return getStatus() + "... " + percentCompleted() + "% ("
                 + getPartsCompleted() + "/" + getTotalParts() + ")";
+    }
+    
+    //--------------------==========--------------------
+    //------------=====Static Functions=====------------
+    //--------------------==========--------------------
+    
+    /**
+     * Creates a new TaskBuilderBuilder. This function is the main entry-point
+     * for creating a Task.
+     */
+    public static TaskBuilderBuilder builder() {
+        return new TaskBuilderBuilder();
     }
     
 }

@@ -84,11 +84,6 @@ public class RegionStore {
      * any unload logic as required by the world. */
     private final Consumer<Region> unloadHandler;
     
-    // VERY IMPORTANT IMPLEMENTATION DETAILS (TODO outdated):
-    // Empirical testing has revealed that the table size for region maps in
-    // HostWorld is usually 16, but can grow to 32. This means the number of
-    // valid hash bits is either 4 or 5 (all higher bits are masked out), so we
-    // need to compress our data into those bits while minimising collisions.
     /** The map of all loaded regions. Maps region.loc -> region. */
     private final ConcurrentMap<Point, Region> regions =
             new ConcurrentHashMap<>();

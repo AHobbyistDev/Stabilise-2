@@ -1,6 +1,5 @@
 package com.stabilise.util.concurrent.task;
 
-import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import com.stabilise.util.annotation.NotThreadSafe;
@@ -8,52 +7,69 @@ import com.stabilise.util.concurrent.Tasks;
 import com.stabilise.util.concurrent.event.Event;
 import com.stabilise.util.concurrent.event.EventDispatcher.EventHandler;
 
+/**
+ * A TaskBuilder builds a task.
+ * 
+ * <p>The type parameters of this class should be invisible and irrelevant to
+ * the end-user, as this class should only ever occur amidst invocation chains.
+ */
 @NotThreadSafe
-public class TaskBuilder {
+public final class TaskBuilder<R, T extends Task> {
     
     private final Executor executor;
     
+    /** Prototype tracker of the all-encapsulating Task to return. */
     private final PrototypeTracker tracker;
     
+    /** The first task unit to run. This can't be null when the task is built. */
     private TaskUnit first = null;
+    /** The final task unit to run. */
     private TaskUnit tail = null;
-    
-    private TaskUnit focus = null;
+
     private TaskGroup group = null;
+    /** The current "focus" task. This is needed for {@link
+     * #onEvent(Event, EventHandler)}, since we add listeners to the focus.
+     * The focus is different from the tail in that subtasks of a group can be
+     * made the focus, but they can never be made the tail. */
+    private TaskUnit focus = null;
+    
+    /** If null, we return a Task; otherwise we return a ReturnTask. */
+    private final ReturnBox<R> retBox;
     
     private boolean built = false;
     
-    public TaskBuilder(Executor executor, String startName) {
-        this(executor, startName, ReportStrategy.all());
-    }
     
     /**
-     * 
-     * @param executor The executor with which to run the created task.
-     * @param startName The name of the task.
-     * @param reportStrategy 
-     * 
-     * @throws NullPointerException if either {@code executor} or {@code
-     * reportStrategy} are {@code null}.
+     * @throws IllegalStateException if either the executor wasn't set on the
+     * builder.
      */
-    public TaskBuilder(Executor executor, String startName, ReportStrategy reportStrategy) {
-        this.executor = Objects.requireNonNull(executor);
-        this.tracker = new PrototypeTracker(0, startName, reportStrategy);
+    TaskBuilder(TaskBuilderBuilder builder) {
+        if(builder.executor == null)
+            throw new IllegalStateException("Executor not set");
+        if(builder.strat == null)
+            builder.strat = ReportStrategy.all();
+        
+        @SuppressWarnings("unchecked")
+        ReturnBox<R> box = (ReturnBox<R>) builder.retBox;
+        
+        this.executor = builder.executor;
+        this.tracker = new PrototypeTracker(0, builder.name, builder.strat);
+        this.retBox = box;
     }
     
-    public TaskBuilder andThen(Runnable r) {
+    public TaskBuilder<R, T> andThen(Runnable r) {
         return andThen(Tasks.wrap(r));
     }
     
-    public TaskBuilder andThen(TaskRunnable t) {
+    public TaskBuilder<R, T> andThen(TaskRunnable t) {
         return andThen(t, null, 0, false);
     }
     
-    public TaskBuilder andThen(TaskRunnable t, long parts) {
+    public TaskBuilder<R, T> andThen(long parts, TaskRunnable t) {
         return andThen(t, null, parts, true);
     }
     
-    private TaskBuilder andThen(TaskRunnable t, String name, long parts,
+    private TaskBuilder<R, T> andThen(TaskRunnable t, String name, long parts,
             boolean partsSpecified) {
         checkState();
         if(group != null && focus == null)
@@ -74,18 +90,18 @@ public class TaskBuilder {
         return this;
     }
     
-    public <E extends Event> TaskBuilder onEvent(E e, EventHandler<? super E> h) {
+    public <E extends Event> TaskBuilder<R, T> onEvent(E e, EventHandler<? super E> h) {
         checkState();
         requireFocus();
         focus.addListener(e, h);
         return this;
     }
     
-    public TaskBuilder andThenGroup() {
+    public TaskBuilder<R, T> andThenGroup() {
         return andThenGroup(null, ReportStrategy.all());
     }
     
-    public TaskBuilder andThenGroup(String status, ReportStrategy subtaskReportStrategy) {
+    public TaskBuilder<R, T> andThenGroup(String status, ReportStrategy subtaskReportStrategy) {
         checkState();
         requireNoGroup();
         group = new TaskGroup(executor, tracker.child(0, status));
@@ -99,7 +115,7 @@ public class TaskBuilder {
         return this;
     }
     
-    public TaskBuilder endGroup() {
+    public TaskBuilder<R, T> endGroup() {
         checkState();
         requireGroup();
         focus = group;
@@ -107,19 +123,19 @@ public class TaskBuilder {
         return this;
     }
     
-    public TaskBuilder subtask(Runnable r) {
+    public TaskBuilder<R, T> subtask(Runnable r) {
         return subtask(Tasks.wrap(r));
     }
     
-    public TaskBuilder subtask(TaskRunnable t) {
+    public TaskBuilder<R, T> subtask(TaskRunnable t) {
         return subtask(t, "", 1, false);
     }
     
-    public TaskBuilder subtask(TaskRunnable t, int parts) {
+    public TaskBuilder<R, T> subtask(TaskRunnable t, int parts) {
         return subtask(t, "", parts, true);
     }
     
-    private TaskBuilder subtask(TaskRunnable t, String name, int parts,
+    private TaskBuilder<R, T> subtask(TaskRunnable t, String name, int parts,
             boolean partsSpecified) {
         checkState();
         requireGroup();
@@ -129,7 +145,13 @@ public class TaskBuilder {
         return this;
     }
     
-    public Task build() {
+    /**
+     * Builds and returns the Task, but does not start it.
+     * 
+     * @throws IllegalStateException if the task has already been built, a
+     * group has not been closed, or no task units have been declared.
+     */
+    public T build() {
         checkState();
         requireNoGroup();
         if(first == null)
@@ -138,7 +160,25 @@ public class TaskBuilder {
         
         tracker.buildHeirarchy();
         first.buildHierarchy();
-        return new Task(tracker.get(), first).start(executor);
+        
+        @SuppressWarnings("unchecked")
+        T t = (T) (retBox == null
+                ? new Task(executor, tracker.get(), first)
+                : new ReturnTask<R>(executor, tracker.get(), first, retBox));
+        
+        return t;
+    }
+    
+    /**
+     * Builds, starts and returns the Task.
+     * 
+     * @throws IllegalStateException if the task has already been built, a
+     * group has not been closed, or no task units have been declared.
+     */
+    public T start() {
+        @SuppressWarnings("unchecked")
+        T t = (T) build().start();
+        return t;
     }
     
     /** @throws IllegalStateException if already built. */

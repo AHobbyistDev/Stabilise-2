@@ -71,8 +71,9 @@ class TaskUnit implements Runnable, TaskHandle {
     
     @Override
     public void run() {
-        tracker.start(task);
         thread = Thread.currentThread();
+        
+        tracker.start(task);
         
         if(group == null) {
             owner.setCurrent(this);
@@ -98,14 +99,16 @@ class TaskUnit implements Runnable, TaskHandle {
     }
     
     protected void finish() {
-        owner.notifyOfComplete();
+        tracker.setState(State.COMPLETED);
         events.post(TaskEvent.STOP);
         events.post(TaskEvent.COMPLETE);
         if(next != null) {
             next.owner = owner;
             // Reuse current thread rather than submit to executor
             next.run();
-        } else if(group == null) { // we're the last task
+        } else if(group != null) {
+            group.onSubtaskFinish();
+        } else { // we're the last task
             owner.setState(State.COMPLETED);
         }
     }
@@ -144,23 +147,26 @@ class TaskUnit implements Runnable, TaskHandle {
     }
     
     void cancel() {
-        thread.interrupt();
+        if(thread != null)
+            thread.interrupt();
     }
     
     @Override
     public void checkCancel() throws InterruptedException {
-        if(isTaskThread() && thread.isInterrupted()) {
+        if(isTaskThread() && (thread.isInterrupted() || owner.cancelled())) {
             throw new InterruptedException();
         }
     }
     
     @Override
     public boolean pollCancel() {
-        return isTaskThread() && thread.isInterrupted();
+        return isTaskThread() && (thread.isInterrupted() || owner.cancelled());
     }
     
     private boolean isTaskThread() {
-        return Thread.currentThread().equals(thread);
+        // We only treat the caller 
+        return Thread.currentThread().equals(thread)
+                && tracker.getState() == State.RUNNING;
     }
     
 }

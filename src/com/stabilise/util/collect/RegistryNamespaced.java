@@ -137,7 +137,8 @@ public class RegistryNamespaced<V> extends Registry<String, V> {
     @Override
     public boolean register(String name, V object) throws UnsupportedOperationException {
         throw new UnsupportedOperationException(
-                "Attempted to use register(String, Object)! Use register(int, String, Object) instead!"
+                "Attempted to use register(String, Object)! Use register(int, String,"
+                + " Object) instead!"
         );
     }
     

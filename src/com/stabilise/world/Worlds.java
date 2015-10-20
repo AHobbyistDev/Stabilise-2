@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.badlogic.gdx.files.FileHandle;
@@ -17,8 +16,9 @@ import com.stabilise.core.GameClient.WorldLoadHandle;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
-import com.stabilise.util.concurrent.TaskTracker;
-import com.stabilise.util.concurrent.TrackableFuture;
+import com.stabilise.util.concurrent.task.ReturnBox;
+import com.stabilise.util.concurrent.task.ReturnTask;
+import com.stabilise.util.concurrent.task.Task;
 import com.stabilise.util.io.IOUtil;
 import com.stabilise.world.multiverse.ClientMultiverse;
 import com.stabilise.world.multiverse.HostMultiverse;
@@ -185,8 +185,6 @@ public class Worlds {
         private Profiler profiler = null;
         
         private boolean building = false;
-        private Thread builderThread;
-        private WorldFuture task;
         
         private WorldBuilder() {}
         
@@ -321,7 +319,7 @@ public class Worlds {
          * @throws IllegalStateException if the world has already been built,
          * or the world has not been set.
          */
-        public TrackableFuture<WorldBundle> buildHost() {
+        public ReturnTask<WorldBundle> buildHost() {
             return build(true);
         }
         
@@ -332,11 +330,11 @@ public class Worlds {
          * @throws IllegalStateException if the world has already been built,
          * or either the player or client have not been set.
          */
-        public TrackableFuture<WorldBundle> buildClient() {
+        public ReturnTask<WorldBundle> buildClient() {
             return build(false);
         }
         
-        private TrackableFuture<WorldBundle> build(final boolean buildHost) {
+        private ReturnTask<WorldBundle> build(final boolean buildHost) {
             checkState();
             building = true;
             
@@ -355,142 +353,39 @@ public class Worlds {
                             + "world without setting the player!");
             }
             
+            Executor exec = (r) -> {
+                Thread t = new Thread(r);
+                t.setName("WorldBuilderThread");
+                t.start();
+            };
             
-            final TaskTracker tracker = new TaskTracker("Loading", buildHost ? 4 : 5);
+            ReturnBox<WorldBundle> box = new ReturnBox<>();
             
-            task = new WorldFuture(() -> {
-                try {
-                    tracker.next("Loading player data");
+            return Task.builder().executor(exec)
+                .name("Loading world")
+                .begin(box)
+                .andThen(buildHost ? 4 : 5, (t) -> {
+                    t.next("Loading player data");
                     if(integratedPlayer != null) // host or client
                         integratedPlayer.load();
-                    tracker.next("Constructing world");
                     
+                    t.next("Constructing world");
                     if(buildHost) {
                         worldInfo.load();
                         HostMultiverse multi = new HostMultiverse(worldInfo, profiler);
                         PlayerBundle player = multi.addPlayer(integratedPlayer, true);
                         HostWorld starterDim = player.world;
-                        tracker.next("Loading dimension " + starterDim.getDimensionName());
+                        t.next("Loading dimension " + starterDim.getDimensionName());
                         while(!starterDim.isLoaded())
                             Thread.sleep(10L);
-                        tracker.next("All is done!");
-                        tracker.setCompleted();
-                        return new WorldBundle(multi, starterDim,
-                                player.playerEntity, player.playerData);
+                        t.next("All is done!");
+                        box.set(new WorldBundle(multi, starterDim,
+                                player.playerEntity, player.playerData));
                     } else {
-                        return new WorldBundle(null, null, null, null);
+                        box.set(new WorldBundle(null, null, null, null));
                     }
-                } catch(Throwable t) {
-                    Log.get().postSevere("...", t);
-                    return null;
-                }
-            }, tracker);
-            builderThread = new Thread(task);
-            builderThread.setName("WorldBuilderThread");
-            builderThread.start();
-            return task;
-        }
-        
-    }
-    
-    /**
-     * Implementation combining FutureTask and TrackableFuture.
-     */
-    static class WorldFuture extends FutureTask<WorldBundle>
-            implements TrackableFuture<WorldBundle> {
-        
-        private volatile Thread runner;
-        private final TaskTracker tracker;
-        
-        public WorldFuture(Callable<WorldBundle> callable, TaskTracker tracker) {
-            super(callable);
-            this.tracker = tracker;
-        }
-        
-        @Override
-        public void run() {
-            if(runner != null) {
-                Log.get().postWarning("World builder's future being run again?");
-                return;
-            }
-            runner = Thread.currentThread();
-            super.run();
-        }
-        
-        @Override
-        public String getStatus() {
-            return tracker.getStatus();
-        }
-        
-        @Override
-        public int parts() {
-            return tracker.parts();
-        }
-        
-        @Override
-        public int partsCompleted() {
-            return tracker.partsCompleted();
-        }
-        
-        @Override
-        public float percentComplete() {
-            return tracker.percentComplete();
-        }
-        
-        @Override
-        public String toString() {
-            return tracker.toString();
-        }
-        
-        @Override
-        public boolean stopped() {
-            //return runner != null && !runner.isAlive();
-            return tracker.stopped();
-        }
-        
-        @Override
-        public boolean completed() {
-            return tracker.completed();// && stopped();
-        }
-        
-        @Override
-        public boolean failed() {
-            return tracker.failed();// && stopped();
-        }
-        
-        @Override
-        public void waitUntilDone() throws InterruptedException {
-            tracker.waitUntilDone();
-            /*
-            while(runner == null)
-                Thread.sleep(5);
-            runner.join();
-            */
-        }
-        
-        @Override
-        public void waitUninterruptibly() {
-            tracker.waitUninterruptibly();
-            /*
-            boolean interrupted = false;
-            while(runner == null) {
-                try {
-                    Thread.sleep(5);
-                } catch(InterruptedException ignored) {
-                    interrupted = true;
-                }
-            }
-            while(true) {
-                try {
-                    runner.join();
-                    break;
-                } catch(InterruptedException ignored) {
-                    interrupted = true;
-                }
-            }
-            if(interrupted)
-                Thread.currentThread().interrupt();
-            */
+                })
+                .build();
         }
         
     }

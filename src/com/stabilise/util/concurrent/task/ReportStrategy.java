@@ -41,17 +41,29 @@ import com.stabilise.util.Checks;
  * <li><b>{@link #none() none}</b> bubbles up no parts from a subtask.
  * <li><b>{@link #all() all}</b> bubbles up all parts from a subtask.
  * <li><b>{@link #constant(long) constant}</b> strategies force all subtasks to
- *     contribute the same number of parts. A subtask's parts are scaled
- *     appropriately when reported to the parent task (e.g. if a subtask has
- *     completed 5/10 of its parts but is under a constant strategy of 500, it
- *     will report 250 parts to its parent).
+ *     contribute the same number of parts.
  * <li><b>{@link #scale(double) scale}</b> strategies simply multiply a
  *     subtask's parts by a specified amount before sending them to the parent
  *     task.
- * <li><b>{@link #manual(LongUnaryOperator) manual} strategies allow the user
- *     to manually specify their own function which produces the number of
+ * <li><b>{@link #manual(LongUnaryOperator) manual}</b> strategies allow the
+ *     user to manually specify their own function which produces the number of
  *     parts to report given a subtask's number of reports.
  * </ul>
+ * 
+ * <p>In all cases a subtask's parts are scaled appropriately when reported to
+ * the parent task (e.g. if a subtask has completed 5/10 of its parts but is
+ * under a constant strategy of 500, it will report 250 parts to its
+ * parent<sup><tt>1</tt></sup>).
+ * 
+ * <p><tt>1.</tt> This isn't technically correct. A task which thinks it has 10
+ * parts altogether actually has 11, as every task is additionally allocated a
+ * "completion part" which is only set when the task is completed. This
+ * completion part is always bubbled up regardless of the report strategy used
+ * (though, again, this may not always be the case - the the completion part
+ * may be rounded away if a task unit's reported parts must be rescaled to
+ * prevent its parent's parts count from overflowing). In this example, the
+ * task unit would've actually completed 5/11 of its parts, which corresponds
+ * to 227 parts to report to its parent.
  */
 public final class ReportStrategy {
     
@@ -90,10 +102,10 @@ public final class ReportStrategy {
      * strategy, like {@link #none()} perfectly balances all tasks, and can be
      * made sufficiently granular with a sufficiently large parts value.
      * 
-     * @throws IllegalArgumentException if parts < 0
+     * @throws IllegalArgumentException if parts < 0 || parts == Long.MAX_VALUE
      */
     public static ReportStrategy constant(long parts) {
-        Checks.testMin(parts, 0);
+        Checks.test(parts, TaskTracker.MIN_PARTS, TaskTracker.MAX_PARTS);
         return new ReportStrategy(l -> parts);
     }
     

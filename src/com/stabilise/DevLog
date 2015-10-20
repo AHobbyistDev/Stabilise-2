@@ -251,12 +251,14 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 19/05/15
 	- WorldProvider -> Multiverse
 11/06/15
-	- Debug key to display hitboxes in-game by their outlines.
+	- Debug key to toggle rendering hitbox outlines in-game
 13/06/15
 	- RegionCache is now RegionStore and is now in charge of managing all regions.
 21/09/15
 	- Game now uses the updated floatarray hitboxes.
 28/09/15
 	- Added FragList and improved general collections classes
+20/10/15
+	- Replaced util.concurrent.Task with the util.concurrent.task framework
 
 	

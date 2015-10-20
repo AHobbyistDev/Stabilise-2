@@ -14,6 +14,7 @@ public class LineCounter {
     String dir;
     String[] ignores;
     int lineTotal = 0;
+    int classTotal = 0;
     
     public LineCounter(String dir) throws IOException {
         this(dir, new String[0]);
@@ -28,7 +29,7 @@ public class LineCounter {
         this.ignores = ignores;
         File f = new File(dir);
         doTheThing(f);
-        System.out.println("\nTotal: " + lineTotal);
+        System.out.println("\nTotal: " + lineTotal + " (" + classTotal + ")");
     }
     
     void doTheThing(File f) throws IOException {
@@ -62,13 +63,14 @@ public class LineCounter {
         br.close();
         isr.close();
         fis.close();
+        classTotal++;
         System.out.println(String.format("%4d - %s", lines, path.replace(dir, "")));
     }
     
     public static void main(String[] args) throws IOException {
         new LineCounter(
-                "C:/Users/Adam/Documents/GitHub/Stabilise-2/Stabilise 2/core/src",
-                //"C:/Users/Administrator/Documents/Java/Stabilise II/core/src",
+                //"C:/Users/Adam/Documents/GitHub/Stabilise-2/Stabilise 2/core/src",
+                "C:/Users/Administrator/Documents/Java/Stabilise II/core/src",
                 new String[] {
                         "com/stabilise/tests",
                         "com/stabilise/screen/menu",

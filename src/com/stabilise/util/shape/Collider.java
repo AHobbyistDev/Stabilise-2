@@ -48,7 +48,7 @@ public class Collider {
     }
     
     private static int keyFor(int k1, int k2) {
-        return (k1 << TAB_SHIFT) + k2;
+        return (k1 << TAB_SHIFT) | k2;
     }
     
     /*
@@ -173,7 +173,7 @@ public class Collider {
      * @throws NullPointerException if either argument is {@code null}.
      */
     public static boolean intersectsAABBPoly(AABB b, Polygon p) {
-        return intersectsOnAABBAxes(p, b) && intersectsOnPolyAxes(p, b);
+        return intersectsOnAABBAxes(p, b, 0, 0) && intersectsOnPolyAxes(p, b);
     }
     
     /** tests for intersects with the AABB offset by (dy,dx) */
@@ -256,36 +256,6 @@ public class Collider {
                     p.projs[i]-off, p.projs[i+1]-off))
                 return false;
         }
-        
-        // All tests passed = shapes appear to intersect.
-        return true;
-    }
-    
-    /** Tests for intersection using the axes of b */
-    private static boolean intersectsOnAABBAxes(Polygon p, AABB b) {
-        float min = p.verts[0];
-        float max = min;
-        
-        // Get the x projections of p
-        for(int i = 2; i < p.verts.length; i += 2) {
-            if(p.verts[i] < min)
-                min = p.verts[i];
-            else if(p.verts[i] > max)
-                max = p.verts[i];
-        }
-        
-        if(min > b.maxX() || max < b.minX()) return false;
-        
-        // Get the y projections of p
-        min = max = p.verts[1]; // reset
-        for(int i = 3; i < p.verts.length; i += 2) {
-            if(p.verts[i] < min)
-                min = p.verts[i];
-            else if(p.verts[i] > max)
-                max = p.verts[i];
-        }
-        
-        if(min > b.maxY() || max < b.minY()) return false;
         
         // All tests passed = shapes appear to intersect.
         return true;
