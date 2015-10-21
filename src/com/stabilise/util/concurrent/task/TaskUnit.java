@@ -6,6 +6,7 @@ import com.stabilise.util.concurrent.event.Event;
 import com.stabilise.util.concurrent.event.EventDispatcher;
 import com.stabilise.util.concurrent.event.EventDispatcher.EventHandler;
 import com.stabilise.util.concurrent.task.Task.State;
+import com.stabilise.util.concurrent.task.TaskEvent.FailEvent;
 
 
 class TaskUnit implements Runnable, TaskHandle {
@@ -29,10 +30,12 @@ class TaskUnit implements Runnable, TaskHandle {
     /** The actual task! Only null for dummy units (e.g. TaskGroup instances). */
     protected TaskRunnable task = null;
     
-    protected final Executor executor;
     /** The thread upon which this unit is executing. This is set in run()
      * before this unit begins executing. Used as a target for interrupts. */
     private Thread thread;
+    /** References the throwable which caused this unit to fail, if it failed.
+     * null otherwise. */
+    private Throwable throwable = null;
     
     private final EventDispatcher events;
     
@@ -40,14 +43,13 @@ class TaskUnit implements Runnable, TaskHandle {
     /**
      * Creates a new task.
      * 
-     * @param exec The executor with which to execute the task. Never null
-     * thanks to TaskBuilder.
-     * @param task The actual task to run. Never null thanks to TaskBuilder.
+     * @param exec The executor with which to execute event listeners. Never
+     * null thanks to TaskBuilder.
+     * @param task The actual task to run. Null if this is a group.
      * @param protoTracker The prototype for our tracker. Never null thanks to
      * TaskBuilder.
      */
     public TaskUnit(Executor exec, TaskRunnable task, PrototypeTracker protoTracker) {
-        this.executor = exec;
         this.task = task;
         this.protoTracker = protoTracker;
         this.events = new EventDispatcher(exec);
@@ -75,8 +77,9 @@ class TaskUnit implements Runnable, TaskHandle {
         
         tracker.start(task);
         
-        if(group == null) {
-            owner.setCurrent(this);
+        if(group == null && !owner.setCurrent(this)) {
+            // Cancelled = we can't do anything now
+            return;
         }
         
         boolean success = false;
@@ -84,9 +87,10 @@ class TaskUnit implements Runnable, TaskHandle {
         try {
             success = execute();
         } catch(Exception e) {
+            throwable = e;
             events.post(TaskEvent.STOP);
-            events.post(TaskEvent.FAIL);
-            owner.setState(State.FAILED);
+            events.post(new FailEvent(e));
+            owner.fail(this);
         }
         if(success)
             finish();
@@ -147,15 +151,14 @@ class TaskUnit implements Runnable, TaskHandle {
     }
     
     void cancel() {
-        if(thread != null)
+        if(thread != null && tracker.getState() == State.RUNNING)
             thread.interrupt();
     }
     
     @Override
     public void checkCancel() throws InterruptedException {
-        if(isTaskThread() && (thread.isInterrupted() || owner.cancelled())) {
-            throw new InterruptedException();
-        }
+        if(pollCancel())
+            throw new InterruptedException("Cancelled");
     }
     
     @Override
@@ -164,9 +167,18 @@ class TaskUnit implements Runnable, TaskHandle {
     }
     
     private boolean isTaskThread() {
-        // We only treat the caller 
+        // Check state too to avoid leaking ownership across the same thread,
+        // in case the thread is a part of a pool and is reused.
         return Thread.currentThread().equals(thread)
                 && tracker.getState() == State.RUNNING;
+    }
+    
+    /**
+     * Gets the failure cause of this task. Only guaranteed to be non-null when
+     * this unit is guaranteed to have failed.
+     */
+    Throwable getFailCause() {
+        return throwable;
     }
     
 }

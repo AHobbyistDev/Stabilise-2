@@ -4,6 +4,7 @@ import static com.stabilise.util.concurrent.task.Task.State;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.stabilise.util.Checks;
 import com.stabilise.util.Log;
@@ -31,7 +32,7 @@ class TaskTracker {
     /** Number of parts which we've reported so far. Unused if parent is null. */
     private final AtomicLong reportedParts = new AtomicLong();
     
-    private volatile State state = State.RUNNING;
+    private final AtomicReference<State> state = new AtomicReference<>(State.RUNNING);
     
     
     TaskTracker(PrototypeTracker prototype) {
@@ -40,6 +41,10 @@ class TaskTracker {
         partsToReport = prototype.partsToReport;
     }
     
+    /** "Starts" this tracker. If totalParts is zero (technically 1, if you
+     * include the completion part), this method sets totalParts to what {@link
+     * TaskRunnable#getParts()} returns (unless it returns -1, in which case
+     * this method does nothing). Runnable may be null. */
     void start(TaskRunnable runnable) {
         // i.e. only accept the updated value if we lack a proper initial
         // value (that is, totalParts == 1).
@@ -52,7 +57,7 @@ class TaskTracker {
                         + status + "\" returned illegal value from getParts() ("
                         + newParts + ")");
             else
-                totalParts = newParts;
+                totalParts = newParts + 1; // +1 for completion part
         }
     }
     
@@ -65,14 +70,20 @@ class TaskTracker {
         doIncrement(p, 0);
     }
     
+    /** Sets the state, incrementing parts up to full if the state is
+     * COMPLETED. This is not atomic. */
     void setState(State state) {
         if(state == State.COMPLETED)
             doIncrement(Long.MAX_VALUE, 1);
-        this.state = state;
+        this.state.set(state);
+    }
+    
+    boolean setState(State expect, State update) {
+        return state.compareAndSet(expect, update);
     }
     
     State getState() {
-        return state;
+        return state.get();
     }
     
     /**
@@ -83,7 +94,7 @@ class TaskTracker {
      */
     private void doIncrement(long p, long c) {
         Checks.testMin(p, 1);
-        if(state != State.RUNNING)
+        if(state.get() != State.RUNNING)
             throw new IllegalStateException();
         long o, n; // old, new
         c--; // since otherwise we'd use c-1 everywhere

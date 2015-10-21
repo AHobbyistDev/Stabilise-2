@@ -214,7 +214,7 @@ public class EventDispatcher {
     /**
      * Clears all event listeners.
      */
-    public final void clear() {
+    public final void clearListeners() {
         handlers.clear();
     }
     
@@ -225,7 +225,7 @@ public class EventDispatcher {
      * 
      * @throws NullPointerException if {@code pred} is {@code null}.
      */
-    protected final void clear(Predicate<Listener<?>> pred) {
+    protected final void clearListeners(Predicate<Listener<?>> pred) {
         Objects.requireNonNull(pred);
         handlers.entrySet().removeIf(e -> {
             synchronized(lockFor(e.getKey())) {

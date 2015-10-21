@@ -58,7 +58,7 @@ class PrototypeTracker {
      * @throws NullPointerException if {@code strategy == null}.
      */
     PrototypeTracker(long parts, String status, ReportStrategy strategy) {
-        this.parts = Checks.test(parts, MIN_PARTS, MAX_PARTS) + 1;
+        this.parts = Checks.test(parts, MIN_PARTS, MAX_PARTS) + 1; // completion part
         this.status = status == null ? DEFAULT_STATUS : status;
         this.strategy = Objects.requireNonNull(strategy);
     }

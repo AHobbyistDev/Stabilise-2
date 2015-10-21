@@ -1,15 +1,15 @@
 package com.stabilise.util.concurrent.task;
 
 /**
- * The common interface with which to implement tasks to run under the Task
- * framework. You can think of a {@code TaskRunnable} as equivalent to a {@code
- * Runnable} which accepts a {@code TaskHandle} through which to communicate to
- * the Task API.
+ * The common interface with which to implement value-returning tasks to run
+ * under the Task framework. You can think of a {@code TaskCallable} as
+ * equivalent to a {@code Callable} which accepts a {@code TaskHandle} through
+ * which to communicate to the Task API.
  */
-public interface TaskRunnable {
+public interface TaskCallable<T> {
     
     /**
-     * Runs the task.
+     * Runs the task and returns the resultant value.
      * 
      * @param handle The handle to the task API. This should not escape the
      * scope of this task.
@@ -17,7 +17,7 @@ public interface TaskRunnable {
      * @throws Exception if an unrecoverable error occurred while running the
      * task.
      */
-    void run(TaskHandle handle) throws Exception;
+    T call(TaskHandle handle) throws Exception;
     
     /**
      * Gets the number of parts in this task unit. Ordinarily this should be

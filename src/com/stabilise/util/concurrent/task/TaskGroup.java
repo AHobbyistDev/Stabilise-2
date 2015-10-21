@@ -6,11 +6,14 @@ import java.util.concurrent.Executor;
 
 class TaskGroup extends TaskUnit {
     
+    private final Executor executor;
+    
     private final List<TaskUnit> subtasks = new ArrayList<>();
     private int remainingSubtasks = 0;
     
     public TaskGroup(Executor exec, PrototypeTracker protoTracker) {
         super(exec, null, protoTracker);
+        this.executor = exec;
     }
     
     @Override
@@ -29,13 +32,16 @@ class TaskGroup extends TaskUnit {
         return remainingSubtasks == 0;
     }
     
-    public TaskGroup addSubtask(TaskUnit t) {
+    /**
+     * Adds a subtask to this group. As this is only invoked from TaskBuilder,
+     * it is implicitly trusted that t is not null.
+     */
+    void addSubtask(TaskUnit t) {
         subtasks.add(t);
         remainingSubtasks++;
-        return this;
     }
     
-    public void onSubtaskFinish() {
+    void onSubtaskFinish() {
         synchronized(subtasks) {
             if(--remainingSubtasks != 0)
                 return;

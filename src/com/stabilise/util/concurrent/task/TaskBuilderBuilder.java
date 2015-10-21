@@ -29,6 +29,7 @@ public final class TaskBuilderBuilder {
      * ordinary Task. */
     ReturnBox<?> retBox  = null;
     
+    
     TaskBuilderBuilder() {} // package-private constructor
     
     /**
@@ -75,14 +76,22 @@ public final class TaskBuilderBuilder {
     }
     
     /**
-     * Begins building a {@link ReturnTask} whose return value will be
-     * extracted by the specified {@code ReturnBox}.
-     * 
-     * @throws NullPointerException if {@code returnBox} is {@code null}.
+     * Begins building a {@link ReturnTask}.
      */
-    public <T> TaskBuilder<T, ReturnTask<T>> begin(ReturnBox<T> returnBox) {
-        this.retBox = Objects.requireNonNull(returnBox);
+    public <T> TaskBuilder<T, ReturnTask<T>> beginReturn() {
+        this.retBox = new ReturnBox<T>();
         return new TaskBuilder<T, ReturnTask<T>>(this);
+    }
+    
+    /**
+     * Begins building a {@link ReturnTask}.
+     * 
+     * <p>This method is provided as an alternative to {@link #beginReturn()}
+     * to coerce the compiler to properly infer type arguments (since it fails
+     * to do so otherwise and requires casting).
+     */
+    public <T> TaskBuilder<T, ReturnTask<T>> beginReturn(Class<T> clazz) {
+        return beginReturn();
     }
     
 }

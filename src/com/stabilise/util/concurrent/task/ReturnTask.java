@@ -21,6 +21,7 @@ public class ReturnTask<T> extends Task {
         this.retVal = retVal;
     }
     
+    // Override as to return ReturnTask<T> instead of Task
     @Override
     public ReturnTask<T> start() {
         super.start();
@@ -38,7 +39,7 @@ public class ReturnTask<T> extends Task {
     public T get() throws InterruptedException, ExecutionException {
         if(!await())
             throw new ExecutionException("Task did not complete successfully", null);
-        return retVal.innerGet();
+        return retVal.get();
     }
     
     /**
@@ -61,7 +62,7 @@ public class ReturnTask<T> extends Task {
             throw new TimeoutException();
         if(failed())
             throw new ExecutionException("Task did not complete successfully", null);
-        return retVal.innerGet();
+        return retVal.get();
     }
     
     /**
@@ -73,7 +74,7 @@ public class ReturnTask<T> extends Task {
     public T tryGet() throws ExecutionException {
         if(!completed())
             throw new IllegalStateException("Task not completed");
-        return retVal.innerGet();
+        return retVal.get();
     }
     
 }

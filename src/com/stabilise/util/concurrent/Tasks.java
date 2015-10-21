@@ -7,9 +7,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.function.BooleanSupplier;
 
-import com.stabilise.util.concurrent.task.ReturnBox;
 import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.util.concurrent.task.Task;
+import com.stabilise.util.concurrent.task.TaskCallable;
 import com.stabilise.util.concurrent.task.TaskRunnable;
 
 /**
@@ -163,6 +163,16 @@ public class Tasks {
     }
     
     /**
+     * Wraps a {@code Callable} in a {@code TaskCallable}.
+     * 
+     * @return NullPointerException if {@code c} is {@code null}.
+     */
+    public static <T> TaskCallable<T> wrap(Callable<T> c) {
+        Objects.requireNonNull(c);
+        return t -> c.call();
+    }
+    
+    /**
      * Executes the given task through the given executor, with the specified
      * display name.
      * 
@@ -174,8 +184,7 @@ public class Tasks {
      * @throws NullPointerException if any argument is {@code null}.
      */
     public static Task exec(Executor executor, String name, TaskRunnable task) {
-        return Task.builder().executor(executor).name(name).begin()
-                .andThen(task).start();
+        return Task.builder(executor).name(name).begin().andThen(task).start();
     }
     
     /**
@@ -188,7 +197,7 @@ public class Tasks {
      * @throws NullPointerException if either argument is {@code null}.
      */
     public static Task exec(Executor executor, Runnable task) {
-        return exec(executor, null, wrap(task));
+        return Task.builder(executor).begin().andThen(task).start();
     }
     
     /**
@@ -215,9 +224,10 @@ public class Tasks {
      * @throws NullPointerException if either argument is {@code null}.
      */
     public static <T> ReturnTask<T> exec(Executor executor, Callable<T> task) {
-        ReturnBox<T> retBox = new ReturnBox<>();
-        return Task.builder().executor(executor).begin(retBox)
-            .andThen(h -> retBox.set(task.call())).start();
+        @SuppressWarnings("unchecked")
+        ReturnTask<T> t = (ReturnTask<T>) Task.builder(executor).beginReturn()
+                .andThenReturn(task).start();
+        return t;
     }
     
     /**

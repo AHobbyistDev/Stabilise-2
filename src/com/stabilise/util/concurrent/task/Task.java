@@ -3,6 +3,7 @@ package com.stabilise.util.concurrent.task;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -30,12 +31,16 @@ public class Task {
     private TaskUnit curUnit;
     
     private final AtomicBoolean started = new AtomicBoolean(false);
-    private volatile boolean cancelled = false;
     
     private final Lock      lock = new ReentrantLock();
     private final Condition cond = lock.newCondition();
     
+    private final AtomicReference<Throwable> failCause = new AtomicReference<>(null);
     
+    
+    /**
+     * Instantiated only by TaskBuilder.
+     */
     Task(Executor exec, TaskTracker tracker, TaskUnit firstUnit) {
         this.exec = exec;
         this.tracker = tracker;
@@ -43,16 +48,18 @@ public class Task {
     }
     
     /**
-     * Starts this task.
+     * Starts this task, unless it has been preemptively cancelled.
      * 
      * @return This task.
      * @throws IllegalStateException if this task has already been started.
      */
     public Task start() {
-        if(started.compareAndSet(false, true))
-            exec.execute(curUnit.setTask(this));
-        else
-            throw new IllegalStateException("Already started");
+        if(getState() != State.CANCELLED) {
+            if(started.compareAndSet(false, true))
+                exec.execute(curUnit.setTask(this));
+            else
+                throw new IllegalStateException("Already started");
+        }
         return this;
     }
     
@@ -65,7 +72,7 @@ public class Task {
      */
     boolean setCurrent(TaskUnit unit) {
         synchronized(this) {
-            if(cancelled)
+            if(cancelled())
                 return false;
             this.curUnit = unit;
         }
@@ -77,6 +84,10 @@ public class Task {
         signalAll();
     }
     
+    State getState() {
+        return tracker.getState();
+    }
+    
     private void signalAll() {
         lock.lock();
         try {
@@ -84,6 +95,11 @@ public class Task {
         } finally {
             lock.unlock();
         }
+    }
+    
+    void fail(TaskUnit failurePoint) {
+        failCause.compareAndSet(null, failurePoint.getFailCause());
+        setState(State.FAILED);
     }
     
     /**
@@ -94,15 +110,17 @@ public class Task {
      * considered to have {@link #failed() failed}.
      */
     public void cancel() {
-        synchronized(this) {
-            cancelled = true;
-            curUnit.cancel();
+        if(tracker.setState(State.RUNNING, State.CANCELLED)) {
+            signalAll();
+            synchronized(this) {
+                curUnit.cancel();
+            }
         }
     }
     
     /** Polls cancellation status. */
     boolean cancelled() {
-        return cancelled;
+        return tracker.getState() == State.CANCELLED;
     }
     
     /**
@@ -135,7 +153,8 @@ public class Task {
      * && !completed()}.
      */
     public boolean failed() {
-        return tracker.getState() == State.FAILED;
+        State s = tracker.getState();
+        return s == State.CANCELLED || s == State.FAILED;
     }
     
     /**
@@ -281,6 +300,17 @@ public class Task {
      */
     public static TaskBuilderBuilder builder() {
         return new TaskBuilderBuilder();
+    }
+    
+    /**
+     * Creates a new TaskBuilderBuilder.
+     * 
+     * @param executor The executor with which to run the task.
+     * 
+     * @throws NullPointerException if {@code executor} is {@code null}.
+     */
+    public static TaskBuilderBuilder builder(Executor executor) {
+        return builder().executor(executor);
     }
     
 }

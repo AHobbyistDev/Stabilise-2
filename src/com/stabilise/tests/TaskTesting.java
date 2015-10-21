@@ -1,8 +1,10 @@
 package com.stabilise.tests;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.stabilise.util.concurrent.Tasks;
 import com.stabilise.util.concurrent.task.ReportStrategy;
 import com.stabilise.util.concurrent.task.Task;
 import com.stabilise.util.concurrent.task.TaskEvent;
@@ -13,7 +15,7 @@ class TaskTesting {
     private TaskTesting() {}
     
     public static void main(String[] args) {
-        test2();
+        test3();
     }
     
     public static void test1() {
@@ -66,6 +68,14 @@ class TaskTesting {
             }
         }
         exec.shutdown();
+    }
+    
+    public static void test3() {
+        try {
+            System.out.println(Tasks.exec(() -> "Hello, world!").get());
+        } catch(InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
     }
     
 }

@@ -1,5 +1,6 @@
 package com.stabilise.util.concurrent.task;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 
 import com.stabilise.util.annotation.NotThreadSafe;
@@ -10,8 +11,15 @@ import com.stabilise.util.concurrent.event.EventDispatcher.EventHandler;
 /**
  * A TaskBuilder builds a task.
  * 
- * <p>The type parameters of this class should be invisible and irrelevant to
- * the end-user, as this class should only ever occur amidst invocation chains.
+ * <p>The type parameters of this class should normally be invisible and
+ * irrelevant to the end-user, as this class should only ever occur amidst
+ * invocation chains.
+ * 
+ * @param <R> The return type of the task to generate. If a builder is
+ * constructing a non-returning task, this will be {@code Void}.
+ * @param <T> The type of task to return. This will be {@code Task} if this
+ * builder is constructing a non-returning task, or {@code ReturnTask<R>}
+ * otherwise.
  */
 @NotThreadSafe
 public final class TaskBuilder<R, T extends Task> {
@@ -35,6 +43,7 @@ public final class TaskBuilder<R, T extends Task> {
     
     /** If null, we return a Task; otherwise we return a ReturnTask. */
     private final ReturnBox<R> retBox;
+    private boolean callableSet = false;
     
     private boolean built = false;
     
@@ -62,15 +71,30 @@ public final class TaskBuilder<R, T extends Task> {
     }
     
     public TaskBuilder<R, T> andThen(TaskRunnable t) {
-        return andThen(t, null, 0, false);
+        return andThen(t, null, 0);
     }
     
     public TaskBuilder<R, T> andThen(long parts, TaskRunnable t) {
-        return andThen(t, null, parts, true);
+        return andThen(t, null, parts);
     }
     
-    private TaskBuilder<R, T> andThen(TaskRunnable t, String name, long parts,
-            boolean partsSpecified) {
+    public TaskBuilder<R, T> andThenReturn(Callable<? extends R> c) {
+        return andThenReturn(0, Tasks.wrap(c));
+    }
+    
+    public TaskBuilder<R, T> andThenReturn(TaskCallable<? extends R> t) {
+        return andThenReturn(0, t);
+    }
+    
+    public TaskBuilder<R, T> andThenReturn(long parts, TaskCallable<? extends R> t) {
+        requireReturn();
+        if(callableSet)
+            throw new IllegalStateException("Value-returning unit already set!");
+        callableSet = true;
+        return andThen(new TaskCallableWrapper<R>(t, retBox), null, parts);
+    }
+    
+    private TaskBuilder<R, T> andThen(TaskRunnable t, String name, long parts) {
         checkState();
         if(group != null && focus == null)
             throw new IllegalStateException("can't do a task after nothing in a group!");
@@ -123,20 +147,68 @@ public final class TaskBuilder<R, T extends Task> {
         return this;
     }
     
+    // Note we do not expose any variants of subtask() which allow the user to
+    // specify a name - this is simply because a name is meaningless for a
+    // group's subtask.
+    
+    /**
+     * Creates a subtask of the current group.
+     * 
+     * @param r The subtask.
+     * 
+     * @throws IllegalStateException if the task has already been built, or a
+     * group has not been opened.
+     * @throws NullPointerException if {@code r} is {@code null}.
+     */
     public TaskBuilder<R, T> subtask(Runnable r) {
         return subtask(Tasks.wrap(r));
     }
     
+    /**
+     * Creates a subtask of the current group.
+     * 
+     * @param t The subtask.
+     * 
+     * @throws IllegalStateException if the task has already been built, or a
+     * group has not been opened.
+     * @throws NullPointerException if {@code t} is {@code null}.
+     */
     public TaskBuilder<R, T> subtask(TaskRunnable t) {
-        return subtask(t, "", 1, false);
+        return subtask(t, null, 0);
     }
     
-    public TaskBuilder<R, T> subtask(TaskRunnable t, int parts) {
-        return subtask(t, "", parts, true);
+    /**
+     * Creates a subtask of the current group.
+     * 
+     * @param parts The number of parts in the subtask.
+     * @param t The subtask.
+     * 
+     * @throws IllegalStateException if the task has already been built, or a
+     * group has not been opened.
+     * @throws NullPointerException if {@code t} is {@code null}.
+     * @throws IllegalArgumentException if {@code parts < 0 || parts ==
+     * Long.MAX_VALUE}.
+     */
+    public TaskBuilder<R, T> subtask(long parts, TaskRunnable t) {
+        return subtask(t, null, parts);
     }
     
-    private TaskBuilder<R, T> subtask(TaskRunnable t, String name, int parts,
-            boolean partsSpecified) {
+    /**
+     * Creates a subtask of the current group.
+     * 
+     * @param t The subtask.
+     * @param name The initial name of the task. If this is null we use {@link
+     * TaskTracker#DEFAULT_STATUS}.
+     * @param parts The number of parts in the subtask. This should be 0 if the
+     * user did not specify a parts count.
+     * 
+     * @throws IllegalStateException if the task has already been built, or a
+     * group has not been opened.
+     * @throws NullPointerException if {@code t} is {@code null}.
+     * @throws IllegalArgumentException if {@code parts < 0 || parts ==
+     * Long.MAX_VALUE}.
+     */
+    private TaskBuilder<R, T> subtask(TaskRunnable t, String name, long parts) {
         checkState();
         requireGroup();
         TaskUnit unit = new TaskUnit(executor, t, group.protoTracker.child(parts, name));
@@ -149,22 +221,27 @@ public final class TaskBuilder<R, T extends Task> {
      * Builds and returns the Task, but does not start it.
      * 
      * @throws IllegalStateException if the task has already been built, a
-     * group has not been closed, or no task units have been declared.
+     * group has not been closed, no task units have been declared, or we're
+     * building a value-returning task but no value-returning unit was {@link
+     * #andThenReturn(TaskCallable)} set.
      */
     public T build() {
         checkState();
         requireNoGroup();
         if(first == null)
-            throw new IllegalStateException("no task units");
+            throw new IllegalStateException("No task units");
+        if(isReturnTask() && !callableSet)
+            throw new IllegalStateException("Value-returning task unit not set!");
+        
         built = true;
         
         tracker.buildHeirarchy();
         first.buildHierarchy();
         
         @SuppressWarnings("unchecked")
-        T t = (T) (retBox == null
-                ? new Task(executor, tracker.get(), first)
-                : new ReturnTask<R>(executor, tracker.get(), first, retBox));
+        T t = (T) (isReturnTask()
+                ? new ReturnTask<R>(executor, tracker.get(), first, retBox)
+                : new Task(executor, tracker.get(), first));
         
         return t;
     }
@@ -193,14 +270,51 @@ public final class TaskBuilder<R, T extends Task> {
             throw new IllegalStateException();
     }
     
+    /** @throws IllegalStateException if no group. */
     private void requireGroup() {
         if(group == null)
             throw new IllegalStateException("group not started");
     }
     
+    /** @throws IllegalStateException if group. */
     private void requireNoGroup() {
         if(group != null)
             throw new IllegalStateException("group already started");
+    }
+    
+    /** @return true if we're constructing a ReturnTask; false if an ordinary
+     * task. */
+    private boolean isReturnTask() {
+        return retBox != null;
+    }
+    
+    /** throws UnsupportedOperationException if not a return task */
+    private void requireReturn() {
+        if(!isReturnTask())
+            throw new UnsupportedOperationException("This is not a value-returning"
+                    + " task!");
+    }
+    
+    private static class TaskCallableWrapper<T> implements TaskRunnable {
+        
+        private final TaskCallable<? extends T> callable;
+        private final ReturnBox<T> retVal;
+        
+        private TaskCallableWrapper(TaskCallable<? extends T> callable, ReturnBox<T> retVal) {
+            this.callable = callable;
+            this.retVal = retVal;
+        }
+
+        @Override
+        public void run(TaskHandle handle) throws Exception {
+            retVal.set(callable.call(handle));
+        }
+        
+        @Override
+        public long getParts() {
+            return callable.getParts();
+        }
+        
     }
     
 }

@@ -16,7 +16,6 @@ import com.stabilise.core.GameClient.WorldLoadHandle;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
-import com.stabilise.util.concurrent.task.ReturnBox;
 import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.util.concurrent.task.Task;
 import com.stabilise.util.io.IOUtil;
@@ -359,12 +358,10 @@ public class Worlds {
                 t.start();
             };
             
-            ReturnBox<WorldBundle> box = new ReturnBox<>();
-            
             return Task.builder().executor(exec)
                 .name("Loading world")
-                .begin(box)
-                .andThen(buildHost ? 4 : 5, (t) -> {
+                .beginReturn(WorldBundle.class)
+                .andThenReturn(buildHost ? 4 : 5, (t) -> {
                     t.next("Loading player data");
                     if(integratedPlayer != null) // host or client
                         integratedPlayer.load();
@@ -379,13 +376,13 @@ public class Worlds {
                         while(!starterDim.isLoaded())
                             Thread.sleep(10L);
                         t.next("All is done!");
-                        box.set(new WorldBundle(multi, starterDim,
-                                player.playerEntity, player.playerData));
+                        return new WorldBundle(multi, starterDim,
+                                player.playerEntity, player.playerData);
                     } else {
-                        box.set(new WorldBundle(null, null, null, null));
+                        return new WorldBundle(null, null, null, null);
                     }
                 })
-                .build();
+                .start();
         }
         
     }
