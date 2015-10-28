@@ -26,6 +26,7 @@ class TaskGroup extends TaskUnit {
     @Override
     protected boolean execute() {
         for(TaskUnit t : subtasks) {
+            t.setTask(owner);
             executor.execute(t);
         }
         
@@ -37,6 +38,7 @@ class TaskGroup extends TaskUnit {
      * it is implicitly trusted that t is not null.
      */
     void addSubtask(TaskUnit t) {
+        t.group = this;
         subtasks.add(t);
         remainingSubtasks++;
     }

@@ -58,9 +58,14 @@ public class WorldStatistics {
         
         @Override
         public String toString() {
-            return name + "{req:" + requests + ", rej:" + rejected
-                    + ", started:" + started + ", aborted:" + aborted
-                    + ", completed:" + completed + ", failed:" + failed + "}";
+            return name + "{"
+                    +       "req:" + requests  + ", "
+                    +       "rej:" + rejected  + ", "
+                    +   "started:" + started   + ", "
+                    +   "aborted:" + aborted   + ", "
+                    + "completed:" + completed + ", "
+                    +    "failed:" + failed
+                    + "}";
         }
         
     }

@@ -28,7 +28,7 @@ class PrototypeTracker {
     /** Parts count. Used if the parts count is bounded by Long.MAX_VALUE.
      * Includes the completion part, so the real value is bounded by
      * MAX_VALUE-1 */
-    long parts;
+    long childParts;
     /** Parts count used if the count exceeds Long.MAX_VALUE. */
     private BigInteger bigParts = null;
     
@@ -58,7 +58,7 @@ class PrototypeTracker {
      * @throws NullPointerException if {@code strategy == null}.
      */
     PrototypeTracker(long parts, String status, ReportStrategy strategy) {
-        this.parts = Checks.test(parts, MIN_PARTS, MAX_PARTS) + 1; // completion part
+        this.childParts = Checks.test(parts, MIN_PARTS, MAX_PARTS) + 1; // completion part
         this.status = status == null ? DEFAULT_STATUS : status;
         this.strategy = Objects.requireNonNull(strategy);
     }
@@ -83,9 +83,9 @@ class PrototypeTracker {
     /**
      * Creates a child prototype.
      * 
-     * @param parts The number of parts in the task. This should be 0 if the
-     * user did not specify a parts count for the task, or it is a group and
-     * hence does not have its own intrinsic count.
+     * @param childParts The number of parts in the task. This should be 0 if
+     * the user did not specify a parts count for the task, or it is a group
+     * and hence does not have its own intrinsic count.
      * @param status The initial status of the task. If this is null we use
      * {@link TaskTracker#DEFAULT_STATUS}.
      * @param strategy The report strategy to apply to children of this task.
@@ -125,12 +125,12 @@ class PrototypeTracker {
                 t.build(this.strategy);
                 
                 if(bigParts == null) {
-                    long p = parts + t.partsToReport;
+                    long p = childParts + t.partsToReport;
                     
-                    if(p < parts) // overflow - upgrade to BigInteger
-                        bigParts = BigInteger.valueOf(parts);
+                    if(p < childParts) // overflow - upgrade to BigInteger
+                        bigParts = BigInteger.valueOf(childParts);
                     else
-                        parts = p;
+                        childParts = p;
                 }
                 
                 if(bigParts != null)
@@ -146,12 +146,12 @@ class PrototypeTracker {
             // childrens' partsToReport values such that their sum does not
             // exceed this value. We also need to resum parts to account for
             // rounding errors.
-            parts = 1; // completion part
+            childParts = 1; // completion part
             double scale = BIG_LONG_MAX_VALUE
                     .divide(new BigDecimal(bigParts), DIV_RULES)
                     .doubleValue();
             for(PrototypeTracker t : children) {
-                parts += t.scale(scale);
+                childParts += t.scale(scale);
             }
         }
         
@@ -161,7 +161,7 @@ class PrototypeTracker {
         // taking a BigInteger as the input parameter.
         // The -1/+1 is the completion part, which is temporarily pulled out as
         // to avoid being scaled.
-        partsToReport = strat.get(parts - 1) + 1;
+        partsToReport = strat.get(childParts - 1) + 1;
         if(partsToReport <= 0) // either an overflow, or the strat did something stupid
             throw new BadReportStrategyException();
         

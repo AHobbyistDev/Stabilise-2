@@ -17,7 +17,6 @@ import com.stabilise.util.Profiler;
 import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.World;
-import com.stabilise.world.event.EventBus;
 import com.stabilise.world.loader.WorldLoader;
 
 /**
@@ -73,9 +72,6 @@ public abstract class Multiverse<W extends AbstractWorld> {
     
     /** Stores all dimensions. Maps dimension names -> dimensions. */
     protected final Map<String, W> dimensions = new HashMap<>(2);
-    
-    /** Manages global events. */
-    public final EventBus globalEvents = new EventBus();
     
     /** Profile any world's operation with this. Never {@code null}. */
     protected Profiler profiler;

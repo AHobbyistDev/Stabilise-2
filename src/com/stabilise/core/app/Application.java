@@ -570,21 +570,4 @@ public abstract class Application {
         
     }
     
-    /*
-    private static class AppThreadExecutor implements Executor {
-        
-        private ClearingQueue<Runnable> queue = ClearingQueue.create();
-        
-        @Override
-        public void execute(Runnable command) {
-            queue.add(Objects.requireNonNull(command));
-        }
-        
-        public void runAll() {
-            queue.consume(r -> r.run());
-        }
-        
-    }
-    */
-    
 }

@@ -66,11 +66,11 @@ public abstract class AppDriver implements Runnable {
      * {@link #run()}. A value of {@code 0} indicates no maximum; a value of
      * {@code -1} indicates not to render (note this case will apply even if
      * {@code run()} isn't used).
-     * @param log The log for this driver to use.
+     * @param log The log for this driver to use. If null, the default log is
+     * used.
      * 
      * @throws IllegalArgumentException if either {@code tps < 1} or {@code fps
      * < -1}.
-     * @throws NullPointerException if {@code log} is {@code null}.
      */
     public AppDriver(int tps, int fps, Log log) {
         this(tps, fps, log, tps);
@@ -84,13 +84,13 @@ public abstract class AppDriver implements Runnable {
      * {@link #run()}. A value of {@code 0} indicates no maximum; a value of
      * {@code -1} indicates not to render (note this case will apply even if
      * {@code run()} isn't used).
-     * @param log The log for this driver to use.
+     * @param log The log for this driver to use. If null, the default log is
+     * used.
      * @param ticksPerFlush The number of update ticks between successive
      * profiler flushes.
      * 
      * @throws IllegalArgumentException if either {@code tps < 1}, {@code
      * ticksPerFlush < 1}, or {@code fps < -1}.
-     * @throws NullPointerException if {@code log} is {@code null}.
      */
     public AppDriver(int tps, int fps, Log log, int ticksPerFlush) {
         if(tps < 1)
@@ -99,7 +99,7 @@ public abstract class AppDriver implements Runnable {
         this.tps = tps;
         nsPerTick = 1000000000 / tps;
         setFPS(fps);
-        this.log = Objects.requireNonNull(log);
+        this.log = log == null ? Log.get() : log;
         setTicksPerProfilerFlush(ticksPerFlush);
     }
     
@@ -302,8 +302,7 @@ public abstract class AppDriver implements Runnable {
      * @return The AppDriver.
      * @throws IllegalArgumentException if either {@code tps < 1} or {@code fps
      * < -1}.
-     * @throws NullPointerException if either {@code drivable} or {@code log}
-     * are {@code null}.
+     * @throws NullPointerException if {@code drivable} is {@code null}.
      */
     public static AppDriver driverFor(Drivable drivable, int tps, int fps, Log log) {
         return new DelegatedDriver(drivable, tps, fps, log);
@@ -325,12 +324,25 @@ public abstract class AppDriver implements Runnable {
      * 
      * @throws IllegalArgumentException if either {@code tps < 1}, {@code
      * ticksPerFlush < 1}, or {@code fps < -1}.
-     * @throws NullPointerException if either {@code drivable} or {@code log}
-     * are {@code null}.
+     * @throws NullPointerException if {@code drivable} is {@code null}.
      */
     public static AppDriver driverFor(Drivable drivable, int tps, int fps,
             Log log, int ticksPerFlush) {
         return new DelegatedDriver(drivable, tps, fps, log, ticksPerFlush);
+    }
+    
+    public static AppDriver driverFor(int tps, Runnable updater) {
+        return driverFor(tps, tps, updater, () -> {});
+    }
+    
+    public static AppDriver driverFor(int tps, int fps, Runnable updater,
+            Runnable renderer) {
+        Objects.requireNonNull(updater);
+        Objects.requireNonNull(renderer);
+        return new AppDriver(tps, fps, null) {
+            @Override protected void update() { updater.run();  }
+            @Override protected void render() { renderer.run(); }
+        };
     }
     
     //--------------------==========--------------------

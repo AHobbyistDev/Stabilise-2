@@ -17,10 +17,10 @@ final class ReturnBox<T> {
     /**
      * @throws ExecutionException if the value hasn't been set
      */
-    T get() throws ExecutionException {
+    T get(AtomicReference<Throwable> failCause) throws ExecutionException {
         T t = value.get();
         if(t == null)
-            throw new ExecutionException("Task did not set the return value!", null);
+            throw new ExecutionException("Task did not set the return value!", failCause.get());
         return t;
     }
     

@@ -53,8 +53,8 @@ public class RegistryNamespacedDefaulted<V> extends RegistryNamespaced<V> {
      * @throws IllegalArgumentException if there is a colon (:) in {@code
      * defaultNamespace}, or {@code capacity < 0}.
      */
-    public RegistryNamespacedDefaulted(String name, String defaultNamespace, String defaultName,
-            int capacity) {
+    public RegistryNamespacedDefaulted(String name, String defaultNamespace,
+            String defaultName, int capacity) {
         this(name, defaultNamespace, defaultName, capacity, DuplicatePolicy.REJECT);
     }
     
@@ -74,8 +74,8 @@ public class RegistryNamespacedDefaulted<V> extends RegistryNamespaced<V> {
      * defaultNamespace}, or {@code capacity < 0}.
      * @see DuplicatePolicy
      */
-    public RegistryNamespacedDefaulted(String name, String defaultNamespace, String defaultName,
-            int capacity, DuplicatePolicy dupePolicy) {
+    public RegistryNamespacedDefaulted(String name, String defaultNamespace,
+            String defaultName, int capacity, DuplicatePolicy dupePolicy) {
         super(name, defaultNamespace, capacity, dupePolicy);
         if(defaultName == null)
             throw new NullPointerException("defaultName is null");

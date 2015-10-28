@@ -431,6 +431,14 @@ public interface World {
     Random getRnd();
     
     /**
+     * Returns {@code true} {@code 1/n}<sup><font size=-1>th</font></sup> of
+     * the time. Equivalent to {@code getRnd().nextInt(n) == 0}.
+     */
+    default boolean rnd(int n) {
+        return getRnd().nextInt(n) == 0;
+    }
+    
+    /**
      * @return {@code true} if this is a {@code HostWorld}; {@code false}
      * otherwise.
      */

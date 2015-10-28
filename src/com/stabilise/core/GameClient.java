@@ -17,12 +17,16 @@ import com.stabilise.world.Worlds;
 import com.stabilise.world.Worlds.WorldBundle;
 import com.stabilise.world.multiverse.ClientMultiverse;
 
-
+/**
+ * @deprecated Since I can't be bothered to strive for multiplayer for now
+ */
+@SuppressWarnings("unused")
 public class GameClient extends Client implements IClientHandshake, IClientLogin {
     
     private boolean firstTimeConnecting = true;
     
     /** True if our game version matches up with the server's, and we can join. */
+    
     private boolean weCanLogin = false;
     /** If {@link #weCanLogin} is false, true indicates we are outdated, and
      * false indicates the server is outdated. */

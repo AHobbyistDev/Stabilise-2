@@ -15,13 +15,16 @@ public class ReturnTask<T> extends Task {
     
     private final ReturnBox<T> retVal;
     
+    /**
+     * Instantiated only by TaskBuilder.
+     */
     ReturnTask(Executor exec, TaskTracker tracker, TaskUnit firstUnit,
             ReturnBox<T> retVal) {
         super(exec, tracker, firstUnit);
         this.retVal = retVal;
     }
     
-    // Override as to return ReturnTask<T> instead of Task
+    // Overridden as to return ReturnTask<T> instead of Task
     @Override
     public ReturnTask<T> start() {
         super.start();
@@ -38,8 +41,8 @@ public class ReturnTask<T> extends Task {
      */
     public T get() throws InterruptedException, ExecutionException {
         if(!await())
-            throw new ExecutionException("Task did not complete successfully", null);
-        return retVal.get();
+            throw new ExecutionException("Task did not complete successfully", failCause.get());
+        return retVal.get(failCause);
     }
     
     /**
@@ -61,8 +64,8 @@ public class ReturnTask<T> extends Task {
         if(!await(time, unit))
             throw new TimeoutException();
         if(failed())
-            throw new ExecutionException("Task did not complete successfully", null);
-        return retVal.get();
+            throw new ExecutionException("Task did not complete successfully", failCause.get());
+        return retVal.get(failCause);
     }
     
     /**
@@ -74,7 +77,7 @@ public class ReturnTask<T> extends Task {
     public T tryGet() throws ExecutionException {
         if(!completed())
             throw new IllegalStateException("Task not completed");
-        return retVal.get();
+        return retVal.get(failCause);
     }
     
 }

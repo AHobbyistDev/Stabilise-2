@@ -73,12 +73,19 @@ class TaskUnit implements Runnable, TaskHandle {
     
     @Override
     public void run() {
+        owner.onUnitStart();
+        
         thread = Thread.currentThread();
         
         tracker.start(task);
         
-        if(group == null && !owner.setCurrent(this)) {
-            // Cancelled = we can't do anything now
+        // Check for cancellation. We check in two ways:
+        // 1. via owner.setCurrent(), which does the check for us in a
+        //    synchronous manner. It is important that we do this after setting
+        //    thread = Thread.currentThread() (as we have above) to avoid a
+        //    race condition with Task.cancel().
+        // 2. polling owner.cancelled() otherwise
+        if((group == null && !owner.setCurrent(this)) || owner.cancelled()) {
             return;
         }
         
@@ -88,9 +95,14 @@ class TaskUnit implements Runnable, TaskHandle {
             success = execute();
         } catch(Exception e) {
             throwable = e;
+            
+            tracker.setState(State.FAILED); // TODO: is this necessary?
             events.post(TaskEvent.STOP);
             events.post(new FailEvent(e));
-            owner.fail(this);
+            owner.fail(this); // bring the entire Task down with us
+            
+            clearInterrupt();
+            owner.onUnitStop();
         }
         if(success)
             finish();
@@ -102,10 +114,17 @@ class TaskUnit implements Runnable, TaskHandle {
         return true;
     }
     
+    /**
+     * Invoked when this task successfully finishes. For a TaskUnit, this is
+     * invoked immediately after its TaskRunnable finishes, and for a
+     * TaskGroup, this is invoked once all subtasks have completed.
+     */
     protected void finish() {
-        tracker.setState(State.COMPLETED);
+        tracker.setState(State.COMPLETED); // TODO: is this necessary?
         events.post(TaskEvent.STOP);
         events.post(TaskEvent.COMPLETE);
+        clearInterrupt();
+        owner.onUnitStop();
         if(next != null) {
             next.owner = owner;
             // Reuse current thread rather than submit to executor
@@ -179,6 +198,15 @@ class TaskUnit implements Runnable, TaskHandle {
      */
     Throwable getFailCause() {
         return throwable;
+    }
+    
+    /**
+     * Clears the current thread's interrupt status as to block an interrupt
+     * from propagating from this task to whatever is next executed on this
+     * thread.
+     */
+    private void clearInterrupt() {
+        Thread.interrupted();
     }
     
 }

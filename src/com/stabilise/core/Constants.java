@@ -193,16 +193,19 @@ public class Constants {
                 try {
                     NBTTagCompound tag = null;
                     
-                    try {
-                        tag = NBTIO.read(file);
-                    } catch(IOException e) {
-                        // File doesn't appear to exist - we'll have to create it.
+                    if(file.exists()) {
+                        try {
+                            tag = NBTIO.read(file);
+                        } catch(IOException e) {
+                            Log.get().postWarning("Couldn't load revision file", e);
+                            tag = new NBTTagCompound("versions");
+                        }
+                    } else {
                         tag = new NBTTagCompound("versions");
                     }
                     
                     tag.addInt("comp", tag.getInt("comp") + 1);
                     int buildCompilations = buildTags(tag, 0);
-                    //System.out.println(tag.toString());
                     
                     NBTIO.safeWrite(file, tag);
                     

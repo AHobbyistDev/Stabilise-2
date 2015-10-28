@@ -1,11 +1,8 @@
 package com.stabilise.entity.model;
 
-/**
- * todo
- */
 public class Model {
     
-    /** The model's bones. A child bone must have a higher inder than its
+    /** The model's bones. A child bone must have a higher index than its
      * parent so positional updates may proliferate. */
     public final Bone[] bones;
     /** The model's controller. */

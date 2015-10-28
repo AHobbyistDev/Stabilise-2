@@ -37,7 +37,7 @@ class TaskTracker {
     
     TaskTracker(PrototypeTracker prototype) {
         status = prototype.status;
-        totalParts = prototype.parts;
+        totalParts = prototype.childParts;
         partsToReport = prototype.partsToReport;
     }
     
@@ -94,8 +94,9 @@ class TaskTracker {
      */
     private void doIncrement(long p, long c) {
         Checks.testMin(p, 1);
-        if(state.get() != State.RUNNING)
-            throw new IllegalStateException();
+        State s = state.get();
+        if(s != State.RUNNING)
+            throw new IllegalStateException("state is " + s);
         long o, n; // old, new
         c--; // since otherwise we'd use c-1 everywhere
         do {

@@ -121,6 +121,8 @@ class TileBuilder {
         friction = t.friction;
         viscosity = t.viscosity;
         
+        registered = false;
+        
         return this;
     }
     
@@ -130,7 +132,6 @@ class TileBuilder {
     public void end() {
         if(!registered && this.template != null)
             register();
-        registered = false;
     }
     
     public TileBuilder solid(boolean solid) {

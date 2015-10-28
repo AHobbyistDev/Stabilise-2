@@ -10,7 +10,6 @@ public class TaskEvent extends Event {
     
     public static final TaskEvent START    = new TaskEvent("start");
     public static final TaskEvent STOP     = new TaskEvent("stop");
-    public static final TaskEvent CANCEL   = new TaskEvent("cancel");
     public static final FailEvent FAIL     = new FailEvent(null);
     public static final TaskEvent COMPLETE = new TaskEvent("complete");
     

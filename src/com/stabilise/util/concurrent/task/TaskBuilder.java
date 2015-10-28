@@ -1,11 +1,13 @@
 package com.stabilise.util.concurrent.task;
 
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.concurrent.Tasks;
 import com.stabilise.util.concurrent.event.Event;
+import com.stabilise.util.concurrent.event.EventDispatcher;
 import com.stabilise.util.concurrent.event.EventDispatcher.EventHandler;
 
 /**
@@ -66,26 +68,101 @@ public final class TaskBuilder<R, T extends Task> {
         this.retBox = box;
     }
     
+    /**
+     * Sequentially runs the given task unit once the prior one has completed.
+     * 
+     * @param r The unit to run.
+     * 
+     * @throws IllegalStateException if the task has already been built, or a
+     * group has been opened and a subtask has not yet been specified.
+     * @throws NullPointerException if {@code r} is {@code null}.
+     */
     public TaskBuilder<R, T> andThen(Runnable r) {
         return andThen(Tasks.wrap(r));
     }
     
+    /**
+     * Sequentially runs the given task unit once the prior one has completed.
+     * 
+     * @param t The unit to run.
+     * 
+     * @throws IllegalStateException if the task has already been built, or a
+     * group has been opened and a subtask has not yet been specified.
+     * @throws NullPointerException if {@code t} is {@code null}.
+     */
     public TaskBuilder<R, T> andThen(TaskRunnable t) {
         return andThen(t, null, 0);
     }
     
+    /**
+     * Sequentially runs the given task unit once the prior one has completed.
+     * 
+     * @param parts The number of parts in the task.
+     * @param t The unit to run.
+     * 
+     * @throws IllegalStateException if the task has already been built, or a
+     * group has been opened and a subtask has not yet been specified.
+     * @throws NullPointerException if {@code t} is {@code null}.
+     * @throws IllegalArgumentException if {@code parts < 0 || parts ==
+     * Long.MAX_VALUE}
+     */
     public TaskBuilder<R, T> andThen(long parts, TaskRunnable t) {
         return andThen(t, null, parts);
     }
     
+    /**
+     * Sequentially runs the given task unit once the prior one has completed,
+     * and uses its return value as the return value of the task.
+     * 
+     * @param c The unit to run.
+     * 
+     * @throws UnsupportedOperationException if this builder is not building a
+     * value-returning task.
+     * @throws IllegalStateException if the task has already been built, or a
+     * group has been opened and a subtask has not yet been specified, or a
+     * value-returning unit (i.e. Callable or TaskCallable) has already been
+     * set.
+     * @throws NullPointerException if {@code c} is {@code null}.
+     */
     public TaskBuilder<R, T> andThenReturn(Callable<? extends R> c) {
         return andThenReturn(0, Tasks.wrap(c));
     }
     
+    /**
+     * Sequentially runs the given task unit once the prior one has completed,
+     * and uses its return value as the return value of the task.
+     * 
+     * @param t The unit to run.
+     * 
+     * @throws UnsupportedOperationException if this builder is not building a
+     * value-returning task.
+     * @throws IllegalStateException if the task has already been built, or a
+     * group has been opened and a subtask has not yet been specified, or a
+     * value-returning unit (i.e. Callable or TaskCallable) has already been
+     * set.
+     * @throws NullPointerException if {@code t} is {@code null}.
+     */
     public TaskBuilder<R, T> andThenReturn(TaskCallable<? extends R> t) {
         return andThenReturn(0, t);
     }
     
+    /**
+     * Sequentially runs the given task unit once the prior one has completed,
+     * and uses its return value as the return value of the task.
+     * 
+     * @param parts The number of parts in the task.
+     * @param t The unit to run.
+     * 
+     * @throws UnsupportedOperationException if this builder is not building a
+     * value-returning task.
+     * @throws IllegalStateException if the task has already been built, or a
+     * group has been opened and a subtask has not yet been specified, or a
+     * value-returning unit (i.e. Callable or TaskCallable) has already been
+     * set.
+     * @throws NullPointerException if {@code t} is {@code null}.
+     * @throws IllegalArgumentException if {@code parts < 0 || parts ==
+     * Long.MAX_VALUE}
+     */
     public TaskBuilder<R, T> andThenReturn(long parts, TaskCallable<? extends R> t) {
         requireReturn();
         if(callableSet)
@@ -94,10 +171,25 @@ public final class TaskBuilder<R, T extends Task> {
         return andThen(new TaskCallableWrapper<R>(t, retBox), null, parts);
     }
     
+    /**
+     * Sequentially runs the given task unit once the prior one has completed.
+     * 
+     * @param t The unit to run.
+     * @param name The name of the task unit. If this is null, {@link
+     * TaskTracker#DEFAULT_STATUS} is used instead.
+     * @param parts The number of parts in the task.
+     * 
+     * @throws IllegalStateException if the task has already been built, or a
+     * group has been opened and a subtask has not yet been specified.
+     * @throws NullPointerException if {@code t} is {@code null}.
+     * @throws IllegalArgumentException if {@code parts < 0 || parts ==
+     * Long.MAX_VALUE}
+     */
     private TaskBuilder<R, T> andThen(TaskRunnable t, String name, long parts) {
         checkState();
         if(group != null && focus == null)
             throw new IllegalStateException("can't do a task after nothing in a group!");
+        Objects.requireNonNull(t);
         TaskUnit unit;
         if(group == null) {
             unit = new TaskUnit(executor, t, tracker.child(parts, name));
@@ -114,6 +206,16 @@ public final class TaskBuilder<R, T extends Task> {
         return this;
     }
     
+    /**
+     * Registers a multi-use event listener on the most recent unit declared.
+     * {@link TaskEvent}s are automatically posted during the lifecycle of
+     * a task unit.
+     * 
+     * @param e The event to listen for.
+     * @param h The handler to invoke when the specified event is posted.
+     * 
+     * @see EventDispatcher#addListener(Event, EventHandler)
+     */
     public <E extends Event> TaskBuilder<R, T> onEvent(E e, EventHandler<? super E> h) {
         checkState();
         requireFocus();
@@ -121,14 +223,37 @@ public final class TaskBuilder<R, T extends Task> {
         return this;
     }
     
+    /**
+     * Sequentially runs the given task group once the prior unit or group has
+     * completed. To add units to the group, use {@link #subtask(TaskRunnable)
+     * subtask}{@code ()}. All units in a group will be executed in parallel.
+     * 
+     * @throws IllegalStateException if the task has already been built, or a
+     * group is already open.
+     * Long.MAX_VALUE}
+     */
     public TaskBuilder<R, T> andThenGroup() {
         return andThenGroup(null, ReportStrategy.all());
     }
     
-    public TaskBuilder<R, T> andThenGroup(String status, ReportStrategy subtaskReportStrategy) {
+    /**
+     * Sequentially runs the given task group once the prior unit or group has
+     * completed. To add units to the group, use {@link #subtask(TaskRunnable)
+     * subtask}{@code ()}. All units in a group will be executed in parallel.
+     * 
+     * @param name The name of the group. If this is null, {@link
+     * TaskTracker#DEFAULT_STATUS} is used instead.
+     * @param subtaskStrategy The report strategy to apply to the constituent
+     * subtasks of this group.
+     * 
+     * @throws IllegalStateException if the task has already been built, or a
+     * group is already open.
+     * @throws NullPointerException if {@code subtaskStrategy} is {@code null}.
+     */
+    public TaskBuilder<R, T> andThenGroup(String name, ReportStrategy subtaskStrategy) {
         checkState();
         requireNoGroup();
-        group = new TaskGroup(executor, tracker.child(0, status));
+        group = new TaskGroup(executor, tracker.child(0, name, subtaskStrategy));
         if(first == null)
             first = group;
         if(tail != null) {
@@ -139,6 +264,12 @@ public final class TaskBuilder<R, T extends Task> {
         return this;
     }
     
+    /**
+     * Closes a group.
+     * 
+     * @throws IllegalStateException if the task has already been built, or
+     * there is no group to close.
+     */
     public TaskBuilder<R, T> endGroup() {
         checkState();
         requireGroup();
@@ -295,6 +426,7 @@ public final class TaskBuilder<R, T extends Task> {
                     + " task!");
     }
     
+    /** Wraps a TaskCallable in a TaskRunnable. */
     private static class TaskCallableWrapper<T> implements TaskRunnable {
         
         private final TaskCallable<? extends T> callable;

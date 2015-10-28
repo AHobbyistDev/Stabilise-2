@@ -26,6 +26,7 @@ import com.stabilise.world.multiverse.HostMultiverse.PlayerBundle;
 import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
 
 
+@SuppressWarnings("deprecation")
 public class Worlds {
     
     private Worlds() {}

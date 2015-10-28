@@ -3,6 +3,7 @@ package com.stabilise.util.concurrent.task;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -22,20 +23,22 @@ public class Task {
     static enum State {
         // There's no point in an UNSTARTED state for a task since a TaskUnit's
         // state variable doesn't come into scope until the task has begun.
-        RUNNING, CANCELLED, COMPLETED, FAILED;
+        RUNNING, COMPLETED, FAILED;
     }
     
     private final Executor exec;
     
-    private final TaskTracker tracker;
     private TaskUnit curUnit;
     
-    private final AtomicBoolean started = new AtomicBoolean(false);
+    private final TaskTracker tracker;
+    private final AtomicBoolean started      = new AtomicBoolean(false);
+    private final AtomicBoolean cancelled    = new AtomicBoolean(false);
+    private final AtomicInteger unitsRunning = new AtomicInteger(0);
     
     private final Lock      lock = new ReentrantLock();
     private final Condition cond = lock.newCondition();
     
-    private final AtomicReference<Throwable> failCause = new AtomicReference<>(null);
+    protected final AtomicReference<Throwable> failCause = new AtomicReference<>(null);
     
     
     /**
@@ -54,13 +57,23 @@ public class Task {
      * @throws IllegalStateException if this task has already been started.
      */
     public Task start() {
-        if(getState() != State.CANCELLED) {
+        if(!cancelled.get()) {
             if(started.compareAndSet(false, true))
                 exec.execute(curUnit.setTask(this));
             else
                 throw new IllegalStateException("Already started");
         }
         return this;
+    }
+    
+    void onUnitStart() {
+        unitsRunning.getAndIncrement();
+    }
+    
+    void onUnitStop() {
+        if(unitsRunning.decrementAndGet() == 0 && cancelled.get()) {
+            setState(State.FAILED);
+        }
     }
     
     /**
@@ -79,6 +92,9 @@ public class Task {
         return true;
     }
     
+    /**
+     * Sets the state and wakes all threads waiting in {@link #await()}, etc.
+     */
     void setState(State state) {
         tracker.setState(state);
         signalAll();
@@ -98,8 +114,19 @@ public class Task {
     }
     
     void fail(TaskUnit failurePoint) {
+        // We'll restrict ourselves to a single failure cause since one task
+        // failing can set off others failing too, and their failures are
+        // redundant.
         failCause.compareAndSet(null, failurePoint.getFailCause());
-        setState(State.FAILED);
+        
+        // If the current unit is a group and one of its subtasks failed, we'll
+        // need to throw out a cancellation to notify the rest of them to stop.
+        cancelled.set(true);
+        curUnit.cancel();
+        
+        // We don't invoke setState(State.FAILED) because we want to wait for
+        // all currently-running tasks to finish up before notify anyone
+        // waiting on await(), etc. So we use onUnitStop() for this purpose.
     }
     
     /**
@@ -110,8 +137,7 @@ public class Task {
      * considered to have {@link #failed() failed}.
      */
     public void cancel() {
-        if(tracker.setState(State.RUNNING, State.CANCELLED)) {
-            signalAll();
+        if(!stopped() && cancelled.compareAndSet(false, true)) {
             synchronized(this) {
                 curUnit.cancel();
             }
@@ -120,7 +146,7 @@ public class Task {
     
     /** Polls cancellation status. */
     boolean cancelled() {
-        return tracker.getState() == State.CANCELLED;
+        return cancelled.get();
     }
     
     /**
@@ -153,8 +179,7 @@ public class Task {
      * && !completed()}.
      */
     public boolean failed() {
-        State s = tracker.getState();
-        return s == State.CANCELLED || s == State.FAILED;
+        return tracker.getState() == State.FAILED;
     }
     
     /**

@@ -29,10 +29,10 @@ public class TileGrass extends Tile {
             t2 = world.getTileAt(tx, y-2);
             for(int ty = y-2; ty <= y+1; ty ++) {
                 // If a tile is dirt and it has an air tile above it, spread
-                // grass to that tile
+                // grass to that tile with a 1/3 chance
                 t1 = t2;
                 t2 = world.getTileAt(tx, ty+1);
-                if(t1 == Tiles.DIRT && t2 == Tiles.AIR)
+                if(t1 == Tiles.DIRT && t2 == Tiles.AIR && world.rnd(3))
                     world.setTileAt(tx, ty, getID());
             }
         }
