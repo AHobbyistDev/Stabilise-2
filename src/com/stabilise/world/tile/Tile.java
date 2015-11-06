@@ -50,16 +50,21 @@ public class Tile {
     /** The tile's frictive force, from 0 to 1. */
     protected final float friction;
     
+    protected final byte light;
+    protected final byte falloff;
+    
     
     /**
      * Creates a tile.
      */
-    protected Tile(TileBuilder builder) {
-        id = builder.id;
-        name = builder.name;
-        solid = builder.solid;
-        hardness = builder.hardness;
-        friction = builder.friction;
+    protected Tile(TileBuilder b) {
+        id = b.id;
+        name = b.name;
+        solid = b.solid;
+        hardness = b.hardness;
+        friction = b.friction;
+        light = b.light;
+        falloff = b.falloff;
     }
     
     /**
@@ -205,6 +210,14 @@ public class Tile {
      */
     public float getHardness() {
         return hardness;
+    }
+    
+    public byte getLight() {
+        return light;
+    }
+    
+    public byte getFalloff() {
+        return falloff;
     }
     
     /**

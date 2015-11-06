@@ -2,10 +2,8 @@ package com.stabilise.util.concurrent.event;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
-import com.stabilise.core.app.Application;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.collect.IteratorUtils;
 
@@ -17,7 +15,7 @@ import com.stabilise.util.collect.IteratorUtils;
  * 
  * <p>Whether or not a listener is single-use is irrelevant for a retained
  * dispatcher since any particular event may only be posted once, so {@link
- * #addListener(Event, EventHandler, boolean)} is redundant.
+ * #addListener(Executor, Event, EventHandler, boolean)} is redundant.
  * 
  * <p>This class may be subclassed if desired.
  */
@@ -25,22 +23,10 @@ import com.stabilise.util.collect.IteratorUtils;
 public class RetainedEventDispatcher extends EventDispatcher {
     
     /**
-     * Creates a new RetainedEventDispatcher powered by the {@link
-     * Application#executor() application executor}.
+     * Creates a new RetainedEventDispatcher with a concurrency level of 1.
      */
     public RetainedEventDispatcher() {
         super();
-    }
-    
-    /**
-     * Creates a new RetainedEventDispatcher.
-     * 
-     * @param executor The executor with which to run event handlers.
-     * 
-     * @throws NullPointerException if {@code executor} is {@code null}.
-     */
-    public RetainedEventDispatcher(Executor executor) {
-        super(executor);
     }
     
     @Override
@@ -51,16 +37,16 @@ public class RetainedEventDispatcher extends EventDispatcher {
     @SuppressWarnings("unchecked")
     @Override
     <E extends Event> void doPost(E e) {
+        ListenerBucket<E> b;
         Listener<? super E>[] ls = null;
         synchronized(lockFor(e)) {
-            ListenerBucket<E> b = (ListenerBucket<E>) handlers.get(e);
-            if(b == null)
+            if((b = (ListenerBucket<E>) handlers.get(e)) == null)
                 handlers.put(e, b = (ListenerBucket<E>) newBucket());
             ls = b.post(e);
         }
         if(ls != null) {
             for(Listener<? super E> l : ls) {
-                execute(e, l);
+                l.execute(e);
             }
         }
     }

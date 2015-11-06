@@ -223,7 +223,7 @@ public class FragList<E> implements SimpleList<E> {
      * Flattens this list, removing any intermediate nulls.
      */
     public void flatten() {
-        for(int i = firstNull+1; i <= lastElement; i++) {
+        for(int i = firstNull + 1; i <= lastElement; i++) {
             if(data[i] != null) {
                 data[firstNull] = data[i];
                 data[i] = null;

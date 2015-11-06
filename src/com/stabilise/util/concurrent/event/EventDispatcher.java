@@ -41,78 +41,60 @@ import com.stabilise.util.concurrent.Striper;
 public class EventDispatcher {
     
     /*
-     * Internally, this class performs quite a bit of ugly casting and fiddly
-     * stuff with generics, solely so we can have:
+     * Internally, this class performs some ugly casting and fiddly stuff with
+     * generics, solely so we can have:
      *     addListener(E event, EventHandler<? super E> handler)
-     * - that is, so we can allow handlers to be generified to receive custom
-     * event types rather than a standard Event.
      * 
      * i.e., without this generic mess, we'd need to do:
-     *     dispatcher.addListener(new MyEvent(),
-     *                            (Event e) -> doSomething((MyEvent)e));
+     *     dispatcher.addListener(new MyEvent(), (Event e) -> blah((MyEvent)e));
      * whereas now we're allowed to do:
-     *     dispatcher.addListener(new MyEvent(),
-     *                            (MyEvent e) -> doSomething(e));
+     *     dispatcher.addListener(new MyEvent(), (MyEvent e) -> blah(e));
      * which is overall much nicer from the user's perspective.
      */
     
     // Package-private for RetainedEventDispatcher
     final ConcurrentHashMap<Event, ListenerBucket<?>> handlers = new ConcurrentHashMap<>();
     private final Striper<Object> locks;
-    private final Executor executor;
     
-    
-    /**
-     * Creates a new EventDispatcher powered by the {@link
-     * Application#executor() application executor} and with a concurrency
-     * level of 1.
-     */
-    public EventDispatcher() {
-        this(Application.executor());
-    }
     
     /**
      * Creates a new EventDispatcher with a concurrency level of 1.
-     * 
-     * @param executor The executor with which to run event handlers.
-     * 
-     * @throws NullPointerException if {@code executor} is {@code null}.
      */
-    public EventDispatcher(Executor executor) {
-        this(executor, 1);
+    public EventDispatcher() {
+        this(1);
     }
     
     /**
      * Creates a new EventDispatcher.
      * 
-     * @param executor The executor with which to run event handlers.
      * @param concurrencyLevel The number of internal locks to use for this
      * dispatcher. 1 is usually a good value, but it may be suitable to use
      * more if this dispatcher will be frequently used by multiple threads.
      * 
-     * @throws NullPointerException if {@code executor} is {@code null}.
      * @throws IllegalArgumentException if {@code concurrencyLevel < 1}.
      */
-    public EventDispatcher(Executor executor, int concurrencyLevel) {
-        this.executor = Objects.requireNonNull(executor);
+    public EventDispatcher(int concurrencyLevel) {
         this.locks = Striper.generic(concurrencyLevel);
     }
     
     /**
      * Adds a multi-use event listener.
      * 
+     * @param exec The executor with which to execute the handler.
      * @param event The event to listen for.
      * @param handler The handler to invoke when the specified event is posted.
      * 
-     * @throws NullPointerException if either argument is null.
+     * @throws NullPointerException if any argument is null.
      */
-    public <E extends Event> void addListener(E event, EventHandler<? super E> handler) {
-        addListener(event, handler, false);
+    public <E extends Event> void addListener(Executor exec, E event,
+            EventHandler<? super E> handler) {
+        doAddListener(event, new Listener<>(exec, handler, -1));
     }
     
     /**
      * Adds an event listener.
      * 
+     * @param exec The executor with which to execute the handler.
      * @param event The event to listen for.
      * @param handler The handler to invoke when the specified event is posted.
      * @param singleUse If {@code true}, the listener is automatically removed
@@ -120,9 +102,9 @@ public class EventDispatcher {
      * 
      * @throws NullPointerException if any argument is null.
      */
-    public <E extends Event> void addListener(E event, EventHandler<? super E> handler,
-            boolean singleUse) {
-        doAddListener(event, new Listener<>(handler, singleUse ? 1 : -1));
+    public <E extends Event> void addListener(Executor exec, E event,
+            EventHandler<? super E> handler, boolean singleUse) {
+        doAddListener(event, new Listener<>(exec, handler, singleUse ? 1 : -1));
     }
     
     /**
@@ -139,12 +121,9 @@ public class EventDispatcher {
             if(handlers.computeIfAbsent(e, k -> newBucket()).addListener(l))
                 return;
         }
+        
         // No return = listener rejected = we should execute it now
-        execute(e, l);
-    }
-    
-    final <E extends Event> void execute(E e, Listener<? super E> l) {
-        executor.execute(() -> l.accept(e));
+        l.execute(e);
     }
     
     /**
@@ -206,7 +185,7 @@ public class EventDispatcher {
         }
         if(ls != null) {
             for(Listener<? super E> l : ls) {
-                execute(e, l);
+                l.execute(e);
             }
         }
     }
@@ -255,8 +234,9 @@ public class EventDispatcher {
      * Holds all data about an event listener. Implements EventHandler for
      * convenience.
      */
-    protected static class Listener<E extends Event> implements EventHandler<E> {
+    protected static class Listener<E extends Event> {
         
+        public final Executor executor;
         private final EventHandler<E> handler;
         /** Set to 1 for single-use and -1 otherwise. This is merely a
          * framework in the case that I wish to implement listeners which may
@@ -264,23 +244,23 @@ public class EventDispatcher {
         private long uses;
         
         /**
-         * @throws NullPointerException if handler is null.
+         * @throws NullPointerException if either executor or handler are null.
          */
-        public Listener(EventHandler<E> handler, long uses) {
+        public Listener(Executor executor, EventHandler<E> handler, long uses) {
+            this.executor = Objects.requireNonNull(executor);
             this.handler = Objects.requireNonNull(handler);
             this.uses = uses;
         }
         
         /**
-         * @throws NullPointerException if handler is null.
+         * @throws NullPointerException if either executor or handler are null.
          */
-        public Listener(EventHandler<E> handler, boolean singleUse) {
-            this(handler, singleUse ? 1 : -1);
+        public Listener(Executor executor, EventHandler<E> handler, boolean singleUse) {
+            this(executor, handler, singleUse ? 1 : -1);
         }
         
-        @Override
-        public final void accept(E e) {
-            handler.accept(e);
+        public final void execute(E e) {
+            executor.execute(() -> handler.accept(e));
         }
         
     }

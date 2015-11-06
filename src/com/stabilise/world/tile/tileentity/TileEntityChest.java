@@ -65,7 +65,7 @@ public class TileEntityChest extends TileEntity {
     
     @Override
     public String toString() {
-        return "Chest: " + items.toString();
+        return "Chest at (" + x + "," + y + "): " + items.toString();
     }
     
 }

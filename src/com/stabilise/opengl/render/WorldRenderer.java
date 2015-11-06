@@ -265,6 +265,8 @@ public class WorldRenderer implements Renderer {
         profiler.next("tiles"); // root.render.tiles
         tileRenderer.render();
         
+        batch.setColor(DEFAULT_COL);
+        
         profiler.next("entities"); // root.render.entities
         
         // Temporary way of ensuring the player is rendered on top

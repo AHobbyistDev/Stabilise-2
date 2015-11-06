@@ -43,16 +43,14 @@ class TaskUnit implements Runnable, TaskHandle {
     /**
      * Creates a new task.
      * 
-     * @param exec The executor with which to execute event listeners. Never
-     * null thanks to TaskBuilder.
      * @param task The actual task to run. Null if this is a group.
      * @param protoTracker The prototype for our tracker. Never null thanks to
      * TaskBuilder.
      */
-    public TaskUnit(Executor exec, TaskRunnable task, PrototypeTracker protoTracker) {
+    public TaskUnit(TaskRunnable task, PrototypeTracker protoTracker) {
         this.task = task;
         this.protoTracker = protoTracker;
-        this.events = new EventDispatcher(exec);
+        this.events = new EventDispatcher();
     }
     
     /**
@@ -75,7 +73,7 @@ class TaskUnit implements Runnable, TaskHandle {
     public void run() {
         owner.onUnitStart();
         
-        thread = Thread.currentThread();
+        setThread();
         
         tracker.start(task);
         
@@ -86,26 +84,42 @@ class TaskUnit implements Runnable, TaskHandle {
         //    race condition with Task.cancel().
         // 2. polling owner.cancelled() otherwise
         if((group == null && !owner.setCurrent(this)) || owner.cancelled()) {
+            if(group != null)
+                group.onSubtaskFinish(false);
             return;
         }
         
-        boolean success = false;
         events.post(TaskEvent.START);
+        
         try {
-            success = execute();
+            execute();
         } catch(Exception e) {
-            throwable = e;
-            
-            tracker.setState(State.FAILED); // TODO: is this necessary?
-            events.post(TaskEvent.STOP);
-            events.post(new FailEvent(e));
-            owner.fail(this); // bring the entire Task down with us
-            
-            clearInterrupt();
-            owner.onUnitStop();
+            fail(e);
+            return;
         }
-        if(success)
-            finish();
+        
+        finish();
+    }
+    
+    /** Designed to be overridden by TaskGroup since a group doesn't really run
+     * on its own thread. */
+    protected void setThread() {
+        thread = Thread.currentThread();
+    }
+    
+    protected void fail(Exception e) {
+        throwable = e;
+        
+        tracker.setState(State.FAILED); // TODO: is this necessary?
+        events.post(TaskEvent.STOP);
+        events.post(new FailEvent(e));
+        
+        if(group != null)
+            group.onSubtaskFinish(false);
+        owner.fail(this); // bring the entire Task down with us
+        
+        clearInterrupt();
+        owner.onUnitStop();
     }
     
     protected boolean execute() throws Exception {
@@ -130,7 +144,7 @@ class TaskUnit implements Runnable, TaskHandle {
             // Reuse current thread rather than submit to executor
             next.run();
         } else if(group != null) {
-            group.onSubtaskFinish();
+            group.onSubtaskFinish(true);
         } else { // we're the last task
             owner.setState(State.COMPLETED);
         }
@@ -165,8 +179,8 @@ class TaskUnit implements Runnable, TaskHandle {
      * 
      * @see EventDispatcher#post(Event)
      */
-    <E extends Event> void addListener(E e, EventHandler<? super E> h) {
-        events.addListener(e, h);
+    <E extends Event> void addListener(Executor exec, E e, EventHandler<? super E> h) {
+        events.addListener(exec, e, h);
     }
     
     void cancel() {

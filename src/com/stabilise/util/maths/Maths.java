@@ -451,8 +451,7 @@ public class Maths {
      * <p>The returned hashing function works best when the table size is equal
      * to {@link #log2Ceil(int) log2Ceil(maxElements)}, and may weight the two
      * input numbers unevenly in terms of their higher bits if the table size
-     * exceeds this, or even degrade if {@code negateHashMapShift} is {@code
-     * true} under certain circumstances.
+     * exceeds this.
      * 
      * @param maxElements The maximum number of elements which are expected to
      * appear in the table.

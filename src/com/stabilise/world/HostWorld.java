@@ -4,11 +4,13 @@ import static com.stabilise.world.World.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.EntityPlayer;
+import com.stabilise.util.annotation.ForTestingPurposes;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.UnorderedArrayList;
@@ -174,6 +176,11 @@ public class HostWorld extends AbstractWorld {
         profiler.end(); // root.update.game.world
     }
     
+    @ForTestingPurposes
+    public void forEachRegion(Consumer<Region> action) {
+        regions.forEach(action);
+    }
+    
     /**
      * Gets a region at the given coordinates.
      * 
@@ -305,14 +312,14 @@ public class HostWorld extends AbstractWorld {
             int tileY = tileCoordRelativeToSliceFromTileCoord(y);
             
             // TODO: remove this when I make sure one can't set a tile over another
-            Tile old = s.getTileAt(tileX, tileY);
-            old.handleRemove(this, x, y);
-            if(old.getID() != id)
+            if(id != s.getTileIDAt(tileX, tileY)) {
+                s.getTileAt(tileX, tileY).handleRemove(this, x, y);
                 SingleplayerState.pop.play(1f, 0.75f, 0f);
-            
-            s.setTileAt(tileX, tileY, id);
-            
-            Tile.getTile(id).handlePlace(this, x, y);
+                
+                s.setTileAt(tileX, tileY, id);
+                
+                Tile.getTile(id).handlePlace(this, x, y);
+            }
         }
     }
     

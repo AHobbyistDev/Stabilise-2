@@ -118,11 +118,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
                         for(int tileX = 0; tileX < Slice.SLICE_SIZE; tileX++) {
                             for(int tileY = 0; tileY < Slice.SLICE_SIZE; tileY++) {
                                 if((t = s.tileEntities[tileY][tileX]) != null) {
-                                    NBTTagCompound tileEntity = t.toNBT();
-                                    tileEntity.addInt("id", t.getID());
-                                    tileEntity.addInt("x", t.x);
-                                    tileEntity.addInt("y", t.y);
-                                    tileEntities.appendTag(tileEntity);
+                                    tileEntities.appendTag(t.toNBT());
                                 }
                             }
                         }

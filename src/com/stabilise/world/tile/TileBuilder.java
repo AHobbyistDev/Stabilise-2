@@ -46,6 +46,8 @@ class TileBuilder {
         private final float hardness;
         private final float friction;
         private final float viscosity;
+        private final byte light;
+        private final byte falloff;
         
         
         /** Air tile */
@@ -55,6 +57,8 @@ class TileBuilder {
             hardness = 0f;
             friction = F_AIR;
             viscosity = 0f;
+            light = 15;
+            falloff = 1;
         }
         
         /** Solid tile */
@@ -69,6 +73,8 @@ class TileBuilder {
             this.hardness = hardness;
             this.friction = friction;
             viscosity = 0f;
+            light = 1;
+            falloff = 5;
         }
         
         /** Fluid tile */
@@ -77,6 +83,8 @@ class TileBuilder {
             solid = false;
             hardness = friction = 0f;
             this.viscosity = viscosity;
+            light = 0;
+            falloff = 3;
         }
         
     }
@@ -89,6 +97,8 @@ class TileBuilder {
     boolean solid;
     float hardness;
     float friction;
+    byte light;
+    byte falloff;
     
     // liquids only
     float viscosity;
@@ -120,6 +130,8 @@ class TileBuilder {
         hardness = t.hardness;
         friction = t.friction;
         viscosity = t.viscosity;
+        light = t.light;
+        falloff = t.falloff;
         
         registered = false;
         
@@ -146,6 +158,16 @@ class TileBuilder {
     
     public TileBuilder viscosity(float viscosity) {
         this.viscosity = viscosity;
+        return this;
+    }
+    
+    public TileBuilder light(byte light) {
+        this.light = light;
+        return this;
+    }
+    
+    public TileBuilder falloff(byte falloff) {
+        this.falloff = falloff;
         return this;
     }
     

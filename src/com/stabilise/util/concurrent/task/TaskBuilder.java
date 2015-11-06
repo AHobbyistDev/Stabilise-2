@@ -120,7 +120,7 @@ public final class TaskBuilder<R, T extends Task> {
      * value-returning task.
      * @throws IllegalStateException if the task has already been built, or a
      * group has been opened and a subtask has not yet been specified, or a
-     * value-returning unit (i.e. Callable or TaskCallable) has already been
+     * value-returning unit (i.e. a Callable or TaskCallable) has already been
      * set.
      * @throws NullPointerException if {@code c} is {@code null}.
      */
@@ -138,7 +138,7 @@ public final class TaskBuilder<R, T extends Task> {
      * value-returning task.
      * @throws IllegalStateException if the task has already been built, or a
      * group has been opened and a subtask has not yet been specified, or a
-     * value-returning unit (i.e. Callable or TaskCallable) has already been
+     * value-returning unit (i.e. a Callable or TaskCallable) has already been
      * set.
      * @throws NullPointerException if {@code t} is {@code null}.
      */
@@ -157,7 +157,7 @@ public final class TaskBuilder<R, T extends Task> {
      * value-returning task.
      * @throws IllegalStateException if the task has already been built, or a
      * group has been opened and a subtask has not yet been specified, or a
-     * value-returning unit (i.e. Callable or TaskCallable) has already been
+     * value-returning unit (i.e. a Callable or TaskCallable) has already been
      * set.
      * @throws NullPointerException if {@code t} is {@code null}.
      * @throws IllegalArgumentException if {@code parts < 0 || parts ==
@@ -192,10 +192,10 @@ public final class TaskBuilder<R, T extends Task> {
         Objects.requireNonNull(t);
         TaskUnit unit;
         if(group == null) {
-            unit = new TaskUnit(executor, t, tracker.child(parts, name));
+            unit = new TaskUnit(t, tracker.child(parts, name));
             tail = unit;
         } else {
-            unit = new TaskUnit(executor, t, group.protoTracker.child(parts, name));
+            unit = new TaskUnit(t, group.protoTracker.child(parts, name));
             unit.group = group;
         }
         if(first == null)
@@ -219,7 +219,7 @@ public final class TaskBuilder<R, T extends Task> {
     public <E extends Event> TaskBuilder<R, T> onEvent(E e, EventHandler<? super E> h) {
         checkState();
         requireFocus();
-        focus.addListener(e, h);
+        focus.addListener(executor, e, h);
         return this;
     }
     
@@ -342,7 +342,7 @@ public final class TaskBuilder<R, T extends Task> {
     private TaskBuilder<R, T> subtask(TaskRunnable t, String name, long parts) {
         checkState();
         requireGroup();
-        TaskUnit unit = new TaskUnit(executor, t, group.protoTracker.child(parts, name));
+        TaskUnit unit = new TaskUnit(t, group.protoTracker.child(parts, name));
         group.addSubtask(unit);
         focus = unit;
         return this;

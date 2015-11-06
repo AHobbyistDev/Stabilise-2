@@ -1,5 +1,6 @@
 package com.stabilise.opengl.render;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.stabilise.core.Resources;
@@ -27,6 +28,8 @@ public class TileRenderer implements Renderer {
     /** Number of slices rendered on each render step. */
     int slicesRendered = 0;
     
+    private float[] lightLevels;
+    
     
     /**
      * Creates a new TileRenderer.
@@ -45,6 +48,11 @@ public class TileRenderer implements Renderer {
         tiles = TextureSheet.sequentiallyOptimised(Resources.textureMipmaps("sheets/tiles"), 8, 8);
         tiles.texture.setFilter(TextureFilter.MipMapNearestLinear, TextureFilter.Nearest);
         tiles.texture.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
+        
+        lightLevels = new float[16];
+        for(int i = 0; i < 16; i++) {
+            lightLevels[i] = new Color(i*16/255f, i*16/255f, i*16/255f, 1f).toFloatBits();
+        }
         
         //System.out.println(tiles);
     }
@@ -104,8 +112,10 @@ public class TileRenderer implements Renderer {
                 // because air has no texture: sums to +7
                 int id = slice.getTileIDAt(c, r) + 7;
                 
-                if(id != 7) // i.e. not air
+                if(id != 7) { // i.e. not air
+                    worldRenderer.batch.setColor(lightLevels[slice.getLightAt(c, r)]);
                     worldRenderer.batch.draw(tiles.getRegion(id), tileX, tileY, 1f, 1f);
+                }
                 
                 tileX++;
             }

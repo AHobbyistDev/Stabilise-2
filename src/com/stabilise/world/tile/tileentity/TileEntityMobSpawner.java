@@ -45,6 +45,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     private void init() {
         xPos = x + 0.5;
         yPos = y + 0.5;
+        System.out.println("Spawner init: " + xPos + "," + yPos);
     }
     
     @Override

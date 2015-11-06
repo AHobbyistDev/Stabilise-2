@@ -32,6 +32,9 @@ public class Slice {
     /** The tiles within this slice. This is visible for convenience purposes.
      * <br>Tiles are indexed in the form [y][x]. */
     public final int[][] tiles;
+    /** The light levels within this slice.
+     * <br>Indexed in the form [y][x]. */
+    public final byte[][] light;
     
     /** The tile entities within the slice. This is public for convenience
      * purposes, but should generally not be interacted with.
@@ -54,6 +57,7 @@ public class Slice {
         this.x = x;
         this.y = y;
         this.tiles = Objects.requireNonNull(tiles);
+        this.light = new byte[SLICE_SIZE][SLICE_SIZE];
     }
     
     /**
@@ -134,6 +138,14 @@ public class Slice {
         tiles[y][x] = tileID;
     }
     
+    public byte getLightAt(int x, int y) {
+        return light[y][x];
+    }
+    
+    public void setLightAt(int x, int y, byte level) {
+        light[y][x] = level;
+    }
+    
     /**
      * Gets a tile entity at the specified coordinates.
      * 
@@ -200,18 +212,49 @@ public class Slice {
     }
     
     /**
-     * Adds any entities and tile entities contained by the slice to the world.
-     * 
-     * @param world The world.
+     * Adds any entities contained by this slice to the world.
      */
-    public void addContainedEntitiesToWorld(AbstractWorld world) {
+    void importEntities(AbstractWorld world) {
+        // TODO
+    }
+    
+    /**
+     * Adds any tile entities contained by this slice to the world.
+     */
+    void importTileEntities(AbstractWorld world) {
         if(tileEntities == null)
             return;
-        // TODO: A more efficient method of finding tile entities may be preferable
         for(int r = 0; r < SLICE_SIZE; r++)
             for(int c = 0; c < SLICE_SIZE; c++)
                 if(tileEntities[r][c] != null)
                     world.addTileEntity(tileEntities[r][c]);
+    }
+    
+    public void buildLight() {
+        for(int y = 0; y < SLICE_SIZE; y++) {
+            for(int x = 0; x < SLICE_SIZE; x++) {
+                setLightAt(x, y, getTileAt(x, y).getLight());
+            }
+        }
+        
+        for(int y = 0; y < SLICE_SIZE; y++) {
+            for(int x = 0; x < SLICE_SIZE; x++) {
+                spreadLightTo(x, y, getTileAt(x, y).getLight(), true);
+            }
+        }
+    }
+    
+    private void spreadLightTo(int x, int y, byte level, boolean src) {
+        if(!src) {
+            if(level < getLightAt(x, y))
+                return;
+            setLightAt(x, y, level);
+        }
+        level -= getTileAt(x, y).getFalloff();
+        if(x != 0)           spreadLightTo(x-1, y  , level, false);
+        if(y != 0)           spreadLightTo(x  , y-1, level, false);
+        if(x < SLICE_SIZE-1) spreadLightTo(x+1, y  , level, false);
+        if(y < SLICE_SIZE-1) spreadLightTo(x  , y+1, level, false);
     }
     
     @Override

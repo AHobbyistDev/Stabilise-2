@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
+import com.stabilise.util.annotation.GuardedBy;
+
 class TaskGroup extends TaskUnit {
     
     private final Executor executor;
@@ -11,8 +13,10 @@ class TaskGroup extends TaskUnit {
     private final List<TaskUnit> subtasks = new ArrayList<>();
     private int remainingSubtasks = 0;
     
+    @GuardedBy("subtasks") private boolean subtasksCompletedSuccessfully = true;
+    
     public TaskGroup(Executor exec, PrototypeTracker protoTracker) {
-        super(exec, null, protoTracker);
+        super(null, protoTracker);
         this.executor = exec;
     }
     
@@ -22,6 +26,9 @@ class TaskGroup extends TaskUnit {
         for(TaskUnit t : subtasks) // also build subtasks
             t.build();
     }
+    
+    @Override
+    protected void setThread() {} // do nothing
     
     @Override
     protected boolean execute() {
@@ -43,12 +50,17 @@ class TaskGroup extends TaskUnit {
         remainingSubtasks++;
     }
     
-    void onSubtaskFinish() {
+    void onSubtaskFinish(boolean success) {
         synchronized(subtasks) {
+            if(!success)
+                subtasksCompletedSuccessfully = false;
             if(--remainingSubtasks != 0)
                 return;
         }
-        finish();
+        if(subtasksCompletedSuccessfully)
+            finish();
+        else
+            fail(null);
     }
     
     @Override

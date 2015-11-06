@@ -38,7 +38,7 @@ public class Task {
     private final Lock      lock = new ReentrantLock();
     private final Condition cond = lock.newCondition();
     
-    protected final AtomicReference<Throwable> failCause = new AtomicReference<>(null);
+    protected final AtomicReference<Throwable> failCause = new AtomicReference<>();
     
     
     /**
@@ -88,8 +88,8 @@ public class Task {
             if(cancelled())
                 return false;
             this.curUnit = unit;
+            return true;
         }
-        return true;
     }
     
     /**

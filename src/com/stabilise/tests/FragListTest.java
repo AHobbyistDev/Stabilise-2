@@ -49,7 +49,7 @@ public abstract class FragListTest {
     // --------------------------------------
     
     public void test() {
-        final int spawnerWaves = 256*256*4;
+        final int spawnerWaves = 256*128;
         final int entitiesPerWave = 25;
         final int finalWaves = 0;
         int id = 0;

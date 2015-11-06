@@ -260,5 +260,7 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Added FragList and improved general collections classes
 20/10/15
 	- Replaced util.concurrent.Task with the util.concurrent.task framework
+06/11/15
+	- Extremely basic lighting implementation
 
 	

@@ -148,6 +148,11 @@ public class Region {
     private final Box<SaveState> saveState = Boxes.box(SaveState.IDLE);
     /** Whether or not this region has been generated. */
     private boolean generated = false;
+    /** Whether or not the entities & tile entities stored in this region have
+     * been loaded into the world. This should be {@code false} until
+     * isPrepared() returns true in the main thread, from which we set this to
+     * true and add all the stuff in this region to the world. */
+    private boolean imported = false;
     
     /** The time the region was last saved, in terms of the world age. */
     public long lastSaved;
@@ -201,6 +206,8 @@ public class Region {
     public boolean update(HostWorld world, RegionStore store) {
         if(!isPrepared())
             return false;
+        
+        tryImport(world);
         
         if(activeNeighbours == 0) {
             // We unload the region if there's no neighbours keeping us around
@@ -542,17 +549,15 @@ public class Region {
         Tasks.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE);
     }
     
-    /**
-     * Adds any entities and tile entities contained by the region to the
-     * world.
-     * 
-     * <p>Unused.
-     */
-    @SuppressWarnings("unused")
-    private void addContainedEntitiesToWorld(HostWorld world) {
-        for(int r = 0; r < REGION_SIZE; r++)
-            for(int c = 0; c < REGION_SIZE; c++)
-                slices[r][c].addContainedEntitiesToWorld(world);
+    private void tryImport(HostWorld world) {
+        if(!imported) {
+            imported = true;
+            forEachSlice(s -> {
+                s.buildLight();
+                s.importEntities(world);
+                s.importTileEntities(world);
+            });
+        }
     }
     
     /**

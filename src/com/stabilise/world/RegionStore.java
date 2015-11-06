@@ -177,12 +177,10 @@ public class RegionStore {
      * 
      * @throws NullPointerException if {@code action} is {@code null}.
      */
-    /*
     @UserThread("MainThread")
     public void forEach(Consumer<Region> action) {
         regions.values().forEach(action);
     }
-    */
     
     /**
      * Gets a region at the given coordinates, which are in region-lengths.
@@ -395,7 +393,8 @@ public class RegionStore {
      * be saved and then unloaded.
      * 
      * <p>An invocation of this method should have an associated prior call to
-     * {@link #cache(int, int)}.
+     * {@link #cache(int, int)} (this is why we only allow this method to be
+     * invoked via {@link #uncacheAll()}). 
      * 
      * @param r The region to uncache, as returned by {@link #cache(int, int)}.
      * 

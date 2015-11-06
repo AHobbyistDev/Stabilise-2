@@ -127,11 +127,13 @@ public class IteratorUtils {
      * false}).
      * 
      * <p>Constructing an iterator as such may be preferable to invoking a
-     * function recursively, as in Java recursion can result in unbounded stack
-     * growth. For example, consider the following.
+     * function recursively, as recursion can result in unbounded stack growth.
+     * For example, consider the following.
      * 
      * <pre>
      * public class RecursiveClass {
+     *     private RecursiveClass next;
+     *     
      *     // Nice and simple, but can result in unbounded stack growth!
      *     public void work() {
      *         ... // do some work

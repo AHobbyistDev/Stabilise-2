@@ -71,9 +71,10 @@ class TaskTesting {
                 h.setStatus("Prepping");
                 for(int i = 0; i < 100; i++) {
                     h.increment();
-                    Thread.sleep(25);
+                    Thread.sleep(5);
                 }
-            }).andThen(() -> buf.append("Hel"))
+            })
+            .andThen(() -> buf.append("Hel"))
             .andThenGroup()
                 .subtask(20, (h) -> {
                     h.setStatus("Print \"Hi!\"");
@@ -100,7 +101,9 @@ class TaskTesting {
                     sayWithSleep(100, "Hi from Hawaii!");
                 })
             .endGroup()
-                .onEvent(TaskEvent.STOP, (e) -> System.out.println("Task completed!"))
+                .onEvent(TaskEvent.STOP, (e) -> System.out.println("Group stopped!"))
+                .onEvent(TaskEvent.COMPLETE, (e) -> System.out.println("Group completed!"))
+                .onEvent(TaskEvent.FAIL, (e) -> System.out.println("Group failed!"))
             .andThen(100, (h) -> {
                 h.setStatus("Say \"world\"");
                 buf.append("w");
