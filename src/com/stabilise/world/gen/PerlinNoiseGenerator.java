@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Random;
 
 import com.stabilise.item.Items;
+import com.stabilise.util.maths.Interpolation;
 import com.stabilise.util.maths.PerlinNoise1D;
 import com.stabilise.util.maths.SimplexNoise;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
 import com.stabilise.world.multiverse.Multiverse;
+import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntityChest;
 
 import static com.stabilise.world.Region.REGION_SIZE;
@@ -172,6 +174,9 @@ public class PerlinNoiseGenerator extends WorldGenerator {
                         chest.items.addItem(Items.ARROW, rnd.nextInt(7)+1);
                         s.setTileEntityAt(tileX, tileY+1, chest);
                     }
+                    
+                    if(rnd.nextInt(10) == 0)
+                        addOres(s, rnd);
                 }
             }
             //*/
@@ -207,11 +212,55 @@ public class PerlinNoiseGenerator extends WorldGenerator {
          * 
          * @param r The region.
          */
-        @SuppressWarnings("unused")
-        private void addOres(Region r) {
-            for(int i = 0; i < 10; i++) {
-                
+        private void addOres(Slice s, Random rnd) {
+            int ore = new int[] {
+                    Tiles.ORE_COPPER.getID(),
+                    Tiles.ORE_IRON.getID(),
+                    Tiles.ORE_SILVER.getID(),
+                    Tiles.ORE_GOLD.getID(),
+                    Tiles.ORE_DIAMOND.getID()
+            }[rnd.nextInt(5)];
+            
+            int baseX = rnd.nextInt(Integer.MAX_VALUE - SLICE_SIZE);
+            int baseY = rnd.nextInt(Integer.MAX_VALUE - SLICE_SIZE);
+            Interpolation interp = Interpolation.QUADRATIC.EASE_IN_OUT;
+            int max = SLICE_SIZE/2;
+            
+            double[] factors = new double[SLICE_SIZE*SLICE_SIZE];
+            int i = 0;
+            
+            for(int y = 0; y < SLICE_SIZE; y++) {
+                for(int x = 0; x < SLICE_SIZE; x++) {
+                    
+                    // x and y factors range from 0-8; min at edges, max at centre
+                    float xFact = interp.transform((max - (x <= max ? max-x-1 : x-max))/(float)max);
+                    float yFact = interp.transform((max - (y <= max ? max-y-1 : y-max))/(float)max);
+                    double fact = Math.sqrt(xFact*yFact);
+                    factors[i++] = fact;
+                    if(simplex16.noise(baseX + x, baseY + y) * fact > 0.5 
+                            && s.getTileIDAt(x, y) == Tiles.STONE.getID()) {
+                        s.setTileAt(x, y, ore);
+                    }
+                }
             }
+            
+            /*
+            System.out.println("----BEGIN FACTORS----");
+            i = 0;
+            StringBuilder sb;
+            for(int y = 0; y < SLICE_SIZE; y++) {
+                sb = new StringBuilder();
+                sb.append('[');
+                for(int x = 0; x < SLICE_SIZE; x++) {
+                    sb.append(String.format("%.2f", factors[i++]));
+                    if(x != SLICE_SIZE-1)
+                        sb.append(", ");
+                }
+                sb.append(']');
+                System.out.println(sb.toString());
+            }
+            System.out.println("----BEGIN FACTORS----");
+            */
         }
         
         /**

@@ -146,6 +146,11 @@ public class Slice {
         light[y][x] = level;
     }
     
+    public void updateLight(int x, int y) {
+        //spreadLightTo(x, y, getTileAt(x, y).getLight(), false);
+        buildLight(); // 10/10 easy solution
+    }
+    
     /**
      * Gets a tile entity at the specified coordinates.
      * 

@@ -317,8 +317,8 @@ public class HostWorld extends AbstractWorld {
                 SingleplayerState.pop.play(1f, 0.75f, 0f);
                 
                 s.setTileAt(tileX, tileY, id);
-                
                 Tile.getTile(id).handlePlace(this, x, y);
+                s.updateLight(tileX, tileY);
             }
         }
     }
@@ -338,6 +338,7 @@ public class HostWorld extends AbstractWorld {
                 SingleplayerState.pop.play(1f, 1.7f, 0f);
             
             s.setTileAt(tileX, tileY, Tiles.AIR);
+            s.updateLight(tileX, tileY);
         }
     }
     

@@ -1,6 +1,5 @@
 package com.stabilise.world.tile;
 
-
 /**
  * This class contains explicit references to all the tiles in the game.
  * 
@@ -25,28 +24,32 @@ public class Tiles {
             );
     }
     
+    @SuppressWarnings("unchecked")
+    private static <T extends Tile> T get(String name) { return (T)Tile.getTile(name); }
+    
     public static final Tile
-            AIR = Tile.getTile("air"),
-            VOID = Tile.getTile("void"),
-            BEDROCK = Tile.getTile("bedrock"),
-            BEDROCK_INVISIBLE = Tile.getTile("invisibleBedrock"),
-            STONE = Tile.getTile("stone"),
-            DIRT = Tile.getTile("dirt"),
-            GRASS = Tile.getTile("grass"),
-            WOOD = Tile.getTile("wood"),
-            LEAVES = Tile.getTile("leaves"),
-            PLANKS = Tile.getTile("planks"),
-            WATER = Tile.getTile("water"),
-            LAVA = Tile.getTile("lava"),
-            ICE = Tile.getTile("ice"),
-            BRICK_STONE = Tile.getTile("stoneBrick"),
-            ORE_IRON = Tile.getTile("oreIron"),
-            ORE_COPPER = Tile.getTile("oreCopper"),
-            ORE_GOLD = Tile.getTile("oreGold"),
-            ORE_SILVER = Tile.getTile("oreSilver"),
-            ORE_DIAMOND = Tile.getTile("oreDiamond"),
-            MOB_SPAWNER = Tile.getTile("mobSpawner");
-    public static final TileChest CHEST = (TileChest)Tile.getTile("chest");
+            AIR = get("air"),
+            VOID = get("void"),
+            BEDROCK = get("bedrock"),
+            BEDROCK_INVISIBLE = get("invisibleBedrock"),
+            STONE = get("stone"),
+            DIRT = get("dirt"),
+            GRASS = get("grass"),
+            WOOD = get("wood"),
+            LEAVES = get("leaves"),
+            PLANKS = get("planks"),
+            WATER = get("water"),
+            LAVA = get("lava"),
+            ICE = get("ice"),
+            BRICK_STONE = get("stoneBrick"),
+            ORE_IRON = get("oreIron"),
+            ORE_COPPER = get("oreCopper"),
+            ORE_GOLD = get("oreGold"),
+            ORE_SILVER = get("oreSilver"),
+            ORE_DIAMOND = get("oreDiamond"),
+            MOB_SPAWNER = get("mobSpawner");
+    public static final TileChest
+            CHEST = get("chest");
     
     
 }

@@ -180,7 +180,6 @@ public class Worlds {
         /** The GameClient through which to communicate to the host server.
          * Null unless multiplayer client. */
         private GameClient client = null;
-        private WorldLoadHandle loadHandle = null; // same conditions as client
         /** Profiler to use for the world. May be null. */
         private Profiler profiler = null;
         
@@ -284,6 +283,7 @@ public class Worlds {
          * multiverse, or the client has already been set, or the world
          * has been set.
          */
+        @Deprecated
         public WorldBuilder setClient(GameClient client, WorldLoadHandle loadHandle) {
             checkState();
             if(this.client != null)
@@ -292,7 +292,7 @@ public class Worlds {
                 throw new IllegalStateException("Cannot set both client and world"
                         + " info!");
             this.client = Objects.requireNonNull(client);
-            this.loadHandle = Objects.requireNonNull(loadHandle);
+            //----this.loadHandle = Objects.requireNonNull(loadHandle);
             return this;
         }
         
@@ -380,7 +380,8 @@ public class Worlds {
                         return new WorldBundle(multi, starterDim,
                                 player.playerEntity, player.playerData);
                     } else {
-                        return new WorldBundle(null, null, null, null);
+                        throw new RuntimeException("Client is deprecated");
+                        //return new WorldBundle(null, null, null, null);
                     }
                 })
                 .start();
