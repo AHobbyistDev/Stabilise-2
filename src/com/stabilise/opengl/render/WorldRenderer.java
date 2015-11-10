@@ -531,14 +531,14 @@ public class WorldRenderer implements Renderer {
     
     private void renderCursorItem() {
         batch.setColor(1f, 1f, 1f, 0.5f);
-        Vector2 coords = mouseCoords();
-        batch.draw(
-                tileRenderer.tiles.getRegion(7 + controller.tileID), // region
-                World.tileCoordFreeToTileCoordFixed(coords.x), // x
-                World.tileCoordFreeToTileCoordFixed(coords.y), // y
+        TextureRegion r = tileRenderer.tiles.getRegion(7 + controller.tileID);
+        controller.doInRadius(this, (x,y) -> batch.draw(
+                r, // region
+                World.tileCoordFreeToTileCoordFixed(x), // x
+                World.tileCoordFreeToTileCoordFixed(y), // y
                 1f, // width
                 1f // height
-        );
+        ));
         /*
         ItemStack stack = player.inventory.getStack(player.curSlot);
         if(stack == ItemStack.NO_STACK)

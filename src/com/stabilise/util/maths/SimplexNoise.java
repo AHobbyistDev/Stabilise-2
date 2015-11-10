@@ -75,8 +75,6 @@ public class SimplexNoise {
      */
     private void setSeed(int x, int y) {
         // TODO: Figure out a non-crappy hashing function
-        //long n = x + (y << 32);
-        //n ^= (n * 15731) >> 16;
         int n = x + y * 57;
         n = (n<<13) ^ n;
         n = n * (n * n * 15731 + 789221) + 1376312589;

@@ -48,7 +48,6 @@ public class Controller implements InputProcessor {
         FLYRIGHT        ("flyright",     Keys.D,       true),
         FLYUP           ("flyup",        Keys.W,       true),
         FLYDOWN         ("flydown",      Keys.S,       true),
-        DESTROY_TILES   ("destroytiles", Keys.Q,       true),
         ZOOM_OUT        ("zoomout",      Keys.MINUS,   true),
         ZOOM_IN         ("zoomin",       Keys.EQUALS,  true),
         INTERACT        ("interact",     Keys.I,       true),

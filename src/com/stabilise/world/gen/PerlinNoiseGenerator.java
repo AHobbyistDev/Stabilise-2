@@ -82,25 +82,28 @@ public class PerlinNoiseGenerator extends WorldGenerator {
             simplex512 = new SimplexNoise(seed, 512f);
         }
         private void generateRegion(Region r) {
+            final int defSlice = Region.REGION_SIZE - 1;
+            final int defTile = Slice.SLICE_SIZE - 1;
+            
             int offsetX = r.x() * REGION_SIZE_IN_TILES;
             int offsetY = r.y() * REGION_SIZE_IN_TILES;
             
-            int sliceX = 15;
-            int sliceY = 15;
-            int tileX = 15;
-            int tileY = 15;
+            int sliceX = defSlice;
+            int sliceY = defSlice;
+            int tileX = defTile;
+            int tileY = defTile;
             
             int n = r.x() + r.y() * 57;
             n = (n<<13) ^ n;
             n = n * (n * n * 15731 + 789221) + 1376312589;
             Random rnd = new Random(seed + n);
             
-            Slice s = r.getSliceAt(15, 15);
+            Slice s = r.getSliceAt(defSlice, defSlice);
             
             for(int x = offsetX + REGION_SIZE_IN_TILES; x > offsetX; x--) {
                 double noise = noise1D(x) - offsetY - REGION_SIZE_IN_TILES;
                 
-                tileY = 15;
+                tileY = defTile;
                 for(int y = offsetY + REGION_SIZE_IN_TILES; y > offsetY; y--) {
                     double caveNoise = noise2D(x, y);
                     // This should produce varying cave types across the world as
@@ -141,18 +144,18 @@ public class PerlinNoiseGenerator extends WorldGenerator {
                         if(sliceY == -1)
                             break;
                         s = r.getSliceAt(sliceX, sliceY);
-                        tileY = 15;
+                        tileY = defTile;
                     }
                 }
                 
                 tileX--;
-                sliceY = 15;
+                sliceY = defSlice;
                 
                 if(tileX == -1) {
                     sliceX--;
                     if(sliceX == -1)
                         break;
-                    tileX = 15;
+                    tileX = defTile;
                 }
                 
                 // Reset the slice
@@ -160,6 +163,8 @@ public class PerlinNoiseGenerator extends WorldGenerator {
             }
             
             ///*
+            // For each slice, pick a random tile, and if applicable, place a
+            // chest
             for(int x = 0; x < REGION_SIZE; x++) {
                 for(int y = 0; y < REGION_SIZE; y++) {
                     s = r.getSliceAt(x, y);
@@ -168,14 +173,16 @@ public class PerlinNoiseGenerator extends WorldGenerator {
                     if(s.getTileAt(tileX, tileY).getID() == STONE.getID() &&
                             s.getTileAt(tileX, tileY+1).getID() == 0) {
                         s.tiles[tileY+1][tileX] = CHEST.getID();
-                        TileEntityChest chest = CHEST.createTileEntity(offsetX + x*SLICE_SIZE + tileX, offsetY + y*SLICE_SIZE + tileY + 1);
+                        TileEntityChest chest = CHEST.createTE(
+                                offsetX + x*SLICE_SIZE + tileX,
+                                offsetY + y*SLICE_SIZE + tileY + 1);
                         chest.items.addItem(Items.APPLE, rnd.nextInt(7)+1);
                         chest.items.addItem(Items.SWORD, rnd.nextInt(7)+1);
                         chest.items.addItem(Items.ARROW, rnd.nextInt(7)+1);
                         s.setTileEntityAt(tileX, tileY+1, chest);
                     }
                     
-                    if(rnd.nextInt(10) == 0)
+                    if(rnd.nextInt(1) == 0)
                         addOres(s, rnd);
                 }
             }

@@ -79,6 +79,7 @@ public class Structure {
         return "Schematic[" + /*name +*/ "]";
     }
     
+    @SuppressWarnings("unused")
     protected static class StructureBuilder {
         
         private final Structure structure;

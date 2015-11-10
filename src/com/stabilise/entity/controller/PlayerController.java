@@ -16,6 +16,7 @@ import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
 import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.util.BiIntConsumer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
 import com.stabilise.util.maths.Maths;
@@ -36,6 +37,7 @@ public class PlayerController extends MobController implements Controllable, Inp
     
     /** The ID of the tile currently selected. */
     public int tileID = Tiles.STONE.getID();
+    public int radius = 0;
     
     
     /**
@@ -53,14 +55,6 @@ public class PlayerController extends MobController implements Controllable, Inp
         
         // This also sets this.mob = mob via a chain of invocations
         mob.setController(this);
-        
-        /*
-        try {
-            musicBase = SoundManager.get().loadSound("sarabande.wav");
-        } catch(IOException e) {
-            Log.exception(e);
-        }
-        */
     }
     
     @Override
@@ -88,13 +82,30 @@ public class PlayerController extends MobController implements Controllable, Inp
             worldRenderer = ((SingleplayerState)Application.get().getState()).renderer;
         }
         
-        Vector2 wc = worldRenderer.mouseCoords();
+        if(Gdx.input.isButtonPressed(Buttons.LEFT))
+            doInRadius(worldRenderer, (x,y) -> game.world.breakTileAt(x, y));
+        else if(Gdx.input.isButtonPressed(Buttons.RIGHT))
+            doInRadius(worldRenderer, (x,y) -> game.world.setTileAt(x, y, tileID));
+    }
+    
+    public void doInRadius(WorldRenderer renderer, BiIntConsumer func) {
+        Vector2 wc = renderer.mouseCoords();
         int x = Maths.floor(wc.x);
         int y = Maths.floor(wc.y);
-        if(Gdx.input.isButtonPressed(Buttons.LEFT))
-            game.getWorld().breakTileAt(x, y);
-        else if(Gdx.input.isButtonPressed(Buttons.RIGHT))
-            game.getWorld().setTileAt(x, y, tileID);
+        int r2 = radius*radius;
+        int minX = (int)(x - radius);
+        int maxX = (int)Math.ceil(x + radius);
+        int minY = (int)(y - radius);
+        int maxY = (int)Math.ceil(y + radius);
+        
+        for(int tx = minX; tx <= maxX; tx++) {
+            for(int ty = minY; ty <= maxY; ty++) {
+                double xDiff = x - tx;
+                double yDiff = y - ty;
+                if(xDiff*xDiff + yDiff*yDiff <= r2)
+                    func.accept(tx, ty);
+            }
+        }
     }
     
     /**
@@ -179,25 +190,6 @@ public class PlayerController extends MobController implements Controllable, Inp
                 break;
             case RESTORE:
                 mob.restore();
-                break;
-            case DESTROY_TILES:
-                float radius = 5.5f;
-                float radiusSquared = radius * radius;
-                int minX = (int)(mob.x - radius);
-                int maxX = (int)Math.ceil(mob.x + radius);
-                int minY = (int)(mob.y - radius);
-                int maxY = (int)Math.ceil(mob.y + radius);
-                
-                for(int tx = minX; tx <= maxX; tx++) {
-                    for(int ty = minY; ty <= maxY; ty++) {
-                        double xDiff = mob.x - tx;
-                        double yDiff = mob.y - ty;
-                        if(xDiff*xDiff + yDiff*yDiff <= radiusSquared)
-                            game.world.breakTileAt(tx, ty);
-                            //game.world.setTileAt(tx, ty, 0);
-                            //game.world.blowUpTile(tx, ty, 12);
-                    }
-                }
                 break;
             case ZOOM_IN:
                 {
@@ -298,7 +290,12 @@ public class PlayerController extends MobController implements Controllable, Inp
 
     @Override
     public boolean scrolled(int amount) {
-        tileID = 1 + Maths.remainder(tileID + amount - 1, 20);
+        if(Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
+            radius -= amount;
+            if(radius < 0)
+                radius = 0;
+        } else
+            tileID = 1 + Maths.remainder(tileID + amount - 1, 20);
         return true;
     }
     

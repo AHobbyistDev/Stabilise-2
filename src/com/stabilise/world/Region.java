@@ -42,7 +42,7 @@ public class Region {
     //--------------------==========--------------------
     
     /** The length of an edge of the square of slices in a region. */
-    public static final int REGION_SIZE = 16;
+    public static final int REGION_SIZE = 16; // must be a power of two
     /** {@link REGION_SIZE} - 1; minor optimisation purposes. */
     public static final int REGION_SIZE_MINUS_ONE = REGION_SIZE - 1;
     /** The power of 2 of {@link REGION_SIZE}; minor optimisation purposes. */

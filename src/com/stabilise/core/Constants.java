@@ -7,6 +7,7 @@ import com.stabilise.util.Log;
 import com.stabilise.util.annotation.Immutable;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.world.Slice;
 
 /**
  * This class contains all of the important universal game constants.
@@ -48,11 +49,13 @@ public class Constants {
      * threads if possible. */ // This may be temporary
     public static final boolean CONCURRENT_DIMENSIONS = true;
     
+    public static final int LOADED_TILE_RADIUS = 6 * 16;
+    public static final int LOADED_TILE_BUFFER = 3 * 16;
     /** The half-length of an edge of the square of loaded slices around the
      * player. */
-    public static final int LOADED_SLICE_RADIUS = 6;
-    /** The buffer length of loaded slices. Unused. */
-    public static final int LOADED_SLICE_BUFFER = 3;
+    public static final int LOADED_SLICE_RADIUS = LOADED_TILE_RADIUS / Slice.SLICE_SIZE;
+    /** The buffer length of loaded slices. */
+    public static final int LOADED_SLICE_BUFFER = LOADED_TILE_BUFFER / Slice.SLICE_SIZE;
     /** The minimum number of slices which can be considered 'loaded' about a
      * player at any given time. */
     public static final int MIN_LOADED_SLICES =
@@ -72,7 +75,7 @@ public class Constants {
     /** The number of items on the hotbar. */
     public static final int HOTBAR_SIZE = 9;
     /** Maximum item stack size. */
-    public static final int MAX_STACK_SIZE = 99;
+    public static final int MAX_STACK_SIZE = 999;
     
     
     //--------------------==========--------------------

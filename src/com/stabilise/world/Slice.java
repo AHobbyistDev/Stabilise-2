@@ -16,7 +16,7 @@ public class Slice {
     //--------------------==========--------------------
     
     /** The length of an edge of the square of tiles in a slice. */
-    public static final int SLICE_SIZE = 16;
+    public static final int SLICE_SIZE = 16; // must be a power of 2
     /** {@link SLICE_SIZE} - 1; minor optimisation purposes. */
     public static final int SLICE_SIZE_MINUS_ONE = SLICE_SIZE - 1;
     /** The power of 2 of {@link SLICE_SIZE}; minor optimisation purposes. */

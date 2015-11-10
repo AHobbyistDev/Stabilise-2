@@ -34,8 +34,8 @@ class TileBuilder {
         WOOD(H_WOOD, F_DEF),
         INVUL(H_INVUL, F_DEF),
         ICE(H_DIRT, F_ICE),
-        WATER(0.12f),
-        LAVA(0.12f),
+        WATER(0.12f, false),
+        LAVA(0.12f, true),
         CHEST(H_WOOD, F_DEF, b -> new TileChest(b)),
         SPWNR(H_STONE, F_DEF, b -> new TileMobSpawner(b)),
         ORE(H_STONE, F_DEF, b -> new TileOre(b));
@@ -78,13 +78,13 @@ class TileBuilder {
         }
         
         /** Fluid tile */
-        private Template(float viscosity) {
+        private Template(float viscosity, boolean lava) {
             builder = b -> new TileFluid(b);
             solid = false;
             hardness = friction = 0f;
             this.viscosity = viscosity;
-            light = 0;
-            falloff = 3;
+            light = (byte)(lava ? 15 : 0);
+            falloff = 2;
         }
         
     }

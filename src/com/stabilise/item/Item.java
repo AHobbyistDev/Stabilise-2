@@ -1,5 +1,6 @@
 package com.stabilise.item;
 
+import com.stabilise.core.Constants;
 import com.stabilise.util.collect.RegistryNamespaced;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.tile.Tile;
@@ -18,7 +19,7 @@ public class Item {
             new RegistryNamespaced<>("ItemRegistry", "stabilise", 8);
     
     /** The default maximum stack size. */
-    public static final int DEFAULT_MAX_STACK_SIZE = 64;
+    public static final int DEFAULT_MAX_STACK_SIZE = Constants.MAX_STACK_SIZE;
     
     /** An item which should be used as a placeholder to indicate the lack of
      * an item, in preference to using a null pointer.
