@@ -48,7 +48,8 @@ public class Stabilise extends Application {
     @Override
     protected State getInitialState() {
         //return new com.stabilise.core.state.MenuTestState();
-        return new com.stabilise.core.state.LoadingState();
+        //return new com.stabilise.core.state.LoadingState();
+        return new com.stabilise.core.state.MainMenuState();
     }
     
     @Override
@@ -77,7 +78,6 @@ public class Stabilise extends Application {
                 "Not suitable for children under the age of 84",
                 "Take twice daily for fast, effective results!",
                 "Batteries not included!",
-                //"Made in China",
                 "Now with excavators!",
                 "(I lied about the excavators)",
                 "No refunds!"

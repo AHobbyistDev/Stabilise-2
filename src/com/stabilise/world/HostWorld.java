@@ -332,13 +332,14 @@ public class HostWorld extends AbstractWorld {
             int tileY = tileCoordRelativeToSliceFromTileCoord(y);
             
             Tile old = s.getTileAt(tileX, tileY);
-            old.handleBreak(this, x, y);
             
-            if(old != Tiles.AIR)
+            if(old != Tiles.AIR) {
                 SingleplayerState.pop.play(1f, 1.7f, 0f);
-            
-            s.setTileAt(tileX, tileY, Tiles.AIR);
-            s.updateLight(tileX, tileY);
+                
+                old.handleBreak(this, x, y);
+                s.setTileAt(tileX, tileY, Tiles.AIR);
+                s.updateLight(tileX, tileY);
+            }
         }
     }
     

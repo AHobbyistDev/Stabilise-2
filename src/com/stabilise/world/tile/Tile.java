@@ -278,7 +278,7 @@ public class Tile {
         register(DIRT,  8, "leaves");
         register(WOOD,  9, "planks");
         register(WATER, 10, "water");
-        register(LAVA,  11, "lava");
+        register(LAVA,  11, "lava").light((byte)15);
         register(ICE,   12, "ice");
         register(STONE, 13, "stoneBrick");
         register(ORE,   14, "oreIron");
@@ -288,6 +288,7 @@ public class Tile {
         register(ORE,   18, "oreDiamond").hardness(50f);
         register(CHEST, 19, "chest");
         register(SPWNR, 20, "mobSpawner");
+        register(STONE, 21, "glass").light((byte)15);
         
         builder.end();
         builder = null;

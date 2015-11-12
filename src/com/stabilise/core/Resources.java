@@ -34,7 +34,7 @@ public class Resources {
     public static final FileHandle IMAGE_DIR = IOUtil.createDir(RESOURCE_DIR.child("img/"));
     public static final FileHandle FONT_DIR = IOUtil.createDir(RESOURCE_DIR.child("fonts/"));
     public static final FileHandle SOUND_DIR = IOUtil.createDir(RESOURCE_DIR.child("sound/"));
-    public static final FileHandle SCHEMATIC_DIR = IOUtil.createDir(RESOURCE_DIR.child("schematics/"));
+    //public static final FileHandle SCHEMATIC_DIR = IOUtil.createDir(RESOURCE_DIR.child("schematics/"));
     
     /** The file directory for mods. */
     public static final FileHandle MODS_DIR = IOUtil.createDir(APP_DIR.child("mods/"));

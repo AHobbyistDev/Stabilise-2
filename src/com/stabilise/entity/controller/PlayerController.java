@@ -37,7 +37,7 @@ public class PlayerController extends MobController implements Controllable, Inp
     
     /** The ID of the tile currently selected. */
     public int tileID = Tiles.STONE.getID();
-    public int radius = 0;
+    public float radius = 0.5f;
     
     
     /**
@@ -90,9 +90,9 @@ public class PlayerController extends MobController implements Controllable, Inp
     
     public void doInRadius(WorldRenderer renderer, BiIntConsumer func) {
         Vector2 wc = renderer.mouseCoords();
-        int x = Maths.floor(wc.x);
-        int y = Maths.floor(wc.y);
-        int r2 = radius*radius;
+        float x = Maths.floor(wc.x);
+        float y = Maths.floor(wc.y);
+        float r2 = radius*radius;
         int minX = (int)(x - radius);
         int maxX = (int)Math.ceil(x + radius);
         int minY = (int)(y - radius);
@@ -100,9 +100,9 @@ public class PlayerController extends MobController implements Controllable, Inp
         
         for(int tx = minX; tx <= maxX; tx++) {
             for(int ty = minY; ty <= maxY; ty++) {
-                double xDiff = x - tx;
-                double yDiff = y - ty;
-                if(xDiff*xDiff + yDiff*yDiff <= r2)
+                float xDiff = x - tx;
+                float yDiff = y - ty;
+                if(xDiff*xDiff + yDiff*yDiff < r2)
                     func.accept(tx, ty);
             }
         }
@@ -186,7 +186,7 @@ public class PlayerController extends MobController implements Controllable, Inp
                 //}
                 break;
             case KILL_MOBS:
-                //mob.world.exterminateMobs();
+                game.world.destroyEntities();
                 break;
             case RESTORE:
                 mob.restore();
@@ -194,7 +194,7 @@ public class PlayerController extends MobController implements Controllable, Inp
             case ZOOM_IN:
                 {
                     SingleplayerState state = (SingleplayerState)Application.get().getState();
-                    state.renderer.setPixelsPerTile(state.renderer.getPixelsPerTile() * 2f, true);
+                    state.renderer.setPixelsPerTile(state.renderer.getPixelsPerTile() * 2, true);
                 }
                 break;
             case ZOOM_OUT:
@@ -215,7 +215,8 @@ public class PlayerController extends MobController implements Controllable, Inp
                 //game.getWorld().camera.snapToFocus();
                 //Log.message(Texture.texturesToString());
                 Runtime r = Runtime.getRuntime();
-                Log.get().postDebug(r.freeMemory()/(1024*1024) + "/" + r.totalMemory()/(1024*1024) + "/" + r.maxMemory()/(1024*1024));
+                Log.get().postDebug(r.freeMemory()/(1024*1024) + "/" +
+                        r.totalMemory()/(1024*1024) + "/" + r.maxMemory()/(1024*1024));
                 System.out.println(game.profiler.getData().toString());
                 break;
             case PREV_TILE:
@@ -287,15 +288,15 @@ public class PlayerController extends MobController implements Controllable, Inp
     public boolean mouseMoved(int screenX, int screenY) {
         return false;
     }
-
+    
     @Override
     public boolean scrolled(int amount) {
         if(Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
             radius -= amount;
-            if(radius < 0)
-                radius = 0;
+            if(radius < 1)
+                radius = 0.5f;
         } else
-            tileID = 1 + Maths.remainder(tileID + amount - 1, 20);
+            tileID = 1 + Maths.remainder(tileID + amount - 1, 21);
         return true;
     }
     

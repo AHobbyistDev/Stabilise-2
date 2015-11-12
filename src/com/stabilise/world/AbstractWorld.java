@@ -17,6 +17,7 @@ import com.stabilise.entity.particle.Particle;
 import com.stabilise.entity.particle.ParticlePhysical;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
+import com.stabilise.util.annotation.ForTestingPurposes;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.Array;
@@ -425,12 +426,14 @@ public abstract class AbstractWorld implements World {
     public abstract void blockUntilClosed();
     
     /**
-     * Destroys all non-player-controlled mobs in the world.
+     * Destroys all non-player entities in the world.
      */
-    public void exterminateMobs() {
+    @ForTestingPurposes
+    public void destroyEntities() {
         for(Entity e : entities.values()) {
-            if(e instanceof EntityMob && !((EntityMob)e).isPlayerControlled())
-                e.destroy();
+            if(e instanceof EntityMob && ((EntityMob)e).isPlayerControlled())
+                continue;
+            e.destroy();
         }
     }
     

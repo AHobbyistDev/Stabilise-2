@@ -26,7 +26,7 @@ public class Tasks {
      * Returns an executor which runs submitted tasks on the caller thread, as
      * if by:
      * 
-     * <pre>return r -> r.run()</pre>
+     * <pre>return r -> r.run();</pre>
      */
     public static Executor currentThreadExecutor() {
         return EXEC_CURRENT_THREAD;
