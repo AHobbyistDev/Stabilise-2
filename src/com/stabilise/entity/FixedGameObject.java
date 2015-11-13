@@ -31,12 +31,22 @@ public class FixedGameObject extends GameObject {
     
     @Override
     public final double getX() {
-        return (double)x;
+        return tileCoordFixedToTileCoordFree(x);
     }
     
     @Override
     public final double getY() {
-        return (double)y;
+        return tileCoordFixedToTileCoordFree(y);
+    }
+    
+    @Override
+    public final int getTileX() {
+        return x;
+    }
+    
+    @Override
+    public final int getTileY() {
+        return y;
     }
     
     @Override

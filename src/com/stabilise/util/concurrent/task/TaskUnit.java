@@ -9,7 +9,7 @@ import com.stabilise.util.concurrent.task.Task.State;
 import com.stabilise.util.concurrent.task.TaskEvent.FailEvent;
 
 
-class TaskUnit implements Runnable, TaskHandle {
+class TaskUnit implements Runnable, TaskHandle, TaskView {
     
     /** Prototype tracker. Only ever used during construction; during operation
      * this will always be null. */
@@ -221,6 +221,32 @@ class TaskUnit implements Runnable, TaskHandle {
      */
     private void clearInterrupt() {
         Thread.interrupted();
+    }
+    
+    @Override
+    public String status() {
+        return tracker.getStatus();
+    }
+    
+    @Override
+    public double fractionCompleted() {
+        return tracker.fractionCompleted();
+    }
+    
+    @Override
+    public long partsCompleted() {
+        return tracker.getPartsCompleted();
+    }
+    
+    @Override
+    public long totalParts() {
+        return tracker.getTotalParts();
+    }
+    
+    @Override
+    public String toString() {
+        return status() + "... " + percentCompleted() + "% ("
+                + partsCompleted() + "/" + totalParts() + ")";
     }
     
 }

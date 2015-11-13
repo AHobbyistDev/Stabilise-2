@@ -47,6 +47,16 @@ public class FreeGameObject extends GameObject {
     }
     
     @Override
+    public final int getTileX() {
+        return tileCoordFreeToTileCoordFixed(x);
+    }
+    
+    @Override
+    public final int getTileY() {
+        return tileCoordFreeToTileCoordFixed(y);
+    }
+    
+    @Override
     public final int getSliceX() {
         return sliceCoordFromTileCoord(x);
     }

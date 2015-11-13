@@ -76,14 +76,26 @@ public abstract class GameObject {
     }
     
     /**
-     * @return The x-coordinate of this GameObject, in slice-lengths.
+     * @return The x-coordinate of this GameObject, in tile-lengths.
      */
     public abstract double getX();
     
     /**
-     * @return The y-coordinate of this GameObject, in slice-lengths.
+     * @return The y-coordinate of this GameObject, in tile-lengths.
      */
     public abstract double getY();
+    
+    /**
+     * @return The x-coordinate of the tile this GameObject is in, in
+     * tile-lengths.
+     */
+    public abstract int getTileX();
+    
+    /**
+     * @return The y-coordinate of the tile this GameObject is in, in
+     * tile-lengths.
+     */
+    public abstract int getTileY();
     
     /**
      * Gets the x-coordinate of the slice the game object is within.

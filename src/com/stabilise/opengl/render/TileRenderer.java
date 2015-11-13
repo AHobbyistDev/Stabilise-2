@@ -1,5 +1,7 @@
 package com.stabilise.opengl.render;
 
+import static com.stabilise.world.Slice.SLICE_SIZE;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
@@ -19,7 +21,7 @@ public class TileRenderer implements Renderer {
     //--------------------==========--------------------
     
     /** A reference to the world renderer. */
-    public final WorldRenderer worldRenderer;
+    public final WorldRenderer wr;
     /** A reference to the world. */
     public final World world;
     
@@ -37,7 +39,7 @@ public class TileRenderer implements Renderer {
      * @param worldRenderer The world renderer.
      */
     public TileRenderer(WorldRenderer worldRenderer) {
-        this.worldRenderer = worldRenderer;
+        this.wr = worldRenderer;
         world = worldRenderer.world;
         
         loadResources();
@@ -76,11 +78,11 @@ public class TileRenderer implements Renderer {
     public void render() {
         //worldRenderer.batch.disableBlending();
         slicesRendered = 0;
-        for(int c = worldRenderer.playerCamera.sliceX - worldRenderer.slicesHorizontal;
-                c <= worldRenderer.playerCamera.sliceX + worldRenderer.slicesHorizontal;
+        for(int c = wr.playerCamera.sliceX - wr.slicesHorizontal;
+                c <= wr.playerCamera.sliceX + wr.slicesHorizontal;
                 c++)
-            for(int r = worldRenderer.playerCamera.sliceY - worldRenderer.slicesVertical;
-                    r <= worldRenderer.playerCamera.sliceY + worldRenderer.slicesVertical;
+            for(int r = wr.playerCamera.sliceY - wr.slicesVertical;
+                    r <= wr.playerCamera.sliceY + wr.slicesVertical;
                     r++)
                 renderSlice(c, r);
         //worldRenderer.batch.enableBlending();
@@ -101,27 +103,34 @@ public class TileRenderer implements Renderer {
         
         slicesRendered++;
         
-        final int tileXInit = x * Slice.SLICE_SIZE;
-        int tileX;
-        int tileY = y * Slice.SLICE_SIZE;
+        int xMin = Math.max(x    *SLICE_SIZE, camX() - wr.tilesHorizontal);
+        int xMax = Math.min((x+1)*SLICE_SIZE, camX() + wr.tilesHorizontal + 1);
+        int yMin = Math.max(y    *SLICE_SIZE, camY() - wr.tilesVertical);
+        int yMax = Math.min((y+1)*SLICE_SIZE, camY() + wr.tilesVertical + 1);
         
-        for(int r = 0; r < Slice.SLICE_SIZE; r++) {
-            tileX = tileXInit;
-            for(int c = 0; c < Slice.SLICE_SIZE; c++) {
-                // Offset of +8 due to tile breaking animations; offset of -1
-                // because air has no texture: sums to +7
-                int id = slice.getTileIDAt(c, r) + 7;
-                
-                if(id != 7) { // i.e. not air
-                    worldRenderer.batch.setColor(lightLevels[slice.getLightAt(c, r)]);
-                    worldRenderer.batch.draw(tiles.getRegion(id), tileX, tileY, 1f, 1f);
+        // These two are to adjust the 0 index if we don't render all of the slice
+        int rMin = Math.max(0, yMin - y*SLICE_SIZE);
+        int cMin = Math.max(0, xMin - x*SLICE_SIZE);
+        
+        for(int r = rMin, ty = yMin; r < SLICE_SIZE && ty < yMax; r++, ty++) {
+            for(int c = cMin, tx = xMin; c < SLICE_SIZE && tx < xMax; c++, tx++) {
+                int id = slice.getTileIDAt(c, r);
+                if(id != 0) { // i.e. not air
+                    wr.batch.setColor(lightLevels[slice.getLightAt(c, r)]);
+                    // Offset of +8 due to tile breaking animations; offset of -1
+                    // because air has no texture: sums to +7
+                    wr.batch.draw(tiles.getRegion(id + 7), tx, ty, 1f, 1f);
                 }
-                
-                tileX++;
             }
-            
-            tileY++;
         }
+    }
+    
+    private int camX() {
+        return wr.playerCamera.getTileX();
+    }
+    
+    private int camY() {
+        return wr.playerCamera.getTileY();
     }
     
 }

@@ -90,8 +90,11 @@ public abstract class Dimension {
      * @return The world generator.
      * @throws NullPointerException if either argument is {@code null}.
      */
-    public abstract WorldGenerator generatorFor(Multiverse<?> multiverse,
-            HostWorld world);
+    public WorldGenerator generatorFor(Multiverse<?> multiverse,
+            HostWorld world) {
+        // TODO
+        return new WorldGenerator(multiverse, world);
+    }
     
     /**
      * Returns {@code true} if this dimension should have perpetually-loaded

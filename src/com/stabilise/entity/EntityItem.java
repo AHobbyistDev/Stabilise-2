@@ -19,7 +19,7 @@ public class EntityItem extends Entity {
     //--------------------==========--------------------
     
     /** The number of ticks after which an item despawns. */
-    private static final int DESPAWN_TICKS = 30*Constants.TICKS_PER_SECOND;
+    private static final int DESPAWN_TICKS = 60*Constants.TICKS_PER_SECOND;
     
     /** The range from which a player may attract the item. */
     private static final float ATTRACTION_RANGE = 5.0f;

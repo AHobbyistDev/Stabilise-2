@@ -3,6 +3,8 @@ package com.stabilise.world.gen;
 import static com.stabilise.world.Region.REGION_SIZE;
 import static com.stabilise.world.Slice.SLICE_SIZE;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +19,6 @@ import com.stabilise.world.RegionStore;
 import com.stabilise.world.Slice;
 import com.stabilise.world.loader.WorldLoader.DimensionLoader;
 import com.stabilise.world.multiverse.Multiverse;
-import com.stabilise.world.tile.Tiles;
 
 /**
  * The {@code WorldGenerator} class provides the mechanism for generating the
@@ -40,13 +41,12 @@ import com.stabilise.world.tile.Tiles;
  * <p>To shut down the generator, invoke {@link #shutdown()}.
  */
 @ThreadSafe
-public abstract class WorldGenerator {
+public final class WorldGenerator {
     
     /** The world for which the generator is generating. */
     private final HostWorld world;
     private DimensionLoader loader;
-    /** The seed to use for world generation. */
-    protected final long seed;
+    private final long seed;
     
     /** The executor which delegates threads. */
     private final Executor executor;
@@ -54,6 +54,8 @@ public abstract class WorldGenerator {
     private volatile boolean isShutdown = false;
     
     private RegionStore regionStore;
+    
+    private final List<IWorldGenerator> generators = new ArrayList<>(1);
     
     protected final Log log = Log.getAgent("GENERATOR");
     
@@ -66,11 +68,14 @@ public abstract class WorldGenerator {
      * 
      * @throws NullPointerException if either argument is {@code null}.
      */
-    protected WorldGenerator(Multiverse<?> multiverse, HostWorld world) {
+    public WorldGenerator(Multiverse<?> multiverse, HostWorld world) {
         this.world = Objects.requireNonNull(world);
         this.executor = multiverse.getExecutor();
         
         seed = multiverse.getSeed();
+        
+        // TODO: de-hardcodify
+        generators.add(new PerlinNoiseGenerator());
     }
     
     /**
@@ -162,8 +167,9 @@ public abstract class WorldGenerator {
                     }
                 }
                 
-                // Generate the region, as implemented in subclasses
-                generateRegion(r);
+                // Generate the region, as per the generators
+                for(IWorldGenerator generator : generators)
+                    generator.generate(r, seed);
             }
             
             // After normal generation processes have been completed, add any
@@ -189,24 +195,6 @@ public abstract class WorldGenerator {
             regionStore.uncacheAll();
         }
     }
-    
-    /**
-     * Generates a region.
-     * 
-     * <p>The general contract of this method is that it may modify the
-     * contents of any slice in the given region - namely, it may set tiles and
-     * tile entities, and add schematics. Leaving this method blank is
-     * equivalent to setting every tile in the region to {@link Tiles#AIR}.
-     * 
-     * <p>Subclasses of WorldGenerator should note that this method may be
-     * invoked by various worker threads concurrently, and it is hence the
-     * responsibility of implementors to ensure correct thread safety
-     * techniques are observed.
-     * 
-     * @param r The region to generate.
-     */
-    @UserThread("WorkerThread")
-    protected abstract void generateRegion(Region r);
     
     /**
      * Adds a schematic to the world.

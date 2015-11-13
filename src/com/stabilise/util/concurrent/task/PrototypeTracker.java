@@ -143,7 +143,7 @@ class PrototypeTracker {
             
             // If our number of parts has been pushed into the BigInteger
             // range, we cap off parts at Long.MAX_VALUE and adjust our
-            // childrens' partsToReport values such that their sum does not
+            // children's partsToReport values such that their sum does not
             // exceed this value. We also need to resum parts to account for
             // rounding errors.
             childParts = 1; // completion part
@@ -162,7 +162,7 @@ class PrototypeTracker {
         // The -1/+1 is the completion part, which is temporarily pulled out as
         // to avoid being scaled.
         partsToReport = strat.get(childParts - 1) + 1;
-        if(partsToReport <= 0) // either an overflow, or the strat did something stupid
+        if(partsToReport <= 0) // overflow, or the strat did something stupid
             throw new BadReportStrategyException();
         
         tracker = new TaskTracker(this);

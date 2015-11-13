@@ -517,7 +517,9 @@ public interface World {
      * slice-lengths.
      */
     public static int sliceCoordFromTileCoord(double c) {
-        return Maths.floor(c / Slice.SLICE_SIZE);
+        //return Maths.floor(c / Slice.SLICE_SIZE);
+        // Shift is faster than division
+        return tileCoordFreeToTileCoordFixed(c) >> Slice.SLICE_SIZE_SHIFT;
     }
     
     /**

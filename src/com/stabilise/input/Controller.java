@@ -55,8 +55,7 @@ public class Controller implements InputProcessor {
         ADVANCE_TICK    ("forceTick",    Keys.NUM_1,   true),
         TOG_HITBOX_RENDER("togHbRender", Keys.H,       true),
         NEXT_TILE       ("nextTile",     Keys.PERIOD,  true),
-        PREV_TILE       ("prevTile",     Keys.COMMA,   true),
-        RELIGHT         ("relight",      Keys.J,       true);
+        PREV_TILE       ("prevTile",     Keys.COMMA,   true);
         
         /** The field's name in the config file. */
         public final String fieldName;

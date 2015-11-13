@@ -10,10 +10,8 @@ import com.stabilise.item.Items;
 import com.stabilise.util.maths.Interpolation;
 import com.stabilise.util.maths.PerlinNoise1D;
 import com.stabilise.util.maths.SimplexNoise;
-import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
-import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntityChest;
 
@@ -24,21 +22,11 @@ import static com.stabilise.world.Slice.SLICE_SIZE;
 /**
  * Generates worlds using the perlin noise algorithm.
  */
-public class PerlinNoiseGenerator extends WorldGenerator {
-    
-    /**
-     * Creates a new PerlinNoiseGenerator.
-     * 
-     * @param multiverse The world provider.
-     * @param world The world.
-     */
-    public PerlinNoiseGenerator(Multiverse<?> multiverse, HostWorld world) {
-        super(multiverse, world);
-    }
+public class PerlinNoiseGenerator implements IWorldGenerator {
     
     @Override
-    protected void generateRegion(Region r) {
-        new PerlinRegionGenerator().generateRegion(r);
+    public void generate(Region r, long seed) {
+        new PerlinRegionGenerator(seed).generateRegion(r, seed);
     }
     
     /**
@@ -66,7 +54,7 @@ public class PerlinNoiseGenerator extends WorldGenerator {
         
         private SimplexNoise simplex512;    //    512             1
         
-        private PerlinRegionGenerator() {
+        private PerlinRegionGenerator(long seed) {
             noise1D_1 = new PerlinNoise1D(seed, 128f);
             noise1D_2 = new PerlinNoise1D(seed, 64f);
             noise1D_3 = new PerlinNoise1D(seed, 32f);
@@ -81,7 +69,7 @@ public class PerlinNoiseGenerator extends WorldGenerator {
             
             simplex512 = new SimplexNoise(seed, 512f);
         }
-        private void generateRegion(Region r) {
+        private void generateRegion(Region r, long seed) {
             final int defSlice = Region.REGION_SIZE - 1;
             final int defTile = Slice.SLICE_SIZE - 1;
             

@@ -37,9 +37,6 @@ public class GameCamera extends FreeGameObject {
     
     @Override
     public void update(World world) {
-        //x = focus.x;
-        //y = focus.y;
-        
         x += (focus.x - x) * followStrength;
         y += (focus.y + 1 - y) * followStrength;
         
@@ -48,7 +45,6 @@ public class GameCamera extends FreeGameObject {
         
         // Unimportant TODOs:
         // Focus on multiple entities
-        // Non-jerky off-centre focusing
         // Function for capping off-centre-ness
     }
     

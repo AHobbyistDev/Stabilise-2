@@ -262,5 +262,8 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Replaced util.concurrent.Task with the util.concurrent.task framework
 06/11/15
 	- Extremely basic lighting implementation
+11/11/15
+	- Added tile brush with variable radius for mass tile devastation!
+
 
 	

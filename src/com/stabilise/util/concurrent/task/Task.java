@@ -9,6 +9,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.stabilise.util.annotation.GuardedBy;
 import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.concurrent.Waiter;
 
@@ -18,7 +19,7 @@ import com.stabilise.util.concurrent.Waiter;
  * <p>The main entry point for creating a Task is {@link #builder()}.
  */
 @ThreadSafe
-public class Task {
+public class Task implements TaskView {
     
     static enum State {
         // There's no point in an UNSTARTED state for a task since a TaskUnit's
@@ -28,7 +29,7 @@ public class Task {
     
     private final Executor exec;
     
-    private TaskUnit curUnit;
+    @GuardedBy("this") private TaskUnit curUnit;
     
     private final TaskTracker tracker;
     private final AtomicBoolean started      = new AtomicBoolean(false);
@@ -252,47 +253,34 @@ public class Task {
      * @throws NullPointerException if {@code unit} is {@code null}.
      */
     public Waiter waiter(long time, TimeUnit unit) {
-        return new Waiter(() -> stopped(), time, unit);
+        return new Waiter(this::stopped, time, unit);
     }
     
-    /**
-     * Gets the status of this task.
-     */
-    public String getStatus() {
+    @Override
+    public String status() {
         return tracker.getStatus();
     }
     
-    /**
-     * Returns the fraction of this task which has been completed, from 0 to 1
-     * (inclusive).
-     */
+    @Override
     public double fractionCompleted() {
         return tracker.fractionCompleted();
     }
     
-    /**
-     * Returns the percentage of this task which has been completed, from 0 to
-     * 100 (inclusive). Equivalent to {@code (int)(100 * fractionCompleted())}.
-     */
-    public int percentCompleted() {
-        return (int)(100 * fractionCompleted());
-    }
-    
-    /**
-     * Returns the number of parts of this task which have been marked as
-     * completed. This is always less than or equal to the value returned by
-     * {@link #getTotalParts()}.
-     */
-    public long getPartsCompleted() {
+    @Override
+    public long partsCompleted() {
         return tracker.getPartsCompleted();
     }
     
-    /**
-     * Returns the total number of parts in this task. This value never
-     * changes.
-     */
-    public long getTotalParts() {
+    @Override
+    public long totalParts() {
         return tracker.getTotalParts();
+    }
+    
+    /**
+     * Returns a view of the current subtask.
+     */
+    public synchronized TaskView curSubtask() {
+        return curUnit;
     }
     
     /**
@@ -311,8 +299,8 @@ public class Task {
      */
     @Override
     public String toString() {
-        return getStatus() + "... " + percentCompleted() + "% ("
-                + getPartsCompleted() + "/" + getTotalParts() + ")";
+        return status() + "... " + percentCompleted() + "% ("
+                + partsCompleted() + "/" + totalParts() + ")";
     }
     
     //--------------------==========--------------------

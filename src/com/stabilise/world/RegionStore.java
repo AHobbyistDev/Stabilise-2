@@ -513,7 +513,7 @@ public class RegionStore {
         // We could alternatively use this.saveRegion(), but I don't think it's
         // necessary as of this writing.
         //regions.values().forEach(r -> loader.saveRegion(r, null));
-        regions.values().forEach(r -> saveRegion(r));
+        regions.values().forEach(this::saveRegion);
     }
     
     /**

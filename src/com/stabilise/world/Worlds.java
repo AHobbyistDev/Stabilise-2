@@ -25,7 +25,6 @@ import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.multiverse.HostMultiverse.PlayerBundle;
 import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
 
-
 @SuppressWarnings("deprecation")
 public class Worlds {
     
@@ -76,12 +75,8 @@ public class Worlds {
         info.seed = worldSeed;
         info.worldFormatVersion = -1;            // TODO: temporary value
         info.sliceFormatVersion = -1;            // TODO: temporary value
-        info.creationDate = System.currentTimeMillis();//new Date().getTime();
+        info.creationDate = System.currentTimeMillis();
         info.lastPlayedDate = info.creationDate;
-        
-        // Set the player spawn. TODO: Possibly temporary
-        //WorldGenerator generator = WorldGenerator.getGenerator(null, info);
-        //generator.setPlayerSpawn(info);
         
         try {
             info.save();
@@ -135,10 +130,7 @@ public class Worlds {
         
         // Now, we convert the ArrayList to a conventional array
         WorldInfo[] worldArr = worlds.toArray(new WorldInfo[worlds.size()]);
-        
-        // Sort the worlds - uses Java's Comparable interface
-        Arrays.sort(worldArr);
-        
+        Arrays.sort(worldArr); // WorldInfo implements Comparable
         return worldArr;
     }
     
@@ -359,7 +351,7 @@ public class Worlds {
                 t.start();
             };
             
-            return Task.builder().executor(exec)
+            return Task.builder(exec)
                 .name("Loading world")
                 .beginReturn(WorldBundle.class)
                 .andThenReturn(buildHost ? 4 : 5, (t) -> {

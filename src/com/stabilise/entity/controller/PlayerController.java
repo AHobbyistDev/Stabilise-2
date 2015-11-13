@@ -37,6 +37,7 @@ public class PlayerController extends MobController implements Controllable, Inp
     
     /** The ID of the tile currently selected. */
     public int tileID = Tiles.STONE.getID();
+    /** Radius of the tile brush. */
     public float radius = 0.5f;
     
     
@@ -205,9 +206,6 @@ public class PlayerController extends MobController implements Controllable, Inp
                 break;
             case INTERACT:
                 game.world.getTileAt(mob.x, mob.y-1).handleInteract(game.world, Maths.floor(mob.x), Maths.floor(mob.y-1), mob);
-                break;
-            case RELIGHT:
-                game.world.forEachRegion(r -> r.forEachSlice(s -> s.buildLight()));
                 break;
             case TEST_RANDOM:
                 //mob.x = 0;

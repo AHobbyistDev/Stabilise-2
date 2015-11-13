@@ -158,7 +158,8 @@ public class LoadingState implements State {
         
         batch.begin();
         sprSplash.draw(batch);
-        font.draw(batch, future.toString(), -150, -100, 300, Align.center, true);
+        font.draw(batch, future.toString() + "\n" + future.curSubtask().toString(),
+                -250, -80, 500, Align.center, true);
         batch.end();
     }
     

@@ -5,7 +5,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
@@ -27,14 +26,13 @@ import com.stabilise.core.state.LoadingState;
 
 public class MainMenu implements Screen {
     
-    private OrthographicCamera camera;
     private ScreenViewport viewport;
     private Stage stage;
     private TextureAtlas atlas;
     private Skin skin;
     private Table table;
     private TextButton btnPlay, btnExit;
-    private BitmapFont white;
+    private BitmapFont font;
     private Label heading;
     
     public MainMenu() {
@@ -43,8 +41,7 @@ public class MainMenu implements Screen {
     
     @Override
     public void show() {
-        camera = new OrthographicCamera();
-        viewport = new ScreenViewport(camera);
+        viewport = new ScreenViewport();
         
         stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
@@ -59,9 +56,9 @@ public class MainMenu implements Screen {
         
         FreeTypeFontParameter textParam = new FreeTypeFontParameter();
         textParam.size = 32;
-        white = Resources.font("arialbd.ttf", textParam);
+        font = Resources.font("arialbd.ttf", textParam);
         
-        LabelStyle headingStyle = new LabelStyle(white, Color.WHITE);
+        LabelStyle headingStyle = new LabelStyle(font, Color.WHITE);
         heading = new Label(Stabilise.GAME_NAME, headingStyle);
         heading.setFontScale(5f);
         
@@ -70,7 +67,7 @@ public class MainMenu implements Screen {
         btnStyle.down = skin.getDrawable("btndown");
         btnStyle.pressedOffsetX = 1;
         btnStyle.pressedOffsetY = -1;
-        btnStyle.font = white;
+        btnStyle.font = font;
         btnStyle.fontColor = Color.BLACK;
         
         btnPlay = new TextButton("Play", btnStyle);
@@ -134,7 +131,7 @@ public class MainMenu implements Screen {
         stage.dispose();
         atlas.dispose();
         skin.dispose();
-        white.dispose();
+        font.dispose();
     }
     
 }

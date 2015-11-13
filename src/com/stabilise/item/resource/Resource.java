@@ -19,29 +19,30 @@ public class Resource {
     
     // Ignoring CAPS_CONVENTIONS
     //id, name, rarity, density, hardness, toughness, malleability, enchantability
-    public static final Resource wood = new Resource(0, "Wood", 1f, 1f, 0.2f, 0.2f, 0.0f, 0.8f);
-    public static final Resource stone = new Resource(1, "Stone", 1f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource coal = new Resource(2, "Coal", 3f, 2f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource iron = new Resource(3, "Iron", 10f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource steel = new Resource(4, "Steel", 20f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource copper = new Resource(5, "Copper", 7f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource tin = new Resource(6, "Tin", 7f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource bronze = new Resource(7, "Bronze", 15f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource silver = new Resource(8, "Silver", 25f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource gold = new Resource(9, "Gold", 50f, 5f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource aluminium = new Resource(10, "Aluminium", 9f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource paper = new Resource(20, "Paper", 1f, 0.1f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource bone = new Resource(21, "Bone", 4f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource leather = new Resource(22, "Leather", 2f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource wool = new Resource(23, "Wool", 1f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource cotton = new Resource(24, "Cotton", 1f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource silk = new Resource(25, "Silk", 2f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource cloth = new Resource(26, "Cloth", 1f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource clay = new Resource(27, "Clay", 4f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource ceramic = new Resource(28, "Ceramic", 4f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource glass = new Resource(29, "Glass", 5f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource obsidian = new Resource(30, "Obsidian", 30f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
-    public static final Resource tallow = new Resource(31, "Tallow", 2f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
+    public static final Resource
+            wood        = new Resource(0, "Wood",   1f, 1f, 0.2f, 0.2f, 0.0f, 0.8f),
+            stone       = new Resource(1, "Stone",  1f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            coal        = new Resource(2, "Coal",   3f, 2f, 0.4f, 0.4f, 0.0f, 0.3f),
+            iron        = new Resource(3, "Iron",   10f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            steel       = new Resource(4, "Steel",  20f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            copper      = new Resource(5, "Copper", 7f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            tin         = new Resource(6, "Tin",    7f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            bronze      = new Resource(7, "Bronze", 15f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            silver      = new Resource(8, "Silver", 25f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            gold        = new Resource(9, "Gold",   50f, 5f, 0.4f, 0.4f, 0.0f, 0.3f),
+            aluminium   = new Resource(10, "Aluminium", 9f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            paper       = new Resource(20, "Paper", 1f, 0.1f, 0.4f, 0.4f, 0.0f, 0.3f),
+            bone        = new Resource(21, "Bone",  4f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            leather     = new Resource(22, "Leather", 2f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            wool        = new Resource(23, "Wool",  1f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            cotton      = new Resource(24, "Cotton", 1f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            silk        = new Resource(25, "Silk",  2f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            cloth       = new Resource(26, "Cloth", 1f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            clay        = new Resource(27, "Clay",  4f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            ceramic     = new Resource(28, "Ceramic", 4f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            glass       = new Resource(29, "Glass", 5f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            obsidian    = new Resource(30, "Obsidian", 30f, 3f, 0.4f, 0.4f, 0.0f, 0.3f),
+            tallow      = new Resource(31, "Tallow", 2f, 3f, 0.4f, 0.4f, 0.0f, 0.3f);
     
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
