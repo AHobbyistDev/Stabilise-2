@@ -1,11 +1,10 @@
 package com.stabilise.network.protocol;
 
-import static com.stabilise.util.collect.DuplicatePolicy.THROW_EXCEPTION;
-
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.stabilise.network.P254ProtocolSwitch;
 import com.stabilise.network.P255Ping;
@@ -13,7 +12,8 @@ import com.stabilise.network.Packet;
 import com.stabilise.network.protocol.handshake.*;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.InstantiationRegistry;
+import com.stabilise.util.collect.RegistryParams;
+import com.stabilise.util.collect.TypeFactory;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.maths.Maths;
@@ -27,8 +27,8 @@ import com.stabilise.util.maths.Maths;
 public enum Protocol {
     
     HANDSHAKE {{
-        registerClientPacket(0, C000VersionInfo.class);
-        registerServerPacket(0, S000VersionInfo.class);
+        registerClientPacket(0, C000VersionInfo.class, C000VersionInfo::new);
+        registerServerPacket(0, S000VersionInfo.class, S000VersionInfo::new);
     }},
     LOGIN {{
         
@@ -39,34 +39,36 @@ public enum Protocol {
     
     /** Registry of packets sent by the server to the client (i.e. clientbound
      * packets). */
-    private final InstantiationRegistry<Packet> serverPackets =
-            new InstantiationRegistry<>(MAX_NORMAL_PACKET_ID,
-                    THROW_EXCEPTION, "ServerPackets");
+    private final TypeFactory<Packet> serverPackets =
+            new TypeFactory<>(new RegistryParams("ServerPackets",
+                    MAX_NORMAL_PACKET_ID));
     /** Registry of packets sent by the client to the server (i.e. serverbound
      * packets). */
-    private final InstantiationRegistry<Packet> clientPackets =
-            new InstantiationRegistry<>(MAX_NORMAL_PACKET_ID,
-                    THROW_EXCEPTION, "ClientPackets");
+    private final TypeFactory<Packet> clientPackets =
+            new TypeFactory<>(new RegistryParams("ClientPackets",
+                    MAX_NORMAL_PACKET_ID));
     
     
     /**
      * Registers a server (i.e. clientbound) packet.
      * 
-     * @see InstantiationRegistry#register(int, Class, Class...)
+     * @see TypeFactory#register(int, Class, Class...)
      */
-    protected void registerServerPacket(int id, Class<? extends Packet> packetClass) {
+    protected void registerServerPacket(int id, Class<? extends Packet> packetClass,
+            Supplier<Packet> supplier) {
         checkID(id, packetClass);
-        serverPackets.registerUnsafe(id, packetClass);
+        serverPackets.register(id, packetClass, supplier);
     }
     
     /**
      * Registers a client (i.e. serverbound) packet.
      * 
-     * @see InstantiationRegistry#register(int, Class, Class...)
+     * @see TypeFactory#register(int, Class, Class...)
      */
-    protected void registerClientPacket(int id, Class<? extends Packet> packetClass) {
+    protected void registerClientPacket(int id, Class<? extends Packet> packetClass,
+            Supplier<Packet> supplier) {
         checkID(id, packetClass);
-        clientPackets.registerUnsafe(id, packetClass);
+        clientPackets.register(id, packetClass, supplier);
     }
     
     private void checkID(int id, Class<? extends Packet> packetClass) {
@@ -96,10 +98,10 @@ public enum Protocol {
             if(id > MAX_NORMAL_PACKET_ID)
                 // Offset of "- MAX_NORMAL_PACKET_ID - 1" to keep registry memory
                 // footprint minimal.
-                return RESERVED_PACKETS.instantiate(id - MAX_NORMAL_PACKET_ID - 1);
+                return RESERVED_PACKETS.create(id - MAX_NORMAL_PACKET_ID - 1);
             return server
-                    ? clientPackets.instantiate(id)
-                    : serverPackets.instantiate(id);
+                    ? clientPackets.create(id)
+                    : serverPackets.create(id);
         } catch(RuntimeException e) {
             throw new FaultyPacketRegistrationException(
                       (server ? "Serverbound" : "Clientbound") + " packet of ID "
@@ -208,13 +210,13 @@ public enum Protocol {
      * <p>To avoid wasting unnecessary memory, we give this registry a small
      * size, and offset IDs by {@code -MAX_NORMAL_PACKET_ID - 1} when accessing
      * entries. */
-    private static final InstantiationRegistry<Packet> RESERVED_PACKETS =
-            new InstantiationRegistry<>(RESERVED_IDS, THROW_EXCEPTION,
-                    "ReservedPackets");
+    private static final TypeFactory<Packet> RESERVED_PACKETS =
+            new TypeFactory<>(new RegistryParams("ReservedPackets",
+                    RESERVED_IDS));
     
     static {
-        registerReservedPacket(255, P255Ping.class);
-        registerReservedPacket(254, P254ProtocolSwitch.class);
+        registerReservedPacket(255, P255Ping.class, P255Ping::new);
+        registerReservedPacket(254, P254ProtocolSwitch.class, P254ProtocolSwitch::new);
         RESERVED_PACKETS.lock();
         for(Protocol protocol : Protocol.values()) {
             checkPackets(protocol, protocol.clientPackets);
@@ -229,18 +231,19 @@ public enum Protocol {
      * {@link #MAX_PACKET_ID} (inclusive).
      * @param packetClass The class of the packet.
      */
-    private static void registerReservedPacket(int id, Class<? extends Packet> packetClass) {
+    private static void registerReservedPacket(int id, Class<? extends Packet> packetClass,
+            Supplier<Packet> supplier) {
         if(id > MAX_PACKET_ID || id <= MAX_NORMAL_PACKET_ID)
             throw new IllegalArgumentException("Invalid id for a reserved packet ("
                     + id + ") - must be in range " + (MAX_NORMAL_PACKET_ID + 1)
                     + " - " + MAX_PACKET_ID + " (inclusive).");
         // Offset of "- MAX_NORMAL_PACKET_ID - 1" to keep registry memory
         // footprint minimal.
-        RESERVED_PACKETS.registerUnsafe(id - MAX_NORMAL_PACKET_ID - 1, packetClass);
+        RESERVED_PACKETS.register(id - MAX_NORMAL_PACKET_ID - 1, packetClass, supplier);
         PACKET_IDS.put(packetClass, Integer.valueOf(id));
     }
     
-    private static void checkPackets(Protocol protocol, InstantiationRegistry<Packet> registry) {
+    private static void checkPackets(Protocol protocol, TypeFactory<Packet> registry) {
         registry.lock();
         for(Class<? extends Packet> pClass : registry) {
             if(PACKET_IDS.containsKey(pClass))

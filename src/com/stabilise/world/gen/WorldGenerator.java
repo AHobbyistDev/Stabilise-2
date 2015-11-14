@@ -57,7 +57,7 @@ public final class WorldGenerator {
     
     private final List<IWorldGenerator> generators = new ArrayList<>(1);
     
-    protected final Log log = Log.getAgent("GENERATOR");
+    private final Log log = Log.getAgent("GENERATOR");
     
     
     /**

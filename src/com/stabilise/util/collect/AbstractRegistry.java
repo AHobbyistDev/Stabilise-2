@@ -29,16 +29,11 @@ abstract class AbstractRegistry<E> implements Iterable<E> {
     
     
     /**
-     * @throws NullPointerException if either argument is {@code null}.
+     * @throws NullPointerException if {@code params} is {@code null}.
      */
-    protected AbstractRegistry(String name, DuplicatePolicy dupePolicy) {
-        if(name == null)
-            throw new NullPointerException("name is null");
-        if(dupePolicy == null)
-            throw new NullPointerException("dupePolicy is null");
-        
-        this.name = name;
-        this.dupePolicy = dupePolicy;
+    protected AbstractRegistry(RegistryParams params) {
+        this.name = params.name;
+        this.dupePolicy = params.dupePolicy;
         
         log = Log.getAgent(name);
     }

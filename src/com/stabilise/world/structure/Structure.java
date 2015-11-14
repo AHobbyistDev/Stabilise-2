@@ -1,7 +1,5 @@
 package com.stabilise.world.structure;
 
-import com.stabilise.util.collect.DuplicatePolicy;
-import com.stabilise.util.collect.InstantiationRegistry;
 import com.stabilise.world.Region;
 import com.stabilise.world.RegionStore;
 
@@ -13,19 +11,6 @@ import com.stabilise.world.RegionStore;
  * such dimensions anyway.
  */
 public class Structure {
-    
-    private static final InstantiationRegistry<Structure> STRUCTURES =
-            new InstantiationRegistry<>(8, DuplicatePolicy.THROW_EXCEPTION);
-    
-    static {
-        STRUCTURES.register(0, SchematicHouse.class);
-        
-        STRUCTURES.lock();
-    }
-    
-    public static Structure getStructure(int id) {
-        return STRUCTURES.instantiate(id);
-    }
     
     /**
      * Creates a new empty schematic.
@@ -71,7 +56,7 @@ public class Structure {
     }
     
     public int id() {
-        return STRUCTURES.getID(getClass());
+        return 0;
     }
     
     @Override

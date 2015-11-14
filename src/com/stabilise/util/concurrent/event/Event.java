@@ -47,7 +47,7 @@ public class Event {
     @Override
     public final boolean equals(Object o) {
         if(o == this) return true;
-        if(!(o instanceof Event)) return false; // filters nulls
+        if(!(o instanceof Event)) return false;
         // Events with identical names but different classes will be unequal,
         // which is what we want.
         if(getClass() != o.getClass()) return false;

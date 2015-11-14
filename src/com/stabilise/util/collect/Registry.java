@@ -24,46 +24,14 @@ public class Registry<K, V> extends AbstractRegistry<V> {
     
     
     /**
-     * Creates a new Registry with an initial capacity of 16 and the {@link
-     * DuplicatePolicy#REJECT REJECT} duplicate policy.
-     * 
-     * @param name The name of the registry.
-     * 
-     * @throws NullPointerException if {@code name} is {@code null}.
-     */
-    public Registry(String name) {
-        this(name, 16);
-    }
-    
-    /**
-     * Creates a new Registry with the {@link DuplicatePolicy#REJECT REJECT}
-     * duplicate policy.
-     * 
-     * @param name The name of the registry.
-     * @param capacity The initial registry capacity.
-     * 
-     * @throws NullPointerException if {@code name} is {@code null}.
-     * @throws IllegalArgumentException if {@code capacity < 0}.
-     */
-    public Registry(String name, int capacity) {
-        this(name, capacity, DuplicatePolicy.REJECT);
-    }
-    
-    /**
      * Creates a new Registry.
      * 
-     * @param name The name of the registry.
-     * @param capacity The initial registry capacity.
-     * @param dupePolicy The duplicate entry policy.
-     * 
-     * @throws NullPointerException if any of the arguments are {@code null}.
-     * @throws IllegalArgumentException if {@code capacity < 0}.
-     * @see DuplicatePolicy
+     * @throws NullPointerException if {@code params} is {@code null}.
      */
-    public Registry(String name, int capacity, DuplicatePolicy dupePolicy) {
-        super(name, dupePolicy);
+    public Registry(RegistryParams params) {
+        super(params);
         
-        objects = createUnderlyingMap(capacity);
+        objects = createUnderlyingMap(params.capacity);
     }
     
     /**

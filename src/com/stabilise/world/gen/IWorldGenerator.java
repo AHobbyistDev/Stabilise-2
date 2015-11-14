@@ -3,9 +3,6 @@ package com.stabilise.world.gen;
 import com.stabilise.world.Region;
 import com.stabilise.world.tile.Tiles;
 
-/**
- * Interface for a world generator.
- */
 public interface IWorldGenerator {
     
     /**

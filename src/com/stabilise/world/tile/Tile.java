@@ -8,6 +8,7 @@ import com.stabilise.entity.EntityMob;
 import com.stabilise.item.ItemStack;
 import com.stabilise.item.Items;
 import com.stabilise.util.collect.RegistryNamespacedDefaulted;
+import com.stabilise.util.collect.RegistryParams;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.TileBuilder.Template;
 
@@ -23,7 +24,9 @@ public class Tile {
     /** The registry of all tiles in the game. The default tile is the air
      * tile. */
     private static final RegistryNamespacedDefaulted<Tile> TILES =
-            new RegistryNamespacedDefaulted<>("TileRegistry", "stabilise", "air", 32);
+            new RegistryNamespacedDefaulted<>(
+                    new RegistryParams("TileRegistry", 32), "stabilise", "air"
+            );
     
     private static TileBuilder builder;
     

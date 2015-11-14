@@ -14,11 +14,8 @@ public class LineCounter {
     String dir;
     String[] ignores;
     int lineTotal = 0;
+    int realLineTotal = 0;
     int classTotal = 0;
-    
-    public LineCounter(String dir) throws IOException {
-        this(dir, new String[0]);
-    }
     
     /**
      * @param dir source dir
@@ -29,7 +26,7 @@ public class LineCounter {
         this.ignores = ignores;
         File f = new File(dir);
         doTheThing(f);
-        System.out.println("\nTotal: " + lineTotal + " (" + classTotal + ")");
+        System.out.println("\nTotal: " + realLineTotal + "/" + lineTotal + " (" + classTotal + ")");
     }
     
     void doTheThing(File f) throws IOException {
@@ -56,9 +53,12 @@ public class LineCounter {
         InputStreamReader isr = new InputStreamReader(fis);
         BufferedReader br = new BufferedReader(isr);
         int lines = 0;
-        while(br.readLine() != null) {
+        String s;
+        while((s = br.readLine()) != null) {
             lines++;
             lineTotal++;
+            if(!isComment(s))
+                realLineTotal++;
         }
         br.close();
         isr.close();
@@ -67,10 +67,28 @@ public class LineCounter {
         System.out.println(String.format("%4d - %s", lines, path.replace(dir, "")));
     }
     
+    private boolean isComment(String s) {
+        boolean whitespace = true;
+        char c;
+        for(int i = 0; i < s.length(); i++) {
+            c = s.charAt(i);
+            if(whitespace) {
+                if(c == '*') // interpret as multiline comment
+                    return true;
+                else if(c == '/')
+                    whitespace = false;
+                else if(c != ' ')
+                    return false;
+            } else {
+                return c == '/' || c == '*'; // "//" or "/*"
+            }
+        }
+        return true; // blank line is considered a comment
+    }
     public static void main(String[] args) throws IOException {
         new LineCounter(
-                //"C:/Users/Adam/Documents/GitHub/Stabilise-2/Stabilise 2/core/src",
-                "C:/Users/Administrator/Documents/Java/Stabilise II/core/src",
+                "C:/Users/Adam/Documents/GitHub/Stabilise-2/Stabilise 2/core/src",
+                //"C:/Users/Administrator/Documents/Java/Stabilise II/core/src",
                 new String[] {
                         "com/stabilise/tests",
                         "com/stabilise/screen/menu",

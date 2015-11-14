@@ -1,5 +1,7 @@
 package com.stabilise.util.collect;
 
+import java.util.Objects;
+
 import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
@@ -19,67 +21,21 @@ public class RegistryNamespacedDefaulted<V> extends RegistryNamespaced<V> {
     
     
     /**
-     * Creates a new namespaced registry with an initial capacity of 16 and the
-     * {@link DuplicatePolicy#REJECT REJECT} duplicate policy.
-     * 
-     * @param name The name of the registry.
-     * @param defaultNamespace The default namespace under which to register
-     * objects.
-     * @param defaultName The name under which the default return value will be
-     * registered.
-     * 
-     * @throws NullPointerException if either {@code name}, {@code
-     * defaultNamespace}, or {@code defaultName} are {@code null}.
-     * @throws IllegalArgumentException if there is a colon (:) in {@code
-     * defaultNamespace}.
-     */
-    public RegistryNamespacedDefaulted(String name, String defaultNamespace, String defaultName) {
-        this(name, defaultNamespace, defaultName, 16);
-    }
-    
-    /**
-     * Creates a new namespaced registry with the {@link DuplicatePolicy#REJECT
-     * REJECT} duplicate policy.
-     * 
-     * @param name The name of the registry.
-     * @param defaultNamespace The default namespace under which to register
-     * objects.
-     * @param defaultName The name under which the default return value will be
-     * registered.
-     * @param capacity The initial registry capacity.
-     * 
-     * @throws NullPointerException if either {@code name}, {@code
-     * defaultNamespace}, or {@code defaultName} are {@code null}.
-     * @throws IllegalArgumentException if there is a colon (:) in {@code
-     * defaultNamespace}, or {@code capacity < 0}.
-     */
-    public RegistryNamespacedDefaulted(String name, String defaultNamespace,
-            String defaultName, int capacity) {
-        this(name, defaultNamespace, defaultName, capacity, DuplicatePolicy.REJECT);
-    }
-    
-    /**
      * Creates a new namespaced registry.
      * 
-     * @param name The name of the registry.
      * @param defaultNamespace The default namespace under which to register
      * objects.
      * @param defaultName The name under which the default return value will be
      * registered.
-     * @param capacity The initial registry capacity.
-     * @param dupePolicy The duplicate entry policy.
      * 
      * @throws NullPointerException if any of the arguments are {@code null}.
      * @throws IllegalArgumentException if there is a colon (:) in {@code
-     * defaultNamespace}, or {@code capacity < 0}.
-     * @see DuplicatePolicy
+     * defaultNamespace}.
      */
-    public RegistryNamespacedDefaulted(String name, String defaultNamespace,
-            String defaultName, int capacity, DuplicatePolicy dupePolicy) {
-        super(name, defaultNamespace, capacity, dupePolicy);
-        if(defaultName == null)
-            throw new NullPointerException("defaultName is null");
-        this.defaultName = defaultName;
+    public RegistryNamespacedDefaulted(RegistryParams params, String defaultNamespace,
+            String defaultName) {
+        super(params, defaultNamespace);
+        this.defaultName = Objects.requireNonNull(defaultName);
     }
     
     /**

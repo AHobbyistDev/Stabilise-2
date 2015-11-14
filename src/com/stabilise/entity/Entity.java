@@ -3,7 +3,8 @@ package com.stabilise.entity;
 import static com.stabilise.util.collect.DuplicatePolicy.THROW_EXCEPTION;
 
 import com.stabilise.util.Direction;
-import com.stabilise.util.collect.InstantiationRegistry;
+import com.stabilise.util.collect.RegistryParams;
+import com.stabilise.util.collect.TypeFactory;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
@@ -22,17 +23,16 @@ public abstract class Entity extends FreeGameObject {
     /** The base value for air friction. */
     protected static final float AIR_FRICTION = 0.001f;
     
-    /** The entity registry. */
-    private static final InstantiationRegistry<Entity> ENTITIES =
-            new InstantiationRegistry<>(8, THROW_EXCEPTION, "EntityRegistry");
+    private static final TypeFactory<Entity> ENTITIES =
+            new TypeFactory<>(new RegistryParams("EntityRegistry", 8, THROW_EXCEPTION));
     
     // Register all entity types.
     static {
-        ENTITIES.register(0, EntityItem.class);
-        ENTITIES.register(1, EntityFireball.class);
-        ENTITIES.register(2, EntityBigFireball.class);
-        ENTITIES.register(3, EntityEnemy.class);
-        ENTITIES.register(4, EntityPerson.class);
+        ENTITIES.register(0, EntityItem.class,          EntityItem::new);
+        ENTITIES.register(1, EntityFireball.class,      EntityFireball::new);
+        ENTITIES.register(2, EntityBigFireball.class,   EntityBigFireball::new);
+        ENTITIES.register(3, EntityEnemy.class,         EntityEnemy::new);
+        ENTITIES.register(4, EntityPerson.class,        EntityPerson::new);
         
         ENTITIES.lock();
     }
@@ -456,13 +456,10 @@ public abstract class Entity extends FreeGameObject {
      * {@link #getID()} method.
      * 
      * @return An Entity object of class determined by the {@code id}
-     * parameter, or {@code null} if the {@code id} parameter is invalid or
-     * the entity could not be constructed for whatever reason.
-     * @throws RuntimeException if the entity corresponding to the ID was
-     * registered incorrectly.
+     * parameter, or {@code null} if the {@code id} parameter is invalid.
      */
     public static Entity createEntity(int id) {
-        return ENTITIES.instantiate(id);
+        return ENTITIES.create(id);
     }
     
     /**

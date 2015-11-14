@@ -142,7 +142,7 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
         if(next != null) {
             next.owner = owner;
             // Reuse current thread rather than submit to executor
-            next.run();
+            next.run(); // TODO this is recursive
         } else if(group != null) {
             group.onSubtaskFinish(true);
         } else { // we're the last task

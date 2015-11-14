@@ -12,7 +12,9 @@ public interface TaskView {
      * Returns the fraction of this task which has been completed, from 0 to 1
      * (inclusive).
      */
-    double fractionCompleted();
+    default double fractionCompleted() {
+        return (double)partsCompleted() / totalParts();
+    }
     
     /**
      * Returns the percentage of this task which has been completed, from 0 to

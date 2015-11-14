@@ -2,6 +2,7 @@ package com.stabilise.item;
 
 import com.stabilise.core.Constants;
 import com.stabilise.util.collect.RegistryNamespaced;
+import com.stabilise.util.collect.RegistryParams;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.tile.Tile;
 
@@ -16,7 +17,7 @@ public class Item {
     
     /** The registry containing all items in the game. */
     public static final RegistryNamespaced<Item> ITEMS = 
-            new RegistryNamespaced<>("ItemRegistry", "stabilise", 8);
+            new RegistryNamespaced<>(new RegistryParams("ItemRegistry", 8), "stabilise");
     
     /** The default maximum stack size. */
     public static final int DEFAULT_MAX_STACK_SIZE = Constants.MAX_STACK_SIZE;
