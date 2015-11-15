@@ -8,7 +8,7 @@ import com.stabilise.world.World;
 import com.stabilise.world.tile.Tile;
 
 
-public class CPhysicsImpl implements CPhysics {
+public class PhysicsImpl implements CPhysics {
     
     protected static final float AIR_FRICTION = 0.001f;
     

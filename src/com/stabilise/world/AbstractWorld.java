@@ -9,10 +9,10 @@ import java.util.Random;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.core.Constants;
+import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.GameObject;
 import com.stabilise.entity.collision.Hitbox;
-import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.entity.particle.ParticlePhysical;
 import com.stabilise.util.Log;
@@ -184,9 +184,9 @@ public abstract class AbstractWorld implements World {
         
         if(!entitiesToAdd.isEmpty()) {
             entitiesToAdd.consume(e -> {
-                e.id = ++entityCount;
+                e.setID(++entityCount);
                 e.init(this);
-                entities.put(e.id, e);
+                entities.put(e.id(), e);
             });
         }
         
@@ -431,9 +431,8 @@ public abstract class AbstractWorld implements World {
     @ForTestingPurposes
     public void destroyEntities() {
         for(Entity e : entities.values()) {
-            if(e.controller instanceof PlayerController)
-                continue;
-            e.destroy();
+            if(!e.isPlayerControlled())
+                e.destroy();
         }
     }
     
@@ -657,7 +656,15 @@ public abstract class AbstractWorld implements World {
         }
         
         private int count(int baseCount) {
-            return baseCount;
+            switch(Settings.getSettingParticles()) {
+                case Settings.PARTICLES_ALL:
+                    return baseCount;
+                case Settings.PARTICLES_REDUCED:
+                    return baseCount / 2;
+                case Settings.PARTICLES_NONE:
+                    return 0;
+            }
+            return 0;
         }
         
         private void addParticle(Particle p, double x, double y) {
@@ -724,6 +731,33 @@ public abstract class AbstractWorld implements World {
             Random rnd = world.getRnd();
             for(int i = 0; i < count(numParticles); i++)
                 createBurstParticle(rnd, x, y, minV, maxV, minAngle, maxAngle);
+        }
+        
+        /**
+         * Creates a directed burst of particles at the specified coordinates.
+         * If the particles created by this source are {@link ParticlePhysical
+         * physical particles}, they will be created with a velocity of
+         * magnitude between {@code minV} and {@code maxV} directed between the
+         * specified angles; otherwise, the particles will simply be displaced
+         * in that direction by that much.
+         * 
+         * @param numParticles The number of particles to create.
+         * @param minV The minimum velocity, in tiles per second.
+         * @param maxV The maximum velocity, in tiles per second.
+         * @param minAngle The minimum angle at which to direct the particles,
+         * in radians.
+         * @param maxAngle The maximum angle at which to direct the particles,
+         * in radians.
+         */
+        public void createBurst(int numParticles,
+                double minX, double maxX, double minY, double maxY,
+                float minV, float maxV, float minAngle, float maxAngle) {
+            Random rnd = world.getRnd();
+            for(int i = 0; i < count(numParticles); i++)
+                createBurstParticle(rnd,
+                        minX + rnd.nextDouble() * (maxX-minX),
+                        minY + rnd.nextDouble() * (maxY-minY),
+                        minV, maxV, minAngle, maxAngle);
         }
         
         /**
@@ -807,6 +841,15 @@ public abstract class AbstractWorld implements World {
                 Entity e) {
             createOutwardsBurst(numParticles, e.x, e.y, burstX, burstY,
                     maxX, maxY, e.aabb);
+        }
+        
+        public void createCentredOutwardsBurst(Random rnd, int numParticles,
+                float minV, float maxV, Entity e) {
+            double midX = e.x + e.aabb.width()/2;
+            double midY = e.y + e.aabb.height()/2;
+            for(int i = 0; i < count(numParticles); i++) {
+                this.createBurstParticle(rnd, midX, midY, minV, maxV, 0f, Maths.TAUf);
+            }
         }
         
     }

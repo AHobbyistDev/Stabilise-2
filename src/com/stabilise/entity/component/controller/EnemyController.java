@@ -2,9 +2,13 @@ package com.stabilise.entity.component.controller;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.ComponentEvent;
+import com.stabilise.entity.component.core.BaseMob;
+import com.stabilise.util.Direction;
 import com.stabilise.world.World;
 
-
+/**
+ * Extremely simplistic mob controller.
+ */
 public class EnemyController implements CController {
     
     /** Actions for the current, incredibly simplistic, AI. */
@@ -18,8 +22,12 @@ public class EnemyController implements CController {
     /** The enemy's current action. */
     private EnumAction action = EnumAction.IDLE;
     
+    private BaseMob mob;
+    
     @Override
-    public void init(World w, Entity e) {}
+    public void init(World w, Entity e) {
+        mob = (BaseMob)e.core;
+    }
     
     @Override
     public void update(World w, Entity e) {
@@ -45,38 +53,12 @@ public class EnemyController implements CController {
             }
             
             if(action == EnumAction.MOVE) {
-                /*
                 if(e.facingRight)
-                    accelerate(e.acceleration);
+                    mob.move(Direction.RIGHT);
                 else
-                    accelerate(-e.acceleration);
-                */
+                    mob.move(Direction.LEFT);
             }
         }
-    }
-    
-    /**
-     * Accelerates the mob.
-     * 
-     * @param ddx The base amount by which to modify the velocity.
-     */
-    @SuppressWarnings("unused")
-    private void accelerate(Entity e, float ddx) {
-        /*
-        if(!mob.state.canMove)
-            return;
-        
-        // Some sort of scaling
-        ddx *= (mob.maxDx - Math.abs(mob.dx));
-        
-        // Note that for the purposes of acceleration the friction of a tile is
-        // treated as its traction.
-        
-        if(e.physics.onGround())
-            e.dx += ddx * Tile.getTile(e.floorTile).getFriction();
-        else
-            e.dx += ddx * mob.airAcceleration;
-        */
     }
     
     @Override

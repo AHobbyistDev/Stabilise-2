@@ -86,7 +86,7 @@ public interface World {
      * @throws NullPointerException if {@code e} is {@code null}.
      */
     default void removeEntity(Entity e) {
-        removeEntity(e.id);
+        removeEntity(e.id());
     }
     
     /**

@@ -26,7 +26,7 @@ public enum ComponentEvent {
     public void post(World w, Entity e) {
         if(c) e.controller.handle(w, e, this);
         if(p) e.physics.handle(w, e, this);
-        if(s) e.state.handle(w, e, this);
+        if(s) e.core.handle(w, e, this);
     }
     
 }

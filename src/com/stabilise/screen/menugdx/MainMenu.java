@@ -89,7 +89,7 @@ public class MainMenu implements Screen {
         table.add(heading).spaceBottom(50).row();
         table.add(btnPlay).spaceBottom(20).row();
         table.add(btnExit).spaceBottom(50).row();
-        table.debug();
+        //table.debug();
         stage.addActor(table);
     }
     

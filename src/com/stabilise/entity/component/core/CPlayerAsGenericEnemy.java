@@ -1,4 +1,4 @@
-package com.stabilise.entity.component.state;
+package com.stabilise.entity.component.core;
 
 import com.stabilise.core.Constants;
 import com.stabilise.item.BoundedContainer;
@@ -8,7 +8,7 @@ import com.stabilise.item.Item;
 import com.stabilise.item.ItemStack;
 
 
-public class CPlayerPerson extends CPerson implements IContainer {
+public class CPlayerAsGenericEnemy extends CGenericEnemy implements IContainer {
     
     public final Container inventory = new BoundedContainer(Constants.INVENTORY_CAPACITY);
     
@@ -41,5 +41,7 @@ public class CPlayerPerson extends CPerson implements IContainer {
     public boolean contains(Item item, int minQuantity) {
         return inventory.contains(item, minQuantity);
     }
+    
+    
     
 }

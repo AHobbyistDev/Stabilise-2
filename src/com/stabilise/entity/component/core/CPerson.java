@@ -1,4 +1,4 @@
-package com.stabilise.entity.component.state;
+package com.stabilise.entity.component.core;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.entity.Entities;
@@ -17,7 +17,7 @@ import com.stabilise.world.AbstractWorld.ParticleSource;
 import com.stabilise.world.World;
 
 
-public class CPerson extends CBaseMob {
+public class CPerson extends BaseMob {
     
     //--------------------==========--------------------
     //-----=====Static Constants and Variables=====-----
@@ -540,7 +540,7 @@ public class CPerson extends CBaseMob {
     }
     
     @Override
-    public void attack(Direction direction) {
+    public void attack(World w, Direction direction) {
         if(!state.canAct)
             return;
         
@@ -582,7 +582,7 @@ public class CPerson extends CBaseMob {
     }
     
     @Override
-    public void specialAttack(Direction direction) {
+    public void specialAttack(World w, Direction direction) {
         if(!state.canAct)
             return;
         

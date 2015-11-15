@@ -1,24 +1,26 @@
 package com.stabilise.entity;
 
 import com.stabilise.entity.component.controller.*;
+import com.stabilise.entity.component.core.*;
 import com.stabilise.entity.component.physics.*;
-import com.stabilise.entity.component.state.*;
 import com.stabilise.item.ItemStack;
 import com.stabilise.world.World;
 
-
+/**
+ * Provides static factory methods for entities.
+ */
 public class Entities {
     
     private Entities() {}
     
-    private static CPhysics       p() { return new CPhysicsImpl();         }
-    private static CController    c() { return IdleController.INSTANCE;    }
+    private static CPhysics       p() { return new PhysicsImpl();          }
+    private static CController    c() { return IdleController.INSTANCE;     }
     
-    private static Entity         e() { return new Entity();               }
-    public  static Entity e(CState s) { return e().construct(p(), c(), s); }
+    private static Entity         e() { return new Entity();                }
+    public  static Entity e(CCore co) { return e().construct(p(), c(), co); }
     
     public static Entity player() {
-        return e(new CPlayerPerson());
+        return e(new CPlayerAsGenericEnemy());
     }
     
     public static Entity fireball(long ownerID, int damage) {
@@ -31,6 +33,10 @@ public class Entities {
     
     public static Entity enemy() {
         return e().construct(p(), new EnemyController(), new CGenericEnemy());
+    }
+    
+    public static Entity person() {
+        return e().construct(p(), new EnemyController(), new CPerson());
     }
     
 }

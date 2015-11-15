@@ -13,7 +13,7 @@ import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.ComponentEvent;
-import com.stabilise.entity.component.state.CBaseMob;
+import com.stabilise.entity.component.core.BaseMob;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
@@ -31,7 +31,7 @@ import com.stabilise.world.tile.Tiles;
 public class PlayerController implements CController, Controllable, InputProcessor {
     
     private Entity e;
-    private CBaseMob mob;
+    private BaseMob mob;
     
     /** A reference to the PlayerController's controller. */
     public Controller controller;
@@ -62,7 +62,7 @@ public class PlayerController implements CController, Controllable, InputProcess
     @Override
     public void init(World w, Entity e) {
         this.e = e;
-        mob = (CBaseMob)e.state;
+        mob = (BaseMob)e.core;
     }
     
     @Override
@@ -155,19 +155,19 @@ public class PlayerController implements CController, Controllable, InputProcess
                 break;
             case ATTACK:
                 if(controller.isControlPressed(Control.UP))
-                    mob.attack(Direction.UP);
+                    mob.attack(game.world, Direction.UP);
                 else if(controller.isControlPressed(Control.DOWN))
-                    mob.attack(Direction.DOWN);
+                    mob.attack(game.world, Direction.DOWN);
                 else
-                    mob.attack(e.facingRight ? Direction.RIGHT : Direction.LEFT);
+                    mob.attack(game.world, e.facingRight ? Direction.RIGHT : Direction.LEFT);
                 break;
             case SPECIAL:
                 if(controller.isControlPressed(Control.UP))
-                    mob.specialAttack(Direction.UP);
+                    mob.specialAttack(game.world, Direction.UP);
                 else if(controller.isControlPressed(Control.DOWN))
-                    mob.specialAttack(Direction.DOWN);
+                    mob.specialAttack(game.world, Direction.DOWN);
                 else
-                    mob.specialAttack(e.facingRight ? Direction.RIGHT : Direction.LEFT);
+                    mob.specialAttack(game.world, e.facingRight ? Direction.RIGHT : Direction.LEFT);
                 break;
             case SAVE_LOG:
                 Log.saveLog(false, Stabilise.GAME_NAME + " v" + Constants.VERSION);

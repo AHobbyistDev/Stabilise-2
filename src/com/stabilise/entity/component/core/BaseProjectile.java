@@ -1,4 +1,4 @@
-package com.stabilise.entity.component.state;
+package com.stabilise.entity.component.core;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.entity.Entity;
@@ -8,7 +8,7 @@ import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
 
 
-public abstract class CBaseProjectile implements CState {
+public abstract class BaseProjectile implements CCore {
     
     protected long ownerID;
     /** The projectile's hitbox. */

@@ -5,8 +5,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.stabilise.core.Resources;
-import com.stabilise.entity.component.state.CBaseMob;
-import com.stabilise.entity.component.state.CPerson;
+import com.stabilise.entity.component.core.BaseMob;
+import com.stabilise.entity.component.core.CPerson;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.util.maths.Point;
 
@@ -138,7 +138,7 @@ public class ModelPlayer extends Model {
      * @param stateDuration The duration for which the player has remained in
      * the state.
      */
-    public void setState(CBaseMob.State state, int stateDuration) {
+    public void setState(BaseMob.State state, int stateDuration) {
         switch(state) {
             case IDLE:
                 setSprite(SPRITE_IDLE);

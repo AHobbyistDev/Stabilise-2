@@ -1,4 +1,4 @@
-package com.stabilise.entity.component.state;
+package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.Component;
@@ -8,8 +8,14 @@ import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
-
-public interface CState extends Component {
+/**
+ * The core component is the primary uniquifying aspect of an entity type
+ * (i.e. under the old inheritance schema, a core would be equivalent to a
+ * subclass of Entity).
+ * 
+ * <p>Cores contain secondary entity data, functionality and render data.
+ */
+public interface CCore extends Component {
     
     /**
      * Renders the entity.

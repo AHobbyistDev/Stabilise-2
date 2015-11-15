@@ -1,4 +1,4 @@
-package com.stabilise.entity.component.state;
+package com.stabilise.entity.component.core;
 
 import java.util.Random;
 
@@ -12,7 +12,7 @@ import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
-public class CItem implements CState {
+public class CItem implements CCore {
     
     //--------------------==========--------------------
     //-----=====Static Constants and Variables=====-----
@@ -65,8 +65,8 @@ public class CItem implements CState {
             e.destroy();
         
         for(Entity p : w.getPlayers()) {
-            if(!(p.state instanceof IContainer)) continue;
-            IContainer c = (IContainer)p.state;
+            if(!(p.core instanceof IContainer)) continue;
+            IContainer c = (IContainer)p.core;
             if(c.canAddStack(stack)) {
                 float distX = (float) (e.x - p.x);
                 float distY = (float) (e.y - p.y);

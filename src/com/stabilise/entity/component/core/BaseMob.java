@@ -1,4 +1,4 @@
-package com.stabilise.entity.component.state;
+package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.ComponentEvent;
@@ -11,8 +11,10 @@ import com.stabilise.util.Direction;
 import com.stabilise.world.World;
 import com.stabilise.world.AbstractWorld.ParticleSource;
 
-
-public abstract class CBaseMob implements CState {
+/**
+ * Basic mob implementation.
+ */
+public abstract class BaseMob implements CCore {
     
     /** The default number of ticks a mob becomes invulnerable for after being
      * hit. */
@@ -218,7 +220,7 @@ public abstract class CBaseMob implements CState {
         stateTicks++;
         
         if(state == State.DEAD && stateTicks == DEATH_TICKS) {
-            spawnSmokeParticles(e);
+            spawnSmokeParticles(w, e);
             e.destroy();
             return;
         }
@@ -367,17 +369,13 @@ public abstract class CBaseMob implements CState {
     
     /**
      * Attacks, if able, in a given direction.
-     * 
-     * @param direction The direction in which to make the attack.
      */
-    public abstract void attack(Direction direction);
+    public abstract void attack(World w, Direction direction);
     
     /**
      * Performs a special attack, if able, in a given direction.
-     * 
-     * @param direction The direction in which to make the attack.
      */
-    public abstract void specialAttack(Direction direction);
+    public abstract void specialAttack(World w, Direction direction);
     
     // ----------End things to be called by the mob's controller----------
     
@@ -424,9 +422,10 @@ public abstract class CBaseMob implements CState {
     /**
      * Spawns smoke particles at the Mob's location.
      */
-    private void spawnSmokeParticles(Entity e) {
+    private void spawnSmokeParticles(World w, Entity e) {
         //srcSmoke.createBurst(30, 0.01f, 0.25f, 0f, (float)Math.PI, this);
-        srcSmoke.createOutwardsBurst(30, true, true, 0.25f, 0.05f, e);
+        //srcSmoke.createOutwardsBurst(30, true, false, 5f, 7f, e);
+        srcSmoke.createCentredOutwardsBurst(w.getRnd(), 30, 1f, 7f, e);
     }
     
     /**

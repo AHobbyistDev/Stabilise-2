@@ -1,4 +1,4 @@
-package com.stabilise.entity.component.state;
+package com.stabilise.entity.component.core;
 
 import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
@@ -13,7 +13,7 @@ import com.stabilise.world.World;
 import com.stabilise.world.AbstractWorld.ParticleSource;
 
 
-public class CFireball extends CBaseProjectile {
+public class CFireball extends BaseProjectile {
     
     /** The fireball hitbox template. */
     private static final AABB FIREBALL_BOUNDING_BOX = new AABB(-0.05f, -0.05f, 0.1f, 0.1f);

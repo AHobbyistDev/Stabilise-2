@@ -16,8 +16,8 @@ public abstract class ParticlePhysical extends Particle {
     public void update(World world) {
         super.update(world);
         
-        x += dx;
-        y += dy;
+        x += dx * world.getTimeIncrement();
+        y += dy * world.getTimeIncrement();
     }
     
     @Override
