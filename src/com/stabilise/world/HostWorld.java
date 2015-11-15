@@ -8,10 +8,8 @@ import java.util.function.Consumer;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.state.SingleplayerState;
+import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.component.EntityData;
-import com.stabilise.entity.component.physics.CPhysicsImpl;
-import com.stabilise.entity.component.state.CPlayerPerson;
 import com.stabilise.util.annotation.ForTestingPurposes;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.UserThread;
@@ -112,11 +110,7 @@ public class HostWorld extends AbstractWorld {
      * @throws NullPointerException if {@code data} is {@code null}.
      */
     public Entity addPlayer(PlayerData data) {
-        EntityData d = new EntityData();
-        d.physics = new CPhysicsImpl();
-        d.state = new CPlayerPerson();
-        Entity p = new Entity();
-        p.init(this, d);
+        Entity p = Entities.player();
         data.playerMob = p;
         if(data.newToWorld) {
             data.newToWorld = false;

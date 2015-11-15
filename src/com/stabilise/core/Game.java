@@ -4,7 +4,7 @@ import static com.badlogic.gdx.Input.Keys;
 
 import com.badlogic.gdx.InputProcessor;
 import com.stabilise.core.app.Application;
-import com.stabilise.core.state.LoadingState;
+import com.stabilise.core.state.MainMenuState;
 import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.controller.PlayerController;
@@ -78,6 +78,7 @@ public class Game implements Controllable, InputProcessor {
         // TODO: Hardcoding this is poor design and should be changed in the future
         playerController = new PlayerController(controller, this);
         player.controller = playerController;
+        playerController.init(world, player);
     }
     
     /**
@@ -112,7 +113,7 @@ public class Game implements Controllable, InputProcessor {
                 Application a = Application.get();
                 //a.produceCrashLog();
                 //close();            // Simply calling close() makes the game freeze
-                a.setState(new LoadingState());
+                a.setState(new MainMenuState());
                 return;
             }
         }

@@ -4,6 +4,7 @@ import java.util.Random;
 
 import com.stabilise.core.Constants;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.item.ItemStack;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
@@ -97,6 +98,11 @@ public class CItem implements CState {
     @Override
     public AABB getAABB() {
         return ENT_AABB;
+    }
+    
+    @Override
+    public void handle(World w, Entity e, ComponentEvent ev) {
+        
     }
     
 }

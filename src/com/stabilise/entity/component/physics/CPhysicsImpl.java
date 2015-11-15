@@ -1,6 +1,7 @@
 package com.stabilise.entity.component.physics;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.util.Direction;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
@@ -259,8 +260,10 @@ public class CPhysicsImpl implements CPhysics {
      * entity has collided with is located.
      */
     private void collideHorizontal(World w, Entity e, double xp, Direction direction) {
-        onHorizontalCollision();
-        impact(w, e, e.dx, true);
+        ComponentEvent.COLLISION.post(w, e);
+        ComponentEvent.COLLISION_HORIZONTAL.post(w, e);
+        ComponentEvent.COLLISION_TILE.post(w, e);
+        //impact(w, e, e.dx, true);
         
         e.dx = dxi = 0;
         
@@ -279,8 +282,10 @@ public class CPhysicsImpl implements CPhysics {
      * entity has collided with is located.
      */
     private void collideVertical(World w, Entity e, double yp, Direction direction) {
-        onVerticalCollision();
-        impact(w, e, e.dy, true);
+        ComponentEvent.COLLISION.post(w, e);
+        ComponentEvent.COLLISION_VERTICAL.post(w, e);
+        ComponentEvent.COLLISION_TILE.post(w, e);
+        //impact(w, e, e.dy, true);
         
         e.dy = dyi = 0;
         
@@ -293,37 +298,17 @@ public class CPhysicsImpl implements CPhysics {
             int tx = Maths.floor(e.x);
             int ty = Maths.floor(e.y - 0.001D);
             Tile t = w.getTileAt(tx, ty);
-            //----t.handleStep(w, tx, ty, this);
+            t.handleStep(w, tx, ty, e);
             floorTile = t.getID();
             onGround = true;
         }
     }
     
-    /**
-     * Handles any resultant effects of a horizontal collision.
-     */
-    protected void onHorizontalCollision() {
-        // nothing to see here, implemented in subclasses
-    }
+    @Override public boolean onGround() { return onGround; }
     
-    /**
-     * Handles any resultant effects of a vertical collision.
-     */
-    protected void onVerticalCollision() {
-        // nothing to see here, implemented in subclasses
+    @Override
+    public void handle(World w, Entity e, ComponentEvent ev) {
+        
     }
-    
-    /**
-     * Resolves an impact (a sudden change in velocity).
-     * 
-     * @param world the world
-     * @param dv The change in the entity's velocity.
-     * @param tileCollision Whether or not the impact is from a tile collision.
-     */
-    protected void impact(World w, Entity e, float dv, boolean tileCollision) {
-        // TODO
-    }
-    
-    public boolean onGround() { return onGround; }
     
 }

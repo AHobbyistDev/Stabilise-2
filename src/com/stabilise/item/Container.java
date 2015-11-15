@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
@@ -15,7 +16,7 @@ import com.stabilise.util.nbt.NBTTagList;
  * A container is something which contains items - e.g. player inventory,
  * chest.
  */
-public abstract class Container implements Iterable<ItemStack>, Sendable {
+public abstract class Container implements IContainer, Iterable<ItemStack>, Sendable {
     
     /**
      * Checks for whether or not this container is a bounded container.
@@ -74,17 +75,7 @@ public abstract class Container implements Iterable<ItemStack>, Sendable {
         return getAndSetSlot(slot, ItemStack.NO_STACK);
     }
     
-    /**
-     * Checks for whether or not an item stack is able to be added to the
-     * container - that is, whether or not a valid slot exists in which at
-     * least one of the item can be placed.
-     * 
-     * @param stack The item stack.
-     * 
-     * @return {@code true} if the stack may be to be added; {@code false}
-     * otherwise.
-     * @throws NullPointerException if {@code stack} is {@code null}.
-     */
+    @Override
     public boolean canAddStack(ItemStack stack) {
         if(stack == null)
             throw new NullPointerException("stack is null");
@@ -99,20 +90,7 @@ public abstract class Container implements Iterable<ItemStack>, Sendable {
         return false;
     }
     
-    /**
-     * Adds a specified quantity of items to the container in the first
-     * available slot (or slots, if such a quantity does not fit in a single
-     * stack; larger quantities will be partitioned into multiple stacks). If
-     * there are any incompletely filled stacks with a matching item in the
-     * container, they will be added to before any new slots are used.
-     * 
-     * @param item The template of the item(s) to add.
-     * @param quantity The number of items to add.
-     * 
-     * @return The number of items which were not added to the container.
-     * @throws NullPointerException if {@code item} is {@code null}.
-     * @throws IllegalArgumentException if {@code quantity <= 0}.
-     */
+    @Override
     public int addItem(Item item, int quantity) {
         if(quantity <= 0)
             throw new IllegalArgumentException("quantity <= 0: " + quantity);
@@ -218,22 +196,7 @@ public abstract class Container implements Iterable<ItemStack>, Sendable {
         return quantity + stack.getQuantity();
     }
     
-    /**
-     * Adds an item stack to the container in the first available slot (or
-     * slots, if it does not fit in a single slot). If there are any
-     * incompletely filled stacks with a matching item in the container, they
-     * will be added to before any new slots are used.
-     * 
-     * <p>If this method returns {@code true}, ownership of {@code stack}
-     * should be relinquished as it is now considered property of this
-     * Container.
-     * 
-     * @param stack The item stack to add to the container.
-     * 
-     * @return {@code true} if the stack was added in its entirety and should
-     * be released; {@code false} otherwise.
-     * @throws NullPointerException if {@code stack} is {@code null}.
-     */
+    @Override
     public boolean addStack(ItemStack stack) {
         if(stack == null)
             throw new NullPointerException("stack is null");
@@ -350,6 +313,26 @@ public abstract class Container implements Iterable<ItemStack>, Sendable {
         return getStack(slot) == ItemStack.NO_STACK;
     }
     
+    @Override
+    public boolean contains(Item item) {
+        for(int i = 0; i < size(); i++) {
+            if(getStack(i).holds(item))
+                return true;
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean contains(Item item, int minQuantity) {
+        int count = 0;
+        for(int i = 0; i < size(); i++) {
+            ItemStack s = getStack(i);
+            if(s.holds(item) && (count = count + s.getQuantity()) >= minQuantity)
+                return true;
+        }
+        return false;
+    }
+    
     /**
      * Clears the contents of the container. These contents will be garbage
      * collected if not otherwise referenced.
@@ -445,7 +428,7 @@ public abstract class Container implements Iterable<ItemStack>, Sendable {
     /*
      * compresses matching adjacent stacks into one stack if possible
      * 
-     * TODO: finish
+     * TODO
      */
     /*
     private void compact() {
@@ -478,6 +461,15 @@ public abstract class Container implements Iterable<ItemStack>, Sendable {
             ; // clean up excess unbounded slots
     }
     */
+    
+    @Override
+    public void forEach(Consumer<? super ItemStack> action) {
+        for(int i = 0; i < size(); i++) {
+            ItemStack s = getStack(i);
+            if(s != ItemStack.NO_STACK)
+                action.accept(s);
+        }
+    }
     
     @Override
     public Iterator<ItemStack> iterator() {

@@ -3,6 +3,7 @@ package com.stabilise.entity.component.state;
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.collision.Hitbox;
+import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.util.Direction;
@@ -192,9 +193,8 @@ public class CPerson extends CBaseMob {
         maxMana = 500;
         mana = 500;
         
-        jumpVelocity = 16f; // max height = u^2/2g
+        jumpVelocity = 16f;
         jumpCrouchDuration = 8;
-        //jump = PhysicsUtil.jumpHeightToInitialJumpVelocity(4, gravity);
         swimAcceleration = 0.08f;
         acceleration = 1.5f;
         //airAcceleration = acceleration * 0.15f;
@@ -507,7 +507,7 @@ public class CPerson extends CBaseMob {
     @Override
     protected void onVerticalCollision() {
         if(e.dy < 0 && !wasOnGround && state.priority != StatePriority.UNOVERRIDEABLE) {
-            if(e.dy < -jumpVelocity) {
+            if(e.dy < 2 * -jumpVelocity) {
                 setState(State.LAND_CROUCH, false, 20);        // TODO: temporary constant duration
             } else {
                 switch(state) {
@@ -715,6 +715,11 @@ public class CPerson extends CBaseMob {
             mana = maxMana;
         
         manaChanged = true;
+    }
+
+    @Override
+    public void handle(World w, Entity e, ComponentEvent ev) {
+        super.handle(w, e, ev);
     }
     
 }

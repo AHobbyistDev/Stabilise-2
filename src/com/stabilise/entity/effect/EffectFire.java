@@ -1,7 +1,9 @@
 package com.stabilise.entity.effect;
 
+import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.damage.FireSource;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.world.World;
 import com.stabilise.world.AbstractWorld.ParticleSource;
@@ -37,8 +39,8 @@ public class EffectFire extends Effect {
         else if(Settings.settingParticlesReduced() && age % 3 == 0)
             createFireParticle(world, target);
         
-        //if(age % Constants.TICKS_PER_SECOND == 0)
-        //    target.damage(world, 2, -1, 0, 0);
+        if(age % Constants.TICKS_PER_SECOND == 0)
+            target.damage(world, new FireSource(2));
     }
     
     /**

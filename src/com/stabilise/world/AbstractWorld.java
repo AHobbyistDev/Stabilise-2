@@ -184,7 +184,7 @@ public abstract class AbstractWorld implements World {
         if(!entitiesToAdd.isEmpty()) {
             entitiesToAdd.consume(e -> {
                 e.id = ++entityCount;
-                e.init(this, null);
+                e.init(this);
                 entities.put(e.id, e);
             });
         }

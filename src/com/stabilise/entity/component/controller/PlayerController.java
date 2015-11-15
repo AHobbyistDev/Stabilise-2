@@ -11,6 +11,7 @@ import com.stabilise.core.app.Application;
 import com.stabilise.core.main.Stabilise;
 import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.entity.component.state.CBaseMob;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
@@ -303,6 +304,11 @@ public class PlayerController implements CController, Controllable, InputProcess
         } else
             tileID = 1 + Maths.remainder(tileID + amount - 1, 21);
         return true;
+    }
+    
+    @Override
+    public void handle(World w, Entity e, ComponentEvent ev) {
+        // TODO Auto-generated method stub
     }
     
 }

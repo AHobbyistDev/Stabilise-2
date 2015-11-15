@@ -1,6 +1,7 @@
 package com.stabilise.entity.component.controller;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.world.World;
 
 
@@ -76,6 +77,11 @@ public class EnemyController implements CController {
         else
             e.dx += ddx * mob.airAcceleration;
         */
+    }
+    
+    @Override
+    public void handle(World w, Entity e, ComponentEvent ev) {
+        // meh
     }
     
 }

@@ -1,7 +1,9 @@
 package com.stabilise.entity.component.state;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.entity.component.controller.PlayerController;
+import com.stabilise.entity.damage.DamageSource;
 import com.stabilise.entity.effect.Effect;
 import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleSmoke;
@@ -165,7 +167,6 @@ public abstract class CBaseMob implements CState {
     /** Whether or not the Mob is dead. */
     public boolean dead = false;
     
-    public boolean invulnerable = false;
     /** The number of ticks until the Mob loses its invulnerability. */
     public int invulnerabilityTicks = 0;
     
@@ -227,9 +228,9 @@ public abstract class CBaseMob implements CState {
             e.dy = jumpVelocity;
         }
         
-        if(invulnerable) {
+        if(e.invulnerable) {
             if(--invulnerabilityTicks == 0)
-                invulnerable = false;
+                e.invulnerable = false;
         }
         
         if(effect != null) {
@@ -302,11 +303,7 @@ public abstract class CBaseMob implements CState {
         }
     }
     
-    /**
-     * Applies an effect to the Mob. The current effect will be overwritten.
-     * 
-     * @param effect The effect.
-     */
+    @Override
     public void applyEffect(Effect effect) {
         this.effect = effect;
     }
@@ -384,46 +381,44 @@ public abstract class CBaseMob implements CState {
     
     // ----------End things to be called by the mob's controller----------
     
-    /**
-     * Damages the mob.
-     * 
-     * @param world
-     * @param damage The damage dealt to the mob.
-     * @param damagerID The ID of the entity to have caused the damage.
-     * @param fx The x component of the force applied to the mob by the impact.
-     * @param fy The y component of the force applied to the mob by the impact.
-     */
-    public void damage(World w, int damage, int damagerID, float fx, float fy) {
-        if(invulnerable || dead)
-            return;
+    @Override
+    public boolean damage(World w, Entity e, DamageSource src) {
+        if(e.invulnerable || dead)
+            return false;
         
-        health -= damage;
-        e.dx = (e.dx + fx);
-        e.dy = (e.dy + fy);
+        health -= src.damage;
+        e.dx = (e.dx + src.force.x());
+        e.dy = (e.dy + src.force.y());
         
         hasTint = true;
         //tintStrength = 1.0f;
         
-        if(damage > 0)
+        if(src.damage > 0)
             srcDmgIndicator.createAt(e.x, e.y);
         
         if(health <= 0) {
             health = 0;
             tintStrength = 0.8f;
-            kill(w);
+            ComponentEvent.DAMAGED.post(w, e);
+            kill(w, e, src);
         } else {
             tintStrength = 1.0f;
-            invulnerable = true;
+            e.invulnerable = true;
             invulnerabilityTicks = INVULNERABILITY_TICKS;
+            ComponentEvent.DAMAGED.post(w, e);
         }
+        
+        return true;
     }
     
     /**
-     * Kills the mob by settings its state to {@link State#DEAD DEAD}.
+     * Kills the mob by setting its state to {@link State#DEAD DEAD}.
      */
-    public void kill(World w) {
+    @Override
+    public void kill(World w, Entity e, DamageSource src) {
         dead = true;
         setState(State.DEAD, false, DEATH_TICKS);
+        ComponentEvent.KILLED.post(w, e);
     }
     
     /**
@@ -480,6 +475,12 @@ public abstract class CBaseMob implements CState {
      */
     public boolean isPlayerControlled() {
         return e.controller instanceof PlayerController;
+    }
+    
+    @Override
+    public void handle(World w, Entity e, ComponentEvent ev) {
+        if(ev == ComponentEvent.COLLISION_VERTICAL)
+            onVerticalCollision();
     }
     
 }

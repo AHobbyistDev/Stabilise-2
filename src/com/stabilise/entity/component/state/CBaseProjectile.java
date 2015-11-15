@@ -9,17 +9,13 @@ import com.stabilise.world.World;
 
 public abstract class CBaseProjectile implements CState {
     
-    private final long ownerID;
+    protected long ownerID;
     /** The projectile's hitbox. */
     public LinkedHitbox hitbox;
     
     private Shape baseShape;
     /** The rotation of the projectile. */
     public float rotation = 0;
-    
-    public CBaseProjectile(World w, long ownerID) {
-        this.ownerID = ownerID;
-    }
     
     protected abstract LinkedHitbox getHitbox(Entity e, long ownerID);
     

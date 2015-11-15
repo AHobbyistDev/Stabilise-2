@@ -8,5 +8,6 @@ public interface Component {
     
     void init(World w, Entity e);
     void update(World w, Entity e);
+    void handle(World w, Entity e, ComponentEvent ev);
     
 }

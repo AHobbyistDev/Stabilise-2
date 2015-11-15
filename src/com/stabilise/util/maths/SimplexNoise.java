@@ -10,6 +10,11 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * 
  * <p>Much of this code is from 
  * http://webstaff.itn.liu.se/~stegu/simplexnoise/SimplexNoise.java
+ * 
+ * <p>
+ * Based on example code by Stefan Gustavson (stegu@itn.liu.se).<br>
+ * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).<br>
+ * Better rank ordering method by Stefan Gustavson in 2012.<br>
  */
 @NotThreadSafe
 public class SimplexNoise {

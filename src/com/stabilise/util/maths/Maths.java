@@ -36,6 +36,8 @@ public class Maths {
     public static final Vec2 VEC_Y = Vec2.immutable(0f, 1f);
     /** A vector with components (1, 1). */
     public static final Vec2 VEC_1_1 = Vec2.immutable(1f, 1f);
+    /** Zero-vector. */
+    public static final Vec2 VEC_ZERO = Vec2.immutable(0f, 0f);
     
     /** The maximum value which can be held by an unsigned byte
      * (<tt>2<sup><font size=-1>8</font></sup>-1</tt>). */

@@ -2,6 +2,7 @@ package com.stabilise.entity.collision;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.FreeGameObject;
+import com.stabilise.entity.damage.DamageSource;
 import com.stabilise.entity.effect.Effect;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.Shape;
@@ -103,13 +104,12 @@ public class Hitbox extends FreeGameObject {
      */
     protected boolean hit(World w, Entity e) {
         // TODO: current implementation of collision resolution is crude and temporary
-        /*
-            m.damage(w, damage, ownerID, fx * force, fy * force);
+        if(e.damage(w, new DamageSource(damage, ownerID, fx*force, fy*force))) {
             if(effect != null)
-                m.applyEffect(effect.clone());
+                e.applyEffect(effect.clone());
             onHit();
             return true;
-        */
+        }
         return false;
     }
     

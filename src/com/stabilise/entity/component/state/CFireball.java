@@ -3,6 +3,7 @@ package com.stabilise.entity.component.state;
 import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.collision.LinkedHitbox;
+import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.util.maths.Maths;
@@ -26,13 +27,12 @@ public class CFireball extends CBaseProjectile {
     private ParticleSource particleSrc;
     
     
-    public CFireball(World w, long ownerID) {
-        super(w, ownerID);
-    }
-    
     @Override
     public void init(World w, Entity e) {
         super.init(w, e);
+        
+        ownerID = e.id();
+        
         particleSrc = w.getParticleManager().getSource(new ParticleFlame());
         hitbox.force = 0.3f;
         hitbox.effect = new EffectFire(300);
@@ -97,6 +97,11 @@ public class CFireball extends CBaseProjectile {
      */
     private void addImpactParticles(World w, Entity e, int particles) {
         particleSrc.createBurst(particles, e.x, e.y, 0.0001f, 0.11f, 0f, (float)Maths.TAU);
+    }
+    
+    @Override
+    public void handle(World w, Entity e, ComponentEvent ev) {
+        
     }
     
 }
