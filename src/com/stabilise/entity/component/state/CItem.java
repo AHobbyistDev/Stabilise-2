@@ -3,13 +3,15 @@ package com.stabilise.entity.component.state;
 import java.util.Random;
 
 import com.stabilise.core.Constants;
+import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.ComponentEvent;
+import com.stabilise.item.IContainer;
 import com.stabilise.item.ItemStack;
+import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
-@SuppressWarnings("unused")
 public class CItem implements CState {
     
     //--------------------==========--------------------
@@ -54,7 +56,7 @@ public class CItem implements CState {
     
     @Override
     public void init(World w, Entity e) {
-        
+        pop(e, w.getRnd());
     }
     
     @Override
@@ -62,37 +64,40 @@ public class CItem implements CState {
         if(e.age == DESPAWN_TICKS)
             e.destroy();
         
-        for(Entity m : w.getPlayers()) {
-            /*
-            if(!(m instanceof EntityPlayer)) continue;
-            EntityPlayer p = (EntityPlayer)m;
-            if(p.inventory.canAddStack(stack)) {
-                float distX = (float) (x - p.x);
-                float distY = (float) (y - p.y);
+        for(Entity p : w.getPlayers()) {
+            if(!(p.state instanceof IContainer)) continue;
+            IContainer c = (IContainer)p.state;
+            if(c.canAddStack(stack)) {
+                float distX = (float) (e.x - p.x);
+                float distY = (float) (e.y - p.y);
                 float distSquared = distX*distX + distY*distY;
                 if(distSquared == 0)
                     distSquared = 0.0001f;
                 if(distSquared < PICKUP_RANGE_SQUARED) {
                     // TODO: player picks the item up
-                    if(p.inventory.addStack(stack)) {
+                    if(c.addStack(stack)) {
                         SingleplayerState.pop.play(1f, 1.2f, 0f);
-                        destroy();
+                        e.destroy();
                         break;
                     }
                 } else if(distSquared <= ATTRACTION_RANGE_SQUARED) {
                     if(distX > 0)
-                        dx -= ATTRACTION_SPEED / distSquared;
+                        e.dx -= ATTRACTION_SPEED / distSquared;
                     else
-                        dx += ATTRACTION_SPEED / distSquared;
+                        e.dx += ATTRACTION_SPEED / distSquared;
                     if(distY > 0)
-                        dy -= ATTRACTION_SPEED / distSquared;
+                        e.dy -= ATTRACTION_SPEED / distSquared;
                     else
-                        dy += ATTRACTION_SPEED  / distSquared;
+                        e.dy += ATTRACTION_SPEED  / distSquared;
                     break;
                 }
             }
-            */
         }
+    }
+    
+    @Override
+    public void render(WorldRenderer renderer, Entity e) {
+        renderer.renderItem(e, this);
     }
     
     @Override

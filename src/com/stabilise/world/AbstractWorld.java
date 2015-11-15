@@ -12,6 +12,7 @@ import com.stabilise.core.Constants;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.GameObject;
 import com.stabilise.entity.collision.Hitbox;
+import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.entity.particle.ParticlePhysical;
 import com.stabilise.util.Log;
@@ -429,13 +430,11 @@ public abstract class AbstractWorld implements World {
      */
     @ForTestingPurposes
     public void destroyEntities() {
-        /*
         for(Entity e : entities.values()) {
-            if(e instanceof EntityMob && ((EntityMob)e).isPlayerControlled())
+            if(e.controller instanceof PlayerController)
                 continue;
             e.destroy();
         }
-        */
     }
     
     //--------------------==========--------------------

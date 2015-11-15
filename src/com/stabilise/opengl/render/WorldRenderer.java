@@ -25,10 +25,15 @@ import com.stabilise.core.Resources;
 import com.stabilise.core.app.Application;
 import com.stabilise.entity.*;
 import com.stabilise.entity.component.controller.PlayerController;
+import com.stabilise.entity.component.state.CFireball;
+import com.stabilise.entity.component.state.CGenericEnemy;
+import com.stabilise.entity.component.state.CItem;
+import com.stabilise.entity.component.state.CPerson;
 import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
+import com.stabilise.item.Items;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
 import com.stabilise.util.Profiler;
@@ -320,27 +325,17 @@ public class WorldRenderer implements Renderer {
     // ----------Entity rendering----------
     
     /**
-     * Renders a big fireball entity.
-     * 
-     * @param e The big fireball entity.
-     */
-    public void renderBigFireball(Entity e) {
-        renderFireball(e);
-    }
-    
-    /**
      * Renders an enemy entity.
      * 
      * @param e The enemy entity.
      */
-    public void renderEnemy(Entity e) {
-        /*
-        if(e.hasTint) {
-            if(e.dead) {
-                batch.setColor(e.tintStrength, 0f, 0f, 1f);
+    public void renderEnemy(Entity e, CGenericEnemy s) {
+        if(s.hasTint) {
+            if(s.dead) {
+                batch.setColor(s.tintStrength, 0f, 0f, 1f);
                 //texEnemy.tint(Color.RED, e.tintStrength);
             } else {
-                batch.setColor(e.tintStrength, e.tintStrength, e.tintStrength, 1);
+                batch.setColor(s.tintStrength, s.tintStrength, s.tintStrength, 1);
                 //texEnemy.tint(Color.WHITE, e.tintStrength);
             }
         } else {
@@ -367,7 +362,6 @@ public class WorldRenderer implements Renderer {
         );
         
         batch.setColor(DEFAULT_COL);
-        */
     }
     
     /**
@@ -375,8 +369,7 @@ public class WorldRenderer implements Renderer {
      * 
      * @param e The fireball entity.
      */
-    public void renderFireball(Entity e) {
-        /*
+    public void renderFireball(Entity e, CFireball s) {
         batch.draw(
                 texFireball, // texture
                 (float)e.x - 0.75f, // x
@@ -387,7 +380,7 @@ public class WorldRenderer implements Renderer {
                 0.5f, // height
                 1f, // scaleX
                 1f, // scaleY
-                Maths.toDegrees(e.rotation), // rotation
+                Maths.toDegrees(s.rotation), // rotation
                 0, // srcX
                 0, // srcY
                 texFireball.getWidth(), // srcWidth
@@ -395,7 +388,6 @@ public class WorldRenderer implements Renderer {
                 false, //!e.facingRight, // flipX
                 false // flipY
         );
-        */
     }
     
     /**
@@ -403,16 +395,13 @@ public class WorldRenderer implements Renderer {
      * 
      * @param e The item entity.
      */
-    public void renderItem(Entity e) {
-        /*
-        if(e.stack.getItem().equals(Items.TILE))
-            renderOn(tileRenderer.tiles.getRegion(7 + e.stack.getData()), e);
+    public void renderItem(Entity e, CItem s) {
+        if(s.stack.getItem().equals(Items.TILE))
+            renderOn(tileRenderer.tiles.getRegion(7 + s.stack.getData()), e);
         else
-            renderOn(shtItems.getRegion(e.stack.getItem().getID() - 1), e);
-        */
+            renderOn(shtItems.getRegion(s.stack.getItem().getID() - 1), e);
     }
     
-    @SuppressWarnings("unused")
     private void renderOn(TextureRegion tex, Entity e) {
         batch.draw(
                 tex, // region
@@ -428,9 +417,9 @@ public class WorldRenderer implements Renderer {
      * 
      * @param e The person entity.
      */
-    public void renderPerson(Entity e) {
+    public void renderPerson(Entity e, CPerson s) {
         personModel.setFlipped(!e.facingRight);
-        //personModel.setState(e.getState(), e.stateTicks);
+        personModel.setState(s.getState(), s.stateTicks);
         personModel.render(batch, (float)e.x, (float)e.y);
     }
     

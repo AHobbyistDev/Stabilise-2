@@ -7,13 +7,13 @@ import com.stabilise.world.World;
 public enum ComponentEvent {
     
     //---------------------  Cont.    Phys.    State
-    COLLISION               (false,   false,   true),
-    COLLISION_VERTICAL      (false,   false,   true),
-    COLLISION_HORIZONTAL    (false,   false,   true),
-    COLLISION_TILE          (false,   false,   true),
+    COLLISION               (false,   false,   true ),
+    COLLISION_VERTICAL      (false,   false,   true ),
+    COLLISION_HORIZONTAL    (false,   false,   true ),
+    COLLISION_TILE          (false,   false,   true ),
     DAMAGED                 (true,    false,   false),
     KILLED                  (true,    true,    false),
-    DESTROYED               (true,    true,    true);
+    DESTROYED               (true,    true,    true );
     
     private final boolean c,p,s;
     

@@ -10,6 +10,7 @@ import com.stabilise.core.Game;
 import com.stabilise.core.app.Application;
 import com.stabilise.core.main.Stabilise;
 import com.stabilise.core.state.SingleplayerState;
+import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.entity.component.state.CBaseMob;
@@ -69,9 +70,9 @@ public class PlayerController implements CController, Controllable, InputProcess
         if(controller.isControlPressed(Control.LEFT) && controller.isControlPressed(Control.RIGHT))
             ;// do nothing
         else if(controller.isControlPressed(Control.LEFT))
-            ;//e.move(Direction.LEFT);
+            mob.move(Direction.LEFT);
         else if(controller.isControlPressed(Control.RIGHT))
-            ;//e.move(Direction.RIGHT);
+            mob.move(Direction.RIGHT);
         
         //if(Constants.DEV_VERSION) {
         if(controller.isControlPressed(Control.FLYRIGHT))
@@ -172,26 +173,22 @@ public class PlayerController implements CController, Controllable, InputProcess
                 Log.saveLog(false, Stabilise.GAME_NAME + " v" + Constants.VERSION);
                 break;
             case SUMMON:
-                {    // Bracing because I don't like using the variable names 'e1', 'e2' that much
-                    /*
-                    EntityEnemy e = new EntityEnemy();
-                    e.x = e.x + (mob.facingRight ? 5 : -5);
-                    e.y = e.y;
-                    game.world.addEntity(e);
-                    */
+                {
+                    Entity m = Entities.enemy();
+                    m.x = e.x + (e.facingRight ? 5 : -5);
+                    m.y = e.y;
+                    game.world.addEntity(m);
                 }
                 break;
             case SUMMON_SWARM:
                 {
-                    /*
                     int max = 750 + game.world.getRnd().nextInt(250);
                     for(int i = 0; i < max; i++) {
-                        EntityEnemy e = new EntityEnemy();
-                        e.x = mob.x - 10 + game.world.getRnd().nextFloat() * 20;
-                        e.y = 1 + mob.y + game.world.getRnd().nextFloat() * 10;
-                        game.world.addEntity(e);
+                        Entity m = Entities.enemy();
+                        m.x = e.x - 10 + game.world.getRnd().nextFloat() * 20;
+                        m.y = 1 + e.y + game.world.getRnd().nextFloat() * 10;
+                        game.world.addEntity(m);
                     }
-                    */
                 }
                 break;
             case KILL_MOBS:

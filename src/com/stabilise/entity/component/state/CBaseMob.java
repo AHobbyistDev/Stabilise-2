@@ -153,7 +153,7 @@ public abstract class CBaseMob implements CState {
     public Entity e;
     
     /** The mob's state. */
-    public State state;
+    public State state = State.IDLE;
     /** The number of ticks the mob has remained in its current state. */
     public int stateTicks = 0;
     /** The number of ticks the mob is locked in the state, unless overridden

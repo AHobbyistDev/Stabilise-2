@@ -1,11 +1,13 @@
 package com.stabilise.entity.component.state;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.particle.ParticleFlame;
+import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.AABB;
@@ -436,11 +438,14 @@ public class CPerson extends CBaseMob {
         }
     }
     
+    @Override
+    public void render(WorldRenderer renderer, Entity e) {
+        renderer.renderPerson(e, this);
+    }
+    
     private void fireball(World w, Entity e, int manaCost, Vec2 originPoint) {
         if(useMana(manaCost)) {
-            /*
-            EntityFireball f = new EntityFireball(w, this,
-                    w.getRnd().nextInt(3) + 5);
+            Entity f = Entities.fireball(e.id(), 5 + w.getRnd().nextInt(5));
             
             if(e.facingRight) {
                 f.x = e.x + originPoint.x();
@@ -456,7 +461,6 @@ public class CPerson extends CBaseMob {
             f.facingRight = e.facingRight;
             
             w.addEntity(f);
-            */
         } else {
             double minAngle, maxAngle, px;
             
@@ -485,19 +489,17 @@ public class CPerson extends CBaseMob {
         double px = e.facingRight ? e.x + originPoint.x() : e.x - originPoint.x();
         
         if(useMana(manaCost)) {
-            /*
             int max = 30 + w.getRnd().nextInt(11);
             for(int i = 0; i < max; i++) {
                 float angle = (w.getRnd().nextFloat() * 0.47f + 0.03f) * MathUtils.PI;
                 float velocity = 18.5f + w.getRnd().nextFloat() * 6.5f;
                 boolean right = w.getRnd().nextBoolean();
-                EntityProjectile f = new EntityFireball(w, this, w.getRnd().nextInt(3) + 5);
+                Entity f = Entities.fireball(e.id(), 5 + w.getRnd().nextInt(5));
                 f.dx = right ? MathUtils.cos(angle) * velocity : -MathUtils.cos(angle) * velocity;
                 f.dy = MathUtils.sin(angle)*velocity;
                 f.facingRight = right;
                 w.addEntity(f, px, e.y + originPoint.y());
             }
-            */
         } else {
             particleSrc.createBurst(6, px, e.y + originPoint.y(),
                     0.03f, 0.08f, MathUtils.PI / 3f, MathUtils.PI * 0.6666f);

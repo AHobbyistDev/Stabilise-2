@@ -5,6 +5,7 @@ import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.component.state.CState;
 import com.stabilise.entity.damage.DamageSource;
 import com.stabilise.entity.effect.Effect;
+import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
@@ -45,7 +46,13 @@ public class Entity extends FreeGameObject {
         age++;
         
         controller.update(world, this);
+        state.update(world, this);
         physics.update(world, this);
+    }
+    
+    @Override
+    public void render(WorldRenderer renderer) {
+        state.render(renderer, this);
     }
     
     public long id() { return id; }

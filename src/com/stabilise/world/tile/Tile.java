@@ -2,6 +2,7 @@ package com.stabilise.world.tile;
 
 import static com.stabilise.world.tile.TileBuilder.Template.*;
 
+import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.item.ItemStack;
 import com.stabilise.item.Items;
@@ -169,13 +170,10 @@ public class Tile {
      * {@link ItemStack#NO_STACK}.
      */
     protected void createItemEntity(World world, int x, int y, ItemStack stack) {
-        /*
         if(stack != ItemStack.NO_STACK) {
-            EntityItem e = new EntityItem(createStack(1));
-            e.pop(world.getRnd());
+            Entity e = Entities.item(world, createStack(1));
             world.addEntity(e, x + 0.5, y + 0.1);
         }
-        */
     }
     
     /**

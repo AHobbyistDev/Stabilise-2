@@ -3,9 +3,9 @@ package com.stabilise.entity.component.state;
 import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.collision.LinkedHitbox;
-import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.particle.ParticleFlame;
+import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Polygon;
@@ -25,7 +25,18 @@ public class CFireball extends CBaseProjectile {
     private static final int DESPAWN_TICKS = 300;
     
     private ParticleSource particleSrc;
+    private int damage;
     
+    public CFireball() {}
+    
+    public CFireball(long ownerID) {
+        this(ownerID, DEFAULT_FIREBALL_DAMAGE);
+    }
+    
+    public CFireball(long ownerID, int damage) {
+        this.ownerID = ownerID;
+        this.damage = damage;
+    }
     
     @Override
     public void init(World w, Entity e) {
@@ -53,7 +64,7 @@ public class CFireball extends CBaseProjectile {
     
     @Override
     protected LinkedHitbox getHitbox(Entity e, long ownerID) {
-        return new LinkedHitbox(ownerID, FIREBALL_HITBOX, DEFAULT_FIREBALL_DAMAGE, e.id());
+        return new LinkedHitbox(ownerID, FIREBALL_HITBOX, damage, e.id());
     }
     
     @Override
@@ -75,15 +86,13 @@ public class CFireball extends CBaseProjectile {
             e.destroy();
     }
     
+    @Override
+    public void render(WorldRenderer renderer, Entity e) {
+        renderer.renderFireball(e, this);
+    }
+    
     protected void impact(World w, Entity e, float dv, boolean tileCollision) {
-        e.destroy();
-        
-        if(tileCollision) {        // Since it removes itself with an entity collision
-            if(Settings.settingParticlesAll())
-                addImpactParticles(w, e, 500);
-            else if(Settings.settingParticlesReduced())
-                addImpactParticles(w, e, 25);
-        }
+
     }
     
     private void addFlightParticles(World w, Entity e, int particles) {
@@ -100,8 +109,13 @@ public class CFireball extends CBaseProjectile {
     }
     
     @Override
-    public void handle(World w, Entity e, ComponentEvent ev) {
+    protected void onImpact(World w, Entity e) {
+        e.destroy();
         
+        if(Settings.settingParticlesAll())
+            addImpactParticles(w, e, 500);
+        else if(Settings.settingParticlesReduced())
+            addImpactParticles(w, e, 25);
     }
     
 }

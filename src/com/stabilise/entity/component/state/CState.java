@@ -4,11 +4,21 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.damage.DamageSource;
 import com.stabilise.entity.effect.Effect;
+import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
 
 public interface CState extends Component {
+    
+    /**
+     * Renders the entity.
+     * 
+     * <p>The default implementation does nothing.
+     */
+    default void render(WorldRenderer renderer, Entity e) {
+        // do nothing
+    }
     
     /**
      * Returns the entity's AABB.

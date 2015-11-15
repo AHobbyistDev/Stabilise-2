@@ -3,6 +3,7 @@ package com.stabilise.entity.component.state;
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.collision.LinkedHitbox;
+import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
 
@@ -48,6 +49,16 @@ public abstract class CBaseProjectile implements CState {
             hitbox.boundingBox = baseShape.rotate(rotation);
         
         e.facingRight = e.dx > 0;
+    }
+    
+    protected void onImpact(World w, Entity e) {
+        e.destroy();
+    }
+    
+    @Override
+    public void handle(World w, Entity e, ComponentEvent ev) {
+        if(ev == ComponentEvent.COLLISION)
+            onImpact(w, e);
     }
     
 }
