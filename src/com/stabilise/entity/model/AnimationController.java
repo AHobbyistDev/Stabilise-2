@@ -1,10 +1,12 @@
 package com.stabilise.entity.model;
 
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.maths.Interpolation;
 
 /**
  * Controls model animations.
  */
+@Incomplete
 public class AnimationController {
     
     private final Model model;

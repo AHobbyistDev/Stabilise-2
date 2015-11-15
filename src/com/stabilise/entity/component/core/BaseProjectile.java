@@ -2,8 +2,8 @@ package com.stabilise.entity.component.core;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.collision.LinkedHitbox;
 import com.stabilise.entity.component.ComponentEvent;
+import com.stabilise.entity.hitbox.LinkedHitbox;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
 

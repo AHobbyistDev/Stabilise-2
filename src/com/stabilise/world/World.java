@@ -3,7 +3,7 @@ package com.stabilise.world;
 import java.util.Random;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.collision.Hitbox;
+import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.maths.Maths;

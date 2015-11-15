@@ -1,7 +1,10 @@
 package com.stabilise.world.tile.tileentity;
 
+import com.stabilise.entity.Entities;
+import com.stabilise.entity.Entity;
 import com.stabilise.item.BoundedContainer;
 import com.stabilise.item.Container;
+import com.stabilise.item.ItemStack;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.World;
 
@@ -44,13 +47,10 @@ public class TileEntityChest extends TileEntity {
     
     @Override
     public void handleRemove(World world, int x, int y) {
-        /*
         for(ItemStack s : items) {
-            EntityItem e = new EntityItem(s);
-            e.pop(world.getRnd());
+            Entity e = Entities.item(world, s);
             world.addEntity(e, x + 0.5f, y + 0.5f);
         }
-        */
     }
     
     @Override

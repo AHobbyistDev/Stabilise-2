@@ -1,7 +1,7 @@
 package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.collision.Hitbox;
+import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;

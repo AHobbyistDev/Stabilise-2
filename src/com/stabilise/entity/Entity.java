@@ -16,13 +16,14 @@ public class Entity extends FreeGameObject {
     private long        id;
     public  long        age;
     private boolean     initialised = false;
-    public  boolean     facingRight;
     
+    // Core physical properties
     public  float       dx, dy;
-    
+    public  boolean     facingRight;
     public  AABB        aabb;
     public  boolean     invulnerable = false;
     
+    // Components
     public  CPhysics    physics;
     public  CController controller;
     public  CCore       core;

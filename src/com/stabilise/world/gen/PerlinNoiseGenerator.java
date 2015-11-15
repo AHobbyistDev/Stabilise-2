@@ -108,10 +108,15 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                     if(y < -200 && caveNoise > 0.8D)
                         s.setTileAt(tileX, tileY, lava);
                     //else if(noise <= 0 || (caveNoise > 0.45D && caveNoise < 0.55D))
-                    else if(noise <= 0 || (caveNoise > caveMask - 0.05D && caveNoise < caveMask + 0.05D))
+                    else if(noise <= -1 || (caveNoise > caveMask - 0.05D && caveNoise < caveMask + 0.05D))
                     //else if(noise <= 0 || caveNoise > 0.8D)
                         s.setTileAt(tileX, tileY, air);
-                    else if(noise <= 1) {
+                    else if(noise <= 0) {
+                        if(rnd.nextInt(10) == 0)
+                            s.setTileAt(tileX, tileY, torch);
+                        else
+                            s.setTileAt(tileX, tileY, air);
+                    } else if(noise <= 1) {
                         s.setTileAt(tileX, tileY, grass);
                         if(rnd.nextInt(10) == 0)
                             addSchematic("tree_1", s.x, s.y, tileX, tileY);

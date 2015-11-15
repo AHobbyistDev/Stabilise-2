@@ -2,8 +2,8 @@ package com.stabilise.entity.component.core;
 
 import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.collision.LinkedHitbox;
 import com.stabilise.entity.effect.EffectFire;
+import com.stabilise.entity.hitbox.LinkedHitbox;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.maths.Maths;

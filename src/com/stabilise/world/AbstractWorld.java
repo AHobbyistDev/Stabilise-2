@@ -12,7 +12,7 @@ import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.GameObject;
-import com.stabilise.entity.collision.Hitbox;
+import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.entity.particle.ParticlePhysical;
 import com.stabilise.util.Log;

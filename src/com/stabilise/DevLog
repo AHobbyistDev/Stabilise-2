@@ -265,6 +265,6 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 11/11/15
 	- Added tile brush with variable radius for mass tile devastation!
 15/11/15
-	- Beginning migration of entities into component-based objects. Unstable!!
+	- Refactored entities to be component-based
 
 	

@@ -1,4 +1,4 @@
-package com.stabilise.entity.collision;
+package com.stabilise.entity.hitbox;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.util.shape.Shape;

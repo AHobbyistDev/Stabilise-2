@@ -1,12 +1,14 @@
 package com.stabilise.entity.model;
 
 import com.badlogic.gdx.math.Vector2;
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.shape.Shape;
 
 /**
  * todo
  */
+@Incomplete
 public class Bone {
     
     /** The position of the bone. */

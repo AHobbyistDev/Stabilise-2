@@ -1,5 +1,6 @@
 package com.stabilise.world.tile.tileentity;
 
+import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
@@ -89,15 +90,14 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      * otherwise.
      */
     private boolean trySpawn(World world) {
-        /*
-        EntityEnemy e = new EntityEnemy();
+        Entity e = Entities.enemy();
         world.addEntity(e, xPos, yPos+1);
+        e.init(world);
         
         for(int i = 0; i < 10; i++) {
             spawnParticle(world);
             spawnParticleOnMob(world, e);
         }
-        */
         
         return true;
     }
@@ -115,7 +115,6 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      * 
      * @param e The mob.
      */
-    @SuppressWarnings("unused")
     private void spawnParticleOnMob(World world, Entity e) {
         smokeGen.createBurst(1, 0.04f, 0.12f, 0, (float)Maths.TAU, e);
     }

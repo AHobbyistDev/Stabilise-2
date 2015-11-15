@@ -1,11 +1,13 @@
 package com.stabilise.entity.model;
 
 import com.badlogic.gdx.math.Vector2;
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.shape.Shape;
 
 /**
  * todo
  */
+@Incomplete
 public class ChildBone extends Bone {
     
     /** This bone's parent bone. */

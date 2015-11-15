@@ -5,6 +5,7 @@ import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.damage.FireSource;
 import com.stabilise.entity.particle.ParticleFlame;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
 import com.stabilise.world.AbstractWorld.ParticleSource;
 
@@ -49,8 +50,8 @@ public class EffectFire extends Effect {
      * @param target The target of the effect.
      */
     private void createFireParticle(World world, Entity target) {
-        particleSrc.createBurst(1, 0.02f, 0.07f, (float)Math.PI / 6.0f,
-                (float)Math.PI * 5.0f / 6.0f, target);
+        particleSrc.createBurst(1, 0.02f, 0.07f, Maths.PIf / 6.0f,
+                Maths.PIf * 5.0f / 6.0f, target);
     }
     
     @Override

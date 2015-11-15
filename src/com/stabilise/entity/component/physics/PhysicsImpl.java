@@ -7,7 +7,9 @@ import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.Tile;
 
-
+/**
+ * Extremely crappy physics implementation
+ */
 public class PhysicsImpl implements CPhysics {
     
     protected static final float AIR_FRICTION = 0.001f;

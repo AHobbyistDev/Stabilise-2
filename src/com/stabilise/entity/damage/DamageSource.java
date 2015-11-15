@@ -3,15 +3,22 @@ package com.stabilise.entity.damage;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Vec2;
 
-
+/**
+ * Represents a source of damage.
+ */
 public class DamageSource {
     
     public int damage;
+    /** The ID of the entity dealing the damage. -1 if not sourced from an
+     * entity. */
     public long srcID;
+    /** Force to apply upon impact. */
     public Vec2 force;
     
     
-    public DamageSource() {}
+    public DamageSource() {
+        this(0);
+    }
     
     public DamageSource(int damage) {
         this.damage = damage;
