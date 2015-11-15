@@ -1,7 +1,6 @@
 package com.stabilise.entity.collision;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.FreeGameObject;
 import com.stabilise.entity.effect.Effect;
 import com.stabilise.opengl.render.WorldRenderer;
@@ -15,7 +14,7 @@ import com.stabilise.world.World;
 public class Hitbox extends FreeGameObject {
     
     /** The entity which owns the hitbox. */
-    public Entity owner;
+    public long ownerID;
     /** Whether or not the hitbox is to persist for longer than a tick. */
     public boolean persistent = true;
     /** The number of ticks the hitbox should persist for, if it is persistent.
@@ -51,9 +50,9 @@ public class Hitbox extends FreeGameObject {
      * @param boundingBox The Hitbox's bounding box.
      * @param damage The damage the hitbox deals.
      */
-    public Hitbox(Entity owner, Shape boundingBox, int damage) {
+    public Hitbox(long ownerID, Shape boundingBox, int damage) {
         super();
-        this.owner = owner;
+        this.ownerID = ownerID;
         this.boundingBox = boundingBox;
         this.damage = damage;
     }
@@ -70,12 +69,12 @@ public class Hitbox extends FreeGameObject {
         if(isDestroyed())
             return;
         
-        moveToOwner();
+        moveToOwner(world);
         
         for(Entity e : world.getEntities()) {
-            if(e.id == owner.id || e.invulnerable) continue;;
+            if(e.id() == ownerID) continue;
             // TODO: broadphase
-            if(e.boundingBox.intersects(boundingBox, (float)(e.x-x), (float)(e.y-y))) {
+            if(e.aabb.intersects(boundingBox, (float)(e.x-x), (float)(e.y-y))) {
                 hit(world, e);
                 if(hits == 0)
                     break;
@@ -89,9 +88,10 @@ public class Hitbox extends FreeGameObject {
     /**
      * Moves the hitbox to the location of its owner.
      */
-    protected void moveToOwner() {
-        x = owner.x;
-        y = owner.y;
+    protected void moveToOwner(World w) {
+        Entity e = w.getEntity(ownerID);
+        x = e.x;
+        y = e.y;
     }
     
     /**
@@ -101,19 +101,15 @@ public class Hitbox extends FreeGameObject {
      * 
      * @return {@code true} if a collision was made; {@code false} if not.
      */
-    protected boolean hit(World world, Entity e) {
+    protected boolean hit(World w, Entity e) {
         // TODO: current implementation of collision resolution is crude and temporary
-        if(e instanceof EntityMob) {
-            EntityMob m = (EntityMob)e;
-            if(m.dead)
-                return false;
-            m.damage(world, damage, owner.id, fx * force, fy * force);
+        /*
+            m.damage(w, damage, ownerID, fx * force, fy * force);
             if(effect != null)
                 m.applyEffect(effect.clone());
             onHit();
             return true;
-        }
-        
+        */
         return false;
     }
     

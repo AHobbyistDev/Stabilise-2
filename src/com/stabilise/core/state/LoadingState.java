@@ -66,6 +66,7 @@ public class LoadingState implements State {
         
         texSplash = new Texture(Resources.IMAGE_DIR.child("loading.png"));
         sprSplash = new Sprite(texSplash);
+        sprSplash.setPosition(-sprSplash.getWidth()/2, -sprSplash.getHeight()/2);
         
         FreeTypeFontParameter param = new FreeTypeFontParameter();
         param.size = 16;
@@ -127,8 +128,6 @@ public class LoadingState implements State {
         viewport.update(width, height);
         batch.setProjectionMatrix(viewport.getCamera().combined);
         shapes.setProjectionMatrix(viewport.getCamera().combined);
-        
-        sprSplash.setPosition(-sprSplash.getWidth()/2, -sprSplash.getHeight()/2);
     }
     
     @Override

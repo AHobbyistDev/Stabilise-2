@@ -1,8 +1,7 @@
 package com.stabilise.entity.effect;
 
-import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
-import com.stabilise.entity.EntityMob;
+import com.stabilise.entity.Entity;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.world.World;
 import com.stabilise.world.AbstractWorld.ParticleSource;
@@ -27,7 +26,7 @@ public class EffectFire extends Effect {
     }
     
     @Override
-    public void update(World world, EntityMob target) {
+    public void update(World world, Entity target) {
         super.update(world, target);
         
         if(particleSrc == null)
@@ -38,8 +37,8 @@ public class EffectFire extends Effect {
         else if(Settings.settingParticlesReduced() && age % 3 == 0)
             createFireParticle(world, target);
         
-        if(age % Constants.TICKS_PER_SECOND == 0)
-            target.damage(world, 2, -1, 0, 0);
+        //if(age % Constants.TICKS_PER_SECOND == 0)
+        //    target.damage(world, 2, -1, 0, 0);
     }
     
     /**
@@ -47,7 +46,7 @@ public class EffectFire extends Effect {
      * 
      * @param target The target of the effect.
      */
-    private void createFireParticle(World world, EntityMob target) {
+    private void createFireParticle(World world, Entity target) {
         particleSrc.createBurst(1, 0.02f, 0.07f, (float)Math.PI / 6.0f,
                 (float)Math.PI * 5.0f / 6.0f, target);
     }

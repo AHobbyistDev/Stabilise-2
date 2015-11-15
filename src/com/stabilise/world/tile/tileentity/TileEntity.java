@@ -2,8 +2,8 @@ package com.stabilise.world.tile.tileentity;
 
 import com.stabilise.entity.FixedGameObject;
 import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.util.collect.GeneralTypeFactory;
 import com.stabilise.util.collect.RegistryParams;
-import com.stabilise.util.collect.TypeRegistry;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.World;
 
@@ -16,18 +16,15 @@ import com.stabilise.world.World;
  */
 public abstract class TileEntity extends FixedGameObject {
     
-    private static interface TileEntityFactory {
-        TileEntity create(int x, int y);
-    }
-    
     /** The tile entity registry. */
-    private static final TypeRegistry<TileEntity, TileEntityFactory> TILE_ENTITIES =
-            new TypeRegistry<>(new RegistryParams("TileEntities", 4));
+    private static final GeneralTypeFactory<TileEntity> TILE_ENTITIES =
+            new GeneralTypeFactory<>(new RegistryParams("TileEntities", 4),
+                    int.class, int.class);
     
     // Register all tile entity types.
     static {
-        TILE_ENTITIES.register(0, TileEntityChest.class, (x,y) -> new TileEntityChest(x, y));
-        TILE_ENTITIES.register(1, TileEntityMobSpawner.class, (x,y) -> new TileEntityMobSpawner(x,y));
+        TILE_ENTITIES.register(0, TileEntityChest.class);
+        TILE_ENTITIES.register(1, TileEntityMobSpawner.class);
         
         TILE_ENTITIES.lock();
     }
@@ -162,7 +159,7 @@ public abstract class TileEntity extends FixedGameObject {
      * invalid.
      */
     public static TileEntity createTileEntity(int id, int x, int y) {
-        return TILE_ENTITIES.getOrDefault(id, (a,b) -> null).create(x, y);
+        return TILE_ENTITIES.create(id, x, y);
     }
     
     /**

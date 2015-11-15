@@ -151,12 +151,12 @@ public class UnorderedArrayList<E>
     
     @Override
     public boolean add(E e) {
-        put(e);
+        append(e);
         return true;
     }
     
     @Override
-    public void put(E e) {
+    public void append(E e) {
         if(data.length == size) // length is never < size
             expand();
         data[size++] = e;

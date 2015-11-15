@@ -1,22 +1,20 @@
-package com.stabilise.entity;
+package com.stabilise.entity.component.state;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.stabilise.entity.Entity;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.particle.ParticleFlame;
-import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Shape;
-import com.stabilise.world.World;
 import com.stabilise.world.AbstractWorld.ParticleSource;
+import com.stabilise.world.World;
 
-/**
- * A Person is a Mob intended to be like a human. The Player is a Person.
- */
-public class EntityPerson extends EntityMob {
+
+public class CPerson extends CBaseMob {
     
     //--------------------==========--------------------
     //-----=====Static Constants and Variables=====-----
@@ -178,15 +176,15 @@ public class EntityPerson extends EntityMob {
     
     private ParticleSource particleSrc;
     
-    
     @Override
-    protected AABB getAABB() {
+    public AABB getAABB() {
         return new AABB(-0.4f, 0f, 0.8f, 1.8f);
-        //return new AABB(-0.5f, 0f, 1.0f, 2.0f);
     }
     
     @Override
-    protected void initProperties() {
+    public void init(World w, Entity e) {
+        super.init(w, e);
+        
         maxHealth = 500;
         health = 500;
         maxStamina = 500;
@@ -204,14 +202,13 @@ public class EntityPerson extends EntityMob {
         maxDx = 15f;
         
         state = State.IDLE;
+        
+        particleSrc = w.getParticleManager().getSource(new ParticleFlame());
     }
     
     @Override
-    public void update(World world) {
-        super.update(world);
-        
-        if(particleSrc == null)
-            particleSrc = world.getParticleManager().getSource(new ParticleFlame());
+    public void update(World w, Entity e) {
+        super.update(w, e);
         
         ticksSinceHealthLoss++;
         ticksSinceStaminaLoss++;
@@ -237,196 +234,198 @@ public class EntityPerson extends EntityMob {
         switch(state) {
             case ATTACK_SIDE_GROUND:
                 if(stateTicks == ATTACK_SIDE_GROUND_FRAME_2_BEGIN) {
-                    damageDealt = world.getRnd().nextInt(16) + 5;
-                    Hitbox h = new Hitbox(this, facingRight
+                    damageDealt = w.getRnd().nextInt(16) + 5;
+                    Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_SIDE_GROUND_HITBOX_1
                             : ATTACK_SIDE_GROUND_HITBOX_1_FLIPPED, damageDealt);
                     h.hits = -1;
                     h.force = ATTACK_SIDE_GROUND_FORCE;
-                    h.fx = facingRight ? 1.0f : -1.0f;
+                    h.fx = e.facingRight ? 1.0f : -1.0f;
                     //h.effect = new EffectFire(120);
-                    world.addHitbox(h, x, y);
+                    w.addHitbox(h, e.x, e.y);
                 } else if(stateTicks == ATTACK_SIDE_GROUND_FRAME_3_BEGIN) {
-                    Hitbox h = new Hitbox(this, facingRight
+                    Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_SIDE_GROUND_HITBOX_2
                             : ATTACK_SIDE_GROUND_HITBOX_2_FLIPPED, damageDealt);
                     h.hits = -1;
                     h.force = ATTACK_SIDE_GROUND_FORCE;
-                    h.fx = facingRight ? -1.0f : 1.0f;
+                    h.fx = e.facingRight ? -1.0f : 1.0f;
                     //h.effect = new EffectFire(120);
-                    world.addHitbox(h, x, y);
+                    w.addHitbox(h, e.x, e.y);
                 }
                 break;
             case ATTACK_UP_GROUND:
                 if(stateTicks == ATTACK_UP_GROUND_FRAME_2_BEGIN) {
-                    Hitbox h = new Hitbox(this, facingRight
+                    Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_UP_GROUND_HITBOX
                             : ATTACK_UP_GROUND_HITBOX_FLIPPED,
-                            world.getRnd().nextInt(16) + 20);
+                            w.getRnd().nextInt(16) + 20);
                     h.hits = -1;
                     h.force = ATTACK_UP_GROUND_FORCE;
                     h.fy = 1.0f;
                     h.persistent = true;
                     h.persistenceTimer = ATTACK_UP_GROUND_HITBOX_DURATION;
-                    world.addHitbox(h, x, y);
+                    w.addHitbox(h, e.x, e.y);
                 }
                 break;
             case ATTACK_DOWN_GROUND:
                 if(stateTicks == ATTACK_DOWN_GROUND_FRAME_2_BEGIN) {
-                    Hitbox h = new Hitbox(this, facingRight
+                    Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_DOWN_GROUND_HITBOX
                             : ATTACK_DOWN_GROUND_HITBOX_FLIPPED,
-                            world.getRnd().nextInt(16) + 5);
+                            w.getRnd().nextInt(16) + 5);
                     h.hits = -1;
                     h.force = ATTACK_DOWN_GROUND_FORCE;
-                    h.fx = facingRight ? 1.0f : -1.0f;
-                    world.addHitbox(h, x, y);
+                    h.fx = e.facingRight ? 1.0f : -1.0f;
+                    w.addHitbox(h, e.x, e.y);
                 }
                 break;
             case ATTACK_SIDE_AIR:
                 if(stateTicks == ATTACK_SIDE_AIR_FRAME_2_BEGIN) {
-                    damageDealt = world.getRnd().nextInt(16) + 5;
-                    Hitbox h = new Hitbox(this, facingRight ?
+                    damageDealt = w.getRnd().nextInt(16) + 5;
+                    Hitbox h = new Hitbox(e.id(), e.facingRight ?
                             ATTACK_SIDE_AIR_HITBOX_1
                             : ATTACK_SIDE_AIR_HITBOX_1_FLIPPED, damageDealt);
                     h.hits = -1;
                     h.force = 0.3f;
-                    h.fx = facingRight ? 1.0f : -1.0f;
-                    world.addHitbox(h, x, y);
+                    h.fx = e.facingRight ? 1.0f : -1.0f;
+                    w.addHitbox(h, e.x, e.y);
                 } else if(stateTicks == ATTACK_SIDE_AIR_FRAME_3_BEGIN) {
-                    Hitbox h = new Hitbox(this, facingRight
+                    Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_SIDE_AIR_HITBOX_2
                             : ATTACK_SIDE_AIR_HITBOX_2_FLIPPED, damageDealt);
                     h.hits = -1;
                     h.force = 0.3f;
-                    h.fx = facingRight ? 1.0f : -1.0f;
-                    world.addHitbox(h, x, y);
+                    h.fx = e.facingRight ? 1.0f : -1.0f;
+                    w.addHitbox(h, e.x, e.y);
                 }
                 break;
             case ATTACK_UP_AIR:
                 if(stateTicks == ATTACK_UP_AIR_FRAME_2_BEGIN) {
-                    damageDealt = world.getRnd().nextInt(16) + 5;
-                    Hitbox h1 = new Hitbox(this, facingRight
+                    damageDealt = w.getRnd().nextInt(16) + 5;
+                    Hitbox h1 = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_UP_AIR_HITBOX_1_1
                             : ATTACK_UP_AIR_HITBOX_1_1_FLIPPED, damageDealt);
                     h1.hits = -1;
                     h1.force = 0.3f;
-                    //h1.fx = facingRight ? 0.86f : -0.85f;
+                    //h1.fx = e.facingRight ? 0.86f : -0.85f;
                     h1.fy = 1.0f;
-                    world.addHitbox(h1, x, y);
+                    w.addHitbox(h1, e.x, e.y);
                     
-                    Hitbox h2 = new Hitbox(this, facingRight
+                    Hitbox h2 = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_UP_AIR_HITBOX_1_2
                             : ATTACK_UP_AIR_HITBOX_1_2_FLIPPED, damageDealt);
                     h2.hits = -1;
                     h2.force = 0.3f;
-                    //h2.fx = facingRight ? 0.5f : -0.5f;
+                    //h2.fx = e.facingRight ? 0.5f : -0.5f;
                     h2.fy = 1.0f;
-                    world.addHitbox(h2, x, y);
+                    w.addHitbox(h2, e.x, e.y);
                 } else if(stateTicks == ATTACK_UP_AIR_FRAME_3_BEGIN) {
-                    Hitbox h = new Hitbox(this, facingRight
+                    Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_UP_AIR_HITBOX_2
                             : ATTACK_UP_AIR_HITBOX_2_FLIPPED, damageDealt);
                     h.hits = -1;
                     h.force = 0.3f;
                     h.fy = 1.0f;
-                    world.addHitbox(h, x, y);
+                    w.addHitbox(h, e.x, e.y);
                 }
                 break;
             case ATTACK_DOWN_AIR:
                 if(stateTicks == ATTACK_DOWN_AIR_FRAME_2_BEGIN) {
-                    damageDealt = world.getRnd().nextInt(16) + 5;
-                    Hitbox h1 = new Hitbox(this, facingRight
+                    damageDealt = w.getRnd().nextInt(16) + 5;
+                    Hitbox h1 = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_DOWN_AIR_HITBOX_1_1
                             : ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED, damageDealt);
                     h1.hits = -1;
                     h1.force = 0.3f;
                     h1.fy = -1.0f;
-                    world.addHitbox(h1, x, y);
+                    w.addHitbox(h1, e.x, e.y);
                     
-                    Hitbox h2 = new Hitbox(this, facingRight
+                    Hitbox h2 = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_DOWN_AIR_HITBOX_1_2
                             : ATTACK_DOWN_AIR_HITBOX_1_2_FLIPPED, damageDealt);
                     h2.hits = -1;
                     h2.force = 0.3f;
                     h2.fy = -1.0f;
-                    world.addHitbox(h2, x, y);
+                    w.addHitbox(h2, e.x, e.y);
                 } else if(stateTicks == ATTACK_DOWN_AIR_FRAME_3_BEGIN) {
-                    Hitbox h = new Hitbox(this, facingRight
+                    Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_DOWN_AIR_HITBOX_2
                             : ATTACK_DOWN_AIR_HITBOX_2_FLIPPED, damageDealt);
                     h.hits = -1;
                     h.force = 0.3f;
                     h.fy = -1.0f;
-                    world.addHitbox(h, x, y);
+                    w.addHitbox(h, e.x, e.y);
                 }
                 break;
             case SPECIAL_SIDE_GROUND:
                 if(stateTicks == SPECIAL_SIDE_GROUND_FRAME_2_BEGIN)
-                    fireball(world, SPECIAL_SIDE_GROUND_COST_MANA, SPECIAL_SIDE_GROUND_ORIGIN);
+                    fireball(w, e, SPECIAL_SIDE_GROUND_COST_MANA, SPECIAL_SIDE_GROUND_ORIGIN);
                 break;
             case SPECIAL_UP_GROUND:
                 if(stateTicks == SPECIAL_UP_GROUND_FRAME_2_BEGIN)
-                    fireballStorm(world, SPECIAL_UP_GROUND_COST_MANA,
+                    fireballStorm(w, e, SPECIAL_UP_GROUND_COST_MANA,
                             SPECIAL_UP_GROUND_ORIGIN);
                 break;
             case SPECIAL_DOWN_GROUND:
                 if(stateTicks == SPECIAL_DOWN_GROUND_FRAME_2_BEGIN) {
                     if(useMana(SPECIAL_DOWN_GROUND_COST_MANA)) {
-                        Hitbox h1 = new Hitbox(this, SPECIAL_DOWN_GROUND_HITBOX_1,
-                                world.getRnd().nextInt(16)+5);
+                        Hitbox h1 = new Hitbox(e.id(), SPECIAL_DOWN_GROUND_HITBOX_1,
+                                w.getRnd().nextInt(16)+5);
                         h1.hits = -1;
                         h1.force = 0.3f;
                         h1.fx = 0.5f;
                         h1.fy = 0.7f;
                         h1.effect = new EffectFire(300);
-                        world.addHitbox(h1, x, y);
+                        w.addHitbox(h1, e.x, e.y);
                         
-                        Hitbox h2 = new Hitbox(this, SPECIAL_DOWN_GROUND_HITBOX_2,
-                                world.getRnd().nextInt(16)+5);
+                        Hitbox h2 = new Hitbox(e.id(), SPECIAL_DOWN_GROUND_HITBOX_2,
+                                w.getRnd().nextInt(16)+5);
                         h2.hits = -1;
                         h2.force = 0.3f;
                         h2.fx = -0.5f;
                         h2.fy = 0.7f;
                         h2.effect = new EffectFire(300);
-                        world.addHitbox(h2, x, y);
+                        w.addHitbox(h2, e.x, e.y);
                         
-                        particleSrc.createBurst(300, x, y, 0.001f, 0.10f, 0, (float)Math.PI);
+                        particleSrc.createBurst(300, e.x, e.y, 0.001f, 0.10f, 0, (float)Math.PI);
                     } else {
-                        particleSrc.createBurst(100, x, y, 0.0001f, 0.08f, 0, (float)Math.PI);
+                        particleSrc.createBurst(100, e.x, e.y, 0.0001f, 0.08f, 0, (float)Math.PI);
                     }
                 }
                 break;
             case SPECIAL_SIDE_AIR:
                 if(stateTicks == SPECIAL_SIDE_AIR_FRAME_2_BEGIN)
-                    fireball(world, SPECIAL_SIDE_AIR_COST_MANA, SPECIAL_SIDE_AIR_ORIGIN);
+                    fireball(w, e, SPECIAL_SIDE_AIR_COST_MANA, SPECIAL_SIDE_AIR_ORIGIN);
                 break;
             case SPECIAL_UP_AIR:
                 if(stateTicks == SPECIAL_UP_AIR_FRAME_2_BEGIN)
-                    fireballStorm(world, SPECIAL_UP_AIR_COST_MANA, SPECIAL_UP_AIR_ORIGIN);
+                    fireballStorm(w, e, SPECIAL_UP_AIR_COST_MANA, SPECIAL_UP_AIR_ORIGIN);
                 break;
             case SPECIAL_DOWN_AIR:
                 if(stateTicks == SPECIAL_DOWN_AIR_FRAME_2_BEGIN) {
                     if(useMana(SPECIAL_DOWN_AIR_COST_MANA)) {
-                        EntityBigFireball f = new EntityBigFireball(world, this);
-                        f.x = x + (facingRight ? SPECIAL_DOWN_AIR_ORIGIN.x()
+                        /*
+                        EntityBigFireball f = new EntityBigFireball(w, this);
+                        f.x = e.x + (e.facingRight ? SPECIAL_DOWN_AIR_ORIGIN.x()
                                 : -SPECIAL_DOWN_AIR_ORIGIN.x());
-                        f.y = y + SPECIAL_DOWN_AIR_ORIGIN.y();
-                        f.dy = Math.min(0f, dy + world.getRnd().nextFloat() * 3.0f - 10f);
-                        world.addEntity(f);
+                        f.y = e.y + SPECIAL_DOWN_AIR_ORIGIN.y();
+                        f.dy = Math.min(0f, dy + w.getRnd().nextFloat() * 3.0f - 10f);
+                        w.addEntity(f);
+                        */
                     } else {
                         double minAngle, maxAngle, px;
                         
                         minAngle = -1.0D * Math.PI / 3.0D;
                         maxAngle = -2.0D * Math.PI / 3.0D;
                         
-                        if(facingRight) {
-                            px = x + SPECIAL_DOWN_AIR_ORIGIN.x();
+                        if(e.facingRight) {
+                            px = e.x + SPECIAL_DOWN_AIR_ORIGIN.x();
                         } else {
-                            px = x - SPECIAL_DOWN_AIR_ORIGIN.x();
+                            px = e.x - SPECIAL_DOWN_AIR_ORIGIN.x();
                         }
                         
-                        particleSrc.createBurst(6, px, y + SPECIAL_DOWN_AIR_ORIGIN.y(),
+                        particleSrc.createBurst(6, px, e.y + SPECIAL_DOWN_AIR_ORIGIN.y(),
                                 0.03f, 0.08f, (float)minAngle, (float)maxAngle);
                     }
                 }
@@ -437,39 +436,41 @@ public class EntityPerson extends EntityMob {
         }
     }
     
-    private void fireball(World world, int manaCost, Vec2 originPoint) {
+    private void fireball(World w, Entity e, int manaCost, Vec2 originPoint) {
         if(useMana(manaCost)) {
-            EntityFireball e = new EntityFireball(world, this,
-                    world.getRnd().nextInt(3) + 5);
+            /*
+            EntityFireball f = new EntityFireball(w, this,
+                    w.getRnd().nextInt(3) + 5);
             
-            if(facingRight) {
-                e.x = x + originPoint.x();
-                e.dx = 30f + world.getRnd().nextFloat() * 10f;
+            if(e.facingRight) {
+                f.x = e.x + originPoint.x();
+                f.dx = 30f + w.getRnd().nextFloat() * 10f;
             } else {
-                e.x = x - originPoint.x();
-                e.dx = -30f - world.getRnd().nextFloat() * 10f;
+                f.x = e.x - originPoint.x();
+                f.dx = -30f - w.getRnd().nextFloat() * 10f;
             }
             
-            e.y = y + originPoint.y();
-            e.dy = 1.0f + world.getRnd().nextFloat() * 1.8f;
+            f.y = e.y + originPoint.y();
+            f.dy = 1.0f + w.getRnd().nextFloat() * 1.8f;
             
-            e.facingRight = facingRight;
+            f.facingRight = e.facingRight;
             
-            world.addEntity(e);
+            w.addEntity(f);
+            */
         } else {
             double minAngle, maxAngle, px;
             
-            if(facingRight) {
-                px = x + originPoint.x();
+            if(e.facingRight) {
+                px = e.x + originPoint.x();
                 minAngle = -Math.PI / 6.0D;
                 maxAngle = Math.PI / 6.0D;
             } else {
-                px = x - originPoint.x();
+                px = e.x - originPoint.x();
                 minAngle = Math.PI * 5.0D / 6.0D;
                 maxAngle = Math.PI * 7.0D / 7.0D;
             }
             
-            particleSrc.createBurst(6, px, y + originPoint.y(),
+            particleSrc.createBurst(6, px, e.y + originPoint.y(),
                     0.03f, 0.08f, (float)minAngle, (float)maxAngle);
         }
     }
@@ -480,31 +481,33 @@ public class EntityPerson extends EntityMob {
      * @param manaCost The mana cost of the storm.
      * @param originPoint The point from which the storm is to originate.
      */
-    private void fireballStorm(World world, int manaCost, Vec2 originPoint) {
-        double px = facingRight ? x + originPoint.x() : x - originPoint.x();
+    private void fireballStorm(World w, Entity e, int manaCost, Vec2 originPoint) {
+        double px = e.facingRight ? e.x + originPoint.x() : e.x - originPoint.x();
         
         if(useMana(manaCost)) {
-            int max = 30 + world.getRnd().nextInt(11);
+            /*
+            int max = 30 + w.getRnd().nextInt(11);
             for(int i = 0; i < max; i++) {
-                float angle = (world.getRnd().nextFloat() * 0.47f + 0.03f) * MathUtils.PI;
-                float velocity = 18.5f + world.getRnd().nextFloat() * 6.5f;
-                boolean right = world.getRnd().nextBoolean();
-                EntityProjectile e = new EntityFireball(world, this, world.getRnd().nextInt(3) + 5);
-                e.dx = right ? MathUtils.cos(angle) * velocity : -MathUtils.cos(angle) * velocity;
-                e.dy = MathUtils.sin(angle)*velocity;
-                e.facingRight = right;
-                world.addEntity(e, px, y + originPoint.y());
+                float angle = (w.getRnd().nextFloat() * 0.47f + 0.03f) * MathUtils.PI;
+                float velocity = 18.5f + w.getRnd().nextFloat() * 6.5f;
+                boolean right = w.getRnd().nextBoolean();
+                EntityProjectile f = new EntityFireball(w, this, w.getRnd().nextInt(3) + 5);
+                f.dx = right ? MathUtils.cos(angle) * velocity : -MathUtils.cos(angle) * velocity;
+                f.dy = MathUtils.sin(angle)*velocity;
+                f.facingRight = right;
+                w.addEntity(f, px, e.y + originPoint.y());
             }
+            */
         } else {
-            particleSrc.createBurst(6, px, y + originPoint.y(),
+            particleSrc.createBurst(6, px, e.y + originPoint.y(),
                     0.03f, 0.08f, MathUtils.PI / 3f, MathUtils.PI * 0.6666f);
         }
     }
     
     @Override
     protected void onVerticalCollision() {
-        if(dy < 0 && !wasOnGround && state.priority != StatePriority.UNOVERRIDEABLE) {
-            if(dy < -jumpVelocity) {
+        if(e.dy < 0 && !wasOnGround && state.priority != StatePriority.UNOVERRIDEABLE) {
+            if(e.dy < -jumpVelocity) {
                 setState(State.LAND_CROUCH, false, 20);        // TODO: temporary constant duration
             } else {
                 switch(state) {
@@ -539,12 +542,12 @@ public class EntityPerson extends EntityMob {
         if(!state.canAct)
             return;
         
-        if(onGround) {
+        if(e.physics.onGround()) {
             switch(direction) {
                 case LEFT:
                 case RIGHT:
                     setState(State.ATTACK_SIDE_GROUND, true, ATTACK_SIDE_GROUND_DURATION);
-                    setFacingRight(direction.hasRight());
+                    e.facingRight = (direction.hasRight());
                     break;
                 case UP:
                     setState(State.ATTACK_UP_GROUND, true, ATTACK_UP_GROUND_DURATION);
@@ -561,7 +564,7 @@ public class EntityPerson extends EntityMob {
                 case LEFT:
                 case RIGHT:
                     setState(State.ATTACK_SIDE_AIR, true, ATTACK_SIDE_AIR_DURATION);
-                    setFacingRight(direction.hasRight());
+                    e.facingRight = (direction.hasRight());
                     break;
                 case UP:
                     setState(State.ATTACK_UP_AIR, true, ATTACK_UP_AIR_DURATION);
@@ -581,12 +584,12 @@ public class EntityPerson extends EntityMob {
         if(!state.canAct)
             return;
         
-        if(onGround) {
+        if(e.physics.onGround()) {
             switch(direction) {
                 case LEFT:
                 case RIGHT:
                     setState(State.SPECIAL_SIDE_GROUND, true, SPECIAL_SIDE_GROUND_DURATION);
-                    setFacingRight(direction.hasRight());
+                    e.facingRight = (direction.hasRight());
                     break;
                 case UP:
                     setState(State.SPECIAL_UP_GROUND, true, SPECIAL_UP_GROUND_DURATION);
@@ -603,7 +606,7 @@ public class EntityPerson extends EntityMob {
                 case LEFT:
                 case RIGHT:
                     setState(State.SPECIAL_SIDE_AIR, true, SPECIAL_SIDE_AIR_DURATION);
-                    setFacingRight(direction.hasRight());
+                    e.facingRight = (direction.hasRight());
                     break;
                 case UP:
                     setState(State.SPECIAL_UP_AIR, true, SPECIAL_UP_AIR_DURATION);
@@ -712,11 +715,6 @@ public class EntityPerson extends EntityMob {
             mana = maxMana;
         
         manaChanged = true;
-    }
-    
-    @Override
-    public void render(WorldRenderer renderer) {
-        renderer.renderPerson(this);
     }
     
 }

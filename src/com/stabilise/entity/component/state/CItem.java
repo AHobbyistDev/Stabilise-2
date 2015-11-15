@@ -1,18 +1,15 @@
-package com.stabilise.entity;
+package com.stabilise.entity.component.state;
 
 import java.util.Random;
 
 import com.stabilise.core.Constants;
-import com.stabilise.core.state.SingleplayerState;
+import com.stabilise.entity.Entity;
 import com.stabilise.item.ItemStack;
-import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
-/**
- * An item entity.
- */
-public class EntityItem extends Entity {
+@SuppressWarnings("unused")
+public class CItem implements CState {
     
     //--------------------==========--------------------
     //-----=====Static Constants and Variables=====-----
@@ -43,40 +40,29 @@ public class EntityItem extends Entity {
     /** The number of the item the entity holds. */
     public int count;
     
-    
-    public EntityItem() {
-        
-    }
-    
-    /**
-     * Creates a new item entity.
-     * 
-     * @param stack The item the entity represents.
-     */
-    public EntityItem(ItemStack stack) {
-        this.stack = stack;
-    }
+    public CItem() {}
+    public CItem(ItemStack stack) { this.stack = stack; }
     
     /**
      * Adds some velocity to the item to give it a nice popping effect.
      */
-    public void pop(Random rnd) {
-        dx = rnd.nextFloat() * 4.0f - 2f;
-        dy = 4f + rnd.nextFloat() * 2f;
-    }
-    
-    protected AABB getAABB() {
-        return ENT_AABB;
+    public void pop(Entity e, Random rnd) {
+        e.dx = rnd.nextFloat() * 4.0f - 2f;
+        e.dy = 4f + rnd.nextFloat() * 2f;
     }
     
     @Override
-    public void update(World world) {
-        super.update(world);
+    public void init(World w, Entity e) {
         
-        if(age == DESPAWN_TICKS)
-            destroy();
+    }
+    
+    @Override
+    public void update(World w, Entity e) {
+        if(e.age == DESPAWN_TICKS)
+            e.destroy();
         
-        for(EntityMob m : world.getPlayers()) {
+        for(Entity m : w.getPlayers()) {
+            /*
             if(!(m instanceof EntityPlayer)) continue;
             EntityPlayer p = (EntityPlayer)m;
             if(p.inventory.canAddStack(stack)) {
@@ -104,12 +90,13 @@ public class EntityItem extends Entity {
                     break;
                 }
             }
+            */
         }
     }
     
     @Override
-    public void render(WorldRenderer renderer) {
-        renderer.renderItem(this);
+    public AABB getAABB() {
+        return ENT_AABB;
     }
     
 }

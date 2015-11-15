@@ -24,12 +24,11 @@ import com.stabilise.core.Game;
 import com.stabilise.core.Resources;
 import com.stabilise.core.app.Application;
 import com.stabilise.entity.*;
-import com.stabilise.entity.controller.PlayerController;
+import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
-import com.stabilise.item.Items;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
 import com.stabilise.util.Profiler;
@@ -63,7 +62,7 @@ public class WorldRenderer implements Renderer {
     public final World world;
     /** The camera. */
     public final GameCamera playerCamera;
-    public final EntityPlayer player;
+    public final Entity player;
     public final PlayerController controller;
     
     //public final HUDRenderer hudRenderer;
@@ -111,12 +110,12 @@ public class WorldRenderer implements Renderer {
      * @param world The game world.
      * @param player The player entity.
      */
-    public WorldRenderer(Game game, World world, EntityMob player, PlayerController controller) {
+    public WorldRenderer(Game game, World world, Entity player, PlayerController controller) {
         super();
         
         this.world = world;
         
-        this.player = (EntityPlayer)player;
+        this.player = player;
         playerCamera = new GameCamera(player);
         this.controller = controller;
         
@@ -293,7 +292,7 @@ public class WorldRenderer implements Renderer {
             shapes.begin(ShapeType.Line);
             shapes.setColor(Color.BLUE);
             world.getEntities().forEach(
-                    e -> renderAABB(e.boundingBox, (float)e.x, (float)e.y)
+                    e -> renderAABB(e.aabb, (float)e.x, (float)e.y)
             );
             shapes.setColor(Color.RED);
             world.getHitboxes().forEach(
@@ -321,30 +320,11 @@ public class WorldRenderer implements Renderer {
     // ----------Entity rendering----------
     
     /**
-     * Renders an arrow entity.
-     * 
-     * @param e The arrow entity.
-     */
-    public void renderArrow(EntityArrow e) {
-        /*
-        arrowSprite.x = (float) (e.x * scale + offsetX);
-        arrowSprite.y = (float) (e.y * scale + offsetY);
-        arrowSprite.rotation = (float) Math.toDegrees(((EntityArrow) e).rotation);
-        if(e.facingRight && arrowSprite.getFlipped())
-            arrowSprite.setPivot(arrowSprite.getTextureWidth(), arrowSprite.getTextureHeight() / 2);
-        else if(!e.facingRight && !arrowSprite.getFlipped())
-            arrowSprite.setPivot(0, arrowSprite.getTextureHeight() / 2);
-        arrowSprite.setFlipped(!e.facingRight);
-        arrowSprite.draw();
-        */
-    }
-    
-    /**
      * Renders a big fireball entity.
      * 
      * @param e The big fireball entity.
      */
-    public void renderBigFireball(EntityBigFireball e) {
+    public void renderBigFireball(Entity e) {
         renderFireball(e);
     }
     
@@ -353,7 +333,8 @@ public class WorldRenderer implements Renderer {
      * 
      * @param e The enemy entity.
      */
-    public void renderEnemy(EntityEnemy e) {
+    public void renderEnemy(Entity e) {
+        /*
         if(e.hasTint) {
             if(e.dead) {
                 batch.setColor(e.tintStrength, 0f, 0f, 1f);
@@ -386,6 +367,7 @@ public class WorldRenderer implements Renderer {
         );
         
         batch.setColor(DEFAULT_COL);
+        */
     }
     
     /**
@@ -393,7 +375,8 @@ public class WorldRenderer implements Renderer {
      * 
      * @param e The fireball entity.
      */
-    public void renderFireball(EntityProjectile e) {
+    public void renderFireball(Entity e) {
+        /*
         batch.draw(
                 texFireball, // texture
                 (float)e.x - 0.75f, // x
@@ -412,6 +395,7 @@ public class WorldRenderer implements Renderer {
                 false, //!e.facingRight, // flipX
                 false // flipY
         );
+        */
     }
     
     /**
@@ -419,20 +403,23 @@ public class WorldRenderer implements Renderer {
      * 
      * @param e The item entity.
      */
-    public void renderItem(EntityItem e) {
+    public void renderItem(Entity e) {
+        /*
         if(e.stack.getItem().equals(Items.TILE))
             renderOn(tileRenderer.tiles.getRegion(7 + e.stack.getData()), e);
         else
             renderOn(shtItems.getRegion(e.stack.getItem().getID() - 1), e);
+        */
     }
     
+    @SuppressWarnings("unused")
     private void renderOn(TextureRegion tex, Entity e) {
         batch.draw(
                 tex, // region
-                (float)e.x + e.boundingBox.minX(), // x
-                (float)e.y + e.boundingBox.minY(), // y
-                e.boundingBox.width(), // width
-                e.boundingBox.height() // height
+                (float)e.x + e.aabb.minX(), // x
+                (float)e.y + e.aabb.minY(), // y
+                e.aabb.width(), // width
+                e.aabb.height() // height
         );
     }
     
@@ -441,9 +428,9 @@ public class WorldRenderer implements Renderer {
      * 
      * @param e The person entity.
      */
-    public void renderPerson(EntityPerson e) {
+    public void renderPerson(Entity e) {
         personModel.setFlipped(!e.facingRight);
-        personModel.setState(e.getState(), e.stateTicks);
+        //personModel.setState(e.getState(), e.stateTicks);
         personModel.render(batch, (float)e.x, (float)e.y);
     }
     

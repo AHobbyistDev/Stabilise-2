@@ -144,7 +144,7 @@ public class FragList<E> implements SimpleList<E> {
      * @throws NullPointerException if {@code e} is {@code null}.
      */
     @Override
-    public void put(E e) {
+    public void append(E e) {
         /*
         // This one just appends to the end, and doesn't try looking for the
         // first null.

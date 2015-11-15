@@ -1,12 +1,12 @@
 package com.stabilise.world.dimension;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.util.Objects;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
 import com.stabilise.util.collect.DuplicatePolicy;
+import com.stabilise.util.collect.GeneralTypeFactory.ReflectiveFactory;
 import com.stabilise.util.collect.Registry;
 import com.stabilise.util.collect.RegistryParams;
 import com.stabilise.util.nbt.NBTIO;
@@ -444,55 +444,6 @@ public abstract class Dimension {
         @Override
         public boolean equals(Object o) {
             return o == this;
-        }
-        
-    }
-    
-    /**
-     * A Factory which utilises reflection to instantiate its objects.
-     * 
-     * FIXME: only temporarily here
-     */
-    public static class ReflectiveFactory<T> {
-        
-        /** The object constructor. */
-        private final Constructor<? extends T> constructor;
-        
-        
-        /**
-         * Creates a new ReflectiveFactory for objects of the specified class.
-         * 
-         * @param objClass The objects' class.
-         * @param args The desired constructor's arguments.
-         * 
-         * @throws NullPointerException if {@code objClass} is {@code null}.
-         * @throws RuntimeException if the specified class does not have a
-         * constructor accepting the specified parameter types.
-         */
-        public ReflectiveFactory(Class<? extends T> objClass, Class<?>... args) {
-            try {
-                constructor = objClass.getConstructor(args);
-                constructor.setAccessible(true);
-            } catch(Exception e) {
-                String className = objClass.getCanonicalName();
-                if(className == null)
-                    className = "[null]";
-                throw new RuntimeException("Constructor for " + className
-                        + " with requested arguments does not exist! ("
-                        + e.getMessage() + ")");
-            }
-        }
-        
-        public T create(Object... args) {
-            try {
-                return constructor.newInstance(args);
-            } catch(Exception e) {
-                throw new RuntimeException("Could not reflectively instantiate"
-                        + " object of class \""
-                        + constructor.getDeclaringClass().getSimpleName()
-                        + "\"! (" + e.getMessage() + ")",
-                        e);
-            }
         }
         
     }

@@ -5,8 +5,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.stabilise.core.Resources;
-import com.stabilise.entity.EntityMob;
-import com.stabilise.entity.EntityPerson;
+import com.stabilise.entity.component.state.CBaseMob;
+import com.stabilise.entity.component.state.CPerson;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.util.maths.Point;
 
@@ -138,7 +138,7 @@ public class ModelPlayer extends Model {
      * @param stateDuration The duration for which the player has remained in
      * the state.
      */
-    public void setState(EntityMob.State state, int stateDuration) {
+    public void setState(CBaseMob.State state, int stateDuration) {
         switch(state) {
             case IDLE:
                 setSprite(SPRITE_IDLE);
@@ -184,8 +184,8 @@ public class ModelPlayer extends Model {
                 
                 break;
             case ATTACK_SIDE_GROUND:
-                if(stateDuration < EntityPerson.ATTACK_SIDE_GROUND_FRAME_3_BEGIN) {
-                    if(stateDuration < EntityPerson.ATTACK_SIDE_GROUND_FRAME_2_BEGIN)
+                if(stateDuration < CPerson.ATTACK_SIDE_GROUND_FRAME_3_BEGIN) {
+                    if(stateDuration < CPerson.ATTACK_SIDE_GROUND_FRAME_2_BEGIN)
                         setSprite(SPRITE_ATTACK_GROUND_SIDE_1);
                     else
                         setSprite(SPRITE_ATTACK_GROUND_SIDE_2);
@@ -194,7 +194,7 @@ public class ModelPlayer extends Model {
                 }
                 break;
             case ATTACK_UP_GROUND:
-                if(stateDuration < EntityPerson.ATTACK_UP_GROUND_FRAME_2_BEGIN)
+                if(stateDuration < CPerson.ATTACK_UP_GROUND_FRAME_2_BEGIN)
                     setSprite(SPRITE_ATTACK_GROUND_UP_1);
                 else
                     setSprite(SPRITE_ATTACK_GROUND_UP_2);
@@ -203,8 +203,8 @@ public class ModelPlayer extends Model {
                 setSprite(SPRITE_ATTACK_GROUND_DOWN_1);
                 break;
             case ATTACK_SIDE_AIR:
-                if(stateDuration < EntityPerson.ATTACK_SIDE_AIR_FRAME_3_BEGIN) {
-                    if(stateDuration < EntityPerson.ATTACK_SIDE_AIR_FRAME_2_BEGIN)
+                if(stateDuration < CPerson.ATTACK_SIDE_AIR_FRAME_3_BEGIN) {
+                    if(stateDuration < CPerson.ATTACK_SIDE_AIR_FRAME_2_BEGIN)
                         setSprite(SPRITE_ATTACK_AIR_SIDE_1);
                     else
                         setSprite(SPRITE_ATTACK_AIR_SIDE_2);
@@ -212,8 +212,8 @@ public class ModelPlayer extends Model {
                     setSprite(SPRITE_ATTACK_AIR_SIDE_3);
                 break;
             case ATTACK_UP_AIR:
-                if(stateDuration < EntityPerson.ATTACK_UP_AIR_FRAME_3_BEGIN) {
-                    if(stateDuration < EntityPerson.ATTACK_UP_AIR_FRAME_2_BEGIN)
+                if(stateDuration < CPerson.ATTACK_UP_AIR_FRAME_3_BEGIN) {
+                    if(stateDuration < CPerson.ATTACK_UP_AIR_FRAME_2_BEGIN)
                         setSprite(SPRITE_ATTACK_AIR_UP_1);
                     else
                         setSprite(SPRITE_ATTACK_AIR_UP_2);
@@ -221,8 +221,8 @@ public class ModelPlayer extends Model {
                     setSprite(SPRITE_ATTACK_AIR_UP_3);
                 break;
             case ATTACK_DOWN_AIR:
-                if(stateDuration < EntityPerson.ATTACK_DOWN_AIR_FRAME_3_BEGIN) {
-                    if(stateDuration < EntityPerson.ATTACK_DOWN_AIR_FRAME_2_BEGIN)
+                if(stateDuration < CPerson.ATTACK_DOWN_AIR_FRAME_3_BEGIN) {
+                    if(stateDuration < CPerson.ATTACK_DOWN_AIR_FRAME_2_BEGIN)
                         setSprite(SPRITE_ATTACK_AIR_DOWN_1);
                     else
                         setSprite(SPRITE_ATTACK_AIR_DOWN_2);
@@ -230,37 +230,37 @@ public class ModelPlayer extends Model {
                     setSprite(SPRITE_ATTACK_AIR_DOWN_3);
                 break;
             case SPECIAL_SIDE_GROUND:
-                if(stateDuration < EntityPerson.SPECIAL_SIDE_GROUND_FRAME_2_BEGIN)
+                if(stateDuration < CPerson.SPECIAL_SIDE_GROUND_FRAME_2_BEGIN)
                     setSprite(SPRITE_SPECIAL_GROUND_SIDE_1);
                 else
                     setSprite(SPRITE_SPECIAL_GROUND_SIDE_2);
                 break;
             case SPECIAL_UP_GROUND:
-                if(stateDuration < EntityPerson.SPECIAL_UP_GROUND_FRAME_2_BEGIN)
+                if(stateDuration < CPerson.SPECIAL_UP_GROUND_FRAME_2_BEGIN)
                     setSprite(SPRITE_SPECIAL_GROUND_UP_1);
                 else
                     setSprite(SPRITE_SPECIAL_GROUND_UP_2);
                 break;
             case SPECIAL_DOWN_GROUND:
-                if(stateDuration < EntityPerson.SPECIAL_DOWN_GROUND_FRAME_2_BEGIN)
+                if(stateDuration < CPerson.SPECIAL_DOWN_GROUND_FRAME_2_BEGIN)
                     setSprite(SPRITE_SPECIAL_GROUND_DOWN_1);
                 else
                     setSprite(SPRITE_SPECIAL_GROUND_DOWN_2);
                 break;
             case SPECIAL_SIDE_AIR:
-                if(stateDuration < EntityPerson.SPECIAL_SIDE_AIR_FRAME_2_BEGIN)
+                if(stateDuration < CPerson.SPECIAL_SIDE_AIR_FRAME_2_BEGIN)
                     setSprite(SPRITE_SPECIAL_AIR_SIDE_1);
                 else
                     setSprite(SPRITE_SPECIAL_AIR_SIDE_2);
                 break;
             case SPECIAL_UP_AIR:
-                if(stateDuration < EntityPerson.SPECIAL_UP_AIR_FRAME_2_BEGIN)
+                if(stateDuration < CPerson.SPECIAL_UP_AIR_FRAME_2_BEGIN)
                     setSprite(SPRITE_SPECIAL_AIR_UP_1);
                 else
                     setSprite(SPRITE_SPECIAL_AIR_UP_2);
                 break;
             case SPECIAL_DOWN_AIR:
-                if(stateDuration < EntityPerson.SPECIAL_DOWN_AIR_FRAME_2_BEGIN)
+                if(stateDuration < CPerson.SPECIAL_DOWN_AIR_FRAME_2_BEGIN)
                     setSprite(SPRITE_SPECIAL_AIR_DOWN_1);
                 else
                     setSprite(SPRITE_SPECIAL_AIR_DOWN_2);

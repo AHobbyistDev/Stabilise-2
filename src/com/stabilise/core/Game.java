@@ -6,8 +6,8 @@ import com.badlogic.gdx.InputProcessor;
 import com.stabilise.core.app.Application;
 import com.stabilise.core.state.LoadingState;
 import com.stabilise.core.state.SingleplayerState;
-import com.stabilise.entity.EntityMob;
-import com.stabilise.entity.controller.PlayerController;
+import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
@@ -36,7 +36,7 @@ public class Game implements Controllable, InputProcessor {
     /** The game's world instance. */
     public final HostWorld world;
     public final PlayerData playerData;
-    public final EntityMob player;
+    public final Entity player;
     
     /** The controller. */
     public Controller controller;
@@ -76,7 +76,8 @@ public class Game implements Controllable, InputProcessor {
         controller = new Controller(this);
         
         // TODO: Hardcoding this is poor design and should be changed in the future
-        playerController = new PlayerController(player, controller, this);
+        playerController = new PlayerController(controller, this);
+        player.controller = playerController;
     }
     
     /**

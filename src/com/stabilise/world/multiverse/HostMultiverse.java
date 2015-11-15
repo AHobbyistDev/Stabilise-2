@@ -7,7 +7,7 @@ import java.util.Objects;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
-import com.stabilise.entity.EntityMob;
+import com.stabilise.entity.Entity;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.nbt.NBTIO;
@@ -107,7 +107,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
             return null;
         players.putIfAbsent(player.hash, data);
         HostWorld world = loadDimension(data.dimension);
-        EntityMob playerEntity = world.addPlayer(data);
+        Entity playerEntity = world.addPlayer(data);
         if(integrated) {
             integratedClient = true;
             integratedCharacter = player;
@@ -186,7 +186,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         /** The player's global data. */
         public final CharacterData data;
         
-        public EntityMob playerMob;
+        public Entity playerMob;
         
         private final FileHandle file;
         
@@ -252,13 +252,13 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         /** The world the player has been added to. */
         public final HostWorld world;
         /** The player entity. */
-        public final EntityMob playerEntity;
+        public final Entity playerEntity;
         /** The player's data. */
         public final PlayerData playerData;
         
-        private PlayerBundle(HostWorld world, EntityMob mob, PlayerData data) {
+        private PlayerBundle(HostWorld world, Entity player, PlayerData data) {
             this.world = world;
-            this.playerEntity = mob;
+            this.playerEntity = player;
             this.playerData = data;
         }
         

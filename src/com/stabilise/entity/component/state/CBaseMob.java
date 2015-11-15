@@ -1,26 +1,16 @@
-package com.stabilise.entity;
+package com.stabilise.entity.component.state;
 
-import com.stabilise.entity.controller.MobController;
-import com.stabilise.entity.controller.PlayerController;
+import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.entity.effect.Effect;
 import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleSmoke;
-import com.stabilise.item.Item;
 import com.stabilise.util.Direction;
-import com.stabilise.world.AbstractWorld.ParticleSource;
 import com.stabilise.world.World;
+import com.stabilise.world.AbstractWorld.ParticleSource;
 
-/**
- * A mob is an entity capable of acting of its own agency.
- */
-public abstract class EntityMob extends Entity {
-    
-    //--------------------==========--------------------
-    //-----=====Static Constants and Variables=====-----
-    //--------------------==========--------------------
-    
-    /** The base value for air traction. TODO: Temporary */
-    protected static final float AIR_TRACTION = 0.15f;
+
+public abstract class CBaseMob implements CState {
     
     /** The default number of ticks a mob becomes invulnerable for after being
      * hit. */
@@ -158,11 +148,10 @@ public abstract class EntityMob extends Entity {
     //-------------=====Member Variables=====-----------
     //--------------------==========--------------------
     
-    /** The Mob's controller. This may never be {@code null}. */
-    private MobController controller;
+    public Entity e;
     
     /** The mob's state. */
-    protected State state;
+    public State state;
     /** The number of ticks the mob has remained in its current state. */
     public int stateTicks = 0;
     /** The number of ticks the mob is locked in the state, unless overridden
@@ -176,6 +165,7 @@ public abstract class EntityMob extends Entity {
     /** Whether or not the Mob is dead. */
     public boolean dead = false;
     
+    public boolean invulnerable = false;
     /** The number of ticks until the Mob loses its invulnerability. */
     public int invulnerabilityTicks = 0;
     
@@ -215,43 +205,26 @@ public abstract class EntityMob extends Entity {
     /** The strength of the mob's 'effect tint'. */
     public float tintStrength = 0.0f;
     
-    
-    /**
-     * Creates a new Mob.
-     */
-    public EntityMob() {
-        initProperties();
+    @Override
+    public void init(World w, Entity e) {
+        this.e = e;
+        srcDmgIndicator = w.getParticleManager().getSource(new ParticleDamageIndicator(0));
+        srcSmoke = w.getParticleManager().getSource(new ParticleSmoke());
     }
     
-    /**
-     * Initiates the Mob's core properties. This is invoked when the Mob is
-     * instantiated.
-     */
-    protected abstract void initProperties();
-    
     @Override
-    public void update(World world) {
-        if(srcDmgIndicator == null) {
-            srcDmgIndicator = world.getParticleManager().getSource(new ParticleDamageIndicator(0));
-            srcSmoke = world.getParticleManager().getSource(new ParticleSmoke());
-        }
-        
-        moving = false;
-        
-        controller.update();
-        
-        if(physicsEnabled)
-            stateTicks++;
+    public void update(World w, Entity e) {
+        stateTicks++;
         
         if(state == State.DEAD && stateTicks == DEATH_TICKS) {
-            spawnSmokeParticles();
-            destroy();
+            spawnSmokeParticles(e);
+            e.destroy();
             return;
         }
         
         if(state == State.JUMP_CROUCH && stateTicks == stateLockDuration) {
             setState(State.JUMP, false);        // No need, checked above
-            dy = jumpVelocity;
+            e.dy = jumpVelocity;
         }
         
         if(invulnerable) {
@@ -260,7 +233,7 @@ public abstract class EntityMob extends Entity {
         }
         
         if(effect != null) {
-            effect.update(world, this);
+            effect.update(w, e);
             if(effect.destroyed)
                 effect = null;
         }
@@ -274,27 +247,27 @@ public abstract class EntityMob extends Entity {
                 hasTint = false;
         }
         
-        super.update(world);
+        //super.update(world);
         
-        wasOnGround = onGround;
+        wasOnGround = e.physics.onGround();
         
-        if(onGround) {
+        if(wasOnGround) {
             if(moving) {
-                if((facingRight && dx > 0) || (!facingRight && dx < 0))
+                if((e.facingRight && e.dx > 0) || (!e.facingRight && e.dx < 0))
                     setState(State.RUN, true);
                 else
                     setState(State.SLIDE_BACK, true);
             } else {
-                if(dx == 0)
+                if(e.dx == 0)
                     setState(State.IDLE, true);
                 else
-                    if((facingRight && dx > 0) || (!facingRight && dx < 0))
+                    if((e.facingRight && e.dx > 0) || (!e.facingRight && e.dx < 0))
                         setState(State.SLIDE_FORWARD, true);
                     else
                         setState(State.SLIDE_BACK, true);
             }
         } else {
-            if(dy > 0)
+            if(e.dy > 0)
                 setState(State.JUMP, true);
             else
                 setState(State.FALL, true);
@@ -302,8 +275,9 @@ public abstract class EntityMob extends Entity {
         
         // Temporary rectification of dx to prevent a mob from remaining in a slide state
         // TODO: Better solution would be ideal
-        if((dx > 0 && dx < 0.001f) || (dx < 0 && dx > -0.001f))
-            dx = 0;
+        if((e.dx > 0 && e.dx < 0.001f)
+                || (e.dx < 0 && e.dx > -0.001f))
+            e.dx = (0);
     }
     
     /*
@@ -316,10 +290,9 @@ public abstract class EntityMob extends Entity {
     }
     */
     
-    @Override
     protected void onVerticalCollision() {
-        if(dy < 0 && !wasOnGround && state.priority != StatePriority.UNOVERRIDEABLE) {
-            if(dy < -jumpVelocity) {
+        if(e.dy < 0 && !wasOnGround && state.priority != StatePriority.UNOVERRIDEABLE) {
+            if(e.dy < -jumpVelocity) {
                 //if(dy < -2*jumpVelocity)
                 //    damage(-(int)(dy * dy * 2), -1, 0, 0);
                 setState(State.LAND_CROUCH, false, 5);        // TODO: temporary constant duration
@@ -358,21 +331,21 @@ public abstract class EntityMob extends Entity {
             return;
         
         if(direction.hasHorizontalComponent()) {
-            float ddx = onGround ? acceleration : airAcceleration;
+            float ddx = e.physics.onGround() ? acceleration : airAcceleration;
             
             if(direction.hasRight())
-                dx += ddx;
+                e.dx = (e.dx + ddx);
             else
-                dx -= ddx;
+                e.dx = (e.dx - ddx);
             
             // TODO: modulate based on max dx better
             //ddx *= (maxDx - Math.abs(dx));
-            if(dx > maxDx)
-                dx = maxDx;
-            else if(dx < -maxDx)
-                dx = -maxDx;
+            if(e.dx > maxDx)
+                e.dx = (maxDx);
+            else if(e.dx < -maxDx)
+                e.dx = (-maxDx);
             
-            setFacingRight(direction.hasRight());
+            e.facingRight = direction.hasRight();
         }
         
         // TODO: no vertical movement implemented for now
@@ -391,7 +364,7 @@ public abstract class EntityMob extends Entity {
      * </p>
      */
     public void jump() {
-        if(onGround && state.ground && state.canAct)
+        if(e.physics.onGround() && state.ground && state.canAct)
             setState(State.JUMP_CROUCH, true, jumpCrouchDuration);
     }
     
@@ -420,24 +393,24 @@ public abstract class EntityMob extends Entity {
      * @param fx The x component of the force applied to the mob by the impact.
      * @param fy The y component of the force applied to the mob by the impact.
      */
-    public void damage(World world, int damage, int damagerID, float fx, float fy) {
+    public void damage(World w, int damage, int damagerID, float fx, float fy) {
         if(invulnerable || dead)
             return;
         
         health -= damage;
-        dx += fx;
-        dy += fy;
+        e.dx = (e.dx + fx);
+        e.dy = (e.dy + fy);
         
         hasTint = true;
         //tintStrength = 1.0f;
         
         if(damage > 0)
-            srcDmgIndicator.createAt(x, y);
+            srcDmgIndicator.createAt(e.x, e.y);
         
         if(health <= 0) {
             health = 0;
             tintStrength = 0.8f;
-            kill();
+            kill(w);
         } else {
             tintStrength = 1.0f;
             invulnerable = true;
@@ -448,66 +421,17 @@ public abstract class EntityMob extends Entity {
     /**
      * Kills the mob by settings its state to {@link State#DEAD DEAD}.
      */
-    public void kill() {
+    public void kill(World w) {
         dead = true;
         setState(State.DEAD, false, DEATH_TICKS);
     }
     
     /**
-     * {@inheritDoc}
-     * 
-     * The Mob will also spawn some smoke particles in its place if it died at
-     * 0 health.
-     */
-    @Override
-    public void destroy() {
-        super.destroy();
-        
-        /*
-        if(health == 0) {
-            if(Settings.settingParticlesAll())
-                spawnSmokeParticles(10);
-            else if(Settings.settingParticlesReduced())
-                spawnSmokeParticles(5);
-        }
-        */
-    }
-    
-    /**
      * Spawns smoke particles at the Mob's location.
      */
-    private void spawnSmokeParticles() {
+    private void spawnSmokeParticles(Entity e) {
         //srcSmoke.createBurst(30, 0.01f, 0.25f, 0f, (float)Math.PI, this);
-        srcSmoke.createOutwardsBurst(30, true, true, 0.25f, 0.05f, this);
-    }
-    
-    /**
-     * Drops an item as a result of being killed.
-     * 
-     * @param world
-     * @param id The ID of the item.
-     * @param count The quantity of the item.
-     * @param chance The chance of dropping the item, from 0.0 to 1.0.
-     */
-    protected void dropItem(World world, int id, int count, float chance) {
-        if(world.getRnd().nextFloat() > chance)
-            return;
-        EntityItem e = new EntityItem(Item.getItem(id).stackOf(count));
-        e.pop(world.getRnd());
-        world.addEntity(e, x, y);
-    }
-    
-    /**
-     * Sets the Mob's controller. This method sets the controller's linked mob,
-     * as per an invocation of
-     * {@link MobController#setTarget(EntityMob)
-     * setControlledMob(this)}.
-     * 
-     * @param controller The controller.
-     */
-    public void setController(MobController controller) {
-        this.controller = controller;
-        controller.setTarget(this);
+        srcSmoke.createOutwardsBurst(30, true, true, 0.25f, 0.05f, e);
     }
     
     /**
@@ -555,7 +479,7 @@ public abstract class EntityMob extends Entity {
      * @return {@code true} if the mob is being controlled by a player.
      */
     public boolean isPlayerControlled() {
-        return controller instanceof PlayerController;
+        return e.controller instanceof PlayerController;
     }
     
 }

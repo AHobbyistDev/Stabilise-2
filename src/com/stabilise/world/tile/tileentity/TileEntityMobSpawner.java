@@ -1,7 +1,6 @@
 package com.stabilise.world.tile.tileentity;
 
-import com.stabilise.entity.EntityEnemy;
-import com.stabilise.entity.EntityMob;
+import com.stabilise.entity.Entity;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.util.maths.Maths;
@@ -74,7 +73,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      * @return {@code true} if a player is in range; {@code false} otherwise.
      */
     private boolean playerInRange(World world) {
-        for(EntityMob p : world.getPlayers()) {
+        for(Entity p : world.getPlayers()) {
             double dx = xPos - p.x;
             double dy = yPos - p.y;
             if(dx*dx + dy*dy <= ACTIVATION_RANGE_SQUARED)
@@ -90,6 +89,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      * otherwise.
      */
     private boolean trySpawn(World world) {
+        /*
         EntityEnemy e = new EntityEnemy();
         world.addEntity(e, xPos, yPos+1);
         
@@ -97,6 +97,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
             spawnParticle(world);
             spawnParticleOnMob(world, e);
         }
+        */
         
         return true;
     }
@@ -114,7 +115,8 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      * 
      * @param e The mob.
      */
-    private void spawnParticleOnMob(World world, EntityMob e) {
+    @SuppressWarnings("unused")
+    private void spawnParticleOnMob(World world, Entity e) {
         smokeGen.createBurst(1, 0.04f, 0.12f, 0, (float)Maths.TAU, e);
     }
     

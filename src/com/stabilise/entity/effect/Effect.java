@@ -1,6 +1,6 @@
 package com.stabilise.entity.effect;
 
-import com.stabilise.entity.EntityMob;
+import com.stabilise.entity.Entity;
 import com.stabilise.world.World;
 
 /**
@@ -35,7 +35,7 @@ public abstract class Effect {
      * @param world The world.
      * @param target The target of the Effect.
      */
-    public void update(World world, EntityMob target) {
+    public void update(World world, Entity target) {
         if(++age == duration)
             destroyed = true;
     }

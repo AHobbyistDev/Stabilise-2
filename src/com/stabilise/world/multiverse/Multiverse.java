@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.EntityMob;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
@@ -86,7 +85,7 @@ public abstract class Multiverse<W extends AbstractWorld> {
     protected CharacterData integratedCharacter = null;
     /** The integrated client's player. {@code null} if there is no integrated
      * client. */
-    protected EntityMob integratedPlayer = null;
+    protected Entity integratedPlayer = null;
     
     
     /**

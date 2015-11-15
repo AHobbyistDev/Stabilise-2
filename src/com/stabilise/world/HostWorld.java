@@ -8,8 +8,10 @@ import java.util.function.Consumer;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.state.SingleplayerState;
-import com.stabilise.entity.EntityMob;
-import com.stabilise.entity.EntityPlayer;
+import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.EntityData;
+import com.stabilise.entity.component.physics.CPhysicsImpl;
+import com.stabilise.entity.component.state.CPlayerPerson;
 import com.stabilise.util.annotation.ForTestingPurposes;
 import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.UserThread;
@@ -109,8 +111,12 @@ public class HostWorld extends AbstractWorld {
      * @return The added player entity.
      * @throws NullPointerException if {@code data} is {@code null}.
      */
-    public EntityMob addPlayer(PlayerData data) {
-        EntityPlayer p = new EntityPlayer();
+    public Entity addPlayer(PlayerData data) {
+        EntityData d = new EntityData();
+        d.physics = new CPhysicsImpl();
+        d.state = new CPlayerPerson();
+        Entity p = new Entity();
+        p.init(this, d);
         data.playerMob = p;
         if(data.newToWorld) {
             data.newToWorld = false;
@@ -214,10 +220,10 @@ public class HostWorld extends AbstractWorld {
         int maxY = minY + Region.REGION_SIZE_IN_TILES;
         
         getEntities().forEach(e -> {
-            if(e.x + e.boundingBox.maxX() >= minX
-                    && e.x + e.boundingBox.minX() <= maxX
-                    && e.y + e.boundingBox.maxY() >= minY
-                    && e.y + e.boundingBox.minY() <= maxY)
+            if(e.x + e.aabb.maxX() >= minX
+                    && e.x + e.aabb.minX() <= maxX
+                    && e.y + e.aabb.maxY() >= minY
+                    && e.y + e.aabb.minY() <= maxY)
                 e.destroy();
         });
     }

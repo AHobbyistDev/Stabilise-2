@@ -3,8 +3,6 @@ package com.stabilise.world.tile;
 import static com.stabilise.world.tile.TileBuilder.Template.*;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.EntityItem;
-import com.stabilise.entity.EntityMob;
 import com.stabilise.item.ItemStack;
 import com.stabilise.item.Items;
 import com.stabilise.util.collect.RegistryNamespacedDefaulted;
@@ -150,7 +148,7 @@ public class Tile {
      * @param y The y-coordinate of the tile, in tile-lengths.
      * @param mob The mob to touch the tile.
      */
-    public void handleTouch(World world, int x, int y, EntityMob mob) {
+    public void handleTouch(World world, int x, int y, Entity mob) {
         // nothing in the default implementation
     }
     
@@ -162,7 +160,7 @@ public class Tile {
      * @param y The y-coordinate of the tile, in tile-lengths.
      * @param mob The mob to interact with the tile.
      */
-    public void handleInteract(World world, int x, int y, EntityMob mob) {
+    public void handleInteract(World world, int x, int y, Entity mob) {
         // nothing in the default implementation
     }
     
@@ -171,11 +169,13 @@ public class Tile {
      * {@link ItemStack#NO_STACK}.
      */
     protected void createItemEntity(World world, int x, int y, ItemStack stack) {
+        /*
         if(stack != ItemStack.NO_STACK) {
             EntityItem e = new EntityItem(createStack(1));
             e.pop(world.getRnd());
             world.addEntity(e, x + 0.5, y + 0.1);
         }
+        */
     }
     
     /**

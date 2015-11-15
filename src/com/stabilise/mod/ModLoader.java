@@ -10,10 +10,11 @@ import java.util.jar.JarFile;
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Resources;
 import com.stabilise.util.Log;
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.collect.IteratorUtils;
 import com.stabilise.util.collect.UnorderedArrayList;
 
-
+@Incomplete
 public class ModLoader {
     
     public static void main(String[] args) {

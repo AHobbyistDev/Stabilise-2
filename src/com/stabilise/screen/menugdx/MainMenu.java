@@ -47,12 +47,10 @@ public class MainMenu implements Screen {
         Gdx.input.setInputProcessor(stage);
         
         FileHandle atlasSrc = Resources.IMAGE_DIR.child("sheets/pack.atlas");
-        FileHandle atlasJson = Resources.IMAGE_DIR.child("sheets/mainmenu.json");
         atlas = new TextureAtlas(atlasSrc);
-        skin = new Skin(atlasJson, atlas);
+        skin = new Skin(atlas);
         
         table = new Table(skin);
-        table.setBounds(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         
         FreeTypeFontParameter textParam = new FreeTypeFontParameter();
         textParam.size = 32;
@@ -91,7 +89,7 @@ public class MainMenu implements Screen {
         table.add(heading).spaceBottom(50).row();
         table.add(btnPlay).spaceBottom(20).row();
         table.add(btnExit).spaceBottom(50).row();
-        //table.debug();
+        table.debug();
         stage.addActor(table);
     }
     

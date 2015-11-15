@@ -52,19 +52,21 @@ public class LineCounter {
         FileInputStream fis = new FileInputStream(file);
         InputStreamReader isr = new InputStreamReader(fis);
         BufferedReader br = new BufferedReader(isr);
-        int lines = 0;
+        int lines = 0, realLines = 0;
         String s;
         while((s = br.readLine()) != null) {
             lines++;
             lineTotal++;
-            if(!isComment(s))
+            if(!isComment(s)) {
+                realLines++;
                 realLineTotal++;
+            }
         }
         br.close();
         isr.close();
         fis.close();
         classTotal++;
-        System.out.println(String.format("%4d - %s", lines, path.replace(dir, "")));
+        System.out.println(String.format("%4d  %4d - %s", realLines, lines, path.replace(dir, "")));
     }
     
     private boolean isComment(String s) {

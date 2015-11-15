@@ -13,7 +13,7 @@ import com.stabilise.character.CharacterData;
 import com.stabilise.core.GameClient;
 import com.stabilise.core.Resources;
 import com.stabilise.core.GameClient.WorldLoadHandle;
-import com.stabilise.entity.EntityMob;
+import com.stabilise.entity.Entity;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.concurrent.task.ReturnTask;
@@ -399,13 +399,13 @@ public class Worlds {
         private final AbstractWorld world;
         /** The player entity. This is {@code null} if no player was
          * specified. */
-        private final EntityMob playerEntity;
+        private final Entity playerEntity;
         /** The world-specific player data. This is non-null iff a host was
          * built with an integrated player specified. */
         private final PlayerData playerData;
         
         protected WorldBundle(Multiverse<?> multiverse, AbstractWorld world,
-                EntityMob playerEntity, PlayerData playerData) {
+                Entity playerEntity, PlayerData playerData) {
             this.multiverse = multiverse;
             this.world = world;
             this.playerEntity = playerEntity;
@@ -480,7 +480,7 @@ public class Worlds {
          * 
          * @throws IllegalStateException if there is no integrated player.
          */
-        public EntityMob getPlayerEntity() {
+        public Entity getPlayerEntity() {
             if(playerEntity == null)
                 throw new IllegalStateException("Not integrated player!");
             return playerEntity;

@@ -11,9 +11,13 @@ import com.stabilise.util.Checks;
  * <p>For all cases, {@code name} and {@code dupePolicy} must be non-null, and
  * {@capacity} must be greater than zero.
  * 
- * <p>If not specified, the default value for {@code capacity} is {@code 16},
- * and the default value for {@code dupePolicy} is {@link
- * DuplicatePolicy#THROW_EXCEPTION}.
+ * <p>If not specified, the default values are:
+ * 
+ * <ul>
+ * <li>{@code name}: {@code "Registry"}
+ * <li>{@code capacity}: {@code 16}
+ * <li>{@code dupePolicy}: {@link DuplicatePolicy#THROW_EXCEPTION}.
+ * </ul>
  */
 public class RegistryParams {
     
@@ -21,9 +25,12 @@ public class RegistryParams {
     final DuplicatePolicy dupePolicy;
     final int capacity;
     
+    public RegistryParams() {
+        this("Registry");
+    }
     
     public RegistryParams(String name) {
-        this(name, 16, DuplicatePolicy.THROW_EXCEPTION);
+        this(name, 16);
     }
     
     public RegistryParams(String name, int capacity) {

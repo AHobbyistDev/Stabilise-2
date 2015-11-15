@@ -3,7 +3,6 @@ package com.stabilise.world;
 import java.util.Random;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.collect.FunctionalIterable;
@@ -61,7 +60,7 @@ public interface World {
      * the entity is added while the map of entities is being iterated over.
      * 
      * <p>Though the entity is not immediately added to the world, {@link
-     * Entity#onAdd() onAdd()} is invoked on {@code e}.
+     * EntityOld#onAdd() onAdd()} is invoked on {@code e}.
      */
     void addEntity(Entity e);
     
@@ -71,7 +70,7 @@ public interface World {
      * @return The entity with the specified ID, or {@code null} if there is no
      * such entity in the world.
      */
-    Entity getEntity(int id);
+    Entity getEntity(long id);
     
     /**
      * Removes an entity from the world.
@@ -79,7 +78,7 @@ public interface World {
      * <p>The entity is not removed from the map of entities immediately;
      * rather, it is removed at the end of the current tick.
      * 
-     * <p>Note that it is normally preferable to invoke {@link Entity#destroy()
+     * <p>Note that it is normally preferable to invoke {@link EntityOld#destroy()
      * destroy()} on an entity to remove it from the world.
      * 
      * @param e The entity.
@@ -96,12 +95,12 @@ public interface World {
      * <p>The entity is not removed from the map of entities immediately;
      * rather, it is removed at the end of the current tick.
      * 
-     * <p>Note that it is normally preferable to invoke {@link Entity#destroy()
+     * <p>Note that it is normally preferable to invoke {@link EntityOld#destroy()
      * destroy()} on an entity to remove it from the world.
      * 
      * @param id The ID of the entity.
      */
-    void removeEntity(int id);
+    void removeEntity(long id);
     
     /**
      * Adds a hitbox to the world. The hitbox's ID is assigned automatically.
@@ -134,7 +133,7 @@ public interface World {
      * player is an entity, every element in the returned collection is also
      * a member of the one returned by {@link #getEntities()}.
      */
-    FunctionalIterable<EntityMob> getPlayers();
+    FunctionalIterable<Entity> getPlayers();
     
     /**
      * @return The collection of entities in the world.

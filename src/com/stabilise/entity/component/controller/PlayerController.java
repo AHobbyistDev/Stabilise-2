@@ -1,4 +1,4 @@
-package com.stabilise.entity.controller;
+package com.stabilise.entity.component.controller;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
@@ -10,8 +10,8 @@ import com.stabilise.core.Game;
 import com.stabilise.core.app.Application;
 import com.stabilise.core.main.Stabilise;
 import com.stabilise.core.state.SingleplayerState;
-import com.stabilise.entity.EntityEnemy;
-import com.stabilise.entity.EntityMob;
+import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.state.CBaseMob;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
@@ -20,18 +20,22 @@ import com.stabilise.util.BiIntConsumer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
 import com.stabilise.util.maths.Maths;
+import com.stabilise.world.World;
 import com.stabilise.world.tile.Tiles;
 
 /**
  * A PlayerController is a MobController which is managed by player input.
  */
-public class PlayerController extends MobController implements Controllable, InputProcessor {
+public class PlayerController implements CController, Controllable, InputProcessor {
+    
+    private Entity e;
+    private CBaseMob mob;
     
     /** A reference to the PlayerController's controller. */
-    private Controller controller;
+    public Controller controller;
     
     /** A reference to the game. */
-    private Game game;
+    public Game game;
     /** A reference to the world renderer. */
     private WorldRenderer worldRenderer;
     
@@ -48,34 +52,35 @@ public class PlayerController extends MobController implements Controllable, Inp
      * PlayerController.
      * @param The game which is currently active.
      */
-    public PlayerController(EntityMob mob, Controller controller, Game game) {
-        super();
-        
+    public PlayerController(Controller controller, Game game) {
         this.controller = controller;
         this.game = game;
-        
-        // This also sets this.mob = mob via a chain of invocations
-        mob.setController(this);
     }
     
     @Override
-    public void update() {
+    public void init(World w, Entity e) {
+        this.e = e;
+        mob = (CBaseMob)e.state;
+    }
+    
+    @Override
+    public void update(World world, Entity e) {
         if(controller.isControlPressed(Control.LEFT) && controller.isControlPressed(Control.RIGHT))
             ;// do nothing
         else if(controller.isControlPressed(Control.LEFT))
-            mob.move(Direction.LEFT);
+            ;//e.move(Direction.LEFT);
         else if(controller.isControlPressed(Control.RIGHT))
-            mob.move(Direction.RIGHT);
+            ;//e.move(Direction.RIGHT);
         
         //if(Constants.DEV_VERSION) {
         if(controller.isControlPressed(Control.FLYRIGHT))
-            mob.dx += 1f;
+            e.dx += 1f;
         if(controller.isControlPressed(Control.FLYLEFT))
-            mob.dx -= 1f;
+            e.dx -= 1f;
         if(controller.isControlPressed(Control.FLYUP))
-            mob.dy += 1f;
+            e.dy += 1f;
         if(controller.isControlPressed(Control.FLYDOWN))
-            mob.dy -= 1f;
+            e.dy -= 1f;
         //}
         
         if(worldRenderer == null) {
@@ -152,7 +157,7 @@ public class PlayerController extends MobController implements Controllable, Inp
                 else if(controller.isControlPressed(Control.DOWN))
                     mob.attack(Direction.DOWN);
                 else
-                    mob.attack(mob.facingRight ? Direction.RIGHT : Direction.LEFT);
+                    mob.attack(e.facingRight ? Direction.RIGHT : Direction.LEFT);
                 break;
             case SPECIAL:
                 if(controller.isControlPressed(Control.UP))
@@ -160,31 +165,33 @@ public class PlayerController extends MobController implements Controllable, Inp
                 else if(controller.isControlPressed(Control.DOWN))
                     mob.specialAttack(Direction.DOWN);
                 else
-                    mob.specialAttack(mob.facingRight ? Direction.RIGHT : Direction.LEFT);
+                    mob.specialAttack(e.facingRight ? Direction.RIGHT : Direction.LEFT);
                 break;
             case SAVE_LOG:
                 Log.saveLog(false, Stabilise.GAME_NAME + " v" + Constants.VERSION);
                 break;
             case SUMMON:
                 {    // Bracing because I don't like using the variable names 'e1', 'e2' that much
+                    /*
                     EntityEnemy e = new EntityEnemy();
-                    e.x = mob.x + (mob.facingRight ? 5 : -5);
-                    e.y = mob.y;
+                    e.x = e.x + (mob.facingRight ? 5 : -5);
+                    e.y = e.y;
                     game.world.addEntity(e);
+                    */
                 }
-                //}
                 break;
             case SUMMON_SWARM:
                 {
+                    /*
                     int max = 750 + game.world.getRnd().nextInt(250);
                     for(int i = 0; i < max; i++) {
                         EntityEnemy e = new EntityEnemy();
                         e.x = mob.x - 10 + game.world.getRnd().nextFloat() * 20;
-                        e.y = mob.y + game.world.getRnd().nextFloat() * 10;
+                        e.y = 1 + mob.y + game.world.getRnd().nextFloat() * 10;
                         game.world.addEntity(e);
                     }
+                    */
                 }
-                //}
                 break;
             case KILL_MOBS:
                 game.world.destroyEntities();
@@ -205,7 +212,7 @@ public class PlayerController extends MobController implements Controllable, Inp
                 }
                 break;
             case INTERACT:
-                game.world.getTileAt(mob.x, mob.y-1).handleInteract(game.world, Maths.floor(mob.x), Maths.floor(mob.y-1), mob);
+                game.world.getTileAt(e.x, e.y-1).handleInteract(game.world, Maths.floor(e.x), Maths.floor(e.y-1), e);
                 break;
             case TEST_RANDOM:
                 //mob.x = 0;

@@ -10,7 +10,6 @@ import java.util.Random;
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.core.Constants;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.EntityMob;
 import com.stabilise.entity.GameObject;
 import com.stabilise.entity.collision.Hitbox;
 import com.stabilise.entity.particle.Particle;
@@ -22,7 +21,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.Array;
 import com.stabilise.util.collect.FragList;
-import com.stabilise.util.collect.IntList;
+import com.stabilise.util.collect.LongList;
 import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.collect.SimpleList;
@@ -44,12 +43,12 @@ public abstract class AbstractWorld implements World {
     protected final Dimension dimension;
     
     /** All players in the world. Maps IDs -> players' EntityMobs. */
-    protected final Map<Integer, EntityMob> players = new HashMap<>(4);
-    private final FunctionalIterable<EntityMob> itrPlayers =
+    protected final Map<Long, Entity> players = new HashMap<>(4);
+    private final FunctionalIterable<Entity> itrPlayers =
             FunctionalIterable.wrap(players.values());
     /** The map of loaded entities in the world. Maps IDs -> Entities.
      * This is a LinkedHashMap as to allow for consistent iteration. */
-    protected final Map<Integer, Entity> entities = new LinkedHashMap<>(64);
+    protected final Map<Long, Entity> entities = new LinkedHashMap<>(64);
     private final FunctionalIterable<Entity> itrEntities =
             FunctionalIterable.wrap(entities.values());
     /** The total number of entities which have existed during the lifetime of
@@ -66,7 +65,7 @@ public abstract class AbstractWorld implements World {
      * over, this does not work when moving an entity to another dimension: if
      * {@code destroy()} is invoked, this would also invalidate its position in
      * the dimension it is being moved to. */
-    private final IntList entitiesToRemove = new IntList();
+    private final LongList entitiesToRemove = new LongList();
     /** The number of hostile mobs in the world. */
     protected int hostileMobCount = 0;
     
@@ -185,7 +184,7 @@ public abstract class AbstractWorld implements World {
         if(!entitiesToAdd.isEmpty()) {
             entitiesToAdd.consume(e -> {
                 e.id = ++entityCount;
-                e.onAdd();
+                e.init(this, null);
                 entities.put(e.id, e);
             });
         }
@@ -212,16 +211,16 @@ public abstract class AbstractWorld implements World {
      * Sets a mob as a player. The mob will be treated as if the player is
      * controlling it thereafter.
      */
-    public void setPlayer(EntityMob m) {
-        players.put(m.id, m);
+    public void setPlayer(Entity e) {
+        players.put(e.id(), e);
     }
     
     /**
      * Removes the status of player from a mob. The mob will no longer be
      * treated as if controlled by a player thereafter.
      */
-    public void unsetPlayer(EntityMob m) {
-        players.remove(m.id);
+    public void unsetPlayer(Entity e) {
+        players.remove(e.id());
     }
     
     @Override
@@ -231,19 +230,19 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
-    public Entity getEntity(int id) {
+    public Entity getEntity(long id) {
         return entities.get(id);
     }
     
     @Override
-    public void removeEntity(int id) {
+    public void removeEntity(long id) {
         entitiesToRemove.add(id);
     }
     
     @Override
     public void addHitbox(Hitbox h) {
         hitboxCount++;
-        hitboxes.put(Objects.requireNonNull(h));
+        hitboxes.append(Objects.requireNonNull(h));
     }
     
     /**
@@ -253,13 +252,13 @@ public abstract class AbstractWorld implements World {
      */
     protected void addParticle(Particle p) {
         particleCount++;
-        particles.put(Objects.requireNonNull(p));
+        particles.append(Objects.requireNonNull(p));
     }
     
     @Override
     public void addTileEntity(TileEntity t) {
         if(t.requiresUpdates())
-            tileEntities.put(t);
+            tileEntities.append(t);
     }
     
     @Override
@@ -270,7 +269,7 @@ public abstract class AbstractWorld implements World {
     // ==========Collection getters==========
     
     @Override
-    public FunctionalIterable<EntityMob> getPlayers() {
+    public FunctionalIterable<Entity> getPlayers() {
         return itrPlayers;
     }
     
@@ -386,7 +385,7 @@ public abstract class AbstractWorld implements World {
      * @param y The y-coordinate at which to attempt to spawn the mob, in
      * tile-lengths.
      */
-    public void spawnMob(EntityMob mob, double x, double y) {
+    public void spawnMob(Entity mob, double x, double y) {
         if(hostileMobCount >= HOSTILE_MOB_CAP)
             return;
         
@@ -394,7 +393,7 @@ public abstract class AbstractWorld implements World {
         // bounds of 32 <= r <= 128
         boolean inRange = false;        // In range of at least 1 player
         double dx, dy, dist2;
-        for(EntityMob p : players.values()) {
+        for(Entity p : players.values()) {
             dx = p.x - x;
             dy = p.y - y;
             dist2 = dx*dx + dy*dy;
@@ -407,10 +406,10 @@ public abstract class AbstractWorld implements World {
         if(!inRange)
             return;
         
-        int minX = Maths.floor(x + mob.boundingBox.minX());
-        int maxX = Maths.ceil(x + mob.boundingBox.maxX());
-        int minY = Maths.floor(y + mob.boundingBox.minY());
-        int maxY = Maths.ceil(y + mob.boundingBox.maxY());
+        int minX = Maths.floor(x + mob.aabb.minX());
+        int maxX = Maths.ceil(x + mob.aabb.maxX());
+        int minY = Maths.floor(y + mob.aabb.minY());
+        int maxY = Maths.ceil(y + mob.aabb.maxY());
         
         // Check to see if the mob would be spawning in any tiles
         for(int tileX = minX; tileX < maxX; tileX++)
@@ -430,11 +429,13 @@ public abstract class AbstractWorld implements World {
      */
     @ForTestingPurposes
     public void destroyEntities() {
+        /*
         for(Entity e : entities.values()) {
             if(e instanceof EntityMob && ((EntityMob)e).isPlayerControlled())
                 continue;
             e.destroy();
         }
+        */
     }
     
     //--------------------==========--------------------
@@ -759,7 +760,7 @@ public abstract class AbstractWorld implements World {
                 float minV, float maxV, float minAngle, float maxAngle,
                 Entity e) {
             createBurst(numParticles, e.x, e.y, minV, maxV, minAngle, maxAngle,
-                    e.boundingBox);
+                    e.aabb);
         }
         
         /**
@@ -806,7 +807,7 @@ public abstract class AbstractWorld implements World {
                 boolean burstX, boolean burstY, float maxX, float maxY,
                 Entity e) {
             createOutwardsBurst(numParticles, e.x, e.y, burstX, burstY,
-                    maxX, maxY, e.boundingBox);
+                    maxX, maxY, e.aabb);
         }
         
     }

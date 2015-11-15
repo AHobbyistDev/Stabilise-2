@@ -6,13 +6,15 @@ import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.world.World;
 
 /**
- * A FixedGameObject is a game object with fixed grid coordinates.
+ * A FixedGameObject is a game object with grid (integer) coordinates.
  */
 public class FixedGameObject extends GameObject {
     
     /** The GameObject's coordinates, in tile-lengths. */
-    public final int x, y;
+    public int x, y;
     
+    
+    public FixedGameObject() {}
     
     /**
      * @param x The x-coordinate, in tile-lengths.

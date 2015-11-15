@@ -1,6 +1,6 @@
 package com.stabilise.world.tile;
 
-import com.stabilise.entity.EntityMob;
+import com.stabilise.entity.Entity;
 import com.stabilise.util.Log;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.tileentity.TileEntityChest;
@@ -23,8 +23,8 @@ public class TileChest extends TileTE {
     }
     
     @Override
-    public void handleInteract(World world, int x, int y, EntityMob mob) {
-        super.handleInteract(world, x, y, mob);
+    public void handleInteract(World world, int x, int y, Entity e) {
+        super.handleInteract(world, x, y, e);
         
         TileEntityChest c = (TileEntityChest)world.getTileEntityAt(x, y);
         // TODO: temporary

@@ -17,6 +17,9 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * 
  * @param <T> The object type.
  * @param <V> The type of value to map to each class.
+ * 
+ * @see TypeFactory
+ * @see GeneralTypeFactory
  */
 @NotThreadSafe
 public class TypeRegistry<T, V> extends AbstractRegistry<Class<? extends T>> {
@@ -40,18 +43,18 @@ public class TypeRegistry<T, V> extends AbstractRegistry<Class<? extends T>> {
     }
     
     /**
-     * Registers an object factory.
+     * Registers a class.
      * 
-     * @param id The ID of the object type.
-     * @param objClass The objects' class.
-     * @param value The value to map.
+     * @param id The ID of the class.
+     * @param objClass The class.
+     * @param value The mapped value.
      * 
      * @throws IllegalStateException if this registry is {@link #lock()
      * locked}.
      * @throws IndexOutOfBoundsException if {@code id < 0}.
      * @throws NullPointerException if any argument is {@code null}.
-     * @throws IllegalArgumentException if {@code id} is already mapped
-     * to a value and this registry uses the {@link
+     * @throws IllegalArgumentException if either {@code id} or the class have
+     * already been registered and this registry uses the {@link
      * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
      */
     public void register(int id, Class<? extends T> objClass, V value) {
@@ -86,7 +89,7 @@ public class TypeRegistry<T, V> extends AbstractRegistry<Class<? extends T>> {
      * @return Either the value or {@code defaultValue}.
      * @throws IndexOutOfBoundsException if {@code id < 0}.
      */
-    public V getOrDefault(int id, V defaultValue) {
+    protected V getOrDefault(int id, V defaultValue) {
         V v = values.getSemiSafe(id);
         return v != null ? v : defaultValue;
     }

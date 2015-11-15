@@ -98,7 +98,7 @@ public abstract class FragListTest {
         final FragList<Entity> list = new FragList<>(1024, 0.22f);
         
         @Override TaskTimer timer() { return new TaskTimer("FragList"); }
-        @Override void add(Entity e) { list.put(e); }
+        @Override void add(Entity e) { list.append(e); }
         @Override void iterate(Predicate<Entity> pred) { list.iterate(pred); }
         @Override int size() { return list.size(); }
     }
