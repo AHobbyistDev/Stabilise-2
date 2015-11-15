@@ -106,22 +106,22 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                     
                     //if((y < -200 && caveNoise > 0.8D) || (y < -180 && caveNoise > (0.8 - 0.2 * (180+y)/20f)))
                     if(y < -200 && caveNoise > 0.8D)
-                        s.setTileAt(tileX, tileY, LAVA);
+                        s.setTileAt(tileX, tileY, lava);
                     //else if(noise <= 0 || (caveNoise > 0.45D && caveNoise < 0.55D))
                     else if(noise <= 0 || (caveNoise > caveMask - 0.05D && caveNoise < caveMask + 0.05D))
                     //else if(noise <= 0 || caveNoise > 0.8D)
-                        s.setTileAt(tileX, tileY, AIR);
+                        s.setTileAt(tileX, tileY, air);
                     else if(noise <= 1) {
-                        s.setTileAt(tileX, tileY, GRASS);
+                        s.setTileAt(tileX, tileY, grass);
                         if(rnd.nextInt(10) == 0)
                             addSchematic("tree_1", s.x, s.y, tileX, tileY);
                     } else if(noise <= 5.75D)
-                        s.setTileAt(tileX, tileY, DIRT);
+                        s.setTileAt(tileX, tileY, dirt);
                     else {
                         if(rnd.nextInt(30) == 0)
-                            s.setTileAt(tileX, tileY, BRICK_STONE);
+                            s.setTileAt(tileX, tileY, glowstone);
                         else
-                            s.setTileAt(tileX, tileY, STONE);
+                            s.setTileAt(tileX, tileY, stone);
                     }
                     
                     noise++;
@@ -158,16 +158,16 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                     s = r.getSliceAt(x, y);
                     tileX = rnd.nextInt(SLICE_SIZE);
                     tileY = rnd.nextInt(SLICE_SIZE-1);
-                    if(s.getTileAt(tileX, tileY).getID() == STONE.getID() &&
+                    if(s.getTileAt(tileX, tileY).getID() == stone.getID() &&
                             s.getTileAt(tileX, tileY+1).getID() == 0) {
-                        s.tiles[tileY+1][tileX] = CHEST.getID();
-                        TileEntityChest chest = CHEST.createTE(
+                        s.tiles[tileY+1][tileX] = chest.getID();
+                        TileEntityChest chestTE = chest.createTE(
                                 offsetX + x*SLICE_SIZE + tileX,
                                 offsetY + y*SLICE_SIZE + tileY + 1);
-                        chest.items.addItem(Items.APPLE, rnd.nextInt(7)+1);
-                        chest.items.addItem(Items.SWORD, rnd.nextInt(7)+1);
-                        chest.items.addItem(Items.ARROW, rnd.nextInt(7)+1);
-                        s.setTileEntityAt(tileX, tileY+1, chest);
+                        chestTE.items.addItem(Items.APPLE, rnd.nextInt(7)+1);
+                        chestTE.items.addItem(Items.SWORD, rnd.nextInt(7)+1);
+                        chestTE.items.addItem(Items.ARROW, rnd.nextInt(7)+1);
+                        s.setTileEntityAt(tileX, tileY+1, chestTE);
                     }
                     
                     if(rnd.nextInt(1) == 0)
@@ -209,11 +209,11 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
          */
         private void addOres(Slice s, Random rnd) {
             int ore = new int[] {
-                    Tiles.ORE_COPPER.getID(),
-                    Tiles.ORE_IRON.getID(),
-                    Tiles.ORE_SILVER.getID(),
-                    Tiles.ORE_GOLD.getID(),
-                    Tiles.ORE_DIAMOND.getID()
+                    Tiles.oreCopper.getID(),
+                    Tiles.oreIron.getID(),
+                    Tiles.oreSilver.getID(),
+                    Tiles.oreGold.getID(),
+                    Tiles.oreDiamond.getID()
             }[rnd.nextInt(5)];
             
             int baseX = rnd.nextInt(Integer.MAX_VALUE - SLICE_SIZE);
@@ -233,7 +233,7 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                     double fact = Math.sqrt(xFact*yFact);
                     factors[i++] = fact;
                     if(simplex16.noise(baseX + x, baseY + y) * fact > 0.5 
-                            && s.getTileIDAt(x, y) == Tiles.STONE.getID()) {
+                            && s.getTileIDAt(x, y) == Tiles.stone.getID()) {
                         s.setTileAt(x, y, ore);
                     }
                 }

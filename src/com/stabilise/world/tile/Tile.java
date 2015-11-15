@@ -245,7 +245,7 @@ public class Tile {
     //--------------------==========--------------------
     
     /**
-     * Returns the tile with the specified ID, or {@link Tiles#AIR} if no such
+     * Returns the tile with the specified ID, or {@link Tiles#air} if no such
      * tile exists.
      */
     public static Tile getTile(int id) {
@@ -253,7 +253,7 @@ public class Tile {
     }
     
     /**
-     * Returns the tile with the specified name, or {@link Tiles#AIR} if no
+     * Returns the tile with the specified name, or {@link Tiles#air} if no
      * such tile exists.
      */
     public static Tile getTile(String name) {
@@ -289,7 +289,9 @@ public class Tile {
         register(ORE,   18, "oreDiamond").hardness(50f);
         register(CHEST, 19, "chest");
         register(SPWNR, 20, "mobSpawner");
-        register(STONE, 21, "glass").light((byte)15);
+        register(STONE, 21, "glass");
+        register(AIR,   22, "torch").light((byte)13);
+        register(STONE, 23, "glowstone").light((byte)15);
         
         builder.end();
         builder = null;

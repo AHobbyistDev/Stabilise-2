@@ -28,28 +28,31 @@ public class Tiles {
     private static <T extends Tile> T get(String name) { return (T)Tile.getTile(name); }
     
     public static final Tile
-            AIR = get("air"),
-            VOID = get("void"),
-            BEDROCK = get("bedrock"),
-            BEDROCK_INVISIBLE = get("invisibleBedrock"),
-            STONE = get("stone"),
-            DIRT = get("dirt"),
-            GRASS = get("grass"),
-            WOOD = get("wood"),
-            LEAVES = get("leaves"),
-            PLANKS = get("planks"),
-            WATER = get("water"),
-            LAVA = get("lava"),
-            ICE = get("ice"),
-            BRICK_STONE = get("stoneBrick"),
-            ORE_IRON = get("oreIron"),
-            ORE_COPPER = get("oreCopper"),
-            ORE_GOLD = get("oreGold"),
-            ORE_SILVER = get("oreSilver"),
-            ORE_DIAMOND = get("oreDiamond"),
-            MOB_SPAWNER = get("mobSpawner");
+            air = get("air"),
+            darkness = get("void"),
+            bedrock = get("bedrock"),
+            barrier = get("invisibleBedrock"),
+            stone = get("stone"),
+            dirt = get("dirt"),
+            grass = get("grass"),
+            wood = get("wood"),
+            leaves = get("leaves"),
+            planks = get("planks"),
+            water = get("water"),
+            lava = get("lava"),
+            ice = get("ice"),
+            stoneBrick = get("stoneBrick"),
+            oreIron = get("oreIron"),
+            oreCopper = get("oreCopper"),
+            oreGold = get("oreGold"),
+            oreSilver = get("oreSilver"),
+            oreDiamond = get("oreDiamond"),
+            mobSpawner = get("mobSpawner"),
+            glass = get("glass"),
+            torch = get("torch"),
+            glowstone = get("glowstone");
     public static final TileChest
-            CHEST = get("chest");
+            chest = get("chest");
     
     
 }

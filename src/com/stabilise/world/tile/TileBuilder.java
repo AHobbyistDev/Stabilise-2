@@ -57,7 +57,7 @@ class TileBuilder {
             hardness = 0f;
             friction = F_AIR;
             viscosity = 0f;
-            light = 15;
+            light = 2;
             falloff = 1;
         }
         

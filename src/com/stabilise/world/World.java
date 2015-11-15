@@ -200,7 +200,7 @@ public interface World {
      * @param y The y-coordinate of the tile, in tile-lengths.
      * 
      * @return The tile at the given coordinates, or the
-     * {@link Tiles#BEDROCK_INVISIBLE invisible bedrock} tile if no such tile
+     * {@link Tiles#barrier invisible bedrock} tile if no such tile
      * is loaded.
      */
     default Tile getTileAt(double x, double y) {
@@ -216,13 +216,13 @@ public interface World {
      * @param y The y-coordinate of the tile, in tile-lengths.
      * 
      * @return The tile at the given coordinates, or the
-     * {@link com.stabilise.world.tile.Tiles#BEDROCK_INVISIBLE invisible
+     * {@link com.stabilise.world.tile.Tiles#barrier invisible
      * bedrock} tile if no such tile is loaded.
      */
     default Tile getTileAt(int x, int y) {
         Slice s = getSliceAtTile(x, y);
         if(s == null)
-            return Tiles.BEDROCK_INVISIBLE;
+            return Tiles.barrier;
         else
             return s.getTileAt(
                     tileCoordRelativeToSliceFromTileCoord(x),
@@ -474,6 +474,20 @@ public interface World {
      */
     public static int regionCoordFromTileCoord(int c) {
         return c >> Region.REGION_SIZE_IN_TILES_SHIFT;
+    }
+    
+    /**
+     * Gets the coordinate of the region at the given tile coordinate.
+     * 
+     * <p>Note that the given coordinate may be one along any axis.
+     * 
+     * @param c The coordinate, in tile-lengths.
+     * 
+     * @return The coordinate of the region occupying the given coordinate, in
+     * region-lengths.
+     */
+    public static int regionCoordFromTileCoord(double c) {
+        return tileCoordFreeToTileCoordFixed(c) >> Region.REGION_SIZE_IN_TILES_SHIFT;
     }
     
     /**

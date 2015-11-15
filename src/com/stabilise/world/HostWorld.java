@@ -333,11 +333,11 @@ public class HostWorld extends AbstractWorld {
             
             Tile old = s.getTileAt(tileX, tileY);
             
-            if(old != Tiles.AIR) {
+            if(old != Tiles.air) {
                 SingleplayerState.pop.play(1f, 1.7f, 0f);
                 
                 old.handleBreak(this, x, y);
-                s.setTileAt(tileX, tileY, Tiles.AIR);
+                s.setTileAt(tileX, tileY, Tiles.air);
                 s.updateLight(tileX, tileY);
             }
         }
@@ -375,7 +375,7 @@ public class HostWorld extends AbstractWorld {
             if(s.getTileAt(tileX, tileY).getHardness() < explosionPower) {
                 s.getTileAt(tileX, tileY).handleBreak(this, x, y);
                 
-                s.setTileAt(tileX, tileY, Tiles.AIR);
+                s.setTileAt(tileX, tileY, Tiles.air);
                 
                 //Tiles.AIR.handlePlace(this, x, y);
             }

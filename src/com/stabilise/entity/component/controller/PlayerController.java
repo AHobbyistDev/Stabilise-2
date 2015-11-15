@@ -42,7 +42,7 @@ public class PlayerController implements CController, Controllable, InputProcess
     private WorldRenderer worldRenderer;
     
     /** The ID of the tile currently selected. */
-    public int tileID = Tiles.STONE.getID();
+    public int tileID = Tiles.stone.getID();
     /** Radius of the tile brush. */
     public float radius = 0.5f;
     
@@ -220,7 +220,9 @@ public class PlayerController implements CController, Controllable, InputProcess
                 Runtime r = Runtime.getRuntime();
                 Log.get().postDebug(r.freeMemory()/(1024*1024) + "/" +
                         r.totalMemory()/(1024*1024) + "/" + r.maxMemory()/(1024*1024));
-                System.out.println(game.profiler.getData().toString());
+                //System.out.println(game.profiler.getData().toString());
+                Log.get().postDebug(World.regionCoordFromTileCoord(e.x) + ","
+                        + World.regionCoordFromTileCoord(e.y));
                 break;
             case PREV_TILE:
                 scrolled(-1);
@@ -299,7 +301,7 @@ public class PlayerController implements CController, Controllable, InputProcess
             if(radius < 1)
                 radius = 0.5f;
         } else
-            tileID = 1 + Maths.remainder(tileID + amount - 1, 21);
+            tileID = 1 + Maths.remainder(tileID + amount - 1, 23);
         return true;
     }
     

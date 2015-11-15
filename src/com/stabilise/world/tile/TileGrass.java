@@ -19,7 +19,7 @@ public class TileGrass extends Tile {
     @Override
     public void update(World world, int x, int y) {
         if(world.getTileAt(x, y+1).isSolid()) {
-            world.setTileAt(x, y, Tiles.DIRT);
+            world.setTileAt(x, y, Tiles.dirt);
             return;
         }
         
@@ -32,7 +32,7 @@ public class TileGrass extends Tile {
                 // grass to that tile with a 1/3 chance
                 t1 = t2;
                 t2 = world.getTileAt(tx, ty+1);
-                if(t1 == Tiles.DIRT && t2 == Tiles.AIR && world.rnd(3))
+                if(t1 == Tiles.dirt && !t2.isSolid() && world.rnd(3))
                     world.setTileAt(tx, ty, getID());
             }
         }
@@ -40,7 +40,7 @@ public class TileGrass extends Tile {
     
     @Override
     public ItemStack createStack(int quantity) {
-        return Items.TILE.stackOf(Tiles.DIRT, quantity);
+        return Items.TILE.stackOf(Tiles.dirt, quantity);
     }
     
 }
