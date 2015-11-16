@@ -96,7 +96,7 @@ public class CFireball extends BaseProjectile {
     }
     
     private void addFlightParticles(World w, Entity e, int particles) {
-        particleSrc.createBurst(particles, e.x, e.y, 0.02f, 0.05f, 0f, (float)Maths.TAU);
+        particleSrc.createBurst(particles, e.x, e.y, 0.5f, 2.5f, 0f, Maths.TAUf);
     }
     
     /**
@@ -105,7 +105,7 @@ public class CFireball extends BaseProjectile {
      * @param particles The number of particles to create.
      */
     private void addImpactParticles(World w, Entity e, int particles) {
-        particleSrc.createBurst(particles, e.x, e.y, 0.0001f, 0.11f, 0f, (float)Maths.TAU);
+        particleSrc.createBurst(particles, e.x, e.y, 0.01f, 4.0f, 0f, (float)Maths.TAU);
     }
     
     @Override

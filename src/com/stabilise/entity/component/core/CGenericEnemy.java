@@ -28,8 +28,8 @@ public class CGenericEnemy extends BaseMob {
         jumpVelocity = 15f;
         jumpCrouchDuration = 8;
         swimAcceleration = 0.08f;
-        acceleration = 1.3f;
-        airAcceleration = 1f;
+        acceleration = 0.8f;
+        airAcceleration = 0.2f;
         maxDx = 13f;
         
         srcFlame = w.getParticleManager().getSource(new ParticleFlame());
@@ -47,13 +47,13 @@ public class CGenericEnemy extends BaseMob {
     
     @Override
     public void attack(World w, Direction direction) {
-        Polygon p = new Polygon(new float[] { 0.5f,0.0f, 0.5f,2.0f, 3.0f,3.0f, 3.0f,-1.0f });
+        Polygon p = new Polygon(new float[] { 0.5f,0.0f, 0.5f,2.0f, 3.5f,3.0f, 3.5f,-1.0f });
         Hitbox h = new Hitbox(e.id(), e.facingRight
                 ? p
                 : p.reflect(),
                 w.getRnd().nextInt(5) + 8);
         h.hits = -1;
-        h.force = 15f;
+        h.force = 75f;
         h.fx = e.facingRight ? 1f : -1f;
         h.fy = 0.2f;
         h.persistent = true;
@@ -79,7 +79,7 @@ public class CGenericEnemy extends BaseMob {
                 : p.reflect(),
                 w.getRnd().nextInt(5) + 8);
         h.hits = -1;
-        h.force = 15f;
+        h.force = 45f;
         h.fx = e.facingRight ? 1f : -1f;
         h.fy = 0.2f;
         h.persistent = true;

@@ -436,7 +436,7 @@ public final class TaskBuilder<R, T extends Task> {
             this.callable = callable;
             this.retVal = retVal;
         }
-
+        
         @Override
         public void run(TaskHandle handle) throws Exception {
             retVal.set(callable.call(handle));

@@ -485,6 +485,7 @@ public class WorldRenderer implements Renderer {
      * @param p The smoke particle.
      */
     public void renderSmoke(ParticleSmoke p) {
+        batch.setColor(1f, 1f, 1f, p.opacity);
         batch.draw(
                 shtParticles.getRegion(0), // region
                 (float)p.x - 0.25f, // x
@@ -497,6 +498,7 @@ public class WorldRenderer implements Renderer {
                 1f, // scaleY
                 0f // rotation
         );
+        batch.setColor(DEFAULT_COL);
     }
     
     private void renderCursorItem() {

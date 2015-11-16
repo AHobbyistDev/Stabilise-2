@@ -1,6 +1,7 @@
 package com.stabilise.entity.particle;
 
 import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.util.maths.Interpolation;
 import com.stabilise.world.World;
 
 /**
@@ -13,11 +14,12 @@ public class ParticleSmoke extends ParticlePhysical {
     //--------------------==========--------------------
     
     /** The number of ticks after which a smoke particle despawns. */
-    private static final int DESPAWN_TICKS = 120;
+    public static final int DESPAWN_TICKS = 120;
     
     /** The value by which a particle's dx is multiplied by each tick. */
     private static final float DX_MULT = 0.92f;
     
+    private int despawn = -1;
     public float opacity;
     
     
@@ -44,6 +46,7 @@ public class ParticleSmoke extends ParticlePhysical {
     public void reset() {
         super.reset();
         opacity = 1f;
+        despawn = -1;
     }
     
     @Override
@@ -53,7 +56,12 @@ public class ParticleSmoke extends ParticlePhysical {
         
         super.update(world);
         
-        if(age == DESPAWN_TICKS)
+        if(despawn == -1)
+            despawn = 120 + (int)(30*world.getRnd().nextGaussian());
+        
+        opacity = 1f - Interpolation.CUBIC.easeInTransform((float)age/despawn);
+        
+        if(age >= despawn)
             destroy();
     }
     

@@ -43,7 +43,7 @@ public class EnemyController implements CController {
                     actionTimeout = 120 + (int)(w.getRnd().nextFloat() * 180);
                 } else if(rnd < 0.70) {
                     action = EnumAction.IDLE;
-                    //if(e.onGround) e.dy = e.jumpVelocity;
+                    mob.jump();
                     actionTimeout = 180 + (int)(w.getRnd().nextFloat() * 180);
                 } else {
                     if(rnd < 0.85) e.facingRight = (!e.facingRight);

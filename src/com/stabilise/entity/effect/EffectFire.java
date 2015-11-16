@@ -50,7 +50,7 @@ public class EffectFire extends Effect {
      * @param target The target of the effect.
      */
     private void createFireParticle(World world, Entity target) {
-        particleSrc.createBurst(1, 0.02f, 0.07f, Maths.PIf / 6.0f,
+        particleSrc.createBurst(1, 0.2f, 2.0f, Maths.PIf / 6.0f,
                 Maths.PIf * 5.0f / 6.0f, target);
     }
     

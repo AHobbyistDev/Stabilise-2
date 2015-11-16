@@ -143,7 +143,7 @@ public interface Interpolation {
      * methods.
      * 
      * <p>The standard function for sinusoidal interpolation is:
-     * <pre>f(x) = 1 - cos(x * �?€/2)</pre>
+     * <pre>f(x) = 1 - cos(x * �?€/2)</pre>
      * Note, however, rather than modifying this function for {@code easeOut}
      * and {@code easeInOut}, sine and cosine functions with varying arguments
      * are appropriately used instead.
@@ -603,7 +603,7 @@ public interface Interpolation {
          * {@code 0.0} and {@code 1.0} (inclusive).
          *  
          * @return A value interpolated between {@code start} and {@code end}.
-         * @see {@link Interpolation.EaseIn} for implementation details.
+         * @see {@link #EASE_IN} for implementation details.
          */
         public final float easeIn(float start, float end, float x) {
             return lerp(start, end, easeInTransform(x));
@@ -618,7 +618,7 @@ public interface Interpolation {
          * @param x The position, between {@code 0.0} and {@code 1.0} (inclusive).
          *  
          * @return The transformed position.
-         * @see {@link Interpolation.EaseIn} for implementation details.
+         * @see {@link #EASE_IN} for implementation details.
          */
         public abstract float easeInTransform(float x);
         
@@ -631,7 +631,7 @@ public interface Interpolation {
          * {@code 0.0} and {@code 1.0} (inclusive).
          *  
          * @return A value interpolated between {@code start} and {@code end}.
-         * @see {@link Interpolation.EaseOut} for implementation details.
+         * @see {@link #EASE_OUT} for implementation details.
          */
         public final float easeOut(float start, float end, float x) {
             return lerp(start, end, easeOutTransform(x));
@@ -646,7 +646,7 @@ public interface Interpolation {
          * @param x The position, between {@code 0.0} and {@code 1.0} (inclusive).
          *  
          * @return The transformed position.
-         * @see {@link Interpolation.EaseOut} for implementation details.
+         * @see {@link #EASE_OUT} for implementation details.
          */
         public abstract float easeOutTransform(float x);
         
@@ -659,7 +659,7 @@ public interface Interpolation {
          * {@code 0.0} and {@code 1.0} (inclusive).
          *  
          * @return A value interpolated between {@code start} and {@code end}.
-         * {@link Interpolation.EaseInOut} for implementation details.
+         * {@link #EASE_IN_OUT} for implementation details.
          */
         public final float easeInOut(float start, float end, float x) {
             return lerp(start, end, easeInOutTransform(x));
@@ -676,7 +676,7 @@ public interface Interpolation {
          * @param x The position, between {@code 0.0} and {@code 1.0} (inclusive).
          * 
          * @return The transformed value.
-         * @see {@link Interpolation.EaseInOut} for implementation details.
+         * @see {@link #EASE_IN_OUT} for implementation details.
          */
         public abstract float easeInOutTransform(float x);
         

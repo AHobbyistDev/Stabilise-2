@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.stabilise.util.concurrent.Tasks;
 import com.stabilise.util.concurrent.Waiter;
-import com.stabilise.util.concurrent.task.ReportStrategy;
 import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.util.concurrent.task.Task;
 import com.stabilise.util.concurrent.task.TaskEvent;
@@ -20,39 +19,6 @@ class TaskTesting {
     
     public static void main(String[] args) {
         test4();
-    }
-    
-    public static void blah(TaskHandle h) {}
-    public static void blah2() {}
-    
-    public static void test2() {
-        ExecutorService exec = Executors.newCachedThreadPool();
-        Task task = Task.builder().executor(exec).name("Task stuff")
-            .strategy(ReportStrategy.constant(Integer.MAX_VALUE))
-            .begin()
-            .andThen(t -> {})
-            .andThen(t -> Thread.sleep(1000))
-                .onEvent(TaskEvent.COMPLETE, e -> System.out.println("Sleep ended: " + e))
-            .andThen(100, t -> {
-                for(int i = 0; i < 100; i++) {
-                    t.increment();
-                    Thread.sleep(25);
-                }
-            })
-            .start();
-        while(true) {
-            System.out.println(task);
-            if(task.stopped()) {
-                System.out.println("Completed!");
-                break;
-            }
-            try {
-                Thread.sleep(100);
-            } catch(InterruptedException e1) {
-                e1.printStackTrace();
-            }
-        }
-        exec.shutdown();
     }
     
     public static void test3() {

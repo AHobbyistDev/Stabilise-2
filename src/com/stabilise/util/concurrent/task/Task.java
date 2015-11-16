@@ -23,7 +23,7 @@ public class Task implements TaskView {
     
     static enum State {
         // There's no point in an UNSTARTED state for a task since a TaskUnit's
-        // state variable doesn't come into scope until the task has begun.
+        // state variable doesn't come into play until the task has begun.
         RUNNING, COMPLETED, FAILED;
     }
     

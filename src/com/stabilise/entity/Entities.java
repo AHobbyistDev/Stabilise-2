@@ -13,14 +13,14 @@ public class Entities {
     
     private Entities() {}
     
-    private static CPhysics       p() { return new PhysicsImpl();          }
+    private static CPhysics       p() { return new PhysicsImpl();           }
     private static CController    c() { return IdleController.INSTANCE;     }
     
     private static Entity         e() { return new Entity();                }
     public  static Entity e(CCore co) { return e().construct(p(), c(), co); }
     
     public static Entity player() {
-        return e(new CPlayerAsGenericEnemy());
+        return e(new CPlayerPerson());
     }
     
     public static Entity fireball(long ownerID, int damage) {
