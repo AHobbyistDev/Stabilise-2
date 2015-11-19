@@ -191,7 +191,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
     public final void run() {
         checkCanRun();
         if(start()) {
-            driver = AppDriver.driverFor(this, tps, tps, log);
+            driver = new AppDriver(tps, this).setLog(log);
             try {
                 driver.run();
             } catch(Throwable t) {

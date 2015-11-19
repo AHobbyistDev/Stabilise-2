@@ -28,7 +28,7 @@ class PrototypeTracker {
     /** Parts count. Used if the parts count is bounded by Long.MAX_VALUE.
      * Includes the completion part, so the real value is bounded by
      * MAX_VALUE-1 */
-    long childParts;
+    long parts;
     /** Parts count used if the count exceeds Long.MAX_VALUE. */
     private BigInteger bigParts = null;
     
@@ -58,7 +58,7 @@ class PrototypeTracker {
      * @throws NullPointerException if {@code strategy == null}.
      */
     PrototypeTracker(long parts, String status, ReportStrategy strategy) {
-        this.childParts = Checks.test(parts, MIN_PARTS, MAX_PARTS) + 1; // completion part
+        this.parts = Checks.test(parts, MIN_PARTS, MAX_PARTS) + 1; // completion part
         this.status = status == null ? DEFAULT_STATUS : status;
         this.strategy = Objects.requireNonNull(strategy);
     }
@@ -125,12 +125,12 @@ class PrototypeTracker {
                 t.build(this.strategy);
                 
                 if(bigParts == null) {
-                    long p = childParts + t.partsToReport;
+                    long p = parts + t.partsToReport;
                     
-                    if(p < childParts) // overflow - upgrade to BigInteger
-                        bigParts = BigInteger.valueOf(childParts);
+                    if(p < parts) // overflow - upgrade to BigInteger
+                        bigParts = BigInteger.valueOf(parts);
                     else
-                        childParts = p;
+                        parts = p;
                 }
                 
                 if(bigParts != null)
@@ -146,12 +146,12 @@ class PrototypeTracker {
             // children's partsToReport values such that their sum does not
             // exceed this value. We also need to resum parts to account for
             // rounding errors.
-            childParts = 1; // completion part
+            parts = 1; // completion part
             double scale = BIG_LONG_MAX_VALUE
                     .divide(new BigDecimal(bigParts), DIV_RULES)
                     .doubleValue();
             for(PrototypeTracker t : children) {
-                childParts += t.scale(scale);
+                parts += t.scale(scale);
             }
         }
         
@@ -161,7 +161,7 @@ class PrototypeTracker {
         // taking a BigInteger as the input parameter.
         // The -1/+1 is the completion part, which is temporarily pulled out as
         // to avoid being scaled.
-        partsToReport = strat.get(childParts - 1) + 1;
+        partsToReport = strat.get(parts - 1) + 1;
         if(partsToReport <= 0) // overflow, or the strat did something stupid
             throw new BadReportStrategyException();
         

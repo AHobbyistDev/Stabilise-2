@@ -20,8 +20,8 @@ import java.util.Objects;
  *     public MyEvent(String name) { super(name); }
  * }
  * 
- * assert(!new Event("hi").equals(new   Event("hi"))); // crash :(
- * assert(!new Event("hi").equals(new MyEvent("hi"))); // no crash :)
+ * assert(!new Event("hi").equals(new   Event("hi"))); // crash
+ * assert(!new Event("hi").equals(new MyEvent("hi"))); // no crash
  * </pre>
  */
 public class Event {
@@ -34,6 +34,8 @@ public class Event {
      * 
      * @param name The identifier for this event. Events are distinguished by
      * name, so be sure to make this reasonably unique!
+     * 
+     * @throws NullPointerException if {@code name} is {@code null}.
      */
     public Event(String name) {
         this.name = Objects.requireNonNull(name);

@@ -1,8 +1,8 @@
 package com.stabilise.entity.component.controller;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.entity.component.core.BaseMob;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Direction;
 import com.stabilise.world.World;
 
@@ -62,8 +62,8 @@ public class EnemyController implements CController {
     }
     
     @Override
-    public void handle(World w, Entity e, ComponentEvent ev) {
-        // meh
+    public boolean handle(World w, Entity e, EntityEvent ev) {
+        return false;
     }
     
 }

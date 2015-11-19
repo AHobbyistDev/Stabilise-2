@@ -18,10 +18,10 @@ public class TaskEvent extends Event {
     }
     
     /**
-     * A FailEvent is a TaskEvent which indicates failure of a task. An
-     * instance additionally contains a (possibly null) {@code Throwable}
-     * which can be retrieved via {@link #getCause()}, which is the cause of
-     * task failure.
+     * A FailEvent is a TaskEvent which indicates failure of a task. A
+     * FailEvent additionally contains a (possibly null) {@code Throwable}
+     * which can be retrieved via {@link #getCause()}, and can be treated as
+     * the cause of task failure.
      */
     public static class FailEvent extends TaskEvent {
         

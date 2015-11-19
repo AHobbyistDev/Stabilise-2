@@ -436,34 +436,6 @@ public abstract class Shape {
             dest[offset+1] = y;
         }
         
-        /**
-         * Sets the resultant x in the destination array. This should only be
-         * invoked from within {@link #apply(float[], int, float, float)
-         * apply}, with the {@code dest} and {@code offset} args forwarded to
-         * this methd.
-         * 
-         * @param dest The destination array in which to store the result.
-         * @param offset The destination array offset.
-         * @param x The x component of the output vertex.
-         */
-        default public void setX(float[] dest, int offset, float x) {
-            dest[offset] = x;
-        }
-        
-        /**
-         * Sets the resultant y in the destination array. This should only be
-         * invoked from within {@link #apply(float[], int, float, float)
-         * apply}, with the {@code dest} and {@code offset} args forwarded to
-         * this methd.
-         * 
-         * @param dest The destination array in which to store the result.
-         * @param offset The destination array offset.
-         * @param x The y component of the output vertex.
-         */
-        default public void setY(float[] dest, int offset, float y) {
-            dest[offset+1] = y;
-        }
-        
     }
     
 }

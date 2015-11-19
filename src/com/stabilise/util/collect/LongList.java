@@ -19,14 +19,14 @@ public class LongList {
     
     
     /**
-     * Creates a new IntList with an internal array size of 8.
+     * Creates a new LongList with an internal array size of 8.
      */
     public LongList() {
         this(8);
     }
     
     /**
-     * Creates a new IntList.
+     * Creates a new LongList.
      * 
      * @param initialLength The initial length of the internal array.
      * 
@@ -56,13 +56,13 @@ public class LongList {
     }
     
     /**
-     * Adds an int to this list. If necessary, the backing array will be
+     * Adds a long to this list. If necessary, the backing array will be
      * resized.
      */
-    public void add(long i) {
+    public void add(long l) {
         if(size == data.length)
             data = Arrays.copyOf(data, 2*size + 1);
-        data[size++] = i;
+        data[size++] = l;
     }
     
     /**
@@ -71,8 +71,8 @@ public class LongList {
      * @throws ArrayIndexOutOfBoundsException if {@code index < 0 || index >=
      * capacity()}.
      */
-    public void set(int index, long i) {
-        data[index] = i;
+    public void set(int index, long l) {
+        data[index] = l;
     }
     
     /**

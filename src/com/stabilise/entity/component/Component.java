@@ -4,6 +4,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.core.CCore;
 import com.stabilise.entity.component.physics.CPhysics;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.world.World;
 
 
@@ -31,6 +32,6 @@ public interface Component {
     /**
      * Handles an entity-local event broadcast.
      */
-    void handle(World w, Entity e, ComponentEvent ev);
+    boolean handle(World w, Entity e, EntityEvent ev);
     
 }

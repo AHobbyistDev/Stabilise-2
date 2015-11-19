@@ -323,13 +323,13 @@ public class WorldRenderer implements Renderer {
      * 
      * @param e The enemy entity.
      */
-    public void renderEnemy(Entity e, CGenericEnemy s) {
-        if(s.hasTint) {
-            if(s.dead) {
-                batch.setColor(s.tintStrength, 0f, 0f, 1f);
+    public void renderEnemy(Entity e, CGenericEnemy c) {
+        if(c.hasTint) {
+            if(c.dead) {
+                batch.setColor(c.tintStrength, 0f, 0f, 1f);
                 //texEnemy.tint(Color.RED, e.tintStrength);
             } else {
-                batch.setColor(s.tintStrength, s.tintStrength, s.tintStrength, 1);
+                batch.setColor(c.tintStrength, c.tintStrength, c.tintStrength, 1);
                 //texEnemy.tint(Color.WHITE, e.tintStrength);
             }
         } else {
@@ -363,7 +363,7 @@ public class WorldRenderer implements Renderer {
      * 
      * @param e The fireball entity.
      */
-    public void renderFireball(Entity e, CFireball s) {
+    public void renderFireball(Entity e, CFireball c) {
         batch.draw(
                 texFireball, // texture
                 (float)e.x - 0.75f, // x
@@ -374,7 +374,7 @@ public class WorldRenderer implements Renderer {
                 0.5f, // height
                 1f, // scaleX
                 1f, // scaleY
-                Maths.toDegrees(s.rotation), // rotation
+                Maths.toDegrees(c.rotation), // rotation
                 0, // srcX
                 0, // srcY
                 texFireball.getWidth(), // srcWidth
@@ -389,11 +389,11 @@ public class WorldRenderer implements Renderer {
      * 
      * @param e The item entity.
      */
-    public void renderItem(Entity e, CItem s) {
-        if(s.stack.getItem().equals(Items.TILE))
-            renderOn(tileRenderer.tiles.getRegion(7 + s.stack.getData()), e);
+    public void renderItem(Entity e, CItem c) {
+        if(c.stack.getItem().equals(Items.TILE))
+            renderOn(tileRenderer.tiles.getRegion(7 + c.stack.getData()), e);
         else
-            renderOn(shtItems.getRegion(s.stack.getItem().getID() - 1), e);
+            renderOn(shtItems.getRegion(c.stack.getItem().getID() - 1), e);
     }
     
     private void renderOn(TextureRegion tex, Entity e) {

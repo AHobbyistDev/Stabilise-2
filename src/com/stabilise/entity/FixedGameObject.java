@@ -14,6 +14,9 @@ public class FixedGameObject extends GameObject {
     public int x, y;
     
     
+    /**
+     * Creates a new FixedGameObject with coordinates (0,0).
+     */
     public FixedGameObject() {}
     
     /**

@@ -13,11 +13,12 @@ public class Entities {
     
     private Entities() {}
     
-    private static CPhysics       p() { return new PhysicsImpl();           }
-    private static CController    c() { return IdleController.INSTANCE;     }
+    private static CPhysics       p() { return new PhysicsImpl();       }
+    private static CController   co() { return IdleController.INSTANCE; }
     
-    private static Entity         e() { return new Entity();                }
-    public  static Entity e(CCore co) { return e().construct(p(), c(), co); }
+    private static Entity e(CPhysics p, CController co, CCore c) 
+                                      { return new Entity(p, co, c);    }
+    public  static Entity e(CCore c)  { return e(p(), co(), c);         }
     
     public static Entity player() {
         return e(new CPlayerPerson());
@@ -32,11 +33,11 @@ public class Entities {
     }
     
     public static Entity enemy() {
-        return e().construct(p(), new EnemyController(), new CGenericEnemy());
+        return e(p(), new EnemyController(), new CGenericEnemy());
     }
     
     public static Entity person() {
-        return e().construct(p(), new EnemyController(), new CPerson());
+        return e(p(), new EnemyController(), new CPerson());
     }
     
 }

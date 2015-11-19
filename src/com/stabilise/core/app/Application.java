@@ -122,7 +122,7 @@ public abstract class Application {
         instance = this;
         
         log = Log.getAgent("Application");
-        driver = new InternalAppDriver(ticksPerSecond, ticksPerSecond, log);
+        driver = new AppDriver(ticksPerSecond, this::update, this::render).setLog(log);
         profiler = driver.profiler;
         
         listener = new InternalAppListener();
@@ -243,6 +243,10 @@ public abstract class Application {
      */
     protected void tick() {
         // nothing in the default implementation
+    }
+    
+    private void render() {
+        state.render(Gdx.graphics.getDeltaTime() / 1000f);
     }
     
     /**
@@ -496,28 +500,6 @@ public abstract class Application {
     //--------------------==========--------------------
     //-------------=====Nested Classes=====-------------
     //--------------------==========--------------------
-    
-    /**
-     * The implementation of AppDriver which powers an application.
-     */
-    private class InternalAppDriver extends AppDriver {
-        
-        /** @see {@link AppDriver#AppDriver(int, int, Log)} */
-        public InternalAppDriver(int tps, int fps, Log log) {
-            super(tps, fps, log);
-        }
-        
-        @Override
-        protected void update() {
-            Application.this.update();
-        }
-        
-        @Override
-        protected void render() {
-            Application.this.state.render(Gdx.graphics.getDeltaTime());
-        }
-        
-    }
     
     /**
      * An implementation of ApplicationListener which delegates to private

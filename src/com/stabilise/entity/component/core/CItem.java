@@ -5,7 +5,7 @@ import java.util.Random;
 import com.stabilise.core.Constants;
 import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.component.ComponentEvent;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.item.IContainer;
 import com.stabilise.item.ItemStack;
 import com.stabilise.opengl.render.WorldRenderer;
@@ -106,8 +106,8 @@ public class CItem implements CCore {
     }
     
     @Override
-    public void handle(World w, Entity e, ComponentEvent ev) {
-        
+    public boolean handle(World w, Entity e, EntityEvent ev) {
+        return false;
     }
     
 }

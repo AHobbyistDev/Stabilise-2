@@ -1,11 +1,16 @@
 package com.stabilise.entity;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import com.stabilise.entity.component.Component;
 import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.entity.component.core.CCore;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.DamageSource;
 import com.stabilise.entity.effect.Effect;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
@@ -13,36 +18,35 @@ import com.stabilise.world.World;
 
 public class Entity extends FreeGameObject {
     
-    private long        id;
-    public  long        age;
-    private boolean     initialised = false;
+    private      long        id;
+    public       long        age;
+    private      boolean     initialised = false;
     
     // Core physical properties
-    public  float       dx, dy;
-    public  boolean     facingRight;
-    public  AABB        aabb;
-    public  boolean     invulnerable = false;
+    public       float       dx, dy;
+    public       boolean     facingRight;
+    public       AABB        aabb;
+    public       boolean     invulnerable = false;
     
     // Components
-    public  CPhysics    physics;
-    public  CController controller;
-    public  CCore       core;
+    public final CPhysics    physics;
+    public       CController controller;
+    public final CCore       core;
+    
+    public final List<Component> components = new LinkedList<>();
     
     
     /**
-     * Sets the components of this entity. None of them should be null.
+     * Creates a new Entity. It is implicitly trusted that none of the
+     * arguments are null.
      */
-    public Entity construct(CPhysics p, CController c, CCore s) {
+    public Entity(CPhysics p, CController co, CCore c) {
         physics    = p;
-        controller = c;
-        core      = s;
-        return this;
+        controller = co;
+        core       = c;
     }
     
-    /**
-     * Initialises this entity. This is invoked when it is added to the world.
-     */
-    public void init(World w) {
+    private void init(World w) {
         if(!initialised) {
             initialised = true;
             
@@ -81,6 +85,26 @@ public class Entity extends FreeGameObject {
      */
     public long id() {
         return id;
+    }
+    
+    public void post(World w, EntityEvent e) {
+        for(Component c : components)
+            if(c.handle(w, this, e))
+                return;
+        core.handle(w, this, e);
+        controller.handle(w, this, e);
+        physics.handle(w, this, e);
+    }
+    
+    public void onAdd(World w) {
+        init(w);
+        post(w, EntityEvent.ADDED_TO_WORLD);
+    }
+    
+    @Override
+    public void destroy() {
+        super.destroy();
+        post(null, EntityEvent.DESTROYED);
     }
     
     /**

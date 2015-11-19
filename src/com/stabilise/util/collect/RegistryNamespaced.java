@@ -1,8 +1,5 @@
 package com.stabilise.util.collect;
 
-import java.util.Map;
-
-import com.google.common.collect.HashBiMap;
 import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
@@ -35,11 +32,6 @@ public class RegistryNamespaced<V> extends IDRegistry<String, V> {
             throw new IllegalArgumentException("\':\' should not appear in defaultNamespace!");
         
         this.defaultNamespace = defaultNamespace + ":";
-    }
-    
-    @Override
-    protected Map<String, V> createUnderlyingMap(int capacity) {
-        return HashBiMap.create(capacity);
     }
     
     @Override

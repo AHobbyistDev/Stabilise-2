@@ -7,9 +7,6 @@ import com.stabilise.world.tile.Tile;
  */
 public class ItemTile extends Item {
     
-    /** The item's parent tile. */
-    //private final Tile tile;
-    
     /**
      * Creates a new tile Item.
      */

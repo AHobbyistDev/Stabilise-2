@@ -3,8 +3,8 @@ package com.stabilise.entity.component.core;
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.entity.effect.EffectFire;
+import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.opengl.render.WorldRenderer;
@@ -507,7 +507,7 @@ public class CPerson extends BaseMob {
     }
     
     @Override
-    protected void onVerticalCollision() {
+    protected void onVerticalCollision(Entity e, ETileCollision ev) {
         if(e.dy < 0 && !wasOnGround && state.priority != StatePriority.UNOVERRIDEABLE) {
             if(e.dy < 2 * -jumpVelocity) {
                 setState(State.LAND_CROUCH, false, 20);        // TODO: temporary constant duration
@@ -717,11 +717,6 @@ public class CPerson extends BaseMob {
             mana = maxMana;
         
         manaChanged = true;
-    }
-
-    @Override
-    public void handle(World w, Entity e, ComponentEvent ev) {
-        super.handle(w, e, ev);
     }
     
 }

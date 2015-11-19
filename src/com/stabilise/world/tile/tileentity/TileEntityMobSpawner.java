@@ -92,7 +92,6 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     private boolean trySpawn(World world) {
         Entity e = Entities.enemy();
         world.addEntity(e, xPos, yPos+1);
-        e.init(world);
         
         for(int i = 0; i < 10; i++) {
             spawnParticle(world);

@@ -119,6 +119,16 @@ public class AABB extends Shape {
         return maxY() - minY();
     }
     
+    /** {@link #width() width}{@code () / 2} */
+    public float centreX() {
+        return width() / 2;
+    }
+    
+    /** {@link #height() height}{@code () / 2} */
+    public float centreY() {
+        return height() / 2;
+    }
+    
     int getKey() {
         return Collider.K_AABB;
     }

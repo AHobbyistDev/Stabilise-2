@@ -37,7 +37,7 @@ class TaskTracker {
     
     TaskTracker(PrototypeTracker prototype) {
         status = prototype.status;
-        totalParts = prototype.childParts;
+        totalParts = prototype.parts;
         partsToReport = prototype.partsToReport;
     }
     
@@ -112,7 +112,7 @@ class TaskTracker {
         // appropriately as per partsToReport) to our parent.
         if(parent != null) {
             // n and o now take on new/old values for reportedParts
-            n = Math.max(0, (long)(n*((double)(partsToReport)/(totalParts))) + c);
+            n = Math.max(0, (long)(n*((double)partsToReport/totalParts)) + c);
             do {
                 o = reportedParts.get();
                 // If o >= n, then either o == n and we have no additional

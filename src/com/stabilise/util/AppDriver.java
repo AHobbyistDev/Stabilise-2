@@ -1,8 +1,9 @@
 package com.stabilise.util;
 
-import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.concurrent.Tasks;
 
 /**
  * An instance of this class may be used to provide a main loop which can be
@@ -19,7 +20,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
  * overriding this class to implement {@code update} and {@code render}.
  */
 @NotThreadSafe
-public abstract class AppDriver implements Runnable {
+public final class AppDriver implements Runnable {
     
     /** Update ticks per second. */
     public final int tps;
@@ -28,6 +29,9 @@ public abstract class AppDriver implements Runnable {
      * no frames should be rendered. */
     private int fps;
     private long nsPerFrame; // nanos per frame
+    /** Threshold value, in nanoseconds, of {@link #unprocessed} before we
+     * reset its value and skip ticks. */
+    private long delaySkip = 5000000000L; // 5 seconds
     
     /** The time when last it was checked as per {@code System.nanoTime()}. */
     private long lastTime = 0L;
@@ -54,53 +58,48 @@ public abstract class AppDriver implements Runnable {
     /** The last update at which the profiler was flushed. */
     private long lastProfilerFlush = 0L;
     
-    private final Log log;
+    private Log log = Log.get();
+    
+    private final Runnable updater;
+    private final Runnable renderer;
     
     
     /**
-     * Creates a new AppDriver for which the {@link #profiler} flushes every
-     * 1 second.
+     * Creates a new AppDriver.
      * 
-     * @param tps The number of update ticks per second.
-     * @param fps The maximum number of frames per second if this is run via
-     * {@link #run()}. A value of {@code 0} indicates no maximum; a value of
-     * {@code -1} indicates not to render (note this case will apply even if
-     * {@code run()} isn't used).
-     * @param log The log for this driver to use. If null, the default log is
-     * used.
+     * @param tps The number of update ticks per second (also used as the FPS).
+     * @param updater The runnable to run for each update tick. May be null.
+     * @param renderer The runnable to run for each frame. May be null.
      * 
-     * @throws IllegalArgumentException if either {@code tps < 1} or {@code fps
-     * < -1}.
+     * @throws IllegalArgumentException if {@code tps < 1}.
+     * @throws NullPointerException if both {@code updater} and {@code
+     * renderer} are {@code null}.
      */
-    public AppDriver(int tps, int fps, Log log) {
-        this(tps, fps, log, tps);
+    public AppDriver(int tps, Runnable updater, Runnable renderer) {
+        this.tps = Checks.testMin(tps, 1);
+        nsPerTick = 1000000000 / tps;
+        setFPS(tps);
+        this.log = log == null ? Log.get() : log;
+        ticksPerFlush = tps;
+        
+        if(updater == null && renderer == null)
+            throw new NullPointerException("Both updater and renderer null!");
+        
+        this.updater = updater == null ? Tasks.emptyRunnable() : updater;
+        this.renderer = renderer == null ? Tasks.emptyRunnable() : renderer;
     }
     
     /**
      * Creates a new AppDriver.
      * 
-     * @param tps The number of update ticks per second.
-     * @param fps The maximum number of frames per second if this is run via
-     * {@link #run()}. A value of {@code 0} indicates no maximum; a value of
-     * {@code -1} indicates not to render (note this case will apply even if
-     * {@code run()} isn't used).
-     * @param log The log for this driver to use. If null, the default log is
-     * used.
-     * @param ticksPerFlush The number of update ticks between successive
-     * profiler flushes.
+     * @param tps The number of update ticks per second (also used as the FPS).
+     * @param drivable The Drivable to update and render.
      * 
-     * @throws IllegalArgumentException if either {@code tps < 1}, {@code
-     * ticksPerFlush < 1}, or {@code fps < -1}.
+     * @throws IllegalArgumentException if {@code tps < 1}.
+     * @throws NullPointerException if {@code drivable} is {@code null}.
      */
-    public AppDriver(int tps, int fps, Log log, int ticksPerFlush) {
-        if(tps < 1)
-            throw new IllegalArgumentException("tps < 1");
-        
-        this.tps = tps;
-        nsPerTick = 1000000000 / tps;
-        setFPS(fps);
-        this.log = log == null ? Log.get() : log;
-        setTicksPerProfilerFlush(ticksPerFlush);
+    public AppDriver(int tps, Drivable drivable) {
+        this(tps, drivable::update, drivable::render);
     }
     
     /**
@@ -143,8 +142,8 @@ public abstract class AppDriver implements Runnable {
      * 
      * @return The number of milliseconds to wait until this should be invoked
      * again to ensure this is invoked as many times per second as specified by
-     * {@code fps} in the constructor. This is used by {@link #run()} but
-     * should generally be ignored.
+     * {@link #getFPS()}. This is used by {@link #run()} and should generally
+     * be ignored.
      * @throws IllegalStateException if this is invoked while a tick is in
      * progress, or if client code has been improperly using the profiler.
      */
@@ -159,14 +158,14 @@ public abstract class AppDriver implements Runnable {
         unprocessed += now - lastTime;
         
         // Make sure nothing has gone wrong with timing.
-        if(unprocessed > 5000000000L) { // 5 seconds
+        if(unprocessed > delaySkip) {
             log.postWarning("Can't keep up! Running "
-                    + ((now - lastTime) / 1000000L) + " milliseconds behind; skipping " 
+                    + ((now - lastTime) / 1000000L) + " milliseconds behind; skipping "
                     + (unprocessed / nsPerTick) + " ticks!"
             );
             unprocessed = nsPerTick; // let at least one tick happen
         } else if(unprocessed < 0L) {
-            log.postWarning("Time ran backwards! Did the timer overflow?");
+            log.postWarning("Time ran backwards!");
             unprocessed = 0L;
         }
         
@@ -177,7 +176,7 @@ public abstract class AppDriver implements Runnable {
         while(unprocessed >= nsPerTick) {
             numUpdates++;
             unprocessed -= nsPerTick;
-            update();
+            updater.run();
         }
         
         profiler.verify(2, "root.update");
@@ -195,7 +194,7 @@ public abstract class AppDriver implements Runnable {
         // Rendering
         profiler.start("render");
         if(fps != -1)
-            render();
+            renderer.run();
         
         profiler.verify(2, "root.render");
         profiler.next("wait");
@@ -209,20 +208,6 @@ public abstract class AppDriver implements Runnable {
         else
             return 0L;
     }
-    
-    /**
-     * Performs an update tick.
-     * 
-     * @see #tick()
-     */
-    protected abstract void update();
-    
-    /**
-     * Performs any rendering.
-     * 
-     * @see #tick()
-     */
-    protected abstract void render();
     
     /**
      * Stops this driver from executing, if it is being run as per {@link
@@ -260,89 +245,68 @@ public abstract class AppDriver implements Runnable {
     }
     
     /**
-     * Sets the maximum FPS.
+     * Sets the maximum FPS. The default value is equal to the TPS as specified
+     * in the constructor.
      * 
      * @param fps The max FPS if this is run via {@link #run()}. A value of
      * {@code 0} indicates no maximum; a value of {@code -1} indicates not to
      * render (note this case will apply even if {@code run()} isn't used).
      * 
      * @throws IllegalArgumentException if {@code fps < -1}.
+     * @return This AppDriver.
      */
-    public void setFPS(int fps) {
+    public AppDriver setFPS(int fps) {
         this.fps = Checks.testMin(fps, -1);
         nsPerFrame = fps == 0 ? 0 : 1000000000 / fps;
+        return this;
+    }
+    
+    /**
+     * Sets the threshold delay time before updates are discarded - that is, if
+     * cumulative delays from updates or renders exceeds the specified time,
+     * this driver will not attempt to catch up on scheduled updates.
+     * 
+     * <p>The default value for this is 5 seconds.
+     * 
+     * @param time The delay threshold.
+     * @param unit The unit of the {@code time} argument.
+     * 
+     * @throws IllegalArgumentException if, when converted to nanoseconds,
+     * {@code < 0}, or the given value is lower than the number of nanoseconds
+     * per tick.
+     * @return This AppDriver.
+     */
+    public AppDriver setDelaySkip(long time, TimeUnit unit) {
+        time = unit.toNanos(time);
+        if(time < 0)
+            throw new IllegalArgumentException("Illegal time! In nanoseconds, "
+                    + "its value is: " + time);
+        if(time <= nsPerTick)
+            throw new IllegalArgumentException("Illegal time; it is lower than "
+                    + "nsPerTick.");
+        this.delaySkip = time;
+        return this;
     }
     
     /**
      * Sets the number of update ticks between which to flush the profiler.
      * 
      * @throws IllegalArgumentException if {@code ticksPerFlush < 1}.
+     * @return This AppDriver.
      */
-    public void setTicksPerProfilerFlush(int ticksPerFlush) {
+    public AppDriver setTicksPerProfilerFlush(int ticksPerFlush) {
         this.ticksPerFlush = Checks.testMin(ticksPerFlush, 1);
-    }
-    
-    //--------------------==========--------------------
-    //------------=====Static Functions=====------------
-    //--------------------==========--------------------
-    
-    /**
-     * Gets an AppDriver which delegates to the specified {@code Drivable} and
-     * for which the {@link #profiler} flushes every 1 second.
-     * 
-     * @param drivable The drivable to delagate update and render invocations
-     * to.
-     * @param tps The number of update ticks per second.
-     * @param fps The maximum number of frames per second if this is run via
-     * {@link #run()}. A value of {@code 0} indicates no maximum; a value of
-     * {@code -1} indicates not to render (note this case will apply even if
-     * {@code run()} isn't used).
-     * @param log The log for this driver to use.
-     * 
-     * @return The AppDriver.
-     * @throws IllegalArgumentException if either {@code tps < 1} or {@code fps
-     * < -1}.
-     * @throws NullPointerException if {@code drivable} is {@code null}.
-     */
-    public static AppDriver driverFor(Drivable drivable, int tps, int fps, Log log) {
-        return new DelegatedDriver(drivable, tps, fps, log);
+        return this;
     }
     
     /**
-     * Gets an AppDriver which delegates to the specified {@code Drivable}.
+     * Sets this AppDriver's log. If null, the default log is used.
      * 
-     * @param drivable The drivable to delagate update and render invocations
-     * to.
-     * @param tps The number of update ticks per second.
-     * @param fps The maximum number of frames per second if this is run via
-     * {@link #run()}. A value of {@code 0} indicates no maximum; a value of
-     * {@code -1} indicates not to render (note this case will apply even if
-     * {@code run()} isn't used).
-     * @param log The log for this driver to use.
-     * @param ticksPerFlush The number of update ticks between successive
-     * profiler flushes.
-     * 
-     * @throws IllegalArgumentException if either {@code tps < 1}, {@code
-     * ticksPerFlush < 1}, or {@code fps < -1}.
-     * @throws NullPointerException if {@code drivable} is {@code null}.
+     * @return This AppDriver.
      */
-    public static AppDriver driverFor(Drivable drivable, int tps, int fps,
-            Log log, int ticksPerFlush) {
-        return new DelegatedDriver(drivable, tps, fps, log, ticksPerFlush);
-    }
-    
-    public static AppDriver driverFor(int tps, Runnable updater) {
-        return driverFor(tps, tps, updater, () -> {});
-    }
-    
-    public static AppDriver driverFor(int tps, int fps, Runnable updater,
-            Runnable renderer) {
-        Objects.requireNonNull(updater);
-        Objects.requireNonNull(renderer);
-        return new AppDriver(tps, fps, null) {
-            @Override protected void update() { updater.run();  }
-            @Override protected void render() { renderer.run(); }
-        };
+    public AppDriver setLog(Log log) {
+        this.log = log == null ? Log.get() : log;
+        return this;
     }
     
     //--------------------==========--------------------
@@ -369,32 +333,6 @@ public abstract class AppDriver implements Runnable {
          * @see AppDriver#tick()
          */
         void render();
-        
-    }
-    
-    private static class DelegatedDriver extends AppDriver {
-        
-        private final Drivable drivable;
-        
-        public DelegatedDriver(Drivable drivable, int tps, int fps, Log log) {
-            super(tps, fps, log);
-            this.drivable = Objects.requireNonNull(drivable);
-        }
-        
-        public DelegatedDriver(Drivable drivable, int tps, int fps, Log log, int ticksPerFlush) {
-            super(tps, fps, log, ticksPerFlush);
-            this.drivable = Objects.requireNonNull(drivable);
-        }
-        
-        @Override
-        protected void update() {
-            drivable.update();
-        }
-        
-        @Override
-        protected void render() {
-            drivable.render();
-        }
         
     }
     

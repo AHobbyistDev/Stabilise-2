@@ -19,6 +19,7 @@ public class Tasks {
     
     private Tasks() { throw new AssertionError(); } // non-instantiable
     
+    private static final Runnable EMPTY_RUNNABLE      = () -> {};
     private static final Executor EXEC_CURRENT_THREAD = r -> r.run();
     private static final Executor EXEC_NEW_THREAD     = r -> new Thread(r).start();
     
@@ -40,6 +41,13 @@ public class Tasks {
      */
     public static Executor newThreadExecutor() {
         return EXEC_NEW_THREAD;
+    }
+    
+    /**
+     * Returns a Runnable which does nothing.
+     */
+    public static Runnable emptyRunnable() {
+        return EMPTY_RUNNABLE;
     }
     
     /**

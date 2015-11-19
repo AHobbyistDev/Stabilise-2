@@ -1,8 +1,10 @@
 package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.ParticleFlame;
+import com.stabilise.item.Items;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.maths.Maths;
@@ -95,6 +97,16 @@ public class CGenericEnemy extends BaseMob {
             srcSmoke.createBurst(150, e.x-0.5d, e.x-0.5d, e.y, e.y+2d, 2f+d, 90f+d, 15*Maths.PIf/16, 17*Maths.PIf/16);
             srcFlame.createBurst(150, e.x-0.5d, e.x-0.5d, e.y, e.y+2d, 2f+d, 35f+d, 15*Maths.PIf/16, 17*Maths.PIf/16);
         }
+    }
+    
+    @Override
+    public boolean handle(World w, Entity e, EntityEvent ev) {
+        if(ev.type() == EntityEvent.Type.KILLED) {
+            dropItem(w, e, Items.APPLE.stackOf(1), 0.75f);
+            dropItem(w, e, Items.SWORD.stackOf(1), 0.75f);
+            dropItem(w, e, Items.ARROW.stackOf(1), 0.75f);
+        }
+        return super.handle(w, e, ev);
     }
     
 }

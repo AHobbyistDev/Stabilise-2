@@ -1,12 +1,16 @@
 package com.stabilise.entity.component.core;
 
+import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.entity.damage.DamageSource;
 import com.stabilise.entity.effect.Effect;
+import com.stabilise.entity.event.EDamaged;
+import com.stabilise.entity.event.ETileCollision;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.particle.ParticleDamageIndicator;
 import com.stabilise.entity.particle.ParticleSmoke;
+import com.stabilise.item.ItemStack;
 import com.stabilise.util.Direction;
 import com.stabilise.world.World;
 import com.stabilise.world.AbstractWorld.ParticleSource;
@@ -293,9 +297,9 @@ public abstract class BaseMob implements CCore {
     }
     */
     
-    protected void onVerticalCollision() {
+    protected void onVerticalCollision(Entity e, ETileCollision ev) {
         if(e.dy < 0 && !wasOnGround && state.priority != StatePriority.UNOVERRIDEABLE) {
-            if(e.dy < -jumpVelocity) {
+            if(e.dy < -2*jumpVelocity) {
                 //if(dy < -2*jumpVelocity)
                 //    damage(-(int)(dy * dy * 2), -1, 0, 0);
                 setState(State.LAND_CROUCH, false, 5);        // TODO: temporary constant duration
@@ -397,13 +401,13 @@ public abstract class BaseMob implements CCore {
         if(health <= 0) {
             health = 0;
             tintStrength = 0.8f;
-            ComponentEvent.DAMAGED.post(w, e);
+            e.post(w, EDamaged.damaged(src));
             kill(w, e, src);
         } else {
             tintStrength = 1.0f;
             e.invulnerable = true;
             invulnerabilityTicks = INVULNERABILITY_TICKS;
-            ComponentEvent.DAMAGED.post(w, e);
+            e.post(w, EDamaged.damaged(src));
         }
         
         return true;
@@ -416,7 +420,7 @@ public abstract class BaseMob implements CCore {
     public void kill(World w, Entity e, DamageSource src) {
         dead = true;
         setState(State.DEAD, false, DEATH_TICKS);
-        ComponentEvent.KILLED.post(w, e);
+        e.post(w, EDamaged.killed(src));
     }
     
     /**
@@ -426,6 +430,11 @@ public abstract class BaseMob implements CCore {
         //srcSmoke.createBurst(30, 0.01f, 0.25f, 0f, (float)Math.PI, this);
         //srcSmoke.createOutwardsBurst(30, true, false, 5f, 7f, e);
         srcSmoke.createCentredOutwardsBurst(w.getRnd(), 30, 1f, 7f, e);
+    }
+    
+    protected void dropItem(World w, Entity e, ItemStack stack, float chance) {
+        if(w.getRnd().nextFloat() < chance)
+            w.addEntity(Entities.item(w, stack), e.x, e.y);
     }
     
     /**
@@ -477,9 +486,10 @@ public abstract class BaseMob implements CCore {
     }
     
     @Override
-    public void handle(World w, Entity e, ComponentEvent ev) {
-        if(ev == ComponentEvent.COLLISION_VERTICAL)
-            onVerticalCollision();
+    public boolean handle(World w, Entity e, EntityEvent ev) {
+        if(ev.type() == EntityEvent.Type.TILE_COLLISION_V)
+            onVerticalCollision(e, (ETileCollision)ev);
+        return false;
     }
     
 }

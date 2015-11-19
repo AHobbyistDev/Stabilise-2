@@ -1,7 +1,8 @@
 package com.stabilise.entity.component.physics;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.component.ComponentEvent;
+import com.stabilise.entity.event.ETileCollision;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Direction;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
@@ -262,10 +263,8 @@ public class PhysicsImpl implements CPhysics {
      * entity has collided with is located.
      */
     private void collideHorizontal(World w, Entity e, double xp, Direction direction) {
-        ComponentEvent.COLLISION.post(w, e);
-        ComponentEvent.COLLISION_HORIZONTAL.post(w, e);
-        ComponentEvent.COLLISION_TILE.post(w, e);
-        //impact(w, e, e.dx, true);
+        e.post(w, ETileCollision.collision(dxi));
+        e.post(w, ETileCollision.collisionH(dxi));
         
         e.dx = dxi = 0;
         
@@ -284,10 +283,8 @@ public class PhysicsImpl implements CPhysics {
      * entity has collided with is located.
      */
     private void collideVertical(World w, Entity e, double yp, Direction direction) {
-        ComponentEvent.COLLISION.post(w, e);
-        ComponentEvent.COLLISION_VERTICAL.post(w, e);
-        ComponentEvent.COLLISION_TILE.post(w, e);
-        //impact(w, e, e.dy, true);
+        e.post(w, ETileCollision.collision(dyi));
+        e.post(w, ETileCollision.collisionV(dyi));
         
         e.dy = dyi = 0;
         
@@ -309,8 +306,8 @@ public class PhysicsImpl implements CPhysics {
     @Override public boolean onGround() { return onGround; }
     
     @Override
-    public void handle(World w, Entity e, ComponentEvent ev) {
-        
+    public boolean handle(World w, Entity e, EntityEvent ev) {
+        return false;
     }
     
 }

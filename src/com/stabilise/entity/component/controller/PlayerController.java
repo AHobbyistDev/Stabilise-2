@@ -12,8 +12,8 @@ import com.stabilise.core.main.Stabilise;
 import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.component.ComponentEvent;
 import com.stabilise.entity.component.core.BaseMob;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
@@ -306,8 +306,8 @@ public class PlayerController implements CController, Controllable, InputProcess
     }
     
     @Override
-    public void handle(World w, Entity e, ComponentEvent ev) {
-        // TODO Auto-generated method stub
+    public boolean handle(World w, Entity e, EntityEvent ev) {
+        return false;
     }
     
 }

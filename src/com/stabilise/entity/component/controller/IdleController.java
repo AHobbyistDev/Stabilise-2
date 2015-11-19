@@ -1,7 +1,7 @@
 package com.stabilise.entity.component.controller;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.component.ComponentEvent;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.world.World;
 
 /**
@@ -30,8 +30,8 @@ public class IdleController implements CController {
     }
 
     @Override
-    public void handle(World w, Entity e, ComponentEvent ev) {
-        // do nothing
+    public boolean handle(World w, Entity e, EntityEvent ev) {
+        return false;
     }
     
 }

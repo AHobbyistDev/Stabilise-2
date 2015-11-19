@@ -16,14 +16,12 @@ public class FreeGameObject extends GameObject {
     
     
     /**
-     * Creates a new FreeGameObject.
+     * Creates a new FreeGameObject with coordinates (0,0.
      */
-    public FreeGameObject() {
-        // nothing to see here, move along
-    }
+    public FreeGameObject() {}
     
     /**
-     * Creates a new FreeGameObject with the specified components.
+     * Creates a new FreeGameObject at the specified coordinates.
      */
     public FreeGameObject(double x, double y) {
         this.x = x;
