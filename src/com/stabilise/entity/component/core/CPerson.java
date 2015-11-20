@@ -5,6 +5,7 @@ import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.effect.EffectFire;
 import com.stabilise.entity.event.ETileCollision;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.opengl.render.WorldRenderer;
@@ -185,8 +186,8 @@ public class CPerson extends BaseMob {
     }
     
     @Override
-    public void init(World w, Entity e) {
-        super.init(w, e);
+    public void init(Entity e) {
+        super.init(e);
         
         maxHealth = 500;
         health = 500;
@@ -204,8 +205,6 @@ public class CPerson extends BaseMob {
         maxDx = 15f;
         
         state = State.IDLE;
-        
-        particleSrc = w.getParticleManager().getSource(new ParticleFlame());
     }
     
     @Override
@@ -475,7 +474,7 @@ public class CPerson extends BaseMob {
             }
             
             particleSrc.createBurst(6, px, e.y + originPoint.y(),
-                    0.03f, 0.08f, (float)minAngle, (float)maxAngle);
+                    1f, 5f, (float)minAngle, (float)maxAngle);
         }
     }
     
@@ -502,7 +501,7 @@ public class CPerson extends BaseMob {
             }
         } else {
             particleSrc.createBurst(6, px, e.y + originPoint.y(),
-                    0.03f, 0.08f, MathUtils.PI / 3f, MathUtils.PI * 0.6666f);
+                    1f, 5f, MathUtils.PI / 3f, MathUtils.PI * 0.6666f);
         }
     }
     
@@ -717,6 +716,13 @@ public class CPerson extends BaseMob {
             mana = maxMana;
         
         manaChanged = true;
+    }
+    
+    @Override
+    public boolean handle(World w, Entity e, EntityEvent ev) {
+        if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
+            particleSrc = w.getParticleManager().getSource(new ParticleFlame());
+        return super.handle(w, e, ev);
     }
     
 }

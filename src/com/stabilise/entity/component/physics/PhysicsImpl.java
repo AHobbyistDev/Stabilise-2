@@ -11,7 +11,7 @@ import com.stabilise.world.tile.Tile;
 /**
  * Extremely crappy physics implementation
  */
-public class PhysicsImpl implements CPhysics {
+public class PhysicsImpl extends CPhysics {
     
     protected static final float AIR_FRICTION = 0.001f;
     
@@ -22,7 +22,7 @@ public class PhysicsImpl implements CPhysics {
     public int floorTile;
     
     @Override
-    public void init(World w, Entity e) {}
+    public void init(Entity e) {}
     
     @Override
     public void update(World w, Entity e) {

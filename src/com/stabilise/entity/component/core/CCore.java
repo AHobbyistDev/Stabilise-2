@@ -15,28 +15,28 @@ import com.stabilise.world.World;
  * 
  * <p>Cores contain secondary entity data, functionality and render data.
  */
-public interface CCore extends Component {
+public abstract class CCore implements Component {
     
     /**
      * Renders the entity.
      * 
      * <p>The default implementation does nothing.
      */
-    default void render(WorldRenderer renderer, Entity e) {
+    public void render(WorldRenderer renderer, Entity e) {
         // do nothing
     }
     
     /**
      * Returns the entity's AABB.
      */
-    AABB getAABB();
+    public abstract AABB getAABB();
     
     /**
      * Applies an effect to the entity.
      * 
      * <p>The default implementation does nothing.
      */
-    default void applyEffect(Effect effect) {
+    public void applyEffect(Effect effect) {
         // do nothing
     }
     
@@ -47,7 +47,7 @@ public interface CCore extends Component {
      * 
      * @return true if the entity was damaged; {@code false} if not.
      */
-    default boolean damage(World w, Entity e, DamageSource src) { 
+    public boolean damage(World w, Entity e, DamageSource src) { 
         return false; 
     }
     
@@ -56,7 +56,7 @@ public interface CCore extends Component {
      * 
      * <p>The default implementation invokes {@code e.destroy()}.
      */
-    default void kill(World w, Entity e, DamageSource src) {
+    public void kill(World w, Entity e, DamageSource src) {
         e.destroy();
     }
     

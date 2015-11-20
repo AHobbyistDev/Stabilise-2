@@ -7,7 +7,7 @@ import com.stabilise.world.World;
 /**
  * Mobs with an IdleController have no defined behaviour; they do nothing.
  */
-public class IdleController implements CController {
+public class IdleController extends CController {
     
     /** The global IdleController instance. Since an IdleController does
      * nothing, this may be shared between multiple mobs. */
@@ -20,7 +20,7 @@ public class IdleController implements CController {
     }
     
     @Override
-    public void init(World w, Entity e) {
+    public void init(Entity e) {
         // do nothing
     }
 

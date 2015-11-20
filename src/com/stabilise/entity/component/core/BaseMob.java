@@ -18,7 +18,7 @@ import com.stabilise.world.AbstractWorld.ParticleSource;
 /**
  * Basic mob implementation.
  */
-public abstract class BaseMob implements CCore {
+public abstract class BaseMob extends CCore {
     
     /** The default number of ticks a mob becomes invulnerable for after being
      * hit. */
@@ -213,10 +213,8 @@ public abstract class BaseMob implements CCore {
     public float tintStrength = 0.0f;
     
     @Override
-    public void init(World w, Entity e) {
+    public void init(Entity e) {
         this.e = e;
-        srcDmgIndicator = w.getParticleManager().getSource(new ParticleDamageIndicator(0));
-        srcSmoke = w.getParticleManager().getSource(new ParticleSmoke());
     }
     
     @Override
@@ -401,13 +399,11 @@ public abstract class BaseMob implements CCore {
         if(health <= 0) {
             health = 0;
             tintStrength = 0.8f;
-            e.post(w, EDamaged.damaged(src));
             kill(w, e, src);
         } else {
             tintStrength = 1.0f;
             e.invulnerable = true;
             invulnerabilityTicks = INVULNERABILITY_TICKS;
-            e.post(w, EDamaged.damaged(src));
         }
         
         return true;
@@ -489,6 +485,12 @@ public abstract class BaseMob implements CCore {
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.TILE_COLLISION_V)
             onVerticalCollision(e, (ETileCollision)ev);
+        else if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD) {
+            srcDmgIndicator = w.getParticleManager().getSource(new ParticleDamageIndicator(0));
+            srcSmoke = w.getParticleManager().getSource(new ParticleSmoke());
+        } else if(ev.type() == EntityEvent.Type.DAMAGED) {
+            return damage(w, e, ((EDamaged)ev).src);
+        }
         return false;
     }
     

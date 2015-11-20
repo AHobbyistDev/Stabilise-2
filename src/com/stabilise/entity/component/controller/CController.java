@@ -5,6 +5,6 @@ import com.stabilise.entity.component.Component;
 /**
  * A controller is responsible for directing an entity.
  */
-public interface CController extends Component {
+public abstract class CController implements Component {
     
 }

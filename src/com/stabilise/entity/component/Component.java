@@ -20,9 +20,9 @@ import com.stabilise.world.World;
 public interface Component {
     
     /**
-     * Initialises this component.
+     * Initialises this component. Invoked when added to the entity.
      */
-    void init(World w, Entity e);
+    void init(Entity e);
     
     /**
      * Updates this component.
@@ -31,6 +31,10 @@ public interface Component {
     
     /**
      * Handles an entity-local event broadcast.
+     * 
+     * @return {@code true} to consume the event and prevent it from being
+     * passed on to more components; {@code false} to not treat the event as
+     * consumed.
      */
     boolean handle(World w, Entity e, EntityEvent ev);
     

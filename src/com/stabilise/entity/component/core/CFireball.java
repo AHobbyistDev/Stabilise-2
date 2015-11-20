@@ -3,6 +3,7 @@ package com.stabilise.entity.component.core;
 import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.effect.EffectFire;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.LinkedHitbox;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.opengl.render.WorldRenderer;
@@ -39,13 +40,15 @@ public class CFireball extends BaseProjectile {
     }
     
     @Override
-    public void init(World w, Entity e) {
-        super.init(w, e);
-        
+    public void init(Entity e) {
         ownerID = e.id();
+    }
+    
+    @Override
+    protected void onAdd(World w, Entity e) {
+        super.onAdd(w, e);
         
-        particleSrc = w.getParticleManager().getSource(new ParticleFlame());
-        hitbox.force = 0.3f;
+        hitbox.force = 3f;
         hitbox.effect = new EffectFire(300);
         hitbox.hits = 1000000; // TODO: temporary for fun
         hitbox.persistenceTimer = -1;
@@ -91,10 +94,6 @@ public class CFireball extends BaseProjectile {
         renderer.renderFireball(e, this);
     }
     
-    protected void impact(World w, Entity e, float dv, boolean tileCollision) {
-
-    }
-    
     private void addFlightParticles(World w, Entity e, int particles) {
         particleSrc.createBurst(particles, e.x, e.y, 0.5f, 2.5f, 0f, Maths.TAUf);
     }
@@ -116,6 +115,13 @@ public class CFireball extends BaseProjectile {
             addImpactParticles(w, e, 500);
         else if(Settings.settingParticlesReduced())
             addImpactParticles(w, e, 25);
+    }
+    
+    @Override
+    public boolean handle(World w, Entity e, EntityEvent ev) {
+        if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
+            particleSrc = w.getParticleManager().getSource(new ParticleFlame());
+        return super.handle(w, e, ev);
     }
     
 }

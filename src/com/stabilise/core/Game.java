@@ -78,7 +78,7 @@ public class Game implements Controllable, InputProcessor {
         // TODO: Hardcoding this is poor design and should be changed in the future
         playerController = new PlayerController(controller, this);
         player.controller = playerController;
-        playerController.init(world, player);
+        playerController.init(player);
     }
     
     /**

@@ -8,7 +8,7 @@ import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
 
 
-public abstract class BaseProjectile implements CCore {
+public abstract class BaseProjectile extends CCore {
     
     protected long ownerID;
     /** The projectile's hitbox. */
@@ -20,8 +20,7 @@ public abstract class BaseProjectile implements CCore {
     
     protected abstract LinkedHitbox getHitbox(Entity e, long ownerID);
     
-    @Override
-    public void init(World w, Entity e) {
+    protected void onAdd(World w, Entity e) {
         hitbox = getHitbox(e, ownerID);
         baseShape = hitbox.boundingBox;
         hitbox.persistent = true;
@@ -57,7 +56,9 @@ public abstract class BaseProjectile implements CCore {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        if(ev.type() == EntityEvent.Type.TILE_COLLISION)
+        if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
+            onAdd(w, e);
+        else if(ev.type() == EntityEvent.Type.TILE_COLLISION)
             onImpact(w, e);
         return false;
     }

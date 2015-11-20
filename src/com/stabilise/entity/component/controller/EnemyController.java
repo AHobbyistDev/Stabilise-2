@@ -9,7 +9,7 @@ import com.stabilise.world.World;
 /**
  * Extremely simplistic mob controller.
  */
-public class EnemyController implements CController {
+public class EnemyController extends CController {
     
     /** Actions for the current, incredibly simplistic, AI. */
     private static enum EnumAction {
@@ -25,7 +25,7 @@ public class EnemyController implements CController {
     private BaseMob mob;
     
     @Override
-    public void init(World w, Entity e) {
+    public void init(Entity e) {
         mob = (BaseMob)e.core;
     }
     

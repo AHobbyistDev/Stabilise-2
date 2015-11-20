@@ -21,8 +21,8 @@ public class CGenericEnemy extends BaseMob {
     private ParticleSource srcFlame;
     
     @Override
-    public void init(World w, Entity e) {
-        super.init(w, e);
+    public void init(Entity e) {
+        super.init(e);
         // Temporary initial value setting
         maxHealth = 20;
         health = 20;
@@ -33,8 +33,6 @@ public class CGenericEnemy extends BaseMob {
         acceleration = 0.8f;
         airAcceleration = 0.2f;
         maxDx = 13f;
-        
-        srcFlame = w.getParticleManager().getSource(new ParticleFlame());
     }
     
     @Override
@@ -101,10 +99,12 @@ public class CGenericEnemy extends BaseMob {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        if(ev.type() == EntityEvent.Type.KILLED) {
-            dropItem(w, e, Items.APPLE.stackOf(1), 0.75f);
-            dropItem(w, e, Items.SWORD.stackOf(1), 0.75f);
-            dropItem(w, e, Items.ARROW.stackOf(1), 0.75f);
+        if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
+            srcFlame = w.getParticleManager().getSource(new ParticleFlame());
+        else if(ev.type() == EntityEvent.Type.KILLED) {
+            dropItem(w, e, Items.APPLE.stackOf(1), 0.15f);
+            dropItem(w, e, Items.SWORD.stackOf(1), 0.15f);
+            dropItem(w, e, Items.ARROW.stackOf(1), 0.15f);
         }
         return super.handle(w, e, ev);
     }

@@ -1,5 +1,7 @@
 package com.stabilise.entity.component.core;
 
+import java.util.Iterator;
+
 import com.stabilise.core.Constants;
 import com.stabilise.item.BoundedContainer;
 import com.stabilise.item.Container;
@@ -40,6 +42,21 @@ public class CPlayerPerson extends CPerson implements IContainer {
     @Override
     public boolean contains(Item item, int minQuantity) {
         return inventory.contains(item, minQuantity);
+    }
+    
+    @Override
+    public void clear() {
+        inventory.clear();
+    }
+    
+    @Override
+    public Iterator<ItemStack> iterator() {
+        return inventory.iterator();
+    }
+    
+    @Override
+    public String toString() {
+        return "Player inventory: " + inventory.toString();
     }
     
 }

@@ -17,6 +17,7 @@ import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
+import com.stabilise.item.IContainer;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.BiIntConsumer;
 import com.stabilise.util.Direction;
@@ -28,7 +29,7 @@ import com.stabilise.world.tile.Tiles;
 /**
  * A PlayerController is a MobController which is managed by player input.
  */
-public class PlayerController implements CController, Controllable, InputProcessor {
+public class PlayerController extends CController implements Controllable, InputProcessor {
     
     private Entity e;
     private BaseMob mob;
@@ -60,7 +61,7 @@ public class PlayerController implements CController, Controllable, InputProcess
     }
     
     @Override
-    public void init(World w, Entity e) {
+    public void init(Entity e) {
         this.e = e;
         mob = (BaseMob)e.core;
     }
@@ -230,10 +231,17 @@ public class PlayerController implements CController, Controllable, InputProcess
             case NEXT_TILE:
                 scrolled(1);
                 break;
+            case CLEAR_INVENTORY:
+                if(e.core instanceof IContainer)
+                    ((IContainer)e.core).clear();
+                break;
+            case PRINT_INVENTORY:
+                Log.get().postInfo(e.core.toString());
+                break;
             default:
                 return false;
         }
-        return true;
+        return false;
     }
     
     @Override
@@ -248,7 +256,7 @@ public class PlayerController implements CController, Controllable, InputProcess
         else if(keycode == Keys.RIGHT_BRACKET)
             game.world.setTimeDelta(game.world.getTimeDelta() * 2f);
         else if(keycode == Keys.P)
-            System.out.println(game.profiler.getData().toString());
+            ;//System.out.println(game.profiler.getData().toString());
         else if(keycode == Keys.O)
             game.profiler.reset();
         return false;

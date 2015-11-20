@@ -1,7 +1,7 @@
 package com.stabilise.item;
 
 
-public interface IContainer {
+public interface IContainer extends Iterable<ItemStack> {
     
     /**
      * Gets the size of this container.
@@ -78,5 +78,11 @@ public interface IContainer {
      * minimum quantity of the specified item.
      */
     boolean contains(Item item, int minQuantity);
+    
+    /**
+     * Clears the contents of the container. These contents will be garbage
+     * collected if not otherwise referenced.
+     */
+    void clear();
     
 }

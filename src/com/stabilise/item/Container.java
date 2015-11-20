@@ -16,7 +16,7 @@ import com.stabilise.util.nbt.NBTTagList;
  * A container is something which contains items - e.g. player inventory,
  * chest.
  */
-public abstract class Container implements IContainer, Iterable<ItemStack>, Sendable {
+public abstract class Container implements IContainer, Sendable {
     
     /**
      * Checks for whether or not this container is a bounded container.
@@ -333,10 +333,7 @@ public abstract class Container implements IContainer, Iterable<ItemStack>, Send
         return false;
     }
     
-    /**
-     * Clears the contents of the container. These contents will be garbage
-     * collected if not otherwise referenced.
-     */
+    @Override
     public void clear() {
         for(int i = 0; i < size(); i++)
             setSlot(i, ItemStack.NO_STACK);

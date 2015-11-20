@@ -12,7 +12,7 @@ import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
-public class CItem implements CCore {
+public class CItem extends CCore {
     
     //--------------------==========--------------------
     //-----=====Static Constants and Variables=====-----
@@ -55,8 +55,8 @@ public class CItem implements CCore {
     }
     
     @Override
-    public void init(World w, Entity e) {
-        pop(e, w.getRnd());
+    public void init(Entity e) {
+        
     }
     
     @Override
@@ -107,6 +107,8 @@ public class CItem implements CCore {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
+        if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
+            pop(e, w.getRnd());
         return false;
     }
     

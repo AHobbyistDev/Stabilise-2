@@ -10,6 +10,7 @@ import com.stabilise.entity.component.core.CCore;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.DamageSource;
 import com.stabilise.entity.effect.Effect;
+import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
@@ -20,7 +21,6 @@ public class Entity extends FreeGameObject {
     
     private      long        id;
     public       long        age;
-    private      boolean     initialised = false;
     
     // Core physical properties
     public       float       dx, dy;
@@ -44,18 +44,12 @@ public class Entity extends FreeGameObject {
         physics    = p;
         controller = co;
         core       = c;
-    }
-    
-    private void init(World w) {
-        if(!initialised) {
-            initialised = true;
-            
-            aabb = core.getAABB();
-            
-            physics.init(w, this);
-            controller.init(w, this);
-            core.init(w, this);
-        }
+        
+        aabb = core.getAABB();
+        
+        physics.init(this);
+        controller.init(this);
+        core.init(this);
     }
     
     @Override
@@ -87,17 +81,21 @@ public class Entity extends FreeGameObject {
         return id;
     }
     
-    public void post(World w, EntityEvent e) {
+    public Entity addComponent(Component c) {
+        components.add(c);
+        return this;
+    }
+    
+    public boolean post(World w, EntityEvent e) {
         for(Component c : components)
             if(c.handle(w, this, e))
-                return;
-        core.handle(w, this, e);
-        controller.handle(w, this, e);
-        physics.handle(w, this, e);
+                return false;
+        return core.handle(w, this, e)
+            && controller.handle(w, this, e)
+            && physics.handle(w, this, e);
     }
     
     public void onAdd(World w) {
-        init(w);
         post(w, EntityEvent.ADDED_TO_WORLD);
     }
     
@@ -113,7 +111,7 @@ public class Entity extends FreeGameObject {
      * @return true if the entity was damaged; false if not.
      */
     public boolean damage(World w, DamageSource src) {
-        return core.damage(w, this, src);
+        return post(w, EDamaged.damaged(src));
     }
     
     public void applyEffect(Effect effect) {
