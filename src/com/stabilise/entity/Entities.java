@@ -2,7 +2,7 @@ package com.stabilise.entity;
 
 import com.stabilise.entity.component.controller.*;
 import com.stabilise.entity.component.core.*;
-import com.stabilise.entity.component.misc.CDamageAmplifier;
+import com.stabilise.entity.component.effect.CDamageAmplifier;
 import com.stabilise.entity.component.physics.*;
 import com.stabilise.item.ItemStack;
 import com.stabilise.world.World;

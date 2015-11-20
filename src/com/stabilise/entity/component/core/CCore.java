@@ -2,8 +2,8 @@ package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.Component;
+import com.stabilise.entity.component.effect.Effect;
 import com.stabilise.entity.damage.DamageSource;
-import com.stabilise.entity.effect.Effect;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;

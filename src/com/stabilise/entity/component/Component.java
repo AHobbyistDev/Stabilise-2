@@ -16,6 +16,9 @@ import com.stabilise.world.World;
  * <li>{@link CController} - entity controller.
  * <li>{@link CCore} - entity core.
  * </ul>
+ * 
+ * <p>Additionally, any number of miscellaneous components may be added to an
+ * entity.
  */
 public interface Component {
     
@@ -28,6 +31,15 @@ public interface Component {
      * Updates this component.
      */
     void update(World w, Entity e);
+    
+    /**
+     * Checks for whether or not this component should be removed.
+     * 
+     * <p>The default implementation returns {@code false}.
+     */
+    default boolean remove() {
+        return false;
+    }
     
     /**
      * Handles an entity-local event broadcast.

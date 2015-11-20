@@ -18,6 +18,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     
     private static final int ACTIVATION_RANGE_SQUARED = 16*16;
     private static final int TICKS_BETWEEN_SPAWNS = 180;
+    private static final int TICKS_BETWEEN_EXTRA = 120;
     private static final int MIN_SPAWNS = 1;
     private static final int MAX_SPAWNS = 2;
     
@@ -48,23 +49,23 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     }
     
     @Override
-    public void update(World world) {
-        if(playerInRange(world)) {
+    public void update(World w) {
+        if(playerInRange(w)) {
             if(fireGen == null) {
-                fireGen = world.getParticleManager().getSource(new ParticleFlame());
-                smokeGen = world.getParticleManager().getSource(new ParticleSmoke());
+                fireGen = w.getParticleManager().getSource(new ParticleFlame());
+                smokeGen = w.getParticleManager().getSource(new ParticleSmoke());
             }
             
             if(--ticksUntilNextSpawn == 0) {
-                ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS;
+                ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS + w.getRnd().nextInt(TICKS_BETWEEN_EXTRA);
                 
-                int spawns = MIN_SPAWNS + world.getRnd().nextInt(1 + MAX_SPAWNS - MIN_SPAWNS);
+                int spawns = MIN_SPAWNS + w.getRnd().nextInt(1 + MAX_SPAWNS - MIN_SPAWNS);
                 while(spawns-- > 0)
-                    trySpawn(world);
+                    trySpawn(w);
             }
             
-            if(world.getRnd().nextInt(5) == 0)
-                spawnParticle(world);
+            if(w.getRnd().nextInt(5) == 0)
+                spawnParticle(w);
         }
     }
     

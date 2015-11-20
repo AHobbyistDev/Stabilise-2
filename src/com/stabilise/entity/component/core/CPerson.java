@@ -3,7 +3,7 @@ package com.stabilise.entity.component.core;
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.effect.EffectFire;
+import com.stabilise.entity.component.effect.EffectFire;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
@@ -377,7 +377,7 @@ public class CPerson extends BaseMob {
                         h1.force = 0.3f;
                         h1.fx = 0.5f;
                         h1.fy = 0.7f;
-                        h1.effect = new EffectFire(300);
+                        h1.effects = tgt -> tgt.addComponent(new EffectFire(300));
                         w.addHitbox(h1, e.x, e.y);
                         
                         Hitbox h2 = new Hitbox(e.id(), SPECIAL_DOWN_GROUND_HITBOX_2,
@@ -386,7 +386,7 @@ public class CPerson extends BaseMob {
                         h2.force = 0.3f;
                         h2.fx = -0.5f;
                         h2.fy = 0.7f;
-                        h2.effect = new EffectFire(300);
+                        h2.effects = tgt -> tgt.addComponent(new EffectFire(300));
                         w.addHitbox(h2, e.x, e.y);
                         
                         particleSrc.createBurst(300, e.x, e.y, 0.001f, 0.10f, 0, (float)Math.PI);

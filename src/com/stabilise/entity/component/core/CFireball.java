@@ -2,7 +2,7 @@ package com.stabilise.entity.component.core;
 
 import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.effect.EffectFire;
+import com.stabilise.entity.component.effect.EffectFire;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.LinkedHitbox;
 import com.stabilise.entity.particle.ParticleFlame;
@@ -28,8 +28,6 @@ public class CFireball extends BaseProjectile {
     private ParticleSource particleSrc;
     private int damage;
     
-    public CFireball() {}
-    
     public CFireball(long ownerID) {
         this(ownerID, DEFAULT_FIREBALL_DAMAGE);
     }
@@ -41,7 +39,7 @@ public class CFireball extends BaseProjectile {
     
     @Override
     public void init(Entity e) {
-        ownerID = e.id();
+        
     }
     
     @Override
@@ -49,7 +47,7 @@ public class CFireball extends BaseProjectile {
         super.onAdd(w, e);
         
         hitbox.force = 3f;
-        hitbox.effect = new EffectFire(300);
+        hitbox.effects = tgt -> tgt.addComponent(new EffectFire(300));
         hitbox.hits = 1000000; // TODO: temporary for fun
         hitbox.persistenceTimer = -1;
         

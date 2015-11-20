@@ -1,5 +1,6 @@
 package com.stabilise.entity.damage;
 
+import com.stabilise.entity.Entity;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Vec2;
 
@@ -34,6 +35,15 @@ public class DamageSource {
     
     public DamageSource(int damage, long srcID, float fx, float fy) {
         this(damage, srcID, Vec2.immutable(fx, fy));
+    }
+    
+    /**
+     * Applies any effects to the entity.
+     * 
+     * <p>The default implementation does nothing.
+     */
+    public void applyEffects(Entity e) {
+        // do nothing
     }
     
 }

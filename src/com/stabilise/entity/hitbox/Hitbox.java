@@ -1,9 +1,10 @@
 package com.stabilise.entity.hitbox;
 
+import java.util.function.Consumer;
+
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.FreeGameObject;
 import com.stabilise.entity.damage.DamageSource;
-import com.stabilise.entity.effect.Effect;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
@@ -15,7 +16,7 @@ import com.stabilise.world.World;
 public class Hitbox extends FreeGameObject {
     
     /** The entity which owns the hitbox. */
-    public long ownerID;
+    public final long ownerID;
     /** Whether or not the hitbox is to persist for longer than a tick. */
     public boolean persistent = true;
     /** The number of ticks the hitbox should persist for, if it is persistent.
@@ -41,7 +42,7 @@ public class Hitbox extends FreeGameObject {
     public int freezeFrames = 0;
     
     /** The effect to be applied to the mob the hitbox hits. */
-    public Effect effect = null;
+    public Consumer<Entity> effects = null;
     
     
     /**
@@ -104,13 +105,21 @@ public class Hitbox extends FreeGameObject {
      */
     protected boolean hit(World w, Entity e) {
         // TODO: current implementation of collision resolution is crude and temporary
-        if(e.damage(w, new DamageSource(damage, ownerID, fx*force, fy*force))) {
-            if(effect != null)
-                e.applyEffect(effect.clone());
+        if(e.damage(w, createSrc())) {
             onHit();
             return true;
         }
         return false;
+    }
+    
+    private DamageSource createSrc() {
+        return new DamageSource(damage, ownerID, fx*force, fy*force) {
+            @Override
+            public void applyEffects(Entity e) {
+                if(effects != null)
+                    effects.accept(e);
+            }
+        };
     }
     
     /**

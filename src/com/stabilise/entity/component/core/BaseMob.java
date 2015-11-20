@@ -4,7 +4,6 @@ import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.entity.damage.DamageSource;
-import com.stabilise.entity.effect.Effect;
 import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
@@ -176,9 +175,6 @@ public abstract class BaseMob extends CCore {
     /** The number of ticks until the Mob loses its invulnerability. */
     public int invulnerabilityTicks = 0;
     
-    /** The effect currently ailing the Mob. */
-    public Effect effect = null;
-    
     /** Whether or not the Mob is currently attempting to move. */
     public boolean moving = false;
     
@@ -235,12 +231,6 @@ public abstract class BaseMob extends CCore {
         if(e.invulnerable) {
             if(--invulnerabilityTicks == 0)
                 e.invulnerable = false;
-        }
-        
-        if(effect != null) {
-            effect.update(w, e);
-            if(effect.destroyed)
-                effect = null;
         }
         
         if(hasTint) {
@@ -305,11 +295,6 @@ public abstract class BaseMob extends CCore {
                 stateLockDuration = 0;
             }
         }
-    }
-    
-    @Override
-    public void applyEffect(Effect effect) {
-        this.effect = effect;
     }
     
     /**
@@ -385,6 +370,8 @@ public abstract class BaseMob extends CCore {
     public boolean damage(World w, Entity e, DamageSource src) {
         if(e.invulnerable || dead)
             return false;
+        
+        src.applyEffects(e);
         
         health -= src.damage;
         e.dx = (e.dx + src.force.x());

@@ -1,9 +1,10 @@
-package com.stabilise.entity.effect;
+package com.stabilise.entity.component.effect;
 
 import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.damage.FireSource;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
@@ -29,9 +30,10 @@ public class EffectFire extends Effect {
     }
     
     @Override
+    public void init(Entity e) {}
+    
+    @Override
     public void update(World world, Entity target) {
-        super.update(world, target);
-        
         if(particleSrc == null)
             particleSrc = world.getParticleManager().getSource(new ParticleFlame());
         
@@ -59,6 +61,11 @@ public class EffectFire extends Effect {
         EffectFire e = new EffectFire(duration);
         e.age = age;
         return e;
+    }
+    
+    @Override
+    public boolean handle(World w, Entity e, EntityEvent ev) {
+        return false;
     }
     
 }

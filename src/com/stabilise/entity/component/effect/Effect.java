@@ -1,20 +1,16 @@
-package com.stabilise.entity.effect;
+package com.stabilise.entity.component.effect;
 
-import com.stabilise.entity.Entity;
-import com.stabilise.world.World;
+import com.stabilise.entity.component.Component;
 
 /**
  * An Effect is a lingering condition which can affect a mob.
  */
-public abstract class Effect {
+public abstract class Effect implements Component {
     
     /** The duration of the effect, in ticks. */
     public final int duration;
     /** The age of the effect, in ticks. */
     public int age = 0;
-    
-    /** Whether or not the effect is considered 'destroyed', or has worn off. */
-    public boolean destroyed = false;
     
     
     /**
@@ -29,15 +25,9 @@ public abstract class Effect {
         this.duration = duration;
     }
     
-    /**
-     * Updates the Effect.
-     * 
-     * @param world The world.
-     * @param target The target of the Effect.
-     */
-    public void update(World world, Entity target) {
-        if(++age == duration)
-            destroyed = true;
+    @Override
+    public boolean remove() {
+        return ++age >= duration;
     }
     
     /**

@@ -1,4 +1,4 @@
-package com.stabilise.entity.component.misc;
+package com.stabilise.entity.component.effect;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.Component;
@@ -18,7 +18,7 @@ public class CDamageAmplifier implements Component {
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.DAMAGED) {
             EDamaged dmg = (EDamaged)ev;
-            dmg.src.damage *= 5;
+            dmg.src.damage *= 2;
         }
         return false;
     }
