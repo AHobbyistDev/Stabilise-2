@@ -92,7 +92,6 @@ public abstract class Dimension {
      */
     public WorldGenerator generatorFor(Multiverse<?> multiverse,
             HostWorld world) {
-        // TODO
         return new WorldGenerator(multiverse, world);
     }
     

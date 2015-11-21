@@ -16,7 +16,7 @@ import com.stabilise.util.nbt.NBTTagList;
  * A container is something which contains items - e.g. player inventory,
  * chest.
  */
-public abstract class Container implements IContainer, Sendable {
+public abstract class Container implements IContainer, Iterable<ItemStack>, Sendable {
     
     /**
      * Checks for whether or not this container is a bounded container.

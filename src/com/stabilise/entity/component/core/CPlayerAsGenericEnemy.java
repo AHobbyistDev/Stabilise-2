@@ -1,7 +1,5 @@
 package com.stabilise.entity.component.core;
 
-import java.util.Iterator;
-
 import com.stabilise.core.Constants;
 import com.stabilise.entity.Entity;
 import com.stabilise.item.BoundedContainer;
@@ -55,11 +53,6 @@ public class CPlayerAsGenericEnemy extends CGenericEnemy implements IContainer {
     @Override
     public void clear() {
         inventory.clear();
-    }
-    
-    @Override
-    public Iterator<ItemStack> iterator() {
-        return inventory.iterator();
     }
     
 }

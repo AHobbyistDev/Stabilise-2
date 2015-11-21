@@ -1,7 +1,6 @@
 package com.stabilise.core.main;
 
 import java.util.Arrays;
-import java.util.concurrent.ThreadLocalRandom;
 
 import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
@@ -9,6 +8,7 @@ import com.stabilise.core.app.Application;
 import com.stabilise.core.state.State;
 import com.stabilise.input.Controller;
 import com.stabilise.item.Item;
+import com.stabilise.util.ArrayUtil;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.world.dimension.Dimension;
@@ -65,7 +65,7 @@ public class Stabilise extends Application {
      * Gets a randomised subtitle for the game window.
      */
     public static String getGameSubtitle() {
-        final String[] titles = {
+        return ArrayUtil.random(
                 Constants.VERSION.toString(),
                 "Coming soon to a computer near you!",
                 "Look, a distraction!",
@@ -81,9 +81,7 @@ public class Stabilise extends Application {
                 "Now with excavators!",
                 "(I lied about the excavators)",
                 "No refunds!"
-        };
-        
-        return titles[ThreadLocalRandom.current().nextInt(titles.length)];
+        );
     }
     
     /**

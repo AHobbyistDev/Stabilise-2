@@ -1,6 +1,7 @@
 package com.stabilise.util;
 
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Array-related utility functions.
@@ -31,6 +32,16 @@ public class ArrayUtil {
         }
         
         return arr;
+    }
+    
+    /**
+     * Returns a random element of the given array using ThreadLocalRandom.
+     * 
+     * @throws NullPointerException if {@code arr} is {@code null}.
+     */
+    @SafeVarargs
+    public static <T> T random(T... arr) {
+        return arr[ThreadLocalRandom.current().nextInt(arr.length)];
     }
     
     /**

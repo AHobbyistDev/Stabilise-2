@@ -344,36 +344,6 @@ public final class WorldGenerator {
     */
     
     /**
-     * Gets a schematic.
-     * 
-     * @param schematic The schematic's name.
-     * 
-     * @return The schematic, or {@code null} if a schematic with the given
-     * name could not be found.
-     */
-    /*
-    @UserThread("WorkerThread")
-    private Structure getSchematic(String schematic) {
-        // Weakly synchronised through use of a ConcurrentHashMap - this is
-        // sufficient for now (it doesn't really matter if a map entry is
-        // overwritten by an equivalent schematic)
-        if(schematics.containsKey(schematic)) {
-            return schematics.get(schematic);
-        } else {
-            Structure s = new Structure(schematic);
-            try {
-                s.load();
-            } catch(IOException e) {
-                log.postWarning("Could not load schematic \"" + schematic + "\"!", e);
-                return null;
-            }
-            schematics.put(schematic, s);
-            return s;
-        }
-    }
-    */
-    
-    /**
      * Instructs the WorldGenerator to shut down.
      */
     @UserThread("MainThread")

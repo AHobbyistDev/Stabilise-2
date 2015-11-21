@@ -4,7 +4,6 @@ TOP PRIORITY
 - Implement structure generation
 
 HIGH PRIORITY
-- Refactor everything in com.stabilise.entity
 - Entity saving in worlds.
 
 TODO EVENTUALLY

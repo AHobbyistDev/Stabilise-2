@@ -1,7 +1,7 @@
 package com.stabilise.item;
 
 
-public interface IContainer extends Iterable<ItemStack> {
+public interface IContainer {
     
     /**
      * Gets the size of this container.

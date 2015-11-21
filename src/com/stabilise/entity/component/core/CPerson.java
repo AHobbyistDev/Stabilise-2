@@ -389,9 +389,9 @@ public class CPerson extends BaseMob {
                         h2.effects = tgt -> tgt.addComponent(new EffectFire(300));
                         w.addHitbox(h2, e.x, e.y);
                         
-                        particleSrc.createBurst(300, e.x, e.y, 0.001f, 0.10f, 0, (float)Math.PI);
+                        particleSrc.createBurst(300, e.x, e.y, 0.1f, 5f, 0, (float)Math.PI);
                     } else {
-                        particleSrc.createBurst(100, e.x, e.y, 0.0001f, 0.08f, 0, (float)Math.PI);
+                        particleSrc.createBurst(100, e.x, e.y, 0.1f, 5f, 0, (float)Math.PI);
                     }
                 }
                 break;

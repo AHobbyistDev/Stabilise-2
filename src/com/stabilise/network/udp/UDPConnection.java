@@ -1,11 +1,13 @@
-package com.stabilise.network2;
+package com.stabilise.network.udp;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import com.stabilise.util.annotation.Incomplete;
 
+@Incomplete
 public class UDPConnection {
     
     public UDPConnection() {

@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -14,6 +13,7 @@ import com.badlogic.gdx.LifecycleListener;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.stabilise.core.state.State;
 import com.stabilise.util.AppDriver;
+import com.stabilise.util.ArrayUtil;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.NotThreadSafe;
@@ -325,13 +325,12 @@ public abstract class Application {
     }
     
     private String dummyExceptionMsg() {
-        String[] msgs = new String[] {
+        return ArrayUtil.random(
                 "I am here to provide a stack trace",
                 "Stack trace buddy!",
                 "All your stack trace are belong to us",
                 "No cause was given for the crash :("
-        };
-        return msgs[ThreadLocalRandom.current().nextInt(msgs.length)];
+        );
     }
     
     /**
