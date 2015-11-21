@@ -2,7 +2,6 @@ package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.Component;
-import com.stabilise.entity.component.effect.Effect;
 import com.stabilise.entity.damage.DamageSource;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
@@ -30,15 +29,6 @@ public abstract class CCore implements Component {
      * Returns the entity's AABB.
      */
     public abstract AABB getAABB();
-    
-    /**
-     * Applies an effect to the entity.
-     * 
-     * <p>The default implementation does nothing.
-     */
-    public void applyEffect(Effect effect) {
-        // do nothing
-    }
     
     /**
      * Attempts to damage the entity.

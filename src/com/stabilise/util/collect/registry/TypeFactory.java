@@ -1,8 +1,8 @@
-package com.stabilise.util.collect;
+package com.stabilise.util.collect.registry;
 
 import java.util.function.Supplier;
 
-import com.stabilise.util.collect.GeneralTypeFactory.UnsafeFactory;
+import com.stabilise.util.collect.registry.GeneralTypeFactory.UnsafeFactory;
 
 /**
  * A TypeFactory is a TypeRegistry for which the value mapped to each class is

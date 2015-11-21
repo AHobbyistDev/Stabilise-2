@@ -1,4 +1,4 @@
-package com.stabilise.util.collect;
+package com.stabilise.util.collect.registry;
 
 import com.stabilise.util.annotation.NotThreadSafe;
 
@@ -14,6 +14,7 @@ public class RegistryNamespaced<V> extends IDRegistry<String, V> {
     
     /** The default namespace. */
     public final String defaultNamespace;
+    
     
     /**
      * Creates a new namespaced registry.

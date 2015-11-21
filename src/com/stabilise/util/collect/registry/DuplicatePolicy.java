@@ -1,4 +1,4 @@
-package com.stabilise.util.collect;
+package com.stabilise.util.collect.registry;
 
 import com.stabilise.util.Log;
 
@@ -8,7 +8,7 @@ import com.stabilise.util.Log;
 public enum DuplicatePolicy {
     
     /** Duplicate entries override old ones using this policy. */
-    OVERRIDE {
+    OVERWRITE {
         @Override
         boolean handle(Log log, String msg) {
             log.postWarning(msg + "; replacing old mapping");

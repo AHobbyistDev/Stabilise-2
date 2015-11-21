@@ -1,11 +1,11 @@
-package com.stabilise.util.collect;
+package com.stabilise.util.collect.registry;
 
 import java.lang.reflect.Constructor;
 import java.util.Objects;
 import java.util.function.Supplier;
 
 import com.stabilise.util.TheUnsafe;
-import com.stabilise.util.collect.GeneralTypeFactory.Factory;
+import com.stabilise.util.collect.registry.GeneralTypeFactory.Factory;
 
 /**
  * A GeneralTypeFactory is much like a {@link TypeFactory}; however it allows

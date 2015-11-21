@@ -1,4 +1,4 @@
-package com.stabilise.util.collect;
+package com.stabilise.util.collect.registry;
 
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.collect.Array;
 
 /**
  * A TypeRegistry is a specialised registry which enables an ID and a 'special

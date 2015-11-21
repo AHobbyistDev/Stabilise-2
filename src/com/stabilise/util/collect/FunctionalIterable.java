@@ -30,8 +30,10 @@ public interface FunctionalIterable<E> extends Iterable<E> {
      * for(Iterator<E> i = iterator(); i.hasNext();) {
      *     if(pred.test(i.next()))
      *         i.remove();
-     * }
-     * </pre>
+     * }</pre>
+     * 
+     * However, implementors are encouraged to override this if a faster
+     * implementation is possible.
      * 
      * <p>This method is equivalent to {@link Collection#removeIf(Predicate)}
      * (though without the return value) - but frankly {@code removeIf} should

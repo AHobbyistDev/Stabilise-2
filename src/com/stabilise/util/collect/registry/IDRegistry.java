@@ -1,4 +1,4 @@
-package com.stabilise.util.collect;
+package com.stabilise.util.collect.registry;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -6,6 +6,7 @@ import java.util.Map;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.collect.BiObjectIntMap;
 
 /**
  * An IDRegistry extends upon a normal Registry as to additionally associate an
@@ -121,7 +122,7 @@ public class IDRegistry<K, V> extends Registry<K, V> {
     @Override
     public void lock() {
         if(!isLocked())
-            idMap.list.resize(maxID + 1);
+            idMap.clampSize(maxID + 1);
         super.lock();
     }
     

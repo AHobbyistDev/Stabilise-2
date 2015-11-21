@@ -1,4 +1,4 @@
-package com.stabilise.util.collect;
+package com.stabilise.util.collect.registry;
 
 import java.util.Objects;
 

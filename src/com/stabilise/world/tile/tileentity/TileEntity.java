@@ -2,8 +2,8 @@ package com.stabilise.world.tile.tileentity;
 
 import com.stabilise.entity.FixedGameObject;
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.util.collect.GeneralTypeFactory;
-import com.stabilise.util.collect.RegistryParams;
+import com.stabilise.util.collect.registry.GeneralTypeFactory;
+import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.World;
 

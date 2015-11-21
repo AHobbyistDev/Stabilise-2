@@ -1,8 +1,8 @@
 package com.stabilise.item;
 
 import com.stabilise.core.Constants;
-import com.stabilise.util.collect.RegistryNamespaced;
-import com.stabilise.util.collect.RegistryParams;
+import com.stabilise.util.collect.registry.RegistryNamespaced;
+import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.tile.Tile;
 

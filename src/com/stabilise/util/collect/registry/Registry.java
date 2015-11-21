@@ -1,4 +1,4 @@
-package com.stabilise.util.collect;
+package com.stabilise.util.collect.registry;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,7 +49,7 @@ public class Registry<K, V> extends AbstractRegistry<V> {
     /**
      * Registers an object. If the specified key is already mapped to an
      * object, the old mapping will be overwritten if this registry uses the
-     * {@link DuplicatePolicy#OVERRIDE OVERRIDE} duplicate policy.
+     * {@link DuplicatePolicy#OVERWRITE OVERRIDE} duplicate policy.
      * 
      * @param key The object's key.
      * @param object The object.

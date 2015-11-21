@@ -6,8 +6,8 @@ import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.item.ItemStack;
 import com.stabilise.item.Items;
-import com.stabilise.util.collect.RegistryNamespacedDefaulted;
-import com.stabilise.util.collect.RegistryParams;
+import com.stabilise.util.collect.registry.RegistryNamespacedDefaulted;
+import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.TileBuilder.Template;
 

@@ -5,6 +5,8 @@ import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.core.CCore;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.event.EntityEvent;
+import com.stabilise.util.collect.IDuplicateResolver;
+import com.stabilise.util.collect.IWeightProvider;
 import com.stabilise.world.World;
 
 
@@ -20,7 +22,7 @@ import com.stabilise.world.World;
  * <p>Additionally, any number of miscellaneous components may be added to an
  * entity.
  */
-public interface Component {
+public interface Component extends IWeightProvider, IDuplicateResolver<Component> {
     
     /**
      * Initialises this component. Invoked when added to the entity.
@@ -49,5 +51,15 @@ public interface Component {
      * consumed.
      */
     boolean handle(World w, Entity e, EntityEvent ev);
+    
+    @Override
+    default int getWeight() {
+        return 0;
+    }
+    
+    @Override
+    default Action resolve(Component c) {
+        return Action.KEEP_BOTH;
+    }
     
 }

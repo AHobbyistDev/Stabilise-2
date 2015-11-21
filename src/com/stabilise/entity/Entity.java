@@ -1,18 +1,15 @@
 package com.stabilise.entity;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.entity.component.core.CCore;
-import com.stabilise.entity.component.effect.Effect;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.DamageSource;
 import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.util.collect.WeightingArrayList;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
@@ -33,7 +30,8 @@ public class Entity extends FreeGameObject {
     public       CController controller;
     public final CCore       core;
     
-    public final List<Component> components = new LinkedList<>();
+    public final WeightingArrayList<Component> components =
+            new WeightingArrayList<>(new Component[2]);
     
     
     /**
@@ -56,7 +54,7 @@ public class Entity extends FreeGameObject {
     public void update(World world) {
         age++;
         
-        components.removeIf(c -> {
+        components.iterate(c -> {
             c.update(world, this);
             return c.remove();
         });
@@ -86,20 +84,42 @@ public class Entity extends FreeGameObject {
         return id;
     }
     
+    /**
+     * Adds a component to this entity.
+     * 
+     * @return This entity.
+     * @throws NullPointerException if {@code c} is {@code null}.
+     */
     public Entity addComponent(Component c) {
         components.add(c);
         return this;
     }
     
+    /**
+     * Posts an event to this entity. It is implicitly trusted that the event
+     * is not null.
+     * 
+     * <p>A posted event first propagates through the ad-hoc list of
+     * components, before finally being posted to the core, controller and
+     * physics components. If any of the components' {@link
+     * Component#handle(World, Entity, EntityEvent) handle} method returns
+     * true, propagation of the event is halted and this method returns false.
+     * 
+     * @return true if no component consumed the event; false if it was fully
+     * handled.
+     */
     public boolean post(World w, EntityEvent e) {
         for(Component c : components)
             if(c.handle(w, this, e))
                 return false;
-        return core.handle(w, this, e)
-            && controller.handle(w, this, e)
-            && physics.handle(w, this, e);
+        return !core.handle(w, this, e)
+            && !controller.handle(w, this, e)
+            && !physics.handle(w, this, e);
     }
     
+    /**
+     * Invoked when this entity is added to the world.
+     */
     public void onAdd(World w) {
         post(w, EntityEvent.ADDED_TO_WORLD);
     }
@@ -117,10 +137,6 @@ public class Entity extends FreeGameObject {
      */
     public boolean damage(World w, DamageSource src) {
         return post(w, EDamaged.damaged(src));
-    }
-    
-    public void applyEffect(Effect effect) {
-        core.applyEffect(effect);
     }
     
     public boolean isPlayerControlled() {

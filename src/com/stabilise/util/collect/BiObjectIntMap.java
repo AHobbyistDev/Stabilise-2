@@ -8,7 +8,7 @@ import java.util.Iterator;
 /**
  * BiObjectIntMap provides a bi-directional integer to object mapping
  * implementation. This class internally uses an array for constant-time
- * key-value retrieval, and an {@link IdentityHashMap} for object-key
+ * key-value retrieval, and an {@link IdentityHashMap} for value-key
  * retrieval.
  * 
  * <p>As a consequence of the integer-object mapping method used, client code
@@ -27,11 +27,10 @@ import java.util.Iterator;
 @NotThreadSafe
 public class BiObjectIntMap<V> implements Iterable<V> {
     
-    // Package-private so RegistryNamespaced can interact with these directly.
     /** Maps Values -> Keys */
-    IdentityHashMap<V, Integer> map;
+    private final IdentityHashMap<V, Integer> map;
     /** Maps Keys -> Values */
-    Array<V> list;
+    private final Array<V> list;
     
     
     /**
@@ -107,6 +106,20 @@ public class BiObjectIntMap<V> implements Iterable<V> {
     @Override
     public Iterator<V> iterator() {
         return list.iteratorNullsFiltered();
+    }
+    
+    /**
+     * Resizes the backing array to {@code size} if its length significantly
+     * exceeds size.
+     * 
+     * @throws NegativeArraySizeException if size is negative.
+     */
+    public void clampSize(int size) {
+        // We use 16 as an arbitrary cutoff value to guard against having to
+        // resize to e.g. 3999 if our current size is 4000, which would just be
+        // a waste of time.
+        if(list.length() > size + 16) 
+            list.resize(size);
     }
     
 }

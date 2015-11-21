@@ -5,10 +5,10 @@ import java.util.Objects;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
-import com.stabilise.util.collect.DuplicatePolicy;
-import com.stabilise.util.collect.GeneralTypeFactory.ReflectiveFactory;
-import com.stabilise.util.collect.Registry;
-import com.stabilise.util.collect.RegistryParams;
+import com.stabilise.util.collect.registry.DuplicatePolicy;
+import com.stabilise.util.collect.registry.Registry;
+import com.stabilise.util.collect.registry.RegistryParams;
+import com.stabilise.util.collect.registry.GeneralTypeFactory.ReflectiveFactory;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.AbstractWorld;

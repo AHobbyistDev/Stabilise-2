@@ -1,4 +1,4 @@
-package com.stabilise.util.collect;
+package com.stabilise.util.collect.registry;
 
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.NotThreadSafe;

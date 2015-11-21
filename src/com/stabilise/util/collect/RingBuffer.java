@@ -16,7 +16,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
 public class RingBuffer<E> extends AbstractQueue<E> {
     
     /*
-     * Our indexing strategy is pretty simple:
+     * Our indexing strategy is as follows:
      * 
      * start points to the head of the queue (i.e. the first element). If the
      * queue is empty this points to where the first element will be placed.
