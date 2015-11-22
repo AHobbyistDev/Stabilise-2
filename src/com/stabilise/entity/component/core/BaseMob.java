@@ -172,6 +172,7 @@ public abstract class BaseMob extends CCore {
     /** Whether or not the Mob is dead. */
     public boolean dead = false;
     
+    public boolean invulnerable = false;
     /** The number of ticks until the Mob loses its invulnerability. */
     public int invulnerabilityTicks = 0;
     
@@ -228,9 +229,9 @@ public abstract class BaseMob extends CCore {
             e.dy = jumpVelocity;
         }
         
-        if(e.invulnerable) {
+        if(invulnerable) {
             if(--invulnerabilityTicks == 0)
-                e.invulnerable = false;
+                invulnerable = false;
         }
         
         if(hasTint) {
@@ -368,7 +369,7 @@ public abstract class BaseMob extends CCore {
     
     @Override
     public boolean damage(World w, Entity e, DamageSource src) {
-        if(e.invulnerable || dead)
+        if(invulnerable || dead)
             return false;
         
         src.applyEffects(e);
@@ -389,7 +390,7 @@ public abstract class BaseMob extends CCore {
             kill(w, e, src);
         } else {
             tintStrength = 1.0f;
-            e.invulnerable = true;
+            invulnerable = true;
             invulnerabilityTicks = INVULNERABILITY_TICKS;
         }
         

@@ -46,4 +46,12 @@ public class DamageSource {
         // do nothing
     }
     
+    public float forceX() {
+        return force.x();
+    }
+    
+    public float forceY() {
+        return force.y();
+    }
+    
 }

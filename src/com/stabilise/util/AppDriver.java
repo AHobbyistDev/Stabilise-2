@@ -248,6 +248,8 @@ public final class AppDriver implements Runnable {
      * Sets the maximum FPS. The default value is equal to the TPS as specified
      * in the constructor.
      * 
+     * <p>The FPS value <b>does not matter</b> if {@link #run()} is not used.
+     * 
      * @param fps The max FPS if this is run via {@link #run()}. A value of
      * {@code 0} indicates no maximum; a value of {@code -1} indicates not to
      * render (note this case will apply even if {@code run()} isn't used).

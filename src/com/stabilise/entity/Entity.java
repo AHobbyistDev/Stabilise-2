@@ -21,9 +21,8 @@ public class Entity extends FreeGameObject {
     
     // Core physical properties
     public       float       dx, dy;
-    public       boolean     facingRight;
     public       AABB        aabb;
-    public       boolean     invulnerable = false;
+    public       boolean     facingRight;
     
     // Components
     public final CPhysics    physics;

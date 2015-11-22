@@ -9,14 +9,14 @@ import com.stabilise.util.Checks;
  * Contains construction parameters for registries.
  * 
  * <p>For all cases, {@code name} and {@code dupePolicy} must be non-null, and
- * {@capacity} must be greater than zero.
+ * {@code capacity} must be greater than zero.
  * 
  * <p>If not specified, the default values are:
  * 
  * <ul>
  * <li>{@code name}: {@code "Registry"}
  * <li>{@code capacity}: {@code 16}
- * <li>{@code dupePolicy}: {@link DuplicatePolicy#THROW_EXCEPTION}.
+ * <li>{@code dupePolicy}: {@link DuplicatePolicy#THROW_EXCEPTION}
  * </ul>
  */
 public class RegistryParams {

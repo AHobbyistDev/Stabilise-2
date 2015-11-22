@@ -22,7 +22,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
         extends AbstractList<E>
         implements SimpleList<E> {
     
-    private static final int TREE_THRESHOLD = Integer.MAX_VALUE; // TODO: temporary
+    private static final int TREE_THRESHOLD = Integer.MAX_VALUE; // TODO: temporary value
     
     private E[] data;
     private int size = 0;
@@ -58,7 +58,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
             for(int i = 0; i < size; i++) {
                 w2 = data[i].getWeight();
                 if(w2 < w) continue;
-                else if(w2 == 2) {
+                else if(w2 == w) {
                     if(data[i].equals(e)) {
                         Action a = data[i].resolve(e);
                         if(a == Action.OVERWRITE) {
