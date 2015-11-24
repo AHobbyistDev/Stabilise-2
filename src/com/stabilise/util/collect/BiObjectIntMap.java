@@ -117,8 +117,9 @@ public class BiObjectIntMap<V> implements Iterable<V> {
     public void clampSize(int size) {
         // We use 16 as an arbitrary cutoff value to guard against having to
         // resize to e.g. 3999 if our current size is 4000, which would just be
-        // a waste of time.
-        if(list.length() > size + 16) 
+        // a waste of time. Admittedly +16 makes little difference for such
+        // large arrays, but it's better than nothing.
+        if(list.length() > size + 16)
             list.resize(size);
     }
     

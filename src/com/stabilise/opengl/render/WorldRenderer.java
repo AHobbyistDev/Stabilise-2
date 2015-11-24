@@ -281,6 +281,7 @@ public class WorldRenderer implements Renderer {
             if(e != playerEntity)
                 e.render(this);
         }
+        batch.flush();
         
         profiler.next("player");
         playerEntity.render(this); // render the player on top
@@ -319,10 +320,10 @@ public class WorldRenderer implements Renderer {
         profiler.next("hud"); // root.render.hud.hud
         hudRenderer.render();
         
-        profiler.end(); // root.render.hud
-        
+        profiler.next("endbatch");
         batch.end();
         
+        profiler.end(); // root.render.hud
         profiler.end(); // root.render
         
     }

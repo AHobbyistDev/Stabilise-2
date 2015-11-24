@@ -73,7 +73,7 @@ class TileBuilder {
             this.hardness = hardness;
             this.friction = friction;
             viscosity = 0f;
-            light = 2;
+            light = 5;
             falloff = 2;
         }
         

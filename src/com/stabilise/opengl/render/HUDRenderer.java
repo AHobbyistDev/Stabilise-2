@@ -130,9 +130,10 @@ public class HUDRenderer implements Renderer {
             refreshProfiler();
         } else if(section > 0 && section <= profilerLevel.getConstituents().length) {
             Profiler.SectionData level = profilerLevel.getConstituents()[section - 1];
-            if(level.hasConstituents())
+            if(level.hasConstituents()) {
                 profilerStack.add(level.name);
-            profilerLevel = level;
+                profilerLevel = level;
+            }
         }
     }
     

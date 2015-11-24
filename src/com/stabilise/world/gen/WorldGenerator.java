@@ -1,7 +1,6 @@
 package com.stabilise.world.gen;
 
 import static com.stabilise.world.Region.REGION_SIZE;
-import static com.stabilise.world.Slice.SLICE_SIZE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -159,11 +158,7 @@ public final class WorldGenerator {
                 // Set up the region's slices
                 for(int y = 0; y < REGION_SIZE; y++) {
                     for(int x = 0; x < REGION_SIZE; x++) {
-                        r.slices[y][x] = new Slice(
-                                x + r.offsetX, y + r.offsetY,
-                                // all values are 0 == Tiles.AIR
-                                new int[SLICE_SIZE][SLICE_SIZE]
-                        );
+                        r.slices[y][x] = new Slice(x + r.offsetX, y + r.offsetY);
                     }
                 }
                 

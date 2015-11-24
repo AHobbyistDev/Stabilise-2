@@ -110,6 +110,17 @@ public class TileRenderer implements Renderer {
         int rMin = Math.max(0, yMin - y*SLICE_SIZE);
         int cMin = Math.max(0, xMin - x*SLICE_SIZE);
         
+        wr.batch.setColor(lightLevels[2]);
+        
+        for(int r = rMin, ty = yMin; r < SLICE_SIZE && ty < yMax; r++, ty++) {
+            for(int c = cMin, tx = xMin; c < SLICE_SIZE && tx < xMax; c++, tx++) {
+                int id = slice.getWallIDAt(c, r);
+                if(id != 0) { // i.e. not air
+                    wr.batch.draw(tiles.getRegion(id + 7), tx, ty, 1f, 1f);
+                }
+            }
+        }
+        
         for(int r = rMin, ty = yMin; r < SLICE_SIZE && ty < yMax; r++, ty++) {
             for(int c = cMin, tx = xMin; c < SLICE_SIZE && tx < xMax; c++, tx++) {
                 int id = slice.getTileIDAt(c, r);

@@ -56,7 +56,10 @@ public class PreAlphaWorldLoader extends WorldLoader {
             for(int y = 0; y < REGION_SIZE; y++) {            // Row (y)
                 for(int x = 0; x < REGION_SIZE; x++) {        // Col (x)
                     NBTTagCompound sliceTag = regionTag.getCompound("slice" + x + "_" + y);
-                    Slice s = new Slice(r.offsetX + x, r.offsetY + y, sliceTag.getIntArray("tiles"));
+                    Slice s = new Slice(r.offsetX + x, r.offsetY + y,
+                            sliceTag.getIntArray("tiles"),
+                            sliceTag.getIntArray("walls"),
+                            sliceTag.getByteArray("light"));
                     
                     NBTTagList tileEntities = sliceTag.getList("tileEntities");
                     if(tileEntities.size() > 0)
@@ -108,7 +111,9 @@ public class PreAlphaWorldLoader extends WorldLoader {
                 for(int x = 0; x < REGION_SIZE; x++) {        // Col (x)
                     NBTTagCompound sliceTag = new NBTTagCompound();
                     Slice s = r.slices[y][x];
-                    sliceTag.addIntArray("tiles", s.getTilesAsIntArray());
+                    sliceTag.addIntArray("tiles", Slice.to1DArray(s.tiles));
+                    sliceTag.addIntArray("walls", Slice.to1DArray(s.walls));
+                    sliceTag.addByteArray("light", Slice.to1DArray(s.light));
                     regionTag.addCompound("slice" + x + "_" + y, sliceTag);
                     
                     if(s.tileEntities != null) {

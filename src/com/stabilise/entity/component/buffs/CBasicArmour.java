@@ -11,7 +11,8 @@ import com.stabilise.world.World;
 
 public class CBasicArmour implements Component {
     
-    private static final int DMG_BLOCK = 10;
+    private static final int DMG_BLOCK = 8;
+    private static final int BLOCK_EXTRA = 2;
     
     private int durability = 50;
     
@@ -40,7 +41,7 @@ public class CBasicArmour implements Component {
             if(d.src.type() != DamageType.ATTACK)
                 return false;
             int dmg = d.src.damage();
-            int sub = Maths.min(DMG_BLOCK, durability, dmg);
+            int sub = Maths.min(DMG_BLOCK + w.getRnd().nextInt(BLOCK_EXTRA+1), durability, dmg);
             dmg -= sub;
             durability -= sub;
             d.src.setDamage(dmg);

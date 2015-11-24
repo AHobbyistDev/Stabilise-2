@@ -12,6 +12,7 @@ import com.stabilise.util.maths.PerlinNoise1D;
 import com.stabilise.util.maths.SimplexNoise;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
+import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntityChest;
 
@@ -54,6 +55,9 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
         
         private SimplexNoise simplex512;    //    512             1
         
+        private Slice s;
+        private boolean cave;
+        
         private PerlinRegionGenerator(long seed) {
             noise1D_1 = new PerlinNoise1D(seed, 128f);
             noise1D_2 = new PerlinNoise1D(seed, 64f);
@@ -86,13 +90,15 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
             n = n * (n * n * 15731 + 789221) + 1376312589;
             Random rnd = new Random(seed + n);
             
-            Slice s = r.getSliceAt(defSlice, defSlice);
+            s = r.getSliceAt(defSlice, defSlice);
             
             for(int x = offsetX + REGION_SIZE_IN_TILES; x > offsetX; x--) {
                 double noise = noise1D(x) - offsetY - REGION_SIZE_IN_TILES;
                 
                 tileY = defTile;
                 for(int y = offsetY + REGION_SIZE_IN_TILES; y > offsetY; y--) {
+                    cave = false;
+                    
                     double caveNoise = noise2D(x, y);
                     // This should produce varying cave types across the world as
                     // the noise forms characteristically different contours at
@@ -106,27 +112,32 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                     
                     //if((y < -200 && caveNoise > 0.8D) || (y < -180 && caveNoise > (0.8 - 0.2 * (180+y)/20f)))
                     if(y < -200 && caveNoise > 0.8D)
-                        s.setTileAt(tileX, tileY, lava);
+                        set(tileX, tileY, lava);
                     //else if(noise <= 0 || (caveNoise > 0.45D && caveNoise < 0.55D))
-                    else if(noise <= -1 || (caveNoise > caveMask - 0.05D && caveNoise < caveMask + 0.05D))
+                    else if(noise <= -1 || (caveNoise > caveMask - 0.05D && caveNoise < caveMask + 0.05D)) {
                     //else if(noise <= 0 || caveNoise > 0.8D)
+                        cave = true;
                         s.setTileAt(tileX, tileY, air);
+                    }
+                    
+                    if(noise <= -1) {}
                     else if(noise <= 0) {
-                        if(rnd.nextInt(10) == 0)
+                        if(rnd.nextInt(10) == 0) {
                             s.setTileAt(tileX, tileY, torch);
-                        else
-                            s.setTileAt(tileX, tileY, air);
+                        } else
+                            set(tileX, tileY, air);
                     } else if(noise <= 1) {
                         s.setTileAt(tileX, tileY, grass);
-                        if(rnd.nextInt(10) == 0)
-                            addSchematic("tree_1", s.x, s.y, tileX, tileY);
+                        s.setWallAt(tileX, tileY, dirt);
+                        //if(rnd.nextInt(10) == 0)
+                        //    addSchematic("tree_1", s.x, s.y, tileX, tileY);
                     } else if(noise <= 5.75D)
-                        s.setTileAt(tileX, tileY, dirt);
+                        set(tileX, tileY, dirt);
                     else {
                         if(rnd.nextInt(30) == 0)
-                            s.setTileAt(tileX, tileY, glowstone);
+                            set(tileX, tileY, glowstone);
                         else
-                            s.setTileAt(tileX, tileY, stone);
+                            set(tileX, tileY, stone);
                     }
                     
                     noise++;
@@ -177,6 +188,8 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                     
                     if(rnd.nextInt(1) == 0)
                         addOres(s, rnd);
+                    
+                    s.buildLight();
                 }
             }
             //*/
@@ -189,6 +202,12 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
             //*/
             
             addSchematics(r);
+        }
+        
+        private void set(int x, int y, Tile t) {
+            if(!cave)
+                s.setTileAt(x, y, t);
+            s.setWallAt(x, y, t);
         }
         
         /**
@@ -306,6 +325,7 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                     simplex16.noise(x,y) * 1) / 15D;
         }
         
+        @SuppressWarnings("unused")
         private void addSchematic(String sc, int sliceX, int sliceY, int tileX, int tileY) {
             schematics.add(new Region.QueuedStructure(sc, sliceX, sliceY, tileX, tileY, 0, 0));
         }

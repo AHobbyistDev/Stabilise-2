@@ -1,7 +1,5 @@
 package com.stabilise.world;
 
-import java.util.Objects;
-
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -32,6 +30,9 @@ public class Slice {
     /** The tiles within this slice. This is visible for convenience purposes.
      * <br>Tiles are indexed in the form [y][x]. */
     public final int[][] tiles;
+    /** The walls within this slice. Visible for convenience purposes.
+     * <br>Indexed in the form [y][x]. */
+    public final int[][] walls;
     /** The light levels within this slice.
      * <br>Indexed in the form [y][x]. */
     public final byte[][] light;
@@ -49,29 +50,44 @@ public class Slice {
      * 
      * @param x The x-coordinate of the slice, in slice-lengths.
      * @param y The y-coordinate of the slice, in slice-lengths.
-     * @param tiles The slice's tiles.
-     * 
-     * @throws NullPointerException if {@code tiles} is {@code null}.
      */
-    public Slice(int x, int y, int[][] tiles) {
-        this.x = x;
-        this.y = y;
-        this.tiles = Objects.requireNonNull(tiles);
-        this.light = new byte[SLICE_SIZE][SLICE_SIZE];
+    public Slice(int x, int y) {
+        this(x, y, new int[SLICE_SIZE][SLICE_SIZE], new int[SLICE_SIZE][SLICE_SIZE],
+                new byte[SLICE_SIZE][SLICE_SIZE]);
     }
     
     /**
-     * Creates a new slice.
+     * Creates a new slice. It is implicitly trusted that the given arrays are
+     * legal.
      * 
      * @param x The x-coordinate of the slice, in slice-lengths.
      * @param y The y-coordinate of the slice, in slice-lengths.
-     * @param tiles The slice's tiles, as would be returned by {@link
-     * #getTilesAsIntArray()}. This array is unpacked into a 2D array.
+     * @param tiles The slice's tiles.
+     * @param walls The slice's walls.
+     * @param light The slice's light values.
+     */
+    public Slice(int x, int y, int[][] tiles, int[][] walls, byte[][] light) {
+        this.x = x;
+        this.y = y;
+        this.tiles = tiles;
+        this.walls = walls;
+        this.light = light;
+    }
+    
+    /**
+     * Creates a new slice. The given arrays are unpacked into their respective
+     * 2D arrays.
+     * 
+     * @param x The x-coordinate of the slice, in slice-lengths.
+     * @param y The y-coordinate of the slice, in slice-lengths.
+     * @param tiles The slice's tiles.
+     * @param walls The slice's walls.
+     * @param light The slice's light values.
      * 
      * @throws NullPointerException if {@code tiles} is {@code null}.
      */
-    public Slice(int x, int y, int[] tiles) {
-        this(x, y, getTilesFromArray(tiles));
+    public Slice(int x, int y, int[] tiles, int[] walls, byte[] light) {
+        this(x, y, to2DArray(tiles), to2DArray(walls), to2DArray(light));
     }
     
     /**
@@ -83,8 +99,8 @@ public class Slice {
      * tile-lengths.
      * 
      * @return The tile at the specified coordinates.
-     * @throws ArrayIndexOutOfBoundsException if either x or y is negative or
-     * greater than 15.
+     * @throws ArrayIndexOutOfBoundsException if either x or y is {@code < 0 ||
+     * >= }{@link SLICE_SIZE}.
      */
     public Tile getTileAt(int x, int y) {
         return Tile.getTile(tiles[y][x]);
@@ -100,8 +116,8 @@ public class Slice {
      * tile-lengths.
      * 
      * @return The ID of the tile at the specified coordinates.
-     * @throws ArrayIndexOutOfBoundsException if either x or y is negative or
-     * greater than 15.
+     * @throws ArrayIndexOutOfBoundsException if either x or y is {@code < 0 ||
+     * >= }{@link SLICE_SIZE}.
      */
     public int getTileIDAt(int x, int y) {
         return tiles[y][x];
@@ -116,7 +132,8 @@ public class Slice {
      * tile-lengths.
      * @param tile The tile.
      * 
-     * @throws ArrayIndexOutOfBoundsException if either x or y are < 0 or > 15.
+     * @throws ArrayIndexOutOfBoundsException if either x or y is {@code < 0 ||
+     * >= }{@link SLICE_SIZE}.
      * @throws NullPointerException if {@code tile} is {@code null}.
      */
     public void setTileAt(int x, int y, Tile tile) {
@@ -132,10 +149,27 @@ public class Slice {
      * tile-lengths.
      * @param tileID The ID of the tile.
      * 
-     * @throws ArrayIndexOutOfBoundsException if either x or y are < 0 or > 15.
+     * @throws ArrayIndexOutOfBoundsException if either x or y is {@code < 0 ||
+     * >= }{@link SLICE_SIZE}.
      */
     public void setTileAt(int x, int y, int tileID) {
         tiles[y][x] = tileID;
+    }
+    
+    public Tile getWallAt(int x, int y) {
+        return Tile.getTile(walls[y][x]);
+    }
+    
+    public int getWallIDAt(int x, int y) {
+        return walls[y][x];
+    }
+    
+    public void setWallAt(int x, int y, Tile tile) {
+        walls[y][x] = tile.getID();
+    }
+    
+    public void setWallAt(int x, int y, int tileID) {
+        walls[y][x] = tileID;
     }
     
     public byte getLightAt(int x, int y) {
@@ -187,25 +221,36 @@ public class Slice {
         tileEntities[y][x] = tileEntity;
     }
     
-    /**
-     * Gets the slice's tiles in the form of a 1D integer array.
-     */
-    public int[] getTilesAsIntArray() {
-        int[] tileArray = new int[SLICE_SIZE * SLICE_SIZE];
+    public static int[] to1DArray(int[][] sliceData) {
+        int[] arr = new int[SLICE_SIZE * SLICE_SIZE];
         for(int r = 0; r < SLICE_SIZE; r++)
-            System.arraycopy(tiles[r], 0, tileArray, r * SLICE_SIZE, SLICE_SIZE);
-        return tileArray;
+            System.arraycopy(sliceData[r], 0, arr, r * SLICE_SIZE, SLICE_SIZE);
+        return arr;
+    }
+    
+    public static byte[] to1DArray(byte[][] sliceData) {
+        byte[] arr = new byte[SLICE_SIZE * SLICE_SIZE];
+        for(int r = 0; r < SLICE_SIZE; r++)
+            System.arraycopy(sliceData[r], 0, arr, r * SLICE_SIZE, SLICE_SIZE);
+        return arr;
     }
     
     /**
      * Converts the specified int array into the 2D int array format used to
      * store tiles.
      */
-    private static int[][] getTilesFromArray(int[] tileArray) {
-        int[][] t = new int[SLICE_SIZE][SLICE_SIZE];
+    private static int[][] to2DArray(int[] sliceData) {
+        int[][] arr = new int[SLICE_SIZE][SLICE_SIZE];
         for(int r = 0; r < SLICE_SIZE; r++)
-            System.arraycopy(tileArray, r*SLICE_SIZE, t[r], 0, SLICE_SIZE);
-        return t;
+            System.arraycopy(sliceData, r*SLICE_SIZE, arr[r], 0, SLICE_SIZE);
+        return arr;
+    }
+    
+    private static byte[][] to2DArray(byte[] sliceData) {
+        byte[][] arr = new byte[SLICE_SIZE][SLICE_SIZE];
+        for(int r = 0; r < SLICE_SIZE; r++)
+            System.arraycopy(sliceData, r*SLICE_SIZE, arr[r], 0, SLICE_SIZE);
+        return arr;
     }
     
     /**

@@ -102,7 +102,8 @@ public class TypeRegistry<T, V> extends AbstractRegistry<Class<? extends T>> {
      * registered.
      */
     public int getID(Class<? extends T> objClass) {
-        return idMap.getOrDefault(objClass, -1).intValue();
+        Integer i = idMap.get(objClass);
+        return i == null ? -1 : i.intValue();
     }
     
     /**

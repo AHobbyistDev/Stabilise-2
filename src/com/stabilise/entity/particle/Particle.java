@@ -7,6 +7,11 @@ import com.stabilise.world.World;
 
 /**
  * A particle is a non-functional GameObject with solely aesthetic purposes.
+ * 
+ * <p>All subclasses of Particle should have the default parameterless
+ * constructor and should not perform any construction initialisation (as
+ * particles may be initialised {@link TheUnsafe unsafely} at runtime);
+ * instead, any initialisation code should be performed by {@link #reset()}.
  */
 public abstract class Particle extends FreeGameObject {
     
@@ -28,12 +33,8 @@ public abstract class Particle extends FreeGameObject {
     public int age;
     
     
-    /**
-     * Creates a new Particle.
-     */
-    Particle() {
-        reset();
-    }
+    // Package-private constructor
+    Particle() {}
     
     @Override
     public void update(World world) {
