@@ -40,16 +40,16 @@ public abstract class AbstractWorld implements World {
     /** All players in the world. Maps IDs -> players' EntityMobs. */
     protected final Map<Long, Entity> players = new HashMap<>(4);
     private final FunctionalIterable<Entity> itrPlayers =
-            FunctionalIterable.wrap(players.values());
+            FunctionalIterable.wrap(players.values(), () -> players.size());
     /** The map of loaded entities in the world. Maps IDs -> Entities.
      * This is a LinkedHashMap as to allow for consistent iteration. */
     protected final Map<Long, Entity> entities = new LinkedHashMap<>(64);
     private final FunctionalIterable<Entity> itrEntities =
-            FunctionalIterable.wrap(entities.values());
+            FunctionalIterable.wrap(entities.values(), () -> entities.size());
     /** The total number of entities which have existed during the lifetime of
      * the world. When a new entity is created this is incremented and set as
      * its ID. */
-    protected int entityCount = 0;
+    public int entityCount = 0;
     /** Entities queued to be added to the world at the end of the tick.
      * <p>This is a ClearingQueue as entities may be added to a world from
      * from another dimension, which can be hosted on another thread. */
@@ -74,7 +74,7 @@ public abstract class AbstractWorld implements World {
     protected final SimpleList<Hitbox> hitboxes = new UnorderedArrayList<>();
     /** The total number of hitboxes which have existed during the lifetime of
      * the world. */
-    protected int hitboxCount = 0;
+    public int hitboxCount = 0;
     
     /** This world's particle manager. */
     public final ParticleManager particleManager = new ParticleManager(this);
@@ -86,7 +86,7 @@ public abstract class AbstractWorld implements World {
     protected final SimpleList<Particle> particles = new FragList<>();
     /** The total number of particles which have existed during the lifetime of
      * the world. */
-    protected int particleCount = 0;
+    public int particleCount = 0;
     
     /** The x/y-coordinates of the slice in which players initially spawn, in
      * slice-lengths. */
@@ -360,6 +360,11 @@ public abstract class AbstractWorld implements World {
     @Override
     public boolean isClient() {
         return multiverse.hasClient();
+    }
+    
+    @Override
+    public Profiler profiler() {
+        return profiler;
     }
     
     // ========== Lifecycle Methods ==========

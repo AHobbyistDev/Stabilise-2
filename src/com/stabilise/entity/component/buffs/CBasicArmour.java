@@ -13,7 +13,7 @@ public class CBasicArmour implements Component {
     
     private static final int DMG_BLOCK = 10;
     
-    private int durability = 100;
+    private int durability = 50;
     
     @Override
     public int getWeight() {

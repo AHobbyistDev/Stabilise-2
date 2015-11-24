@@ -35,6 +35,7 @@ import com.stabilise.util.Profiler;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Shape;
+import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.Slice;
 
@@ -58,7 +59,7 @@ public class WorldRenderer implements Renderer {
     float pixelsPerTile = 32;
     
     /** Holds a reference to the world. */
-    public final World world;
+    public final AbstractWorld world;
     /** The camera. */
     public final GameCamera playerCamera;
     public final Entity player;
@@ -67,6 +68,8 @@ public class WorldRenderer implements Renderer {
     //public final HUDRenderer hudRenderer;
     
     public TileRenderer tileRenderer;
+    public HUDRenderer hudRenderer;
+    
     /** The number of tiles which may fit horizontally and vertically within
      * half of the screen. */
     int tilesHorizontal, tilesVertical;
@@ -112,7 +115,7 @@ public class WorldRenderer implements Renderer {
      * @param world The game world.
      * @param player The player entity.
      */
-    public WorldRenderer(Game game, World world, Entity player, PlayerController controller) {
+    public WorldRenderer(Game game, AbstractWorld world, Entity player, PlayerController controller) {
         super();
         
         this.world = world;
@@ -122,7 +125,7 @@ public class WorldRenderer implements Renderer {
         this.controller = controller;
         
         tileRenderer = new TileRenderer(this);
-        //hudRenderer = new HUDRenderer(game, this);
+        hudRenderer = new HUDRenderer(game, this);
         
         loadResources();
     }
@@ -133,7 +136,7 @@ public class WorldRenderer implements Renderer {
         //if(!shader.isCompiled())
         //    throw new RuntimeException("Shader could not compile: " + shader.getLog());
         
-        batch = register(new SpriteBatch(2048*2));
+        batch = register(new SpriteBatch(4096));
         
         camera = new OrthographicCamera();
         hudCamera = new OrthographicCamera();
@@ -141,17 +144,13 @@ public class WorldRenderer implements Renderer {
         hudViewport = new ScreenViewport(hudCamera);
         
         FreeTypeFontParameter param = new FreeTypeFontParameter();
-        param.size = 16;
+        param.size = 17;
         font = register(Resources.font("arialbd", param));
         
         personModel = register(new ModelPlayer());
         
         texEnemy = register(Resources.texture("enemy"));
         texEnemy.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-        
-        //arrowSprite = new Sprite("arrow");
-        //arrowSprite.setPivot(arrowSprite.getTextureWidth() * 3 / 4, arrowSprite.getTextureHeight() / 2);
-        //arrowSprite.filter(Texture.NEAREST);
         
         texFireball = register(Resources.texture("fireball"));
         texFireball.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
@@ -170,7 +169,8 @@ public class WorldRenderer implements Renderer {
         //background.colourVertices(new Colour(0xFFFFFF), new Colour(0xFF00FF), new Colour(0x00FFFF), new Colour(0xFFFF00));
         //background.gradientTopToBottom(new Colour(0x000000), new Colour(0xC9300E));
         
-        //hudRenderer.loadResources();
+        tileRenderer.loadResources();
+        hudRenderer.loadResources();
         
         shapes = register(new ShapeRenderer());
         
@@ -188,7 +188,7 @@ public class WorldRenderer implements Renderer {
             d.dispose();
         
         tileRenderer.unloadResources();
-        //hudRenderer.unloadResources();
+        hudRenderer.unloadResources();
     }
     
     /**
@@ -235,7 +235,7 @@ public class WorldRenderer implements Renderer {
         //if(world.loading) return; 
         
         profiler.start("hud"); // root.update.renderer.hud
-        //hudRenderer.update();
+        hudRenderer.update();
         
         profiler.next("tileRenderer"); // root.update.renderer.tileRenderer
         tileRenderer.update();
@@ -268,6 +268,7 @@ public class WorldRenderer implements Renderer {
         
         profiler.next("entities"); // root.render.entities
         
+        profiler.start("findPlayer");
         // Temporary way of ensuring the player is rendered on top
         Entity playerEntity = null;
         for(Entity e : world.getPlayers()) {
@@ -275,12 +276,15 @@ public class WorldRenderer implements Renderer {
             break;
         }
         
+        profiler.next("nonplayer");
         for(Entity e : world.getEntities()) {
             if(e != playerEntity)
                 e.render(this);
         }
         
+        profiler.next("player");
         playerEntity.render(this); // render the player on top
+        profiler.end();
         
         profiler.next("particles"); // root.render.particles
         world.getParticles().forEach(p -> p.render(this));
@@ -303,15 +307,19 @@ public class WorldRenderer implements Renderer {
             shapes.end();
         }
         
-        batch.begin();
-        
         profiler.next("hud"); // root.render.hud
         
+        batch.begin();
+        
+        profiler.start("cursor"); // root.render.hud.cursor
         renderCursorItem();
         
         updateMatrices(true);
         
-        //hudRenderer.render();
+        profiler.next("hud"); // root.render.hud.hud
+        hudRenderer.render();
+        
+        profiler.end(); // root.render.hud
         
         batch.end();
         

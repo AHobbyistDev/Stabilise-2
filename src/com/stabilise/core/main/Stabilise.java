@@ -40,7 +40,7 @@ public class Stabilise extends Application {
         super(Constants.TICKS_PER_SECOND);
         Log.setLogLevel(Constants.DEV_VERSION ? Log.Level.ALL : Log.Level.INFO);
         profiler.setResetOnFlush(true);
-        driver.setTicksPerProfilerFlush(60);
+        driver.setTicksPerProfilerFlush(3 * Constants.TICKS_PER_SECOND);
         
         Log.get().postInfo("Program args: " + Arrays.toString(args));
     }

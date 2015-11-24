@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 
 /**
@@ -49,6 +50,16 @@ public interface FunctionalIterable<E> extends Iterable<E> {
         }
     }
     
+    /**
+     * Returns the number of elements behind this iterable. This is offered
+     * merely as a convenience method.
+     * 
+     * <p>The default implementation returns 0.
+     */
+    default int size() {
+        return 0;
+    }
+    
     //--------------------==========--------------------
     //------------=====Static Functions=====------------
     //--------------------==========--------------------
@@ -58,9 +69,29 @@ public interface FunctionalIterable<E> extends Iterable<E> {
      * 
      * @throws NullPointerException if {@code itr} is {@code null}.
      */
-    public static <T> FunctionalIterable<T> wrap(final Iterable<T> itr) {
+    public static <T> FunctionalIterable<T> wrap(Iterable<T> itr) {
         Objects.requireNonNull(itr); // fail-fast
         return () -> itr.iterator();
+    }
+    
+    /**
+     * Wraps an {@code Iterable} object in a {@code FunctionalIterable}.
+     * 
+     * @throws NullPointerException if either argument is {@code null}.
+     */
+    public static <T> FunctionalIterable<T> wrap(Iterable<T> itr, IntSupplier size) {
+        Objects.requireNonNull(itr);
+        Objects.requireNonNull(size);
+        return new FunctionalIterable<T>() {
+            @Override public Iterator<T> iterator() {
+                return itr.iterator();
+            }
+            
+            @Override public int size() {
+                return size.getAsInt();
+            }
+            
+        };
     }
     
 }

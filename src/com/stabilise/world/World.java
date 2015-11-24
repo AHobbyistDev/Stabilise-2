@@ -6,6 +6,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.entity.particle.ParticleManager;
+import com.stabilise.util.Profiler;
 import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.tile.Tile;
@@ -457,6 +458,11 @@ public interface World {
      * client world.
      */
     //boolean hasParticles();
+    
+    /**
+     * Returns the world profiler.
+     */
+    Profiler profiler();
     
     //--------------------==========--------------------
     //------------=====Static Functions=====------------

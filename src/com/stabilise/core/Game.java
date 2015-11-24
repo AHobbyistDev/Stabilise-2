@@ -11,6 +11,7 @@ import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
+import com.stabilise.opengl.render.HUDRenderer;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
@@ -47,7 +48,7 @@ public class Game implements Controllable, InputProcessor {
     //public Menu menu;
     
     /** A reference to the HUD renderer. TODO: Temporary */
-    //public HUDRenderer hudRenderer;
+    public HUDRenderer hudRenderer;
     
     /** Whether or not the debug display is active. */
     public boolean debug = false;
@@ -85,15 +86,6 @@ public class Game implements Controllable, InputProcessor {
      * Updates the game - this should be called by the core game update loop.
      */
     public void update() {
-        /*
-        if(world.loading) {
-            if(world.regionsLoaded())
-                world.loading = false;
-            else
-                return;
-        }
-        */
-        
         if(running) {
             try {
                 profiler.start("menu"); // root.update.game.menu
@@ -213,6 +205,10 @@ public class Game implements Controllable, InputProcessor {
                 break;
             case DEBUG:
                 debug = !debug;
+                if(debug)
+                    profiler.enable();
+                else
+                    profiler.disable();
                 break;
             case TOG_HITBOX_RENDER:
                 WorldRenderer r = ((SingleplayerState)Application.get().getState()).renderer;
@@ -231,11 +227,10 @@ public class Game implements Controllable, InputProcessor {
     
     @Override
     public boolean keyDown(int keycode) {
-        //hudRenderer.setProfilerSection(keyValue(keycode));
+        hudRenderer.setProfilerSection(keyValue(keycode));
         return false;
     }
     
-    @SuppressWarnings("unused")
     private int keyValue(int keycode) {
         switch(keycode) {
             case Keys.NUM_0:

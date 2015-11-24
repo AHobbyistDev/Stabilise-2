@@ -193,8 +193,8 @@ public class CPerson extends BaseMob {
         health = 500;
         maxStamina = 500;
         stamina = 500;
-        maxMana = 500;
-        mana = 500;
+        maxMana = 500000;
+        mana = 500000;
         
         jumpVelocity = 16f;
         jumpCrouchDuration = 8;

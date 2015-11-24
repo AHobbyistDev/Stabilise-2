@@ -41,8 +41,6 @@ public class TileRenderer implements Renderer {
     public TileRenderer(WorldRenderer worldRenderer) {
         this.wr = worldRenderer;
         world = worldRenderer.world;
-        
-        loadResources();
     }
     
     @Override

@@ -23,6 +23,7 @@ public interface SimpleList<E> extends FunctionalIterable<E> {
     /**
      * Returns the number of elements in this list.
      */
+    @Override
     int size();
     
     /**
