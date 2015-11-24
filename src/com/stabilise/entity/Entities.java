@@ -1,8 +1,8 @@
 package com.stabilise.entity;
 
+import com.stabilise.entity.component.buffs.*;
 import com.stabilise.entity.component.controller.*;
 import com.stabilise.entity.component.core.*;
-import com.stabilise.entity.component.effect.CDamageAmplifier;
 import com.stabilise.entity.component.physics.*;
 import com.stabilise.item.ItemStack;
 import com.stabilise.world.World;
@@ -21,8 +21,10 @@ public class Entities {
                                       { return new Entity(p, co, c);    }
     public  static Entity e(CCore c)  { return e(p(), co(), c);         }
     
+    
+    
     public static Entity player() {
-        return e(new CPlayerPerson());
+        return e(new CPlayerPerson()).addComponent(new CInvulnerability());
     }
     
     public static Entity fireball(long ownerID, int damage) {
@@ -35,7 +37,7 @@ public class Entities {
     
     public static Entity enemy() {
         return e(p(), new EnemyController(), new CGenericEnemy())
-                .addComponent(CDamageAmplifier.AMPLIFIER);
+                .addComponent(new CBasicArmour());
     }
     
     public static Entity person() {

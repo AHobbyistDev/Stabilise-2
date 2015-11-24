@@ -381,10 +381,9 @@ public abstract class BaseMob extends CCore {
         hasTint = true;
         //tintStrength = 1.0f;
         
-        if(src.damage() > 0) {
-            ParticleIndicator p = srcDmgIndicator.createAt(e.x, e.y);
-            p.text = String.valueOf(src.damage());
-        }
+        ParticleIndicator p = srcDmgIndicator.createAt(e.x, e.y+e.aabb.maxY());
+        p.text = String.valueOf(src.damage());
+        p.orange = src.damage() == 0;
         
         if(health <= 0) {
             health = 0;

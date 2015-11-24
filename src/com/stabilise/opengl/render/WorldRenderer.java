@@ -48,9 +48,8 @@ public class WorldRenderer implements Renderer {
     //-----=====Static Constants and Variables=====-----
     //--------------------==========--------------------
     
-    @SuppressWarnings("unused")
-    private static final float COL_WHITE = Color.WHITE.toFloatBits();
     private static final float DEFAULT_COL = new Color(1f, 1f, 1f, 1f).toFloatBits();
+    
     
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
@@ -97,6 +96,9 @@ public class WorldRenderer implements Renderer {
     ShapeRenderer shapes;
     public boolean renderHitboxes = false;
     
+    private final Vector2 vec = new Vector2();
+    private final List<ParticleIndicator> indicators = new ArrayList<>();
+    
     // List for automatic resource disposal
     private List<Disposable> disposables = new ArrayList<>();
     
@@ -131,11 +133,12 @@ public class WorldRenderer implements Renderer {
         //if(!shader.isCompiled())
         //    throw new RuntimeException("Shader could not compile: " + shader.getLog());
         
+        batch = register(new SpriteBatch(2048*2));
+        
         camera = new OrthographicCamera();
         hudCamera = new OrthographicCamera();
         viewport = new ScreenViewport(camera);
         hudViewport = new ScreenViewport(hudCamera);
-        batch = register(new SpriteBatch(1024));
         
         FreeTypeFontParameter param = new FreeTypeFontParameter();
         param.size = 16;
@@ -215,19 +218,16 @@ public class WorldRenderer implements Renderer {
     }
     
     private void updateMatrices(boolean hud) {
-        Matrix4 m = hud
-                ? hudViewport.getCamera().combined
-                : viewport.getCamera().combined;
-        //System.out.println(m.toString() + " :: " + hud);
-        batch.setProjectionMatrix(m);
-        shapes.setProjectionMatrix(m);
+        Matrix4 mat = hud ? hudCamera.combined : camera.combined;
+        batch.setProjectionMatrix(mat);
+        shapes.setProjectionMatrix(mat);
     }
     
     /**
      * Gets the world coordinates over which the mouse is hovering.
      */
     public Vector2 mouseCoords() {
-        return viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
+        return viewport.unproject(vec.set(Gdx.input.getX(), Gdx.input.getY()));
     }
     
     @Override
@@ -285,6 +285,8 @@ public class WorldRenderer implements Renderer {
         profiler.next("particles"); // root.render.particles
         world.getParticles().forEach(p -> p.render(this));
         
+        doRenderIndicators();
+        
         batch.end();
         
         profiler.next("hitboxes"); // root.render.hitboxes
@@ -328,13 +330,9 @@ public class WorldRenderer implements Renderer {
         if(c.hasTint) {
             if(c.dead) {
                 batch.setColor(c.tintStrength, 0f, 0f, 1f);
-                //texEnemy.tint(Color.RED, e.tintStrength);
             } else {
                 batch.setColor(c.tintStrength, c.tintStrength, c.tintStrength, 1);
-                //texEnemy.tint(Color.WHITE, e.tintStrength);
             }
-        } else {
-            //texEnemy.removeTint();
         }
         
         batch.draw(
@@ -426,7 +424,18 @@ public class WorldRenderer implements Renderer {
      * @param p The damage indicator particle.
      */
     public void renderIndicator(ParticleIndicator p) {
-        //font.draw(batch, p.text, (float)p.x, (float)p.y, 10, Align.center, false);
+        indicators.add(p);
+    }
+    
+    private void doRenderIndicators() {
+        updateMatrices(true);
+        for(ParticleIndicator p : indicators) {
+            font.setColor(p.orange ? Color.ORANGE : Color.RED);
+            hudViewport.unproject(viewport.project(vec.set((float)p.x, (float)p.y)));
+            font.draw(batch, p.text, vec.x - 25, -vec.y, 50, Align.center, false);
+        }
+        indicators.clear();
+        updateMatrices(false);
     }
     
     /**

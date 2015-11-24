@@ -183,7 +183,7 @@ public class PlayerController extends CController implements Controllable, Input
                 break;
             case SUMMON_SWARM:
                 {
-                    int max = 750 + game.world.getRnd().nextInt(250);
+                    int max = 1000;// + game.world.getRnd().nextInt(250);
                     for(int i = 0; i < max; i++) {
                         Entity m = Entities.enemy();
                         m.x = e.x - 10 + game.world.getRnd().nextFloat() * 20;
@@ -237,6 +237,9 @@ public class PlayerController extends CController implements Controllable, Input
                 break;
             case PRINT_INVENTORY:
                 Log.get().postInfo(e.core.toString());
+                break;
+            case PROFILER:
+                Log.get().postDebug(game.profiler.getData().toString());
                 break;
             default:
                 return false;

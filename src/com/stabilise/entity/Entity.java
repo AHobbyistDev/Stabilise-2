@@ -53,10 +53,12 @@ public class Entity extends FreeGameObject {
     public void update(World world) {
         age++;
         
+        /*
         components.iterate(c -> {
             c.update(world, this);
             return c.remove();
         });
+        */
         
         controller.update(world, this);
         core.update(world, this);
@@ -108,9 +110,9 @@ public class Entity extends FreeGameObject {
      * handled.
      */
     public boolean post(World w, EntityEvent e) {
-        for(Component c : components)
-            if(c.handle(w, this, e))
-                return false;
+        //for(Component c : components)
+        //    if(c.handle(w, this, e))
+        //        return false;
         return !core.handle(w, this, e)
             && !controller.handle(w, this, e)
             && !physics.handle(w, this, e);

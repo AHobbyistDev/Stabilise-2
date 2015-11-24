@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.RandomAccess;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -20,7 +21,7 @@ import com.stabilise.util.collect.IDuplicateResolver.Action;
  */
 public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E>>
         extends AbstractList<E>
-        implements SimpleList<E> {
+        implements SimpleList<E>, RandomAccess {
     
     private static final int TREE_THRESHOLD = Integer.MAX_VALUE; // TODO: temporary value
     

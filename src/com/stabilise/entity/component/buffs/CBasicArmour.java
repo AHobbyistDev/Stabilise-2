@@ -11,9 +11,9 @@ import com.stabilise.world.World;
 
 public class CBasicArmour implements Component {
     
-    private static final int DMG_BLOCK = 8;
+    private static final int DMG_BLOCK = 10;
     
-    private int durability = 50;
+    private int durability = 100;
     
     @Override
     public int getWeight() {
@@ -44,8 +44,10 @@ public class CBasicArmour implements Component {
             dmg -= sub;
             durability -= sub;
             d.src.setDamage(dmg);
-            if(dmg == 0)
-                return true;
+            
+            // Don't stop the attack from propagating; we still want effects
+            // to apply.
+            //if(dmg == 0) return true;
         }
         return false;
     }

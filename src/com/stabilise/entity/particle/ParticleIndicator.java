@@ -27,18 +27,19 @@ public class ParticleIndicator extends Particle {
     //-------------=====Member Variables=====-----------
     //--------------------==========--------------------
     
-    /** The indicator's display text. */
     public String text;
-    /** The indicator's display text's alpha. */
-    @SuppressWarnings("unused")
-    private float alpha = 1.0f;
+    public float alpha;
+    public boolean orange;
+    
+    private float dy;
     
     
     @Override
     public void update(World world) {
         super.update(world);
         
-        y += 0.05f;    // arbitrary lift rate
+        y += dy;
+        dy *= 0.95f;
         
         if(age > FADE_OUT_MARK) {
             if(age == DURATION)
@@ -51,6 +52,15 @@ public class ParticleIndicator extends Particle {
     @Override
     public void render(WorldRenderer renderer) {
         renderer.renderIndicator(this);
+    }
+    
+    @Override
+    public void reset() {
+        super.reset();
+        text = "";
+        alpha = 1.0f;
+        orange = false;
+        dy = 0.1f;
     }
     
 }
