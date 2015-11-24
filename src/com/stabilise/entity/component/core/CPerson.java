@@ -8,13 +8,13 @@ import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.ParticleFlame;
+import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Shape;
-import com.stabilise.world.AbstractWorld.ParticleSource;
 import com.stabilise.world.World;
 
 
@@ -178,7 +178,7 @@ public class CPerson extends BaseMob {
      * frames. */
     private int damageDealt = 0;
     
-    private ParticleSource particleSrc;
+    private ParticleSource<?> particleSrc;
     
     @Override
     public AABB getAABB() {
@@ -242,7 +242,6 @@ public class CPerson extends BaseMob {
                     h.hits = -1;
                     h.force = ATTACK_SIDE_GROUND_FORCE;
                     h.fx = e.facingRight ? 1.0f : -1.0f;
-                    //h.effect = new EffectFire(120);
                     w.addHitbox(h, e.x, e.y);
                 } else if(stateTicks == ATTACK_SIDE_GROUND_FRAME_3_BEGIN) {
                     Hitbox h = new Hitbox(e.id(), e.facingRight
@@ -251,7 +250,6 @@ public class CPerson extends BaseMob {
                     h.hits = -1;
                     h.force = ATTACK_SIDE_GROUND_FORCE;
                     h.fx = e.facingRight ? -1.0f : 1.0f;
-                    //h.effect = new EffectFire(120);
                     w.addHitbox(h, e.x, e.y);
                 }
                 break;
@@ -721,7 +719,7 @@ public class CPerson extends BaseMob {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
-            particleSrc = w.getParticleManager().getSource(new ParticleFlame());
+            particleSrc = w.getParticleManager().getSource(ParticleFlame.class);
         return super.handle(w, e, ev);
     }
     

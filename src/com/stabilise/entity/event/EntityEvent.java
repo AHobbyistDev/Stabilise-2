@@ -5,10 +5,16 @@ import com.stabilise.util.concurrent.event.Event;
 
 public class EntityEvent extends Event {
     
+    /**
+     * An identifying type for an event; enums can be switched for efficient
+     * handler code.
+     */
     public static enum Type {
         ADDED_TO_WORLD,
         TILE_COLLISION,
+        /** Horizontal tile collision. */
         TILE_COLLISION_H,
+        /** Vertical tile collision. */
         TILE_COLLISION_V,
         DAMAGED,
         KILLED,

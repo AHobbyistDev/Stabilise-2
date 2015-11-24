@@ -4,10 +4,10 @@ import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
+import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.World;
-import com.stabilise.world.AbstractWorld.ParticleSource;
 import com.stabilise.world.tile.tileentity.TileEntity.Updated;
 
 /**
@@ -25,8 +25,8 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     private int ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS;
     private double xPos, yPos;
     
-    private ParticleSource fireGen;
-    private ParticleSource smokeGen;
+    private ParticleSource<?> fireGen;
+    private ParticleSource<?> smokeGen;
     
     
     /**
@@ -52,8 +52,8 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     public void update(World w) {
         if(playerInRange(w)) {
             if(fireGen == null) {
-                fireGen = w.getParticleManager().getSource(new ParticleFlame());
-                smokeGen = w.getParticleManager().getSource(new ParticleSmoke());
+                fireGen = w.getParticleManager().getSource(ParticleFlame.class);
+                smokeGen = w.getParticleManager().getSource(ParticleSmoke.class);
             }
             
             if(--ticksUntilNextSpawn == 0) {

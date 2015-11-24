@@ -8,7 +8,7 @@ import java.util.Objects;
  * 
  * <p>An Event is identified by the name assigned to it in its constructor, so
  * {@code new Event("Hello, world!").equals(new Event("Hello, world!"))} will
- * return {@code true}, as they are indisginguishable. This is acceptable for
+ * return {@code true}, as they are indistinguishable. This is acceptable for
  * many cases, but poses a security threat for others. To make an event
  * unduplicatable, simply subclass Event and instantiate your event as a
  * member of that class. e.g.,
@@ -63,7 +63,7 @@ public class Event {
     }
     
     /**
-     * Identical to new Event(name);
+     * Identical to {@code new Event(name)}.
      */
     public static Event of(String name) {
         return new Event(name);

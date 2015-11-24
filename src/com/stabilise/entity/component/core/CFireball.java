@@ -6,12 +6,12 @@ import com.stabilise.entity.component.effect.EffectFire;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.LinkedHitbox;
 import com.stabilise.entity.particle.ParticleFlame;
+import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Polygon;
 import com.stabilise.world.World;
-import com.stabilise.world.AbstractWorld.ParticleSource;
 
 
 public class CFireball extends BaseProjectile {
@@ -25,7 +25,7 @@ public class CFireball extends BaseProjectile {
     /** The number of ticks after which a fireball despawns. */
     private static final int DESPAWN_TICKS = 300;
     
-    private ParticleSource particleSrc;
+    private ParticleSource<ParticleFlame> particleSrc;
     private int damage;
     
     public CFireball(long ownerID) {
@@ -109,16 +109,13 @@ public class CFireball extends BaseProjectile {
     protected void onImpact(World w, Entity e) {
         e.destroy();
         
-        if(Settings.settingParticlesAll())
-            addImpactParticles(w, e, 500);
-        else if(Settings.settingParticlesReduced())
-            addImpactParticles(w, e, 25);
+        addImpactParticles(w, e, 500);
     }
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
-            particleSrc = w.getParticleManager().getSource(new ParticleFlame());
+            particleSrc = w.getParticleManager().getSource(ParticleFlame.class);
         return super.handle(w, e, ev);
     }
     

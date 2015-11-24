@@ -45,9 +45,4 @@ public class ParticleFlame extends ParticlePhysical {
         opacity = 1.0f;
     }
     
-    @Override
-    public Particle duplicate() {
-        return new ParticleFlame();
-    }
-    
 }

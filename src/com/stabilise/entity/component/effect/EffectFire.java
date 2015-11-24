@@ -3,12 +3,12 @@ package com.stabilise.entity.component.effect;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.damage.FireSource;
+import com.stabilise.entity.damage.GeneralSource;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.particle.ParticleFlame;
+import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
-import com.stabilise.world.AbstractWorld.ParticleSource;
 
 /**
  * The effect a Mob has when it is on fire.
@@ -18,7 +18,8 @@ import com.stabilise.world.AbstractWorld.ParticleSource;
  */
 public class EffectFire extends Effect {
     
-    private ParticleSource particleSrc;
+    private ParticleSource<?> particleSrc;
+    
     
     /**
      * Creates a new fire effect.
@@ -33,17 +34,19 @@ public class EffectFire extends Effect {
     public void init(Entity e) {}
     
     @Override
-    public void update(World world, Entity target) {
+    public void update(World w, Entity e) {
+        super.update(w, e);
+        
         if(particleSrc == null)
-            particleSrc = world.getParticleManager().getSource(new ParticleFlame());
+            particleSrc = w.getParticleManager().getSource(ParticleFlame.class);
         
         if(Settings.settingParticlesAll())
-            createFireParticle(world, target);
+            createFireParticle(w, e);
         else if(Settings.settingParticlesReduced() && age % 3 == 0)
-            createFireParticle(world, target);
+            createFireParticle(w, e);
         
         if(age % Constants.TICKS_PER_SECOND == 0)
-            target.damage(world, new FireSource(2));
+            e.damage(w, GeneralSource.fire(2));
     }
     
     /**
@@ -54,13 +57,6 @@ public class EffectFire extends Effect {
     private void createFireParticle(World world, Entity target) {
         particleSrc.createBurst(1, 0.2f, 2.0f, Maths.PIf / 6.0f,
                 Maths.PIf * 5.0f / 6.0f, target);
-    }
-    
-    @Override
-    public EffectFire clone() {
-        EffectFire e = new EffectFire(duration);
-        e.age = age;
-        return e;
     }
     
     @Override

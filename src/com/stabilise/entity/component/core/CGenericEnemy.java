@@ -4,13 +4,13 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.ParticleFlame;
+import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.item.Items;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Polygon;
-import com.stabilise.world.AbstractWorld.ParticleSource;
 import com.stabilise.world.World;
 
 
@@ -18,7 +18,7 @@ public class CGenericEnemy extends BaseMob {
     
     private static final AABB ENEMY_AABB = new AABB(-0.5f, 0, 1, 2);
     
-    private ParticleSource srcFlame;
+    private ParticleSource<?> srcFlame;
     
     @Override
     public void init(Entity e) {
@@ -100,7 +100,7 @@ public class CGenericEnemy extends BaseMob {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
-            srcFlame = w.getParticleManager().getSource(new ParticleFlame());
+            srcFlame = w.getParticleManager().getSource(ParticleFlame.class);
         else if(ev.type() == EntityEvent.Type.KILLED) {
             dropItem(w, e, Items.APPLE.stackOf(1), 0.02f);
             dropItem(w, e, Items.SWORD.stackOf(1), 0.02f);

@@ -77,9 +77,4 @@ public class ParticleExplosion extends Particle {
         renderer.renderExplosion(this);
     }
     
-    @Override
-    public Particle duplicate() {
-        return new ParticleExplosion(0,0);
-    }
-    
 }

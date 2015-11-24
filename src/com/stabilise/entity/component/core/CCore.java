@@ -2,7 +2,7 @@ package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.Component;
-import com.stabilise.entity.damage.DamageSource;
+import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
@@ -37,7 +37,7 @@ public abstract class CCore implements Component {
      * 
      * @return true if the entity was damaged; {@code false} if not.
      */
-    public boolean damage(World w, Entity e, DamageSource src) { 
+    public boolean damage(World w, Entity e, IDamageSource src) { 
         return false; 
     }
     
@@ -46,7 +46,7 @@ public abstract class CCore implements Component {
      * 
      * <p>The default implementation invokes {@code e.destroy()}.
      */
-    public void kill(World w, Entity e, DamageSource src) {
+    public void kill(World w, Entity e, IDamageSource src) {
         e.destroy();
     }
     

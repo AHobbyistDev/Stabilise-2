@@ -18,7 +18,7 @@ public class CDamageAmplifier implements Component {
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.DAMAGED) {
             EDamaged dmg = (EDamaged)ev;
-            dmg.src.damage *= 2;
+            dmg.src.setDamage(dmg.src.damage() * 10);
         }
         return false;
     }

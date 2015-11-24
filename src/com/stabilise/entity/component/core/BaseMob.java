@@ -3,16 +3,16 @@ package com.stabilise.entity.component.core;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.controller.PlayerController;
-import com.stabilise.entity.damage.DamageSource;
+import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
-import com.stabilise.entity.particle.ParticleDamageIndicator;
+import com.stabilise.entity.particle.ParticleIndicator;
 import com.stabilise.entity.particle.ParticleSmoke;
+import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.item.ItemStack;
 import com.stabilise.util.Direction;
 import com.stabilise.world.World;
-import com.stabilise.world.AbstractWorld.ParticleSource;
 
 /**
  * Basic mob implementation.
@@ -201,8 +201,8 @@ public abstract class BaseMob extends CCore {
     
     // Visual things
     
-    protected ParticleSource srcDmgIndicator;
-    protected ParticleSource srcSmoke;
+    protected ParticleSource<ParticleIndicator> srcDmgIndicator;
+    protected ParticleSource<ParticleSmoke> srcSmoke;
     
     /** Whether or not the mob has a tint. */
     public boolean hasTint = false;
@@ -368,21 +368,23 @@ public abstract class BaseMob extends CCore {
     // ----------End things to be called by the mob's controller----------
     
     @Override
-    public boolean damage(World w, Entity e, DamageSource src) {
+    public boolean damage(World w, Entity e, IDamageSource src) {
         if(invulnerable || dead)
             return false;
         
         src.applyEffects(e);
         
-        health -= src.damage;
-        e.dx = (e.dx + src.force.x());
-        e.dy = (e.dy + src.force.y());
+        health -= src.damage();
+        e.dx = (e.dx + src.impulseX());
+        e.dy = (e.dy + src.impulseY());
         
         hasTint = true;
         //tintStrength = 1.0f;
         
-        if(src.damage > 0)
-            srcDmgIndicator.createAt(e.x, e.y);
+        if(src.damage() > 0) {
+            ParticleIndicator p = srcDmgIndicator.createAt(e.x, e.y);
+            p.text = String.valueOf(src.damage());
+        }
         
         if(health <= 0) {
             health = 0;
@@ -401,7 +403,7 @@ public abstract class BaseMob extends CCore {
      * Kills the mob by setting its state to {@link State#DEAD DEAD}.
      */
     @Override
-    public void kill(World w, Entity e, DamageSource src) {
+    public void kill(World w, Entity e, IDamageSource src) {
         dead = true;
         setState(State.DEAD, false, DEATH_TICKS);
         e.post(w, EDamaged.killed(src));
@@ -411,8 +413,6 @@ public abstract class BaseMob extends CCore {
      * Spawns smoke particles at the Mob's location.
      */
     private void spawnSmokeParticles(World w, Entity e) {
-        //srcSmoke.createBurst(30, 0.01f, 0.25f, 0f, (float)Math.PI, this);
-        //srcSmoke.createOutwardsBurst(30, true, false, 5f, 7f, e);
         srcSmoke.createCentredOutwardsBurst(w.getRnd(), 30, 1f, 7f, e);
     }
     
@@ -474,8 +474,8 @@ public abstract class BaseMob extends CCore {
         if(ev.type() == EntityEvent.Type.TILE_COLLISION_V)
             onVerticalCollision(e, (ETileCollision)ev);
         else if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD) {
-            srcDmgIndicator = w.getParticleManager().getSource(new ParticleDamageIndicator(0));
-            srcSmoke = w.getParticleManager().getSource(new ParticleSmoke());
+            srcDmgIndicator = w.getParticleManager().getSource(ParticleIndicator.class);
+            srcSmoke = w.getParticleManager().getSource(ParticleSmoke.class);
         } else if(ev.type() == EntityEvent.Type.DAMAGED) {
             return damage(w, e, ((EDamaged)ev).src);
         }

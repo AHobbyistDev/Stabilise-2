@@ -1,26 +1,21 @@
 package com.stabilise.world;
 
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.core.Constants;
-import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.GameObject;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.Particle;
-import com.stabilise.entity.particle.ParticlePhysical;
+import com.stabilise.entity.particle.ParticleManager;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.ForTestingPurposes;
-import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.collect.Array;
 import com.stabilise.util.collect.FragList;
 import com.stabilise.util.collect.LongList;
 import com.stabilise.util.collect.UnorderedArrayList;
@@ -28,7 +23,6 @@ import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.collect.SimpleList;
 import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.maths.Maths;
-import com.stabilise.util.shape.AABB;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -172,7 +166,7 @@ public abstract class AbstractWorld implements World {
         profiler.next("tileEntity"); // root.update.game.world.tileEntity
         updateObjects(getTileEntities());
         profiler.next("particle"); // root.update.game.world.particle
-        updateObjects(getParticles());
+        getParticles().iterate(p -> p.updateAndCheck(this) && reclaimParticle(p));
         
         // Do a particle cleanup every 5 seconds
         if(getAge() % 300 == 0)
@@ -247,13 +241,19 @@ public abstract class AbstractWorld implements World {
     }
     
     /**
-     * Adds a particle to the world.
+     * Adds a particle to the world. This is for {@link ParticleSource} use
+     * only!
      * 
-     * @throws NullPointerException if {@code p} is {@code null}.
+     * <p>It is implicitly trusted that {@code p} is non-null.
      */
-    protected void addParticle(Particle p) {
+    public void addParticle(Particle p) {
         particleCount++;
-        particles.append(Objects.requireNonNull(p));
+        particles.append(p);
+    }
+    
+    private boolean reclaimParticle(Particle p) {
+        getParticleManager().getSource(p.getClass()).reclaim(p);
+        return true;
     }
     
     @Override
@@ -434,424 +434,6 @@ public abstract class AbstractWorld implements World {
             if(!e.isPlayerControlled())
                 e.destroy();
         }
-    }
-    
-    //--------------------==========--------------------
-    //-------------=====Nested Classes=====-------------
-    //--------------------==========--------------------
-    
-    /**
-     * Manages particles for a world by performing the following tasks:
-     * 
-     * <ul>
-     * <li>Decides whether or not to add particles to the world based on the
-     *     game settings.
-     * <li>Acts as a particle generator.
-     * <li>Handles particle pooling to avoid excessive object creation.
-     * </ul>
-     */
-    @NotThreadSafe
-    public static class ParticleManager {
-        
-        private final AbstractWorld world;
-        /** Caches all the particle pools used and shared by each
-         * ParticleSource. */
-        private final Map<Class<? extends Particle>, ParticleSource> sources =
-                new IdentityHashMap<>();
-        
-        
-        private ParticleManager(AbstractWorld world) {
-            this.world = world;
-        }
-        
-        /*
-        public void addParticle(Particle p) {
-            if(world.isClient()) {
-                world.addParticle(p);
-            }
-        }
-        */
-        
-        /**
-         * Returns a generator, or <i>source</i>, of particles of the same type
-         * as the specified particle.
-         * 
-         * @param templateParticle The particle to use as the template for all
-         * particles created by the returned {@code ParticleSource}.
-         * 
-         * @throws NullPointerException if {@code templateParticle} is {@code
-         * null}.
-         */
-        public ParticleSource getSource(Particle templateParticle) {
-            ParticleSource source = sources.get(templateParticle.getClass());
-            if(source == null) {
-                source = new ParticleSource(
-                        world,
-                        new ParticlePool(templateParticle),
-                        templateParticle instanceof ParticlePhysical
-                );
-                sources.put(templateParticle.getClass(), source);
-            } else {
-                // We don't want the particle to go to waste so we may as well
-                // put it in the pool.
-                templateParticle.pool = source.pool;
-                source.pool.put(templateParticle);
-            }
-            return source;
-        }
-        
-        /**
-         * Tries to release any apparently unused pooled particles if possible,
-         * in order to free up memory.
-         */
-        void cleanup() {
-            for(ParticleSource src : sources.values())
-                src.pool.flush();
-        }
-        
-    }
-    
-    /**
-     * Provides a pool of particles of the same type to avoid unnecessary
-     * object instantiation and to reduce the strain on the GC.
-     */
-    @NotThreadSafe
-    public static class ParticlePool {
-        
-        /** Functions as the initial and the minimum capacity. */
-        private static final int CAPACITY_INITIAL = 16;
-        /** Maximum pool capacity. */
-        private static final int CAPACITY_MAX = 1024; // 6 expansions
-        /** Number of active particles must be this many times the size of
-         * the pool to force a resize. */
-        private static final int LOAD_FACTOR = 3;
-        /** The amount by which the pool's length is multiplied when it is
-         * resized. */
-        private static final int EXPANSION = 2;
-        /** Maximum number of pooled particles retained when the pool is
-         * flushed. This must be less than {@link #CAPACITY_INITIAL}. */
-        private static final int RETENTION_ON_FLUSH = 8;
-        
-        
-        /** The template particle for this pool. We use {@link
-         * Particle#duplicate()} to create new particles when the pool is
-         * empty. */
-        final Particle template;
-        private final Array<Particle> pool = new Array<>(CAPACITY_INITIAL);
-        /** Number of particles in the pool. Always < pool.length(). */
-        private int poolSize = 0;
-        /** Number of particles currently in the world which are linked to this
-         * pool. */
-        private int activeParticles = 0;
-        /** If activeParticles exceeds the expansion load, we increase the size
-         * of the pool. */
-        private int expansionLoad = CAPACITY_INITIAL * LOAD_FACTOR;
-        
-        
-        /**
-         * Creates a new pool with the specified template particle. The
-         * particle will henceforth be used as a component of this pool, and
-         * should no longer be used for anything else.
-         */
-        private ParticlePool(Particle template) {
-            this.template = template;
-            template.pool = this;
-            pool.set(0, template);
-        }
-        
-        /**
-         * Gets a particle from this pool, instantiating a new one if
-         * necessary.
-         */
-        Particle get() {
-            activeParticles++;
-            if(poolSize == 0) {
-                Particle p = template.duplicate();
-                p.pool = this;
-                return p;
-            }
-            return pool.get(--poolSize);
-        }
-        
-        /**
-         * Puts a particle in this pool. If this pool is full, this method does
-         * nothing. If it is added to this pool, {@code p} is {@link
-         * Particle#reset() reset}.
-         */
-        void put(Particle p) {
-            // If the pool is full, let the particle get GC'd
-            if(poolSize == pool.length())
-                return;
-            
-            p.reset();
-            pool.set(poolSize++, p);
-        }
-        
-        /**
-         * Reclaims a particle into this pool. This should only be invoked by
-         * a particle when it is registered as destroyed (i.e. from within
-         * {@link Particle#updateAndCheck(World)}).
-         * <!--
-         * Reclaims a particle into this pool as per {@link #put(Particle)},
-         * expanding this pool if able and necessary. This method should be
-         * invoked to return any particle obtained through {@link #get()}.
-         * -->
-         */
-        public void reclaim(Particle p) {
-            if(activeParticles-- > expansionLoad && pool.length() < CAPACITY_MAX) {
-                //System.out.println("Resizing the pool from " + pool.length()
-                //        + " to " + (pool.length() * EXPANSION));
-                pool.resize(EXPANSION * pool.length());
-                expansionLoad = pool.length() * LOAD_FACTOR;
-            }
-            
-            put(p);
-        }
-        
-        /**
-         * Flushes this pool by garbage-collecting all but a few pooled
-         * particles, and shrinking the internal size if necessary. This
-         * shouldn't be invoked too frequently as this can be an expensive
-         * operation.
-         */
-        void flush() {
-            // Dump all but RETENTION_ON_FLUSH-many pooled particles.
-            // TODO: We might want to retain a larger amount if the pool has
-            // sufficiently expanded.
-            pool.setBetween(null, RETENTION_ON_FLUSH, poolSize);
-            // If the pool has been expanded over its initial capacity and the
-            // most recent expansion's worth of space is unused, we'll shrink
-            // the pool.
-            if(pool.length() > CAPACITY_INITIAL &&
-                    activeParticles < pool.length() / LOAD_FACTOR) {
-                //System.out.println("Shrinking the pool from " + pool.length()
-                //        + " to " + (pool.length() / EXPANSION));
-                pool.resize(pool.length() / EXPANSION);
-                expansionLoad = pool.length() * LOAD_FACTOR;
-            }
-            if(poolSize > RETENTION_ON_FLUSH)
-                poolSize = RETENTION_ON_FLUSH;
-        }
-        
-    }
-    
-    /**
-     * A ParticleSource may be used to easily generate particles of a specified
-     * type.
-     * 
-     * <p>A ParticleSource pools its particles using a {@link ParticlePool} as
-     * a background optimisation.
-     */
-    @NotThreadSafe
-    public static class ParticleSource {
-        
-        private final AbstractWorld world;
-        private final ParticlePool pool;
-        private final boolean physical;
-        
-        ParticleSource(AbstractWorld world, ParticlePool pool, boolean physical) {
-            this.world = world;
-            this.pool = pool;
-            this.physical = physical;
-        }
-        
-        private int count(int baseCount) {
-            switch(Settings.getSettingParticles()) {
-                case Settings.PARTICLES_ALL:
-                    return baseCount;
-                case Settings.PARTICLES_REDUCED:
-                    return baseCount / 2;
-                case Settings.PARTICLES_NONE:
-                    return 0;
-            }
-            return 0;
-        }
-        
-        private void addParticle(Particle p, double x, double y) {
-            p.x = x;
-            p.y = y;
-            world.addParticle(p);
-        }
-        
-        private void create(double x, double y, float dx, float dy) {
-            if(physical) {
-                ParticlePhysical p = (ParticlePhysical)pool.get();
-                p.dx = dx;
-                p.dy = dy;
-                addParticle(p, x, y);
-            } else {
-                addParticle(pool.get(), x + dx, y + dy);
-            }
-        }
-        
-        /**
-         * Creates a particle and adds it to the world as if by {@link
-         * World#addParticle(Particle) addParticle(particle)}, and then returns
-         * the particle.
-         */
-        public Particle create() {
-            Particle p = pool.get();
-            world.addParticle(p);
-            return p;
-        }
-        
-        /**
-         * Creates a particle and adds it to the world as if by {@link
-         * World#addParticle(Particle, double, double)
-         * addParticle(particle, x, y)}, and then returns the particle.
-         */
-        public Particle createAt(double x, double y) {
-            Particle p = pool.get();
-            addParticle(p, x, y);
-            return p;
-        }
-        
-        /**
-         * Creates a directed burst of particles at the specified coordinates.
-         * If the particles created by this source are {@link ParticlePhysical
-         * physical particles}, they will be created with a velocity of
-         * magnitude between {@code minV} and {@code maxV} directed between the
-         * specified angles; otherwise, the particles will simply be displaced
-         * in that direction by that much.
-         * 
-         * @param numParticles The number of particles to create.
-         * @param x The x-coordinate at which to place the particles, in
-         * tile-lengths.
-         * @param y The y-coordinate at which to place the particles, in
-         * tile-lengths.
-         * @param minV The minimum velocity, in tiles per second.
-         * @param maxV The maximum velocity, in tiles per second.
-         * @param minAngle The minimum angle at which to direct the particles,
-         * in radians.
-         * @param maxAngle The maximum angle at which to direct the particles,
-         * in radians.
-         */
-        public void createBurst(int numParticles, double x, double y,
-                float minV, float maxV, float minAngle, float maxAngle) {
-            Random rnd = world.getRnd();
-            for(int i = 0; i < count(numParticles); i++)
-                createBurstParticle(rnd, x, y, minV, maxV, minAngle, maxAngle);
-        }
-        
-        /**
-         * Creates a directed burst of particles at the specified coordinates.
-         * If the particles created by this source are {@link ParticlePhysical
-         * physical particles}, they will be created with a velocity of
-         * magnitude between {@code minV} and {@code maxV} directed between the
-         * specified angles; otherwise, the particles will simply be displaced
-         * in that direction by that much.
-         * 
-         * @param numParticles The number of particles to create.
-         * @param minV The minimum velocity, in tiles per second.
-         * @param maxV The maximum velocity, in tiles per second.
-         * @param minAngle The minimum angle at which to direct the particles,
-         * in radians.
-         * @param maxAngle The maximum angle at which to direct the particles,
-         * in radians.
-         */
-        public void createBurst(int numParticles,
-                double minX, double maxX, double minY, double maxY,
-                float minV, float maxV, float minAngle, float maxAngle) {
-            Random rnd = world.getRnd();
-            for(int i = 0; i < count(numParticles); i++)
-                createBurstParticle(rnd,
-                        minX + rnd.nextDouble() * (maxX-minX),
-                        minY + rnd.nextDouble() * (maxY-minY),
-                        minV, maxV, minAngle, maxAngle);
-        }
-        
-        /**
-         * Same as {@link
-         * #createBurst(int, double, double, float, float, float, float)}, but
-         * the particles are placed at a random location on the specified AABB
-         * (which is in turn considered to be defined relative to the specified
-         * x and y).
-         * 
-         * @param aabb
-         * 
-         * @throws NullPointerException if {@code aabb} is {@code null}.
-         */
-        public void createBurst(int numParticles, double x, double y,
-                float minV, float maxV, float minAngle, float maxAngle,
-                AABB aabb) {
-            Random rnd = world.getRnd();
-            for(int i = 0; i < count(numParticles); i++)
-                createBurstParticle(rnd,
-                        x + aabb.minX() + rnd.nextFloat() * aabb.width(),
-                        y + aabb.minY() + rnd.nextFloat() * aabb.height(),
-                        minV, maxV, minAngle, maxAngle);
-        }
-        
-        /**
-         * Same was {@link
-         * #createBurst(int, double, double, float, float, float, float)}, but
-         * the particles are placed somewhere on the specified entity.
-         * 
-         * @throws NullPointerException if {@code e} is {@code null}.
-         */
-        public void createBurst(int numParticles,
-                float minV, float maxV, float minAngle, float maxAngle,
-                Entity e) {
-            createBurst(numParticles, e.x, e.y, minV, maxV, minAngle, maxAngle,
-                    e.aabb);
-        }
-        
-        /**
-         * Same as {@link
-         * #createBurst(int, double, double, float, float, float, float)}, but
-         * the particles are placed somewhere on the tile specified by the
-         * given tile coordinates.
-         */
-        public void createBurstOnTile(int numParticles, int x, int y,
-                float minV, float maxV, float minAngle, float maxAngle) {
-            Random rnd = world.getRnd();
-            createBurst(numParticles, x + rnd.nextDouble(), y + rnd.nextDouble(),
-                    minV, maxV, minAngle, maxAngle);
-        }
-        
-        private void createBurstParticle(Random rnd, double x, double y,
-                float minV, float maxV, float minAngle, float maxAngle) {
-            float v = minV + rnd.nextFloat() * (maxV - minV);
-            float angle = minAngle + rnd.nextFloat() * (maxAngle - minAngle);
-            float dx = v * MathUtils.cos(angle);
-            float dy = v * MathUtils.sin(angle);
-            create(x, y, dx, dy);
-        }
-        
-        public void createOutwardsBurst(int numParticles, double x, double y,
-                boolean burstX, boolean burstY, float maxX, float maxY,
-                AABB aabb) {
-            Random rnd = world.getRnd();
-            float w = aabb.width();
-            float h = aabb.height();
-            for(int i = 0; i < count(numParticles); i++) {
-                float xp = rnd.nextFloat();
-                float yp = rnd.nextFloat();
-                create(
-                        x + w*xp,
-                        y + h*yp,
-                        burstX ? (2*xp - 1) * maxX : 0f,
-                        burstY ? (2*yp - 1) * maxY : 0f
-                );
-            }
-        }
-        
-        public void createOutwardsBurst(int numParticles,
-                boolean burstX, boolean burstY, float maxX, float maxY,
-                Entity e) {
-            createOutwardsBurst(numParticles, e.x, e.y, burstX, burstY,
-                    maxX, maxY, e.aabb);
-        }
-        
-        public void createCentredOutwardsBurst(Random rnd, int numParticles,
-                float minV, float maxV, Entity e) {
-            double midX = e.x + e.aabb.width()/2;
-            double midY = e.y + e.aabb.height()/2;
-            for(int i = 0; i < count(numParticles); i++) {
-                this.createBurstParticle(rnd, midX, midY, minV, maxV, 0f, Maths.TAUf);
-            }
-        }
-        
     }
     
 }

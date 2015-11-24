@@ -45,7 +45,8 @@ public abstract class GameObject {
     }
     
     /**
-     * @param renderer The renderer with which to render the GameObject.
+     * @param renderer The renderer with which to render the GameObject. Never
+     * null.
      */
     public abstract void render(WorldRenderer renderer);
     

@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.stabilise.core.Game;
@@ -424,9 +425,8 @@ public class WorldRenderer implements Renderer {
      * 
      * @param p The damage indicator particle.
      */
-    public void renderDamageIndicator(ParticleDamageIndicator p) {
-        // TODO
-        //font.drawLine(p.text, (int)(p.x * scale) + offsetX, (int)(p.y * scale) + offsetY, p.getFontStyle());
+    public void renderIndicator(ParticleIndicator p) {
+        //font.draw(batch, p.text, (float)p.x, (float)p.y, 10, Align.center, false);
     }
     
     /**

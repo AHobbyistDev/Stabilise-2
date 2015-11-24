@@ -1,6 +1,8 @@
 package com.stabilise.entity.component.effect;
 
+import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.Component;
+import com.stabilise.world.World;
 
 /**
  * An Effect is a lingering condition which can affect a mob.
@@ -26,15 +28,13 @@ public abstract class Effect implements Component {
     }
     
     @Override
-    public boolean remove() {
-        return ++age >= duration;
+    public void update(World w, Entity e) {
+        age++;
     }
     
-    /**
-     * Clones the Effect.
-     * 
-     * @return The clone.
-     */
-    public abstract Effect clone();
+    @Override
+    public boolean remove() {
+        return age >= duration;
+    }
     
 }

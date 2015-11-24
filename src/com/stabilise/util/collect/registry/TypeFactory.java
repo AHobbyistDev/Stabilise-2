@@ -17,7 +17,7 @@ import com.stabilise.util.collect.registry.GeneralTypeFactory.UnsafeFactory;
  * 
  * TypeFactory{@code <S>} factory = new TypeFactory<>(new RegistryParams());
  * factory.register(0, A.class, A::new); // uses constructor
- * factory.register(1, B.class);         // uses UnsafeFactory
+ * factory.registerUnsafe(1, B.class);   // uses UnsafeFactory
  * 
  * S a = factory.create(0);
  * S b = factory.create(1);
@@ -47,7 +47,7 @@ public class TypeFactory<T> extends TypeRegistry<T, Supplier<T>> {
      * already been registered and this registry uses the {@link
      * DuplicatePolicy#THROW_EXCEPTION THROW_EXCEPTION} duplicate policy.
      */
-    public void register(int id, Class<? extends T> objClass) {
+    public void registerUnsafe(int id, Class<? extends T> objClass) {
         register(id, objClass, new UnsafeFactory<>(objClass));
     }
     
@@ -60,6 +60,21 @@ public class TypeFactory<T> extends TypeRegistry<T, Supplier<T>> {
      */
     public T create(int id) {
         return getOrDefault(id, () -> null).get();
+    }
+    
+    /**
+     * Creates a new object.
+     * 
+     * @param clazz The class of the object.
+     * 
+     * @return A new object, or {@code null} if the class is not registered.
+     */
+    public <S extends T> S create(Class<S> clazz) {
+        int id = getID(clazz);
+        if(id == -1) return null;
+        @SuppressWarnings("unchecked")
+        S s = (S)create(id);
+        return s;
     }
     
 }

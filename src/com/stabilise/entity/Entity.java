@@ -5,7 +5,7 @@ import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.entity.component.core.CCore;
 import com.stabilise.entity.component.physics.CPhysics;
-import com.stabilise.entity.damage.DamageSource;
+import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.opengl.render.WorldRenderer;
@@ -134,7 +134,7 @@ public class Entity extends FreeGameObject {
      * 
      * @return true if the entity was damaged; false if not.
      */
-    public boolean damage(World w, DamageSource src) {
+    public boolean damage(World w, IDamageSource src) {
         return post(w, EDamaged.damaged(src));
     }
     

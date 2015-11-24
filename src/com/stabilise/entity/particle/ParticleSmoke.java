@@ -19,28 +19,9 @@ public class ParticleSmoke extends ParticlePhysical {
     /** The value by which a particle's dx is multiplied by each tick. */
     private static final float DX_MULT = 0.92f;
     
-    private int despawn = -1;
+    private int despawn;
     public float opacity;
     
-    
-    /**
-     * Creates a new smoke particle.
-     */
-    public ParticleSmoke() {
-        /*
-        double angle = (0.16666667f + world.rng.nextFloat() / 3) * Math.PI;
-        float velocity = 0.05f + world.rng.nextFloat() * 0.4f;
-        boolean right = world.rng.nextBoolean();
-        
-        dx = (float) (right ? Math.cos(angle) * velocity : -Math.cos(angle) * velocity);
-        dy = (float) (Math.sin(angle) * velocity);
-        */
-        
-        /*
-        dx = (world.rng.nextFloat() * 0.4f) - 0.2f;
-        dy = world.rng.nextFloat() * 0.015f;
-        */
-    }
     
     @Override
     public void reset() {
@@ -68,11 +49,6 @@ public class ParticleSmoke extends ParticlePhysical {
     @Override
     public void render(WorldRenderer renderer) {
         renderer.renderSmoke(this);
-    }
-    
-    @Override
-    public Particle duplicate() {
-        return new ParticleSmoke();
     }
     
 }

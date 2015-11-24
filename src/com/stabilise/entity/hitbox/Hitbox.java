@@ -4,7 +4,9 @@ import java.util.function.Consumer;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.FreeGameObject;
-import com.stabilise.entity.damage.DamageSource;
+import com.stabilise.entity.damage.DamageType;
+import com.stabilise.entity.damage.GeneralSource;
+import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
@@ -112,14 +114,17 @@ public class Hitbox extends FreeGameObject {
         return false;
     }
     
-    private DamageSource createSrc() {
-        return new DamageSource(damage, ownerID, fx*force, fy*force) {
+    private IDamageSource createSrc() {
+        GeneralSource src = new GeneralSource(true, DamageType.ATTACK, ownerID, damage) {
             @Override
             public void applyEffects(Entity e) {
                 if(effects != null)
                     effects.accept(e);
             }
         };
+        src.fx = fx * force;
+        src.fy = fy * force;
+        return src;
     }
     
     /**
