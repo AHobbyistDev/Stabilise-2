@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -84,7 +85,9 @@ public class WorldRenderer implements Renderer {
     ScreenViewport hudViewport;
     ShaderProgram shader;
     
-    BitmapFont font;
+    BitmapFont indicatorFontRed;
+    BitmapFont indicatorFontOrange;
+    BitmapFont debugFont;
     
     // Textures for different game objects
     Texture texEnemy;
@@ -143,9 +146,25 @@ public class WorldRenderer implements Renderer {
         viewport = new ScreenViewport(camera);
         hudViewport = new ScreenViewport(hudCamera);
         
+        FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(
+                Resources.FONT_DIR.child("arialbd.ttf"));
         FreeTypeFontParameter param = new FreeTypeFontParameter();
         param.size = 17;
-        font = register(Resources.font("arialbd", param));
+        param.borderWidth = 1.5f;
+        param.borderColor = Color.WHITE;
+        param.color = Color.RED;
+        indicatorFontRed = register(fontGen.generateFont(param));
+        param.color = Color.ORANGE;
+        indicatorFontOrange = register(fontGen.generateFont(param));
+        
+        param = new FreeTypeFontParameter();
+        param.size = 17;
+        param.shadowOffsetX = 2;
+        param.shadowOffsetY = 2;
+        param.shadowColor = Color.BLACK;
+        debugFont = register(fontGen.generateFont(param));
+        
+        fontGen.dispose();
         
         personModel = register(new ModelPlayer());
         
@@ -439,9 +458,9 @@ public class WorldRenderer implements Renderer {
     private void doRenderIndicators() {
         updateMatrices(true);
         for(ParticleIndicator p : indicators) {
-            font.setColor(p.orange ? Color.ORANGE : Color.RED);
+            BitmapFont fnt = p.orange ? indicatorFontOrange : indicatorFontRed;
             hudViewport.unproject(viewport.project(vec.set((float)p.x, (float)p.y)));
-            font.draw(batch, p.text, vec.x - 25, -vec.y, 50, Align.center, false);
+            fnt.draw(batch, p.text, vec.x - 25, -vec.y, 50, Align.center, false);
         }
         indicators.clear();
         updateMatrices(false);

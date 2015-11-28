@@ -42,6 +42,7 @@ public class HostWorld extends AbstractWorld {
     private final DimensionLoader loader;
     /** The world generator. */
     private final WorldGenerator generator;
+    private final WorldLoadTracker loadTracker = new WorldLoadTracker();
     
     /** Holds all player slice maps. */
     private final List<SliceMap> sliceMaps = new UnorderedArrayList<>(4, 2);
@@ -150,6 +151,13 @@ public class HostWorld extends AbstractWorld {
     @Override
     public boolean isLoaded() {
         return regions.isLoaded() && prepared;
+    }
+    
+    /**
+     * Returns this world's load tracker.
+     */
+    public WorldLoadTracker loadTracker() {
+        return loadTracker;
     }
     
     @Override

@@ -9,6 +9,7 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.RegionStore.CachedRegion;
+import com.stabilise.world.WorldLoadTracker;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.multiverse.Multiverse;
 
@@ -74,9 +75,11 @@ public abstract class WorldLoader {
     private void loadRegion(DimensionLoader handle, Region r, boolean generate) {
         handle.world.stats.load.requests.increment();
         
-        if(r.getLoadPermit())
+        if(r.getLoadPermit()) {
+            handle.tracker.startLoadOp();
             executor.execute(new RegionLoader(handle, r, generate));
-        else if(generate) {
+        } else if(generate) {
+            handle.tracker.startLoadOp();
             handle.world.stats.load.rejected.increment();
             handle.generator.generate(r);
         }
@@ -122,10 +125,12 @@ public abstract class WorldLoader {
         private final HostWorld world;
         private WorldGenerator generator = null;
         private volatile boolean cancelLoadOperations = false;
+        private final WorldLoadTracker tracker;
         
         private DimensionLoader(WorldLoader loader, HostWorld world) {
             this.loader = loader;
             this.world = world;
+            this.tracker = world.loadTracker();
         }
         
         /**
@@ -229,6 +234,7 @@ public abstract class WorldLoader {
             world.stats.load.started.increment();
             
             if(worldHandle.cancelLoadOperations) {
+                worldHandle.tracker.endLoadOp();
                 world.stats.load.aborted.increment();
                 return;
             }
@@ -244,6 +250,8 @@ public abstract class WorldLoader {
             
             if(generate)
                 generator.generateSynchronously(r);
+            else
+                worldHandle.tracker.endLoadOp();
             
             //log.postFineDebug("Finished loading " + r);
         }

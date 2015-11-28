@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.badlogic.gdx.files.FileHandle;
@@ -16,8 +15,13 @@ import com.stabilise.core.GameClient.WorldLoadHandle;
 import com.stabilise.entity.Entity;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
+import com.stabilise.util.box.Box;
+import com.stabilise.util.box.Boxes;
+import com.stabilise.util.concurrent.Tasks;
 import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.util.concurrent.task.Task;
+import com.stabilise.util.concurrent.task.TaskCallable;
+import com.stabilise.util.concurrent.task.TaskHandle;
 import com.stabilise.util.io.IOUtil;
 import com.stabilise.world.multiverse.ClientMultiverse;
 import com.stabilise.world.multiverse.HostMultiverse;
@@ -113,8 +117,8 @@ public class Worlds {
         
         List<WorldInfo> worlds = new ArrayList<>(worldDirs.length);
         
-        // Cycle over all the folders in the worlds directory and determine
-        // their validity as worlds.
+        // Check all folders in the worlds directory and determine their
+        // validity as worlds.
         for(int i = 0; i < worldDirs.length; i++) {
             try {
                 WorldInfo info = new WorldInfo(worldDirs[i].name());
@@ -345,36 +349,49 @@ public class Worlds {
                             + "world without setting the player!");
             }
             
-            Executor exec = (r) -> {
-                Thread t = new Thread(r);
-                t.setName("WorldBuilderThread");
-                t.start();
-            };
+            Box<HostMultiverse> bMulti    = Boxes.empty();
+            Box<PlayerBundle> bPlayer     = Boxes.empty();
+            Box<HostWorld> bWorld         = Boxes.empty();
+            Box<WorldLoadTracker> bStatus = Boxes.empty();
             
-            return Task.builder(exec)
+            return Task.builder(Tasks.newThreadExecutor())
                 .name("Loading world")
                 .beginReturn(WorldBundle.class)
-                .andThenReturn(buildHost ? 4 : 5, (t) -> {
-                    t.next("Loading player data");
+                .andThen(200, (t) -> {
+                    t.setStatus("Loading player data");
                     if(integratedPlayer != null) // host or client
                         integratedPlayer.load();
                     
-                    t.next("Constructing world");
                     if(buildHost) {
+                        t.next(50, "Loading world data");
                         worldInfo.load();
-                        HostMultiverse multi = new HostMultiverse(worldInfo, profiler);
-                        PlayerBundle player = multi.addPlayer(integratedPlayer, true);
-                        HostWorld starterDim = player.world;
-                        t.next("Loading dimension " + starterDim.getDimensionName());
-                        while(!starterDim.isLoaded())
-                            Thread.sleep(10L);
-                        t.next("All is done!");
-                        return new WorldBundle(multi, starterDim,
-                                player.playerEntity, player.playerData);
+                        t.next(50, "Starting up the world");
+                        bMulti.set(new HostMultiverse(worldInfo, profiler));
+                        t.next(50, "Creating the player");
+                        bPlayer.set(bMulti.get().addPlayer(integratedPlayer, true));
+                        bWorld.set(bPlayer.get().world);
+                        bStatus.set(bWorld.get().loadTracker());
                     } else {
-                        throw new RuntimeException("Client is deprecated");
-                        //return new WorldBundle(null, null, null, null);
+                        throw new RuntimeException("Client is NYI");
                     }
+                }).andThenReturn(1000, new TaskCallable<WorldBundle>() {
+                    
+                    @Override
+                    public long getParts() {
+                        return bStatus.get().numTotal();
+                    }
+                    
+                    @Override
+                    public WorldBundle run(TaskHandle t) throws Exception {
+                        t.setStatus("Loading dimension " + bWorld.get().getDimensionName());
+                        do {
+                            t.set(bStatus.get().numDone());
+                            bStatus.get().waitUntilNext();
+                        } while(!bStatus.get().isDone());
+                        return new WorldBundle(bMulti.get(), bWorld.get(),
+                                bPlayer.get().playerEntity, bPlayer.get().playerData);
+                    }
+                    
                 })
                 .start();
         }
@@ -404,7 +421,7 @@ public class Worlds {
          * built with an integrated player specified. */
         private final PlayerData playerData;
         
-        protected WorldBundle(Multiverse<?> multiverse, AbstractWorld world,
+        private WorldBundle(Multiverse<?> multiverse, AbstractWorld world,
                 Entity playerEntity, PlayerData playerData) {
             this.multiverse = multiverse;
             this.world = world;

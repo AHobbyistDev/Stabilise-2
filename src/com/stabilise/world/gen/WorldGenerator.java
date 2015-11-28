@@ -16,6 +16,7 @@ import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.RegionStore;
 import com.stabilise.world.Slice;
+import com.stabilise.world.WorldLoadTracker;
 import com.stabilise.world.loader.WorldLoader.DimensionLoader;
 import com.stabilise.world.multiverse.Multiverse;
 
@@ -56,6 +57,8 @@ public final class WorldGenerator {
     
     private final List<IWorldGenerator> generators = new ArrayList<>(1);
     
+    private final WorldLoadTracker loadTracker;
+    
     private final Log log = Log.getAgent("GENERATOR");
     
     
@@ -72,6 +75,8 @@ public final class WorldGenerator {
         this.executor = multiverse.getExecutor();
         
         seed = multiverse.getSeed();
+        
+        loadTracker = world.loadTracker();
         
         // TODO: de-hardcodify
         generators.add(new PerlinNoiseGenerator());
@@ -130,8 +135,10 @@ public final class WorldGenerator {
         world.stats.gen.requests.increment();
         if(!isShutdown && region.getGenerationPermit())
             genRegion(region);
-        else
+        else {
+            loadTracker.endLoadOp();
             world.stats.gen.rejected.increment();
+        }
     }
     
     /**
@@ -143,6 +150,7 @@ public final class WorldGenerator {
         world.stats.gen.started.increment();
         
         if(isShutdown) {
+            loadTracker.endLoadOp();
             world.stats.gen.aborted.increment();
             return;
         }
@@ -186,6 +194,7 @@ public final class WorldGenerator {
             log.postSevere("Worldgen of " + r + " failed!", t);
             return;
         } finally {
+            loadTracker.endLoadOp();
             // We always clean up all regions cached during generation.
             regionStore.uncacheAll();
         }

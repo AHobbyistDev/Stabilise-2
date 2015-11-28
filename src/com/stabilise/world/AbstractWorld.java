@@ -40,12 +40,12 @@ public abstract class AbstractWorld implements World {
     /** All players in the world. Maps IDs -> players' EntityMobs. */
     protected final Map<Long, Entity> players = new HashMap<>(4);
     private final FunctionalIterable<Entity> itrPlayers =
-            FunctionalIterable.wrap(players.values(), () -> players.size());
+            FunctionalIterable.wrap(players.values(), players::size);
     /** The map of loaded entities in the world. Maps IDs -> Entities.
      * This is a LinkedHashMap as to allow for consistent iteration. */
     protected final Map<Long, Entity> entities = new LinkedHashMap<>(64);
     private final FunctionalIterable<Entity> itrEntities =
-            FunctionalIterable.wrap(entities.values(), () -> entities.size());
+            FunctionalIterable.wrap(entities.values(), entities::size);
     /** The total number of entities which have existed during the lifetime of
      * the world. When a new entity is created this is incremented and set as
      * its ID. */

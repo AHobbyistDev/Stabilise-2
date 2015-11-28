@@ -67,14 +67,24 @@ class TaskTracker {
      * @throws IllegalArgumentException if p < 1
      */
     void increment(long p) {
-        doIncrement(p, 0);
+        doIncrement(p, -1);
+    }
+    
+    /**
+     * Sets the parts count to the specified amount. Values are clamped to the
+     * total parts.
+     * 
+     * @throws IllegalArgumentException if p < 0
+     */
+    void set(long p) {
+        doSet(p, -1);
     }
     
     /** Sets the state, incrementing parts up to full if the state is
      * COMPLETED. This is not atomic. */
     void setState(State state) {
         if(state == State.COMPLETED)
-            doIncrement(Long.MAX_VALUE, 1);
+            doIncrement(Long.MAX_VALUE, 0);
         this.state.set(state);
     }
     
@@ -88,7 +98,7 @@ class TaskTracker {
     
     /**
      * @param p parts to increment
-     * @param c completion part. 1 if complete; 0 if not
+     * @param c completion part. 0 if complete; -1 if not
      * 
      * @throws IllegalArgumentException if p < 1
      */
@@ -96,18 +106,50 @@ class TaskTracker {
         Checks.testMin(p, 1);
         State s = state.get();
         if(s != State.RUNNING)
-            throw new IllegalStateException("state is " + s);
+            throw new IllegalStateException("Task isn't running!");
         long o, n; // old, new
-        c--; // since otherwise we'd use c-1 everywhere
         do {
             o = parts.get();
-            if(o == totalParts + c)
+            if(o >= totalParts + c)
                 return;
             n = o + p;
             if(n >= totalParts || n < 0) // overstep or overflow
                 n = totalParts + c;
         } while(!parts.compareAndSet(o, n));
         
+        reportToParent(n, c);
+    }
+    
+    /**
+     * 
+     * @param n number of parts to set
+     * @param c completion part. 0 if complete; -1 if not
+     * 
+     * @throws IllegalArgumentException if n < 0
+     */
+    private void doSet(long n, long c) {
+        Checks.testMin(n, 0);
+        if(n >= partsToReport + c)
+            n = partsToReport + c;
+        State s = state.get();
+        if(s != State.RUNNING)
+            throw new IllegalStateException("Task isn't running!");
+        long o; // old
+        do {
+            o = parts.get();
+            if(o == totalParts)
+                return;
+        } while(!parts.compareAndSet(o, n));
+        
+        reportToParent(n, c);
+    }
+    
+    /**
+     * @param n number of parts
+     * @param c completion part. 0 if complete; -1 if not
+     */
+    private void reportToParent(long n, long c) {
+        long o; // old
         // If we have a parent, we try to forward these parts (scaled
         // appropriately as per partsToReport) to our parent.
         if(parent != null) {

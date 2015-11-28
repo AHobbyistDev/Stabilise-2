@@ -21,7 +21,7 @@ public abstract class BaseMob extends CCore {
     
     /** The default number of ticks a mob becomes invulnerable for after being
      * hit. */
-    protected static final int INVULNERABILITY_TICKS = 10;
+    protected static final int INVULNERABILITY_TICKS = 20;
     
     /** The default number of ticks a mob remains in the world after being
      * killed, before vanishing. */

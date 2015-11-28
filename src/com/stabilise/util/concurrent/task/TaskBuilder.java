@@ -15,7 +15,7 @@ import com.stabilise.util.concurrent.event.EventDispatcher.EventHandler;
  * 
  * <p>The type parameters of this class should normally be invisible and
  * irrelevant to the end-user, as this class should only ever occur amidst
- * invocation chains.
+ * method chaining.
  * 
  * @param <R> The return type of the task to generate. If a builder is
  * constructing a non-returning task, this will be {@code Void}.
@@ -51,8 +51,7 @@ public final class TaskBuilder<R, T extends Task> {
     
     
     /**
-     * @throws IllegalStateException if either the executor wasn't set on the
-     * builder.
+     * @throws IllegalStateException if the executor wasn't set on the builder.
      */
     TaskBuilder(TaskBuilderBuilder builder) {
         if(builder.executor == null)
@@ -354,7 +353,7 @@ public final class TaskBuilder<R, T extends Task> {
      * @throws IllegalStateException if the task has already been built, a
      * group has not been closed, no task units have been declared, or we're
      * building a value-returning task but no value-returning unit was {@link
-     * #andThenReturn(TaskCallable)} set.
+     * #andThenReturn(TaskCallable) set}.
      */
     public T build() {
         checkState();
@@ -381,7 +380,9 @@ public final class TaskBuilder<R, T extends Task> {
      * Builds, starts and returns the Task.
      * 
      * @throws IllegalStateException if the task has already been built, a
-     * group has not been closed, or no task units have been declared.
+     * group has not been closed, no task units have been declared, or we're
+     * building a value-returning task but no value-returning unit was {@link
+     * #andThenReturn(TaskCallable) set}.
      */
     public T start() {
         @SuppressWarnings("unchecked")
@@ -439,7 +440,7 @@ public final class TaskBuilder<R, T extends Task> {
         
         @Override
         public void run(TaskHandle handle) throws Exception {
-            retVal.set(callable.call(handle));
+            retVal.set(callable.run(handle));
         }
         
         @Override

@@ -157,8 +157,20 @@ public class LoadingState implements State {
         
         batch.begin();
         sprSplash.draw(batch);
-        font.draw(batch, future.toString() + "\n" + future.curSubtask().toString(),
-                -250, -80, 500, Align.center, true);
+        batch.end();
+        
+        shapes.begin(ShapeType.Filled);
+        shapes.setColor(Color.FIREBRICK);
+        shapes.rect(-150, -96,  300, 20);
+        shapes.rect(-150, -136, 300, 20);
+        shapes.setColor(Color.FOREST);
+        shapes.rect(-150, -96,  (int)(300*future.fractionCompleted()), 20);
+        shapes.rect(-150, -136, (int)(300*future.curSubtask().fractionCompleted()), 20);
+        shapes.end();
+        
+        batch.begin();
+        font.draw(batch, future.toString(), -250, -80, 500, Align.center, true);
+        font.draw(batch, future.curSubtask().toString(), -250, -120, 500, Align.center, true);
         batch.end();
     }
     

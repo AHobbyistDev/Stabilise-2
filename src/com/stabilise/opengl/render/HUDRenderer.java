@@ -67,8 +67,8 @@ public class HUDRenderer implements Renderer {
     @Override
     public void render() {
         if(game.debug) {
-            wr.font.setColor(Color.BLACK);
-            wr.font.draw(wr.batch,
+            wr.debugFont.setColor(Color.WHITE);
+            wr.debugFont.draw(wr.batch,
                     "Stabilise II v" + Constants.VERSION + "\n" +
                     //"FPS: " + screen.getFPS() + " (" + screen.getFPSCap() + ")",
                     "x: " + String.format("%1.2f", player.x) + "\n" +

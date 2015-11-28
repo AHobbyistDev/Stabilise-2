@@ -23,10 +23,6 @@ public class WorldStatistics {
     // Client
     
     
-    public WorldStatistics() {
-        // nothing to see here, move along
-    }
-    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

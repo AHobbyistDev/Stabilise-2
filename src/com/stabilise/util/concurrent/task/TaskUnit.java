@@ -165,8 +165,13 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
     }
     
     @Override
-    public void increment(int parts) {
+    public void increment(long parts) {
         tracker.increment(parts);
+    }
+    
+    @Override
+    public void set(long parts) {
+        tracker.set(parts);
     }
     
     @Override
@@ -186,12 +191,6 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
     void cancel() {
         if(thread != null && tracker.getState() == State.RUNNING)
             thread.interrupt();
-    }
-    
-    @Override
-    public void checkCancel() throws InterruptedException {
-        if(pollCancel())
-            throw new InterruptedException("Cancelled");
     }
     
     @Override

@@ -554,7 +554,7 @@ public class Region {
         if(!imported) {
             imported = true;
             forEachSlice(s -> {
-                s.buildLight();
+                //s.buildLight();
                 s.importEntities(world);
                 s.importTileEntities(world);
             });

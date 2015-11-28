@@ -26,7 +26,16 @@ public interface TaskHandle {
      * 
      * @throws IllegalArgumentException if {@code parts < 1}.
      */
-    void increment(int parts);
+    void increment(long parts);
+    
+    /**
+     * Marks the specified number of parts as completed. Values are clamped to
+     * the total parts. This method is provided for convenience; using {@link
+     * #increment(long)} is generally preferable.
+     * 
+     * @throws IllegalArgumentException if {@code parts < 0}.
+     */
+    void set(long parts);
     
     /**
      * Updates the status and marks a single part as completed. Equivalent to
@@ -46,7 +55,7 @@ public interface TaskHandle {
      * @throws IllegalArgumentException if {@code parts < 1}.
      * @throws NullPointerException if {@code status} is {@code null}.
      */
-    default void next(int parts, String status) {
+    default void next(long parts, String status) {
         increment(parts);
         setStatus(status);
     }
@@ -54,7 +63,10 @@ public interface TaskHandle {
     /**
      * Throws an {@code InterruptedException} if the task has been cancelled.
      */
-    void checkCancel() throws InterruptedException;
+    default void checkCancel() throws InterruptedException {
+        if(pollCancel())
+            throw new InterruptedException("Cancelled");
+    }
     
     /**
      * Checks for whether or not the task has been cancelled.
