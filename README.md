@@ -1,3 +1,3 @@
 A 2D tile-based platformer with hopefully other fancy features, akin to Terraria.
 
-All stuff is considered copyright (c) WeenAFK unless otherwise stated, so no stealing please.
+This is a work-in-progress hobby and probably shouldn't be taken seriously by anyone.
