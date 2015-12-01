@@ -9,6 +9,7 @@ import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.controller.IdleController;
 import com.stabilise.entity.component.core.CCore;
 import com.stabilise.entity.component.physics.CPhysics;
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.collect.registry.DuplicatePolicy;
 import com.stabilise.util.collect.registry.GeneralTypeFactory;
 import com.stabilise.util.collect.registry.GeneralTypeFactory.ReflectiveFactory;
@@ -16,7 +17,7 @@ import com.stabilise.util.collect.registry.RegisterMe;
 import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.collect.registry.TypeFactory;
 
-
+@Incomplete
 public class GameData {
     
     private boolean registered = false;
