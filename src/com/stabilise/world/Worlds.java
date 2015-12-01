@@ -383,12 +383,14 @@ public class Worlds {
                     
                     @Override
                     public WorldBundle run(TaskHandle t) throws Exception {
-                        t.setStatus("Loading dimension " + bWorld.get().getDimensionName());
+                        HostWorld w = bWorld.get();
+                        t.setStatus("Loading dimension " + w.getDimensionName());
                         do {
                             t.set(bStatus.get().numDone());
                             bStatus.get().waitUntilNext();
+                            w.forEachRegion(r -> { if(r.isPrepared()) r.tryImport(w); });
                         } while(!bStatus.get().isDone());
-                        return new WorldBundle(bMulti.get(), bWorld.get(),
+                        return new WorldBundle(bMulti.get(), w,
                                 bPlayer.get().playerEntity, bPlayer.get().playerData);
                     }
                     

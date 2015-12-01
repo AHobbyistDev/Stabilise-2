@@ -34,27 +34,19 @@ public abstract class BaseMob extends CCore {
         OCCUPIED(1),        // A mob is considered 'occupied' if in a state with
                             // this priority and must wait for it to finish before
                             // being able to do other stuff
-        UNOVERRIDEABLE(2);    // This state is un-overridable by any other
+        UNOVERRIDEABLE(2);  // This state can not be overridden
         
         /** The StatePriority's underlying integer value, for comparison
          * purposes. */
         private final int value;
         
-        /**
-         * Sets a StatePriority.
-         * 
-         * @param value The priority's underlying integer value.
-         */
+        
         private StatePriority(int value) {
             this.value = value;
         }
         
         /**
-         * Checks for whether or not something with the priority is capable of
-         * overriding something with the given priority.
-         * 
-         * @param priority The priority.
-         * @return {@code true} if something with the priority is capable of
+         * @return {@code true} if something with this priority is capable of
          * overriding something with the given priority.
          */
         public boolean canOverride(StatePriority priority) {

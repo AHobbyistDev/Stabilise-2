@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-import com.stabilise.util.annotation.GuardedBy;
+import javax.annotation.concurrent.GuardedBy;
 
 class TaskGroup extends TaskUnit {
     

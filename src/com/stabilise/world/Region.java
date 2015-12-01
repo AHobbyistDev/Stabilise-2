@@ -10,8 +10,8 @@ import java.util.function.IntBinaryOperator;
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Constants;
 import com.stabilise.util.Log;
-import com.stabilise.util.annotation.NotThreadSafe;
-import com.stabilise.util.annotation.ThreadSafe;
+import com.stabilise.util.annotation.ThreadSafeMethod;
+import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.box.Box;
 import com.stabilise.util.box.Boxes;
@@ -307,7 +307,7 @@ public class Region {
      * @return {@code true} if this region is newly-anchored.
      */
     @UserThread("MainThread")
-    @NotThreadSafe
+    @ThreadUnsafeMethod
     boolean anchor() {
         return anchors++ == 0;
     }
@@ -321,7 +321,7 @@ public class Region {
      * method call.
      */
     @UserThread("MainThread")
-    @NotThreadSafe
+    @ThreadUnsafeMethod
     boolean deAnchor() {
         return --anchors == 0;
     }
@@ -375,7 +375,7 @@ public class Region {
      * 
      * @throws NullPointerException if {@code struct} is {@code null}.
      */
-    @ThreadSafe
+    @ThreadSafeMethod
     public void addStructure(QueuedStructure struct) {
         structures.add(Objects.requireNonNull(struct));
     }
@@ -388,7 +388,7 @@ public class Region {
      * Returns {@code true} if this region has queued structures; {@code false}
      * otherwise.
      */
-    @ThreadSafe
+    @ThreadSafeMethod
     public boolean hasQueuedStructures() {
         return !structures.isEmpty();
     }
@@ -396,7 +396,7 @@ public class Region {
     /**
      * Gets the structures queued to be added to this region.
      */
-    @ThreadSafe
+    @ThreadSafeMethod
     public Iterable<QueuedStructure> getStructures() {
         return structures.asNonClearing();
     }
@@ -404,7 +404,7 @@ public class Region {
     /**
      * Implants all structures queued to be added to this region.
      */
-    @NotThreadSafe
+    @ThreadUnsafeMethod
     public void implantStructures(RegionStore cache) {
         for(QueuedStructure s : structures) // clears the queue
             doAddStructure(s, cache);
@@ -550,7 +550,7 @@ public class Region {
         Tasks.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE);
     }
     
-    private void tryImport(HostWorld world) {
+    public void tryImport(HostWorld world) {
         if(!imported) {
             imported = true;
             forEachSlice(s -> {
@@ -618,8 +618,10 @@ public class Region {
         return state.get().toString();
     }
     
-    private synchronized String saveStateToString() {
-        return saveState.toString();
+    private String saveStateToString() {
+        synchronized(saveState) {
+            return saveState.toString();
+        }
     }
     
     //--------------------==========--------------------

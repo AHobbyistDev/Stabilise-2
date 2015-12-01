@@ -1,6 +1,7 @@
 package com.stabilise.entity.particle;
 
-import com.stabilise.util.annotation.NotThreadSafe;
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.stabilise.util.collect.Array;
 import com.stabilise.world.World;
 
@@ -10,12 +11,12 @@ import com.stabilise.world.World;
  * object instantiation and to reduce the strain on the GC.
  */
 @NotThreadSafe
-public class ParticlePool<T extends Particle> {
+class ParticlePool<T extends Particle> {
     
     /** Functions as the initial and the minimum capacity. */
-    private static final int CAPACITY_INITIAL = 16;
+    private static final int CAPACITY_INITIAL = 1 << 4;
     /** Maximum pool capacity. */
-    private static final int CAPACITY_MAX = 1024; // 6 expansions
+    private static final int CAPACITY_MAX = 1 << 13; // 9 expansions
     /** Number of active particles must be this many times the size of
      * the pool to force a resize. */
     private static final int LOAD_FACTOR = 3;
@@ -57,15 +58,19 @@ public class ParticlePool<T extends Particle> {
      * Gets a particle from this pool, instantiating a new one if
      * necessary.
      */
-    T get() {
+    Particle get() {
         activeParticles++;
         if(poolSize == 0) {
-            @SuppressWarnings("unchecked")
-            T p = (T)Particle.REGISTRY.create(id);
+            Particle p = Particle.REGISTRY.create(id);
             p.reset();
             return p;
         }
         return pool.get(--poolSize);
+    }
+    
+    @SuppressWarnings("unchecked")
+    T getCasted() {
+        return (T) get();
     }
     
     /**

@@ -30,7 +30,7 @@ public class CBasicArmour implements Component {
     @Override public void update(World w, Entity e) {}
     
     @Override
-    public boolean remove() {
+    public boolean shouldRemove() {
         return durability == 0;
     }
     

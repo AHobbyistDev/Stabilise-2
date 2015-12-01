@@ -2,9 +2,6 @@ package com.stabilise.entity;
 
 import static com.stabilise.world.World.*;
 
-import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.world.World;
-
 /**
  * A FreeGameObject is a game object whose coordinates are not constrained to
  * the coordinate grid of the world, and generally move freely.
@@ -16,23 +13,20 @@ public class FreeGameObject extends GameObject {
     
     
     /**
-     * Creates a new FreeGameObject with coordinates (0,0.
+     * Creates a new FreeGameObject with coordinates (0,0).
      */
     public FreeGameObject() {}
     
     /**
      * Creates a new FreeGameObject at the specified coordinates.
+     * 
+     * @param x The x-coordinate, in tile-lengths.
+     * @param y The y-coordinate, in tile lengths.
      */
     public FreeGameObject(double x, double y) {
         this.x = x;
         this.y = y;
     }
-    
-    @Override
-    public void update(World world) {}
-    
-    @Override
-    public void render(WorldRenderer renderer) {}
     
     @Override
     public final double getX() {

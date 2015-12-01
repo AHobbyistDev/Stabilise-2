@@ -7,11 +7,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates the the target class or method is thread-safe.
+ * Indicates that the annotated method is thread-safe.
+ * 
+ * @see javax.annotation.ThreadSafe
  */
 @Documented
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.TYPE, ElementType.METHOD})
-public @interface ThreadSafe {
+public @interface ThreadSafeMethod {
     
 }

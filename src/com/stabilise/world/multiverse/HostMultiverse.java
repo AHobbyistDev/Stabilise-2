@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.util.Profiler;
-import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.export.ExportToNBT;
 import com.stabilise.util.nbt.export.NBTExporter;
@@ -59,9 +61,9 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         info.age++;
         super.update();
     }
-
+    
     @Override
-    @NotThreadSafe
+    @ThreadUnsafeMethod
     public HostWorld loadDimension(String name) {
         HostWorld world = getDimension(name);
         if(world != null)
@@ -98,7 +100,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
      * loaded, or the dimension could not be loaded.
      * @throws NullPointerException if {@code player} is {@code null}.
      */
-    @NotThreadSafe
+    @ThreadUnsafeMethod
     public PlayerBundle addPlayer(CharacterData player, boolean integrated) {
         PlayerData data = players.get(player.hash);
         if(data == null)

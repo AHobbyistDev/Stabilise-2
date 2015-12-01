@@ -1,9 +1,9 @@
 package com.stabilise.util.collect;
 
-import com.stabilise.util.annotation.NotThreadSafe;
-
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * BiObjectIntMap provides a bi-directional integer to object mapping

@@ -2,7 +2,8 @@ package com.stabilise.util.shape;
 
 import java.util.function.BiPredicate;
 
-import com.stabilise.util.annotation.ThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.stabilise.util.maths.Maths;
 
 /**
@@ -41,10 +42,10 @@ public class Collider {
         TAB_NOR[keyFor(K_AABB, K_POLY)] = (s1,s2) -> intersectsAABBPoly((AABB)s1,(Polygon)s2);
         TAB_NOR[keyFor(K_AABB, K_AABB)] = (s1,s2) -> intersectsAABB((AABB)s1,(AABB)s2);
         
-        TAB_OFF[keyFor(K_POLY, K_POLY)] = (s1,s2,y,x) -> intersectsPoly((Polygon)s1,(Polygon)s2,y,x);
-        TAB_OFF[keyFor(K_POLY, K_AABB)] = (s1,s2,y,x) -> intersectsAABBPoly((AABB)s2,(Polygon)s1,-y,-x);
-        TAB_OFF[keyFor(K_AABB, K_POLY)] = (s1,s2,y,x) -> intersectsAABBPoly((AABB)s1,(Polygon)s2,y,x);
-        TAB_OFF[keyFor(K_AABB, K_AABB)] = (s1,s2,y,x) -> intersectsAABB((AABB)s1,(AABB)s2,y,x);
+        TAB_OFF[keyFor(K_POLY, K_POLY)] = (s1,s2,x,y) -> intersectsPoly((Polygon)s1,(Polygon)s2,x,y);
+        TAB_OFF[keyFor(K_POLY, K_AABB)] = (s1,s2,x,y) -> intersectsAABBPoly((AABB)s2,(Polygon)s1,-x,-y);
+        TAB_OFF[keyFor(K_AABB, K_POLY)] = (s1,s2,x,y) -> intersectsAABBPoly((AABB)s1,(Polygon)s2,x,y);
+        TAB_OFF[keyFor(K_AABB, K_AABB)] = (s1,s2,x,y) -> intersectsAABB((AABB)s1,(AABB)s2,x,y);
     }
     
     private static int keyFor(int k1, int k2) {

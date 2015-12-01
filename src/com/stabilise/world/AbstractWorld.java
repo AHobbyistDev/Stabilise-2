@@ -49,7 +49,7 @@ public abstract class AbstractWorld implements World {
     /** The total number of entities which have existed during the lifetime of
      * the world. When a new entity is created this is incremented and set as
      * its ID. */
-    public int entityCount = 0;
+    public long entityCount = 0;
     /** Entities queued to be added to the world at the end of the tick.
      * <p>This is a ClearingQueue as entities may be added to a world from
      * from another dimension, which can be hosted on another thread. */
@@ -86,7 +86,7 @@ public abstract class AbstractWorld implements World {
     protected final SimpleList<Particle> particles = new FragList<>();
     /** The total number of particles which have existed during the lifetime of
      * the world. */
-    public int particleCount = 0;
+    public long particleCount = 0;
     
     /** The x/y-coordinates of the slice in which players initially spawn, in
      * slice-lengths. */

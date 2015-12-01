@@ -8,11 +8,12 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.stabilise.network.protocol.PacketHandler;
 import com.stabilise.network.protocol.Protocol;
 import com.stabilise.util.Log;
-import com.stabilise.util.annotation.NotThreadSafe;
-import com.stabilise.util.annotation.ThreadSafe;
+import com.stabilise.util.annotation.ThreadSafeMethod;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
@@ -468,7 +469,7 @@ public class TCPConnection {
      * 
      * <p>This method does nothing if this connection has already been closed.
      */
-    @ThreadSafe
+    @ThreadSafeMethod
     public void closeConnection() {
         if(!state.compareAndSet(STATE_ACTIVE, STATE_SHUTDOWN) &&
                 !state.compareAndSet(STATE_CLOSE_REQUESTED, STATE_SHUTDOWN))

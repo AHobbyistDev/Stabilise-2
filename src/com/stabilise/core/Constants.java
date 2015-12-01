@@ -2,9 +2,10 @@ package com.stabilise.core;
 
 import java.io.IOException;
 
+import javax.annotation.concurrent.Immutable;
+
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.Log;
-import com.stabilise.util.annotation.Immutable;
 import com.stabilise.util.nbt.NBTIO;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.Slice;
@@ -18,6 +19,8 @@ public class Constants {
     private Constants() {}
     
     // Primary Application Data -----------------------------------------------
+    
+    public static final String GAME_PACKAGE = "com.stabilise";
     
     /** Indicates whether or not this copy of the game is a developer version.
      * <p>This should be {@code false} for all public releases. */

@@ -5,7 +5,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import com.stabilise.util.annotation.NotThreadSafe;
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.stabilise.util.collect.Array;
 
 /**
@@ -127,6 +128,23 @@ public class TypeRegistry<T, V> extends AbstractRegistry<Class<? extends T>> {
     @Override
     public Iterator<Class<? extends T>> iterator() {
         return idMap.keySet().iterator();
+    }
+    
+    @Override
+    public String toStringVerbose() {
+        StringBuilder sb = new StringBuilder();
+        int size = size();
+        sb.append('"').append(name).append("\":[").append(size);
+        sb.append(size == 1 ? " entry] {\n" : " entries] {\n");
+        for(Iterator<Map.Entry<Class<? extends T>,Integer>> i = idMap.entrySet().iterator(); i.hasNext();) {
+            sb.append("    ");
+            Map.Entry<Class<? extends T>,Integer> e = i.next();
+            sb.append(e.getValue()).append(": ").append(e.getKey());
+            sb.append(": ").append(values.get(e.getValue()));
+            if(i.hasNext()) sb.append(',');
+            sb.append('\n');
+        }
+        return sb.append("}").toString();
     }
     
 }

@@ -6,9 +6,10 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterators;
-import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
  * This class provides a thin wrapper for an object array with some added

@@ -1,11 +1,11 @@
 package com.stabilise.util.maths;
 
-import com.stabilise.util.annotation.Immutable;
-
 /**
- * An immutable 2D vector.
+ * A 2D vector.
+ * 
+ * @see #mutable(float, float)
+ * @see #immutable(float, float)
  */
-@Immutable
 public abstract class Vec2 {
     
     /** Gets the x-component of this vector. */

@@ -2,7 +2,7 @@ package com.stabilise.util;
 
 import java.util.concurrent.TimeUnit;
 
-import com.stabilise.util.annotation.NotThreadSafe;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * A TaskTimer allows the execution time of a task to be measured and compared

@@ -12,8 +12,9 @@ import java.util.RandomAccess;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.stabilise.util.Checks;
-import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
  * An alternative ArrayList implementation with some design adjustments and

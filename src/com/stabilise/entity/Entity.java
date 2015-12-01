@@ -57,7 +57,7 @@ public class Entity extends FreeGameObject {
         
         components.iterate(c -> {
             c.update(world, this);
-            return c.remove();
+            return c.shouldRemove();
         });
         
         world.profiler().next("controller");

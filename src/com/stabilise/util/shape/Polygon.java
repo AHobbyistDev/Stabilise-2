@@ -2,8 +2,9 @@ package com.stabilise.util.shape;
 
 import java.util.Arrays;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.stabilise.util.Checks;
-import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
  * A polygon is a shape with any number of vertices.

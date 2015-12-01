@@ -47,32 +47,27 @@ public abstract class NBTTag implements Sendable {
     /**
      * Creates a new NBT tag.
      * 
-     * @param tagName The tag's name.
+     * @param tagName The tag name.
      */
     public NBTTag(String tagName) {
         setName(tagName);
     }
     
     /**
-     * Sets the tag's name. If {@code name} is {@code null}, the name is set to
-     * an empty string.
+     * Sets this tag's name. If {@code name} is {@code null}, the name is set
+     * to an empty string.
      * 
      * @param name The desired tag name.
      * 
-     * @return This tag, for chaining operations.
+     * @return This tag.
      */
     public NBTTag setName(String name) {
-        if(name != null)
-            this.name = name;
-        else
-            name = "";
+        this.name = name != null ? name : "";
         return this;
     }
     
     /**
-     * Gets the tag's name.
-     * 
-     * @return This NBTTag's name.
+     * Gets this tag's name.
      */
     public String getName() {
         return name;

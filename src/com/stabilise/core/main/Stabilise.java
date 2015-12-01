@@ -3,6 +3,7 @@ package com.stabilise.core.main;
 import java.util.Arrays;
 
 import com.stabilise.core.Constants;
+import com.stabilise.core.GameData;
 import com.stabilise.core.Settings;
 import com.stabilise.core.app.Application;
 import com.stabilise.core.state.State;
@@ -106,6 +107,8 @@ public class Stabilise extends Application {
                 
                 Settings.initialise();
                 Controller.poke();
+                
+                new GameData().register();
                 
                 bootstrapped = true;
                 

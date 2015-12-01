@@ -2,7 +2,7 @@ package com.stabilise.util.maths;
 
 import java.util.Random;
 
-import com.stabilise.util.annotation.NotThreadSafe;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * A utility class which generates 1-dimensional perlin noise.

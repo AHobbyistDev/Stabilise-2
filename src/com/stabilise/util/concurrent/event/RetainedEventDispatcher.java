@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import com.stabilise.util.annotation.ThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.stabilise.util.collect.IteratorUtils;
 
 /**

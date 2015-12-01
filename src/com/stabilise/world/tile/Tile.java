@@ -9,6 +9,7 @@ import com.stabilise.item.Items;
 import com.stabilise.util.collect.registry.RegistryNamespacedDefaulted;
 import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.world.World;
+import com.stabilise.world.WorldProvider;
 import com.stabilise.world.tile.TileBuilder.Template;
 
 /**
@@ -87,7 +88,7 @@ public class Tile {
      * @param x The x-coordinate of the tile, in tile-lengths.
      * @param y The y-coordinate of the tile, in tile-lengths.
      */
-    public void handlePlace(World world, int x, int y) {
+    public void handlePlace(WorldProvider world, int x, int y) {
         // TODO
     }
     
@@ -98,7 +99,7 @@ public class Tile {
      * @param x The x-coordinate of the tile, in tile-lengths.
      * @param y The y-coordinate of the tile, in tile-lengths.
      */
-    public void handleRemove(World world, int x, int y) {
+    public void handleRemove(WorldProvider world, int x, int y) {
         // TODO
     }
     

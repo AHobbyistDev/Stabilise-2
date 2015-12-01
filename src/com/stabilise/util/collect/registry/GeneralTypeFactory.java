@@ -94,7 +94,7 @@ public class GeneralTypeFactory<T> extends TypeRegistry<T, Factory<T>> {
     /**
      * A Factory which utilises reflection to instantiate its objects.
      */
-    public static class ReflectiveFactory<T> implements Factory<T> {
+    public static class ReflectiveFactory<T> implements Factory<T>, Supplier<T> {
         
         /** The object constructor. */
         private final Constructor<? extends T> constructor;
@@ -135,6 +135,17 @@ public class GeneralTypeFactory<T> extends TypeRegistry<T, Factory<T>> {
                         + "\"! (" + e.getMessage() + ")",
                         e);
             }
+        }
+        
+        /**
+         * This class implements {@code Supplier} for convenience purposes;
+         * note, however, that it is not safe to use this method for
+         * constructing objects unless it is known that this ReflectiveFactory
+         * is for a parameterless constructor.
+         */
+        @Override
+        public T get() {
+            return create();
         }
         
     }

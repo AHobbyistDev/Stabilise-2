@@ -5,7 +5,6 @@ import java.util.Random;
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
-import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.AbstractWorld;
@@ -19,7 +18,6 @@ import com.stabilise.world.World;
  * <p>A ParticleSource pools its particles using a {@link ParticlePool} as
  * a background optimisation.
  */
-@NotThreadSafe
 public class ParticleSource<T extends Particle> {
     
     private final AbstractWorld world;
@@ -79,7 +77,7 @@ public class ParticleSource<T extends Particle> {
      * the particle.
      */
     public T create() {
-        T p = pool.get();
+        T p = pool.getCasted();
         p.reset();
         world.addParticle(p);
         return p;
@@ -91,7 +89,7 @@ public class ParticleSource<T extends Particle> {
      * addParticle(particle, x, y)}, and then returns the particle.
      */
     public T createAt(double x, double y) {
-        T p = pool.get();
+        T p = pool.getCasted();
         addParticle(p, x, y);
         return p;
     }

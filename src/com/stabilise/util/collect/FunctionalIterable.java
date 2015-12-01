@@ -66,10 +66,13 @@ public interface FunctionalIterable<E> extends Iterable<E> {
     
     /**
      * Wraps an {@code Iterable} object in a {@code FunctionalIterable}.
+     * Returns the given Iterable if it is already a FunctionalIterable.
      * 
      * @throws NullPointerException if {@code itr} is {@code null}.
      */
     public static <T> FunctionalIterable<T> wrap(Iterable<T> itr) {
+        if(itr instanceof FunctionalIterable)
+            return (FunctionalIterable<T>)itr;
         Objects.requireNonNull(itr); // fail-fast
         return () -> itr.iterator();
     }
@@ -86,11 +89,9 @@ public interface FunctionalIterable<E> extends Iterable<E> {
             @Override public Iterator<T> iterator() {
                 return itr.iterator();
             }
-            
             @Override public int size() {
                 return size.getAsInt();
             }
-            
         };
     }
     

@@ -15,8 +15,8 @@ import com.stabilise.util.collect.registry.GeneralTypeFactory.UnsafeFactory;
  * class A extends S {}
  * class B extends S {}
  * 
- * TypeFactory{@code <S>} factory = new TypeFactory<>(new RegistryParams());
- * factory.register(0, A.class, A::new); // uses constructor
+ * TypeFactory{@code <S>} factory = new TypeFactory<>();
+ * factory.register(0, A.class, A::new); // uses default constructor
  * factory.registerUnsafe(1, B.class);   // uses UnsafeFactory
  * 
  * S a = factory.create(0);
@@ -24,6 +24,10 @@ import com.stabilise.util.collect.registry.GeneralTypeFactory.UnsafeFactory;
  * </pre>
  */
 public class TypeFactory<T> extends TypeRegistry<T, Supplier<T>> {
+    
+    public TypeFactory() {
+        this(new RegistryParams());
+    }
     
     /**
      * @throws NullPointerException if {@code params} is {@code null}.

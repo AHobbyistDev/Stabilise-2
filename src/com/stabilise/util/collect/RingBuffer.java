@@ -5,8 +5,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.badlogic.gdx.math.MathUtils;
-import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
  * A RingBuffer is an array-based bounded queue implementation with

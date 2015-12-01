@@ -32,6 +32,8 @@ public class CItem extends CCore {
     /** The speed at which items accelerate towards a player. */
     private static final float ATTRACTION_SPEED = 2.0f;
     
+    private static final double MERGE_RANGE_SQ = 2*2;
+    
     private static final AABB ENT_AABB = new AABB(-0.4f, 0f, 0.8f, 0.8f);
     
     //--------------------==========--------------------
@@ -40,8 +42,7 @@ public class CItem extends CCore {
     
     /** The item stack the entity represents. */
     public ItemStack stack;
-    /** The number of the item the entity holds. */
-    public int count;
+    
     
     public CItem() {}
     public CItem(ItemStack stack) { this.stack = stack; }
@@ -63,6 +64,13 @@ public class CItem extends CCore {
     public void update(World w, Entity e) {
         if(e.age == DESPAWN_TICKS)
             e.destroy();
+        
+        if(e.age == 60 || e.age == 120 || e.age == 600) {
+            for(Entity o : w.getEntities()) {
+                if(o.core instanceof CItem && tryMerge(e, o, (CItem)o.core))
+                    return;
+            }
+        }
         
         for(Entity p : w.getPlayers()) {
             if(!(p.core instanceof IContainer)) continue;
@@ -93,6 +101,22 @@ public class CItem extends CCore {
                 }
             }
         }
+    }
+    
+    private boolean tryMerge(Entity e, Entity o, CItem c) {
+        // Don't add to a destroyed stack or self
+        if(o.isDestroyed() || o == e) return false;
+        
+        double dx = e.x - o.x;
+        double dy = e.y - o.y;
+        if(dx*dx + dy*dy <= MERGE_RANGE_SQ) {
+            if(c.stack.add(stack)) {
+                o.age = 0; // reset the other's timer
+                e.destroy();
+                return true;
+            }
+        }
+        return false;
     }
     
     @Override

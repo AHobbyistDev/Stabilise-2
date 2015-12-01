@@ -9,8 +9,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.stabilise.util.annotation.GuardedBy;
-import com.stabilise.util.annotation.ThreadSafe;
+import javax.annotation.concurrent.GuardedBy;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.stabilise.util.concurrent.Waiter;
 
 /**
@@ -289,18 +290,16 @@ public class Task implements TaskView {
      * <p>This implementation behaves as if by:
      * 
      * <pre>
-     * return getStatus() + "... " + percentCompleted() + "% ("
-     *         + getPartsCompleted() + "/" + getTotalParts() + ")";
+     * return getStatus() + "... " + percentCompleted();
      * </pre>
      * 
      * which returns a string of the form:
      *
-     * <pre>"Working... 50% (256/512)"</pre>
+     * <pre>"Working... 50%"</pre>
      */
     @Override
     public String toString() {
-        return status() + "... " + percentCompleted() + "% ("
-                + partsCompleted() + "/" + totalParts() + ")";
+        return status() + "... " + percentCompleted() + "%";
     }
     
     //--------------------==========--------------------

@@ -3,7 +3,7 @@ package com.stabilise.util.concurrent.task;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.stabilise.util.annotation.ThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
 
 /**
  * A ReturnBox encapsulates the return value of a ReturnTask. This class

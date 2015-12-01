@@ -1,6 +1,7 @@
 package com.stabilise.world.tile;
 
 import com.stabilise.world.World;
+import com.stabilise.world.WorldProvider;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -26,13 +27,13 @@ public abstract class TileTE extends Tile {
     protected abstract TileEntity createTE(int x, int y);
     
     @Override
-    public void handlePlace(World world, int x, int y) {
+    public void handlePlace(WorldProvider world, int x, int y) {
         super.handlePlace(world, x, y);
         world.setTileEntityAt(x, y, createTE(x, y));
     }
     
     @Override
-    public void handleRemove(World world, int x, int y) {
+    public void handleRemove(WorldProvider world, int x, int y) {
         super.handleRemove(world, x, y);
         world.removeTileEntityAt(x, y);
     }

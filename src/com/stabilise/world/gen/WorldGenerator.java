@@ -8,9 +8,10 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.stabilise.util.Log;
 import com.stabilise.util.TaskTimer;
-import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;

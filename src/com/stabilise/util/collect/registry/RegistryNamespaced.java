@@ -1,6 +1,6 @@
 package com.stabilise.util.collect.registry;
 
-import com.stabilise.util.annotation.NotThreadSafe;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * A namespaced registry is an IDRegistry whose keys are namespaced strings

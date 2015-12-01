@@ -3,7 +3,7 @@ package com.stabilise.util.concurrent;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
-import com.stabilise.util.annotation.ThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
 
 /**
  * A {@code ClearingQueue} is a minimalist type of thread-safe queue for which

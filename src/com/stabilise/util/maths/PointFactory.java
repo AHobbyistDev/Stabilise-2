@@ -3,8 +3,8 @@ package com.stabilise.util.maths;
 import java.util.Objects;
 import java.util.function.IntBinaryOperator;
 
-import com.stabilise.util.annotation.Immutable;
-import com.stabilise.util.annotation.ThreadSafe;
+import javax.annotation.concurrent.Immutable;
+
 import com.stabilise.util.maths.Point.ImmutablePoint;
 import com.stabilise.util.maths.Point.MutablePoint;
 
@@ -18,7 +18,6 @@ import com.stabilise.util.maths.Point.MutablePoint;
  * 'breeds' of points.
  */
 @Immutable
-@ThreadSafe
 public class PointFactory {
     
     private final IntBinaryOperator hasher;

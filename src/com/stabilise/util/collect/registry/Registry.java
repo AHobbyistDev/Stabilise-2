@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import com.stabilise.util.annotation.NotThreadSafe;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * A registry allows for objects of a certain type to be registered and
@@ -115,6 +115,22 @@ public class Registry<K, V> extends AbstractRegistry<V> {
     @Override
     public Iterator<V> iterator() {
         return objects.values().iterator();
+    }
+    
+    @Override
+    public String toStringVerbose() {
+        StringBuilder sb = new StringBuilder();
+        int size = size();
+        sb.append('"').append(name).append("\":[").append(size);
+        sb.append(size == 1 ? " entry] {\n" : " entries] {\n");
+        for(Iterator<Map.Entry<K,V>> i = objects.entrySet().iterator(); i.hasNext();) {
+            sb.append("    ");
+            Map.Entry<K,V> e = i.next();
+            sb.append(e.getKey()).append(": ").append(e.getValue());
+            if(i.hasNext()) sb.append(',');
+            sb.append('\n');
+        }
+        return sb.append("}").toString();
     }
     
 }

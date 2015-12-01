@@ -4,7 +4,8 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 
-import com.stabilise.util.annotation.NotThreadSafe;
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.stabilise.util.concurrent.Tasks;
 import com.stabilise.util.concurrent.event.Event;
 import com.stabilise.util.concurrent.event.EventDispatcher;

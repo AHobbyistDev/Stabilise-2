@@ -244,8 +244,7 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
     
     @Override
     public String toString() {
-        return status() + "... " + percentCompleted() + "% ("
-                + partsCompleted() + "/" + totalParts() + ")";
+        return status() + "... " + percentCompleted() + "%";
     }
     
 }

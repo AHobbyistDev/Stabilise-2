@@ -7,11 +7,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that an instance of the annotated class is immutable.
+ * Indicates that the annotated method is not thread-safe.
+ * 
+ * @see javax.annotation.NotThreadSafe
  */
 @Documented
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.TYPE})
-public @interface Immutable {
+public @interface ThreadUnsafeMethod {
     
 }

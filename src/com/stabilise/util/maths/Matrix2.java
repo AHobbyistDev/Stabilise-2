@@ -1,6 +1,6 @@
 package com.stabilise.util.maths;
 
-import com.stabilise.util.annotation.NotThreadSafe;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * A 2x2 row-major matrix. Such a matrix takes the form:

@@ -2,7 +2,7 @@ package com.stabilise.util.collect.registry;
 
 import java.util.Objects;
 
-import com.stabilise.util.annotation.NotThreadSafe;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * This class allows for the creation of a namespaced registry which returns a

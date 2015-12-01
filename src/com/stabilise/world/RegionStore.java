@@ -12,10 +12,11 @@ import java.util.function.Consumer;
 import java.util.function.IntBinaryOperator;
 import java.util.function.IntFunction;
 
+import javax.annotation.concurrent.GuardedBy;
+
 import com.stabilise.util.Log;
-import com.stabilise.util.annotation.GuardedBy;
-import com.stabilise.util.annotation.NotThreadSafe;
-import com.stabilise.util.annotation.ThreadSafe;
+import com.stabilise.util.annotation.ThreadSafeMethod;
+import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
@@ -188,7 +189,7 @@ public class RegionStore {
      * @return The region, or {@code null} if no such region exists.
      */
     @UserThread("MainThread")
-    @NotThreadSafe
+    @ThreadUnsafeMethod
     Region getRegionAt(int x, int y) {
         return regions.get(unguardedDummyLoc.set(x, y));
     }
@@ -201,7 +202,7 @@ public class RegionStore {
      * 
      * @return The region, or {@code null} if no such region exists.
      */
-    @ThreadSafe
+    @ThreadSafeMethod
     private Region getRegionAt(Point point) {
         return regions.get(point);
     }
@@ -216,7 +217,7 @@ public class RegionStore {
      * @return The region.
      */
     @UserThread("MainThread")
-    @NotThreadSafe
+    @ThreadUnsafeMethod
     private Region loadRegion(int x, int y) {
         // Get the region if it is already loaded
         Region r = regions.get(unguardedDummyLoc.set(x, y));
@@ -536,7 +537,7 @@ public class RegionStore {
      * Returns the number of regions in primary storage.
      */
     @UserThread("MainThread")
-    @NotThreadSafe
+    @ThreadUnsafeMethod
     int numRegions() {
         return numRegions;
     }

@@ -39,18 +39,22 @@ public interface Component extends IWeightProvider, IDuplicateResolver<Component
      * 
      * <p>The default implementation returns {@code false}.
      */
-    default boolean remove() {
+    default boolean shouldRemove() {
         return false;
     }
     
     /**
      * Handles an entity-local event broadcast.
      * 
+     * <p>The default implementation returns {@code false}.
+     * 
      * @return {@code true} to consume the event and prevent it from being
      * passed on to more components; {@code false} to not treat the event as
      * consumed.
      */
-    boolean handle(World w, Entity e, EntityEvent ev);
+    default boolean handle(World w, Entity e, EntityEvent ev) {
+        return false;
+    }
     
     @Override
     default int getWeight() {

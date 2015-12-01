@@ -9,9 +9,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.stabilise.entity.GameObject;
 import com.stabilise.util.annotation.Incomplete;
-import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
 import com.stabilise.util.maths.PointFactory;

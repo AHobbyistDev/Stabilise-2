@@ -3,9 +3,10 @@ package com.stabilise.util.collect.registry;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.stabilise.util.annotation.NotThreadSafe;
 import com.stabilise.util.collect.BiObjectIntMap;
 
 /**
@@ -129,6 +130,23 @@ public class IDRegistry<K, V> extends Registry<K, V> {
     @Override
     public Iterator<V> iterator() {
         return idMap.iterator();
+    }
+    
+    @Override
+    public String toStringVerbose() {
+        StringBuilder sb = new StringBuilder();
+        int size = size();
+        sb.append('"').append(name).append("\":[").append(size);
+        sb.append(size == 1 ? " entry] {\n" : " entries] {\n");
+        for(Iterator<Map.Entry<K,V>> i = objects.entrySet().iterator(); i.hasNext();) {
+            sb.append("    ");
+            Map.Entry<K,V> e = i.next();
+            sb.append(idMap.getKey(e.getKey())).append(": ");
+            sb.append(e.getKey()).append(": ").append(e.getValue());
+            if(i.hasNext()) sb.append(',');
+            sb.append('\n');
+        }
+        return sb.append("}").toString();
     }
     
 }

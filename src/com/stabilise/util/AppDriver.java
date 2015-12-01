@@ -2,7 +2,8 @@ package com.stabilise.util;
 
 import java.util.concurrent.TimeUnit;
 
-import com.stabilise.util.annotation.NotThreadSafe;
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.stabilise.util.concurrent.Tasks;
 
 /**
@@ -27,7 +28,10 @@ public final class AppDriver implements Runnable {
     private final long nsPerTick; // nanos per tick
     /** Maximum number of frames per second. 0 indicates no max, -1 indicates
      * no frames should be rendered. */
-    private int fps;
+    private int maxFps;
+    private int fps = 0;
+    private int lastFps = 0;
+    private long lastFPSRefresh = System.currentTimeMillis();
     private long nsPerFrame; // nanos per frame
     /** Threshold value, in nanoseconds, of {@link #unprocessed} before we
      * reset its value and skip ticks. */
@@ -78,7 +82,7 @@ public final class AppDriver implements Runnable {
     public AppDriver(int tps, Runnable updater, Runnable renderer) {
         this.tps = Checks.testMin(tps, 1);
         nsPerTick = 1000000000 / tps;
-        setFPS(tps);
+        setMaxFPS(tps);
         this.log = log == null ? Log.get() : log;
         ticksPerFlush = tps;
         
@@ -105,8 +109,8 @@ public final class AppDriver implements Runnable {
     /**
      * Initiates a loop which invokes {@link #tick()} up to as many times per
      * second as {@code fps} as specified in the constructor or by {@link
-     * #setFPS(int)}. This method will not return until either of the following
-     * occurs:
+     * #setMaxFPS(int)}. This method will not return until either of the
+     * following occurs:
      * 
      * <ul>
      * <li>{@link #running} is set to {@code false}; or, equivalently,
@@ -142,7 +146,7 @@ public final class AppDriver implements Runnable {
      * 
      * @return The number of milliseconds to wait until this should be invoked
      * again to ensure this is invoked as many times per second as specified by
-     * {@link #getFPS()}. This is used by {@link #run()} and should generally
+     * {@link #getMaxFPS()}. This is used by {@link #run()} and should generally
      * be ignored.
      * @throws IllegalStateException if this is invoked while a tick is in
      * progress, or if client code has been improperly using the profiler.
@@ -193,8 +197,15 @@ public final class AppDriver implements Runnable {
         
         // Rendering
         profiler.start("render");
-        if(fps != -1)
+        if(maxFps != -1)
             renderer.run();
+        
+        fps++;
+        if(System.currentTimeMillis() - lastFPSRefresh >= 1000) {
+            lastFps = fps;
+            fps = 0;
+            lastFPSRefresh += 1000;
+        }
         
         profiler.verify(2, "root.render");
         profiler.next("wait");
@@ -240,8 +251,8 @@ public final class AppDriver implements Runnable {
      * @return The max FPS. A value of {@code 0} indicates no maximum; a value
      * of {@code -1} means {@link #render()} will not be invoked at all. 
      */
-    public int getFPS() {
-        return fps;
+    public int getMaxFPS() {
+        return maxFps;
     }
     
     /**
@@ -257,10 +268,17 @@ public final class AppDriver implements Runnable {
      * @throws IllegalArgumentException if {@code fps < -1}.
      * @return This AppDriver.
      */
-    public AppDriver setFPS(int fps) {
-        this.fps = Checks.testMin(fps, -1);
+    public AppDriver setMaxFPS(int fps) {
+        this.maxFps = Checks.testMin(fps, -1);
         nsPerFrame = fps == 0 ? 0 : 1000000000 / fps;
         return this;
+    }
+    
+    /**
+     * Returns the current fps value.
+     */
+    public int getFPS() {
+        return lastFps;
     }
     
     /**

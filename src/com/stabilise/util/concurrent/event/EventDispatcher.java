@@ -7,9 +7,10 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import javax.annotation.concurrent.GuardedBy;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.stabilise.core.app.Application;
-import com.stabilise.util.annotation.GuardedBy;
-import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.collect.IteratorUtils;
 import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.util.concurrent.Striper;
@@ -39,18 +40,6 @@ import com.stabilise.util.concurrent.Striper;
  */
 @ThreadSafe
 public class EventDispatcher {
-    
-    /*
-     * Internally, this class performs some ugly casting and fiddly stuff with
-     * generics, solely so we can have:
-     *     addListener(E event, EventHandler<? super E> handler)
-     * 
-     * i.e., without this generic mess, we'd need to do:
-     *     dispatcher.addListener(new MyEvent(), (Event e) -> blah((MyEvent)e));
-     * whereas now we're allowed to do:
-     *     dispatcher.addListener(new MyEvent(), (MyEvent e) -> blah(e));
-     * which is overall much nicer from the user's perspective.
-     */
     
     // Package-private for RetainedEventDispatcher
     final ConcurrentHashMap<Event, ListenerBucket<?>> handlers = new ConcurrentHashMap<>();

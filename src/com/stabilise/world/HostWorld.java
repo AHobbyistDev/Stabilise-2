@@ -11,7 +11,7 @@ import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.util.annotation.ForTestingPurposes;
-import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.world.dimension.Dimension;
@@ -78,7 +78,7 @@ public class HostWorld extends AbstractWorld {
         regions.prepare(loader);
     }
     
-    @NotThreadSafe
+    @ThreadUnsafeMethod
     @Override
     public void prepare() {
         if(prepared)
@@ -198,7 +198,7 @@ public class HostWorld extends AbstractWorld {
      * @return The region, or {@code null} if no such region exists.
      */
     @UserThread("MainThread")
-    @NotThreadSafe
+    @ThreadUnsafeMethod
     public Region getRegionAt(int x, int y) {
         return regions.getRegionAt(x, y);
     }
@@ -276,7 +276,7 @@ public class HostWorld extends AbstractWorld {
      * @param y The y-coordinate of the slice, in slice lengths.
      */
     @UserThread("MainThread")
-    @NotThreadSafe
+    @ThreadUnsafeMethod
     public void loadSlice(int x, int y) {
         regions.anchorRegion(
                 regionCoordFromSliceCoord(x),
@@ -354,7 +354,7 @@ public class HostWorld extends AbstractWorld {
     @Override
     public void setTileEntityAt(int x, int y, TileEntity t) {
         Slice s = getSliceAtTile(x, y);
-            
+        
         if(s != null) {
             int tileX = tileCoordRelativeToSliceFromTileCoord(x);
             int tileY = tileCoordRelativeToSliceFromTileCoord(y);

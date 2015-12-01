@@ -7,6 +7,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.LifecycleListener;
@@ -16,8 +18,6 @@ import com.stabilise.util.AppDriver;
 import com.stabilise.util.ArrayUtil;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
-import com.stabilise.util.annotation.NotThreadSafe;
-import com.stabilise.util.annotation.ThreadSafe;
 import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 
 /**
@@ -404,6 +404,13 @@ public abstract class Application {
     }
     
     /**
+     * Returns the current FPS.
+     */
+    public final int getFPS() {
+        return driver.getFPS();
+    }
+    
+    /**
      * Gets the ApplicationListener linked to this application for libGDX to
      * link to.
      * 
@@ -422,7 +429,6 @@ public abstract class Application {
      * execute new tasks; users should utilise a separate executor if they wish
      * to create long-running tasks.
      */
-    @ThreadSafe
     public final Executor getExecutor() {
         return executor;
     }

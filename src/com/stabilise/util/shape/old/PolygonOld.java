@@ -2,7 +2,8 @@ package com.stabilise.util.shape.old;
 
 import java.util.function.UnaryOperator;
 
-import com.stabilise.util.annotation.NotThreadSafe;
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.stabilise.util.maths.Vec2;
 
 /**

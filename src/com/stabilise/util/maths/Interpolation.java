@@ -2,9 +2,9 @@ package com.stabilise.util.maths;
 
 import java.util.Objects;
 
-import com.badlogic.gdx.math.MathUtils;
-import com.stabilise.util.annotation.Immutable;
+import javax.annotation.concurrent.Immutable;
 
+import com.badlogic.gdx.math.MathUtils;
 
 /**
  * This class provides a variety of functions for achieving three modes of

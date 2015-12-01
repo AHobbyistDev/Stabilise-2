@@ -70,7 +70,7 @@ public class HUDRenderer implements Renderer {
             wr.debugFont.setColor(Color.WHITE);
             wr.debugFont.draw(wr.batch,
                     "Stabilise II v" + Constants.VERSION + "\n" +
-                    //"FPS: " + screen.getFPS() + " (" + screen.getFPSCap() + ")",
+                    "FPS: " + Application.get().getFPS() + "\n" +
                     "x: " + String.format("%1.2f", player.x) + "\n" +
                     "y: " + String.format("%1.2f", player.y) + "\n" +
                     "Entities:  " + wr.world.getEntities().size() + "/" + wr.world.entityCount + "\n" +
@@ -78,8 +78,6 @@ public class HUDRenderer implements Renderer {
                     "Particles: " + wr.world.getParticles().size() + "/" + wr.world.particleCount + "\n" +
                     "\n" +
                     "Slices rendered: " + wr.tileRenderer.slicesRendered + "\n" +
-                    //"World seed: " + wr.world.info.seed + "\n" +
-                    //"World age: " + wr.world.info.age + "\n" +
                     "\n\n\n" +
                     getProfilerStrings(),
                 -Gdx.graphics.getWidth() / 2 + 5, // x

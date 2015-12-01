@@ -11,7 +11,7 @@ import com.stabilise.util.box.*;
 public class DataSender implements Closeable {
     
     public static enum Format {
-        NBT, JSON, RAW;
+        NBT, JSON, BYTE_ARRAY;
     }
     
     private boolean writing = false;

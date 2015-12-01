@@ -1,7 +1,10 @@
 package com.stabilise.util.collect.registry;
 
+import java.util.Iterator;
+
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.stabilise.util.Log;
-import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
  * This class provides a simple base for a registry to extend.
@@ -17,7 +20,7 @@ import com.stabilise.util.annotation.NotThreadSafe;
 abstract class AbstractRegistry<E> implements Iterable<E> {
     
     /** The name of this registry. */
-    private final String name;
+    protected final String name;
     protected final DuplicatePolicy dupePolicy;
     protected final Log log;
     
@@ -79,6 +82,23 @@ abstract class AbstractRegistry<E> implements Iterable<E> {
     @Override
     public String toString() {
         return "\"" + name + "\":[" + size + " entries]";
+    }
+    
+    /**
+     * Returns a verbose string representation of this registry.
+     */
+    public String toStringVerbose() {
+        StringBuilder sb = new StringBuilder();
+        int size = size();
+        sb.append('"').append(name).append("\":[").append(size);
+        sb.append(size == 1 ? " entry] {\n" : " entries] {\n");
+        for(Iterator<E> i = iterator(); i.hasNext();) {
+            sb.append("    ");
+            sb.append(i.next().toString());
+            if(i.hasNext()) sb.append(',');
+            sb.append('\n');
+        }
+        return sb.append("}").toString();
     }
     
 }

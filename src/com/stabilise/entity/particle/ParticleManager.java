@@ -4,7 +4,8 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import com.stabilise.util.annotation.NotThreadSafe;
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.stabilise.world.AbstractWorld;
 
 
@@ -39,14 +40,12 @@ public class ParticleManager {
     }
     
     /**
-     * Returns a generator, or <i>source</i>, of particles of the same type
-     * as the specified particle.
+     * Returns a generator, or <i>source</i>, for particles of the specified
+     * type.
      * 
-     * @param templateParticle The particle to use as the template for all
-     * particles created by the returned {@code ParticleSource}.
-     * 
-     * @throws NullPointerException if {@code templateParticle} is {@code
-     * null}.
+     * @throws NullPointerException if {@code particleClass} is {@code null}.
+     * @throws IllegalStateException if the given class has not been
+     * registered.
      */
     public <T extends Particle> ParticleSource<T> getSource(Class<T> particleClass) {
         @SuppressWarnings("unchecked")
@@ -62,8 +61,8 @@ public class ParticleManager {
     }
     
     /**
-     * Tries to release any apparently unused pooled particles if possible,
-     * in order to free up memory.
+     * Tries to release any unused pooled particles if possible, in order to
+     * free up memory.
      */
     public void cleanup() {
         for(ParticleSource<?> src : sources.values())

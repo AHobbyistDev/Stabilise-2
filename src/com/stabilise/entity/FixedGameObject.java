@@ -2,9 +2,6 @@ package com.stabilise.entity;
 
 import static com.stabilise.world.World.*;
 
-import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.world.World;
-
 /**
  * A FixedGameObject is a game object with grid (integer) coordinates.
  */
@@ -20,6 +17,8 @@ public class FixedGameObject extends GameObject {
     public FixedGameObject() {}
     
     /**
+     * Creates a new FixedGameObject at the specified coordinates.
+     * 
      * @param x The x-coordinate, in tile-lengths.
      * @param y The y-coordinate, in tile lengths.
      */
@@ -27,12 +26,6 @@ public class FixedGameObject extends GameObject {
         this.x = x;
         this.y = y;
     }
-    
-    @Override
-    public void update(World world) {}
-    
-    @Override
-    public void render(WorldRenderer renderer) {}
     
     @Override
     public final double getX() {

@@ -33,7 +33,7 @@ public abstract class Effect implements Component {
     }
     
     @Override
-    public boolean remove() {
+    public boolean shouldRemove() {
         return age >= duration;
     }
     

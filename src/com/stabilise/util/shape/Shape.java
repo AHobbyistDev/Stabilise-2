@@ -4,7 +4,7 @@ package com.stabilise.util.shape;
 import java.util.Arrays;
 
 import com.badlogic.gdx.math.MathUtils;
-import com.stabilise.util.annotation.NotThreadSafe;
+import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.maths.Matrix2;
 
 /**
@@ -212,7 +212,7 @@ public abstract class Shape {
      * threads, make sure you invoke this method before sharing it to ensure
      * correct behaviour.
      */
-    @NotThreadSafe
+    @ThreadUnsafeMethod
     public void genCollisionData() {
        // nothing to see here in the default implementation; move along 
     }

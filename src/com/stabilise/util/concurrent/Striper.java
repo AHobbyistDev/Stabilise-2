@@ -3,9 +3,10 @@ package com.stabilise.util.concurrent;
 import java.util.Objects;
 import java.util.function.IntFunction;
 
+import javax.annotation.concurrent.Immutable;
+
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.Checks;
-import com.stabilise.util.annotation.Immutable;
 
 /**
  * This class facilitates the implementation of an object striping strategy by

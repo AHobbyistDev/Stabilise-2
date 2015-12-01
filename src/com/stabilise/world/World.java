@@ -1,7 +1,5 @@
 package com.stabilise.world;
 
-import java.util.Random;
-
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.Particle;
@@ -9,14 +7,12 @@ import com.stabilise.entity.particle.ParticleManager;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.maths.Maths;
-import com.stabilise.world.tile.Tile;
-import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
  * Defines methods which summarise a world implementation.
  */
-public interface World {
+public interface World extends WorldProvider {
     
     /** The file name of the world info file. */
     public static final String FILE_INFO = "info";
@@ -35,37 +31,6 @@ public interface World {
     
     
     /**
-     * Adds an entity to the world. The entity's ID is assigned automatically.
-     * 
-     * <p>The entity is not added to the map of entities immediately; rather,
-     * it is added at the end of the current tick. This is intended as to
-     * prevent a {@code ConcurrentModificationException} from being thrown if
-     * the entity is added while the map of entities is being iterated over.
-     * 
-     * @param e The entity.
-     * @param x The x-coordinate at which to place the entity, in tile-lengths.
-     * @param y The y-coordinate at which to place the entity, in tile-lengths.
-     */
-    default void addEntity(Entity e, double x, double y) {
-        e.x = x;
-        e.y = y;
-        addEntity(e);
-    }
-    
-    /**
-     * Adds an entity to the world. The entity's ID is assigned automatically.
-     * 
-     * <p>The entity is not added to the map of entities immediately; rather,
-     * it is added at the end of the current tick. This is intended as to
-     * prevent a {@code ConcurrentModificationException} from being thrown if
-     * the entity is added while the map of entities is being iterated over.
-     * 
-     * <p>Though the entity is not immediately added to the world, {@link
-     * EntityOld#onAdd() onAdd()} is invoked on {@code e}.
-     */
-    void addEntity(Entity e);
-    
-    /**
      * Gets the entity with the specified ID.
      * 
      * @return The entity with the specified ID, or {@code null} if there is no
@@ -76,10 +41,10 @@ public interface World {
     /**
      * Removes an entity from the world.
      * 
-     * <p>The entity is not removed from the map of entities immediately;
-     * rather, it is removed at the end of the current tick.
+     * <p>The entity is not removed from the world immediately; rather, it is
+     * removed at the end of the current tick.
      * 
-     * <p>Note that it is normally preferable to invoke {@link EntityOld#destroy()
+     * <p>Note that it is normally preferable to invoke {@link Entity#destroy()
      * destroy()} on an entity to remove it from the world.
      * 
      * @param e The entity.
@@ -93,10 +58,10 @@ public interface World {
     /**
      * Removes an entity from the world.
      * 
-     * <p>The entity is not removed from the map of entities immediately;
-     * rather, it is removed at the end of the current tick.
+     * <p>The entity is not removed from the world immediately; rather, it is
+     * removed at the end of the current tick.
      * 
-     * <p>Note that it is normally preferable to invoke {@link EntityOld#destroy()
+     * <p>Note that it is normally preferable to invoke {@link Entity#destroy()
      * destroy()} on an entity to remove it from the world.
      * 
      * @param id The ID of the entity.
@@ -147,15 +112,13 @@ public interface World {
     FunctionalIterable<Hitbox> getHitboxes();
     
     /**
-     * @return The collection of particles in the world, or {@code null} if
-     * this view of the world is one which does not include particles (i.e.
-     * this would be the case if this is a server's world, as particles are
-     * purely aesthetic and a server doesn't concern itself with them).
+     * @return The collection of particles in the world.
      */
     FunctionalIterable<Particle> getParticles();
     
     /**
-     * @return The collection of tile entities in the world.
+     * @return The collection of {@link TileEntity.Updated updated} tile
+     * entities in the world.
      */
     FunctionalIterable<TileEntity> getTileEntities();
     
@@ -167,145 +130,12 @@ public interface World {
     // ==========World component getters and setters==========
     
     /**
-     * Gets the slice at the given coordinates.
-     * 
-     * @param x The slice's x-coordinate, in slice lengths.
-     * @param y The slice's y-coordinate, in slice lengths.
-     * 
-     * @return The slice at the given coordinates, or {@code null} if no such
-     * slice is loaded.
-     */
-    Slice getSliceAt(int x, int y);
-    
-    /**
-     * Gets the slice at the given coordinates.
-     * 
-     * @param x The slice's x-coordinate, in tile lengths.
-     * @param y The slice's y-coordinate, in tile lengths.
-     * 
-     * @return The slice at the given coordinates, or {@code null} if no such
-     * slice is loaded.
-     */
-    default Slice getSliceAtTile(int x, int y) {
-        // This should be optimised for worlds which deal with regions
-        return getSliceAt(
-                sliceCoordFromTileCoord(x),
-                sliceCoordFromTileCoord(y));
-    }
-    
-    /**
-     * Gets a tile at the given coordinates. Fractional coordinates are rounded
-     * down.
-     * 
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
-     * 
-     * @return The tile at the given coordinates, or the
-     * {@link Tiles#barrier invisible bedrock} tile if no such tile
-     * is loaded.
-     */
-    default Tile getTileAt(double x, double y) {
-        return getTileAt(
-                tileCoordFreeToTileCoordFixed(x),
-                tileCoordFreeToTileCoordFixed(y));
-    }
-    
-    /**
-     * Gets a tile at the given coordinates.
-     * 
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
-     * 
-     * @return The tile at the given coordinates, or the
-     * {@link com.stabilise.world.tile.Tiles#barrier invisible
-     * bedrock} tile if no such tile is loaded.
-     */
-    default Tile getTileAt(int x, int y) {
-        Slice s = getSliceAtTile(x, y);
-        if(s == null)
-            return Tiles.barrier;
-        else
-            return s.getTileAt(
-                    tileCoordRelativeToSliceFromTileCoord(x),
-                    tileCoordRelativeToSliceFromTileCoord(y)
-            );
-    }
-    
-    /**
-     * Sets the tile at the specified coordinates.
-     * 
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
-     * @param tile The tile to set.
-     * 
-     * @throws NullPointerException if {@code tile} is {@code null}.
-     */
-    default void setTileAt(int x, int y, Tile tile) {
-        setTileAt(x, y, tile.getID());
-    }
-    
-    /**
-     * Sets a tile at the specified coordinates.
-     * 
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
-     * @param id The ID of the tile to set.
-     */
-    void setTileAt(int x, int y, int id);
-    
-    /**
      * Breaks a tile.
      * 
      * @param x The x-coordinate of the tile, in tile-lengths.
      * @param y The y-coordinate of the tile, in tile-lengths.
      */
     void breakTileAt(int x, int y);
-    
-    /**
-     * Gets the tile entity at the given coordinates.
-     * 
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
-     * 
-     * @return The tile entity at the given coordinates, or {@code null} if no
-     * such tile entity is loaded.
-     */
-    default TileEntity getTileEntityAt(int x, int y) {
-        Slice s = getSliceAtTile(x, y);
-        if(s == null)
-            return null;
-        else
-            return s.getTileEntityAt(
-                    tileCoordRelativeToSliceFromTileCoord(x),
-                    tileCoordRelativeToSliceFromTileCoord(y)
-            );
-    }
-    
-    /**
-     * Sets a tile entity at the given coordinates.
-     * 
-     * @param x The x-coordinate of the tile at which to place the tile entity,
-     * in tile-lengths.
-     * @param y The y-coordinate of the tile at which to place the tile entity,
-     * in tile-lengths.
-     * @param t The tile entity. Setting this to {@code null} will remove the
-     * tile entity at the specified location, if it exists.
-     */
-    void setTileEntityAt(int x, int y, TileEntity t);
-    
-    /**
-     * Removes a tile entity at the given coordinates. Invoking this method is
-     * equivalent to invoking {@link #setTileEntityAt(int, int, TileEntity)}
-     * with a {@code null} parameter.
-     * 
-     * @param x The x-coordinate of the tile at which the tile entity to remove
-     * is placed.
-     * @param y The y-coordinate of the tile at which the tile entity to remove
-     * is placed.
-     */
-    default void removeTileEntityAt(int x, int y) {
-        setTileEntityAt(x, y, null);
-    }
     
     /**
      * Adds a tile entity to the "update list" of tile entities, so that it may
@@ -332,7 +162,7 @@ public interface World {
      * method does nothing asides from invoking {@link TileEntity#destroy()}.
      * 
      * <p>A technical point: {@code t} is not removed from the update list
-     * immediately; rather, it is removed by {@link Iterator#remove()} while
+     * immediately; rather, it is removed by {@link Iterator#shouldRemove()} while
      * iterating over the update list iff {@link
      * TileEntity#updateAndCheck(World)} returns {@code true} (which it should,
      * as this method invokes {@code t.destroy()}).
@@ -424,19 +254,6 @@ public interface World {
     long getAge();
     
     // ========== Utility Methods ==========
-    
-    /**
-     * @return A {@code Random} instance held by this World.
-     */
-    Random getRnd();
-    
-    /**
-     * Returns {@code true} {@code 1/n}<sup><font size=-1>th</font></sup> of
-     * the time. Equivalent to {@code getRnd().nextInt(n) == 0}.
-     */
-    default boolean rnd(int n) {
-        return getRnd().nextInt(n) == 0;
-    }
     
     /**
      * @return {@code true} if this is a {@code HostWorld}; {@code false}

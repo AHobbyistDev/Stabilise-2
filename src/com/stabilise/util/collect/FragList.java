@@ -9,8 +9,9 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.stabilise.util.Checks;
-import com.stabilise.util.annotation.NotThreadSafe;
 
 /**
  * A FragList (or "fragmented list") is a variant on an ArrayList which

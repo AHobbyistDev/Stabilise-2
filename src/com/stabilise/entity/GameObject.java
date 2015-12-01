@@ -7,8 +7,11 @@ import com.stabilise.world.World;
  * A GameObject is an object which exists within the game world. GameObjects
  * may be updated every tick, rendered if appropriate, and destroyed.
  * 
- * <p>A GameObject also possesses x and y coordinates; for these, see {@link
- * FixedGameObject} and {@link FreeGameObject}.
+ * <p>This class can not be directly subclassed; see {@link FixedGameObject}
+ * and {@link FreeGameObject} instead.
+ * 
+ * @see FixedGameObject
+ * @see FreeGameObject
  */
 public abstract class GameObject {
     
@@ -16,12 +19,19 @@ public abstract class GameObject {
     protected boolean destroyed = false;
     
     
+    // Package-private default constructor so this cannot be directly
+    // subclassed externally.
+    GameObject() {}
+    
+    
     /**
      * Updates this GameObject.
      * 
-     * @param world The world.
+     * @param world The world in which this GameObject is present. Never null.
      */
-    public abstract void update(World world);
+    public void update(World world) {
+        // do nothing
+    }
     
     /**
      * Updates this GameObject, and then returns {@link #isDestroyed()}.
@@ -32,7 +42,7 @@ public abstract class GameObject {
      * update(world);
      * return isDestroyed();</pre>
      * 
-     * @param world The world.
+     * @param world The world in which this GameObject is present. Never null.
      * 
      * @return {@code true} if this GameObject is considered destroyed and
      * should be removed from the world ASAP; {@code false} otherwise.
@@ -48,7 +58,9 @@ public abstract class GameObject {
      * @param renderer The renderer with which to render the GameObject. Never
      * null.
      */
-    public abstract void render(WorldRenderer renderer);
+    public void render(WorldRenderer renderer) {
+        // do nothing
+    }
     
     /**
      * Destroys this GameObject.
@@ -57,8 +69,8 @@ public abstract class GameObject {
      * from the world ASAP (either during the current update tick, or during
      * the next one).
      * 
-     * <p>In the default implementation, this sets the {@link #destroyed} flag
-     * to {@code true}, and {@link #isDestroyed()} will return {@code true}
+     * <p>The default implementation sets the {@link #destroyed} flag to {@code
+     * true}; and thus {@link #isDestroyed()} will return {@code true}
      * henceforth.
      */
     public void destroy() {
@@ -66,11 +78,9 @@ public abstract class GameObject {
     }
     
     /**
-     * If {@code true} is returned, this GameObject should be removed from the
+     * Checks for whether or not this GameObject is considered destroyed. If
+     * {@code true} is returned, this GameObject should be removed from the
      * world ASAP.
-     * 
-     * @return {@code true} if this GameObject is considered destroyed; {@code
-     * false} otherwise.
      */
     public boolean isDestroyed() {
         return destroyed;
@@ -99,16 +109,14 @@ public abstract class GameObject {
     public abstract int getTileY();
     
     /**
-     * Gets the x-coordinate of the slice the game object is within.
-     * 
-     * @return The x-coordinate of the slice, in slice-lengths.
+     * @return The x-coordinate of the slice this GameObject is in, in
+     * slice-lengths.
      */
     public abstract int getSliceX();
     
     /**
-     * Gets the y-coordinate of the slice the game object is within.
-     * 
-     * @return The y-coordinate of the slice, in slice-lengths.
+     * @return The y-coordinate of the slice this GameObject is in, in
+     * slice-lengths.
      */
     public abstract int getSliceY();
     
