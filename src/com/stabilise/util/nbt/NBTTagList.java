@@ -16,7 +16,7 @@ import com.stabilise.util.io.DataOutStream;
 public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
     
     /** The tag's data. */
-    private ArrayList<NBTTag> data = new ArrayList<NBTTag>();
+    private ArrayList<NBTTag> data;
     /** The tag's data type. */
     private byte dataType;
     
@@ -25,16 +25,29 @@ public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
      * Creates a new unnamed list tag.
      */
     public NBTTagList() {
-        super();
+        this(10);
+    }
+    
+    /**
+     * Creates a new unnamed list tag with the specified initial capacity.
+     */
+    public NBTTagList(int size) {
+        data = new ArrayList<>(size);
     }
     
     /**
      * Creates a new list tag.
-     * 
-     * @param tagName The tag's name.
      */
     public NBTTagList(String tagName) {
+        this(tagName, 10);
+    }
+    
+    /**
+     * Creates a new list tag with the specified initial capacity.
+     */
+    public NBTTagList(String tagName, int size) {
         super(tagName);
+        data = new ArrayList<>(size);
     }
     
     @Override

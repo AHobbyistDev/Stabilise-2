@@ -10,6 +10,7 @@ import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.collect.WeightingArrayList;
+import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
@@ -146,6 +147,14 @@ public class Entity extends FreeGameObject {
     
     public boolean isPlayerControlled() {
         return controller instanceof PlayerController;
+    }
+    
+    public NBTTagCompound toNBT() {
+        return new NBTTagCompound(); // TODO
+    }
+    
+    public static Entity fromNBT(NBTTagCompound tag) {
+        return Entities.enemy(); // TOOD
     }
     
 }

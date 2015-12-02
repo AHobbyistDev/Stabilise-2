@@ -129,6 +129,38 @@ public interface WorldProvider {
      */
     void setTileAt(int x, int y, int id);
     
+    default Tile getWallAt(int x, int y) {
+        Slice s = getSliceAtTile(x, y);
+        if(s == null)
+            return Tiles.air;
+        else
+            return s.getWallAt(
+                    tileCoordRelativeToSliceFromTileCoord(x),
+                    tileCoordRelativeToSliceFromTileCoord(y)
+            );
+    }
+    
+    default void setWallAt(int x, int y, Tile wall) {
+        setWallAt(x, y, wall.getID());
+    }
+    
+    default void setWallAt(int x, int y, int id) {
+        Slice s = getSliceAtTile(x, y);
+        if(s != null)
+            s.setWallAt(
+                    tileCoordRelativeToSliceFromTileCoord(x),
+                    tileCoordRelativeToSliceFromTileCoord(y),
+                    id
+            );
+    }
+    
+    default int getLightAt(int x, int y) {
+        Slice s = getSliceAtTile(x, y);
+        return s == null ? 0 : s.getLightAt(
+                    tileCoordRelativeToSliceFromTileCoord(x),
+                    tileCoordRelativeToSliceFromTileCoord(y));
+    }
+    
     /**
      * Gets the tile entity at the given coordinates.
      * 

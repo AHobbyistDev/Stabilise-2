@@ -10,7 +10,8 @@ public abstract class Action {
     private static final TypeFactory<Action> registry = new TypeFactory<>();
     
     static {
-        
+        registry.registerUnsafe(1, ActionAddEntity.class);
+        registry.registerUnsafe(2, ActionAddTileEntity.class);
     }
     
     public abstract void apply(World w, Region r);

@@ -4,6 +4,8 @@ import static com.stabilise.world.Region.REGION_SIZE;
 import static com.stabilise.world.World.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.nbt.NBTIO;
@@ -12,6 +14,7 @@ import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.util.nbt.NBTTagList;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
+import com.stabilise.world.gen.action.Action;
 import com.stabilise.world.Region.QueuedStructure;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -77,6 +80,14 @@ public class PreAlphaWorldLoader extends WorldLoader {
             }
         }
         
+        NBTTagList actions = regionTag.getList("queuedActions");
+        if(actions.size() != 0) {
+            r.queuedActions = new ArrayList<>(actions.size());
+            for(int i = 0; i < actions.size(); i++) {
+                r.queuedActions.add(Action.read((NBTTagCompound)actions.getTagAt(i)));
+            }
+        }
+        
         NBTTagList structures = regionTag.getList("queuedStructures");
         
         if(structures.size() != 0) {
@@ -134,6 +145,13 @@ public class PreAlphaWorldLoader extends WorldLoader {
             }
         }
         
+        List<Action> queuedActions = r.queuedActions;
+        if(queuedActions != null) {
+            NBTTagList actions = new NBTTagList(queuedActions.size());
+            queuedActions.stream().map(a -> a.toNBT()).forEach(t -> actions.appendTag(t));
+            regionTag.addList("queuedActions", actions);
+        }
+        
         if(r.hasQueuedStructures()) {
             NBTTagList structures = new NBTTagList();
             for(QueuedStructure s : r.getStructures()) {
@@ -149,8 +167,6 @@ public class PreAlphaWorldLoader extends WorldLoader {
             }
             
             regionTag.addList("queuedStructures", structures);
-            
-            //log.postDebug("Saved " + schematics.size() + " schematics in " + r);
         }
         
         try {

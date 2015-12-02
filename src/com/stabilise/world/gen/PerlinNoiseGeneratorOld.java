@@ -2,6 +2,8 @@ package com.stabilise.world.gen;
 
 import static com.stabilise.world.tile.Tiles.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import com.stabilise.item.Items;
@@ -22,11 +24,11 @@ import static com.stabilise.world.Slice.SLICE_SIZE;
 /**
  * Generates worlds using the perlin noise algorithm.
  */
-public class PerlinNoiseGenerator implements IWorldGenerator {
+public class PerlinNoiseGeneratorOld implements IWorldGenerator {
     
     @Override
     public void generate(Region r, WorldProvider w, long seed) {
-        new PerlinRegionGenerator(w, seed).generateRegion(r, seed);
+        new PerlinRegionGenerator(seed).generateRegion(r, w, seed);
     }
     
     /**
@@ -36,6 +38,8 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
      * region is to be generated simultaneously.
      */
     private class PerlinRegionGenerator {
+        private List<Region.QueuedStructure> schematics = new ArrayList<>();
+        
         // Landform                             WAVELENGTH    AMPLITUDE
         private PerlinNoise1D noise1D_1;    //    128            64
         private PerlinNoise1D noise1D_2;    //    64             32
@@ -52,10 +56,10 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
         
         private SimplexNoise simplex512;    //    512             1
         
-        private final WorldProvider w;
+        private Slice s;
         private boolean cave;
         
-        private PerlinRegionGenerator(WorldProvider w, long seed) {
+        private PerlinRegionGenerator(long seed) {
             noise1D_1 = new PerlinNoise1D(seed, 128f);
             noise1D_2 = new PerlinNoise1D(seed, 64f);
             noise1D_3 = new PerlinNoise1D(seed, 32f);
@@ -69,32 +73,38 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
             simplex16 = new SimplexNoise(seed, 16f);
             
             simplex512 = new SimplexNoise(seed, 512f);
-            
-            this.w = w;
         }
-        private void generateRegion(Region r, long seed) {
+        private void generateRegion(Region r, WorldProvider w, long seed) {
+            final int defSlice = Region.REGION_SIZE - 1;
+            final int defTile = Slice.SLICE_SIZE - 1;
+            
             int offsetX = r.x() * REGION_SIZE_IN_TILES;
             int offsetY = r.y() * REGION_SIZE_IN_TILES;
+            
+            int sliceX = defSlice;
+            int sliceY = defSlice;
+            int tileX = defTile;
+            int tileY = defTile;
             
             int n = r.x() + r.y() * 57;
             n = (n<<13) ^ n;
             n = n * (n * n * 15731 + 789221) + 1376312589;
             Random rnd = new Random(seed + n);
             
-            double[] noiseVec = new double[REGION_SIZE_IN_TILES];
-            for(int x = 0; x < REGION_SIZE_IN_TILES; x++) {
-                noiseVec[x] = noise1D(x+offsetX) - offsetY;
-            }
+            s = r.getSliceAt(defSlice, defSlice);
             
-            for(int y = 0, ty = offsetY; y < REGION_SIZE_IN_TILES; y++, ty++) {
-                for(int x = 0, tx = offsetX; x < REGION_SIZE_IN_TILES; x++, tx++) {
+            for(int x = offsetX + REGION_SIZE_IN_TILES; x > offsetX; x--) {
+                double noise = noise1D(x) - offsetY - REGION_SIZE_IN_TILES;
+                
+                tileY = defTile;
+                for(int y = offsetY + REGION_SIZE_IN_TILES; y > offsetY; y--) {
                     cave = false;
-                    double noise = noiseVec[x]--;
-                    double caveNoise = noise2D(tx, ty);
+                    
+                    double caveNoise = noise2D(x, y);
                     // This should produce varying cave types across the world as
                     // the noise forms characteristically different contours at
                     // different points between 0.25-0.75.
-                    double caveMask = 0.25D + transformCaveMask(simplex512.noise(tx,ty))/2;
+                    double caveMask = 0.25D + transformCaveMask(simplex512.noise(x, y))/2;
                     
                     // Multiply caveNoise or caveMask by 0 to 1 based on the depth
                     // to try to deter a great multitude of surface cave entrances
@@ -102,63 +112,104 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                     //    caveMask *= Interpolation.QUADRATIC.easeIn(0.5f, 1, (float)noise / 20);
                     
                     //if((y < -200 && caveNoise > 0.8D) || (y < -180 && caveNoise > (0.8 - 0.2 * (180+y)/20f)))
-                    if(ty < -200 && caveNoise > 0.8D)
-                        set(tx, ty, lava);
+                    if(y < -200 && caveNoise > 0.8D)
+                        set(tileX, tileY, lava);
                     //else if(noise <= 0 || (caveNoise > 0.45D && caveNoise < 0.55D))
                     else if(noise <= -1 || (caveNoise > caveMask - 0.05D && caveNoise < caveMask + 0.05D)) {
                     //else if(noise <= 0 || caveNoise > 0.8D)
                         cave = true;
-                        w.setTileAt(tx, ty, air);
+                        s.setTileAt(tileX, tileY, air);
                     }
                     
                     if(noise <= -1) {}
                     else if(noise <= 0) {
                         if(rnd.nextInt(10) == 0) {
-                            w.setTileAt(tx, ty, torch);
+                            s.setTileAt(tileX, tileY, torch);
                         } else
-                            set(tx, ty, air);
+                            set(tileX, tileY, air);
                     } else if(noise <= 1) {
                         if(!cave)
-                            w.setTileAt(tx, ty, grass);
-                        w.setWallAt(tx, ty, dirt);
+                            s.setTileAt(tileX, tileY, grass);
+                        s.setWallAt(tileX, tileY, dirt);
+                        //if(rnd.nextInt(10) == 0)
+                        //    addSchematic("tree_1", s.x, s.y, tileX, tileY);
                     } else if(noise <= 5.75D)
-                        set(tx, ty, dirt);
-                    else
-                        set(tx, ty, w.rnd(30) ? glowstone : stone);
+                        set(tileX, tileY, dirt);
+                    else {
+                        if(rnd.nextInt(30) == 0)
+                            set(tileX, tileY, glowstone);
+                        else
+                            set(tileX, tileY, stone);
+                    }
+                    
+                    noise++;
+                    
+                    tileY--;
+                    if(tileY == -1) {
+                        sliceY--;
+                        if(sliceY == -1)
+                            break;
+                        s = r.getSliceAt(sliceX, sliceY);
+                        tileY = defTile;
+                    }
                 }
+                
+                tileX--;
+                sliceY = defSlice;
+                
+                if(tileX == -1) {
+                    sliceX--;
+                    if(sliceX == -1)
+                        break;
+                    tileX = defTile;
+                }
+                
+                // Reset the slice
+                s = r.getSliceAt(sliceX, sliceY);
             }
             
             ///*
             // For each slice, pick a random tile, and if applicable, place a
             // chest
-            for(int x = r.offsetX; x < r.offsetX + REGION_SIZE; x++) {
-                for(int y = r.offsetY; y < r.offsetY + REGION_SIZE; y++) {
-                    Slice s = w.getSliceAt(x, y);
-                    int tx = x*SLICE_SIZE + rnd.nextInt(SLICE_SIZE);
-                    int ty = y*SLICE_SIZE + rnd.nextInt(SLICE_SIZE-1);
-                    if(w.getTileAt(tx, ty).getID() == stone.getID() &&
-                            w.getTileAt(tx, ty+1).getID() == air.getID()) {
-                        
-                        w.setTileAt(tx, ty, chest);
-                        TileEntityChest te = (TileEntityChest)w.getTileEntityAt(tx, ty);
-                        te.items.addItem(Items.APPLE, rnd.nextInt(7)+1);
-                        te.items.addItem(Items.SWORD, rnd.nextInt(7)+1);
-                        te.items.addItem(Items.ARROW, rnd.nextInt(7)+1);
+            for(int x = 0; x < REGION_SIZE; x++) {
+                for(int y = 0; y < REGION_SIZE; y++) {
+                    s = r.getSliceAt(x, y);
+                    tileX = rnd.nextInt(SLICE_SIZE);
+                    tileY = rnd.nextInt(SLICE_SIZE-1);
+                    if(s.getTileAt(tileX, tileY).getID() == stone.getID() &&
+                            s.getTileAt(tileX, tileY+1).getID() == 0) {
+                        s.tiles[tileY+1][tileX] = chest.getID();
+                        TileEntityChest chestTE = chest.createTE(
+                                offsetX + x*SLICE_SIZE + tileX,
+                                offsetY + y*SLICE_SIZE + tileY + 1);
+                        chestTE.items.addItem(Items.APPLE, rnd.nextInt(7)+1);
+                        chestTE.items.addItem(Items.SWORD, rnd.nextInt(7)+1);
+                        chestTE.items.addItem(Items.ARROW, rnd.nextInt(7)+1);
+                        s.setTileEntityAt(tileX, tileY+1, chestTE);
                     }
                     
-                    if(w.rnd(1))
+                    if(rnd.nextInt(1) == 0)
                         addOres(s, rnd);
                     
                     s.buildLight();
                 }
             }
             //*/
+            
+            /*
+            // Temporary schematics for testing purposes
+            generator.addSchematicAt(r, "testhouse", 15, 15, 8, 15, SchematicParams.defaultParams());
+            generator.addSchematicAt(r, "testhouse", 0, 14, 8, 15, SchematicParams.defaultParams());
+            generator.addSchematicAt(r, "testStructure", 7, 0, 1, 0, SchematicParams.defaultParams());
+            //*/
+            
+            addSchematics(r);
         }
         
         private void set(int x, int y, Tile t) {
             if(!cave)
-                w.setTileAt(x, y, t);
-            w.setWallAt(x, y, t);
+                s.setTileAt(x, y, t);
+            s.setWallAt(x, y, t);
         }
         
         /**
@@ -247,6 +298,26 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                     noise1D_4.noise(x) * 8f +
                     noise1D_5.noise(x) * 4f +
                     noise1D_6.noise(x) * 2f;
+            
+            /*
+            double noise = 0.0D;
+            for(int i = 0; i < LAYERS_1D.length; i++) {
+                float amplitude = LAYERS_1D[i][0];
+                float wavelength = LAYERS_1D[i][1];
+                
+                setWavelength(wavelength);
+                double scaledX = x / wavelength;
+                double flooredX = Math.floor(scaledX);
+                
+                setSeed((int)flooredX);
+                double y0 = (2*rnd.nextFloat() - 1) * amplitude;
+                setSeed((int)(flooredX+1));
+                double y1 = (2*rnd.nextFloat() - 1) * amplitude;
+                
+                noise += MathUtil.interpolateSinusoidal(y0, y1, scaledX - flooredX);
+            }
+            return noise;
+            */
         }
         
         private double noise2D(int x, int y) {
@@ -256,6 +327,24 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                     simplex16.noise(x,y) * 1) / 15D;
         }
         
+        @SuppressWarnings("unused")
+        private void addSchematic(String sc, int sliceX, int sliceY, int tileX, int tileY) {
+            schematics.add(new Region.QueuedStructure(sc, sliceX, sliceY, tileX, tileY, 0, 0));
+        }
+        
+        private void addSchematics(Region r) {
+            //for(Region.QueuedStructure s : schematics)
+            //    addSchematicAt(r, s.schematicName, s.sliceX, s.sliceY, s.tileX, s.tileY, SchematicParams.defaultParams());
+            //schematics.clear();
+        }
     }
+    
+    /*
+    @Override
+    public void setPlayerSpawn(WorldInfo world) {
+        world.spawnSliceX = 0;
+        world.spawnSliceY = World.sliceCoordFromTileCoord(MathUtil.fastFloor(new PerlinRegionGenerator(seed).noise1D(0)));
+    }
+    */
     
 }

@@ -116,6 +116,17 @@ public class FragList<E> implements SimpleList<E> {
     }
     
     /**
+     * Creates a new FragList with a flattening threshold of 0.25;
+     * 
+     * @param capacity The initial internal array length.
+     * 
+     * @throws NegativeArraySizeException if {@code capacity} is negative.
+     */
+    public FragList(int capacity) {
+        this(capacity, 0.25f);
+    }
+    
+    /**
      * Creates a new FragList.
      * 
      * @param capacity The initial internal array length.

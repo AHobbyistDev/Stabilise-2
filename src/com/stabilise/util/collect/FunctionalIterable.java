@@ -6,6 +6,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Extends on {@code Iterator} for functional-ish niceness.
@@ -48,6 +50,21 @@ public interface FunctionalIterable<E> extends Iterable<E> {
             if(pred.test(i.next()))
                 i.remove();
         }
+    }
+    
+    /**
+     * Returns a stream over the elements in this iterable.
+     * 
+     * <p>Named {@code toStream} rather than {@code stream} as to avoid naming
+     * conflicts with {@link Collection#stream()}.
+     */
+    default Stream<E> toStream() {
+        if(this instanceof Collection) {
+            @SuppressWarnings("unchecked")
+            Collection<E> c = (Collection<E>)this;
+            return c.stream();
+        }
+        return StreamSupport.stream(spliterator(), false);
     }
     
     /**

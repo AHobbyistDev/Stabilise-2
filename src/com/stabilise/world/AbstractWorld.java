@@ -43,7 +43,7 @@ public abstract class AbstractWorld implements World {
             FunctionalIterable.wrap(players.values(), players::size);
     /** The map of loaded entities in the world. Maps IDs -> Entities.
      * This is a LinkedHashMap as to allow for consistent iteration. */
-    protected final Map<Long, Entity> entities = new LinkedHashMap<>(64);
+    protected final Map<Long, Entity> entities = new LinkedHashMap<>(1024);
     private final FunctionalIterable<Entity> itrEntities =
             FunctionalIterable.wrap(entities.values(), entities::size);
     /** The total number of entities which have existed during the lifetime of
@@ -83,7 +83,7 @@ public abstract class AbstractWorld implements World {
      * <p>Implementation note: This is a FragList as we want to maintain local
      * render order between any two pairs of particles, but we don't really
      * care if new particles are spawned between any two. */
-    protected final SimpleList<Particle> particles = new FragList<>();
+    protected final SimpleList<Particle> particles = new FragList<>(4096);
     /** The total number of particles which have existed during the lifetime of
      * the world. */
     public long particleCount = 0;

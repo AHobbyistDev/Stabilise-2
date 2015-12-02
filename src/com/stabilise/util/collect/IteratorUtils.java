@@ -2,6 +2,7 @@ package com.stabilise.util.collect;
 
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -190,10 +191,9 @@ public class IteratorUtils {
             
             @Override
             public T next() {
-                poll();
+                if(!hasNext()) throw new NoSuchElementException();
                 polled = false;
                 cur = next;
-                //next = null; // no need
                 return cur;
             }
             

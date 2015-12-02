@@ -1,6 +1,7 @@
 package com.stabilise.world.gen;
 
 import com.stabilise.world.Region;
+import com.stabilise.world.WorldProvider;
 import com.stabilise.world.tile.Tiles;
 
 public interface IWorldGenerator {
@@ -18,8 +19,9 @@ public interface IWorldGenerator {
      * implementors to ensure correct thread safety techniques are observed.
      * 
      * @param r The region to generate.
+     * @param w Worldprovider.
      * @param seed The world seed.
      */
-    void generate(Region r, long seed);
+    void generate(Region r, WorldProvider w, long seed);
     
 }
