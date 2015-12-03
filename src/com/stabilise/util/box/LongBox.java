@@ -45,4 +45,9 @@ public class LongBox implements IBox {
         value = o.readLong(name);
     }
     
+    @Override
+    public String toString() {
+        return "" + value;
+    }
+    
 }

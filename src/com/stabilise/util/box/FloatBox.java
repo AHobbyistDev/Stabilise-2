@@ -45,4 +45,9 @@ public class FloatBox implements IBox {
         value = o.readFloat(name);
     }
     
+    @Override
+    public String toString() {
+        return "" + value;
+    }
+    
 }

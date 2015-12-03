@@ -45,4 +45,9 @@ public class IntBox implements IBox {
         value = o.readInt(name);
     }
     
+    @Override
+    public String toString() {
+        return "" + value;
+    }
+    
 }

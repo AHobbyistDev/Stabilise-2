@@ -126,7 +126,7 @@ public class NBTIO {
      */
     private static NBTTagCompound read(DataInStream in) throws IOException {
         NBTTag tag = readTag(in);
-
+        
         if(tag instanceof NBTTagCompound)
             return (NBTTagCompound)tag;
         else

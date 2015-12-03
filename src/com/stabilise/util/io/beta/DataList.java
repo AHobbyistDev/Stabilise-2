@@ -1,10 +1,8 @@
 package com.stabilise.util.io.beta;
 
+import com.stabilise.util.io.Sendable;
 
-public class DataList {
-    
-    public DataList() {
-        // TODO Auto-generated constructor stub
-    }
+
+public interface DataList extends Sendable {
     
 }

@@ -52,4 +52,9 @@ public class ByteArrBox implements IBox {
         value = o.readByteArr(name);
     }
     
+    @Override
+    public String toString() {
+        return "[" + value.length + (value.length == 1 ? " byte]" : " bytes]");
+    }
+    
 }

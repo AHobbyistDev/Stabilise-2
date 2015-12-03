@@ -34,12 +34,12 @@ public class StringBox extends ABox<String> implements IBox {
     
     @Override
     public void readData(DataInStream in) throws IOException {
-        super.set(in.readString());
+        super.set(in.readUTF());
     }
 
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        out.writeString(get());
+        out.writeUTF(get());
     }
     
     @Override
@@ -50,6 +50,11 @@ public class StringBox extends ABox<String> implements IBox {
     @Override
     public void read(String name, DataObject o) throws IOException {
         super.set(o.readString(name));
+    }
+    
+    @Override
+    public String toString() {
+        return get();
     }
     
 }

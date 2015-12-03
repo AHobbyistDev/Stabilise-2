@@ -9,10 +9,9 @@ import java.util.Map;
 import javaslang.control.Option;
 
 import com.stabilise.util.box.*;
-import com.stabilise.util.collect.registry.Registries;
-import com.stabilise.util.collect.registry.Registry;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
+import com.stabilise.util.io.Sendable;
 import com.stabilise.util.io.beta.DataList;
 import com.stabilise.util.io.beta.DataObject;
 import com.stabilise.util.io.beta.Exportable;
@@ -21,41 +20,9 @@ import com.stabilise.util.io.beta.ValueExportable;
 
 public class NBTCompound implements DataObject {
     
-    static final byte
-            COMPOUND_END = 0x0,
-            BYTE         = 0x1,
-            SHORT        = 0x2,
-            INT          = 0x3,
-            LONG         = 0x4,
-            FLOAT        = 0x5,
-            DOUBLE       = 0x6,
-            BYTE_ARRAY   = 0x7,
-            STRING       = 0x8,
-            LIST         = 0x9,
-            COMPOUND     = 0xA,
-            INT_ARRAY    = 0xB;
-    
-    private static final Registry<Class<?>, Byte> ids = Registries.registry();
-    
-    static {
-        ids.register(Byte.class, BYTE);
-        ids.register(Short.class, SHORT);
-        ids.register(Integer.class, INT);
-        ids.register(Long.class, LONG);
-        ids.register(Float.class, FLOAT);
-        ids.register(Double.class, DOUBLE);
-        ids.register(byte[].class, BYTE_ARRAY);
-        ids.register(int[].class, INT_ARRAY);
-        ids.register(String.class, STRING);
-        ids.register(NBTCompound.class, COMPOUND);
-        ids.register(NBTList.class, LIST);
-        
-        ids.lock();
-    }
-    
-    
     private boolean write;
-    private final Map<String, Object> data = new LinkedHashMap<>();
+    private final Map<String, Sendable> data = new LinkedHashMap<>();
+    
     
     public NBTCompound() {
         write = true;
@@ -65,15 +32,41 @@ public class NBTCompound implements DataObject {
         write = parent.write;
     }
     
+    public static void writeTag(DataOutStream out, String name, Sendable tag) throws IOException {
+        out.writeByte(NBTType.tagID(tag));
+        out.writeUTF(name);
+        tag.writeData(out);
+    }
+    
+    public static NBTCompound readTag(DataInStream in) throws IOException {
+        NBTCompound c = new NBTCompound();
+        if(in.readByte() != NBTType.tagID(c))
+            throw new IOException("Root tag must be a named compound");
+        in.readUTF(); // get rid of unwanted name
+        c.readData(in);
+        return c;
+    }
+    
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        out.writeByte(COMPOUND);
+        for(Map.Entry<String, Sendable> tag : data.entrySet()) {
+            writeTag(out, tag.getKey(), tag.getValue());
+        }
         
+        out.writeByte(0); // 0 == compound end
     }
     
     @Override
     public void readData(DataInStream in) throws IOException {
+        data.clear();
         
+        byte id;
+        while((id = in.readByte()) != 0) { // 0 == compound end
+            String name = in.readUTF();
+            Sendable tag = NBTType.createTag(id);
+            tag.readData(in);
+            data.put(name, tag);
+        }
     }
     
     @SuppressWarnings("unchecked")
@@ -82,7 +75,7 @@ public class NBTCompound implements DataObject {
         return c.isInstance(o) ? Option.some((T)o) : Option.none();
     }
     
-    private <T> T put(String name, T t) {
+    private <T extends Sendable> T put(String name, T t) {
         data.put(name, t);
         return t;
     }
@@ -123,57 +116,84 @@ public class NBTCompound implements DataObject {
     
     @Override
     public boolean readBool(String name) throws IOException {
-        return get(name, Boolean.class).orElse(false);
+        return get(name, BoolBox.class).orElseGet(() -> box(false)).get();
     }
     
     @Override
     public byte readByte(String name) throws IOException {
-        return get(name, Byte.class).orElse((byte)0);
+        return get(name, ByteBox.class).orElseGet(() -> box((byte)0)).get();
     }
     
     @Override
     public char readChar(String name) throws IOException {
-        return get(name, Character.class).orElse((char)0);
+        return get(name, CharBox.class).orElseGet(() -> box((char)0)).get();
     }
     
     @Override
     public double readDouble(String name) throws IOException {
-        return get(name, Double.class).orElse(0.0);
+        return get(name, DoubleBox.class).orElseGet(() -> box(0.0)).get();
     }
     
     @Override
     public float readFloat(String name) throws IOException {
-        return get(name, Float.class).orElse(0f);
+        return get(name, FloatBox.class).orElseGet(() -> box(0f)).get();
     }
     
     @Override
     public int readInt(String name) throws IOException {
-        return get(name, Integer.class).orElse(0);
+        return get(name, IntBox.class).orElseGet(() -> box(0)).get();
     }
     
     @Override
     public long readLong(String name) throws IOException {
-        return get(name, Long.class).orElse(0L);
+        return get(name, LongBox.class).orElseGet(() -> box(0L)).get();
     }
     
     @Override
     public short readShort(String name) throws IOException {
-        return get(name, Short.class).orElse((short)0);
+        return get(name, ShortBox.class).orElseGet(() -> box((short)0)).get();
     }
     
     @Override
     public String readString(String name) throws IOException {
-        return get(name, String.class).orElse("");
+        return get(name, StringBox.class).orElseGet(() -> box("")).get();
     }
     
     @Override
     public byte[] readByteArr(String name) throws IOException {
-        return get(name, byte[].class).orElse(new byte[0]);
+        return get(name, ByteArrBox.class).orElseGet(() -> box(new byte[0])).get();
     }
     
     @Override
     public int[] readIntArr(String name) throws IOException {
-        return get(name, int[].class).orElse(new int[0]);
+        return get(name, IntArrBox.class).orElseGet(() -> box(new int[0])).get();
+    }
+    
+    @Override
+    public String toString() {
+        return toString("");
+    }
+    
+    private String toString(String prefix) {
+        String pre = prefix + "    ";
+        StringBuilder sb = new StringBuilder("[\n");
+        
+        for(Map.Entry<String, Sendable> e : data.entrySet()) {
+            sb.append(pre);
+            sb.append("\"");
+            sb.append(e.getKey());
+            sb.append("\": ");
+            if(e.getValue() instanceof NBTCompound)
+                sb.append(((NBTCompound) e.getValue()).toString(pre));
+            else
+                sb.append(e.getValue().toString());
+            sb.append(",\n");
+        }
+        
+        sb.append(prefix);
+        sb.append("]");
+
+        return sb.toString();
     }
     
 }

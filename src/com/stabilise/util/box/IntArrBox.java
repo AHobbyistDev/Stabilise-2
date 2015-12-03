@@ -55,4 +55,9 @@ public class IntArrBox implements IBox {
         value = o.readIntArr(name);
     }
     
+    @Override
+    public String toString() {
+        return "[" + value.length + (value.length == 1 ? " int]" : " ints]");
+    }
+    
 }

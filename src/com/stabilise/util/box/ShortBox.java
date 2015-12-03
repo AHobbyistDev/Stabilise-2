@@ -45,4 +45,9 @@ public class ShortBox implements IBox {
         value = o.readShort(name);
     }
     
+    @Override
+    public String toString() {
+        return "" + value;
+    }
+    
 }

@@ -45,4 +45,9 @@ public class DoubleBox implements IBox {
         value = o.readDouble(name);
     }
     
+    @Override
+    public String toString() {
+        return "" + value;
+    }
+    
 }

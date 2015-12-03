@@ -45,4 +45,9 @@ public class CharBox implements IBox {
         value = o.readChar(name);
     }
     
+    @Override
+    public String toString() {
+        return "" + value;
+    }
+    
 }

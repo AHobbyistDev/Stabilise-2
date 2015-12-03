@@ -45,4 +45,9 @@ public class ByteBox implements IBox {
         value = o.readByte(name);
     }
     
+    @Override
+    public String toString() {
+        return "" + value;
+    }
+    
 }

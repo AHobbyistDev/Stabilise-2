@@ -44,7 +44,10 @@ public class BoolBox implements IBox {
     public void read(String name, DataObject o) throws IOException {
         value = o.readBool(name);
     }
-
-
+    
+    @Override
+    public String toString() {
+        return "" + value;
+    }
     
 }

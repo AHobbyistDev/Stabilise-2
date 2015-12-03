@@ -2,14 +2,10 @@ package com.stabilise.util.io.beta;
 
 import java.io.IOException;
 
-import com.stabilise.util.io.DataInStream;
-import com.stabilise.util.io.DataOutStream;
+import com.stabilise.util.io.Sendable;
 
 
-public interface DataObject {
-    
-    void writeData(DataOutStream out) throws IOException;
-    void readData (DataInStream  in ) throws IOException;
+public interface DataObject extends Sendable {
     
     DataObject object(String name);
     DataList   list  (String name);
