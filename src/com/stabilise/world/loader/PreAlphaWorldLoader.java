@@ -148,7 +148,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
         List<Action> queuedActions = r.queuedActions;
         if(queuedActions != null) {
             NBTTagList actions = new NBTTagList(queuedActions.size());
-            queuedActions.stream().map(a -> a.toNBT()).forEach(t -> actions.appendTag(t));
+            queuedActions.stream().map(Action::toNBT).forEach(actions::appendTag);
             regionTag.addList("queuedActions", actions);
         }
         

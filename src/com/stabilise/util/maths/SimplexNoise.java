@@ -4,6 +4,7 @@ import java.util.Random;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 /**
@@ -65,7 +66,7 @@ public class SimplexNoise {
     }
     
     /**
-     * Hashes two long values in a really simple way
+     * Hashes two long values in a really simple and stupid way
      */
     private long hash(long x, long y) {
         x ^= y;
@@ -88,12 +89,7 @@ public class SimplexNoise {
     }
     
     /**
-     * Gets the noise value at the given point.
-     * 
-     * @param x The x-coordinate of the point at which to sample the noise.
-     * @param y The y-coordinate of the point at which to sample the noise.
-     * 
-     * @return The noise value at (x,y), between 0.0 and 1.0.
+     * Gets the noise value at (x,y), between 0 and 1.
      */
     public double noise(double x, double y) {
         x /= scale;
@@ -164,27 +160,21 @@ public class SimplexNoise {
         }
         
         // Add contributions from each corner to get the final noise value.
-        // The result is scaled to return values in the interval [-1,1].
+        // The result is scaled to return values in the interval [0,1].
         
-        //return 70.0 * (n0 + n1 + n2);            // Produces a value between -1 and 1
-        return 0.5 + 35.0 * (n0 + n1 + n2) * Maths.SQRT_2;        // Produces a value between 0 and 1
+        //return 70.0 * (n0 + n1 + n2) * Maths.SQRT_2;     // -1 to 1
+        return 0.5 + 35.0 * (n0 + n1 + n2) * Maths.SQRT_2; // 0 to 1
     }
     
     /**
      * Generates the noise 'gradient' at a given gridpoint.
      * 
-     * @param x The x-coordinate of the gridpoint.
-     * @param y The y-coordinate of the gridpoint.
-     * 
      * @return The noise gradient at (x,y).
      */
     private Vector2 genGradient(int x, int y) {
         setSeed(x, y);
-        // We require a normalised vector; this is unsatisfactory
-        //return new Vector2f(2*rnd.nextFloat()-1, 2*rnd.nextFloat()-1);
-        
-        double angle = Maths.TAU*rnd.nextDouble();
-        return grad.set((float)(Math.cos(angle)), (float)(Math.sin(angle)));
+        float angle = Maths.TAUf * rnd.nextFloat();
+        return grad.set(MathUtils.cos(angle), MathUtils.sin(angle));
     }
     
 }

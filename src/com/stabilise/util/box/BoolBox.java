@@ -6,33 +6,33 @@ import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.beta.DataObject;
 
-public class IntBox implements IBox {
+public class BoolBox implements IBox {
     
-    private int value;
+    private boolean value;
     
     
     /**
-     * Creates a new IntBox holding the value 0.
+     * Creates a new BooleanBox holding the value false.
      */
-    public IntBox() {
-        this(0);
+    public BoolBox() {
+        this(false);
     }
     
-    public IntBox(int value) {
+    public BoolBox(boolean value) {
         this.value = value;
     }
     
-    public int get()           { return value; }
-    public void set(int value) { this.value = value; }
+    public boolean get()           { return value;       }
+    public void set(boolean value) { this.value = value; }
     
     @Override
     public void readData(DataInStream in) throws IOException {
-        value = in.readInt();
+        value = in.readBoolean();
     }
 
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        out.writeInt(value);
+        out.writeBoolean(value);
     }
     
     @Override
@@ -42,7 +42,9 @@ public class IntBox implements IBox {
 
     @Override
     public void read(String name, DataObject o) throws IOException {
-        value = o.readInt(name);
+        value = o.readBool(name);
     }
+
+
     
 }

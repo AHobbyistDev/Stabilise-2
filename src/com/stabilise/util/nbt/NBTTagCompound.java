@@ -21,7 +21,7 @@ import com.stabilise.util.io.DataOutStream;
 public class NBTTagCompound extends NBTTag {
     
     /** The tag's data. */        // Linked as to allow for consistent iteration
-    public HashMap<String, NBTTag> data = new LinkedHashMap<String, NBTTag>();
+    public HashMap<String, NBTTag> data = new LinkedHashMap<>();
     
     
     /**

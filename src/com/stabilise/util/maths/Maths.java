@@ -246,12 +246,12 @@ public class Maths {
      */
     public static int meanFloor(int a, int b) {
         // How this works:
-        // Binary addition can be described as such (do your research if you don't know this):
+        // Binary addition can be described as such:
         // a + b = ((a & b) << 1) + (a ^ b)
         // The arithmetic mean is defined as (a + b)/2
         // (a+b)/2 = (((a & b) << 1) + (a ^ b)) / 2
-        //         = (((a & b) << 1) + (a ^ b)) >> 1    [division by 2 is equivalent to a shift right]
-        //         = (a & b) + ((a ^ b) >> 1)            [the shifts cancel out]
+        //         = (((a & b) << 1) + (a ^ b)) >> 1 
+        //         = (a & b) + ((a ^ b) >> 1)        [the shifts cancel out]
         // return (a & b) + ((a ^ b) >> 1);
         return (a & b) + ((a ^ b) >> 1);
     }
@@ -307,45 +307,7 @@ public class Maths {
     */
     
     /**
-     * Linearly interpolates between two given values. Though {@code x} should
-     * be between 0.0 and 1.0, an exception will not be thrown if it is outside
-     * of these bounds.
-     * 
-     * @param y0 The y value when x=0;
-     * @param y1 The y value when x=1.
-     * @param x The x-coordinate at which to find the value, from 0.0 to 1.0.
-     * 
-     * @return A value linearly interpolated between y0 and y1.
-     */
-    public static double interpolateLinear(double y0, double y1, double x) {
-        return y0 + (y1 - y0)*x;
-    }
-    
-    /**
-     * Sinusoidally interpolates between two given values. Though {@code x}
-     * should be between 0.0 and 1.0, an exception will not be thrown if it is
-     * outside of these bounds.
-     * 
-     * @param y0 The y value when x=0;
-     * @param y1 The y value when x=1.
-     * @param x The x-coordinate at which to find the value, from 0.0 to 1.0.
-     * 
-     * @return A value sinusoidally interpolated between y0 and y1.
-     */
-    public static double interpolateSinusoidal(double y0, double y1, double x) {
-        return interpolateLinear(y0, y1, 3*x*x - 2*x*x*x);
-        
-        // Better because both first and second derivatives are 0 at endpoints
-        //return interpolateLinear(y0, y1, 6*x*x*x*x*x - 15*x*x*x*x + 10*x*x*x);
-        
-        // Almost identical graph, but possibly more computationally expensive
-        //return interpolateLinear(y0, y1, (1-Math.cos(x*Math.PI))*0.5D);
-    }
-    
-    /**
-     * Linearly interpolates between the four vertices of a unit square. Though
-     * {@code x} and {@code y} should be between 0.0 and 1.0, an exception
-     * will not be thrown if they are outside of these bounds.
+     * Interpolates between the four vertices of a unit square.
      * 
      * @param z00 The z value when x=0 and y=0.
      * @param z01 The z value when x=0 and y=1.
@@ -353,37 +315,14 @@ public class Maths {
      * @param z11 The z value when x=1 and y=1.
      * @param x The x-coordinate at which to find the value, from 0.0 to 1.0.
      * @param y The y-coordinate at which to find the value, from 0.0 to 1.0.
+     * @param interp Interpolation type to use.
      * 
-     * @return A value linearly interpolated between all four vertices at the
-     * given point.
+     * @return A value interpolated between all four vertices at the given
+     * point.
      */
-    public static double interpolateBilinear(double z00, double z01, double z10,
-            double z11, double x, double y) {
-        double z0 = interpolateLinear(z00, z10, x);
-        double z1 = interpolateLinear(z01, z11, x);
-        return interpolateLinear(z0, z1, y);
-    }
-    
-    /**
-     * Sinusoidally interpolates between the four vertices of a unit square.
-     * Though {@code x} and {@code y} should be between 0.0 and 1.0, an
-     * exception will not be thrown if they are outside of these bounds.
-     * 
-     * @param z00 The z value when x=0 and y=0.
-     * @param z01 The z value when x=0 and y=1.
-     * @param z10 The z value when x=1 and y=0.
-     * @param z11 The z value when x=1 and y=1.
-     * @param x The x-coordinate at which to find the value, from 0.0 to 1.0.
-     * @param y The y-coordinate at which to find the value, from 0.0 to 1.0.
-     * 
-     * @return A value sinusoidally interpolated between all four vertices at
-     * the given point.
-     */
-    public static double interpolateBisinusoidal(double z00, double z01,
-            double z10, double z11, double x, double y) {
-        double z0 = interpolateSinusoidal(z00, z10, x);
-        double z1 = interpolateSinusoidal(z01, z11, x);
-        return interpolateSinusoidal(z0, z1, y);
+    public static float biInterp(float z00, float z01, float z10, float z11,
+            float x, float y, Interpolation interp) {
+        return interp.apply(interp.apply(z00, z10, x), interp.apply(z01, z11, x), y);
     }
     
     /**

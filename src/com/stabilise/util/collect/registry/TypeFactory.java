@@ -25,10 +25,6 @@ import com.stabilise.util.collect.registry.GeneralTypeFactory.UnsafeFactory;
  */
 public class TypeFactory<T> extends TypeRegistry<T, Supplier<T>> {
     
-    public TypeFactory() {
-        this(new RegistryParams());
-    }
-    
     /**
      * @throws NullPointerException if {@code params} is {@code null}.
      */

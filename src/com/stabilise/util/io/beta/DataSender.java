@@ -8,7 +8,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.box.*;
 
 @SuppressWarnings("unused")
-public class DataSender implements Closeable {
+public abstract class DataSender implements DataObject, Closeable {
     
     public static enum Format {
         NBT, JSON, BYTE_ARRAY;
@@ -39,43 +39,47 @@ public class DataSender implements Closeable {
         format = null;
     }
     
-    public void io(String name, ByteArrayBox data) throws IOException {
+    public void io(String name, Exportable data) throws IOException {
         
     }
     
-    public void io(String name, ByteBox data) throws IOException {
+    public void write(String name, byte[] data) throws IOException {
         
     }
     
-    public void io(String name, CharBox data) throws IOException {
+    public void write(String name, byte data) throws IOException {
         
     }
     
-    public void io(String name, DoubleBox data) throws IOException {
+    public void write(String name, char data) throws IOException {
         
     }
     
-    public void io(String name, FloatBox data) throws IOException {
+    public void write(String name, double data) throws IOException {
         
     }
     
-    public void io(String name, IntArrayBox data) throws IOException {
+    public void write(String name, float data) throws IOException {
         
     }
     
-    public void io(String name, IntBox data) throws IOException {
+    public void write(String name, int[] data) throws IOException {
         
     }
     
-    public void io(String name, LongBox data) throws IOException {
+    public void write(String name, int data) throws IOException {
         
     }
     
-    public void io(String name, ShortBox data) throws IOException {
+    public void write(String name, long data) throws IOException {
         
     }
     
-    public void io(String name, StringBox data) throws IOException {
+    public void write(String name, short data) throws IOException {
+        
+    }
+    
+    public void write(String name, String data) throws IOException {
         
     }
     

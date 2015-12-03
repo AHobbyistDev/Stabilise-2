@@ -10,16 +10,14 @@ import javax.annotation.concurrent.NotThreadSafe;
 @NotThreadSafe
 public class PerlinNoise1D {
     
+    // Your standard interpolation function
     static final Interpolation interp1 = x -> 3*x*x - 2*x*x*x;
+    // A slightly better but more expensive interpolation function. Unlike
+    // interp1, the second derivative is 0 at the endpoints (vs. only the
+    // first derivative).
     static final Interpolation interp2 = x -> 6*x*x*x*x*x - 15*x*x*x*x + 10*x*x*x;
-    
-    //return interpolateLinear(y0, y1, 3*x*x - 2*x*x*x);
-    
-    // Better because both first and second derivatives are 0 at endpoints
-    //return interpolateLinear(y0, y1, 6*x*x*x*x*x - 15*x*x*x*x + 10*x*x*x);
-    
-    // Almost identical graph, but possibly more computationally expensive
-    //return interpolateLinear(y0, y1, (1-Math.cos(x*Math.PI))*0.5D);
+    // Actual sinusoidal interp
+    static final Interpolation interp3 = Interpolation.SINUSOIDAL.inOut;
     
     /** The pseudorandom number generator. */
     private final Random rnd;
@@ -77,8 +75,7 @@ public class PerlinNoise1D {
         
         // Note: this implementation is technically that of value noise
         // instead of perlin noise
-        return Maths.interpolateSinusoidal(genValue(flooredX),
-                genValue(flooredX + 1), x - flooredX);
+        return interp1.apply(genValue(flooredX), genValue(flooredX + 1), x - flooredX);
     }
     
     /**
@@ -86,9 +83,9 @@ public class PerlinNoise1D {
      * 
      * @return The noise value at x, between 0.0 and 1.0.
      */
-    private double genValue(int x) {
+    private float genValue(int x) {
         setSeed(x);
-        return rnd.nextDouble();
+        return rnd.nextFloat();
     }
     
 }

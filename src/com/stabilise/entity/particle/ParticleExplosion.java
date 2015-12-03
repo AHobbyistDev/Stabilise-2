@@ -22,8 +22,8 @@ public class ParticleExplosion extends Particle {
     /** The final colour of the explosion. */
     private static final Color COLOUR_FINAL = new Color(0xFF660000); //0xAAFFA200
     
-    private static final Interpolation interpCol = Interpolation.CIRCULAR.EASE_IN;
-    private static final Interpolation interpSize = Interpolation.CIRCULAR.EASE_OUT;
+    private static final Interpolation interpCol = Interpolation.CIRCULAR.in;
+    private static final Interpolation interpSize = Interpolation.CIRCULAR.out;
     
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------

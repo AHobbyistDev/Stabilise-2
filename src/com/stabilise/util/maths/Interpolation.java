@@ -543,11 +543,6 @@ public interface Interpolation {
     @Immutable
     public static abstract class All implements Interpolation {
         
-        // Ignoring naming conventions because these things should generally
-        // be treated as static constants anyway (e.g.
-        // Interpolation.CUBIC.EASE_IN). Besides, there'd be naming conflicts
-        // if I opted to name them e.g. easeIn()
-        
         /**
          * An ease-in interpolation function f(x) is broadly characterised by:
          * 
@@ -559,7 +554,8 @@ public interface Interpolation {
          * <p>This results in an interpolative function which smoothly tends
          * towards {@code start} and sharply tends toward {@code end}.
          */
-        public final Interpolation EASE_IN = x -> easeInTransform(x);
+        public final Interpolation in = x -> easeInTransform(x);
+        
         /**
          * An ease-out interpolation function f(x) is broadly characterised by:
          * 
@@ -571,7 +567,8 @@ public interface Interpolation {
          * <p>This results in an interpolative function which sharply tends
          * towards {@code start} and smoothly tends toward {@code end}.
          */
-        public final Interpolation EASE_OUT = x -> easeOutTransform(x);
+        public final Interpolation out = x -> easeOutTransform(x);
+        
         /**
          * An ease-in-out interpolation function f(x) is broadly characterised
          * as identical to an ease-in function on [0,0.5) and an ease-out
@@ -586,7 +583,7 @@ public interface Interpolation {
          * <p>This results in an interpolative function which smoothly tends
          * towards both {@code start} and {@code end}.
          */
-        public final Interpolation EASE_IN_OUT = x -> easeInOutTransform(x);
+        public final Interpolation inOut = x -> easeInOutTransform(x);
         
         
         @Override
@@ -603,7 +600,7 @@ public interface Interpolation {
          * {@code 0.0} and {@code 1.0} (inclusive).
          *  
          * @return A value interpolated between {@code start} and {@code end}.
-         * @see {@link #EASE_IN} for implementation details.
+         * @see {@link #in} for implementation details.
          */
         public final float easeIn(float start, float end, float x) {
             return lerp(start, end, easeInTransform(x));
@@ -618,7 +615,7 @@ public interface Interpolation {
          * @param x The position, between {@code 0.0} and {@code 1.0} (inclusive).
          *  
          * @return The transformed position.
-         * @see {@link #EASE_IN} for implementation details.
+         * @see {@link #in} for implementation details.
          */
         public abstract float easeInTransform(float x);
         
@@ -631,7 +628,7 @@ public interface Interpolation {
          * {@code 0.0} and {@code 1.0} (inclusive).
          *  
          * @return A value interpolated between {@code start} and {@code end}.
-         * @see {@link #EASE_OUT} for implementation details.
+         * @see {@link #out} for implementation details.
          */
         public final float easeOut(float start, float end, float x) {
             return lerp(start, end, easeOutTransform(x));
@@ -646,7 +643,7 @@ public interface Interpolation {
          * @param x The position, between {@code 0.0} and {@code 1.0} (inclusive).
          *  
          * @return The transformed position.
-         * @see {@link #EASE_OUT} for implementation details.
+         * @see {@link #out} for implementation details.
          */
         public abstract float easeOutTransform(float x);
         
@@ -657,9 +654,9 @@ public interface Interpolation {
          * @param end The end value.
          * @param x The position between the start and end values, between
          * {@code 0.0} and {@code 1.0} (inclusive).
-         *  
+         * 
          * @return A value interpolated between {@code start} and {@code end}.
-         * {@link #EASE_IN_OUT} for implementation details.
+         * {@link #inOut} for implementation details.
          */
         public final float easeInOut(float start, float end, float x) {
             return lerp(start, end, easeInOutTransform(x));
@@ -676,7 +673,7 @@ public interface Interpolation {
          * @param x The position, between {@code 0.0} and {@code 1.0} (inclusive).
          * 
          * @return The transformed value.
-         * @see {@link #EASE_IN_OUT} for implementation details.
+         * @see {@link #inOut} for implementation details.
          */
         public abstract float easeInOutTransform(float x);
         

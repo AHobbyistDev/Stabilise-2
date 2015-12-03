@@ -12,7 +12,7 @@ public class Boxes {
      * Box#set(Object) set()}.
      */
     public static <T> Box<T> empty() {
-        return box(null);
+        return new ABox<T>(null);
     }
     
     /**
@@ -35,6 +35,51 @@ public class Boxes {
     public static <T> Box<T> boxVolatile(T object) {
         return new AVolatileBox<T>(object);
     }
+    
+    public static BoolBox box(boolean data) {
+        return new BoolBox(data);
+    }
+    
+    public static ByteArrBox box(byte[] data) {
+        return new ByteArrBox(data);
+    }
+    
+    public static ByteBox box(byte data) {
+        return new ByteBox(data);
+    }
+    
+    public static CharBox box(char data) {
+        return new CharBox(data);
+    }
+    
+    public static DoubleBox box(double data) {
+        return new DoubleBox(data);
+    }
+    
+    public static FloatBox box(float data) {
+        return new FloatBox(data);
+    }
+    
+    public static IntArrBox box(int[] data) {
+        return new IntArrBox(data);
+    }
+    
+    public static IntBox box(int data) {
+        return new IntBox(data);
+    }
+    
+    public static LongBox box(long data) {
+        return new LongBox(data);
+    }
+    
+    public static ShortBox box(short data) {
+        return new ShortBox(data);
+    }
+    
+    public static StringBox box(String data) {
+        return new StringBox(data);
+    }
+    
     
     static class ABox<T> implements Box<T> {
         private T value;

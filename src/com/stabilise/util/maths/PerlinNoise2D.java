@@ -4,6 +4,7 @@ import java.util.Random;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 /**
@@ -42,7 +43,7 @@ public class PerlinNoise2D {
     }
     
     /**
-     * Hashes two long values in an order-irrelevant manner.
+     * Hashes two long values in a really simple and stupid way
      */
     private long hash(long x, long y) {
         x ^= y;
@@ -52,9 +53,6 @@ public class PerlinNoise2D {
     
     /**
      * Sets the seed of the RNG for noise generation at a point.
-     * 
-     * @param x The x-coordinate of the point for which to set the seed.
-     * @param y The y-coordinate of the point for which to set the seed.
      */
     private void setSeed(int x, int y) {
         //long n = x + (y << 32);
@@ -66,12 +64,7 @@ public class PerlinNoise2D {
     }
     
     /**
-     * Gets the noise value at the given point.
-     * 
-     * @param x The x-coordinate of the point at which to sample the noise.
-     * @param y The y-coordinate of the point at which to sample the noise.
-     * 
-     * @return The noise value at (x,y), between 0.0 and 1.0.
+     * Gets the noise value at (x,y), between 0 and 1.
      */
     public double noise(double x, double y) {
         x /= wavelength;
@@ -80,9 +73,9 @@ public class PerlinNoise2D {
         int flooredY = Maths.floor(y);
         
         // Gen gradients for the vertices of the square about the point
-        genGradient(flooredX, flooredY, g00);
-        genGradient(flooredX, flooredY+1, g01);
-        genGradient(flooredX+1, flooredY, g10);
+        genGradient(flooredX,   flooredY,   g00);
+        genGradient(flooredX,   flooredY+1, g01);
+        genGradient(flooredX+1, flooredY,   g10);
         genGradient(flooredX+1, flooredY+1, g11);
         
         // We'll need to dot the gradients at each vertex with vectors pointing
@@ -92,24 +85,22 @@ public class PerlinNoise2D {
         float v00 = g00.dot(p);
         float v01 = g01.dot(p.x, p.y - 1f);        //g01.dot(p.sub(Vector2.Y));
         float v10 = g10.dot(p.x - 1f, p.y);        //g10.dot(p.sub(Vector2.X));
-        float v11 = g11.dot(p.x - 1f, p.y - 1f);//g11.dot(p.sub(MathUtil.VEC_1_1));
+        float v11 = g11.dot(p.x - 1f, p.y - 1f);   //g11.dot(p.sub(MathUtil.VEC_1_1));
         
         // Interpolate to attain a value
-        return Maths.interpolateBisinusoidal(v00, v01, v10, v11, p.x, p.y) * Maths.SQRT_2;
+        return Maths.SQRT_2f * 
+                Maths.biInterp(v00, v01, v10, v11, p.x, p.y, PerlinNoise1D.interp1);
     }
     
     /**
      * Generates the noise gradient at a given gridpoint.
      * 
-     * @param x The x-coordinate of the gridpoint.
-     * @param y The y-coordinate of the gridpoint.
      * @param dest The destination vector in which to store the gradient.
      */
     private void genGradient(int x, int y, Vector2 dest) {
         setSeed(x, y);
-        double angle = Maths.TAU*rnd.nextDouble();
-        dest.set((float)Math.cos(angle), (float)Math.sin(angle));
-        //dest.set(2*rnd.nextFloat()-1, 2*rnd.nextFloat()-1);
+        float angle = Maths.TAUf * rnd.nextFloat();
+        dest.set(MathUtils.cos(angle), MathUtils.sin(angle));
     }
     
 }

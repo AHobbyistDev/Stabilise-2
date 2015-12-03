@@ -1,5 +1,6 @@
 package com.stabilise.world.gen.action;
 
+import com.stabilise.util.collect.registry.Registries;
 import com.stabilise.util.collect.registry.TypeFactory;
 import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.Region;
@@ -7,7 +8,7 @@ import com.stabilise.world.World;
 
 public abstract class Action {
     
-    private static final TypeFactory<Action> registry = new TypeFactory<>();
+    private static final TypeFactory<Action> registry = Registries.typeFactory();
     
     static {
         registry.registerUnsafe(1, ActionAddEntity.class);

@@ -193,7 +193,7 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
             
             int baseX = rnd.nextInt(Integer.MAX_VALUE - SLICE_SIZE);
             int baseY = rnd.nextInt(Integer.MAX_VALUE - SLICE_SIZE);
-            Interpolation interp = Interpolation.QUADRATIC.EASE_IN_OUT;
+            Interpolation interp = Interpolation.QUADRATIC.inOut;
             int max = SLICE_SIZE/2;
             
             double[] factors = new double[SLICE_SIZE*SLICE_SIZE];

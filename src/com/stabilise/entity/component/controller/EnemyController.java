@@ -33,23 +33,7 @@ public class EnemyController extends CController {
     public void update(World w, Entity e) {
         if(true/*!e.dead*/) {
             if(--actionTimeout == 0) {
-                float rnd = w.getRnd().nextFloat();
-                if(rnd < 0.45) {
-                    action = EnumAction.IDLE;
-                    actionTimeout = 180 + (int)(w.getRnd().nextFloat() * 180);
-                } else if(rnd < 0.55) {
-                    action = EnumAction.IDLE;
-                    e.facingRight = (!e.facingRight);
-                    actionTimeout = 120 + (int)(w.getRnd().nextFloat() * 180);
-                } else if(rnd < 0.70) {
-                    action = EnumAction.IDLE;
-                    mob.jump();
-                    actionTimeout = 180 + (int)(w.getRnd().nextFloat() * 180);
-                } else {
-                    if(rnd < 0.85) e.facingRight = (!e.facingRight);
-                    action = EnumAction.MOVE;
-                    actionTimeout = 30 + (int)(w.getRnd().nextFloat() * 90);
-                }
+                refreshAction(w, e);
             }
             
             if(action == EnumAction.MOVE) {
@@ -61,8 +45,30 @@ public class EnemyController extends CController {
         }
     }
     
+    private void refreshAction(World w, Entity e) {
+        float rnd = w.getRnd().nextFloat();
+        if(rnd < 0.45) {
+            action = EnumAction.IDLE;
+            actionTimeout = 180 + (int)(w.getRnd().nextFloat() * 180);
+        } else if(rnd < 0.55) {
+            action = EnumAction.IDLE;
+            e.facingRight = (!e.facingRight);
+            actionTimeout = 120 + (int)(w.getRnd().nextFloat() * 180);
+        } else if(rnd < 0.70) {
+            action = EnumAction.IDLE;
+            mob.jump();
+            actionTimeout = 180 + (int)(w.getRnd().nextFloat() * 180);
+        } else {
+            if(rnd < 0.85) e.facingRight = (!e.facingRight);
+            action = EnumAction.MOVE;
+            actionTimeout = 30 + (int)(w.getRnd().nextFloat() * 90);
+        }
+    }
+    
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
+        if(ev.type() == EntityEvent.Type.DAMAGED)
+            refreshAction(w, e);
         return false;
     }
     
