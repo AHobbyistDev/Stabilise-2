@@ -1,20 +1,20 @@
-package com.stabilise.util.io.beta.bytes;
+package com.stabilise.util.io.data.bytestream;
 
 import java.io.IOException;
 
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.Sendable;
-import com.stabilise.util.io.beta.AbstractDataList;
-import com.stabilise.util.io.beta.DataList;
-import com.stabilise.util.io.beta.DataObject;
+import com.stabilise.util.io.data.AbstractDataList;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.DataList;
 
 
 public class ByteList extends AbstractDataList {
     
-    private final ByteObject backer;
+    private final ByteCompound backer;
     
-    ByteList(ByteObject backer) {
+    ByteList(ByteCompound backer) {
         this.backer = backer;
     }
     
@@ -104,7 +104,7 @@ public class ByteList extends AbstractDataList {
     }
     
     @Override
-    public DataObject object() {
+    public DataCompound object() {
         // TODO Auto-generated method stub
         return null;
     }

@@ -41,13 +41,13 @@ public class Maths {
     
     /** The maximum value which can be held by an unsigned byte
      * (<tt>2<sup><font size=-1>8</font></sup>-1</tt>). */
-    public static final int UBYTE_MAX_VALUE = 0xFF; //(1 << Byte.SIZE) - 1;
+    public static final int UBYTE_MAX_VALUE = 0xFF;
     /** The maximum value which can be held by an unsigned short
      * (<tt>2<sup><font size=-1>16</font></sup>-1</tt>). */
-    public static final int USHORT_MAX_VALUE = 0xFFFF; //(1 << Short.SIZE) - 1;
+    public static final int USHORT_MAX_VALUE = 0xFFFF;
     /** The maximum value which can be held by an unsigned int
      * (<tt>2<sup><font size=-1>32</font></sup>-1</tt>). */
-    public static final int UINT_MAX_VALUE = 0xFFFFFFFF; //(int)((1L << Integer.SIZE) - 1);
+    public static final int UINT_MAX_VALUE = 0xFFFFFFFF;
     
     
     /**

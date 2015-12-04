@@ -1,4 +1,4 @@
-package com.stabilise.util.io.beta;
+package com.stabilise.util.io.data;
 
 import com.stabilise.util.io.Sendable;
 
@@ -13,7 +13,7 @@ public interface DataList extends Sendable {
     void io(Exportable data);
     void io(ValueExportable data);
     
-    DataObject object();
+    DataCompound object();
     DataList   list();
     
     void add(boolean data);

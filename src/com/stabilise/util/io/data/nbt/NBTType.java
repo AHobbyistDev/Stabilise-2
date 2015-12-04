@@ -1,9 +1,10 @@
-package com.stabilise.util.io.beta.nbt;
+package com.stabilise.util.io.data.nbt;
 
 import java.util.function.Supplier;
 
 import com.stabilise.util.box.ByteArrBox;
 import com.stabilise.util.box.ByteBox;
+import com.stabilise.util.box.CharBox;
 import com.stabilise.util.box.DoubleBox;
 import com.stabilise.util.box.FloatBox;
 import com.stabilise.util.box.IntArrBox;
@@ -25,10 +26,11 @@ public enum NBTType {
     FLOAT     (5,  FloatBox.class),
     DOUBLE    (6,  DoubleBox.class),
     BYTE_ARRAY(7,  ByteArrBox.class),
-    STING     (8,  StringBox.class),
+    STRING     (8,  StringBox.class),
     LIST      (9,  NBTList.class, NBTList::new),
     COMPOUND  (10, NBTCompound.class, NBTCompound::new),
-    INT_ARRAY (11, IntArrBox.class);
+    INT_ARRAY (11, IntArrBox.class),
+    CHAR      (12, CharBox.class);
     
     
     public final byte id;
@@ -57,14 +59,23 @@ public enum NBTType {
             
     }
     
+    /**
+     * Creates an NBT tag with the specified ID.
+     */
     public static Sendable createTag(byte id) {
         return registry.create(id);
     }
     
+    /**
+     * Returns the ID of the given tag, or -1 if {@code s} isn't a valid tag.
+     */
     public static byte tagID(Sendable s) {
         return (byte) registry.getID(s.getClass());
     }
     
+    /**
+     * Returns the tag name for a tag with the specified ID.
+     */
     public static String name(byte id) {
         return NBTType.values()[id-1].toString();
     }

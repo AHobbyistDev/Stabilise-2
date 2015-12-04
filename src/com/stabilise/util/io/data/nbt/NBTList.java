@@ -1,4 +1,4 @@
-package com.stabilise.util.io.beta.nbt;
+package com.stabilise.util.io.data.nbt;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,9 +7,9 @@ import java.util.List;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.Sendable;
-import com.stabilise.util.io.beta.AbstractDataList;
-import com.stabilise.util.io.beta.DataList;
-import com.stabilise.util.io.beta.DataObject;
+import com.stabilise.util.io.data.AbstractDataList;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.DataList;
 
 
 public class NBTList extends AbstractDataList {
@@ -64,7 +64,7 @@ public class NBTList extends AbstractDataList {
     }
     
     @Override
-    public DataObject object() {
+    public DataCompound object() {
         return new NBTCompound();
     }
     

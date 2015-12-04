@@ -1,16 +1,16 @@
-package com.stabilise.util.io.beta.bytes;
+package com.stabilise.util.io.data.bytestream;
 
 import java.io.IOException;
 
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.IOUtil.IORunnable;
-import com.stabilise.util.io.beta.AbstractDataObject;
-import com.stabilise.util.io.beta.DataList;
-import com.stabilise.util.io.beta.DataObject;
+import com.stabilise.util.io.data.AbstractCompound;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.DataList;
 
 
-public class ByteObject extends AbstractDataObject {
+public class ByteCompound extends AbstractCompound {
     
     byte[] buf;
     int size;
@@ -18,11 +18,11 @@ public class ByteObject extends AbstractDataObject {
     DataOutStream writer;
     
     
-    public ByteObject() {
+    public ByteCompound() {
         this(1024); // 1kb
     }
     
-    public ByteObject(int len) {
+    public ByteCompound(int len) {
         size = len;
         buf = new byte[len];
     }
@@ -54,12 +54,17 @@ public class ByteObject extends AbstractDataObject {
     }
     
     @Override
-    public DataObject object(String name) {
+    public boolean contains(String name) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public DataCompound getCompound(String name) {
         return this;
     }
     
     @Override
-    public DataList list(String name) {
+    public DataList getList(String name) {
         return new ByteList(this);
     }
     

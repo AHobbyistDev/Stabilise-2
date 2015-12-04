@@ -1,12 +1,36 @@
-package com.stabilise.util.io.beta;
+package com.stabilise.util.io.data;
 
 import com.stabilise.util.io.Sendable;
 
-
-public interface DataObject extends Sendable {
+/**
+ * 
+ * @author Adam
+ *
+ */
+public interface DataCompound extends Sendable {
     
-    DataObject object(String name);
-    DataList   list  (String name);
+    /**
+     * Checks for whether or not a compound, list, or data with the specified
+     * name is contained within this compound.
+     */
+    boolean contains(String name);
+    
+    /**
+     * Gets a compound which is a child of this one. If a compound by the
+     * specified name already exists, it is returned, otherwise one is
+     * created.
+     * 
+     * @throws NullPointerException if {@code name} is {@code null} and names
+     * are not ignored.
+     */
+    DataCompound getCompound(String name);
+    
+    /**
+     * Gets a list which is a child of this compound. If a list by the
+     * specified name already exists, it is returned, otherwise one is created.
+     * 
+     */
+    DataList     getList    (String name);
     
     void io(String name, Exportable data);
     void io(String name, ValueExportable data);

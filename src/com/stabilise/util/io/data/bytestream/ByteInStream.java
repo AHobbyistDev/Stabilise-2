@@ -1,4 +1,4 @@
-package com.stabilise.util.io.beta.bytes;
+package com.stabilise.util.io.data.bytestream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +9,7 @@ class ByteInStream extends InputStream {
     private final byte[] buf;
     private int index = 0;
     
-    public ByteInStream(ByteObject obj) {
+    public ByteInStream(ByteCompound obj) {
         this.buf = obj.buf;
     }
     

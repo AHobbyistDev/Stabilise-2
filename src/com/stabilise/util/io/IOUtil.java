@@ -1,11 +1,19 @@
 package com.stabilise.util.io;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.regex.Pattern;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.google.common.io.Files;
+import com.stabilise.util.io.data.Compression;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.Format;
 
 /**
  * This class provides some static utility IO methods.
@@ -188,6 +196,66 @@ public class IOUtil {
             throw new IOException("Failed to delete " + file);
         else if(!tmp.file().renameTo(file.file()))
             throw new IOException("Failed to rename " + tmp);
+    }
+    
+    /**
+     * Reads a file.
+     * 
+     * @throws NullPointerException if any argument is null.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static DataCompound read(Format format, Compression compression,
+            FileHandle file) throws IOException {
+        InputStream is = null;
+        BufferedInputStream bis = null;
+        DataInStream dis = null;
+        
+        try {
+            is = compression.wrap(file.read());
+            bis = new BufferedInputStream(is);
+            dis = new DataInStream(bis);
+            return format.read(dis);
+        } catch(GdxRuntimeException e) {
+            throw new IOException(e);
+        } finally {
+            dis.close(); // also closes bis, is
+        }
+    }
+    
+    /**
+     * Writes a file. If the file already exists, it will be overwritten.
+     * 
+     * @throws NullPointerException if any argument is null.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static void write(DataCompound data, Format format,
+            Compression compression, FileHandle file) throws IOException {
+        OutputStream os = null;
+        BufferedOutputStream bos = null;
+        DataOutStream dos = null;
+        
+        try {
+            os = compression.wrap(file.write(false));
+            bos = new BufferedOutputStream(os);
+            dos = new DataOutStream(bos);
+        } catch(GdxRuntimeException e) {
+            throw new IOException(e);
+        } finally {
+            dos.close(); // also closes bos, os
+        }
+    }
+    
+    /**
+     * Safely (as per {@link #safelySaveFile(FileHandle, IOConsumer)
+     * safelySaveFile}{@code ()}) saves a file (as per {@link
+     * #write(DataCompound, Format, Compression, FileHandle) write}{@code ()}).
+     * 
+     * @throws NullPointerException if any argument is null.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static void writeSafe(DataCompound data, Format format,
+            Compression compression, FileHandle file) throws IOException {
+        safelySaveFile(file, f -> write(data, format, compression, f));
     }
     
     /**

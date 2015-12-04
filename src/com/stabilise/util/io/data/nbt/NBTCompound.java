@@ -1,4 +1,4 @@
-package com.stabilise.util.io.beta.nbt;
+package com.stabilise.util.io.data.nbt;
 
 import java.io.IOException;
 import java.util.Map;
@@ -6,12 +6,12 @@ import java.util.Map;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.Sendable;
-import com.stabilise.util.io.beta.AbstractMapObject;
-import com.stabilise.util.io.beta.DataList;
-import com.stabilise.util.io.beta.DataObject;
+import com.stabilise.util.io.data.AbstractMapCompound;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.DataList;
 
 
-public class NBTCompound extends AbstractMapObject {
+public class NBTCompound extends AbstractMapCompound {
     
     public NBTCompound() {
         writeMode = true;
@@ -59,12 +59,12 @@ public class NBTCompound extends AbstractMapObject {
     }
     
     @Override
-    public DataObject object(String name) {
+    public DataCompound getCompound(String name) {
         return get(name, NBTCompound.class).orElseGet(() -> put(name, new NBTCompound(this))); 
     }
     
     @Override
-    public DataList list(String name) {
+    public DataList getList(String name) {
         return get(name, NBTList.class).orElseGet(() -> put(name, new NBTList()));
     }
     

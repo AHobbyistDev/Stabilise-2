@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
-import com.stabilise.util.io.beta.DataList;
-import com.stabilise.util.io.beta.DataObject;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.DataList;
 
 public class FloatBox implements IBox {
     
@@ -37,12 +37,12 @@ public class FloatBox implements IBox {
     }
     
     @Override
-    public void write(String name, DataObject o) {
+    public void write(String name, DataCompound o) {
         o.put(name, value);
     }
 
     @Override
-    public void read(String name, DataObject o) {
+    public void read(String name, DataCompound o) {
         value = o.getFloat(name);
     }
     

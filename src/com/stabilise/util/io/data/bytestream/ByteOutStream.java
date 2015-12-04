@@ -1,4 +1,4 @@
-package com.stabilise.util.io.beta.bytes;
+package com.stabilise.util.io.data.bytestream;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -7,11 +7,11 @@ import java.util.Arrays;
 
 class ByteOutStream extends OutputStream {
     
-    private final ByteObject obj;
+    private final ByteCompound obj;
     private byte[] buf;
     private int index = 0;
     
-    ByteOutStream(ByteObject obj) {
+    ByteOutStream(ByteCompound obj) {
         this.obj = obj;
         this.buf = obj.buf;
     }

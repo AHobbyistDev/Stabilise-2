@@ -1,4 +1,4 @@
-package com.stabilise.util.io.beta;
+package com.stabilise.util.io.data;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.box.*;
 
 @SuppressWarnings("unused")
-public abstract class DataSender implements DataObject, Closeable {
+public abstract class DataSender implements DataCompound, Closeable {
     
     public static enum Format {
         NBT, JSON, BYTE_ARRAY;

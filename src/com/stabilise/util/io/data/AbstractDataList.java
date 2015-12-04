@@ -1,4 +1,4 @@
-package com.stabilise.util.io.beta;
+package com.stabilise.util.io.data;
 
 import static com.stabilise.util.box.Boxes.box;
 

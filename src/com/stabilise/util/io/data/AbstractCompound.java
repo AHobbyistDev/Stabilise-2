@@ -1,12 +1,12 @@
-package com.stabilise.util.io.beta;
+package com.stabilise.util.io.data;
 
-public abstract class AbstractDataObject implements DataObject {
+public abstract class AbstractCompound implements DataCompound {
     
     protected boolean writeMode;
     
     @Override
     public void io(String name, Exportable data) {
-        data.io(object(name), writeMode);
+        data.io(getCompound(name), writeMode);
     }
     
     @Override

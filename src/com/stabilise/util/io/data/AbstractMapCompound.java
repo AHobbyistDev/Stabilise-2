@@ -1,4 +1,4 @@
-package com.stabilise.util.io.beta;
+package com.stabilise.util.io.data;
 
 import static com.stabilise.util.box.Boxes.box;
 
@@ -21,12 +21,17 @@ import com.stabilise.util.box.StringBox;
 import com.stabilise.util.io.Sendable;
 
 
-public abstract class AbstractMapObject extends AbstractDataObject {
+public abstract class AbstractMapCompound extends AbstractCompound {
     
     protected final Map<String, Sendable> data = new LinkedHashMap<>();
     
-    @Override public abstract DataObject object(String name);
-    @Override public abstract DataList list(String name);
+    @Override
+    public boolean contains(String name) {
+        return data.containsKey(name);
+    }
+    
+    @Override public abstract DataCompound getCompound(String name);
+    @Override public abstract DataList getList(String name);
     
     @SuppressWarnings("unchecked")
     protected <T extends Sendable> Option<T> get(String name, Class<T> c) {

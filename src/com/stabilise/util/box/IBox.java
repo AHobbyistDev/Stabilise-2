@@ -1,9 +1,9 @@
 package com.stabilise.util.box;
 
 import com.stabilise.util.io.Sendable;
-import com.stabilise.util.io.beta.DataList;
-import com.stabilise.util.io.beta.DataObject;
-import com.stabilise.util.io.beta.ValueExportable;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.DataList;
+import com.stabilise.util.io.data.ValueExportable;
 
 /**
  * A unifying marker interface to indicate that a class functions as a box.
@@ -11,12 +11,12 @@ import com.stabilise.util.io.beta.ValueExportable;
 public interface IBox extends Sendable, ValueExportable {
     
     @Override
-    default void io(String name, DataObject o, boolean write) {
+    default void io(String name, DataCompound o, boolean write) {
         if(write) write(name, o); else read(name, o);
     }
     
-    void write(String name, DataObject o);
-    void read (String name, DataObject o);
+    void write(String name, DataCompound o);
+    void read (String name, DataCompound o);
     
     @Override
     default void io(DataList l, boolean write) {
