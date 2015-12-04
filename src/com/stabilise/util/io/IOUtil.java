@@ -225,6 +225,22 @@ public class IOUtil {
     }
     
     /**
+     * Reads a file. The returned compound will be in read mode.
+     * 
+     * @throws NullPointerException if either argument is null.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static DataCompound read(Format format, DataInStream dis) throws IOException {
+        try {
+            DataCompound c = format.read(dis);
+            c.setReadMode();
+            return c;
+        } finally {
+            dis.close();
+        }
+    }
+    
+    /**
      * Writes a file. If the file already exists, it will be overwritten.
      * 
      * @throws NullPointerException if any argument is null.

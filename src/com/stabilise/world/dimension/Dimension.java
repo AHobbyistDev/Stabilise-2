@@ -9,8 +9,10 @@ import com.stabilise.util.collect.registry.DuplicatePolicy;
 import com.stabilise.util.collect.registry.Registry;
 import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.collect.registry.GeneralTypeFactory.ReflectiveFactory;
-import com.stabilise.util.nbt.NBTIO;
-import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.util.io.IOUtil;
+import com.stabilise.util.io.data.Compression;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.Format;
 import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.ClientWorld;
 import com.stabilise.world.HostWorld;
@@ -123,7 +125,7 @@ public abstract class Dimension {
      * 
      * @param tag The NBT compound tag from which to read the data.
      */
-    protected void loadExtraData(NBTTagCompound tag) {
+    protected void loadExtraData(DataCompound tag) {
         // nothing to see here, move along
     }
     
@@ -133,7 +135,7 @@ public abstract class Dimension {
      * @throws IOException if an I/O error occurs.
      */
     public final void saveData() throws IOException {
-        NBTTagCompound tag = new NBTTagCompound();
+        DataCompound tag = Format.NBT.create(true);
         saveExtraData(tag);
         info.save(tag);
     }
@@ -147,7 +149,7 @@ public abstract class Dimension {
      * 
      * @param tag The NBT compound tag to which to write the data.
      */
-    protected void saveExtraData(NBTTagCompound tag) {
+    protected void saveExtraData(DataCompound tag) {
         // nothing to see here, move along
     }
     
@@ -380,17 +382,17 @@ public abstract class Dimension {
          * @throws IOException if the info file does not exist or an I/O error
          * otherwise occurs.
          */
-        private NBTTagCompound load() throws IOException {
-            NBTTagCompound tag = NBTIO.readCompressed(getFile());
+        private DataCompound load() throws IOException {
+            DataCompound tag = IOUtil.read(Format.NBT, Compression.GZIP, getFile());
             
             if(!name.equals(tag.getString("dimName")))
                 throw new IOException("Dimension name does not match stored name \""
                         + tag.getString("dimName") + "\"");
             
-            age = tag.getLongUnsafe("age");
+            age = tag.getLong("age");
             
-            spawnSliceX = tag.getIntUnsafe("spawnX");
-            spawnSliceY = tag.getIntUnsafe("spawnY");
+            spawnSliceX = tag.getInt("spawnX");
+            spawnSliceY = tag.getInt("spawnY");
             
             return tag;
         }
@@ -400,14 +402,14 @@ public abstract class Dimension {
          * 
          * @throws IOException if an I/O error occurs.
          */
-        private void save(NBTTagCompound tag) throws IOException {
-            tag.addString("dimName", name);
-            tag.addLong("age", age);
+        private void save(DataCompound tag) throws IOException {
+            tag.put("dimName", name);
+            tag.put("age", age);
             
-            tag.addInt("spawnX", spawnSliceX);
-            tag.addInt("spawnY", spawnSliceY);
+            tag.put("spawnX", spawnSliceX);
+            tag.put("spawnY", spawnSliceY);
             
-            NBTIO.safeWriteCompressed(getFile(), tag);
+            IOUtil.writeSafe(tag, Format.NBT, Compression.GZIP, getFile());
         }
         
         /**

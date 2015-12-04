@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
-import com.stabilise.util.nbt.NBTTagCompound;
-import com.stabilise.util.nbt.export.NBTExporter;
+import com.stabilise.util.io.data.Format;
+import com.stabilise.util.io.data.ObjectExporter;
 
 /**
  * A ReflectivePacket reads and writes itself by converting itself to and from
@@ -16,12 +16,12 @@ public abstract class ReflectivePacket extends Packet {
     
     @Override
     public void readData(DataInStream in) throws IOException {
-        NBTExporter.importCompletely(this, NBTTagCompound.read(in));
+        ObjectExporter.importObj(this, Format.NBT_SIMPLE.read(in));
     }
     
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        NBTExporter.exportCompletely(this).writeData(out);
+        ObjectExporter.exportObj(this, Format.NBT_SIMPLE).writeData(out);
     }
     
 }

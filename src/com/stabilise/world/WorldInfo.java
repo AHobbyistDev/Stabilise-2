@@ -3,8 +3,10 @@ package com.stabilise.world;
 import java.io.IOException;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.stabilise.util.nbt.NBTIO;
-import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.util.io.IOUtil;
+import com.stabilise.util.io.data.Compression;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.Format;
 
 /**
  * Contains important information about a world, common to all dimensions.
@@ -63,17 +65,17 @@ public class WorldInfo implements Comparable<WorldInfo> {
         if(loaded)
             return;
         
-        NBTTagCompound infoTag = NBTIO.readCompressed(getFile());
+        DataCompound infoTag = IOUtil.read(Format.NBT, Compression.GZIP, getFile());
         
-        name = infoTag.getStringUnsafe("worldName");
-        seed = infoTag.getLongUnsafe("seed");
-        age = infoTag.getLongUnsafe("age");
+        name = infoTag.getString("worldName");
+        seed = infoTag.getLong("seed");
+        age = infoTag.getLong("age");
         
-        creationDate = infoTag.getLongUnsafe("creationDate");
-        lastPlayedDate = infoTag.getLongUnsafe("lastPlayed");
+        creationDate = infoTag.getLong("creationDate");
+        lastPlayedDate = infoTag.getLong("lastPlayed");
         
-        worldFormatVersion = infoTag.getIntUnsafe("formatVersion");
-        sliceFormatVersion = infoTag.getIntUnsafe("sliceFormatVersion");
+        worldFormatVersion = infoTag.getInt("formatVersion");
+        sliceFormatVersion = infoTag.getInt("sliceFormatVersion");
         
         loaded = true;
     }
@@ -86,19 +88,19 @@ public class WorldInfo implements Comparable<WorldInfo> {
     public void save() throws IOException {
         lastPlayedDate = System.currentTimeMillis();
         
-        NBTTagCompound infoTag = new NBTTagCompound();
+        DataCompound infoTag = Format.NBT.create(true);
         
-        infoTag.addString("worldName", name);
-        infoTag.addLong("seed", seed);
-        infoTag.addLong("age", age);
+        infoTag.put("worldName", name);
+        infoTag.put("seed", seed);
+        infoTag.put("age", age);
         
-        infoTag.addLong("creationDate", creationDate);
-        infoTag.addLong("lastPlayed", lastPlayedDate);
+        infoTag.put("creationDate", creationDate);
+        infoTag.put("lastPlayed", lastPlayedDate);
         
-        infoTag.addInt("formatVersion", worldFormatVersion);
-        infoTag.addInt("sliceFormatVersion", sliceFormatVersion);
+        infoTag.put("formatVersion", worldFormatVersion);
+        infoTag.put("sliceFormatVersion", sliceFormatVersion);
         
-        NBTIO.safeWriteCompressed(getFile(), infoTag);
+        IOUtil.writeSafe(infoTag, Format.NBT, Compression.GZIP, getFile());
     }
     
     /**

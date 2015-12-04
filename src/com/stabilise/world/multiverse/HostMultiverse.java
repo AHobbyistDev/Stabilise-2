@@ -12,9 +12,10 @@ import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
-import com.stabilise.util.nbt.NBTIO;
-import com.stabilise.util.nbt.export.ExportToNBT;
-import com.stabilise.util.nbt.export.NBTExporter;
+import com.stabilise.util.io.IOUtil;
+import com.stabilise.util.io.data.Compression;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.Format;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
@@ -195,11 +196,9 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         /** Whether or not the character is new to the world. */
         public boolean newToWorld = true;
         /** The dimension the player is in. */
-        @ExportToNBT
         public String dimension;
         /** The coordinates of the player's last known location, in
          * tile-lengths. */
-        @ExportToNBT
         public double lastX, lastY;
         
         
@@ -224,7 +223,10 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         public boolean load() {
             if(file.exists()) {
                 try {
-                    NBTExporter.importObj(this, NBTIO.readCompressed(file));
+                    DataCompound tag = IOUtil.read(Format.NBT, Compression.GZIP, file);
+                    dimension = tag.getString("dimension");
+                    lastX = tag.getDouble("lastX");
+                    lastY = tag.getDouble("lastY");
                     newToWorld = false;
                 } catch(IOException e) {
                     log.postSevere("Could not load data for " + data + "!");
@@ -240,7 +242,11 @@ public class HostMultiverse extends Multiverse<HostWorld> {
          * Saves the player data.
          */
         public void save() throws IOException {
-            NBTIO.safeWriteCompressed(file, NBTExporter.exportObj(this));
+            DataCompound tag = Format.NBT.create(true);
+            tag.put("dimension", dimension);
+            tag.put("lastX", lastX);
+            tag.put("lastY", lastY);
+            IOUtil.writeSafe(tag, Format.NBT, Compression.GZIP, file);
         }
         
     }

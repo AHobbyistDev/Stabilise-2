@@ -10,7 +10,8 @@ import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.collect.WeightingArrayList;
-import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.nbt.NBTCompound;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
@@ -149,11 +150,11 @@ public class Entity extends FreeGameObject {
         return controller instanceof PlayerController;
     }
     
-    public NBTTagCompound toNBT() {
-        return new NBTTagCompound(); // TODO
+    public DataCompound toNBT() {
+        return new NBTCompound(); // TODO
     }
     
-    public static Entity fromNBT(NBTTagCompound tag) {
+    public static Entity fromNBT(DataCompound tag) {
         return Entities.enemy(); // TOOD
     }
     
