@@ -9,8 +9,9 @@ import java.util.function.Consumer;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.Sendable;
-import com.stabilise.util.nbt.NBTTagCompound;
-import com.stabilise.util.nbt.NBTTagList;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.DataList;
+import com.stabilise.util.io.data.nbt.NBTList;
 
 /**
  * A container is something which contains items - e.g. player inventory,
@@ -367,17 +368,12 @@ public abstract class Container implements IContainer, Iterable<ItemStack>, Send
      * 
      * @return The container in the form of an NBT list tag.
      */
-    public NBTTagList toNBT() {
-        NBTTagList tag = new NBTTagList();
-        
+    public DataList toNBT(DataList tag) {
         for(int i = 0; i < size(); i++) {
             if(!isSlotEmpty(i)) {
-                NBTTagCompound stackTag = getStack(i).toNBT();
-                stackTag.addByte("slot", (byte)i);
-                tag.appendTag(stackTag);
+                getStack(i).toNBT(tag.addCompound()).put("slot", (byte)i);
             }
         }
-        
         return tag;
     }
     
@@ -386,33 +382,23 @@ public abstract class Container implements IContainer, Iterable<ItemStack>, Send
      * 
      * @param tag The NBT list tag.
      */
-    public void fromNBT(NBTTagList tag) {
+    public void fromNBT(DataList tag) {
         for(int i = 0; i < tag.size()/* && i < size()*/; i++) {
-            NBTTagCompound stackTag = (NBTTagCompound) tag.getTagAt(i);
+            DataCompound stackTag = tag.getCompound();
             byte slot = stackTag.getByte("slot");
             setSlot(slot, ItemStack.fromNBT(stackTag));
         }
-        
-        // Replace any of the default null array entries with NO_STACK.
-        /*
-        if(isBounded()) {
-            for(int i = 0; i < size(); i++) {
-                if(getStack(i) == null)
-                    setSlot(i, ItemStack.NO_STACK);
-            }
-        }
-        */
     }
     
     @Override
     public void readData(DataInStream in) throws IOException {
-        NBTTagList l = new NBTTagList();
+        DataList l = new NBTList();
         l.readData(in);
         fromNBT(l);
     }
     
     public void writeData(DataOutStream out) throws IOException {
-        toNBT().writeData(out);
+        toNBT(new NBTList()).writeData(out);
     }
     
     /**

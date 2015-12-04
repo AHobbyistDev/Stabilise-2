@@ -33,6 +33,7 @@ import com.stabilise.util.nbt.NBTTagList;
  * @see ExportToNBT
  * @see Exportable
  */
+@Deprecated
 public class NBTExporter {
     
     private static final Log LOG_EXP = Log.getAgent("NBTExporter");

@@ -47,6 +47,11 @@ public class Stabilise extends Application {
     }
     
     @Override
+    protected void init() {
+        Log.get().postInfo("Starting name... " + GAME_NAME + " " + Constants.VERSION.toString());
+    }
+    
+    @Override
     protected State getInitialState() {
         //return new com.stabilise.core.state.MenuTestState();
         //return new com.stabilise.core.state.LoadingState();

@@ -3,7 +3,7 @@ package com.stabilise.item;
 import com.stabilise.core.Constants;
 import com.stabilise.util.collect.registry.RegistryNamespaced;
 import com.stabilise.util.collect.registry.RegistryParams;
-import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.tile.Tile;
 
 /**
@@ -166,9 +166,8 @@ public class Item {
      * possesses an integer tag "id" corresponding to the item's ID, and can be
      * used to reobtain this Item via {@link #fromNBT(NBTTagCompound)}.
      */
-    public NBTTagCompound toNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.addInt("id", id);
+    public DataCompound toNBT(DataCompound tag) {
+        tag.put("id", id);
         return tag;
     }
     
@@ -225,7 +224,7 @@ public class Item {
      * item.
      * @throws NullPointerException if {@code tag} is {@code null}.
      */
-    public static Item fromNBT(NBTTagCompound tag) {
+    public static Item fromNBT(DataCompound tag) {
         return getItem(tag.getInt("id"));
     }
     

@@ -1,13 +1,16 @@
 package com.stabilise.core;
 
-import java.io.IOException;
+import javaslang.control.Try;
 
 import javax.annotation.concurrent.Immutable;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.Log;
-import com.stabilise.util.nbt.NBTIO;
-import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.util.io.IOUtil;
+import com.stabilise.util.io.data.Compression;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.Format;
+import com.stabilise.util.io.data.nbt.NBTCompound;
 import com.stabilise.world.Slice;
 
 /**
@@ -197,23 +200,22 @@ public class Constants {
             if(DEV_VERSION) {
                 FileHandle file = Resources.APP_DIR.child("revision");
                 try {
-                    NBTTagCompound tag = null;
+                    DataCompound tag = null;
                     
                     if(file.exists()) {
-                        try {
-                            tag = NBTIO.read(file);
-                        } catch(IOException e) {
+                        tag = Try.of(() -> IOUtil.read(Format.NBT, Compression.UNCOMPRESSED, file))
+                                .recover(e -> {
                             Log.get().postWarning("Couldn't load revision file", e);
-                            tag = new NBTTagCompound("versions");
-                        }
+                            return new NBTCompound();
+                        }).get();
                     } else {
-                        tag = new NBTTagCompound("versions");
+                        tag = new NBTCompound();
                     }
                     
-                    tag.addInt("comp", tag.getInt("comp") + 1);
+                    tag.put("comp", tag.getInt("comp") + 1);
                     int buildCompilations = buildTags(tag, 0);
                     
-                    NBTIO.safeWrite(file, tag);
+                    IOUtil.writeSafe(tag, Format.NBT, Compression.UNCOMPRESSED, file);
                     
                     return buildCompilations;
                 } catch(Exception e) {
@@ -230,11 +232,9 @@ public class Constants {
          * 
          * @return The number of builds of the current version.
          */
-        private int buildTags(NBTTagCompound parent, int i) {
-            NBTTagCompound tag = parent.getCompound(tags[i] + data[i]);
-            if(!parent.hasTag(tag))
-                parent.addCompound(tag.getName(), tag);
-            tag.addInt("comp", tag.getInt("comp") + 1);
+        private int buildTags(DataCompound parent, int i) {
+            DataCompound tag = parent.getCompound(tags[i] + data[i]);
+            tag.put("comp", tag.getInt("comp") + 1);
             if(++i < data.length) // we are not build
                 return buildTags(tag, i); // recursively get children
             else // we are build!

@@ -12,6 +12,7 @@ import java.lang.annotation.Target;
  * @see ExportToNBT
  * @see NBTExporter
  */
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 public @interface Exportable {

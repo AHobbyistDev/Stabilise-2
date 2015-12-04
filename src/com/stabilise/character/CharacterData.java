@@ -22,8 +22,10 @@ import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.IOUtil;
 import com.stabilise.util.io.Sendable;
-import com.stabilise.util.nbt.NBTIO;
-import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.util.io.data.Compression;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.Format;
+import com.stabilise.util.io.data.nbt.NBTCompound;
 
 /**
  * Data about a character.
@@ -145,14 +147,14 @@ public class CharacterData implements Sendable {
         if(loaded)
             return;
         
-        NBTTagCompound tag = NBTIO.readCompressed(getFile());
+        DataCompound tag = IOUtil.read(Format.NBT, Compression.GZIP, getFile());
         
         // TODO: For now only the hash and name are configured to throw
         // IOExceptions, as they're the only important details
         
-        hash = tag.getStringUnsafe("hash");
+        hash = tag.getString("hash");
         
-        name = tag.getStringUnsafe("name");
+        name = tag.getString("name");
         
         level = tag.getInt("level");
         xp = tag.getInt("xp");
@@ -175,22 +177,22 @@ public class CharacterData implements Sendable {
     public void save() throws IOException {
         lastPlayed = new Date().getTime();
         
-        NBTTagCompound tag = new NBTTagCompound();
+        DataCompound tag = new NBTCompound();
         
-        tag.addString("hash", hash);
+        tag.put("hash", hash);
         
-        tag.addString("name", name);
+        tag.put("name", name);
         
-        tag.addInt("level", level);
-        tag.addInt("xp", xp);
+        tag.put("level", level);
+        tag.put("xp", xp);
         
-        tag.addInt("maxHealth", maxHealth);
-        tag.addInt("maxStamina", maxStamina);
-        tag.addInt("maxMana", maxMana);
+        tag.put("maxHealth", maxHealth);
+        tag.put("maxStamina", maxStamina);
+        tag.put("maxMana", maxMana);
         
-        tag.addList("inventory", inventory.toNBT());
+        inventory.toNBT(tag.getList("inventory"));
         
-        NBTIO.safeWriteCompressed(getFile(), tag);
+        IOUtil.writeSafe(tag, Format.NBT, Compression.GZIP, getFile());
     }
     
     @Override

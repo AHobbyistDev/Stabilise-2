@@ -14,10 +14,18 @@ import com.stabilise.util.io.data.Tag;
 
 public class NBTList extends AbstractDataList {
     
-    private final List<Tag> data = new ArrayList<>();
+    private final List<Tag> data;
     private byte type = NBTType.BYTE.id; // default value
     private int index = 0;
     
+    
+    public NBTList() {
+        data = new ArrayList<>();
+    }
+    
+    public NBTList(int initialCapacity) {
+        data = new ArrayList<>(initialCapacity);
+    }
     
     @Override
     public void readData(DataInStream in) throws IOException {

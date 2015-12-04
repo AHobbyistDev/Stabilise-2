@@ -38,6 +38,7 @@ import com.stabilise.util.io.IOUtil;
  * output streams in {@link GZIPInputStream} and {@link GZIPOutputStream}
  * objects where appropriate.
  */
+@Deprecated
 public class NBTIO {
     
     // non-instantiable

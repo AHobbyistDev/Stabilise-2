@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.stabilise.util.nbt.NBTIO;
-import com.stabilise.util.nbt.NBTTag;
-import com.stabilise.util.nbt.NBTTagCompound;
-import com.stabilise.util.nbt.NBTTagList;
+import com.stabilise.util.io.IOUtil;
+import com.stabilise.util.io.data.Compression;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.DataList;
+import com.stabilise.util.io.data.Format;
+import com.stabilise.util.io.data.nbt.NBTCompound;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
 import com.stabilise.world.gen.action.Action;
@@ -40,16 +42,16 @@ public class PreAlphaWorldLoader extends WorldLoader {
     
     @Override
     protected void load(Region r, FileHandle file) {
-        NBTTagCompound regionTag;
+        DataCompound regionTag;
         try {
-            regionTag = NBTIO.readCompressed(file);
+            regionTag = IOUtil.read(Format.NBT, Compression.GZIP, file);
         } catch(IOException e) {
             log.postSevere("Could not load the NBT data for region " + r.x()
                     + "," + r.y() + "!", e);
             return;
         }
         
-        boolean generated = regionTag.getBoolean("generated");
+        boolean generated = regionTag.getBool("generated");
         
         //System.out.println("Loaded NBT of " + r);
         //if(!r.generated)
@@ -58,17 +60,17 @@ public class PreAlphaWorldLoader extends WorldLoader {
         if(generated) {
             for(int y = 0; y < REGION_SIZE; y++) {            // Row (y)
                 for(int x = 0; x < REGION_SIZE; x++) {        // Col (x)
-                    NBTTagCompound sliceTag = regionTag.getCompound("slice" + x + "_" + y);
+                    DataCompound sliceTag = regionTag.getCompound("slice" + x + "_" + y);
                     Slice s = new Slice(r.offsetX + x, r.offsetY + y,
-                            sliceTag.getIntArray("tiles"),
-                            sliceTag.getIntArray("walls"),
-                            sliceTag.getByteArray("light"));
+                            sliceTag.getIntArr("tiles"),
+                            sliceTag.getIntArr("walls"),
+                            sliceTag.getByteArr("light"));
                     
-                    NBTTagList tileEntities = sliceTag.getList("tileEntities");
+                    DataList tileEntities = sliceTag.getList("tileEntities");
                     if(tileEntities.size() > 0)
                         s.initTileEntities();
-                    for(NBTTag t : tileEntities) {
-                        NBTTagCompound tc = (NBTTagCompound)t;
+                    for(int i = 0; i < tileEntities.size(); i++) {
+                        DataCompound tc = tileEntities.getCompound();
                         TileEntity te = TileEntity.createTileEntityFromNBT(tc);
                         s.tileEntities        // I just love really long method names!
                             [tileCoordRelativeToSliceFromTileCoord(te.y)]
@@ -80,19 +82,19 @@ public class PreAlphaWorldLoader extends WorldLoader {
             }
         }
         
-        NBTTagList actions = regionTag.getList("queuedActions");
+        DataList actions = regionTag.getList("queuedActions");
         if(actions.size() != 0) {
             r.queuedActions = new ArrayList<>(actions.size());
             for(int i = 0; i < actions.size(); i++) {
-                r.queuedActions.add(Action.read((NBTTagCompound)actions.getTagAt(i)));
+                r.queuedActions.add(Action.read(actions.getCompound()));
             }
         }
         
-        NBTTagList structures = regionTag.getList("queuedStructures");
+        DataList structures = regionTag.getList("queuedStructures");
         
         if(structures.size() != 0) {
             for(int i = 0; i < structures.size(); i++) {
-                NBTTagCompound structure = (NBTTagCompound)structures.getTagAt(i);
+                DataCompound structure = structures.getCompound();
                 QueuedStructure s = new Region.QueuedStructure();
                 s.structureName = structure.getString("structureName");
                 s.sliceX = structure.getInt("sliceX");
@@ -113,33 +115,30 @@ public class PreAlphaWorldLoader extends WorldLoader {
     
     @Override
     protected void save(Region r, FileHandle file) {
-        NBTTagCompound regionTag = new NBTTagCompound();
+        DataCompound regionTag = new NBTCompound();
         
-        regionTag.addBoolean("generated", r.isGenerated());
+        regionTag.put("generated", r.isGenerated());
         
         if(r.isGenerated()) {
             for(int y = 0; y < REGION_SIZE; y++) {            // Row (y)
                 for(int x = 0; x < REGION_SIZE; x++) {        // Col (x)
-                    NBTTagCompound sliceTag = new NBTTagCompound();
+                    DataCompound sliceTag = regionTag.getCompound("slice" + x + "_" + y);
                     Slice s = r.slices[y][x];
-                    sliceTag.addIntArray("tiles", Slice.to1DArray(s.tiles));
-                    sliceTag.addIntArray("walls", Slice.to1DArray(s.walls));
-                    sliceTag.addByteArray("light", Slice.to1DArray(s.light));
-                    regionTag.addCompound("slice" + x + "_" + y, sliceTag);
+                    sliceTag.put("tiles", Slice.to1DArray(s.tiles));
+                    sliceTag.put("walls", Slice.to1DArray(s.walls));
+                    sliceTag.put("light", Slice.to1DArray(s.light));
                     
                     if(s.tileEntities != null) {
-                        NBTTagList tileEntities = new NBTTagList();
+                        DataList tileEntities = sliceTag.getList("tileEntities");
                         
                         TileEntity t;
                         for(int tileX = 0; tileX < Slice.SLICE_SIZE; tileX++) {
                             for(int tileY = 0; tileY < Slice.SLICE_SIZE; tileY++) {
                                 if((t = s.tileEntities[tileY][tileX]) != null) {
-                                    tileEntities.appendTag(t.toNBT());
+                                    t.toNBT(tileEntities.addCompound());
                                 }
                             }
                         }
-                        
-                        sliceTag.addList("tileEntities", tileEntities);
                     }
                 }
             }
@@ -147,30 +146,26 @@ public class PreAlphaWorldLoader extends WorldLoader {
         
         List<Action> queuedActions = r.queuedActions;
         if(queuedActions != null) {
-            NBTTagList actions = new NBTTagList(queuedActions.size());
-            queuedActions.stream().map(Action::toNBT).forEach(actions::appendTag);
-            regionTag.addList("queuedActions", actions);
+            DataList actions = regionTag.getList("queuedActions");
+            queuedActions.forEach(a -> a.toNBT(actions.addCompound()));
         }
         
         if(r.hasQueuedStructures()) {
-            NBTTagList structures = new NBTTagList();
+            DataList structures = regionTag.getList("queuedStructures");
             for(QueuedStructure s : r.getStructures()) {
-                NBTTagCompound structure = new NBTTagCompound();
-                structure.addString("schematicName", s.structureName);
-                structure.addInt("sliceX", s.sliceX);
-                structure.addInt("sliceY", s.sliceY);
-                structure.addInt("tileX", s.tileX);
-                structure.addInt("tileY", s.tileY);
-                structure.addInt("offsetX", s.offsetX);
-                structure.addInt("offsetY", s.offsetY);
-                structures.appendTag(structure);
+                DataCompound structure = structures.addCompound();
+                structure.put("schematicName", s.structureName);
+                structure.put("sliceX", s.sliceX);
+                structure.put("sliceY", s.sliceY);
+                structure.put("tileX", s.tileX);
+                structure.put("tileY", s.tileY);
+                structure.put("offsetX", s.offsetX);
+                structure.put("offsetY", s.offsetY);
             }
-            
-            regionTag.addList("queuedStructures", structures);
         }
         
         try {
-            NBTIO.safeWriteCompressed(file, regionTag);
+            IOUtil.writeSafe(regionTag, Format.NBT, Compression.GZIP, file);
         } catch(IOException e) {
             log.postSevere("Could not save " + r + "!", e);
         }

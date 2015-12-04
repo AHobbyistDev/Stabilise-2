@@ -5,7 +5,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.item.BoundedContainer;
 import com.stabilise.item.Container;
 import com.stabilise.item.ItemStack;
-import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
 /**
@@ -54,12 +54,12 @@ public class TileEntityChest extends TileEntity {
     }
     
     @Override
-    protected void writeNBT(NBTTagCompound tag) {
-        tag.addList("items", items.toNBT());
+    protected void writeNBT(DataCompound tag) {
+        items.toNBT(tag.getList("items"));
     }
     
     @Override
-    public void fromNBT(NBTTagCompound tag) {
+    public void fromNBT(DataCompound tag) {
         items.fromNBT(tag.getList("items"));
     }
     

@@ -4,7 +4,7 @@ import com.stabilise.entity.FixedGameObject;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.collect.registry.GeneralTypeFactory;
 import com.stabilise.util.collect.registry.RegistryParams;
-import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
 /**
@@ -126,11 +126,10 @@ public abstract class TileEntity extends FixedGameObject {
      * 
      * @return The NBT tag.
      */
-    public final NBTTagCompound toNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.addInt("id", getID());
-        tag.addInt("x", x);
-        tag.addInt("y", y);
+    public final DataCompound toNBT(DataCompound tag) {
+        tag.put("id", getID());
+        tag.put("x", x);
+        tag.put("y", y);
         writeNBT(tag);
         return tag;
     }
@@ -138,12 +137,12 @@ public abstract class TileEntity extends FixedGameObject {
     /**
      * Writes this tile entity's data to the specified compound NBT tag.
      */
-    protected abstract void writeNBT(NBTTagCompound tag);
+    protected abstract void writeNBT(DataCompound tag);
     
     /**
      * Reads the tile entity from the specified compound NBT tag.
      */
-    public abstract void fromNBT(NBTTagCompound tag);
+    public abstract void fromNBT(DataCompound tag);
     
     //--------------------==========--------------------
     //------------=====Static Functions=====------------
@@ -173,7 +172,7 @@ public abstract class TileEntity extends FixedGameObject {
      * @throws NullPointerException if {@code tag} is {@code null}.
      * @throws RuntimeException if tile entity creation failed.
      */
-    public static TileEntity createTileEntityFromNBT(NBTTagCompound tag) {
+    public static TileEntity createTileEntityFromNBT(DataCompound tag) {
         TileEntity t = createTileEntity(tag.getInt("id"), tag.getInt("x"), tag.getInt("y"));
         if(t == null)
             return null;

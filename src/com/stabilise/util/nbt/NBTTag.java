@@ -8,6 +8,7 @@ import com.stabilise.util.io.Sendable;
  * <p>Created by Notch and used by Minecraft - I'm borrowing them because
  * they're so nice.
  */
+@Deprecated
 public abstract class NBTTag implements Sendable {
     
     //--------------------==========--------------------

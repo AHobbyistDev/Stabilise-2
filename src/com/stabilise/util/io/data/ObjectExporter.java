@@ -4,24 +4,18 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.function.Predicate;
 
-import com.stabilise.util.nbt.NBTTagCompound;
-
 /**
  * Provides static methods to automatically export an object to and import an
  * object from a compound tag.
  * 
  * <p>These utility methods are provided to avoid the need to manually write
  * such import and export code for every desired field of an object. Simply
- * pass an object to {@link #exportCompletely(Object)} or use it's inverse,
- * {@link #importCompletely(Object, NBTTagCompound, boolean)}.
+ * pass an object to {@link #exportObj(Object, Format)} or use it's inverse,
+ * {@link #importObj(Object, DataCompound)}.
  * 
  * <p>Note that, of course, as these methods utilise reflection, exporting an
  * object via these utility methods is much slower than manually writing
  * import and export methods.
- * 
- * <p>Also note that many field types (e.g. Collections classes) can not be
- * exported, and in some cases it is necessary to manually write or append to
- * an object's representative compound tag.
  */
 public class ObjectExporter {
     

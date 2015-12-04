@@ -18,6 +18,7 @@ import com.stabilise.util.io.DataOutStream;
  * 
  * @see NBTTag
  */
+@Deprecated
 public class NBTTagCompound extends NBTTag {
     
     /** The tag's data. */        // Linked as to allow for consistent iteration

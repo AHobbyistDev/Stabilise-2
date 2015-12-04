@@ -13,6 +13,7 @@ import com.stabilise.util.io.DataOutStream;
  * 
  * @see NBTTag
  */
+@Deprecated
 public class NBTTagList extends NBTTag implements Iterable<NBTTag> {
     
     /** The tag's data. */

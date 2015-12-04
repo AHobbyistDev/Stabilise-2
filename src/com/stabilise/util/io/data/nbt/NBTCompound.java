@@ -15,6 +15,9 @@ import com.stabilise.util.io.data.Tag;
 
 public class NBTCompound extends AbstractMapCompound {
     
+    /**
+     * Creates a new compound in write mode.
+     */
     public NBTCompound() {
         writeMode = true;
     }

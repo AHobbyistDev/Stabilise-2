@@ -10,6 +10,7 @@ import com.stabilise.util.io.DataOutStream;
  * 
  * @see NBTTag
  */
+@Deprecated
 public class NBTTagFloat extends NBTTag {
     
     /** The tag's data. */

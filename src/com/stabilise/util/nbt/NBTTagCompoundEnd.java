@@ -11,6 +11,7 @@ import com.stabilise.util.io.DataOutStream;
  * 
  * @see NBTTag
  */
+@Deprecated
 public class NBTTagCompoundEnd extends NBTTag {
     
     /**

@@ -1,6 +1,6 @@
 package com.stabilise.world.gen.action;
 
-import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.Region;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -15,14 +15,13 @@ public class ActionAddTileEntity extends Action {
     }
     
     @Override
-    public NBTTagCompound toNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.addCompound("t", t.toNBT());
+    public DataCompound toNBT(DataCompound tag) {
+        t.toNBT(tag.getCompound("t"));
         return tag;
     }
     
     @Override
-    public Action fromNBT(NBTTagCompound tag) {
+    public Action fromNBT(DataCompound tag) {
         t = TileEntity.createTileEntityFromNBT(tag.getCompound("t"));
         return null;
     }

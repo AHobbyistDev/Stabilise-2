@@ -1,7 +1,7 @@
 package com.stabilise.world.gen.action;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.Region;
 import com.stabilise.world.World;
 
@@ -16,12 +16,12 @@ public class ActionAddEntity extends Action {
     }
     
     @Override
-    public NBTTagCompound toNBT() {
+    public DataCompound toNBT(DataCompound tag) {
         return null;
     }
     
     @Override
-    public Action fromNBT(NBTTagCompound tag) {
+    public Action fromNBT(DataCompound tag) {
         return null;
     }
     

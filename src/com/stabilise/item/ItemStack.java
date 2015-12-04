@@ -1,6 +1,6 @@
 package com.stabilise.item;
 
-import com.stabilise.util.nbt.NBTTagCompound;
+import com.stabilise.util.io.data.DataCompound;
 
 /**
  * This class represents a stack of identical items.
@@ -203,12 +203,11 @@ public class ItemStack {
      * returned NBT data can be used to reconstruct this ItemStack via {@link
      * #fromNBT(NBTTagCompound)}.
      */
-    public NBTTagCompound toNBT() {
-        NBTTagCompound tag = item.toNBT();
-        tag.addInt("count", quantity);
-        // Don't write if it's 0 to save space.
-        if(data != 0)
-            tag.addInt("data", data);
+    public DataCompound toNBT(DataCompound tag) {
+        item.toNBT(tag);
+        tag.put("count", quantity);
+        if(data != 0) // Don't write if it's 0 to save space.
+            tag.put("data", data);
         return tag;
     }
     
@@ -242,7 +241,7 @@ public class ItemStack {
      * item stack.
      * @throws NullPointerException if {@code tag} is {@code null}.
      */
-    public static ItemStack fromNBT(NBTTagCompound tag) {
+    public static ItemStack fromNBT(DataCompound tag) {
         Item item = Item.fromNBT(tag);
         if(item == Item.NO_ITEM)
             return NO_STACK;

@@ -5,8 +5,8 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.entity.particle.ParticleSource;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
-import com.stabilise.util.nbt.NBTTagCompound;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.tileentity.TileEntity.Updated;
 
@@ -130,12 +130,12 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     }
     
     @Override
-    protected void writeNBT(NBTTagCompound tag) {
-        tag.addInt("ticksUntilNextSpawn", ticksUntilNextSpawn);
+    protected void writeNBT(DataCompound tag) {
+        tag.put("ticksUntilNextSpawn", ticksUntilNextSpawn);
     }
     
     @Override
-    public void fromNBT(NBTTagCompound tag) {
+    public void fromNBT(DataCompound tag) {
         ticksUntilNextSpawn = tag.getInt("ticksUntilNextSpawn");
     }
     
