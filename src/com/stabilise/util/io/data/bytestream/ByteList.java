@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
-import com.stabilise.util.io.Sendable;
 import com.stabilise.util.io.data.AbstractDataList;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
+import com.stabilise.util.io.data.Tag;
 
 
 public class ByteList extends AbstractDataList {
@@ -28,13 +28,25 @@ public class ByteList extends AbstractDataList {
         throw new UnsupportedOperationException("Cannot directly read a list!");
     }
     
+    // From ValueExportable
+    @Override
+    public void io(String name, DataCompound o, boolean write) {
+        throw new UnsupportedOperationException("NYI");
+    }
+    
+    // From ValueExportable
+    @Override
+    public void io(DataList l, boolean write) {
+        throw new UnsupportedOperationException("NYI");
+    }
+    
     @Override
     public int size() {
         return 0;
     }
     
     @Override
-    protected void add(Sendable o) {
+    public void add(Tag o) {
         backer.checkCanWrite2();
         try {
             o.writeData(backer.writer);
@@ -44,8 +56,8 @@ public class ByteList extends AbstractDataList {
     }
     
     @Override
-    protected <T extends Sendable> T getNext() {
-        throw new UnsupportedOperationException();
+    public Tag getNext() {
+        throw new UnsupportedOperationException("A ByteList requires context!");
     }
     
     @Override
@@ -104,20 +116,19 @@ public class ByteList extends AbstractDataList {
     }
     
     @Override
-    public DataCompound object() {
+    public DataCompound addCompound() {
         // TODO Auto-generated method stub
         return null;
     }
     
     @Override
-    public DataList list() {
+    public DataList addList() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     protected boolean writeMode() {
-        // TODO Auto-generated method stub
         return false;
     }
 

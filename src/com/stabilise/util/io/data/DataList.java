@@ -13,9 +13,8 @@ public interface DataList extends Sendable {
     void io(Exportable data);
     void io(ValueExportable data);
     
-    DataCompound object();
-    DataList   list();
-    
+    DataCompound addCompound();
+    DataList     addList();
     void add(boolean data);
     void add(byte    data);
     void add(char    data);
@@ -28,6 +27,9 @@ public interface DataList extends Sendable {
     void add(byte[]  data);
     void add(int[]   data);
     
+    Tag     getNext   ();
+    default DataCompound getCompound() { return (DataCompound) getNext(); }
+    default DataList     getList()     { return (DataList)     getNext(); }
     boolean getBool   ();
     byte    getByte   ();
     char    getChar   ();

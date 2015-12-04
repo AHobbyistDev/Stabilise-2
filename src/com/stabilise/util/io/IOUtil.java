@@ -199,7 +199,7 @@ public class IOUtil {
     }
     
     /**
-     * Reads a file.
+     * Reads a file. The returned compound will be in read mode.
      * 
      * @throws NullPointerException if any argument is null.
      * @throws IOException if an I/O error occurs.
@@ -214,7 +214,9 @@ public class IOUtil {
             is = compression.wrap(file.read());
             bis = new BufferedInputStream(is);
             dis = new DataInStream(bis);
-            return format.read(dis);
+            DataCompound c = format.read(dis);
+            c.setReadMode();
+            return c;
         } catch(GdxRuntimeException e) {
             throw new IOException(e);
         } finally {
@@ -238,6 +240,7 @@ public class IOUtil {
             os = compression.wrap(file.write(false));
             bos = new BufferedOutputStream(os);
             dos = new DataOutStream(bos);
+            format.write(data.convert(format), dos);
         } catch(GdxRuntimeException e) {
             throw new IOException(e);
         } finally {
@@ -256,6 +259,37 @@ public class IOUtil {
     public static void writeSafe(DataCompound data, Format format,
             Compression compression, FileHandle file) throws IOException {
         safelySaveFile(file, f -> write(data, format, compression, f));
+    }
+    
+    
+    /**
+     * Counts the number of bytes which would be written by {@code data} in the
+     * specified format with the specified compression.
+     * 
+     * @throws NullPointerException if any argument is null.
+     */
+    public static int countBytes(DataCompound data, Format format, Compression compression) {
+        ByteCountingStream bcs = new ByteCountingStream();
+        OutputStream os = null;
+        BufferedOutputStream bos = null;
+        DataOutStream dos = null;
+        
+        try {
+            os = compression.wrap(bcs);
+            bos = new BufferedOutputStream(os);
+            dos = new DataOutStream(bos);
+            format.write(data.convert(format), dos);
+        } catch(Throwable t) {
+            return 0;
+        } finally {
+            try {
+                dos.close(); // also closes bos, os
+            } catch(IOException e) {
+                throw new AssertionError("y u do dis to me");
+            } 
+        }
+        
+        return bcs.byteCount();
     }
     
     /**

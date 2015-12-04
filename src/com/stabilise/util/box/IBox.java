@@ -1,14 +1,13 @@
 package com.stabilise.util.box;
 
-import com.stabilise.util.io.Sendable;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
-import com.stabilise.util.io.data.ValueExportable;
+import com.stabilise.util.io.data.Tag;
 
 /**
  * A unifying marker interface to indicate that a class functions as a box.
  */
-public interface IBox extends Sendable, ValueExportable {
+public interface IBox extends Tag {
     
     @Override
     default void io(String name, DataCompound o, boolean write) {

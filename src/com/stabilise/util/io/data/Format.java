@@ -51,6 +51,11 @@ public enum Format {
      * <p>This format is <i>extremely</i> volatile, and readers/writers must
      * take extreme care to read/write the data in exactly the same way, as a
      * desync in protocol could cause corruption of data.
+     * 
+     * <p>Furthermore, this format generally doesn't play nice with other
+     * formats; a compound of this format cannot be converted to other formats,
+     * and compounds of other formats do not translate perfectly into this
+     * format for technical reasons (see: NBTList).
      */
     BYTE_STREAM(ByteCompound::new);
     
@@ -63,10 +68,25 @@ public enum Format {
     }
     
     /**
-     * Creates a new DataObject of this format.
+     * Creates a new compound of this format. The returned compound is not
+     * guaranteed to be in either read or write mode.
      */
     public DataCompound create() {
         return sup.get();
+    }
+    
+    /**
+     * Creates a new compound in read/write mode.
+     * 
+     * @param writeMode true for write mode, false for read mode.
+     */
+    public DataCompound create(boolean writeMode) {
+        DataCompound c = create();
+        if(writeMode)
+            c.setWriteMode();
+        else
+            c.setReadMode();
+        return c;
     }
     
     /**

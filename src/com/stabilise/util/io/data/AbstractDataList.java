@@ -13,16 +13,15 @@ import com.stabilise.util.box.IntBox;
 import com.stabilise.util.box.LongBox;
 import com.stabilise.util.box.ShortBox;
 import com.stabilise.util.box.StringBox;
-import com.stabilise.util.io.Sendable;
 
 
-public abstract class AbstractDataList implements DataList {
+public abstract class AbstractDataList implements DataList, Tag {
     
     protected abstract boolean writeMode();
     
     @Override
     public void io(Exportable data) {
-        data.io(object(), writeMode());
+        data.io(addCompound(), writeMode());
     }
     
     @Override
@@ -30,8 +29,7 @@ public abstract class AbstractDataList implements DataList {
         data.io(this, writeMode());
     }
     
-    protected abstract void add(Sendable data);
-    protected abstract <T extends Sendable> T getNext();
+    public abstract void add(Tag data);
     
     @Override public void add(boolean data) { add(box(data)); }
     @Override public void add(byte data) { add(box(data)); }

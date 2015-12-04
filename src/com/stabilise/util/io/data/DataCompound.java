@@ -4,8 +4,6 @@ import com.stabilise.util.io.Sendable;
 
 /**
  * 
- * @author Adam
- *
  */
 public interface DataCompound extends Sendable {
     
@@ -58,5 +56,32 @@ public interface DataCompound extends Sendable {
     String  getString (String name);
     byte[]  getByteArr(String name);
     int[]   getIntArr (String name);
+    
+    /**
+     * Returns the format of this compound.
+     */
+    Format format();
+    
+    /**
+     * Converts this compound to the specified format. The returned compound
+     * will be in read mode.
+     * 
+     * @throws UnsupportedOperationException if this type of data is unable to
+     * be converted (e.g. {@link Format#BYTE_STREAM} cannot be converted as the
+     * data can only be parsed with contextual knowledge).
+     */
+    DataCompound convert(Format format);
+    
+    /**
+     * Sets this compound into read mode. In read mode, users can get data from
+     * this compound.
+     */
+    void setReadMode();
+    
+    /**
+     * Sets this compound into write mode. In write mode, users may write data
+     * to this compound.
+     */
+    void setWriteMode();
     
 }

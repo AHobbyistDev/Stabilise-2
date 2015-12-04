@@ -8,6 +8,8 @@ import com.stabilise.util.io.IOUtil.IORunnable;
 import com.stabilise.util.io.data.AbstractCompound;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
+import com.stabilise.util.io.data.Format;
+import com.stabilise.util.io.data.Tag;
 
 
 public class ByteCompound extends AbstractCompound {
@@ -40,15 +42,31 @@ public class ByteCompound extends AbstractCompound {
         out.write(buf, 0, size);
     }
     
+    // From ValueExportable
+    @Override
+    public void io(String name, DataCompound o, boolean write) {
+        throw new UnsupportedOperationException("NYI");
+    }
+    
+    // From ValueExportable
+    @Override
+    public void io(DataList l, boolean write) {
+        throw new UnsupportedOperationException("NYI");
+    }
+    
+    @Override
     public void setWriteMode() {
-        writeMode = true;
+        if(writeMode) return;
+        super.setWriteMode();
         reader = null;
         writer = new DataOutStream(new ByteOutStream(this));
         size = 0;
     }
     
+    @Override
     public void setReadMode() {
-        writeMode = false;
+        if(!writeMode) return;
+        super.setReadMode();
         writer = null;
         reader = new DataInStream(new ByteInStream(this));
     }
@@ -68,7 +86,7 @@ public class ByteCompound extends AbstractCompound {
         return new ByteList(this);
     }
     
-    private void tryDo(IORunnable r) {
+    private void tryWrite(IORunnable r) {
         try {
             r.run();
         } catch(IOException e) {
@@ -76,66 +94,76 @@ public class ByteCompound extends AbstractCompound {
         }
     }
     
+    @Override
+    public <T extends Tag> T put(String name, T t) {
+        checkCanWrite();
+        // Due to this, to ensure compatibility, we need to make sure that all
+        // all put() and all get() methods thus do so in the same way as the
+        // Box classes.
+        tryWrite(() -> t.writeData(writer));
+        return t;
+    }
+    
     // WOW I LOVE REPETITION DON'T YOU???
     
     @Override
     public void put(String name, boolean data) {
         checkCanWrite();
-        tryDo(() -> writer.writeBoolean(data));
+        tryWrite(() -> writer.writeBoolean(data));
     }
     
     @Override
     public void put(String name, byte data) {
         checkCanWrite();
-        tryDo(() -> writer.writeByte(data));
+        tryWrite(() -> writer.writeByte(data));
     }
     
     @Override
     public void put(String name, char data) {
         checkCanWrite();
-        tryDo(() -> writer.writeChar(data));
+        tryWrite(() -> writer.writeChar(data));
     }
     
     @Override
     public void put(String name, double data) {
         checkCanWrite();
-        tryDo(() -> writer.writeDouble(data));
+        tryWrite(() -> writer.writeDouble(data));
     }
     
     @Override
     public void put(String name, float data) {
         checkCanWrite();
-        tryDo(() -> writer.writeFloat(data));
+        tryWrite(() -> writer.writeFloat(data));
     }
     
     @Override
     public void put(String name, int data) {
         checkCanWrite();
-        tryDo(() -> writer.writeInt(data));
+        tryWrite(() -> writer.writeInt(data));
     }
     
     @Override
     public void put(String name, long data) {
         checkCanWrite();
-        tryDo(() -> writer.writeLong(data));
+        tryWrite(() -> writer.writeLong(data));
     }
     
     @Override
     public void put(String name, short data) {
         checkCanWrite();
-        tryDo(() -> writer.writeShort(data));
+        tryWrite(() -> writer.writeShort(data));
     }
     
     @Override
     public void put(String name, String data) {
         checkCanWrite();
-        tryDo(() -> writer.writeString(data));
+        tryWrite(() -> writer.writeUTF(data));
     }
     
     @Override
     public void put(String name, byte[] data) {
         checkCanWrite();
-        tryDo(() -> {
+        tryWrite(() -> {
             writer.writeInt(data.length);
             writer.write(data);
         });
@@ -144,7 +172,7 @@ public class ByteCompound extends AbstractCompound {
     @Override
     public void put(String name, int[] data) {
         checkCanWrite();
-        tryDo(() -> {
+        tryWrite(() -> {
             writer.writeInt(data.length);
             writer.writeIntArray(data);
         });
@@ -156,7 +184,7 @@ public class ByteCompound extends AbstractCompound {
         try {
             return reader.readBoolean();
         } catch(IOException e) {
-            throw new AssertionError("This shouldn't happen!", e);
+            throw new RuntimeException(e);
         }
     }
     
@@ -166,7 +194,7 @@ public class ByteCompound extends AbstractCompound {
         try {
             return reader.readByte();
         } catch(IOException e) {
-            throw new AssertionError("This shouldn't happen!", e);
+            throw new RuntimeException(e);
         }
     }
     
@@ -176,7 +204,7 @@ public class ByteCompound extends AbstractCompound {
         try {
             return reader.readChar();
         } catch(IOException e) {
-            throw new AssertionError("This shouldn't happen!", e);
+            throw new RuntimeException(e);
         }
     }
     
@@ -186,7 +214,7 @@ public class ByteCompound extends AbstractCompound {
         try {
             return reader.readDouble();
         } catch(IOException e) {
-            throw new AssertionError("This shouldn't happen!", e);
+            throw new RuntimeException(e);
         }
     }
     
@@ -196,7 +224,7 @@ public class ByteCompound extends AbstractCompound {
         try {
             return reader.readFloat();
         } catch(IOException e) {
-            throw new AssertionError("This shouldn't happen!", e);
+            throw new RuntimeException(e);
         }
     }
     
@@ -206,7 +234,7 @@ public class ByteCompound extends AbstractCompound {
         try {
             return reader.readInt();
         } catch(IOException e) {
-            throw new AssertionError("This shouldn't happen!", e);
+            throw new RuntimeException(e);
         }
     }
     
@@ -216,7 +244,7 @@ public class ByteCompound extends AbstractCompound {
         try {
             return reader.readLong();
         } catch(IOException e) {
-            throw new AssertionError("This shouldn't happen!", e);
+            throw new RuntimeException(e);
         }
     }
     
@@ -226,7 +254,7 @@ public class ByteCompound extends AbstractCompound {
         try {
             return reader.readShort();
         } catch(IOException e) {
-            throw new AssertionError("This shouldn't happen!", e);
+            throw new RuntimeException(e);
         }
     }
     
@@ -234,9 +262,9 @@ public class ByteCompound extends AbstractCompound {
     public String getString(String name) {
         checkCanRead();
         try {
-            return reader.readString();
+            return reader.readUTF();
         } catch(IOException e) {
-            throw new AssertionError("This shouldn't happen!", e);
+            throw new RuntimeException(e);
         }
     }
     
@@ -248,7 +276,7 @@ public class ByteCompound extends AbstractCompound {
             reader.read(arr);
             return arr;
         } catch(IOException e) {
-            throw new AssertionError("This shouldn't happen!", e);
+            throw new RuntimeException(e);
         }
     }
     
@@ -260,12 +288,29 @@ public class ByteCompound extends AbstractCompound {
             reader.readIntArray(arr);
             return arr;
         } catch(IOException e) {
-            throw new AssertionError("This shouldn't happen!", e);
+            throw new RuntimeException(e);
         }
     }
     
     // Promoting to package-private visibility
     void checkCanRead2() { checkCanRead(); }
     void checkCanWrite2() { checkCanWrite(); }
+    
+    @Override
+    public Format format() {
+        return Format.BYTE_STREAM;
+    }
+    
+    @Override
+    public DataCompound convert(Format format) {
+        if(format == format()) return this;
+        throw new UnsupportedOperationException("Cannot convert from the "
+                + "byte array format to another!");
+    }
+    
+    @Override
+    public String toString() {
+        return "ByteCompound[" + size + " bytes]";
+    }
     
 }

@@ -4,6 +4,7 @@ import static com.stabilise.util.box.Boxes.box;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import javaslang.control.Option;
 
@@ -18,12 +19,11 @@ import com.stabilise.util.box.IntBox;
 import com.stabilise.util.box.LongBox;
 import com.stabilise.util.box.ShortBox;
 import com.stabilise.util.box.StringBox;
-import com.stabilise.util.io.Sendable;
 
 
 public abstract class AbstractMapCompound extends AbstractCompound {
     
-    protected final Map<String, Sendable> data = new LinkedHashMap<>();
+    protected final Map<String, Tag> data = new LinkedHashMap<>();
     
     @Override
     public boolean contains(String name) {
@@ -34,14 +34,21 @@ public abstract class AbstractMapCompound extends AbstractCompound {
     @Override public abstract DataList getList(String name);
     
     @SuppressWarnings("unchecked")
-    protected <T extends Sendable> Option<T> get(String name, Class<T> c) {
+    protected <T extends Tag> Option<T> get(String name, Class<T> c) {
         Object o = data.get(name);
         return c.isInstance(o) ? Option.some((T)o) : Option.none();
     }
     
-    protected <T extends Sendable> T put(String name, T t) {
+    @Override
+    public <T extends Tag> T put(String name, T t) {
         data.put(name, t);
         return t;
+    }
+    
+    protected final void forEachTag(BiConsumer<String, Tag> action) {
+        for(Map.Entry<String, Tag> pair : data.entrySet()) {
+            action.accept(pair.getKey(), pair.getValue());
+        }
     }
     
     // DON'T YOU JUST LOVE HOW WONDERFULLY REPETITIVE THIS IS
