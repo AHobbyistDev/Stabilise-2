@@ -39,48 +39,4 @@ public abstract class DataSender implements DataObject, Closeable {
         format = null;
     }
     
-    public void io(String name, Exportable data) throws IOException {
-        
-    }
-    
-    public void write(String name, byte[] data) throws IOException {
-        
-    }
-    
-    public void write(String name, byte data) throws IOException {
-        
-    }
-    
-    public void write(String name, char data) throws IOException {
-        
-    }
-    
-    public void write(String name, double data) throws IOException {
-        
-    }
-    
-    public void write(String name, float data) throws IOException {
-        
-    }
-    
-    public void write(String name, int[] data) throws IOException {
-        
-    }
-    
-    public void write(String name, int data) throws IOException {
-        
-    }
-    
-    public void write(String name, long data) throws IOException {
-        
-    }
-    
-    public void write(String name, short data) throws IOException {
-        
-    }
-    
-    public void write(String name, String data) throws IOException {
-        
-    }
-    
 }

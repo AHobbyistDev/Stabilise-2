@@ -200,9 +200,20 @@ public class IOUtil {
         /**
          * Performs an action on the given parameter.
          * 
-         * @throws IOException if an I/O error occurred.
+         * @throws IOException if an I/O error occurs.
          */
-        public void accept(T t) throws IOException;
+        void accept(T t) throws IOException;
+        
+    }
+    
+    /**
+     * A alternative utility interface to {@code Runnable} which may throw an
+     * IOException.
+     */
+    @FunctionalInterface
+    public static interface IORunnable {
+        
+        void run() throws IOException;
         
     }
 

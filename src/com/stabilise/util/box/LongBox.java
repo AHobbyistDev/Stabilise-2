@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
+import com.stabilise.util.io.beta.DataList;
 import com.stabilise.util.io.beta.DataObject;
 
 public class LongBox implements IBox {
@@ -36,13 +37,23 @@ public class LongBox implements IBox {
     }
     
     @Override
-    public void write(String name, DataObject o) throws IOException {
-        o.write(name, value);
+    public void write(String name, DataObject o) {
+        o.put(name, value);
     }
 
     @Override
-    public void read(String name, DataObject o) throws IOException {
-        value = o.readLong(name);
+    public void read(String name, DataObject o) {
+        value = o.getLong(name);
+    }
+    
+    @Override
+    public void write(DataList l) {
+        l.add(value);
+    }
+
+    @Override
+    public void read(DataList l) {
+        value = l.getLong();
     }
     
     @Override

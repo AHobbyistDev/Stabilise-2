@@ -1,10 +1,8 @@
 package com.stabilise.util.io.beta;
 
-import java.io.IOException;
-
-
 public interface ValueExportable {
     
-    void io(String name, DataObject o, boolean write) throws IOException;
+    void io(String name, DataObject o, boolean write);
+    void io(DataList o, boolean write);
     
 }

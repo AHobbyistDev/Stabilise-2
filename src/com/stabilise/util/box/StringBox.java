@@ -6,6 +6,7 @@ import java.util.Objects;
 import com.stabilise.util.box.Boxes.ABox;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
+import com.stabilise.util.io.beta.DataList;
 import com.stabilise.util.io.beta.DataObject;
 
 public class StringBox extends ABox<String> implements IBox {
@@ -34,27 +35,37 @@ public class StringBox extends ABox<String> implements IBox {
     
     @Override
     public void readData(DataInStream in) throws IOException {
-        super.set(in.readUTF());
+        value = in.readUTF();
     }
 
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        out.writeUTF(get());
+        out.writeUTF(value);
     }
     
     @Override
-    public void write(String name, DataObject o) throws IOException {
-        o.write(name, get());
+    public void write(String name, DataObject o) {
+        o.put(name, value);
     }
 
     @Override
-    public void read(String name, DataObject o) throws IOException {
-        super.set(o.readString(name));
+    public void read(String name, DataObject o){
+        value = o.getString(name);
+    }
+    
+    @Override
+    public void write(DataList l) {
+        l.add(value);
+    }
+
+    @Override
+    public void read(DataList l) {
+        value = l.getString();
     }
     
     @Override
     public String toString() {
-        return get();
+        return value;
     }
     
 }

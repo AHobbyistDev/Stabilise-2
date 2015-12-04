@@ -82,7 +82,7 @@ public class Boxes {
     
     
     static class ABox<T> implements Box<T> {
-        private T value;
+        protected T value;
         
         public ABox(T value) { this.value = value; }
         
@@ -91,7 +91,7 @@ public class Boxes {
     }
     
     static class AVolatileBox<T> implements Box<T> {
-        private volatile T value;
+        protected volatile T value;
         
         public AVolatileBox(T value) { this.value = value; }
         
