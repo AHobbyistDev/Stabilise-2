@@ -2,6 +2,7 @@ package com.stabilise.util.io.data.bytestream;
 
 import java.io.IOException;
 
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.IOUtil.IORunnable;
@@ -11,7 +12,7 @@ import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.Format;
 import com.stabilise.util.io.data.Tag;
 
-
+@Incomplete
 public class ByteCompound extends AbstractCompound {
     
     byte[] buf;

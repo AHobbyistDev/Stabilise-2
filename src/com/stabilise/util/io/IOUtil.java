@@ -20,12 +20,10 @@ import com.stabilise.util.io.data.Format;
  */
 public class IOUtil {
     
-    /** Regex source for illegal filename characters. */
     // Allows only lowercase+uppercase letters, all numbers, spaces (\u0020),
     // parentheses, periods, dashes, and inverted commas 
-    public static final String ILLEGAL_FILENAME_REGEX_SRC = "[^a-zA-Z0-9\\u0020().'-]";
     /** Regex for illegal filename characters. */
-    public static final Pattern ILLEGAL_FILENAME_REGEX = Pattern.compile(ILLEGAL_FILENAME_REGEX_SRC);
+    public static final Pattern ILLEGAL_FILENAME_REGEX = Pattern.compile("[^a-zA-Z0-9\\u0020().'-]");
     
     // non-instantiable
     private IOUtil() {}

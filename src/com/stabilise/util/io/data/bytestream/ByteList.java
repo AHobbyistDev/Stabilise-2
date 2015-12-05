@@ -2,6 +2,7 @@ package com.stabilise.util.io.data.bytestream;
 
 import java.io.IOException;
 
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.AbstractDataList;
@@ -9,7 +10,7 @@ import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.Tag;
 
-
+@Incomplete
 public class ByteList extends AbstractDataList {
     
     private final ByteCompound backer;

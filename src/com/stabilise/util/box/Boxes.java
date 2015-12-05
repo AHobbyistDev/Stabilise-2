@@ -37,7 +37,7 @@ public class Boxes {
     }
     
     public static BoolBox box(boolean data) {
-        return new BoolBox(data);
+        return BoolBox.valueOf(data);
     }
     
     public static ByteArrBox box(byte[] data) {

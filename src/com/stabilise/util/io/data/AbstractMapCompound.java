@@ -67,7 +67,7 @@ public abstract class AbstractMapCompound extends AbstractCompound {
     
     @Override
     public boolean getBool(String name) {
-        return get(name, BoolBox.class).orElseGet(() -> box(false)).get();
+        return get(name, BoolBox.class).orElse(BoolBox.FALSE).get();
     }
     
     @Override
@@ -118,6 +118,43 @@ public abstract class AbstractMapCompound extends AbstractCompound {
     @Override
     public int[] getIntArr(String name) {
         return get(name, IntArrBox.class).orElseGet(() -> box(new int[0])).get();
+    }
+    
+    @Override
+    public DataCompound convert(Format format) {
+        if(format == format()) return this;
+        AbstractCompound c = (AbstractCompound) format.create(true);
+        for(Map.Entry<String, Tag> e : data.entrySet())
+            c.put(e.getKey(), e.getValue());
+        c.setReadMode();
+        return c;
+    }
+    
+    @Override
+    public String toString() {
+        return toString("");
+    }
+    
+    private String toString(String prefix) {
+        String pre = prefix + "    ";
+        StringBuilder sb = new StringBuilder("[\n");
+        
+        for(Map.Entry<String, Tag> e : data.entrySet()) {
+            sb.append(pre);
+            sb.append("\"");
+            sb.append(e.getKey());
+            sb.append("\": ");
+            if(e.getValue() instanceof AbstractMapCompound)
+                sb.append(((AbstractMapCompound) e.getValue()).toString(pre));
+            else
+                sb.append(e.getValue().toString());
+            sb.append(",\n");
+        }
+        
+        sb.append(prefix);
+        sb.append("]");
+
+        return sb.toString();
     }
     
 }

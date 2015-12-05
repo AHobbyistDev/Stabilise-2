@@ -9,6 +9,19 @@ import com.stabilise.util.io.data.DataList;
 
 public class BoolBox implements IBox {
     
+    public static final BoolBox TRUE = new ImmutableBoolBox(true);
+    public static final BoolBox FALSE = new ImmutableBoolBox(false);
+    
+    /**
+     * Returns a BoolBox encapsulating the specified value. This method may be
+     * preferable to constructing a new BoolBox as it reuses {@link TRUE} and
+     * {@link FALSE}.
+     */
+    public static BoolBox valueOf(boolean bool) {
+        return bool ? TRUE : FALSE;
+    }
+    
+    
     private boolean value;
     
     
@@ -59,6 +72,17 @@ public class BoolBox implements IBox {
     @Override
     public String toString() {
         return "" + value;
+    }
+    
+    private static final class ImmutableBoolBox extends BoolBox {
+        public ImmutableBoolBox(boolean value) {
+            super(value);
+        }
+        
+        @Override
+        public void set(boolean ignored) {
+            throw new UnsupportedOperationException();
+        }
     }
 
 }

@@ -1,6 +1,6 @@
 package com.stabilise.util.io.data;
 
-public abstract class AbstractCompound implements DataCompound, Tag {
+public abstract class AbstractCompound implements Tag, DataCompound {
     
     protected boolean writeMode;
     

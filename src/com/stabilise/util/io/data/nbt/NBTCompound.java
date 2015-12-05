@@ -91,39 +91,9 @@ public class NBTCompound extends AbstractMapCompound {
     
     @Override
     public DataCompound convert(Format format) {
-        if(format == Format.NBT || format == Format.NBT_SIMPLE) return this;
-        AbstractCompound c = (AbstractCompound) format.create(true);
-        for(Map.Entry<String, Tag> e : data.entrySet())
-            c.put(e.getKey(), e.getValue());
-        c.setReadMode();
-        return c;
-    }
-    
-    @Override
-    public String toString() {
-        return toString("");
-    }
-    
-    private String toString(String prefix) {
-        String pre = prefix + "    ";
-        StringBuilder sb = new StringBuilder("[\n");
-        
-        for(Map.Entry<String, Tag> e : data.entrySet()) {
-            sb.append(pre);
-            sb.append("\"");
-            sb.append(e.getKey());
-            sb.append("\": ");
-            if(e.getValue() instanceof NBTCompound)
-                sb.append(((NBTCompound) e.getValue()).toString(pre));
-            else
-                sb.append(e.getValue().toString());
-            sb.append(",\n");
-        }
-        
-        sb.append(prefix);
-        sb.append("]");
-
-        return sb.toString();
+        // Add in the extra check for NBT_SIMPLE; super impl. checks for NBT
+        if(format == Format.NBT_SIMPLE) return this;
+        return super.convert(format);
     }
     
 }

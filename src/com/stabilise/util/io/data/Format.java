@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.bytestream.ByteCompound;
+import com.stabilise.util.io.data.json.JsonCompound;
 import com.stabilise.util.io.data.nbt.NBTCompound;
 import com.stabilise.util.io.data.nbt.NBTType;
 
@@ -57,7 +58,12 @@ public enum Format {
      * and compounds of other formats do not translate perfectly into this
      * format for technical reasons (see: NBTList).
      */
-    BYTE_STREAM(ByteCompound::new);
+    BYTE_STREAM(ByteCompound::new),
+    
+    /**
+     * The JSON format that everyone knows and loves.
+     */
+    JSON(JsonCompound::new);
     
     // ------------------------------------------------------------------------
     

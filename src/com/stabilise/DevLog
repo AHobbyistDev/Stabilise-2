@@ -266,4 +266,6 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Added tile brush with variable radius for mass tile devastation!
 15/11/15
 	- Refactored entities to be component-based
+05/12/15
+	- Refactored NBT
 

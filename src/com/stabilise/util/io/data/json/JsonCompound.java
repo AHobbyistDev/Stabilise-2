@@ -1,0 +1,181 @@
+package com.stabilise.util.io.data.json;
+
+import static com.stabilise.util.box.Boxes.box;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Map;
+
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.SerializationException;
+import com.badlogic.gdx.utils.JsonValue.ValueType;
+import com.stabilise.util.box.*;
+import com.stabilise.util.io.DataInStream;
+import com.stabilise.util.io.DataOutStream;
+import com.stabilise.util.io.data.AbstractMapCompound;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.DataList;
+import com.stabilise.util.io.data.Format;
+import com.stabilise.util.io.data.Tag;
+
+
+public class JsonCompound extends AbstractMapCompound {
+    
+    private boolean dirty = true;
+    private JsonValue json = null;
+    
+    public JsonValue toJson() {
+        if(!dirty)
+            return json;
+        dirty = false;
+        
+        json = new JsonValue(ValueType.object);
+        JsonValue child = null;
+        
+        for(Map.Entry<String, Tag> entry : data.entrySet()) {
+            String name = entry.getKey();
+            Tag tag = entry.getValue();
+            JsonValue v = null;
+            
+            if(tag instanceof JsonCompound) {
+                v = ((JsonCompound)tag).toJson();
+            } else if(tag instanceof JsonList) {
+                v = ((JsonList)tag).toJson();
+            } else if(tag instanceof BoolBox) {
+                v = new JsonValue(((BoolBox)tag).get());
+            } else if(tag instanceof ByteArrBox) {
+                //v = new JsonValue(((ByteArrBox)tag).get());
+            } else if(tag instanceof ByteBox) {
+                v = new JsonValue(((ByteBox)tag).get());
+            } else if(tag instanceof CharBox) {
+                v = new JsonValue(((CharBox)tag).get());
+            } else if(tag instanceof DoubleBox) {
+                v = new JsonValue(((DoubleBox)tag).get());
+            } else if(tag instanceof FloatBox) {
+                v = new JsonValue(((FloatBox)tag).get());
+            } else if(tag instanceof IntArrBox) {
+                //v = new JsonValue(((IntArrBox)tag).get());
+            } else if(tag instanceof IntBox) {
+                v = new JsonValue(((IntBox)tag).get());
+            } else if(tag instanceof LongBox) {
+                v = new JsonValue(((LongBox)tag).get());
+            } else if(tag instanceof ShortBox) {
+                v = new JsonValue(((ShortBox)tag).get());
+            } else if(tag instanceof StringBox) {
+                v = new JsonValue(((StringBox)tag).get());
+            } else {
+                throw new RuntimeException("Unrecognised Tag type");
+            }
+            
+            v.name = name;
+            if(child == null) {
+                child = v;
+                json.child = child;
+            } else {
+                child.next = v;
+                child = v;
+            }
+        }
+        
+        return json;
+    }
+    
+    public JsonCompound fromJson(JsonValue json) {
+        if(json.type() != ValueType.object)
+            throw new RuntimeException("Not an object");
+        this.json = json;
+        
+        for(JsonValue val = json.child; val != null; val = val.next) {
+            switch(val.type()) {
+                case array:
+                    put(val.name, new JsonList().fromJson(val));
+                    break;
+                case booleanValue:
+                    put(val.name, box(val.asBoolean()));
+                    break;
+                case doubleValue:
+                    put(val.name, box(val.asDouble()));
+                    break;
+                case longValue:
+                    put(val.name, box(val.asLong()));
+                    break;
+                case nullValue:
+                    throw new RuntimeException("wtf is a null value");
+                case object:
+                    put(val.name, new JsonCompound().fromJson(val));
+                    break;
+                case stringValue:
+                    put(val.name, box(val.asString()));
+                    break;
+                default:
+                    throw new AssertionError();
+            }
+        }
+        
+        dirty = false;
+        return this;
+    }
+    
+    @Override
+    public <T extends Tag> T put(String name, T t) {
+        dirty = true;
+        return super.put(name, t);
+    }
+    
+    @Override
+    public void readData(DataInStream in) throws IOException {
+        Reader r = null;
+        try {
+            r = new InputStreamReader(in);
+            fromJson(new JsonReader().parse(r));
+        } catch(SerializationException e) {
+            // Necessary because JsonReader.parse catches IOExceptions...
+            // and spits them out as SerializationExceptions. >.<
+            throw new IOException("Error reading JSON!", e);
+        } finally {
+            if(r != null)
+                r.close();
+        }
+    }
+    
+    @Override
+    public void writeData(DataOutStream out) throws IOException {
+        Writer w = null;
+        try {
+            w = new OutputStreamWriter(out);
+            w.write(toJson().toString());
+        } finally {
+            if(w != null) w.close();
+        }
+    }
+    
+    @Override
+    public void io(String name, DataCompound o, boolean write) {
+        // TODO
+    }
+    
+    @Override
+    public void io(DataList l, boolean write) {
+        // TODO
+    }
+    
+    @Override
+    public Format format() {
+        return Format.JSON;
+    }
+    
+    @Override
+    public DataCompound getCompound(String name) {
+        return get(name, JsonCompound.class).orElseGet(() -> put(name, new JsonCompound())); 
+    }
+    
+    @Override
+    public DataList getList(String name) {
+        return get(name, JsonList.class).orElseGet(() -> put(name, new JsonList())); 
+    }
+    
+}
