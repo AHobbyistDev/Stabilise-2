@@ -135,7 +135,7 @@ public abstract class Dimension {
      * @throws IOException if an I/O error occurs.
      */
     public final void saveData() throws IOException {
-        DataCompound tag = Format.NBT.create(true);
+        DataCompound tag = Format.NBT.newCompound(true);
         saveExtraData(tag);
         info.save(tag);
     }

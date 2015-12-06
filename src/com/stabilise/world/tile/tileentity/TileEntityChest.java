@@ -55,12 +55,12 @@ public class TileEntityChest extends TileEntity {
     
     @Override
     protected void writeNBT(DataCompound tag) {
-        items.toNBT(tag.getList("items"));
+        items.toNBT(tag.createList("items"));
     }
     
     @Override
     public void fromNBT(DataCompound tag) {
-        items.fromNBT(tag.getList("items"));
+        items.fromNBT(tag.createList("items"));
     }
     
     @Override

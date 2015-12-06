@@ -17,10 +17,8 @@ import com.stabilise.util.box.*;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.AbstractMapCompound;
-import com.stabilise.util.io.data.DataCompound;
-import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.Format;
-import com.stabilise.util.io.data.Tag;
+import com.stabilise.util.io.data.ITag;
 
 
 public class JsonCompound extends AbstractMapCompound {
@@ -36,9 +34,9 @@ public class JsonCompound extends AbstractMapCompound {
         json = new JsonValue(ValueType.object);
         JsonValue child = null;
         
-        for(Map.Entry<String, Tag> entry : data.entrySet()) {
+        for(Map.Entry<String, ITag> entry : data.entrySet()) {
             String name = entry.getKey();
-            Tag tag = entry.getValue();
+            ITag tag = entry.getValue();
             JsonValue v = null;
             
             if(tag instanceof JsonCompound) {
@@ -92,24 +90,24 @@ public class JsonCompound extends AbstractMapCompound {
         for(JsonValue val = json.child; val != null; val = val.next) {
             switch(val.type()) {
                 case array:
-                    put(val.name, new JsonList().fromJson(val));
+                    putData(val.name, new JsonList().fromJson(val));
                     break;
                 case booleanValue:
-                    put(val.name, box(val.asBoolean()));
+                    putData(val.name, box(val.asBoolean()));
                     break;
                 case doubleValue:
-                    put(val.name, box(val.asDouble()));
+                    putData(val.name, box(val.asDouble()));
                     break;
                 case longValue:
-                    put(val.name, box(val.asLong()));
+                    putData(val.name, box(val.asLong()));
                     break;
                 case nullValue:
-                    throw new RuntimeException("wtf is a null value");
+                    throw new RuntimeException("no null values allowed");
                 case object:
-                    put(val.name, new JsonCompound().fromJson(val));
+                    putData(val.name, new JsonCompound().fromJson(val));
                     break;
                 case stringValue:
-                    put(val.name, box(val.asString()));
+                    putData(val.name, box(val.asString()));
                     break;
                 default:
                     throw new AssertionError();
@@ -121,9 +119,9 @@ public class JsonCompound extends AbstractMapCompound {
     }
     
     @Override
-    public <T extends Tag> T put(String name, T t) {
+    public <T extends ITag> T putData(String name, T t) {
         dirty = true;
-        return super.put(name, t);
+        return super.putData(name, t);
     }
     
     @Override
@@ -154,28 +152,8 @@ public class JsonCompound extends AbstractMapCompound {
     }
     
     @Override
-    public void io(String name, DataCompound o, boolean write) {
-        // TODO
-    }
-    
-    @Override
-    public void io(DataList l, boolean write) {
-        // TODO
-    }
-    
-    @Override
     public Format format() {
         return Format.JSON;
-    }
-    
-    @Override
-    public DataCompound getCompound(String name) {
-        return get(name, JsonCompound.class).orElseGet(() -> put(name, new JsonCompound())); 
-    }
-    
-    @Override
-    public DataList getList(String name) {
-        return get(name, JsonList.class).orElseGet(() -> put(name, new JsonList())); 
     }
     
 }

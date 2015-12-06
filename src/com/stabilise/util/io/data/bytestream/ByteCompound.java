@@ -2,6 +2,8 @@ package com.stabilise.util.io.data.bytestream;
 
 import java.io.IOException;
 
+import javaslang.control.Option;
+
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
@@ -10,7 +12,7 @@ import com.stabilise.util.io.data.AbstractCompound;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.Format;
-import com.stabilise.util.io.data.Tag;
+import com.stabilise.util.io.data.ITag;
 
 @Incomplete
 public class ByteCompound extends AbstractCompound {
@@ -78,12 +80,12 @@ public class ByteCompound extends AbstractCompound {
     }
     
     @Override
-    public DataCompound getCompound(String name) {
+    public DataCompound createCompound(String name) {
         return this;
     }
     
     @Override
-    public DataList getList(String name) {
+    public DataList createList(String name) {
         return new ByteList(this);
     }
     
@@ -96,7 +98,7 @@ public class ByteCompound extends AbstractCompound {
     }
     
     @Override
-    public <T extends Tag> T put(String name, T t) {
+    public <T extends ITag> T putData(String name, T t) {
         checkCanWrite();
         // Due to this, to ensure compatibility, we need to make sure that all
         // all put() and all get() methods thus do so in the same way as the
@@ -312,6 +314,114 @@ public class ByteCompound extends AbstractCompound {
     @Override
     public String toString() {
         return "ByteCompound[" + size + " bytes]";
+    }
+
+    @Override
+    public void put(String name, DataCompound data) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void put(String name, DataList data) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public DataCompound getCompound(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public DataList getList(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Option<DataCompound> optCompound(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Option<DataList> optList(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Option<Boolean> optBool(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Option<Byte> optByte(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Option<Character> optChar(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Option<Double> optDouble(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Option<Float> optFloat(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Option<Integer> optInt(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Option<Long> optLong(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Option<Short> optShort(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Option<String> optString(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Option<byte[]> optByteArr(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Option<int[]> optIntArr(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void putAll(AbstractCompound c) {
+        // TODO Auto-generated method stub
+        
     }
     
 }

@@ -1,15 +1,21 @@
 package com.stabilise.util.io.data;
 
+import javaslang.control.Option;
+
 import com.stabilise.util.io.Sendable;
 
 /**
- * 
+ * A DataCompound is the basic unifying building block for this package. A
+ * DataCompound is essentially equivalent to any old object - it encapsulates
+ * data, and may be saved in a variety of {@link Format}{@code s}. 
  */
-public interface DataCompound extends Sendable {
+public interface DataCompound extends Sendable, IContainerTag<DataCompound> {
     
     /**
-     * Checks for whether or not a compound, list, or data with the specified
-     * name is contained within this compound.
+     * Checks for whether or not a tag with the specified name is contained
+     * within this compound.
+     * 
+     * <p>This method is meaningless for {@link Format#BYTE_STREAM}.
      */
     boolean contains(String name);
     
@@ -18,20 +24,34 @@ public interface DataCompound extends Sendable {
      * specified name already exists, it is returned, otherwise one is
      * created.
      * 
-     * @throws NullPointerException if {@code name} is {@code null} and names
-     * are not ignored.
+     * <p>The returned compound will be of the same format as this one.
+     * 
+     * <p>If this compound is in the {@link Format#BYTE_STREAM} format, this
+     * itself is always returned (as children are meaningless).
      */
-    DataCompound getCompound(String name);
+    DataCompound createCompound(String name);
     
     /**
      * Gets a list which is a child of this compound. If a list by the
      * specified name already exists, it is returned, otherwise one is created.
-     * 
      */
-    DataList     getList    (String name);
+    DataList createList(String name);
     
-    void io(String name, Exportable data);
-    void io(String name, ValueExportable data);
+    // <----- PUT METHODS ----->
+    // Insert the data into this tag; if data with the specified name already
+    // exists, it'll be overwritten.
+    
+    /**
+     * If the given compound is of a different format to this one, it will be
+     * converted before being added.
+     */
+    void put(String name, DataCompound data);
+    
+    /**
+     * If the given list is of a different format to this compound, it will be
+     * converted before being added.
+     */
+    void put(String name, DataList     data);
     
     void put(String name, boolean data);
     void put(String name, byte    data);
@@ -45,6 +65,22 @@ public interface DataCompound extends Sendable {
     void put(String name, byte[]  data);
     void put(String name, int[]   data);
     
+    // <----- GET METHODS ----->
+    // Gets data from this compound. If data with the specified name is not
+    // present or is of another type, suitable defaults are returned.
+    
+    /**
+     * If a compound with the specified name is not present, an empty one is
+     * created and returned, but not added to this compound.
+     */
+    DataCompound getCompound(String name);
+    
+    /**
+     * If a list with the specified name is not present, an empty one is
+     * created and returned, but not added to this compound.
+     */
+    DataList getList(String name);
+    
     boolean getBool   (String name);
     byte    getByte   (String name);
     char    getChar   (String name);
@@ -57,30 +93,49 @@ public interface DataCompound extends Sendable {
     byte[]  getByteArr(String name);
     int[]   getIntArr (String name);
     
-    /**
-     * Returns the format of this compound.
-     */
-    Format format();
+    // <----- OPTION GETTERS ----->
+    // Gets data from this compound. If data with the specified name is
+    // present, a Some<T> is returned.
+    
+    Option<DataCompound> optCompound(String name);
+    Option<DataList>     optList    (String name);
+    Option<Boolean>      optBool    (String name);
+    Option<Byte>         optByte    (String name);
+    Option<Character>    optChar    (String name);
+    Option<Double>       optDouble  (String name);
+    Option<Float>        optFloat   (String name);
+    Option<Integer>      optInt     (String name);
+    Option<Long>         optLong    (String name);
+    Option<Short>        optShort   (String name);
+    Option<String>       optString  (String name);
+    Option<byte[]>       optByteArr (String name);
+    Option<int[]>        optIntArr  (String name);
     
     /**
-     * Converts this compound to the specified format. The returned compound
-     * will be in read mode.
+     * Sets this compound into read mode. In read mode, users can always get
+     * data from this compound, and the {@code io} methods will automatically
+     * read from the given exportables.
      * 
-     * @throws UnsupportedOperationException if this type of data is unable to
-     * be converted (e.g. {@link Format#BYTE_STREAM} cannot be converted as the
-     * data can only be parsed with contextual knowledge).
-     */
-    DataCompound convert(Format format);
-    
-    /**
-     * Sets this compound into read mode. In read mode, users can get data from
-     * this compound.
+     * <p>In general, it is not necessary to have a compound in read mode to
+     * read data (the only current exception is {@link Format#BYTE_STREAM}),
+     * but it's better to play it safe.
+     * 
+     * @see #io(String, Exportable)
+     * @see #io(String, ValueExportable)
      */
     void setReadMode();
     
     /**
-     * Sets this compound into write mode. In write mode, users may write data
-     * to this compound.
+     * Sets this compound into write mode. In write mode, can always write data
+     * from this compound, and the {@code io} methods will automatically write
+     * to the given exportables.
+     * 
+     * <p>In general, it is not necessary to have a compound in write mode to
+     * add to it (the only current exception is {@link Format#BYTE_STREAM}),
+     * but it's better to play it safe.
+     * 
+     * @see #io(String, Exportable)
+     * @see #io(String, ValueExportable)
      */
     void setWriteMode();
     

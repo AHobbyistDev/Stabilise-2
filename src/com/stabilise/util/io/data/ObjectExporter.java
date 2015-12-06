@@ -40,7 +40,7 @@ public class ObjectExporter {
      * @throws RuntimeException if the object could not be properly exported.
      */
     public static DataCompound exportObj(Object o, Format f) {
-        return doExport(o, f.create(true));
+        return doExport(o, f.newCompound(true));
     }
     
     /**
@@ -93,10 +93,10 @@ public class ObjectExporter {
                         else { //if(t.getAnnotation(Exportable.class) != null) {
                             Object[] arr = (Object[])f.get(o);
                             if(arr != null) {
-                                DataList list = tag.getList(n);
+                                DataList list = tag.createList(n);
                                 for(Object obj : arr)
                                     if(obj != null)
-                                        doExport(obj, list.addCompound());
+                                        doExport(obj, list.createCompound());
                             }
                         }
                     } else if(c.equals(byte.class)) tag.put(n, f.getByte(o));
@@ -107,7 +107,7 @@ public class ObjectExporter {
                         //        " of field \"" + n + "\"");
                         Object obj = f.get(o);
                         if(obj != null)
-                            doExport(obj, tag.getCompound(n));
+                            doExport(obj, tag.createCompound(n));
                     }
 
                 } else {
@@ -141,7 +141,7 @@ public class ObjectExporter {
                         else { //if(t.getAnnotation(Exportable.class) != null) {
                             Object[] arr = (Object[])f.get(o);
                             if(arr != null) {
-                                DataList list = tag.getList(n);
+                                DataList list = tag.createList(n);
                                 for(int i = 0; i < Math.min(arr.length, list.size()); i++)
                                     doImport(arr[i], list.getCompound());
                             }
@@ -154,7 +154,7 @@ public class ObjectExporter {
                         //        " of field \"" + n + "\"");
                         Object obj = f.get(o);
                         if(obj != null)
-                            doImport(obj, tag.getCompound(n));
+                            doImport(obj, tag.createCompound(n));
                     }
                 } else {
                     //System.out.println("Not importing field \"" + f.getName() + "\"");

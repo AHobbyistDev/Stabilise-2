@@ -13,9 +13,9 @@ import com.stabilise.util.box.IntBox;
 import com.stabilise.util.box.LongBox;
 import com.stabilise.util.box.ShortBox;
 import com.stabilise.util.box.StringBox;
-import com.stabilise.util.collect.registry.Registries;
+import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.collect.registry.TypeFactory;
-import com.stabilise.util.io.data.Tag;
+import com.stabilise.util.io.data.ITag;
 
 
 public enum NBTType {
@@ -36,20 +36,21 @@ public enum NBTType {
     
     
     public final byte id;
-    private final Class<? extends Tag> type;
-    private final Supplier<Tag> fac;
+    private final Class<? extends ITag> type;
+    private final Supplier<ITag> fac;
     
-    private NBTType(int id, Class<? extends Tag> type) {
+    private NBTType(int id, Class<? extends ITag> type) {
         this(id, type, null);
     }
     
-    private NBTType(int id, Class<? extends Tag> type, Supplier<Tag> fac) {
+    private NBTType(int id, Class<? extends ITag> type, Supplier<ITag> fac) {
         this.id = (byte)id;
         this.type = type;
         this.fac = fac;
     }
     
-    private static final TypeFactory<Tag> registry = Registries.typeFactory();
+    private static final TypeFactory<ITag> registry =
+            new TypeFactory<>(new RegistryParams("NBTTypeRegistry"));
     
     static {
         for(NBTType t : NBTType.values()) {
@@ -58,20 +59,20 @@ public enum NBTType {
             else
                 registry.register(t.id, t.type, t.fac);
         }
-            
+        registry.lock();
     }
     
     /**
      * Creates an NBT tag with the specified ID.
      */
-    public static Tag createTag(byte id) {
+    public static ITag createTag(byte id) {
         return registry.create(id);
     }
     
     /**
      * Returns the ID of the given tag, or -1 if {@code s} isn't a valid tag.
      */
-    public static byte tagID(Tag s) {
+    public static byte tagID(ITag s) {
         return (byte) registry.getID(s.getClass());
     }
     

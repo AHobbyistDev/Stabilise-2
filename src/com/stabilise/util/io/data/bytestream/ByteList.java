@@ -1,6 +1,7 @@
 package com.stabilise.util.io.data.bytestream;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.io.DataInStream;
@@ -8,7 +9,8 @@ import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.AbstractDataList;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
-import com.stabilise.util.io.data.Tag;
+import com.stabilise.util.io.data.Format;
+import com.stabilise.util.io.data.ITag;
 
 @Incomplete
 public class ByteList extends AbstractDataList {
@@ -47,7 +49,7 @@ public class ByteList extends AbstractDataList {
     }
     
     @Override
-    public void add(Tag o) {
+    public void addData(ITag o) {
         backer.checkCanWrite2();
         try {
             o.writeData(backer.writer);
@@ -57,7 +59,7 @@ public class ByteList extends AbstractDataList {
     }
     
     @Override
-    public Tag getNext() {
+    public ITag getNext() {
         throw new UnsupportedOperationException("A ByteList requires context!");
     }
     
@@ -117,20 +119,25 @@ public class ByteList extends AbstractDataList {
     }
     
     @Override
-    public DataCompound addCompound() {
+    public DataCompound createCompound() {
         // TODO Auto-generated method stub
         return null;
     }
     
     @Override
-    public DataList addList() {
+    public DataList createList() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    protected boolean writeMode() {
-        return false;
+    public Format format() {
+        return Format.BYTE_STREAM;
+    }
+
+    @Override
+    protected void forEach(Consumer<ITag> action) {
+        throw new UnsupportedOperationException();
     }
 
 }

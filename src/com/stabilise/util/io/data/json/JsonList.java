@@ -1,25 +1,21 @@
 package com.stabilise.util.io.data.json;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 import com.badlogic.gdx.utils.JsonValue;
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.AbstractDataList;
-import com.stabilise.util.io.data.DataCompound;
-import com.stabilise.util.io.data.DataList;
-import com.stabilise.util.io.data.Tag;
+import com.stabilise.util.io.data.Format;
+import com.stabilise.util.io.data.ITag;
 
 @Incomplete
 public class JsonList extends AbstractDataList {
     
     private boolean dirty = true;
     private JsonValue json;
-    
-    public JsonList() {
-        // TODO Auto-generated constructor stub
-    }
     
     JsonValue toJson() {
         if(!dirty)
@@ -42,50 +38,33 @@ public class JsonList extends AbstractDataList {
     }
     
     @Override
-    public DataCompound addCompound() {
-        return null;
+    public void addData(ITag data) {
+        
     }
     
     @Override
-    public DataList addList() {
-        return null;
-    }
-    
-    @Override
-    public Tag getNext() {
+    public ITag getNext() {
         return null;
     }
     
     @Override
     public void readData(DataInStream in) throws IOException {
-        
+        throw new UnsupportedOperationException("Should not read a JsonList directly!");
     }
     
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        
+        throw new UnsupportedOperationException("Should not write a JsonList directly!");
     }
     
     @Override
-    public void io(String name, DataCompound o, boolean write) {
-        
+    public Format format() {
+        return Format.JSON;
     }
     
     @Override
-    public void io(DataList l, boolean write) {
-        
-    }
-    
-    @Override
-    protected boolean writeMode() {
-        
-        return false;
-    }
-    
-    @Override
-    public void add(Tag data) {
-        
-        
+    protected void forEach(Consumer<ITag> action) {
+        // TODO Auto-generated method stub
     }
     
 }

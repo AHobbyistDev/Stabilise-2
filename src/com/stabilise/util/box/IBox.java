@@ -2,12 +2,12 @@ package com.stabilise.util.box;
 
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
-import com.stabilise.util.io.data.Tag;
+import com.stabilise.util.io.data.ITag;
 
 /**
  * A unifying marker interface to indicate that a class functions as a box.
  */
-public interface IBox extends Tag {
+public interface IBox extends ITag {
     
     @Override
     default void io(String name, DataCompound o, boolean write) {

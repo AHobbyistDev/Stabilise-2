@@ -371,7 +371,7 @@ public abstract class Container implements IContainer, Iterable<ItemStack>, Send
     public DataList toNBT(DataList tag) {
         for(int i = 0; i < size(); i++) {
             if(!isSlotEmpty(i)) {
-                getStack(i).toNBT(tag.addCompound()).put("slot", (byte)i);
+                getStack(i).toNBT(tag.createCompound()).put("slot", (byte)i);
             }
         }
         return tag;

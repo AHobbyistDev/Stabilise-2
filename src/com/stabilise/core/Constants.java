@@ -233,7 +233,7 @@ public class Constants {
          * @return The number of builds of the current version.
          */
         private int buildTags(DataCompound parent, int i) {
-            DataCompound tag = parent.getCompound(tags[i] + data[i]);
+            DataCompound tag = parent.createCompound(tags[i] + data[i]);
             tag.put("comp", tag.getInt("comp") + 1);
             if(++i < data.length) // we are not build
                 return buildTags(tag, i); // recursively get children

@@ -242,7 +242,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
          * Saves the player data.
          */
         public void save() throws IOException {
-            DataCompound tag = Format.NBT.create(true);
+            DataCompound tag = Format.NBT.newCompound(true);
             tag.put("dimension", dimension);
             tag.put("lastX", lastX);
             tag.put("lastY", lastY);

@@ -2,19 +2,34 @@ package com.stabilise.util.io.data;
 
 import com.stabilise.util.io.Sendable;
 
-
-public interface DataList extends Sendable {
+/**
+ * A DataList is a list which may be written to and read from sequentially.
+ * Each of the {@code add()} methods append to the end of this list, and
+ * each of the {@code get()} methods reads the next element from the list.
+ */
+public interface DataList extends Sendable, IContainerTag<DataList> {
     
     /**
      * Returns the number of elements in this list.
      */
     int size();
     
-    void io(Exportable data);
-    void io(ValueExportable data);
+    /**
+     * Creates a new compound and adds it to this list.
+     */
+    DataCompound createCompound();
     
-    DataCompound addCompound();
-    DataList     addList();
+    /**
+     * Creates a new list and adds it to this list.
+     */
+    DataList createList();
+    
+    /** If {@code data} is of a different format to this list, it will be
+     * converted first. */
+    void add(DataCompound data);
+    /** If {@code data} is of a different format to this list, it will be
+     * converted first. */
+    void add(DataList     data);
     void add(boolean data);
     void add(byte    data);
     void add(char    data);
@@ -27,9 +42,8 @@ public interface DataList extends Sendable {
     void add(byte[]  data);
     void add(int[]   data);
     
-    Tag     getNext   ();
-    default DataCompound getCompound() { return (DataCompound) getNext(); }
-    default DataList     getList()     { return (DataList)     getNext(); }
+    DataCompound getCompound();
+    DataList     getList();
     boolean getBool   ();
     byte    getByte   ();
     char    getChar   ();

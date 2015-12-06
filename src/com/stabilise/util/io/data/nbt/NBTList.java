@@ -3,19 +3,19 @@ package com.stabilise.util.io.data.nbt;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.AbstractDataList;
-import com.stabilise.util.io.data.DataCompound;
-import com.stabilise.util.io.data.DataList;
-import com.stabilise.util.io.data.Tag;
+import com.stabilise.util.io.data.Format;
+import com.stabilise.util.io.data.ITag;
 
 
 public class NBTList extends AbstractDataList {
     
-    private final List<Tag> data;
-    private byte type = NBTType.BYTE.id; // default value
+    private final List<ITag> data;
+    private byte type = NBTType.BYTE.id; // arbitrary default value
     private int index = 0;
     
     
@@ -35,9 +35,9 @@ public class NBTList extends AbstractDataList {
         int length = in.readInt();
         
         for(int i = 0; i < length; i++) {
-            Tag s = NBTType.createTag(type);
-            s.readData(in);
-            data.add(s);
+            ITag t = NBTType.createTag(type);
+            t.readData(in);
+            data.add(t);
         }
     }
     
@@ -46,30 +46,8 @@ public class NBTList extends AbstractDataList {
         out.writeByte(type);
         out.writeInt(data.size());
         
-        for(Tag t : data)
+        for(ITag t : data)
             t.writeData(out);
-    }
-    
-    // From ValueExportable
-    @Override
-    public void io(String name, DataCompound o, boolean write) {
-        if(write) {
-            AbstractDataList l = (AbstractDataList) o.getList(name);
-            data.forEach(t -> l.add(t));
-        } else {
-            throw new UnsupportedOperationException("NYI");
-        }
-    }
-    
-    // From ValueExportable
-    @Override
-    public void io(DataList l, boolean write) {
-        if(write) {
-            AbstractDataList l2 = (AbstractDataList) l.addList();
-            data.forEach(t -> l2.add(t));
-        } else {
-            throw new UnsupportedOperationException("NYI");
-        }
     }
     
     @Override
@@ -78,33 +56,31 @@ public class NBTList extends AbstractDataList {
     }
     
     @Override
-    public void add(Tag t) {
-        if(data.size() != 0 && NBTType.tagID(t) != type)
-            throw new IllegalArgumentException("Attempting to append to a list"
-                    + " a tag of the wrong type!");
-        else
+    protected void addData(ITag t) {
+        if(data.size() != 0) {
+            if(NBTType.tagID(t) != type)
+                throw new IllegalArgumentException("Attempting to append to a list"
+                        + " a tag of the wrong type!");
+        } else {
             type = NBTType.tagID(t);
+        }
+            
         data.add(t);
     }
     
     @Override
-    public Tag getNext() {
+    protected ITag getNext() {
         return data.get(index++);
     }
     
     @Override
-    public DataCompound addCompound() {
-        return new NBTCompound();
+    public Format format() {
+        return Format.NBT;
     }
     
     @Override
-    public DataList addList() {
-        return new NBTList();
-    }
-    
-    @Override
-    protected boolean writeMode() {
-        return false;
+    protected void forEach(Consumer<ITag> action) {
+        data.forEach(action);
     }
     
     @Override
