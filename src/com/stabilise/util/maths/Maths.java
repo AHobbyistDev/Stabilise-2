@@ -457,7 +457,7 @@ public class Maths {
      * are within the specified range of each other.
      */
     public static boolean pointsInRange(double x1, double y1, double x2,
-            double y2, float range) {
+            double y2, double range) {
         x2 -= x1;
         y2 -= y1;
         return x2*x2 + y2*y2 <= range*range;

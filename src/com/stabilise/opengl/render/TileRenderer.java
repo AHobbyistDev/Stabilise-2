@@ -3,12 +3,10 @@ package com.stabilise.opengl.render;
 import static com.stabilise.world.Slice.SLICE_SIZE;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.graphics.Texture.TextureWrap;
-import com.stabilise.core.Resources;
-import com.stabilise.opengl.TextureSheet;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.stabilise.world.World;
 import com.stabilise.world.Slice;
+import com.stabilise.world.tile.Tile;
 
 /**
  * The TileRenderer class manages the rendering of the tiles that constitute a
@@ -25,11 +23,10 @@ public class TileRenderer implements Renderer {
     /** A reference to the world. */
     public final World world;
     
-    public TextureSheet tiles;
-    
     /** Number of slices rendered on each render step. */
     int slicesRendered = 0;
     
+    TextureRegion[] tiles;
     private float[] lightLevels;
     
     
@@ -45,21 +42,23 @@ public class TileRenderer implements Renderer {
     
     @Override
     public void loadResources() {
-        tiles = TextureSheet.sequentiallyOptimised(Resources.textureMipmaps("sheets/tiles"), 8, 8);
-        tiles.texture.setFilter(TextureFilter.MipMapNearestLinear, TextureFilter.Nearest);
-        tiles.texture.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
-        
         lightLevels = new float[16];
         for(int i = 0; i < 16; i++) {
             lightLevels[i] = new Color(i*16/255f, i*16/255f, i*16/255f, 1f).toFloatBits();
         }
+        
+        tiles = new TextureRegion[32]; // TODO: temp length
+        Tile.TILES.forEachEntry(t -> {
+            if(t._2 != 0) // skip air
+                tiles[t._2] = wr.skin.getRegion("tile/" + t._1.split(":")[1]);
+        });
         
         //System.out.println(tiles);
     }
     
     @Override
     public void unloadResources() {
-        tiles.dispose();
+        
     }
     
     @Override
@@ -116,7 +115,7 @@ public class TileRenderer implements Renderer {
             for(int c = cMin, tx = xMin; c < SLICE_SIZE && tx < xMax; c++, tx++) {
                 int id = slice.getWallIDAt(c, r);
                 if(id != 0) { // i.e. not air
-                    wr.batch.draw(tiles.getRegion(id + 7), tx, ty, 1f, 1f);
+                    wr.batch.draw(tiles[id], tx, ty, 1f, 1f);
                 }
             }
         }
@@ -126,9 +125,7 @@ public class TileRenderer implements Renderer {
                 int id = slice.getTileIDAt(c, r);
                 if(id != 0) { // i.e. not air
                     wr.batch.setColor(lightLevels[slice.getLightAt(c, r)]);
-                    // Offset of +8 due to tile breaking animations; offset of -1
-                    // because air has no texture: sums to +7
-                    wr.batch.draw(tiles.getRegion(id + 7), tx, ty, 1f, 1f);
+                    wr.batch.draw(tiles[id], tx, ty, 1f, 1f);
                 }
             }
         }

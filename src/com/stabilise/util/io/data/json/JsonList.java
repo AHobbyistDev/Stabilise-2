@@ -38,6 +38,11 @@ public class JsonList extends AbstractDataList {
     }
     
     @Override
+    public boolean hasNext() {
+        return false;
+    }
+    
+    @Override
     public void addData(ITag data) {
         
     }

@@ -368,10 +368,13 @@ public abstract class Container implements IContainer, Iterable<ItemStack>, Send
      * 
      * @return The container in the form of an NBT list tag.
      */
-    public DataList toNBT(DataList tag) {
+    public DataList toNBT() {
+        DataList tag = DataList.create();
         for(int i = 0; i < size(); i++) {
             if(!isSlotEmpty(i)) {
-                getStack(i).toNBT(tag.createCompound()).put("slot", (byte)i);
+                DataCompound c = getStack(i).toNBT();
+                c.put("slot", (byte)i);
+                tag.add(c);
             }
         }
         return tag;
@@ -383,7 +386,7 @@ public abstract class Container implements IContainer, Iterable<ItemStack>, Send
      * @param tag The NBT list tag.
      */
     public void fromNBT(DataList tag) {
-        for(int i = 0; i < tag.size()/* && i < size()*/; i++) {
+        while(tag.hasNext()) {
             DataCompound stackTag = tag.getCompound();
             byte slot = stackTag.getByte("slot");
             setSlot(slot, ItemStack.fromNBT(stackTag));
@@ -398,7 +401,7 @@ public abstract class Container implements IContainer, Iterable<ItemStack>, Send
     }
     
     public void writeData(DataOutStream out) throws IOException {
-        toNBT(new NBTList()).writeData(out);
+        toNBT().writeData(out);
     }
     
     /**

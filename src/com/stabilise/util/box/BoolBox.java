@@ -74,7 +74,7 @@ public class BoolBox implements IBox {
         return "" + value;
     }
     
-    private static final class ImmutableBoolBox extends BoolBox {
+    public static final class ImmutableBoolBox extends BoolBox {
         public ImmutableBoolBox(boolean value) {
             super(value);
         }

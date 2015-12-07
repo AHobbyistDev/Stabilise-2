@@ -10,9 +10,27 @@ import com.stabilise.util.io.Sendable;
 public interface DataList extends Sendable, IContainerTag<DataList> {
     
     /**
+     * Creates a DataCompound of the format determined the current thread's
+     * default value.
+     * 
+     * @see Format#getDefaultFormat()
+     * @see Format#setDefaultFormat(Format)
+     */
+    public static DataList create() {
+        return Format.getDefaultFormat().newList();
+    }
+    
+    
+    
+    /**
      * Returns the number of elements in this list.
      */
     int size();
+    
+    /**
+     * Returns if another invocation of a {@code get()} method is valid.
+     */
+    boolean hasNext();
     
     /**
      * Creates a new compound and adds it to this list.

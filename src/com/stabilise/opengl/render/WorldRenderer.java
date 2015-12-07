@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -29,6 +30,7 @@ import com.stabilise.entity.*;
 import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.entity.component.core.*;
 import com.stabilise.entity.particle.*;
+import com.stabilise.item.Item;
 import com.stabilise.item.Items;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
@@ -90,13 +92,19 @@ public class WorldRenderer implements Renderer {
     BitmapFont debugFont;
     
     // Textures for different game objects
-    Texture texEnemy;
-    Texture texFireball;
-    Texture texExplosion;
+    TextureRegion texEnemy;
+    TextureRegion texFireball;
+    TextureRegion texExplosion;
+    TextureRegion texFlame;
+    TextureRegion texSmoke;
+    TextureRegion[] texItems;
     TextureSheet shtItems;
     TextureSheet shtParticles;
     
     ModelPlayer personModel;
+    
+    TextureAtlas atlas;
+    Skin skin;
     
     // Shape renderer for debug
     ShapeRenderer shapes;
@@ -166,22 +174,27 @@ public class WorldRenderer implements Renderer {
         
         fontGen.dispose();
         
+        FileHandle atlasSrc = Resources.IMAGE_DIR.child("textures.atlas");
+        atlas = register(new TextureAtlas(atlasSrc));
+        skin = register(new Skin(atlas));
+        
+        //for(AtlasRegion r : atlas.getRegions()) {
+        //    System.out.println("Detected region: " + r.name);
+        //}
+        
         personModel = register(new ModelPlayer());
         
-        texEnemy = register(Resources.texture("enemy"));
-        texEnemy.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+        texEnemy = skin.getRegion("entity/enemy");
+        texFireball = skin.getRegion("entity/fireball");
+        texExplosion = skin.getRegion("particle/explosion");
+        texFlame = skin.getRegion("particle/flame");
+        texSmoke = skin.getRegion("particle/smoke");
         
-        texFireball = register(Resources.texture("fireball"));
-        texFireball.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-        
-        texExplosion = register(Resources.texture("explosion"));
-        texExplosion.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        
-        shtItems = register(TextureSheet.sequentiallyOptimised(Resources.texture("sheets/items"), 8, 8));
-        shtItems.texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-        
-        shtParticles = register(TextureSheet.sequentiallyOptimised(Resources.texture("sheets/particles"), 8, 8));
-        shtParticles.texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+        texItems = new TextureRegion[8]; // TODO: temp length
+        Item.ITEMS.forEachEntry(i -> {
+            if(i._2 <= 1) return; // NO_ITEM, ItemTile
+            texItems[i._2] = skin.getRegion("item/" + i._1.split(":")[1]);
+        });
         
         //background = new Rectangle(screen.getWidth(), screen.getHeight());
         //----background.fill(new Colour(0x92D1E4));
@@ -363,6 +376,7 @@ public class WorldRenderer implements Renderer {
             }
         }
         
+        /*
         batch.draw(
                 texEnemy, // texture
                 (float)e.x - 0.5f, // x
@@ -381,6 +395,19 @@ public class WorldRenderer implements Renderer {
                 !e.facingRight, // flipX
                 false // flipY
         );
+        */
+        batch.draw(
+                texEnemy, // region
+                (float)e.x - 0.5f, // x
+                (float)e.y, // y
+                0f, // originX
+                0f, // originY
+                1f, // width
+                2f, // height
+                1f, // scaleX
+                1f, // scaleY
+                0f // rotation
+        );
         
         batch.setColor(DEFAULT_COL);
     }
@@ -391,6 +418,7 @@ public class WorldRenderer implements Renderer {
      * @param e The fireball entity.
      */
     public void renderFireball(Entity e, CFireball c) {
+        /*
         batch.draw(
                 texFireball, // texture
                 (float)e.x - 0.75f, // x
@@ -409,6 +437,19 @@ public class WorldRenderer implements Renderer {
                 false, //!e.facingRight, // flipX
                 false // flipY
         );
+        */
+        batch.draw(
+                texFireball, // region
+                (float)e.x - 0.75f, // x
+                (float)e.y - 0.25f, // y
+                0.75f, // originX
+                0.25f, // originY
+                1f, // width
+                0.5f, // height
+                1f, // scaleX
+                1f, // scaleY
+                Maths.toDegrees(c.rotation) // rotation
+        );
     }
     
     /**
@@ -418,9 +459,10 @@ public class WorldRenderer implements Renderer {
      */
     public void renderItem(Entity e, CItem c) {
         if(c.stack.getItem().equals(Items.TILE))
-            renderOn(tileRenderer.tiles.getRegion(7 + c.stack.getData()), e);
+            renderOn(tileRenderer.tiles[c.stack.getData()], e);
         else
-            renderOn(shtItems.getRegion(c.stack.getItem().getID() - 1), e);
+            renderOn(texItems[c.stack.getItem().getID()], e);
+            //renderOn(shtItems.getRegion(c.stack.getItem().getID() - 1), e);
     }
     
     private void renderOn(TextureRegion tex, Entity e) {
@@ -473,6 +515,7 @@ public class WorldRenderer implements Renderer {
      */
     public void renderExplosion(ParticleExplosion p) {
         batch.setColor(p.colour);
+        /*
         batch.draw(
                 texExplosion, // texture
                 (float)p.x, // x
@@ -491,6 +534,19 @@ public class WorldRenderer implements Renderer {
                 false, // flipX
                 false // flipY
         );
+        */
+        batch.draw(
+                texExplosion, // region
+                (float)p.x - 0.5f, // x
+                (float)p.y - 0.5f, // y
+                0.5f, // originX
+                0.5f, // originY
+                1f, // width
+                1f, // height
+                p.radius, // scaleX
+                p.radius, // scaleY
+                0f // rotation
+        );
         batch.setColor(DEFAULT_COL);
     }
     
@@ -502,7 +558,7 @@ public class WorldRenderer implements Renderer {
     public void renderFlame(ParticleFlame p) {
         batch.setColor(1f, 1f, 1f, p.opacity);
         batch.draw(
-                shtParticles.getRegion(2), // region
+                texFlame, // region
                 (float)p.x - 0.125f, // x
                 (float)p.y - 0.125f, // y
                 0.25f, // originX
@@ -524,7 +580,7 @@ public class WorldRenderer implements Renderer {
     public void renderSmoke(ParticleSmoke p) {
         batch.setColor(1f, 1f, 1f, p.opacity);
         batch.draw(
-                shtParticles.getRegion(0), // region
+                texSmoke, // region
                 (float)p.x - 0.25f, // x
                 (float)p.y - 0.25f, // y
                 0.25f, // originX
@@ -540,7 +596,7 @@ public class WorldRenderer implements Renderer {
     
     private void renderCursorItem() {
         batch.setColor(1f, 1f, 1f, 0.5f);
-        TextureRegion r = tileRenderer.tiles.getRegion(7 + controller.tileID);
+        TextureRegion r = tileRenderer.tiles[controller.tileID];
         controller.doInRadius(this, (x,y) -> batch.draw(
                 r, // region
                 World.tileCoordFreeToTileCoordFixed(x), // x

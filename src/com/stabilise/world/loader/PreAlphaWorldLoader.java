@@ -60,7 +60,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
         if(generated) {
             for(int y = 0; y < REGION_SIZE; y++) {            // Row (y)
                 for(int x = 0; x < REGION_SIZE; x++) {        // Col (x)
-                    DataCompound sliceTag = regionTag.createCompound("slice" + x + "_" + y);
+                    DataCompound sliceTag = regionTag.getCompound("slice" + x + "_" + y);
                     Slice s = new Slice(r.offsetX + x, r.offsetY + y,
                             sliceTag.getIntArr("tiles"),
                             sliceTag.getIntArr("walls"),
@@ -82,17 +82,14 @@ public class PreAlphaWorldLoader extends WorldLoader {
             }
         }
         
-        DataList actions = regionTag.createList("queuedActions");
-        if(actions.size() != 0) {
+        regionTag.optList("queuedActions").peek(actions -> {
             r.queuedActions = new ArrayList<>(actions.size());
             for(int i = 0; i < actions.size(); i++) {
                 r.queuedActions.add(Action.read(actions.getCompound()));
             }
-        }
+        });
         
-        DataList structures = regionTag.createList("queuedStructures");
-        
-        if(structures.size() != 0) {
+        regionTag.optList("queuedStructures").peek(structures -> {
             for(int i = 0; i < structures.size(); i++) {
                 DataCompound structure = structures.getCompound();
                 QueuedStructure s = new Region.QueuedStructure();
@@ -105,9 +102,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
                 s.offsetY = structure.getInt("offsetY");
                 r.addStructure(s);
             }
-            
-            //log.postDebug("Loaded " + schematics.size() + " schematics into " + r);
-        }
+        });
         
         if(generated)
             r.setGenerated();
@@ -135,7 +130,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
                         for(int tileX = 0; tileX < Slice.SLICE_SIZE; tileX++) {
                             for(int tileY = 0; tileY < Slice.SLICE_SIZE; tileY++) {
                                 if((t = s.tileEntities[tileY][tileX]) != null) {
-                                    t.toNBT(tileEntities.createCompound());
+                                    tileEntities.add(t.toNBT());
                                 }
                             }
                         }
@@ -147,7 +142,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
         List<Action> queuedActions = r.queuedActions;
         if(queuedActions != null) {
             DataList actions = regionTag.createList("queuedActions");
-            queuedActions.forEach(a -> a.toNBT(actions.createCompound()));
+            queuedActions.forEach(a -> actions.add(a.toNBT()));
         }
         
         if(r.hasQueuedStructures()) {

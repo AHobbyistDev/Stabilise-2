@@ -2,12 +2,15 @@ package com.stabilise.util.collect.registry;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.stabilise.util.collect.BiObjectIntMap;
+
+import javaslang.Tuple3;
 
 /**
  * An IDRegistry extends upon a normal Registry as to additionally associate an
@@ -125,6 +128,17 @@ public class IDRegistry<K, V> extends Registry<K, V> {
         if(!isLocked())
             idMap.clampSize(maxID + 1);
         super.lock();
+    }
+    
+    /**
+     * Performs the given action for each entry in this registry.
+     */
+    public void forEachEntry(Consumer<Tuple3<K, Integer, V>> action) {
+        for(Map.Entry<K, V> entry : objects.entrySet()) {
+            action.accept(new Tuple3<>(entry.getKey(),
+                    idMap.getKey(entry.getValue()),
+                    entry.getValue()));
+        }
     }
     
     @Override

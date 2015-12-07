@@ -15,14 +15,15 @@ public class ActionAddTileEntity extends Action {
     }
     
     @Override
-    public DataCompound toNBT(DataCompound tag) {
-        t.toNBT(tag.createCompound("t"));
+    public DataCompound toNBT() {
+        DataCompound tag = DataCompound.create();
+        tag.put("t", t.toNBT());
         return tag;
     }
     
     @Override
     public Action fromNBT(DataCompound tag) {
-        t = TileEntity.createTileEntityFromNBT(tag.createCompound("t"));
+        t = TileEntity.createTileEntityFromNBT(tag.getCompound("t"));
         return null;
     }
     

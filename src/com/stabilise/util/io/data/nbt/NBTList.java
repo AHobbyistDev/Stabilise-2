@@ -56,6 +56,11 @@ public class NBTList extends AbstractDataList {
     }
     
     @Override
+    public boolean hasNext() {
+        return index < size();
+    }
+    
+    @Override
     protected void addData(ITag t) {
         if(data.size() != 0) {
             if(NBTType.tagID(t) != type)

@@ -16,8 +16,8 @@ public class ActionAddEntity extends Action {
     }
     
     @Override
-    public DataCompound toNBT(DataCompound tag) {
-        return null;
+    public DataCompound toNBT() {
+        return DataCompound.create();
     }
     
     @Override

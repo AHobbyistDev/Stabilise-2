@@ -1,6 +1,7 @@
 package com.stabilise.util.io.data;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import com.stabilise.util.io.DataInStream;
@@ -68,11 +69,11 @@ public enum Format {
     // ------------------------------------------------------------------------
     
     private final EquivalenceClass equivClass;
-    private final Supplier<DataCompound> compoundSup;
-    private final Supplier<DataList> listSup;
+    private final Supplier<AbstractCompound> compoundSup;
+    private final Supplier<AbstractDataList> listSup;
     
-    private Format(EquivalenceClass equivClass, Supplier<DataCompound> compoundSup,
-            Supplier<DataList> listSup) {
+    private Format(EquivalenceClass equivClass, Supplier<AbstractCompound> compoundSup,
+            Supplier<AbstractDataList> listSup) {
         this.equivClass = equivClass;
         this.compoundSup = compoundSup;
         this.listSup = listSup;
@@ -107,6 +108,14 @@ public enum Format {
         return listSup.get();
     }
     
+    AbstractCompound newAbstractCompound() {
+        return compoundSup.get();
+    }
+    
+    AbstractDataList newAbstractList() {
+        return listSup.get();
+    }
+    
     /**
      * Reads a DataObject from the given input stream and returns it.
      * 
@@ -137,6 +146,25 @@ public enum Format {
     
     private static enum EquivalenceClass {
         NBT, JSON, BYTES;
+    }
+    
+    private static final ThreadLocal<Format> DEFAULTS =
+            ThreadLocal.withInitial(() -> NBT_SIMPLE);
+    
+    /**
+     * Sets the default format for use by the current thread.
+     * 
+     * @throws NullPointerException if {@code format} is {@code null}.
+     */
+    public static void setDefaultFormat(Format format) {
+        DEFAULTS.set(Objects.requireNonNull(format));
+    }
+    
+    /**
+     * Returns the default format in use by the current thread.
+     */
+    public static Format getDefaultFormat() {
+        return DEFAULTS.get();
     }
     
 }

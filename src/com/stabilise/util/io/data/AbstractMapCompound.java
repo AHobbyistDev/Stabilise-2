@@ -38,13 +38,13 @@ public abstract class AbstractMapCompound extends AbstractCompound {
     @Override
     public DataCompound createCompound(String name) {
         return get(name, DataCompound.class)
-                .orElseGet(() -> putData(name, (AbstractCompound) format().newCompound()));
+                .orElseGet(() -> putData(name, format().newAbstractCompound()));
     }
     
     @Override
     public DataList createList(String name) {
         return get(name, DataList.class)
-                .orElseGet(() -> putData(name, (AbstractDataList) format().newList()));
+                .orElseGet(() -> putData(name, format().newAbstractList()));
     }
     
     @SuppressWarnings("unchecked")
@@ -78,8 +78,8 @@ public abstract class AbstractMapCompound extends AbstractCompound {
     
     // DON'T YOU JUST LOVE HOW WONDERFULLY REPETITIVE THIS IS
     
-    @Override public void put(String name, DataCompound data) { put(name, data.convert(format())); }
-    @Override public void put(String name, DataList data) { put(name, data.convert(format())); }
+    @Override public void put(String name, DataCompound data) { putData(name, (ITag)data.convert(format())); }
+    @Override public void put(String name, DataList data) { putData(name, (ITag)data.convert(format())); }
     @Override public void put(String name, boolean data) { putData(name, box(data)); }
     @Override public void put(String name, byte data) { putData(name, box(data)); }
     @Override public void put(String name, char data) { putData(name, box(data)); }
@@ -95,13 +95,13 @@ public abstract class AbstractMapCompound extends AbstractCompound {
     @Override
     public DataCompound getCompound(String name) {
         return get(name, DataCompound.class)
-                .orElseGet(() -> (AbstractCompound) format().newCompound());
+                .orElseGet(() -> format().newAbstractCompound());
     }
     
     @Override
     public DataList getList(String name) {
         return get(name, DataList.class)
-                .orElseGet(() -> (AbstractDataList) format().newList());
+                .orElseGet(() -> format().newAbstractList());
     }
     
     @Override
@@ -191,7 +191,7 @@ public abstract class AbstractMapCompound extends AbstractCompound {
         if(write)
             o.put(name, this);
         else
-            o.optCompound(name).peek((c) -> ((AbstractCompound)c).putAll(this));
+            o.optCompound(name).peek(c -> ((AbstractCompound)c).putAll(this));
     }
     
     // From ValueExportable

@@ -203,8 +203,8 @@ public class ItemStack {
      * returned NBT data can be used to reconstruct this ItemStack via {@link
      * #fromNBT(NBTTagCompound)}.
      */
-    public DataCompound toNBT(DataCompound tag) {
-        item.toNBT(tag);
+    public DataCompound toNBT() {
+        DataCompound tag = item.toNBT();
         tag.put("count", quantity);
         if(data != 0) // Don't write if it's 0 to save space.
             tag.put("data", data);

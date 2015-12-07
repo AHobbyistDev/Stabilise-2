@@ -32,6 +32,8 @@ public class Hitbox extends FreeGameObject {
      * anything, and as such, do <i>NOT</i> set it to 0. */
     public int hits = 1;
     
+    public boolean stickToOwner = true;
+    
     /** The damage the hitbox deals. */
     public int damage;
     /** How much force the hitbox applies upon impact. */
@@ -93,9 +95,11 @@ public class Hitbox extends FreeGameObject {
      * Moves the hitbox to the location of its owner.
      */
     protected void moveToOwner(World w) {
-        Entity e = w.getEntity(ownerID);
-        x = e.x;
-        y = e.y;
+        if(stickToOwner) {
+            Entity e = w.getEntity(ownerID);
+            x = e.x;
+            y = e.y;
+        }
     }
     
     /**

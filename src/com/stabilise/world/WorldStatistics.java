@@ -35,9 +35,7 @@ public class WorldStatistics {
     }
     
     private void append(StringBuilder sb, Object o) {
-        sb.append('\t');
-        sb.append(o);
-        sb.append('\n');
+        sb.append("    ").append(o).append('\n');
     }
     
     public static class ProcessStats {
@@ -54,13 +52,13 @@ public class WorldStatistics {
         
         @Override
         public String toString() {
-            return name + "{"
-                    +       "req:" + requests  + ", "
-                    +       "rej:" + rejected  + ", "
-                    +   "started:" + started   + ", "
-                    +   "aborted:" + aborted   + ", "
-                    + "completed:" + completed + ", "
-                    +    "failed:" + failed
+            return String.format("%10s", name) + "{"
+                    +       "req:" + String.format("%4d", requests.sum())  + ", "
+                    +       "rej:" + String.format("%4d", rejected.sum())  + ", "
+                    +   "started:" + String.format("%4d", started.sum())   + ", "
+                    +   "aborted:" + String.format("%4d", aborted.sum())   + ", "
+                    + "completed:" + String.format("%4d", completed.sum()) + ", "
+                    +    "failed:" + String.format("%4d", failed.sum())
                     + "}";
         }
         

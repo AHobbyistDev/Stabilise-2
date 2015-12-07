@@ -204,13 +204,15 @@ public class IOUtil {
      */
     public static DataCompound read(Format format, Compression compression,
             FileHandle file) throws IOException {
-        InputStream is = null;
+        InputStream is1 = null;
+        InputStream is2 = null;
         BufferedInputStream bis = null;
         DataInStream dis = null;
         
         try {
-            is = compression.wrap(file.read());
-            bis = new BufferedInputStream(is);
+            is1 = file.read();
+            is2 = compression.wrap(is1);
+            bis = new BufferedInputStream(is2);
             dis = new DataInStream(bis);
             DataCompound c = format.read(dis);
             c.setReadMode();
@@ -218,23 +220,10 @@ public class IOUtil {
         } catch(GdxRuntimeException e) {
             throw new IOException(e);
         } finally {
-            dis.close(); // also closes bis, is
-        }
-    }
-    
-    /**
-     * Reads a file. The returned compound will be in read mode.
-     * 
-     * @throws NullPointerException if either argument is null.
-     * @throws IOException if an I/O error occurs.
-     */
-    public static DataCompound read(Format format, DataInStream dis) throws IOException {
-        try {
-            DataCompound c = format.read(dis);
-            c.setReadMode();
-            return c;
-        } finally {
-            dis.close();
+            if(dis != null) dis.close();
+            else if(bis != null) bis.close();
+            else if(is2 != null) is2.close();
+            else if(is1 != null) is1.close();
         }
     }
     
@@ -246,19 +235,24 @@ public class IOUtil {
      */
     public static void write(DataCompound data, Format format,
             Compression compression, FileHandle file) throws IOException {
-        OutputStream os = null;
+        OutputStream os1 = null;
+        OutputStream os2 = null;
         BufferedOutputStream bos = null;
         DataOutStream dos = null;
         
         try {
-            os = compression.wrap(file.write(false));
-            bos = new BufferedOutputStream(os);
+            os1 = file.write(false);
+            os2 = compression.wrap(os1);
+            bos = new BufferedOutputStream(os2);
             dos = new DataOutStream(bos);
             format.write(data.convert(format), dos);
         } catch(GdxRuntimeException e) {
             throw new IOException(e);
         } finally {
-            dos.close(); // also closes bos, os
+            if(dos != null) dos.close();
+            else if(bos != null) bos.close();
+            else if(os2 != null) os2.close();
+            else if(os1 != null) os1.close();
         }
     }
     

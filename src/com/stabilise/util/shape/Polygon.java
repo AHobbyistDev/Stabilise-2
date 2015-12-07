@@ -4,7 +4,9 @@ import java.util.Arrays;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.Checks;
+import com.stabilise.util.maths.Maths;
 
 /**
  * A polygon is a shape with any number of vertices.
@@ -125,6 +127,21 @@ public class Polygon extends Shape {
         return Arrays.equals(verts, p.verts);
     }
     
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Polygon: [");
+        for(int i = 0; i < verts.length; i += 2) {
+            sb.append("\n     (");
+            sb.append(String.format("%.2f", verts[i]));
+            sb.append(", ");
+            sb.append(String.format("%.2f", verts[i+1]));
+            sb.append(")");
+        }
+        sb.append("\n]");
+        return sb.toString();
+    }
+    
     //--------------------==========--------------------
     //------------=====Static Functions=====------------
     //--------------------==========--------------------
@@ -156,6 +173,19 @@ public class Polygon extends Shape {
                 x, y + height
         };
         return p;
+    }
+    
+    public static Polygon circle(float x, float y, float radius, int points) {
+        Checks.testMin(points, 3);
+        float[] verts = new float[2*points];
+        float increment = Maths.TAUf / points;
+        float angle = increment;
+        for(int i = 0; i < 2*points; i += 2) {
+            verts[i]   = x + radius * MathUtils.cos(angle);
+            verts[i+1] = y + radius * MathUtils.sin(angle);
+            angle += increment;
+        }
+        return newPolygon(verts);
     }
     
 }

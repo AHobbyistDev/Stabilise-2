@@ -123,10 +123,9 @@ public abstract class TileEntity extends FixedGameObject {
      * {@link #createTileEntity(int, int, int)} required to produce a tile
      * entity of the same class), the "x" and "y" integer tags, and other tags
      * which are dependent on subclass implementations.
-     * 
-     * @return The NBT tag.
      */
-    public final DataCompound toNBT(DataCompound tag) {
+    public final DataCompound toNBT() {
+        DataCompound tag = DataCompound.create();
         tag.put("id", getID());
         tag.put("x", x);
         tag.put("y", y);

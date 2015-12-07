@@ -7,9 +7,36 @@ import com.stabilise.util.io.Sendable;
 /**
  * A DataCompound is the basic unifying building block for this package. A
  * DataCompound is essentially equivalent to any old object - it encapsulates
- * data, and may be saved in a variety of {@link Format}{@code s}. 
+ * data, and may be saved in a variety of {@link Format}{@code s}.
+ * 
+ * <p>There are three primary data-interactions methods for a DataCompound:
+ *  
+ * <ul>
+ * <li>{@code put()} methods. Each of these methods inserts data into this tag;
+ *     if data with the specified name already exists, it will be overwritten.
+ * <li>{@code get()} methods. Each of these methods get data from this tag. For
+ *     each of the {@code get} methods, if data is not present or is present in
+ *     a different format (e.g. invoking {@code getBool("foo")} when the data
+ *     type of {@code "foo"} is {@code int}), a suitable default will be
+ *     returned.
+ * <li>{@code opt()} methods. These methods behave like the {@code get()}
+ *     methods, but return an {@code Option} instead of a default value.
+ * </ul>
  */
 public interface DataCompound extends Sendable, IContainerTag<DataCompound> {
+    
+    /**
+     * Creates a DataCompound of the format determined the current thread's
+     * default value.
+     * 
+     * @see Format#getDefaultFormat()
+     * @see Format#setDefaultFormat(Format)
+     */
+    public static DataCompound create() {
+        return Format.getDefaultFormat().newCompound();
+    }
+    
+    
     
     /**
      * Checks for whether or not a tag with the specified name is contained
@@ -22,18 +49,20 @@ public interface DataCompound extends Sendable, IContainerTag<DataCompound> {
     /**
      * Gets a compound which is a child of this one. If a compound by the
      * specified name already exists, it is returned, otherwise one is
-     * created.
+     * created. If another data type under the specified name is present,
+     * it will be overwritten.
      * 
      * <p>The returned compound will be of the same format as this one.
-     * 
-     * <p>If this compound is in the {@link Format#BYTE_STREAM} format, this
-     * itself is always returned (as children are meaningless).
      */
     DataCompound createCompound(String name);
     
     /**
      * Gets a list which is a child of this compound. If a list by the
      * specified name already exists, it is returned, otherwise one is created.
+     * If another data type under the specified name is present, it will be
+     * overwritten.
+     * 
+     * <p>The returned list will be of the same format as this compound.
      */
     DataList createList(String name);
     

@@ -163,7 +163,7 @@ public class CharacterData implements Sendable {
         maxStamina = tag.getInt("maxStamina");
         maxMana = tag.getInt("maxMana");
         
-        inventory.fromNBT(tag.createList("inventory"));
+        inventory.fromNBT(tag.getList("inventory"));
         
         loaded = true;
     }
@@ -190,7 +190,7 @@ public class CharacterData implements Sendable {
         tag.put("maxStamina", maxStamina);
         tag.put("maxMana", maxMana);
         
-        inventory.toNBT(tag.createList("inventory"));
+        tag.put("inventory", inventory.toNBT());
         
         IOUtil.writeSafe(tag, Format.NBT, Compression.GZIP, getFile());
     }

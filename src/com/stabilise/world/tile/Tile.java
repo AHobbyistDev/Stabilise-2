@@ -23,7 +23,7 @@ public class Tile {
     
     /** The registry of all tiles in the game. The default tile is the air
      * tile. */
-    private static final RegistryNamespacedDefaulted<Tile> TILES =
+    public static final RegistryNamespacedDefaulted<Tile> TILES =
             new RegistryNamespacedDefaulted<>(
                     new RegistryParams("TileRegistry", 32), "stabilise", "air"
             );

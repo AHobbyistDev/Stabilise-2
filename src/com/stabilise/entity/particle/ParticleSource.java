@@ -47,7 +47,7 @@ public class ParticleSource<T extends Particle> {
             case Settings.PARTICLES_ALL:
                 return baseCount;
             case Settings.PARTICLES_REDUCED:
-                return baseCount == 1 ? 1 : baseCount / 2;
+                return baseCount <= 4 ? 1 : baseCount / 4;
             case Settings.PARTICLES_NONE:
                 return 0;
         }

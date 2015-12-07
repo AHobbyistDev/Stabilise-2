@@ -1,10 +1,11 @@
 package com.stabilise.entity.component.core;
 
-import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.effect.EffectFire;
 import com.stabilise.entity.event.EntityEvent;
+import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.hitbox.LinkedHitbox;
+import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.opengl.render.WorldRenderer;
@@ -22,10 +23,13 @@ public class CFireball extends BaseProjectile {
     /** Default fireball damage. */
     private static final int DEFAULT_FIREBALL_DAMAGE = 10;
     
+    private static final Polygon SPLASH_HITBOX = Polygon.circle(0f, 0f, 3f, 8);
+    
     /** The number of ticks after which a fireball despawns. */
     private static final int DESPAWN_TICKS = 300;
     
     private ParticleSource<ParticleFlame> particleSrc;
+    private ParticleSource<ParticleExplosion> explosionSrc;
     private int damage;
     
     public CFireball(long ownerID) {
@@ -78,10 +82,7 @@ public class CFireball extends BaseProjectile {
             hitbox.fy = e.dy / div;
         }
         
-        if(Settings.settingParticlesAll())
-            addFlightParticles(w, e, 8);
-        else if(Settings.settingParticlesReduced())
-            addFlightParticles(w, e, 4);
+        addFlightParticles(w, e, 8);
         
         if(e.age == DESPAWN_TICKS)
             e.destroy();
@@ -98,8 +99,6 @@ public class CFireball extends BaseProjectile {
     
     /**
      * Creates fire particles about the fireball's location of impact.
-     * 
-     * @param particles The number of particles to create.
      */
     private void addImpactParticles(World w, Entity e, int particles) {
         particleSrc.createBurst(particles, e.x, e.y, 0.01f, 4.0f, 0f, (float)Maths.TAU);
@@ -109,13 +108,38 @@ public class CFireball extends BaseProjectile {
     protected void onImpact(World w, Entity e) {
         e.destroy();
         
+        /*
+        final float range = 3.75f;
+        int xMin = Maths.floor(e.x - range);
+        int xMax = Maths.floor(e.x + range);
+        int yMin = Maths.floor(e.y - range);
+        int yMax = Maths.floor(e.y + range);
+        
+        for(int y = yMin; y <= yMax; y++) {
+            for(int x = xMin; x <= xMax; x++) {
+                if(Maths.pointsInRange(e.x, e.y, x, y, range))
+                    w.breakTileAt(x, y);
+            }
+        }
+        */
+        
+        Hitbox h = new Hitbox(ownerID, SPLASH_HITBOX, 2*damage);
+        h.persistent = true;
+        h.persistenceTimer = 3;
+        h.stickToOwner = false;
+        h.effects = tgt -> tgt.addComponent(new EffectFire(300));
+        w.addHitbox(h, e.x, e.y);
+        
+        explosionSrc.createAt(e.x, e.y);
         addImpactParticles(w, e, 500);
     }
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
+        if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD) {
             particleSrc = w.getParticleManager().getSource(ParticleFlame.class);
+            explosionSrc = w.getParticleManager().getSource(ParticleExplosion.class);
+        }
         return super.handle(w, e, ev);
     }
     

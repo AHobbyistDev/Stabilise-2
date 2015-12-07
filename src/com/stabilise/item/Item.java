@@ -166,7 +166,8 @@ public class Item {
      * possesses an integer tag "id" corresponding to the item's ID, and can be
      * used to reobtain this Item via {@link #fromNBT(NBTTagCompound)}.
      */
-    public DataCompound toNBT(DataCompound tag) {
+    public DataCompound toNBT() {
+        DataCompound tag = DataCompound.create();
         tag.put("id", id);
         return tag;
     }

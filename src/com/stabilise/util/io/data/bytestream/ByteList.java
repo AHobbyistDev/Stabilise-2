@@ -49,6 +49,11 @@ public class ByteList extends AbstractDataList {
     }
     
     @Override
+    public boolean hasNext() {
+        return false;
+    }
+    
+    @Override
     public void addData(ITag o) {
         backer.checkCanWrite2();
         try {

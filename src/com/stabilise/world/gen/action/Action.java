@@ -17,7 +17,7 @@ public abstract class Action {
     
     public abstract void apply(World w, Region r);
     
-    public abstract DataCompound toNBT(DataCompound tag);
+    public abstract DataCompound toNBT();
     public abstract Action fromNBT(DataCompound tag);
     
     

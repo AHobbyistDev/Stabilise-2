@@ -40,16 +40,12 @@ public class ParticleExplosion extends Particle {
     public float radius;
     
     
-    /**
-     * Creates a new explosion particle.
-     * 
-     * @param initialRadius The initial radius of the explosion, in
-     * tile-lengths.
-     * @param finalRadius The final radius of the explosion, in tile-lengths.
-     */
-    public ParticleExplosion(float initialRadius, float finalRadius) {
-        radiusInit = initialRadius;
-        radiusFinal = finalRadius;
+    @Override
+    public void reset() {
+        super.reset();
+        
+        radiusInit = 0.5f;
+        radiusFinal = 5.5f;
         
         colour = new Color(COLOUR_INIT);
         radius = radiusInit;
