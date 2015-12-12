@@ -14,6 +14,7 @@ import com.stabilise.util.annotation.ForTestingPurposes;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.UnorderedArrayList;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.loader.WorldLoader.DimensionLoader;
@@ -196,12 +197,14 @@ public class HostWorld extends AbstractWorld {
      * @param x The x-coordinate of the region, in region-lengths.
      * @param y The y-coordinate of the region, in region-lengths.
      * 
-     * @return The region, or {@code null} if no such region exists.
+     * @return The region, or {@link Region#DUMMY_REGION} if no such region
+     * exists.
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
     public Region getRegionAt(int x, int y) {
-        return regions.getRegionAt(x, y);
+        Region r = regions.getRegionAt(x, y);
+        return r == null ? Region.DUMMY_REGION : r;
     }
     
     /**
@@ -241,8 +244,8 @@ public class HostWorld extends AbstractWorld {
     }
     
     /**
-     * Returns the region occupying the specified tile coord, or {@code null}
-     * if it is not loaded.
+     * Returns the region occupying the specified tile coord, or
+     * {@link Region#DUMMY_REGION} if it is not loaded.
      */
     private Region getRegionFromTileCoords(int x, int y) {
         return getRegionAt(regionCoordFromTileCoord(x),
@@ -250,23 +253,12 @@ public class HostWorld extends AbstractWorld {
     }
     
     /**
-     * Returns the region occupying the specified slice coord, or {@code null}
-     * if it is not loaded.
+     * Returns the region occupying the specified slice coord, or
+     * {@link Region#DUMMY_REGION} if it is not loaded.
      */
     private Region getRegionFromSliceCoords(int x, int y) {
         return getRegionAt(regionCoordFromSliceCoord(x),
                 regionCoordFromSliceCoord(y));
-    }
-    
-    /**
-     * Returns the slice occupying the specified location in the region, or
-     * {@code null} if it has not been loaded yet.
-     * 
-     * @throws NullPointerException if {@code r} is {@code null}.
-     */
-    private Slice getSliceFromTileCoords(Region r, int x, int y) {
-        return r.getSliceAt(sliceCoordRelativeToRegionFromTileCoord(x),
-                sliceCoordRelativeToRegionFromTileCoord(y));
     }
     
     /**
@@ -300,43 +292,73 @@ public class HostWorld extends AbstractWorld {
     
     @Override
     public Slice getSliceAt(int x, int y) {
-        Region r = getRegionFromSliceCoords(x, y);
-        return r == null ? null : r.getSliceAt(
+        return getRegionFromSliceCoords(x, y).getSliceAt(
                 sliceCoordRelativeToRegionFromSliceCoord(x),
-                sliceCoordRelativeToRegionFromSliceCoord(y));
+                sliceCoordRelativeToRegionFromSliceCoord(y)
+        );
     }
     
     @Override
     public Slice getSliceAtTile(int x, int y) {
-        Region r = getRegionFromTileCoords(x, y);
-        return r == null ? null : getSliceFromTileCoords(r, x, y);
+        return getRegionFromTileCoords(x, y).getSliceAt(
+                sliceCoordRelativeToRegionFromTileCoord(x),
+                sliceCoordRelativeToRegionFromTileCoord(y)
+        );
     }
     
     @Override
     public void setTileAt(int x, int y, int id) {
         Slice s = getSliceAtTile(x, y);
         
-        if(s != null) {
-            int tileX = tileCoordRelativeToSliceFromTileCoord(x);
-            int tileY = tileCoordRelativeToSliceFromTileCoord(y);
+        if(!s.isDummy()) {
+            int tx = tileCoordRelativeToSliceFromTileCoord(x);
+            int ty = tileCoordRelativeToSliceFromTileCoord(y);
             
             // TODO: remove this when I make sure one can't set a tile over another
-            if(id != s.getTileIDAt(tileX, tileY)) {
-                s.getTileAt(tileX, tileY).handleRemove(this, x, y);
+            if(id != s.getTileIDAt(tx, ty)) {
+                s.getTileAt(tx, ty).handleRemove(this, x, y);
                 SingleplayerState.pop.play(1f, 0.75f, 0f);
                 
-                s.setTileAt(tileX, tileY, id);
+                s.setTileIDAt(tx, ty, id);
+                //recalcLightingAt(x, y, s.getLightAt(tx, ty));
+                s.updateLight(tx, ty);
                 Tile.getTile(id).handlePlace(this, x, y);
-                s.updateLight(tileX, tileY);
             }
         }
+    }
+    
+    @SuppressWarnings("unused")
+    private byte recalcLightingAt(int x, int y, byte curLight) {
+        Tile t = getTileAt(x, y);
+        
+        byte[] l = new byte[5]; // base, 4x neighbours
+        l[0] = t.getLight();
+        if(l[0] == curLight)
+            return (byte)(curLight - t.getFalloff());
+        setLightAt(x, y, l[0]);
+        
+        l[1] = getLightAt(x-1, y  );
+        l[2] = getLightAt(x+1, y  );
+        l[3] = getLightAt(x,   y-1);
+        l[4] = getLightAt(x,   y+1);
+        
+        if(l[1] > l[0]) l[1] = recalcLightingAt(x-1, y  , l[1]);
+        if(l[2] > l[0]) l[2] = recalcLightingAt(x+1, y  , l[2]);
+        if(l[3] > l[0]) l[3] = recalcLightingAt(x  , y-1, l[3]);
+        if(l[4] > l[0]) l[4] = recalcLightingAt(x  , y+1, l[4]);
+        
+        byte newLevel = Maths.max(l);
+        if(newLevel > l[0])
+            setLightAt(x, y, newLevel);
+        
+        return (byte)(newLevel - t.getFalloff());
     }
     
     @Override
     public void breakTileAt(int x, int y) {
         Slice s = getSliceAtTile(x, y);
         
-        if(s != null) {
+        if(!s.isDummy()) {
             int tileX = tileCoordRelativeToSliceFromTileCoord(x);
             int tileY = tileCoordRelativeToSliceFromTileCoord(y);
             
@@ -356,7 +378,7 @@ public class HostWorld extends AbstractWorld {
     public void setTileEntityAt(int x, int y, TileEntity t) {
         Slice s = getSliceAtTile(x, y);
         
-        if(s != null) {
+        if(!s.isDummy()) {
             int tileX = tileCoordRelativeToSliceFromTileCoord(x);
             int tileY = tileCoordRelativeToSliceFromTileCoord(y);
             
@@ -377,7 +399,7 @@ public class HostWorld extends AbstractWorld {
     public void blowUpTile(int x, int y, float explosionPower) {
         Slice s = getSliceAtTile(x, y);
         
-        if(s != null) {
+        if(!s.isDummy()) {
             int tileX = tileCoordRelativeToSliceFromTileCoord(x);
             int tileY = tileCoordRelativeToSliceFromTileCoord(y);
             

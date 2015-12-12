@@ -95,7 +95,7 @@ public class TileRenderer implements Renderer {
     private void renderSlice(int x, int y) {
         Slice slice = world.getSliceAt(x, y);
         
-        if(slice == null)
+        if(slice.isDummy())
             return;
         
         slicesRendered++;

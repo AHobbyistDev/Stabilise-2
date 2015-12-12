@@ -56,7 +56,7 @@ class GenProvider implements WorldProvider {
     @Override
     public void setTileAt(int x, int y, int id) {
         getTileAt(x, y).handleRemove(this, x, y);
-        getSliceAtTile(x,y).setTileAt(
+        getSliceAtTile(x,y).setTileIDAt(
                 World.tileCoordRelativeToSliceFromTileCoord(x),
                 World.tileCoordRelativeToSliceFromTileCoord(y),
                 id);

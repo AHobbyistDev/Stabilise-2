@@ -467,4 +467,13 @@ public class Maths {
         return Math.min(Math.min(a, b), c);
     }
     
+    public static byte max(byte[] b) {
+        byte max = b[0];
+        for(int i = 1; i < b.length; i++) {
+            if(b[i] > max)
+                max = b[i];
+        }
+        return max;
+    }
+    
 }

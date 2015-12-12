@@ -9,7 +9,7 @@ import com.stabilise.util.io.Sendable;
  * DataCompound is essentially equivalent to any old object - it encapsulates
  * data, and may be saved in a variety of {@link Format}{@code s}.
  * 
- * <p>There are three primary data-interactions methods for a DataCompound:
+ * <p>There are three primary data-interaction methods for a DataCompound:
  *  
  * <ul>
  * <li>{@code put()} methods. Each of these methods inserts data into this tag;

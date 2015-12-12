@@ -71,6 +71,10 @@ public class Region {
     /** The factory with which to generate a region's {@link #loc} member. */
     private static final PointFactory LOC_FACTORY = new PointFactory(16, true);
     
+    /** Dummy region to indicate the lack of a region in preference to a null
+     * pointer. */
+    public static final Region DUMMY_REGION = new DummyRegion();
+    
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
     //--------------------==========--------------------
@@ -127,19 +131,6 @@ public class Region {
     private final ClearingQueue<QueuedStructure> structures =
             ClearingQueue.create();
     
-    
-    /**
-     * Private since this creates an ordinarily-invalid region.
-     */
-    /*
-    private Region() {
-        offsetX = offsetY = Integer.MIN_VALUE;
-        loc = new Point(0, 0) {
-            public boolean equals(Object o) { return false; }
-            public int hashCode() { return Integer.MIN_VALUE; }
-        };
-    }
-    */
     
     /**
      * Creates a new region.
@@ -591,6 +582,13 @@ public class Region {
         }
     }
     
+    /**
+     * Checks for whether or not this is a dummy region.
+     */
+    public boolean isDummy() {
+        return false;
+    }
+    
     //--------------------==========--------------------
     //------------=====Static Functions=====------------
     //--------------------==========--------------------
@@ -731,6 +729,29 @@ public class Region {
             this.tileY = tileY;
             this.offsetX = offsetX;
             this.offsetY = offsetY;
+        }
+        
+    }
+    
+    private static class DummyRegion extends Region {
+        
+        DummyRegion() {
+            super(0, 0, 0);
+        }
+        
+        @Override
+        public boolean update(HostWorld world, RegionStore store) {
+            throw new IllegalStateException("Dummy region is getting updated!");
+        }
+        
+        @Override
+        public Slice getSliceAt(int x, int y) {
+            return Slice.DUMMY_SLICE;
+        }
+        
+        @Override
+        public boolean isDummy() {
+            return true;
         }
         
     }

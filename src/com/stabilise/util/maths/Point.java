@@ -72,7 +72,7 @@ public abstract class Point {
     public boolean equals(Object o) {
         if(!(o instanceof Point)) return false;
         Point p = (Point)o;
-        return x() == p.x() && y() == p.y();
+        return x == p.x && y == p.y;
     }
     
     /**
@@ -80,7 +80,7 @@ public abstract class Point {
      * {@code false} otherwise.
      */
     public boolean equals(int x, int y) {
-        return x() == x && y() == y;
+        return this.x == x && this.y == y;
     }
     
     @Override
@@ -122,7 +122,7 @@ public abstract class Point {
     
     // Nested classes ---------------------------------------------------------
     
-    static class ImmutablePoint extends Point {
+    public static class ImmutablePoint extends Point {
         
         private final int hash;
         
@@ -144,7 +144,7 @@ public abstract class Point {
         
     }
     
-    static class MutablePoint extends Point {
+    public static class MutablePoint extends Point {
         
         MutablePoint(int x, int y) {
             this.x = x;

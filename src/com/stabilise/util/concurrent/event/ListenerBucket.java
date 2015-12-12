@@ -2,6 +2,8 @@ package com.stabilise.util.concurrent.event;
 
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 /**
  * A ListenerBucket holds all listeners for a particular event.
  * 
@@ -37,7 +39,7 @@ interface ListenerBucket<E extends Event> {
      * Returns an array of triggered listeners (so they can be executed while
      * not in a synchronised block, for concurrent event dispatchers).
      */
-    Listener<? super E>[] post(E e);
+    @Nullable Listener<? super E>[] post(E e);
     
     /**
      * Returns {@code true} if this bucket is empty and may be removed.

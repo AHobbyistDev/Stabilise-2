@@ -20,6 +20,10 @@ public class Slice {
     /** The power of 2 of {@link SLICE_SIZE}; minor optimisation purposes. */
     public static final int SLICE_SIZE_SHIFT = Maths.log2(SLICE_SIZE);
     
+    /** Dummy slice to indicate the lack of a slice in preference to a null
+     * pointer. */
+    public static final Slice DUMMY_SLICE = new DummySlice();
+    
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
     //--------------------==========--------------------
@@ -137,7 +141,7 @@ public class Slice {
      * @throws NullPointerException if {@code tile} is {@code null}.
      */
     public void setTileAt(int x, int y, Tile tile) {
-        tiles[y][x] = tile.getID();
+        setTileIDAt(x, y, tile.getID());
     }
     
     /**
@@ -152,12 +156,12 @@ public class Slice {
      * @throws ArrayIndexOutOfBoundsException if either x or y is {@code < 0 ||
      * >= }{@link SLICE_SIZE}.
      */
-    public void setTileAt(int x, int y, int tileID) {
+    public void setTileIDAt(int x, int y, int tileID) {
         tiles[y][x] = tileID;
     }
     
     public Tile getWallAt(int x, int y) {
-        return Tile.getTile(walls[y][x]);
+        return Tile.getTile(getWallIDAt(x, y));
     }
     
     public int getWallIDAt(int x, int y) {
@@ -165,10 +169,10 @@ public class Slice {
     }
     
     public void setWallAt(int x, int y, Tile tile) {
-        walls[y][x] = tile.getID();
+        setWallIDAt(x, y, tile.getID());
     }
     
-    public void setWallAt(int x, int y, int tileID) {
+    public void setWallIDAt(int x, int y, int tileID) {
         walls[y][x] = tileID;
     }
     
@@ -183,6 +187,26 @@ public class Slice {
     public void updateLight(int x, int y) {
         //spreadLightTo(x, y, getTileAt(x, y).getLight(), false);
         buildLight(); // 10/10 easy solution
+        
+        /*
+        Tile t = getTileAt(x, y);
+        
+        byte oldLight = getLightAt(x, y);
+        byte level = t.getLight();
+        
+        if(level == oldLight)
+            return;
+        else if(level > oldLight) {
+            setLightAt(x, y, level);
+            level -= t.getFalloff();
+            if(x != 0)           spreadLightTo(x-1, y  , level, false);
+            if(y != 0)           spreadLightTo(x  , y-1, level, false);
+            if(x < SLICE_SIZE-1) spreadLightTo(x+1, y  , level, false);
+            if(y < SLICE_SIZE-1) spreadLightTo(x  , y+1, level, false);
+        } else {
+            
+        }
+        */
     }
     
     /**
@@ -310,6 +334,36 @@ public class Slice {
     @Override
     public String toString() {
         return "Slice[" + x + "," + y + "]";
+    }
+    
+    /**
+     * Checks for whether or not this slice is a dummy slice.
+     */
+    public boolean isDummy() {
+        return false;
+    }
+    
+    
+    private static class DummySlice extends Slice {
+        
+        public DummySlice() {
+            super(0, 0, new int[0][0], new int[0][0], new byte[0][0]);
+        }
+        
+        @Override public int  getTileIDAt(int x, int y) { return 0; }
+        @Override public void setTileIDAt(int x, int y, int tileID) {}
+        @Override public int  getWallIDAt(int x, int y) { return 0; }
+        @Override public void setWallIDAt(int x, int y, int tileID) {}
+        @Override public byte getLightAt(int x, int y) { return 0; }
+        @Override public void setLightAt(int x, int y, byte level) {}
+        @Override public TileEntity getTileEntityAt(int x, int y) { return null; }
+        @Override public void setTileEntityAt(int x, int y, TileEntity tileEntity) {}
+        
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+        
     }
     
 }

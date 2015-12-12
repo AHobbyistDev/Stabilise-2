@@ -185,8 +185,10 @@ public class EventDispatcher {
             l.unlock();
         }
         
-        for(Listener<? super E> li : ls) {
-            li.execute(e);
+        if(ls != null) {
+            for(Listener<? super E> li : ls) {
+                li.execute(e);
+            }
         }
     }
     

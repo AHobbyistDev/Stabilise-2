@@ -209,7 +209,7 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                     factors[i++] = fact;
                     if(simplex16.noise(baseX + x, baseY + y) * fact > 0.5 
                             && s.getTileIDAt(x, y) == Tiles.stone.getID()) {
-                        s.setTileAt(x, y, ore);
+                        s.setTileIDAt(x, y, ore);
                     }
                 }
             }

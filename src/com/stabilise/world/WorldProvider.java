@@ -48,8 +48,8 @@ public interface WorldProvider {
      * @param x The slice's x-coordinate, in slice lengths.
      * @param y The slice's y-coordinate, in slice lengths.
      * 
-     * @return The slice at the given coordinates, or {@code null} if no such
-     * slice is loaded.
+     * @return The slice at the given coordinates, or {@link Slice#DUMMY_SLICE}
+     * if no such slice is loaded.
      */
     Slice getSliceAt(int x, int y);
     
@@ -59,8 +59,8 @@ public interface WorldProvider {
      * @param x The slice's x-coordinate, in tile lengths.
      * @param y The slice's y-coordinate, in tile lengths.
      * 
-     * @return The slice at the given coordinates, or {@code null} if no such
-     * slice is loaded.
+     * @return The slice at the given coordinates, or {@link Slice#DUMMY_SLICE}
+     * if no such slice is loaded.
      */
     default Slice getSliceAtTile(int x, int y) {
         // This should be optimised for worlds which deal with regions
@@ -97,14 +97,10 @@ public interface WorldProvider {
      * bedrock} tile if no such tile is loaded.
      */
     default Tile getTileAt(int x, int y) {
-        Slice s = getSliceAtTile(x, y);
-        if(s == null)
-            return Tiles.barrier;
-        else
-            return s.getTileAt(
-                    tileCoordRelativeToSliceFromTileCoord(x),
-                    tileCoordRelativeToSliceFromTileCoord(y)
-            );
+        return getSliceAtTile(x, y).getTileAt(
+                tileCoordRelativeToSliceFromTileCoord(x),
+                tileCoordRelativeToSliceFromTileCoord(y)
+        );
     }
     
     /**
@@ -130,35 +126,41 @@ public interface WorldProvider {
     void setTileAt(int x, int y, int id);
     
     default Tile getWallAt(int x, int y) {
-        Slice s = getSliceAtTile(x, y);
-        if(s == null)
-            return Tiles.air;
-        else
-            return s.getWallAt(
-                    tileCoordRelativeToSliceFromTileCoord(x),
-                    tileCoordRelativeToSliceFromTileCoord(y)
-            );
+        return getSliceAtTile(x, y).getWallAt(
+                tileCoordRelativeToSliceFromTileCoord(x),
+                tileCoordRelativeToSliceFromTileCoord(y)
+        );
     }
     
     default void setWallAt(int x, int y, Tile wall) {
-        setWallAt(x, y, wall.getID());
+        getSliceAtTile(x, y).setWallAt(
+                tileCoordRelativeToSliceFromTileCoord(x),
+                tileCoordRelativeToSliceFromTileCoord(y),
+                wall
+        );
     }
     
     default void setWallAt(int x, int y, int id) {
-        Slice s = getSliceAtTile(x, y);
-        if(s != null)
-            s.setWallAt(
-                    tileCoordRelativeToSliceFromTileCoord(x),
-                    tileCoordRelativeToSliceFromTileCoord(y),
-                    id
-            );
+        getSliceAtTile(x, y).setWallIDAt(
+                tileCoordRelativeToSliceFromTileCoord(x),
+                tileCoordRelativeToSliceFromTileCoord(y),
+                id
+        );
     }
     
-    default int getLightAt(int x, int y) {
-        Slice s = getSliceAtTile(x, y);
-        return s == null ? 0 : s.getLightAt(
-                    tileCoordRelativeToSliceFromTileCoord(x),
-                    tileCoordRelativeToSliceFromTileCoord(y));
+    default byte getLightAt(int x, int y) {
+        return getSliceAtTile(x, y).getLightAt(
+                tileCoordRelativeToSliceFromTileCoord(x),
+                tileCoordRelativeToSliceFromTileCoord(y)
+        );
+    }
+    
+    default void setLightAt(int x, int y, byte light) {
+        getSliceAtTile(x, y).setLightAt(
+                tileCoordRelativeToSliceFromTileCoord(x),
+                tileCoordRelativeToSliceFromTileCoord(y),
+                light
+        );
     }
     
     /**
@@ -171,14 +173,10 @@ public interface WorldProvider {
      * such tile entity is loaded.
      */
     default TileEntity getTileEntityAt(int x, int y) {
-        Slice s = getSliceAtTile(x, y);
-        if(s == null)
-            return null;
-        else
-            return s.getTileEntityAt(
-                    tileCoordRelativeToSliceFromTileCoord(x),
-                    tileCoordRelativeToSliceFromTileCoord(y)
-            );
+        return getSliceAtTile(x, y).getTileEntityAt(
+                tileCoordRelativeToSliceFromTileCoord(x),
+                tileCoordRelativeToSliceFromTileCoord(y)
+        );
     }
     
     /**
