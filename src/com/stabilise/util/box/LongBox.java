@@ -30,7 +30,7 @@ public class LongBox implements IBox {
     public void readData(DataInStream in) throws IOException {
         value = in.readLong();
     }
-
+    
     @Override
     public void writeData(DataOutStream out) throws IOException {
         out.writeLong(value);
@@ -40,7 +40,7 @@ public class LongBox implements IBox {
     public void write(String name, DataCompound o) {
         o.put(name, value);
     }
-
+    
     @Override
     public void read(String name, DataCompound o) {
         value = o.getLong(name);
@@ -50,7 +50,7 @@ public class LongBox implements IBox {
     public void write(DataList l) {
         l.add(value);
     }
-
+    
     @Override
     public void read(DataList l) {
         value = l.getLong();

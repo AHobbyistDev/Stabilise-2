@@ -7,17 +7,21 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.IntBinaryOperator;
-import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.ThreadSafeMethod;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.box.Box;
+import com.stabilise.util.box.Boxes;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
 import com.stabilise.world.loader.WorldLoader.DimensionLoader;
@@ -69,7 +73,7 @@ public class RegionStore {
     /** Wait time in seconds for {@link #waitUntilDone()}. */
     private static final int WAIT_TIME = 5;
     
-    /** Number of regions */
+    /** Radius of neighbouring regions about a loaded region to semi-load. */
     private static final int NEIGHBOUR_LOAD_RADIUS = 1;
     
     /** The number of locks to stripe {@link #cacheLocks} and {@link
@@ -78,12 +82,13 @@ public class RegionStore {
     private static final IntBinaryOperator STRIPE_HASHER =
             Maths.generateHashingFunction(STRIPE_FACTOR, false);
     
+    
     private final HostWorld world;
     private DimensionLoader loader = null;
     
     /** Consumer which is invoked right before a region is unloaded, to perform
      * any unload logic as required by the world. */
-    private final Consumer<Region> unloadHandler;
+    private final Box<Consumer<Region>> unloadHandler = Boxes.empty();
     
     /** The map of all loaded regions. Maps region.loc -> region. */
     private final ConcurrentMap<Point, Region> regions =
@@ -98,8 +103,7 @@ public class RegionStore {
     /** Locks to use for managing cache-local data. These locks double as
      * mutable points for convenience, which should only be used while
      * synchronised on themselves. */
-    private final Striper<Point> cacheLocks =
-            new Striper<>(i -> Region.createMutableLoc());
+    private final Striper<Point> cacheLocks = new Striper<>(Region::createMutableLoc);
     /** Locks to synchronise on when adding/removing from storage. These locks
      * are designed to be used to ensure mutual exclusion between the two
      * following operations:
@@ -116,7 +120,7 @@ public class RegionStore {
      *     <li>If it is not in main storage, create it and add it to the cache.
      *     </ul>
      * </ul> */
-    private final Striper<Object> storeLocks = new Striper<>(i -> new Object());
+    private final Striper<Object> storeLocks = new Striper<>(Object::new);
     
     /** Dummy key for {@link #regions} whose mutability may be abused for
      * optimisation purposes on the main thread. */
@@ -127,10 +131,10 @@ public class RegionStore {
     // List to a Map, especially if some implementation decides to rapid-fire
     // on cache() to fetch tons of different regions.
     private final ThreadLocal<List<Region>> localCachedRegions =
-            ThreadLocal.withInitial(() -> new ArrayList<>());
+            ThreadLocal.withInitial(ArrayList::new);
     
     // A Lock and its associated Condition to wait on in waitUntilDone().
-    private final ReentrantLock doneLock = new ReentrantLock();
+    private final Lock doneLock = new ReentrantLock();
     private final Condition emptyCondition = doneLock.newCondition();
     
     private final Log log;
@@ -140,16 +144,22 @@ public class RegionStore {
      * Creates a new region cache.
      * 
      * @param world The world to cache regions for.
-     * @param unloadHandler A task to run when a region is about to be
-     * unloaded.
      * 
-     * @throws NullPointerException if either argument is {@code null}.
+     * @throws NullPointerException if {@code world} is {@code null}.
      */
-    RegionStore(HostWorld world, Consumer<Region> unloadHandler) {
+    RegionStore(HostWorld world) {
         this.world = Objects.requireNonNull(world);
-        this.unloadHandler = Objects.requireNonNull(unloadHandler);
         
         log = Log.getAgent(world.getDimensionName() + "RegionCache");
+    }
+    
+    /**
+     * Sets this store's unload handler. The given consumer will be invoked
+     * when a region is unloaded - immediately before it is removed from
+     * primary storage.
+     */
+    void setUnloadHandler(@Nullable Consumer<Region> action) {
+        unloadHandler.set(action);
     }
     
     /**
@@ -248,7 +258,7 @@ public class RegionStore {
     @UserThread("MainThread")
     private boolean unloadRegion(Region r) {
         // Perform any operations needed for proper unloading first.
-        unloadHandler.accept(r);
+        unloadHandler.ifPresent(a -> a.accept(r));
         
         // We save the region through the cache before we remove it from
         // primary storage.
@@ -652,7 +662,7 @@ public class RegionStore {
      */
     private static class Striper<T> extends com.stabilise.util.concurrent.Striper<T> {
         
-        public Striper(IntFunction<T> supplier) {
+        public Striper(Supplier<T> supplier) {
             super(STRIPE_FACTOR, supplier);
         }
         

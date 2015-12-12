@@ -63,7 +63,7 @@ public class BoolBox implements IBox {
     public void write(DataList l) {
         l.add(value);
     }
-
+    
     @Override
     public void read(DataList l) {
         value = l.getBool();
@@ -84,5 +84,5 @@ public class BoolBox implements IBox {
             throw new UnsupportedOperationException();
         }
     }
-
+    
 }

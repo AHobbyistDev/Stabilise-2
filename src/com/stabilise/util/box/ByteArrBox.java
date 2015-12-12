@@ -36,7 +36,7 @@ public class ByteArrBox implements IBox {
         value = new byte[in.readInt()];
         in.readFully(value);
     }
-
+    
     @Override
     public void writeData(DataOutStream out) throws IOException {
         out.writeInt(value.length);
@@ -47,7 +47,7 @@ public class ByteArrBox implements IBox {
     public void write(String name, DataCompound o) {
         o.put(name, value);
     }
-
+    
     @Override
     public void read(String name, DataCompound o) {
         value = o.getByteArr(name);
@@ -57,7 +57,7 @@ public class ByteArrBox implements IBox {
     public void write(DataList l) {
         l.add(value);
     }
-
+    
     @Override
     public void read(DataList l) {
         value = l.getByteArr();

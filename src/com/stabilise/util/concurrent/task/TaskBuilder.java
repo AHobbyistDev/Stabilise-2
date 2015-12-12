@@ -9,7 +9,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import com.stabilise.util.concurrent.Tasks;
 import com.stabilise.util.concurrent.event.Event;
 import com.stabilise.util.concurrent.event.EventDispatcher;
-import com.stabilise.util.concurrent.event.EventDispatcher.EventHandler;
+import com.stabilise.util.concurrent.event.EventHandler;
 
 /**
  * A TaskBuilder builds a task.

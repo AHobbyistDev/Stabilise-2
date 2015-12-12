@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.function.BooleanSupplier;
 
+import com.stabilise.util.Checks;
 import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.util.concurrent.task.Task;
 import com.stabilise.util.concurrent.task.TaskCallable;
@@ -17,11 +18,12 @@ import com.stabilise.util.concurrent.task.TaskRunnable;
  */
 public class Tasks {
     
-    private Tasks() { throw new AssertionError(); } // non-instantiable
+    private Tasks() { Checks.badAssert(); } // non-instantiable
     
     private static final Runnable EMPTY_RUNNABLE      = () -> {};
     private static final Executor EXEC_CURRENT_THREAD = r -> r.run();
     private static final Executor EXEC_NEW_THREAD     = r -> new Thread(r).start();
+    
     
     /**
      * Returns an executor which runs submitted tasks on the caller thread, as

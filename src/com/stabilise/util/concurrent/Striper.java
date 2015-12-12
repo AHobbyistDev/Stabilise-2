@@ -1,7 +1,7 @@
 package com.stabilise.util.concurrent;
 
 import java.util.Objects;
-import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 import javax.annotation.concurrent.Immutable;
 
@@ -32,7 +32,7 @@ public class Striper<T> {
      * @throws NullPointerException if {@code supplier} is {@code null}, or it
      * supplies any null objects.
      */
-    public Striper(int numObjects, IntFunction<T> supplier) {
+    public Striper(int numObjects, Supplier<T> supplier) {
         Checks.testMin(numObjects, 1);
         Objects.requireNonNull(supplier);
         
@@ -41,7 +41,7 @@ public class Striper<T> {
         @SuppressWarnings("unchecked")
         T[] objs = (T[]) new Object[numObjects];
         for(int i = 0; i < numObjects; i++)
-            objs[i] = Objects.requireNonNull(supplier.apply(i));
+            objs[i] = Objects.requireNonNull(supplier.get());
         
         objects = objs;
         mask = numObjects - 1; // only works if numObjects is a power of 2
@@ -74,7 +74,7 @@ public class Striper<T> {
      * @throws IllegalArgumentException if {@code numObjects < 1}.
      */
     public static Striper<Object> generic(int numObjects) {
-        return new Striper<>(numObjects, i -> new Object());
+        return new Striper<>(numObjects, Object::new);
     }
     
 }

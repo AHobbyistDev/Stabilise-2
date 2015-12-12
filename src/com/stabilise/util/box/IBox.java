@@ -19,7 +19,8 @@ public interface IBox extends ITag {
     
     @Override
     default void io(DataList l, boolean write) {
-        if(write) write(l); else read(l);
+        if(write) write(l);
+        else      read(l);
     }
     
     void write(DataList l);

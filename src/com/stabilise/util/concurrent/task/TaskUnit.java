@@ -4,7 +4,7 @@ import java.util.concurrent.Executor;
 
 import com.stabilise.util.concurrent.event.Event;
 import com.stabilise.util.concurrent.event.EventDispatcher;
-import com.stabilise.util.concurrent.event.EventDispatcher.EventHandler;
+import com.stabilise.util.concurrent.event.EventHandler;
 import com.stabilise.util.concurrent.task.Task.State;
 import com.stabilise.util.concurrent.task.TaskEvent.FailEvent;
 
@@ -50,7 +50,7 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
     public TaskUnit(TaskRunnable task, PrototypeTracker protoTracker) {
         this.task = task;
         this.protoTracker = protoTracker;
-        this.events = new EventDispatcher();
+        this.events = EventDispatcher.normal();
     }
     
     /**

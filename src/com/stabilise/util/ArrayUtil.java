@@ -8,6 +8,9 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class ArrayUtil {
     
+    private static final Object[] EMPTY_ARR = new Object[0];
+    
+    
     // non-instantiable
     private ArrayUtil() {}
     
@@ -42,6 +45,14 @@ public class ArrayUtil {
     @SafeVarargs
     public static <T> T random(T... arr) {
         return arr[ThreadLocalRandom.current().nextInt(arr.length)];
+    }
+    
+    /**
+     * Returns an empty array. Safe to use as there are no elements present.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T[] emptyArr() {
+        return (T[]) EMPTY_ARR;
     }
     
     /**

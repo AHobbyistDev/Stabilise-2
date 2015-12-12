@@ -1,69 +1,74 @@
 package com.stabilise.util.concurrent.event;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
-import javax.annotation.concurrent.GuardedBy;
-import javax.annotation.concurrent.ThreadSafe;
-
-import com.stabilise.core.app.Application;
-import com.stabilise.util.collect.IteratorUtils;
-import com.stabilise.util.collect.UnorderedArrayList;
+import com.stabilise.util.concurrent.FakeLock;
 import com.stabilise.util.concurrent.Striper;
 
 /**
  * An EventDispatcher allows users to register event listeners and dispatch
  * events to these listeners. To register an event listener via {@link
- * #addListener(Event, EventHandler)}, users specify the event to listen for
- * and the <i>callback function</i> - or <i>handler</i> - which is invoked when
- * the event is posted.
+ * #addListener(Executor, Event, EventHandler)}, users specify the event to
+ * listen for, the <i>callback function</i> - or <i>handler</i> - which is
+ * invoked when the event is posted, and their own executor with which to
+ * execute their handlers. Note that even if given executors provide
+ * execution-order guarantees, an EventDispatcher does not.
  * 
- * <p>Handlers are posted to an {@code Executor} specified in an {@code
- * EventDispatcher's} constructor (or the {@link Application#executor()
- * application executor} by default). As such, no guarantees are made as to the
- * order in which listeners for a particular event are run, and given they may
- * be run on different threads entirely, handler methods should be thread-safe.
- * 
- * <p>By default, listeners are single-use - that is, they are automatically
- * removed when they receive an event. To register a persistent listener, use
- * {@link #addListener(Event, EventHandler, boolean)}.
+ * <p>An EventDispatcher offers two modes: <i>normal</i> and <i>retained</i>.
+ * In retained mode, a posted event is considered to be perpetually posted, and
+ * as such subsequent listeners registered on alread-posted events are
+ * triggered immediately. Note that whether or not a listener is single-use is
+ * irrelevant in retained mode since any particular event may only be posted
+ * once.
  * 
  * <p>Event equality is determined using the {@link Event#equals(Object)}
- * method such that a listener will be invoked when an event which
- * <tt>equals</tt> its registered event is posted.
- * 
- * <p>This class may be subclassed if desired.
+ * method - that is, a listener will be triggered if a posted event {@code
+ * equals} its registered event.
  */
-@ThreadSafe
 public class EventDispatcher {
     
-    // Package-private for RetainedEventDispatcher
-    final ConcurrentHashMap<Event, ListenerBucket<?>> handlers = new ConcurrentHashMap<>();
-    private final Striper<Object> locks;
+    protected final boolean retained;
+    protected final Map<Event, ListenerBucket<?>> handlers;
+    protected final Supplier<ListenerBucket<?>> bucketSupplier;
+    protected final Striper<Lock> locks;
     
     
     /**
-     * Creates a new EventDispatcher with a concurrency level of 1.
-     */
-    public EventDispatcher() {
-        this(1);
-    }
-    
-    /**
-     * Creates a new EventDispatcher.
-     * 
+     * @param retained true if this is a retained dispatcher; false if this is
+     * a normal dispatcher.
      * @param concurrencyLevel The number of internal locks to use for this
      * dispatcher. 1 is usually a good value, but it may be suitable to use
-     * more if this dispatcher will be frequently used by multiple threads.
+     * more if this dispatcher will be frequently used by multiple threads. If
+     * this value is 0, this dispatcher will not use any locks and will thus
+     * not be thread-safe.
      * 
-     * @throws IllegalArgumentException if {@code concurrencyLevel < 1}.
+     * @throws IllegalArgumentException if {@code concurrencyLevel < 0}.
      */
-    public EventDispatcher(int concurrencyLevel) {
-        this.locks = Striper.generic(concurrencyLevel);
+    public EventDispatcher(boolean retained, int concurrencyLevel) {
+        if(concurrencyLevel < 0)
+            throw new IllegalArgumentException("concurrencyLevel < 0");
+        
+        this.retained = retained;
+        
+        handlers = concurrencyLevel == 0
+                ? new HashMap<>()
+                : new ConcurrentHashMap<>();
+        
+        bucketSupplier = retained
+                ? RetainedListenerBucket::new
+                : StandardListenerBucket::new;
+        
+        locks = concurrencyLevel == 0
+                ? new Striper<>(1, () -> FakeLock.INSTANCE)
+                : new Striper<>(concurrencyLevel, ReentrantLock::new);
     }
     
     /**
@@ -77,7 +82,7 @@ public class EventDispatcher {
      */
     public <E extends Event> void addListener(Executor exec, E event,
             EventHandler<? super E> handler) {
-        doAddListener(event, new Listener<>(exec, handler, -1));
+        addListener(exec, event, handler, false);
     }
     
     /**
@@ -104,23 +109,19 @@ public class EventDispatcher {
      * 
      * @throws NullPointerException if either argument is null.
      */
-    protected final <E extends Event> void doAddListener(E e, Listener<? super E> l) {
-        Objects.requireNonNull(l);
-        synchronized(lockFor(e)) {
-            if(handlers.computeIfAbsent(e, k -> newBucket()).addListener(l))
+    protected final <E extends Event> void doAddListener(E e, Listener<? super E> li) {
+        Objects.requireNonNull(li);
+        Lock l = locks.get(e);
+        l.lock();
+        try {
+            if(handlers.computeIfAbsent(e, k -> bucketSupplier.get()).addListener(li))
                 return;
+        } finally {
+            l.unlock();
         }
         
         // No return = listener rejected = we should execute it now
-        l.execute(e);
-    }
-    
-    /**
-     * Creates a new listener bucket. Overridden in {@link
-     * RetainedEventDispatcher} to return a customised bucket.
-     */
-    ListenerBucket<?> newBucket() {
-        return new StandardListenerBucket<>();
+        li.execute(e);
     }
     
     /**
@@ -135,16 +136,20 @@ public class EventDispatcher {
      * 
      * @throws NullPointerException if either argument is null.
      */
-    public final <E extends Event> void removeListener(E e, EventHandler<? super E> handler) {
+    public <E extends Event> void removeListener(E e, EventHandler<? super E> handler) {
         Objects.requireNonNull(handler);
         
-        synchronized(lockFor(e)) {
+        Lock l = locks.get(e);
+        l.lock();
+        try {
             ListenerBucket<?> b = handlers.get(e);
             if(b != null) {
-                b.removeListener(l -> l.handler.equals(handler));
+                b.removeListener(li -> li.handler.equals(handler));
                 if(b.isEmpty())
                     handlers.remove(e);
             }
+        } finally {
+            l.unlock();
         }
     }
     
@@ -157,32 +162,38 @@ public class EventDispatcher {
         doPost(Objects.requireNonNull(e));
     }
     
-    /**
-     * Actually posts an event. Package-private impl. method as {@link
-     * #post(Event)} must be public final. {@code e} is never null.
-     */
     @SuppressWarnings("unchecked")
-    <E extends Event> void doPost(E e) {
+    private <E extends Event> void doPost(E e) {
         ListenerBucket<E> b;
         Listener<? super E>[] ls = null;
-        synchronized(lockFor(e)) {
-            if((b = (ListenerBucket<E>) handlers.get(e)) != null) {
+        
+        Lock l = locks.get(e);
+        l.lock();
+        try {
+            if(retained) {
+                if((b = (ListenerBucket<E>) handlers.get(e)) == null)
+                    handlers.put(e, b = (ListenerBucket<E>) bucketSupplier.get());
                 ls = b.post(e);
-                if(b.isEmpty())
-                    handlers.remove(e);
+            } else {
+                if((b = (ListenerBucket<E>) handlers.get(e)) != null) {
+                    ls = b.post(e);
+                    if(b.isEmpty())
+                        handlers.remove(e);
+                }
             }
+        } finally {
+            l.unlock();
         }
-        if(ls != null) {
-            for(Listener<? super E> l : ls) {
-                l.execute(e);
-            }
+        
+        for(Listener<? super E> li : ls) {
+            li.execute(e);
         }
     }
     
     /**
      * Clears all event listeners.
      */
-    public final void clearListeners() {
+    public void clearListeners() {
         handlers.clear();
     }
     
@@ -193,157 +204,53 @@ public class EventDispatcher {
      * 
      * @throws NullPointerException if {@code pred} is {@code null}.
      */
-    protected final void clearListeners(Predicate<Listener<?>> pred) {
+    public final void clearListeners(Predicate<Listener<?>> pred) {
         Objects.requireNonNull(pred);
         handlers.entrySet().removeIf(e -> {
-            synchronized(lockFor(e.getKey())) {
-                e.getValue().removeListeners(pred);
-                return e.getValue().isEmpty();
+            Lock l = locks.get(e.getKey());
+            l.lock();
+            try {
+                ListenerBucket<?> b = e.getValue();
+                b.removeListeners(pred);
+                return b.isEmpty();
+            } finally {
+                l.unlock();
             }
         });
     }
     
-    /**
-     * Returns a lock for the specified event. Throws an NPE if e is null.
-     */
-    Object lockFor(Event e) {
-        return locks.get(e.hashCode());
-    }
-    
     //--------------------==========--------------------
-    //-------------=====Nested Classes=====-------------
+    //------------=====Static Functions=====------------
     //--------------------==========--------------------
     
     /**
-     * Implementation interface for an event handler.
+     * Returns a new <i>normal</i> EventDispatcher which is not thread-safe.
      */
-    public static interface EventHandler<E extends Event> extends Consumer<E> {}
-    
-    /**
-     * Holds all data about an event listener. Implements EventHandler for
-     * convenience.
-     */
-    protected static class Listener<E extends Event> {
-        
-        public final Executor executor;
-        private final EventHandler<E> handler;
-        /** Set to 1 for single-use and -1 otherwise. This is merely a
-         * framework in the case that I wish to implement listeners which may
-         * activate only a set number of times. */
-        private long uses;
-        
-        /**
-         * @throws NullPointerException if either executor or handler are null.
-         */
-        public Listener(Executor executor, EventHandler<E> handler, long uses) {
-            this.executor = Objects.requireNonNull(executor);
-            this.handler = Objects.requireNonNull(handler);
-            this.uses = uses;
-        }
-        
-        /**
-         * @throws NullPointerException if either executor or handler are null.
-         */
-        public Listener(Executor executor, EventHandler<E> handler, boolean singleUse) {
-            this(executor, handler, singleUse ? 1 : -1);
-        }
-        
-        public final void execute(E e) {
-            executor.execute(() -> handler.accept(e));
-        }
-        
+    public static EventDispatcher normal() {
+        return new EventDispatcher(false, 0);
     }
     
     /**
-     * A ListenerBucket is an entry in the {@link GenericEventDispatcher#handlers} map
-     * corresponding to a registered event. Each ListenerBucket manages the
-     * listeners corresponding to its event.
-     * 
-     * <p>Access to each method is guarded by an exclusion lock, so
-     * implementations do not need to worry about thread safety.
+     * Returns a new <i>retained</i> EventDispatcher which is not thread-safe.
      */
-    static interface ListenerBucket<E extends Event> {
-        
-        /**
-         * Adds a listener to the bucket. It is implicitly trusted that {@code
-         * l} is not null and listens for the same event as this bucket.
-         * 
-         * @return true if the listener was successfully registered; false if
-         * it should instead be executed immediately (see {@link
-         * RetainedEventDispatcher}).
-         */
-        @GuardedBy("lockFor")
-        public boolean addListener(Listener<?> l);
-        
-        /**
-         * Removes the first listener from this bucket satisfying the given
-         * predicate.
-         */
-        @GuardedBy("lockFor")
-        public void removeListener(Predicate<Listener<?>> pred);
-        
-        /**
-         * Removes any listeners from this bucket satisfying the given
-         * predicate.
-         */
-        @GuardedBy("lockFor")
-        public void removeListeners(Predicate<Listener<?>> pred);
-        
-        /**
-         * Posts the event. It is implicitly trusted that {@code e} is not
-         * null. Returns the list of triggered listeners so they can be
-         * executed while not in a synchronised block.
-         */
-        @GuardedBy("lockFor")
-        public Listener<? super E>[] post(E e);
-        
-        /**
-         * Returns {@code true} if this bucket is empty and may be removed.
-         */
-        @GuardedBy("lockFor")
-        public boolean isEmpty();
-        
+    public static EventDispatcher retained() {
+        return new EventDispatcher(true, 0);
     }
     
     /**
-     * The standard listener bucket implementation. Registered listeners are
-     * stored in an unordered list. When an event is posted, we traverse the
-     * list and run each of the listeners, removing any single-use listeners.
+     * Returns a new <i>normal</i> EventDispatcher which is thread-safe (and
+     * has a concurrency level of 1).
      */
-    private class StandardListenerBucket<E extends Event> implements ListenerBucket<E> {
-        
-        private final List<Listener<? super E>> listeners = new UnorderedArrayList<>(4, 2f);
-        
-        @SuppressWarnings("unchecked")
-        @Override
-        public boolean addListener(Listener<?> l) {
-            listeners.add((Listener<? super E>) l);
-            return true;
-        }
-        
-        @Override
-        public void removeListener(Predicate<Listener<?>> pred) {
-            IteratorUtils.removeFirst(listeners, pred);
-        }
-        
-        @Override
-        public void removeListeners(Predicate<Listener<?>> pred) {
-            listeners.removeIf(pred);
-        }
-        
-        @Override
-        public Listener<? super E>[] post(E e) {
-            @SuppressWarnings("unchecked")
-            Listener<? super E>[] arr = listeners.toArray(new Listener[listeners.size()]);
-            listeners.removeIf(l -> --l.uses == 0);
-            return arr;
-        }
-        
-        @Override
-        public boolean isEmpty() {
-            return listeners.isEmpty();
-        }
-        
+    public static EventDispatcher concurrentNormal() {
+        return new EventDispatcher(false, 1);
+    }
+    
+    /**
+     * Returns a new <i>retained</i> EventDispatcher which is thread-safe (and
+     * has a concurrency level of 1).
+     */
+    public static EventDispatcher concurrentRetained() {
+        return new EventDispatcher(true, 1);
     }
     
 }

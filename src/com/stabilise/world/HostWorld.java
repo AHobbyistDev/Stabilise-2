@@ -71,7 +71,8 @@ public class HostWorld extends AbstractWorld {
         // them references to each other as required.
         loader = multiverse.loader.loaderFor(this);
         generator = dimension.generatorFor(multiverse, this);
-        regions = new RegionStore(this, r -> unloadRegion(r));
+        regions = new RegionStore(this);
+        regions.setUnloadHandler(this::unloadRegion);
         
         loader.prepare(generator);
         generator.prepare(loader, regions);

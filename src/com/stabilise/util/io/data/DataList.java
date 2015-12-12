@@ -34,11 +34,15 @@ public interface DataList extends Sendable, IContainerTag<DataList> {
     
     /**
      * Creates a new compound and adds it to this list.
+     * 
+     * @return The created compound.
      */
     DataCompound createCompound();
     
     /**
      * Creates a new list and adds it to this list.
+     * 
+     * @return The created list.
      */
     DataList createList();
     
