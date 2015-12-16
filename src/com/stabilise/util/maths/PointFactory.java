@@ -36,10 +36,10 @@ public class PointFactory {
     
     /**
      * Creates a new point factory with a hasher returned by {@link
-     * Maths#generateHashingFunction(int, boolean)}.
+     * Maths#genHashFunction(int, boolean)}.
      */
     public PointFactory(int maxElements, boolean negateHashMapShift) {
-        hasher = Maths.generateHashingFunction(maxElements, negateHashMapShift);
+        hasher = Maths.genHashFunction(maxElements, negateHashMapShift);
     }
     
     /**

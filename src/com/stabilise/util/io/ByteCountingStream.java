@@ -9,7 +9,7 @@ import java.io.OutputStream;
 public class ByteCountingStream extends OutputStream {
     
     private int count = 0;
-
+    
     @Override
     public void write(int b) throws IOException {
         count++;

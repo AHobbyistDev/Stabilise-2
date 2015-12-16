@@ -104,7 +104,7 @@ public class Worlds {
     public static FileHandle getWorldDir(String worldName) {
         if(worldName.length() == 0)
             throw new IllegalArgumentException("The world name must not be empty!");
-        return Resources.WORLDS_DIR.child(IOUtil.getLegalString(worldName) + "/");
+        return Resources.DIR_WORLDS.child(IOUtil.getLegalString(worldName) + "/");
     }
     
     /**
@@ -113,7 +113,7 @@ public class Worlds {
      * @return An array of created worlds.
      */
     public static WorldInfo[] getWorldsList() {
-        FileHandle[] worldDirs = Resources.WORLDS_DIR.list();
+        FileHandle[] worldDirs = Resources.DIR_WORLDS.list();
         
         List<WorldInfo> worlds = new ArrayList<>(worldDirs.length);
         

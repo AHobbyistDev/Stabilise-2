@@ -64,7 +64,7 @@ public class LoadingState implements State {
         
         batch = new SpriteBatch(64);
         
-        texSplash = new Texture(Resources.IMAGE_DIR.child("loading.png"));
+        texSplash = new Texture(Resources.DIR_IMG.child("loading.png"));
         sprSplash = new Sprite(texSplash);
         sprSplash.setPosition(-sprSplash.getWidth()/2, -sprSplash.getHeight()/2);
         

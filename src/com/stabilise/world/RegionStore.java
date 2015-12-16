@@ -80,7 +80,7 @@ public class RegionStore {
      * #storeLocks} into. */
     private static final int STRIPE_FACTOR = 8;
     private static final IntBinaryOperator STRIPE_HASHER =
-            Maths.generateHashingFunction(STRIPE_FACTOR, false);
+            Maths.genHashFunction(STRIPE_FACTOR, false);
     
     
     private final HostWorld world;

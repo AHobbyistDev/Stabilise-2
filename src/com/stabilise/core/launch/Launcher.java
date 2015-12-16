@@ -12,9 +12,9 @@ public class Launcher {
                 "\"" + System.getProperty("java.home").replace('\\', '/') + "/bin/javaw\" "
                 //"\"" + System.getProperty("sun.boot.library.path").replace('\\', '/') + "/javaw\""
                 + " -jar "
-                + " \"" + Resources.APP_DIR.child("Game.jar").path() + "\"",
+                + " \"" + Resources.DIR_APP.child("Game.jar").path() + "\"",
                 "arg1", "arg2");
-        pb.directory(Resources.APP_DIR.file());
+        pb.directory(Resources.DIR_APP.file());
         pb.inheritIO();
         
         Process p = pb.start();

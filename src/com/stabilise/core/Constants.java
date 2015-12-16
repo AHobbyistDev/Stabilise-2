@@ -198,7 +198,7 @@ public class Constants {
          */
         private int getRevision() {
             if(DEV_VERSION) {
-                FileHandle file = Resources.APP_DIR.child("revision");
+                FileHandle file = Resources.DIR_APP.child("revision");
                 try {
                     DataCompound tag = null;
                     

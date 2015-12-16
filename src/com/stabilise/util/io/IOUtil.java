@@ -291,7 +291,9 @@ public class IOUtil {
             return 0;
         } finally {
             try {
-                dos.close(); // also closes bos, os
+                if(dos != null) dos.close();
+                else if(bos != null) bos.close();
+                else if(os != null) os.close();
             } catch(IOException e) {
                 throw new AssertionError("y u do dis to me");
             } 

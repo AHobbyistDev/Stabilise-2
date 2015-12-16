@@ -363,7 +363,7 @@ public class Log {
         String fileName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(Calendar.getInstance().getTime());
         if(crashLog)
             fileName += " [CRASH]";
-        FileHandle logFile = Resources.LOG_DIR.child(fileName + ".txt");
+        FileHandle logFile = Resources.DIR_LOG.child(fileName + ".txt");
         saveLog(crashLog, prefixMessage, logFile);
     }
     

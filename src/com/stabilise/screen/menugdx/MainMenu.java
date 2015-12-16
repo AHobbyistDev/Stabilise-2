@@ -46,7 +46,7 @@ public class MainMenu implements Screen {
         stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
         
-        FileHandle atlasSrc = Resources.IMAGE_DIR.child("sheets/pack.atlas");
+        FileHandle atlasSrc = Resources.DIR_IMG.child("sheets/pack.atlas");
         atlas = new TextureAtlas(atlasSrc);
         skin = new Skin(atlas);
         

@@ -377,7 +377,7 @@ public class Maths {
      * @throws IllegalArgumentException if {@code maxElements <= 0}.
      */
     public static IntBinaryOperator generateHashingFunction(int maxElements) {
-        return generateHashingFunction(maxElements, false);
+        return genHashFunction(maxElements, false);
     }
     
     /**
@@ -401,7 +401,7 @@ public class Maths {
      * 
      * @throws IllegalArgumentException if {@code maxElements <= 0}.
      */
-    public static IntBinaryOperator generateHashingFunction(int maxElements,
+    public static IntBinaryOperator genHashFunction(int maxElements,
             boolean negateHashMapShift) {
         if(maxElements <= 0)
             throw new IllegalArgumentException("maxElements <= 0");

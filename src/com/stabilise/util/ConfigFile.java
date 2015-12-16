@@ -3,6 +3,7 @@ package com.stabilise.util;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import com.badlogic.gdx.files.FileHandle;
@@ -396,7 +397,7 @@ public class ConfigFile {
     public ConfigFile load() throws IOException {
         //tags.clear();
         
-        String[] lines = Resources.readTextFile(getFile());
+        List<String> lines = Resources.readTextFile(getFile());
         String[] keyValuePair;
         for(String s : lines) {
             keyValuePair = s.split(":");
@@ -453,7 +454,7 @@ public class ConfigFile {
      * Gets the file reference for this config file.
      */
     private FileHandle getFile() {
-        return IOUtil.createParentDir(Resources.CONFIG_DIR.child(name + CONFIG_FILE_EXTENSION));
+        return IOUtil.createParentDir(Resources.DIR_CONFIG.child(name + CONFIG_FILE_EXTENSION));
     }
     
     /**

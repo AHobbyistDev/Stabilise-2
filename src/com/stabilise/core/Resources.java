@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
@@ -11,36 +12,35 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.stabilise.util.Log;
-import com.stabilise.util.io.IOUtil;
 
 /**
  * Manages application resources.
  */
 public class Resources {
     
-    /** The application's root working directory. */
-    public static final FileHandle APP_DIR = getApplicationPath("stabilise");
-    
-    /** The config file directory. */
-    public static final FileHandle CONFIG_DIR = IOUtil.createDir(APP_DIR.child("config/"));
-    
-    /** Root directory for save data. */
-    public static final FileHandle SAVES_DIR = IOUtil.createDir(APP_DIR.child("saves/"));
-    public static final FileHandle CHARACTERS_DIR = IOUtil.createDir(SAVES_DIR.child("chars/"));
-    public static final FileHandle WORLDS_DIR = IOUtil.createDir(SAVES_DIR.child("worlds/"));
-    
-    /** Root directory for application resources e.g. images, sounds. */
-    public static final FileHandle RESOURCE_DIR = IOUtil.createDir(APP_DIR.child("res/"));
-    public static final FileHandle IMAGE_DIR = IOUtil.createDir(RESOURCE_DIR.child("img/"));
-    public static final FileHandle FONT_DIR = IOUtil.createDir(RESOURCE_DIR.child("fonts/"));
-    public static final FileHandle SOUND_DIR = IOUtil.createDir(RESOURCE_DIR.child("sound/"));
-    //public static final FileHandle SCHEMATIC_DIR = IOUtil.createDir(RESOURCE_DIR.child("schematics/"));
-    
-    /** The file directory for mods. */
-    public static final FileHandle MODS_DIR = IOUtil.createDir(APP_DIR.child("mods/"));
-    
-    /** The directory in which console output logs should be saved. */
-    public static final FileHandle LOG_DIR = IOUtil.createDir(APP_DIR.child("log/"));
+    public static final FileHandle
+            /** The application's root working directory. */
+            DIR_APP = getApplicationPath("stabilise"),
+            
+            /** The config file directory. */
+            DIR_CONFIG = DIR_APP.child("config/"),
+            
+            /** Root directory for save data. */
+            DIR_SAVES = DIR_APP.child("saves/"),
+            DIR_CHARS = DIR_SAVES.child("chars/"),
+            DIR_WORLDS = DIR_SAVES.child("worlds/"),
+            
+            /** Root directory for application resources e.g. images, sounds. */
+            DIR_RESOURCES = DIR_APP.child("res/"),
+            DIR_IMG = DIR_RESOURCES.child("img/"),
+            DIR_FONT = DIR_RESOURCES.child("fonts/"),
+            DIR_SOUND = DIR_RESOURCES.child("sound/"),
+            
+            /** The file directory for mods. */
+            DIR_MODS = DIR_APP.child("mods/"),
+            
+            /** The directory in which console output logs should be saved. */
+            DIR_LOG = DIR_APP.child("log/");
     
     
     /**
@@ -72,7 +72,8 @@ public class Resources {
             throw new InternalError("OS not supported");
         }
         
-        return IOUtil.createDir(new FileHandle(appDir));
+        //return Gdx.files.external(appDir.getPath());
+        return new FileHandle(appDir);
     }
     
     /**
@@ -85,13 +86,13 @@ public class Resources {
      * @throws NullPointerException if {@code file} is {@code null}.
      * @throws IOException if the file does not exist, or an I/O error occurs.
      */
-    public static String[] readTextFile(FileHandle file) throws IOException {
+    public static List<String> readTextFile(FileHandle file) throws IOException {
         if(!file.exists())
             throw new IOException("Text resource does not exist!");
         
         BufferedReader br = new BufferedReader(file.reader());
         
-        ArrayList<String> strings = new ArrayList<>();
+        List<String> strings = new ArrayList<>();
         String s;
         
         try {
@@ -101,12 +102,12 @@ public class Resources {
             br.close();
         }
         
-        return strings.toArray(new String[0]);
+        return strings;
     }
     
     /**
      * Creates a texture from a .png image of the specified name in the {@link
-     * #IMAGE_DIR image directory}.
+     * #DIR_IMG image directory}.
      * 
      * <p>Usage example:
      * <pre>Texture myTexture = Resources.texture("myTexture");</pre>
@@ -116,12 +117,12 @@ public class Resources {
      * @return The created texture.
      */
     public static Texture texture(String name) {
-        return new Texture(IMAGE_DIR.child(name + ".png"));
+        return new Texture(DIR_IMG.child(name + ".png"));
     }
     
     /**
      * Creates a texture from a .png image of the specified name in the {@link
-     * #IMAGE_DIR image directory}. The texture will be generated with mipmaps.
+     * #DIR_IMG image directory}. The texture will be generated with mipmaps.
      * 
      * <p>Usage example:
      * <pre>Texture myTexture = Resources.texture("myTexture");</pre>
@@ -131,7 +132,7 @@ public class Resources {
      * @return The created texture.
      */
     public static Texture textureMipmaps(String name) {
-        return new Texture(IMAGE_DIR.child(name + ".png"), true);
+        return new Texture(DIR_IMG.child(name + ".png"), true);
     }
     
     /**
@@ -145,7 +146,7 @@ public class Resources {
      * @throws NullPointerException if {@code name} is {@code null}.
      */
     public static BitmapFont font(String name, FreeTypeFontParameter param) {
-        return font(Resources.FONT_DIR.child(name.endsWith(".ttf") ? name : name + ".ttf"), param);
+        return font(DIR_FONT.child(name.endsWith(".ttf") ? name : name + ".ttf"), param);
     }
     
     /**

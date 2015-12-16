@@ -38,6 +38,18 @@ public class ArrayUtil {
     }
     
     /**
+     * Performs a deep copy of the given 2D array (because arr.clone() does
+     * not work as one would expect >.<).
+     */
+    public static int[][] deepCopy(int[][] arr) {
+        int[][] copy = new int[arr.length][];
+        for(int i = 0; i < arr.length; i++) {
+            copy[i] = arr[i].clone();
+        }
+        return copy;
+    }
+    
+    /**
      * Returns a random element of the given array using ThreadLocalRandom.
      * 
      * @throws NullPointerException if {@code arr} is {@code null}.

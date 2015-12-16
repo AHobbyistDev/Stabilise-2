@@ -260,8 +260,8 @@ public class CharacterData implements Sendable {
      * @return An array of created characters.
      */
     public static CharacterData[] getCharactersList() {
-        IOUtil.createDir(Resources.CHARACTERS_DIR);
-        FileHandle[] characterDirs = Resources.CHARACTERS_DIR.list();
+        IOUtil.createDir(Resources.DIR_CHARS);
+        FileHandle[] characterDirs = Resources.DIR_CHARS.list();
         
         List<CharacterData> characters = new ArrayList<>(characterDirs.length);
         
@@ -300,7 +300,7 @@ public class CharacterData implements Sendable {
     public static FileHandle getCharacterDir(String characterName) {
         if(characterName.length() == 0)
             throw new IllegalArgumentException("characterName is empty");
-        return Resources.CHARACTERS_DIR.child(IOUtil.getLegalString(characterName) + "/");
+        return Resources.DIR_CHARS.child(IOUtil.getLegalString(characterName) + "/");
     }
     
     /**

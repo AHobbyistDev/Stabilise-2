@@ -30,7 +30,7 @@ public class ModLoader {
     }
     
     public static FileHandle[] findModCandidates() {
-        FileHandle[] fileList = Resources.MODS_DIR.list();
+        FileHandle[] fileList = Resources.DIR_MODS.list();
         UnorderedArrayList<FileHandle> jarFiles = new UnorderedArrayList<>();
         for(FileHandle f : fileList) {
             if(f.isDirectory())
