@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.tests.gameoflife.GeneticSim.Result;
+import com.stabilise.util.ArrayUtil;
 import com.stabilise.util.io.IOUtil;
 import com.stabilise.util.io.data.Compression;
 import com.stabilise.util.io.data.DataCompound;
@@ -19,9 +20,9 @@ public class GameOfLife {
     public static final FileHandle destFile = destFolder.child("GoL_LastResults.nbt");
     
     public static void main(String[] args) throws Exception {
-        //simulate();
-        retrieveLastResults();
-        //sim(Simulation.s8700_4c);
+        simulate();
+        //retrieveLastResults();
+        //sim(Simulation.s34200_10c);
     }
     
     public static void simulate() throws IOException {
@@ -36,9 +37,7 @@ public class GameOfLife {
         DataCompound saveData = DataCompound.create();
         DataList resList = saveData.createList("results");
         for(Result r : results) {
-            DataList l = resList.createList();
-            for(int[] row : r.reducedBoard)
-                l.add(row);
+            resList.add(ArrayUtil.to1D(r.reducedBoard));
         }
         
         IOUtil.write(saveData, Format.NBT_SIMPLE, Compression.UNCOMPRESSED, destFile);
@@ -50,12 +49,7 @@ public class GameOfLife {
         DataCompound saveData = IOUtil.read(Format.NBT_SIMPLE, Compression.UNCOMPRESSED, destFile);
         DataList resList = saveData.getList("results");
         for(int i = 0; i < resList.size(); i++) {
-            DataList l = resList.getList();
-            int[][] board = new int[l.size()][];
-            for(int j = 0; j < l.size(); j++) {
-                board[j] = l.getIntArr();
-            }
-            results.add(new Result(board));
+            results.add(new Result(ArrayUtil.to2D(resList.getIntArr(), Simulation.size, Simulation.size)));
         }
         
         for(Result r : results)

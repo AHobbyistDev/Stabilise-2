@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.stabilise.tests.gameoflife.GeneticSim.Params;
 import com.stabilise.tests.gameoflife.GeneticSim.Result;
@@ -13,16 +14,21 @@ import com.stabilise.tests.gameoflife.GeneticSim.Result;
 
 public class GeneticDriver {
     
+    private int tasks;
+    private final AtomicInteger done = new AtomicInteger();
+    
     public List<Result> run() {
         int ncpu = Runtime.getRuntime().availableProcessors();
         
-        ExecutorService exec = Executors.newFixedThreadPool(ncpu);
+        ExecutorService exec = Executors.newFixedThreadPool(ncpu/2);
         
         List<Future<Result>> futures = new ArrayList<>(ncpu);
         List<Result> results = new ArrayList<>(ncpu);
         
-        for(Params p : genParams())
-            futures.add(exec.submit(new GeneticSim(p)));
+        Params[] params = genParams();
+        tasks = params.length;
+        for(Params p : params)
+            futures.add(submit(exec, p));
         
         for(Future<Result> f : futures) {
             try {
@@ -45,12 +51,21 @@ public class GeneticDriver {
         return results;
     }
     
+    private Future<Result> submit(ExecutorService exec, Params p) {
+        GeneticSim sim = new GeneticSim(p);
+        return exec.submit(() -> {
+            Result r = sim.call();
+            System.out.println(done.incrementAndGet() + " / " + tasks + " done.");
+            return r;
+        });
+    }
+    
     private Params[] genParams() {
-        float[] fillCh = { 0.1f, 0.5f, 0.8f };
-        float[] mutBestCh = { 0.01f, 0.08f, 0.25f };
-        float[] mutCh = { 0.15f, 0.5f };
-        float[] prefWeakCh = { 0.15f };
-        int[] centreClearDist = { 8 };
+        float[] fillCh = { 0.10f };
+        float[] mutBestCh = { 0.01f, 0.1f, 0.25f };
+        float[] mutCh = { 0.01f, 0.1f, 0.20f };
+        float[] prefWeakCh = { 0.05f };
+        int[] centreClearDist = { 2, 16 };
         int len = fillCh.length * mutBestCh.length * mutCh.length * prefWeakCh.length * centreClearDist.length;
         System.out.println(len + " different param combinations");
         Params[] p = new Params[len];

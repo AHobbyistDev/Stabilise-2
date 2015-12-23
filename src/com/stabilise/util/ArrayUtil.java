@@ -14,32 +14,35 @@ public class ArrayUtil {
     // non-instantiable
     private ArrayUtil() {}
     
+    
     /**
-     * Flips a two-dimensional integer array, such that:
+     * Flips a two-dimensional integer array, such that e.g.:
      * <pre>{ {foo1}, {foo2}, {foo3} }</pre> becomes
      * <pre>{ {foo3}, {foo2}, {foo1} }</pre>
      * 
-     * @param arr The array to flip.
+     * @param a The array to flip.
      * 
-     * @return {@code arr}
+     * @return {@code a}
      */
-    public static int[][] flip2DIntArray(int[][] arr) {
-        if(arr == null || arr.length < 2)
-            return arr;
+    public static int[][] flip2DIntArray(int[][] a) {
+        if(a == null || a.length < 2)
+            return a;
         
         int[] temp;
-        for(int i = 0; i < arr.length / 2; i++) {
-            temp = arr[arr.length - i - 1];
-            arr[arr.length - i - 1] = arr[i];
-            arr[i] = temp;
+        for(int i = 0; i < a.length / 2; i++) {
+            temp = a[a.length - i - 1];
+            a[a.length - i - 1] = a[i];
+            a[i] = temp;
         }
         
-        return arr;
+        return a;
     }
     
     /**
      * Performs a deep copy of the given 2D array (because arr.clone() does
      * not work as one would expect >.<).
+     * 
+     * @throws NullPointerException if {@code arr} is {@code null}.
      */
     public static int[][] deepCopy(int[][] arr) {
         int[][] copy = new int[arr.length][];
@@ -47,6 +50,45 @@ public class ArrayUtil {
             copy[i] = arr[i].clone();
         }
         return copy;
+    }
+    
+    /**
+     * Converts a 1D array to a 2D array with the specified number of rows and
+     * columns.
+     * 
+     * @throws NullPointerException if {@code a} is {@code null}.
+     * @throws IllegalArgumentException if {@code a.length != rows * cols}, or
+     * either {@code rows} or {@code cols} is negative.
+     */
+    public static int[][] to2D(int[] a, int rows, int cols) {
+        if(a.length != rows * cols)
+            throw new IllegalArgumentException("Input array length ");
+        int[][] arr = new int[rows][cols];
+        int i = 0;
+        for(int r = 0; r < rows; r++) {
+            for(int c = 0; c < cols; c++) {
+                arr[r][c] = a[i++];
+            }
+        }
+        return arr;
+    }
+    
+    /**
+     * Converts a 2D array to a 1D array.
+     */
+    public static int[] to1D(int[][] a) {
+        int rows = a.length;
+        if(rows == 0)
+            return new int[0];
+        int cols = a[0].length;
+        int[] arr = new int[rows*cols];
+        int i = 0;
+        for(int r = 0; r < rows; r++) {
+            for(int c = 0; c < cols; c++) {
+                arr[i++] = a[r][c];
+            }
+        }
+        return arr;
     }
     
     /**

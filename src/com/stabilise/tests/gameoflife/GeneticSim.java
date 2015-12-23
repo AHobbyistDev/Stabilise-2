@@ -78,7 +78,7 @@ public class GeneticSim implements Callable<Result> {
     }
     
     public static final int nSim = 24;
-    public static final int generations = 1024;
+    public static final int generations = 4*4*1024;
     
     public final Params params;
     private final Simulation[] sims = new Simulation[nSim];
@@ -89,6 +89,9 @@ public class GeneticSim implements Callable<Result> {
         
         for(int i = 0; i < nSim; i++) {
             sims[i] = new Simulation();
+            //if(i == 0)
+            //    sims[i].board = Simulation.deserialize(Simulation.s34200_10c);
+            //else
             sims[i].fillRandom(rnd, params.filledGenChance, params.centreClearDist);
         }
     }
@@ -130,7 +133,7 @@ public class GeneticSim implements Callable<Result> {
             // Breed 2nd with 3rd
             newSims[newCount++] = breed(sims[1], sims[2], sims[backCount--]);
             // Reduce and reuse the best one
-            newSims[newCount++] = reduce(sims[0], sims[backCount--]);
+            //newSims[newCount++] = reduce(sims[0], sims[backCount--]);
             
             // Fill up the rest with randoms
             while(newCount < nSim) {
@@ -180,7 +183,8 @@ public class GeneticSim implements Callable<Result> {
         return tgt;
     }
     
-    private Simulation reduce(Simulation s, Simulation dest) {
+    @SuppressWarnings("unused")
+    private static Simulation reduce(Simulation s, Simulation dest) {
         dest.board = Simulation.reduce(s.initial);
         return dest;
     }
