@@ -91,8 +91,7 @@ public abstract class Client implements PacketHandler {
             // some sense of continuity in handleProtocolSwitch() when it is
             // first invoked.
             state = STATE_CONNECTED;
-            connection = new TCPConnection(socket, false,
-                    (c,p) -> handleProtocolSwitch(c,p));
+            connection = new TCPConnection(socket, false, this::handleProtocolSwitch);
             connection.open();
         } catch(IOException e) {
             state = STATE_DISCONNECTED;

@@ -17,9 +17,8 @@ public class NBTCompound extends AbstractMapCompound {
         for(Map.Entry<String, ITag> e : data.entrySet()) {
             String name = e.getKey();
             ITag tag = e.getValue();
-            byte id = NBTType.tagID(tag);
-            if(id == -1)
-                System.out.println("Writing -1 for " + name + "(" + tag.getClass().getSimpleName() + ")");
+            //if(NBTType.tagID(tag) == -1)
+            //    System.out.println("Writing -1 for " + name + "(" + tag.getClass().getSimpleName() + ")");
             out.writeByte(NBTType.tagID(tag));
             out.writeUTF(name);
             tag.writeData(out);

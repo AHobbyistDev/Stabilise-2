@@ -83,9 +83,9 @@ public class PerlinNoise2D {
         p.set((float)(x - flooredX), (float)(y - flooredY));
         
         float v00 = g00.dot(p);
-        float v01 = g01.dot(p.x, p.y - 1f);        //g01.dot(p.sub(Vector2.Y));
-        float v10 = g10.dot(p.x - 1f, p.y);        //g10.dot(p.sub(Vector2.X));
-        float v11 = g11.dot(p.x - 1f, p.y - 1f);   //g11.dot(p.sub(MathUtil.VEC_1_1));
+        float v01 = g01.dot(p.x, p.y - 1f);
+        float v10 = g10.dot(p.x - 1f, p.y);
+        float v11 = g11.dot(p.x - 1f, p.y - 1f);
         
         // Interpolate to attain a value
         return Maths.SQRT_2f * 

@@ -143,7 +143,7 @@ public interface Interpolation {
      * methods.
      * 
      * <p>The standard function for sinusoidal interpolation is:
-     * <pre>f(x) = 1 - cos(x * �?€/2)</pre>
+     * <pre>f(x) = 1 - cos(x * π/2)</pre>
      * Note, however, rather than modifying this function for {@code easeOut}
      * and {@code easeInOut}, sine and cosine functions with varying arguments
      * are appropriately used instead.

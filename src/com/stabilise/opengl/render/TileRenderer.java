@@ -58,7 +58,7 @@ public class TileRenderer implements Renderer {
     
     @Override
     public void unloadResources() {
-        
+        // nothing to unload as everything is managed by WorldRenderer
     }
     
     @Override
@@ -100,16 +100,16 @@ public class TileRenderer implements Renderer {
         
         slicesRendered++;
         
-        int xMin = Math.max(x    *SLICE_SIZE, camX() - wr.tilesHorizontal);
+        int xMin = Math.max(x    *SLICE_SIZE, camX() - wr.tilesHorizontal    );
         int xMax = Math.min((x+1)*SLICE_SIZE, camX() + wr.tilesHorizontal + 1);
-        int yMin = Math.max(y    *SLICE_SIZE, camY() - wr.tilesVertical);
-        int yMax = Math.min((y+1)*SLICE_SIZE, camY() + wr.tilesVertical + 1);
+        int yMin = Math.max(y    *SLICE_SIZE, camY() - wr.tilesVertical      );
+        int yMax = Math.min((y+1)*SLICE_SIZE, camY() + wr.tilesVertical   + 1);
         
         // These two are to adjust the 0 index if we don't render all of the slice
         int rMin = Math.max(0, yMin - y*SLICE_SIZE);
         int cMin = Math.max(0, xMin - x*SLICE_SIZE);
         
-        wr.batch.setColor(lightLevels[2]);
+        wr.batch.setColor(lightLevels[2]); // walls have light level 2 for now
         
         for(int r = rMin, ty = yMin; r < SLICE_SIZE && ty < yMax; r++, ty++) {
             for(int c = cMin, tx = xMin; c < SLICE_SIZE && tx < xMax; c++, tx++) {

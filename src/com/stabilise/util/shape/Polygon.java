@@ -20,10 +20,10 @@ public class Polygon extends Shape {
     /** The polygon's vertices. */
     float[] verts;
     
-    /** The projection axes - lazily initialised by getAxes(). */
+    /** The projection axes - lazily initialised by genCollisionData(). */
     float[] axes = null;
     /** The projections corresponding to each axis - lazily initialised by
-     * getAxes(). */
+     * genCollisionData(). */
     float[] projs = null;
     
     

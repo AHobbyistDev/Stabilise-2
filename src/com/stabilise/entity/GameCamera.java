@@ -1,18 +1,23 @@
 package com.stabilise.entity;
 
-import java.util.Objects;
-
 import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.util.Checks;
+import com.stabilise.util.collect.SimpleList;
+import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.world.World;
+import com.stabilise.world.WorldCamera;
 
 /**
  * The GameCamera controls the player's perspective, and hence which parts of
  * the world are visible to them.
  */
-public class GameCamera extends FreeGameObject {
+public class GameCamera extends FreeGameObject implements WorldCamera {
     
     /** The entity upon which to focus the camera. */
     private Entity focus;
+    
+    /** Real x, y values (i.e. ignoring shake). */
+    private double rx, ry;
     
     /** The number of tiles to view horizontally/vertically. */
     public int width, height;
@@ -24,21 +29,34 @@ public class GameCamera extends FreeGameObject {
     /** The strength with which the camera follows the focus. */
     private float followStrength = 0.25f;
     
+    private final SimpleList<Shake> shakes = new UnorderedArrayList<>();
+    
     
     /**
      * Creates a new GameCamera.
-     * 
-     * @param provider The game world.
-     * @param focus The entity upon which to focus the camera.
      */
-    public GameCamera(Entity focus) {
-        setFocus(focus);
+    public GameCamera() {
+        setFocus(null);
+        rx = x;
+        ry = y;
     }
     
     @Override
-    public void update(World world) {
-        x += (focus.x - x) * followStrength;
-        y += (focus.y + 1 - y) * followStrength;
+    public void update(World w) {
+        if(focus != null) {
+            rx += (focus.x - rx) * followStrength;
+            ry += (focus.y + focus.aabb.centreY() - ry) * followStrength;
+        }
+        
+        x = rx;
+        y = ry;
+        
+        shakes.iterate(s -> {
+            float mod = (float) s.duration / s.maxDuration;
+            x += s.strength * (2 * w.getRnd().nextFloat() - 1) * mod;
+            y += s.strength * (2 * w.getRnd().nextFloat() - 1) * mod;
+            return --s.duration == 0;
+        });
         
         sliceX = getSliceX();
         sliceY = getSliceY();
@@ -55,20 +73,19 @@ public class GameCamera extends FreeGameObject {
     
     @Override
     public void destroy() {
-        // nothing to see here, move along
+        focus = null; // help the gc
     }
     
-    /**
-     * Sets the entity upon which to focus the camera.
-     * 
-     * @throws NullPointerException if {@code e} is {@code null}.
-     */
+    @Override
     public void setFocus(Entity e) {
-        focus = Objects.requireNonNull(e);
-        x = focus.x;
-        y = focus.y + 1;
-        sliceX = focus.getSliceX();
-        sliceY = focus.getSliceY();
+        focus = e;
+        
+        if(e != null) {
+            rx = e.x;
+            ry = e.y + e.aabb.centreY();
+            sliceX = getSliceX();
+            sliceY = getSliceY();
+        }
     }
     
     /**
@@ -81,17 +98,34 @@ public class GameCamera extends FreeGameObject {
      * the range {@code 0 < followStrength <= 1}.
      */
     public void setFollowStrength(float followStrength) {
-        if(followStrength <= 0 || followStrength > 1)
-            throw new IllegalArgumentException("The follow strength must be within (0,1]!");
-        this.followStrength = followStrength;
+        this.followStrength = Checks.testExclIncl(followStrength, 0f, 1);
     }
     
     /**
      * Moves the camera to the same coordinates as its focus.
      */
     public void snapToFocus() {
-        x = focus.x;
-        y = focus.y;
+        rx = focus.x;
+        ry = focus.y + focus.aabb.centreY();
+    }
+    
+    @Override
+    public void shake(float strength, int duration) {
+        shakes.append(new Shake(strength, duration));
+    }
+    
+    private static class Shake {
+        
+        public float strength;
+        public int duration;
+        public int maxDuration;
+        
+        public Shake(float strength, int duration) {
+            this.strength = strength;
+            this.duration = duration;
+            maxDuration = duration;
+        }
+        
     }
     
 }

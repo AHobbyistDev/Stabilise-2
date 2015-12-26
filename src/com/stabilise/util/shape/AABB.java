@@ -1,5 +1,7 @@
 package com.stabilise.util.shape;
 
+import com.stabilise.util.Checks;
+
 /**
  * An Axis-Aligned Bounding Box, or AABB for short, is a rectangle whose edges
  * are aligned with the x and y axes. AABBs are typically much faster than
@@ -19,6 +21,9 @@ public class AABB extends Shape {
      * Creates a new AABB. It is implicitly trusted that the given values for
      * {@code width} and {@code height} are non-negative.
      * 
+     * <p>For safer AABB construction, use {@link
+     * #create(float, float, float, float)}.
+     * 
      * @param x The x-coordinate of the AABB's bottom-left vertex.
      * @param y The y-coordinate of the AABB's bottom-left vertex.
      * @param width The AABB's width.
@@ -32,7 +37,12 @@ public class AABB extends Shape {
     }
     
     /**
-     * Creates a new AABB. No checking is done on the provided vertex array.
+     * Creates a new AABB. No checking is done on the provided vertex array and
+     * so care must be taken to ensure this class' invariants. The given float
+     * array will be used directly (i.e. not cloned).
+     * 
+     * <p>For safer AABB construction, use {@link #create(float[])} or {@link
+     * #createCopy(float[])}.
      */
     public AABB(float[] verts) {
         this.verts = verts;
@@ -56,9 +66,8 @@ public class AABB extends Shape {
     
     @Override
     public AABB reflect() {
-        // We need to manually do this since AABB breaks if v00 is to the right
-        // of v11, as we make algorithmic simplifications on the assumption
-        // that v00 is always to the left of v11.
+        // We do this manually rather than rely on superclass to ensure v00 is
+        // to the left of v11.
         return new AABB(new float[] {
             -verts[XMAX], verts[YMIN],
             -verts[XMIN], verts[YMAX]
@@ -119,18 +128,72 @@ public class AABB extends Shape {
         return maxY() - minY();
     }
     
-    /** {@link #width() width}{@code () / 2} */
+    /** {@code (maxX() + minX()) / 2} */
     public float centreX() {
-        return width() / 2;
+        return (maxX() + minX()) / 2;
     }
     
-    /** {@link #height() height}{@code () / 2} */
+    /** {@code (maxY() + minY()) / 2} */
     public float centreY() {
-        return height() / 2;
+        return (maxY() + minY()) / 2;
     }
     
     int getKey() {
         return Collider.K_AABB;
+    }
+    
+    //--------------------==========--------------------
+    //------------=====Static Functions=====------------
+    //--------------------==========--------------------
+    
+    /**
+     * Creates a new AABB as per {@link #AABB(float, float, float, float) this
+     * constructor}, but performs checking on the arguments.
+     * 
+     * @throws IllegalArgumentException if {@code width < 0 || height < 0}.
+     */
+    public static AABB create(float x, float y, float width, float height) {
+        return new AABB(x, y, Checks.testMin(width, 0f), Checks.testMin(width, 0f));
+    }
+    
+    /**
+     * Creates a new AABB as per {@link #AABB(float[]) this constructor}, but
+     * performs checking on the {@code verts} argument.
+     * 
+     * @throws NullPointerException if {@code verts} is {@code null}.
+     * @throws IllegalArgumentException if any of the following hold:
+     *     <ul>
+     *     <li>{@code verts.length != 4}
+     *     <li>{@code verts[XMIN] > verts[XMAX]}
+     *     <li>{@code verts[YMIN] > verts[YMAX]}
+     *     </ul>
+     */
+    public static AABB create(float[] verts) {
+        if(verts.length != 4)
+            throw new IllegalArgumentException("Vertex array not of length 4");
+        if(verts[XMIN] > verts[XMAX])
+            throw new IllegalArgumentException("minX > maxX");
+        if(verts[YMIN] > verts[YMAX])
+            throw new IllegalArgumentException("minY > maxY");
+        return new AABB(verts);
+    }
+    
+    /**
+     * Creates a new AABB as per {@link #AABB(float[]) this constructor}, but
+     * performs checking on the {@code verts} argument.
+     * 
+     * <p>{@code verts} is cloned rather than used directly.
+     * 
+     * @throws NullPointerException if {@code verts} is {@code null}.
+     * @throws IllegalArgumentException if any of the following hold:
+     *     <ul>
+     *     <li>{@code verts.length != 4}
+     *     <li>{@code verts[XMIN] > verts[XMAX]}
+     *     <li>{@code verts[YMIN] > verts[YMAX]}
+     *     </ul>
+     */
+    public static AABB createCopy(float[] verts) {
+        return create(verts.clone());
     }
     
 }

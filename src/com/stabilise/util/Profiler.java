@@ -1,11 +1,11 @@
 package com.stabilise.util;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -106,22 +106,14 @@ public class Profiler {
     public void start(String section) {
         if(effectivelyEnabled) {
             if(section == null)
-                throw new NullPointerException("section is null");
+                throw new NullPointerException("section name is null");
             
-            List<Section> curConstituents = stack.getLast().getConstituents();
+            Map<String, Section> curConstituents = stack.getLast().getConstituents();
             
-            // Somewhat inefficient, but check to see if such a section already
-            // exists.
-            for(Section s : curConstituents) {
-                if(s.name.equals(section)) {
-                    stack.add(s);
-                    s.start();
-                    return;
-                }
-            }
+            Section s = curConstituents.get(section);
+            if(s == null)
+                curConstituents.put(section, s = new Section(section));
             
-            Section s = new Section(section);
-            curConstituents.add(s);
             stack.add(s);
             s.start();
         }
@@ -360,7 +352,7 @@ public class Profiler {
         private boolean active = false;
         /** The sections's constituent sections. Lazily initialised by
          * getConstituents(); null by default. */
-        private List<Section> constituents;
+        private Map<String, Section> constituents;
         
         
         /**
@@ -400,9 +392,9 @@ public class Profiler {
             }
         }
         
-        public List<Section> getConstituents() {
+        public Map<String, Section> getConstituents() {
             return constituents == null
-                    ? constituents = new ArrayList<>()
+                    ? constituents = new HashMap<>()
                     : constituents;
         }
         
@@ -439,18 +431,20 @@ public class Profiler {
             SectionData[] children = new SectionData[len+1];
             
             long unspecified = duration; // time not specified by any constituents
-            for(int i = 0; i < len; i++) {
-                Section s = constituents.get(i);
-                s.updateDuration(currentTime);
-                
-                unspecified -= s.duration;
-                
-                float locPercent = duration == 0L ? 0f :
-                    ((float)s.duration / duration);
-                float totPercent = locPercent * totalPercent;
-                
-                children[i] = s.getData(parentName, 100*locPercent, totPercent,
-                        currentTime);
+            if(constituents != null) {
+                int i = 0;
+                for(Section s : constituents.values()) {
+                    s.updateDuration(currentTime);
+                    
+                    unspecified -= s.duration;
+                    
+                    float locPercent = duration == 0L ? 0f :
+                        ((float)s.duration / duration);
+                    float totPercent = locPercent * totalPercent;
+                    
+                    children[i++] = s.getData(parentName, 100*locPercent, totPercent,
+                            currentTime);
+                }
             }
             
             //if(unspecified > 0L) {

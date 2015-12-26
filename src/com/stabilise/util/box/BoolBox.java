@@ -9,8 +9,9 @@ import com.stabilise.util.io.data.DataList;
 
 public class BoolBox implements IBox {
     
-    public static final BoolBox TRUE = new ImmutableBoolBox(true);
+    public static final BoolBox TRUE  = new ImmutableBoolBox(true);
     public static final BoolBox FALSE = new ImmutableBoolBox(false);
+    
     
     /**
      * Returns a BoolBox encapsulating the specified value. This method may be

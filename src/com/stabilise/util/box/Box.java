@@ -9,8 +9,8 @@ import java.util.function.UnaryOperator;
  * A Box is an object which contains - or "Boxes" - another object. A Box may
  * be useful when multiple sources need to share multiple objects.
  * 
- * <p>A Box also includes a set of functional methods which allow it to act
- * sort-of as a mutable {@code Optional}.
+ * <p>A Box also includes a set of functional methods which allow it to act as
+ * somewhat of a mutable {@code Optional}.
  */
 public interface Box<T> {
     
@@ -46,6 +46,15 @@ public interface Box<T> {
     }
     
     /**
+     * Equivalent to {@code computeIfAbsent(defaultVal).ifPresent(action)}.
+     */
+    default void with(Supplier<? extends T> defaultVal, Consumer<? super T> action) {
+        T t = get();
+        if(t == null) set(t = defaultVal.get());
+        action.accept(t);
+    }
+    
+    /**
      * If a value is present, returns a Box wrapping the given mapper's output.
      * Otherwise, returns an empty box.
      */
@@ -54,7 +63,30 @@ public interface Box<T> {
         if(t != null)
             return Boxes.box(mapper.apply(t));
         else
-            return Boxes.empty();
+            return Boxes.emptyMut();
+    }
+    
+    /**
+     * If no value is present, sets this box's value to the one provided by the
+     * given supplier.
+     * 
+     * @return This box.
+     */
+    default Box<T> computeIfAbsent(Supplier<? extends T> supplier) {
+        if(get() == null)
+            set(supplier.get());
+        return this;
+    }
+    
+    /**
+     * If no value is present, sets this box's value to the given value.
+     * 
+     * @return This box.
+     */
+    default Box<T> setIfAbsent(T value) {
+        if(get() == null)
+            set(value);
+        return this;
     }
     
     /**

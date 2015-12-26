@@ -92,27 +92,21 @@ public class Item {
     }
     
     /**
-     * Gets the item's ID.
-     * 
-     * @return The item's ID.
+     * @return This item's ID.
      */
     public int getID() {
         return id;
     }
     
     /**
-     * Gets the item's name.
-     * 
-     * @return The item's name.
+     * @return This item's name.
      */
     public String getName() {
         return name;
     }
     
     /**
-     * Gets the item's maximum stack size.
-     * 
-     * @return The item's maximum stack size.
+     * @return This item's maximum stack size.
      */
     public int getMaxStackSize() {
         return maxStackSize;

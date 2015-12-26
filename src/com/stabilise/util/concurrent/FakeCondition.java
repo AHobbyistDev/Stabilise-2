@@ -12,6 +12,8 @@ public class FakeCondition implements Condition {
     public static final FakeCondition INSTANCE = new FakeCondition();
     
     
+    private FakeCondition() {}
+    
     @Override public void await() throws InterruptedException {}
     @Override public void awaitUninterruptibly() {}
     @Override public long awaitNanos(long nanosTimeout) throws InterruptedException { return nanosTimeout; }

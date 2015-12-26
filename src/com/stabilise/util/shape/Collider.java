@@ -73,7 +73,7 @@ public class Collider {
      *   project one of the two vertices which generated the axis (as they have
      *   identical projections on their axis). However, the overhead of
      *   ensuring we only project the correct n-1 vertices (instead of n) will
-     *   probably overshadow the win of not calculating a proj.
+     *   almost certainly overshadow the win of not calculating a proj.
      */
     
     /*

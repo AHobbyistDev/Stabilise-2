@@ -19,6 +19,7 @@ public class PerlinNoise1D {
     // Actual sinusoidal interp
     static final Interpolation interp3 = Interpolation.SINUSOIDAL.inOut;
     
+    
     /** The pseudorandom number generator. */
     private final Random rnd;
     /** The base seed. */

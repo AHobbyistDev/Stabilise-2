@@ -140,17 +140,13 @@ public class CharacterData implements Sendable {
      * <p>If this data has already been loaded (i.e. this method has returned
      * without throwing an exception), this method does nothing.
      * 
-     * @throws IOException if an I/O exception is encountered while attempting
-     * to load the character data.
+     * @throws IOException if an I/O error occurs.
      */
     public void load() throws IOException {
         if(loaded)
             return;
         
         DataCompound tag = IOUtil.read(Format.NBT, Compression.GZIP, getFile());
-        
-        // TODO: For now only the hash and name are configured to throw
-        // IOExceptions, as they're the only important details
         
         hash = tag.getString("hash");
         

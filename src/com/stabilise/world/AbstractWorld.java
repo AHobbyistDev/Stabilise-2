@@ -8,6 +8,7 @@ import java.util.Random;
 
 import com.stabilise.core.Constants;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.GameCamera;
 import com.stabilise.entity.GameObject;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.Particle;
@@ -97,6 +98,8 @@ public abstract class AbstractWorld implements World {
     private final float gravity = -3 * 9.8f; // arbitrary, but 9.8 feels too sluggish
     private float gravityIncrement = gravity * timeIncrement;
     private float gravity2ndOrder = gravity * timeIncrement * timeIncrement / 2;
+    
+    public final GameCamera camera = new GameCamera();
     
     /** An easy-access utility RNG which should be used by any GameObject with
      * a reference to this world in preference to constructing a new one.
@@ -208,6 +211,7 @@ public abstract class AbstractWorld implements World {
      */
     public void setPlayer(Entity e) {
         players.put(e.id(), e);
+        camera.setFocus(e);
     }
     
     /**
@@ -297,6 +301,11 @@ public abstract class AbstractWorld implements World {
     @Override
     public ParticleManager getParticleManager() {
         return particleManager;
+    }
+    
+    @Override
+    public WorldCamera getCamera() {
+        return camera;
     }
     
     // ========== Stuff ==========

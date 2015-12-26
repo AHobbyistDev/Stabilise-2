@@ -18,13 +18,13 @@ import com.stabilise.util.concurrent.Striper;
  * events to these listeners. To register an event listener via {@link
  * #addListener(Executor, Event, EventHandler)}, users specify the event to
  * listen for, the <i>callback function</i> - or <i>handler</i> - which is
- * invoked when the event is posted, and their own executor with which to
- * execute their handlers. Note that even if given executors provide
- * execution-order guarantees, an EventDispatcher does not.
+ * invoked when the event is posted, and the executor with which to execute
+ * the handler. It is worth nothing that even if given executors provide
+ * execution-order guarantees, this class does not.
  * 
  * <p>An EventDispatcher offers two modes: <i>normal</i> and <i>retained</i>.
  * In retained mode, a posted event is considered to be perpetually posted, and
- * as such subsequent listeners registered on alread-posted events are
+ * as such subsequent listeners registered on already-posted events are
  * triggered immediately. Note that whether or not a listener is single-use is
  * irrelevant in retained mode since any particular event may only be posted
  * once.

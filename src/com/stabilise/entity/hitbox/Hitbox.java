@@ -113,6 +113,7 @@ public class Hitbox extends FreeGameObject {
         // TODO: current implementation of collision resolution is crude and temporary
         if(e.damage(w, createSrc())) {
             onHit();
+            w.getCamera().shake(damage * 0.0025f, 5);
             return true;
         }
         return false;

@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.RandomAccess;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -84,7 +85,7 @@ import com.stabilise.util.Checks;
  * </pre>
  */
 @NotThreadSafe
-public class FragList<E> implements SimpleList<E> {
+public class FragList<E> implements SimpleList<E>, RandomAccess {
     
     /** The backing array.
      * Invariant: length >= size */
@@ -201,6 +202,17 @@ public class FragList<E> implements SimpleList<E> {
         }
         
         flatten(flattenThreshold);
+    }
+    
+    @Override
+    public boolean iterateUntil(Predicate<? super E> pred) {
+        Objects.requireNonNull(pred); // fail-fast
+        for(int i = 0; i < size; i++) {
+            if(pred.test(data[i])) {
+                return false;
+            }
+        }
+        return true;
     }
     
     /** Removes the element at index i and decrements size. Adjusts firstNull

@@ -116,10 +116,8 @@ public class Entity extends FreeGameObject {
      * handled.
      */
     public boolean post(World w, EntityEvent e) {
-        for(Component c : components)
-            if(c.handle(w, this, e))
-                return false;
-        return !core.handle(w, this, e)
+        return components.iterateUntil(c -> c.handle(w, this, e))
+            && !core.handle(w, this, e)
             && !controller.handle(w, this, e)
             && !physics.handle(w, this, e);
     }
@@ -155,7 +153,7 @@ public class Entity extends FreeGameObject {
     }
     
     public static Entity fromNBT(DataCompound tag) {
-        return Entities.enemy(); // TOOD
+        return Entities.enemy(); // TODO
     }
     
 }

@@ -119,6 +119,23 @@ public class Checks {
      * Tests a value.
      * 
      * @param val The value being tested.
+     * @param min The minimum legal value (exclusive).
+     * @param max The maximum legal value (inclusive).
+     * 
+     * @return val
+     * @throws IllegalArgumentException if {@code val <= min || val > max}.
+     */
+    public static float testExclIncl(float val, float min, float max) {
+        if(val <= min || val > max)
+            throw new IllegalArgumentException("Illegal value " + val +
+                    "; it should be in the range (" + min + ", " + max + "]");
+        return val;
+    }
+    
+    /**
+     * Tests a value.
+     * 
+     * @param val The value being tested.
      * @param min The minimum legal value (inclusive).
      * @param max The maximum legal value (inclusive).
      * 

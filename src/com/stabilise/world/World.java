@@ -127,6 +127,11 @@ public interface World extends WorldProvider {
      */
     ParticleManager getParticleManager();
     
+    /**
+     * Gets this world's camera.
+     */
+    WorldCamera getCamera();
+    
     // ==========World component getters and setters==========
     
     /**

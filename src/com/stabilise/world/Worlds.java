@@ -349,10 +349,10 @@ public class Worlds {
                             + "world without setting the player!");
             }
             
-            Box<HostMultiverse> bMulti    = Boxes.empty();
-            Box<PlayerBundle> bPlayer     = Boxes.empty();
-            Box<HostWorld> bWorld         = Boxes.empty();
-            Box<WorldLoadTracker> bStatus = Boxes.empty();
+            Box<HostMultiverse> bMulti    = Boxes.emptyMut();
+            Box<PlayerBundle> bPlayer     = Boxes.emptyMut();
+            Box<HostWorld> bWorld         = Boxes.emptyMut();
+            Box<WorldLoadTracker> bStatus = Boxes.emptyMut();
             
             return Task.builder(Tasks.newThreadExecutor())
                 .name("Loading world")

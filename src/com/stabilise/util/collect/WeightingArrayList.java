@@ -154,6 +154,16 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
                 doRemove(i);
     }
     
+    @Override
+    public boolean iterateUntil(Predicate<? super E> pred) {
+        for(int i = 0; i < size; i++) {
+            if(pred.test(data[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     //--------------------==========--------------------
     //-------------=====Nested Classes=====-------------
     //--------------------==========--------------------

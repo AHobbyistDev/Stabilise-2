@@ -132,6 +132,8 @@ public class CFireball extends BaseProjectile {
         
         explosionSrc.createAt(e.x, e.y);
         addImpactParticles(w, e, 500);
+        
+        w.getCamera().shake(0.1f, 30);
     }
     
     @Override

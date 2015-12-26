@@ -132,7 +132,7 @@ public class WorldRenderer implements Renderer {
         this.world = world;
         
         this.player = player;
-        playerCamera = new GameCamera(player);
+        playerCamera = world.camera;
         this.controller = controller;
         
         tileRenderer = new TileRenderer(this);

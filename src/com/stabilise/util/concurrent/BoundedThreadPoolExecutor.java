@@ -65,9 +65,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * Integer.MAX_VALUE is functionally equivalent to a ThreadPoolExecutor
  * returned by Executors.newCachedThreadPool().
  * 
- * <p>All code in this class is basically copied from ThreadPoolExecutor since
- * it's designed not to be extended such that the above functionality may be
- * replaced, which is somewhat irritating.
+ * <p>Since ThreadPoolExecutor does not make subclassing easy, we instead
+ * duplicate it and tweak a few lines.
  * 
  * @see ThreadPoolExecutor
  */

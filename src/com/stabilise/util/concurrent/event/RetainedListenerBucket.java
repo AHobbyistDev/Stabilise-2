@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import com.stabilise.util.ArrayUtil;
 import com.stabilise.util.collect.IteratorUtils;
 
 /**
@@ -48,7 +47,7 @@ class RetainedListenerBucket<E extends Event> implements ListenerBucket<E> {
         // We ignore duplicate events rather than complain as to adhere to
         // the contract of post() in EventDispatcher.
         if(this.e != null) {
-            return ArrayUtil.emptyArr();
+            return null;
             //throw new IllegalStateException("Event already posted!");
         }
         
@@ -59,7 +58,7 @@ class RetainedListenerBucket<E extends Event> implements ListenerBucket<E> {
             listeners = null;
             return arr;
         }
-        return ArrayUtil.emptyArr();
+        return null;
     }
     
     @Override

@@ -214,7 +214,7 @@ public abstract class Shape {
      */
     @ThreadUnsafeMethod
     public void genCollisionData() {
-       // nothing to see here in the default implementation; move along 
+       // nothing in the default implementation; move along 
     }
     
     /** For use by {@link Collider}. */

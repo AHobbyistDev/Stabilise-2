@@ -11,7 +11,8 @@ public interface IBox extends ITag {
     
     @Override
     default void io(String name, DataCompound o, boolean write) {
-        if(write) write(name, o); else read(name, o);
+        if(write) write(name, o);
+        else      read(name, o);
     }
     
     void write(String name, DataCompound o);

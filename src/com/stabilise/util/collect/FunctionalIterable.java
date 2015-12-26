@@ -35,7 +35,7 @@ public interface FunctionalIterable<E> extends Iterable<E> {
      *         i.remove();
      * }</pre>
      * 
-     * However, implementors are encouraged to override this if a faster
+     * <p>Implementors are encouraged to override this if a faster
      * implementation is possible.
      * 
      * <p>This method is equivalent to {@link Collection#removeIf(Predicate)}
@@ -50,6 +50,35 @@ public interface FunctionalIterable<E> extends Iterable<E> {
             if(pred.test(i.next()))
                 i.remove();
         }
+    }
+    
+    /**
+     * Iterates over all elements, stopping either when no more elements are
+     * available or the given predicate returns {@code false}.
+     * 
+     * <p>The default implementation behaves as if by:
+     * 
+     * <pre>
+     * for(E e : this) {
+     *     if(pred.test(i.next()))
+     *         return false;
+     * }
+     * return true;</pre>
+     * 
+     * <p>Implementors are encouraged to override this if a faster
+     * implementation is possible.
+     * 
+     * @return {@code true} if the predicate never returned true (i.e. never
+     * broke); {@code false} otherwise.
+     * @throws NullPointerException if {@code pred} is {@code null}.
+     */
+    default boolean iterateUntil(Predicate<? super E> pred) {
+        Objects.requireNonNull(pred); // fail-fast
+        for(E e : this) {
+            if(pred.test(e))
+                return false;
+        }
+        return true;
     }
     
     /**
@@ -91,7 +120,7 @@ public interface FunctionalIterable<E> extends Iterable<E> {
         if(itr instanceof FunctionalIterable)
             return (FunctionalIterable<T>)itr;
         Objects.requireNonNull(itr); // fail-fast
-        return () -> itr.iterator();
+        return itr::iterator;
     }
     
     /**

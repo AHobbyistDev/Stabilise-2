@@ -97,7 +97,7 @@ public class TCPConnection {
     private final DataInStream in;
     private final DataOutStream out;
     
-    private final BlockingDeque<Packet> packetQueueIn = new LinkedBlockingDeque<>();
+    private final BlockingDeque<Packet> packetQueueIn  = new LinkedBlockingDeque<>();
     private final BlockingDeque<Packet> packetQueueOut = new LinkedBlockingDeque<>();
     
     private final TCPReadThread readThread;

@@ -3,13 +3,13 @@ package com.stabilise.util.box;
 import java.io.IOException;
 import java.util.Objects;
 
-import com.stabilise.util.box.Boxes.ABox;
+import com.stabilise.util.box.Boxes.MutBox;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 
-public class StringBox extends ABox<String> implements IBox {
+public class StringBox extends MutBox<String> implements IBox {
     
     /**
      * Creates a new StringBox holding an empty string.

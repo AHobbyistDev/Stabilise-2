@@ -88,7 +88,7 @@ public class RegionStore {
     
     /** Consumer which is invoked right before a region is unloaded, to perform
      * any unload logic as required by the world. */
-    private final Box<Consumer<Region>> unloadHandler = Boxes.empty();
+    private final Box<Consumer<Region>> unloadHandler = Boxes.emptyMut();
     
     /** The map of all loaded regions. Maps region.loc -> region. */
     private final ConcurrentMap<Point, Region> regions =

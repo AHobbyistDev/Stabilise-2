@@ -12,6 +12,8 @@ public class FakeLock implements Lock {
     public static final FakeLock INSTANCE = new FakeLock();
     
     
+    private FakeLock() {}
+    
     @Override public void lock() {}
     @Override public void lockInterruptibly() throws InterruptedException { }
     @Override public boolean tryLock() { return true; }
