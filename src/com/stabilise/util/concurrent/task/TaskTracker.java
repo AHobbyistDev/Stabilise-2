@@ -1,13 +1,10 @@
 package com.stabilise.util.concurrent.task;
 
-import static com.stabilise.util.concurrent.task.Task.State;
-
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.stabilise.util.Checks;
-import com.stabilise.util.Log;
 
 /**
  * A TaskTracker maintains the state of a task - status, parts completed, and
@@ -24,41 +21,29 @@ class TaskTracker {
     private long totalParts;
     private final AtomicLong parts = new AtomicLong();
     
-    /** The tracker of our task's parent. This is only ever null if we are the
-     * root task. */
+    /** The tracker of our task's parent. null if we are a root task or an
+     * ad-hoc task that doesn't report to its parent. */
     private TaskTracker parent = null;
     /** Total number of parts to report. Includes the completion part. */
     private long partsToReport;
     /** Number of parts which we've reported so far. Unused if parent is null. */
     private final AtomicLong reportedParts = new AtomicLong();
     
-    private final AtomicReference<State> state = new AtomicReference<>(State.RUNNING);
+    private final AtomicReference<State> state = new AtomicReference<>(State.UNSTARTED);
     
     
-    TaskTracker(PrototypeTracker prototype) {
+    /** Main constructor. */
+    TaskTracker(Prototype prototype) {
         status = prototype.status;
         totalParts = prototype.parts;
         partsToReport = prototype.partsToReport;
     }
     
-    /** "Starts" this tracker. If totalParts is zero (technically 1, if you
-     * include the completion part), this method sets totalParts to what {@link
-     * TaskRunnable#getParts()} returns (unless it returns -1, in which case
-     * this method does nothing). Runnable may be null. */
-    void start(TaskRunnable runnable) {
-        // i.e. only accept the updated value if we lack a proper initial
-        // value (that is, totalParts == 1).
-        if(totalParts != 1 && runnable != null) {
-            long newParts = runnable.getParts();
-            if(newParts == -1)
-                return;
-            else if(newParts < MIN_PARTS || newParts > MAX_PARTS)
-                Log.getAgent("Task").postWarning("TaskRunnable for task \""
-                        + status + "\" returned illegal value from getParts() ("
-                        + newParts + ")");
-            else
-                totalParts = newParts + 1; // +1 for completion part
-        }
+    /** Constructor for ad-hoc subtasks. Parts is trusted to be non-negative. */
+    TaskTracker(long parts) {
+        status = DEFAULT_STATUS;
+        totalParts = parts + 1; // completion part
+        partsToReport = 0;
     }
     
     /**
@@ -80,6 +65,15 @@ class TaskTracker {
         doSet(p, -1);
     }
     
+    /**
+     * Sets the total number of parts. Make sure you know what you're doing!
+     * 
+     * @throws IllegalArgumentException if p < MIN_PARTS || p > MAX_PARTS
+     */
+    void setTotal(long p) {
+        totalParts = Checks.test(p, MIN_PARTS, MAX_PARTS) + 1; // completion part
+    }
+    
     /** Sets the state, incrementing parts up to full if the state is
      * COMPLETED. This is not atomic. */
     void setState(State state) {
@@ -89,6 +83,8 @@ class TaskTracker {
     }
     
     boolean setState(State expect, State update) {
+        if(update == State.COMPLETED)
+            doIncrement(Long.MAX_VALUE, 0);
         return state.compareAndSet(expect, update);
     }
     
@@ -105,7 +101,7 @@ class TaskTracker {
     private void doIncrement(long p, long c) {
         Checks.testMin(p, 1);
         State s = state.get();
-        if(s != State.RUNNING)
+        if(s != State.RUNNING && s != State.COMPLETION_PENDING)
             throw new IllegalStateException("Task isn't running!");
         long o, n; // old, new
         do {
@@ -134,7 +130,7 @@ class TaskTracker {
         State s = state.get();
         if(s != State.RUNNING)
             throw new IllegalStateException("Task isn't running!");
-        long o; // old
+        long o;
         do {
             o = parts.get();
             if(o == totalParts)
@@ -149,10 +145,10 @@ class TaskTracker {
      * @param c completion part. 0 if complete; -1 if not
      */
     private void reportToParent(long n, long c) {
-        long o; // old
         // If we have a parent, we try to forward these parts (scaled
         // appropriately as per partsToReport) to our parent.
         if(parent != null) {
+            long o; // old
             // n and o now take on new/old values for reportedParts
             n = Math.max(0, (long)(n*((double)partsToReport/totalParts)) + c);
             do {
@@ -191,13 +187,6 @@ class TaskTracker {
     
     String getStatus() {
         return status;
-    }
-    
-    /**
-     * Returns the fraction of parts completed, from 0 to 1 (inclusive).
-     */
-    double fractionCompleted() {
-        return (double)parts.get() / totalParts;
     }
     
     /**

@@ -2,6 +2,7 @@ package com.stabilise.util;
 
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 
 /**
  * Array-related utility functions.
@@ -166,6 +167,7 @@ public class ArrayUtil {
         
         private final E[] arr;
         
+        
         /**
          * Creates a new immutable array.
          * 
@@ -191,6 +193,14 @@ public class ArrayUtil {
          */
         public int length() {
             return arr.length;
+        }
+        
+        /**
+         * Performs the given action for every element in the array.
+         */
+        public void forEach(Consumer<? super E> action) {
+            for(E e : arr)
+                action.accept(e);
         }
         
     }

@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * A GuardedObject guards a value behind an intrinsic lock.
+ * A GuardedObject guards a value behind some object's intrinsic lock.
  */
 public class GuardedObject<T> {
     
@@ -22,7 +22,7 @@ public class GuardedObject<T> {
      * 
      * @throws NullPointerException if {@code action} is {@code null}.
      */
-    public void action(Consumer<? super T> action) {
+    public void with(Consumer<? super T> action) {
         synchronized(guard) {
             action.accept(value);
         }

@@ -15,6 +15,7 @@ public class ReturnTask<T> extends Task {
     
     private final ReturnBox<T> retVal;
     
+    
     /**
      * Instantiated only by TaskBuilder.
      */
@@ -40,8 +41,12 @@ public class ReturnTask<T> extends Task {
      * @throws ExecutionException if the task failed, or didn't set the result.
      */
     public T get() throws InterruptedException, ExecutionException {
-        if(!await())
-            throw new ExecutionException("Task did not complete successfully", failCause.get());
+        if(!await()) {
+            Throwable t = failCause.get();
+            throw new ExecutionException("Task did not complete successfully ("
+                        + (t == null ? "no reason given" : t.getMessage()) + ")",
+                        failCause.get());
+        }
         return retVal.get(failCause);
     }
     

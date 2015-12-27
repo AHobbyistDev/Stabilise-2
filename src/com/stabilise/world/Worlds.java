@@ -375,14 +375,9 @@ public class Worlds {
                         throw new RuntimeException("Client is NYI");
                     }
                 }).andThenReturn(1000, new TaskCallable<WorldBundle>() {
-                    
-                    @Override
-                    public long getParts() {
-                        return bStatus.get().numTotal();
-                    }
-                    
                     @Override
                     public WorldBundle run(TaskHandle t) throws Exception {
+                        t.setTotal(bStatus.get().numTotal());
                         HostWorld w = bWorld.get();
                         t.setStatus("Loading dimension " + w.getDimensionName());
                         do {

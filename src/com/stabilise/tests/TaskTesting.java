@@ -10,8 +10,6 @@ import com.stabilise.util.concurrent.Waiter;
 import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.util.concurrent.task.Task;
 import com.stabilise.util.concurrent.task.TaskEvent;
-import com.stabilise.util.concurrent.task.TaskHandle;
-import com.stabilise.util.concurrent.task.TaskRunnable;
 
 
 class TaskTesting {
@@ -41,35 +39,65 @@ class TaskTesting {
                 }
             })
             .andThen(() -> buf.append("Hel"))
-            .andThenGroup()
-                .subtask(20, (h) -> {
-                    h.setStatus("Print \"Hi!\"");
+            .andThen(100, h -> {
+                h.spawn(false, h2 -> {
+                    h2.setStatus("Print \"Hi!\"");
                     sayWithSleep(100, "Hi!");
-                })
-                    .onEvent(TaskEvent.COMPLETE, (e) -> System.out.println("Hi, guy!"))
-                .subtask(20, (h) -> {
-                    h.setStatus("Print \"Also hi!\"");
+                });
+                h.spawn(false, h2 -> {
+                    h2.setStatus("Print \"Also hi!\"");
                     sayWithSleep(100, "Also hi!");
-                })
-                .subtask(new TaskRunnable() {
-                    public void run(TaskHandle h) throws Exception {
-                        h.setStatus("Print \"Hi as well!\"");
-                        sayWithSleep(100, "Hi as well!");
-                     }
-                    public long getParts() { return 20; }
-                })
-                .subtask(20, (h) -> {
-                    h.setStatus("Say \"lo, \"");
+                });
+                h.spawn(false, h2 -> {
+                    h2.setStatus("Print \"Hi as well!\"");
+                    sayWithSleep(100, "Hi as well!");
+                });
+                h.spawn(false, h2 -> {
+                    h2.setStatus("Say \"lo, \"");
+                    sayWithSleep(100, "Append \"lo, \"");
                     buf.append("lo, ");
-                })
-                .subtask(20, (h) -> {
-                    h.setStatus("Print \"Hi from Hawaii!\"");
-                    sayWithSleep(100, "Hi from Hawaii!");
-                })
-            .endGroup()
+                });
+            })
                 .onEvent(TaskEvent.STOP, (e) -> System.out.println("Group stopped!"))
                 .onEvent(TaskEvent.COMPLETE, (e) -> System.out.println("Group completed!"))
                 .onEvent(TaskEvent.FAIL, (e) -> System.out.println("Group failed!"))
+            .andThen(h -> {
+                h.spawn(false, (h2) -> sayWithSleep(100, "Node 1"));
+                h.spawn(true, (h2) -> sayWithSleep(100, "Node 2"));
+                h.spawn(true, (h2) -> sayWithSleep(0, "Node 3"));
+                h.spawn(false, (h2) -> {
+                    sayWithSleep(100, "Node 4");
+                    h2.spawn(false, h3 -> sayWithSleep(100, "Node 4.1"));
+                    h2.spawn(false, h3 -> sayWithSleep(0, "Node 4.2"));
+                    h2.spawn(true, h3 -> sayWithSleep(0, "Node 4.3"));
+                    h2.spawn(true, h3 -> sayWithSleep(100, "Node 4.4"));
+                    h2.spawn(false, h3 -> sayWithSleep(100, "Node 4.5"));
+                });
+                h.spawn(true, (h2) -> sayWithSleep(100, "Node 5"));
+                h.beginFlatten();
+                h.spawn(false, (h2) -> sayWithSleep(100, "Node 6"));
+                h.spawn(false, (h2) -> sayWithSleep(1000, "Node 7"));
+                h.spawn(false, (h2) -> sayWithSleep(100, "Node 8"));
+                h.spawn(false, (h2) -> sayWithSleep(100, "Node 9"));
+                h.spawn(false, (h2) -> sayWithSleep(0, "Node 10"));
+                h.spawn(false, (h2) -> sayWithSleep(0, "Node 11"));
+                h.spawn(false, (h2) -> sayWithSleep(0, "Node 12"));
+                h.spawn(false, (h2) -> sayWithSleep(100, "Node 13"));
+                h.spawn(false, (h2) -> sayWithSleep(100, "Node 14"));
+                h.endFlatten();
+                h.spawn(true, (h2) -> {
+                    sayWithSleep(100, "Node 15");
+                    h2.spawn(false, h3 -> sayWithSleep(100, "Node 15.1"));
+                    h2.spawn(true, h3 -> sayWithSleep(0, "Node 15.2"));
+                    h2.spawn(false, h3 -> sayWithSleep(100, "Node 15.3"));
+                });
+                h.spawn(false, (h2) -> sayWithSleep(0, "Node 16"));
+                h.spawn(false, (h2) -> sayWithSleep(0, "Node 17"));
+                h.spawn(false, (h2) -> sayWithSleep(100, "Node 18"));
+                h.spawn(true, (h2) -> sayWithSleep(0, "Node 19"));
+                h.spawn(true, (h2) -> sayWithSleep(100, "Node 20"));
+                h.spawn(true, (h2) -> sayWithSleep(0, "Node 21"));
+            })
             .andThen(100, (h) -> {
                 h.setStatus("Say \"world\"");
                 buf.append("w");
@@ -89,7 +117,7 @@ class TaskTesting {
                 return buf.toString();
             })
             .build().start();
-        Waiter waiter = task.waiter(2500, TimeUnit.MILLISECONDS);
+        Waiter waiter = task.waiter(1030, TimeUnit.MILLISECONDS);
         loop: while(true) {
             switch(waiter.poll()) {
                 case COMPLETE:
@@ -101,18 +129,26 @@ class TaskTesting {
                     }
                     break loop;
                 case INCOMPLETE:
-                    System.out.println(task);
+                    //task.printStack();
                     break;
                 case TIMEOUT:
                     System.out.println("Timeout!");
                     task.cancel();
-                    System.out.println("Awaited... " + task.awaitUninterruptibly());
+                    boolean result = task.awaitUninterruptibly();
+                    System.out.println("Awaited... " + result);
+                    if(result) {
+                        try {
+                            System.out.println("Result: " + task.tryGet());
+                        } catch(ExecutionException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
                     break loop;
                 default:
                     throw new AssertionError();
             }
             try {
-                Thread.sleep(100);
+                Thread.sleep(250);
             } catch(InterruptedException e1) {
                 e1.printStackTrace();
             }

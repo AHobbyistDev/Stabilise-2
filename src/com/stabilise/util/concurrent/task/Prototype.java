@@ -1,6 +1,6 @@
-package com.stabilise.util.concurrent.task2;
+package com.stabilise.util.concurrent.task;
 
-import static com.stabilise.util.concurrent.task2.TaskTracker.*;
+import static com.stabilise.util.concurrent.task.TaskTracker.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -176,11 +176,11 @@ class Prototype {
         
         tracker = new TaskTracker(this);
         if(task != null)
-            unit = new TaskUnit(exec, task, tracker, true, false);
+            unit = new TaskUnit(exec, task, tracker, events);
         
         children.forEach(t -> {
             t.tracker.setParent(tracker);
-            // While we're at it, we also link the units, now that they've been
+            // While we're at it, we also link the units now that they've been
             // built.
             if(t.next != null)
                 t.unit.setNext(t.next.unit);

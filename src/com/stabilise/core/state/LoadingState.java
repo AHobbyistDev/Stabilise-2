@@ -21,6 +21,7 @@ import com.stabilise.core.app.Application;
 import com.stabilise.core.main.Stabilise;
 import com.stabilise.util.concurrent.event.Event;
 import com.stabilise.util.concurrent.task.ReturnTask;
+import com.stabilise.util.concurrent.task.TaskView;
 import com.stabilise.world.Worlds;
 import com.stabilise.world.Worlds.WorldBundle;
 import com.stabilise.world.WorldInfo;
@@ -159,18 +160,20 @@ public class LoadingState implements State {
         sprSplash.draw(batch);
         batch.end();
         
+        TaskView[] stack = future.getStack();
+        
         shapes.begin(ShapeType.Filled);
         shapes.setColor(Color.FIREBRICK);
         shapes.rect(-150, -96,  300, 20);
         shapes.rect(-150, -136, 300, 20);
         shapes.setColor(Color.FOREST);
-        shapes.rect(-150, -96,  (int)(300*future.fractionCompleted()), 20);
-        shapes.rect(-150, -136, (int)(300*future.curSubtask().fractionCompleted()), 20);
+        for(int i = 0; i < stack.length; i++)
+            shapes.rect(-150, -96-i*40, (int)(300*stack[i].fractionCompleted()), 20);
         shapes.end();
         
         batch.begin();
-        font.draw(batch, future.toString(), -250, -80, 500, Align.center, true);
-        font.draw(batch, future.curSubtask().toString(), -250, -120, 500, Align.center, true);
+        for(int i = 0; i < stack.length; i++)
+            font.draw(batch, stack[i].toString(), -250, -80-i*40, 500, Align.center, true);
         batch.end();
     }
     

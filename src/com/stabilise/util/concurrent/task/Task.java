@@ -1,5 +1,8 @@
 package com.stabilise.util.concurrent.task;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -12,28 +15,26 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.stabilise.util.annotation.ForTestingPurposes;
 import com.stabilise.util.concurrent.Waiter;
 
 /**
- * A Task is essentially a {@code Runnable} with other additional facilities.
+ * A Task is essentially a {@code Runnable} with additional useful facilities.
  * 
  * <p>The main entry point for creating a Task is {@link #builder()}.
  */
 @ThreadSafe
 public class Task implements TaskView {
     
-    static enum State {
-        // There's no point in an UNSTARTED state for a task since a TaskUnit's
-        // state variable doesn't come into play until the task has begun.
-        RUNNING, COMPLETED, FAILED;
-    }
+    private static final TaskView[] EMPTY_STACK = {};
     
     private final Executor exec;
     
-    @GuardedBy("this") private TaskUnit curUnit;
+    @GuardedBy("this") private final Deque<TaskUnit> stack = new ArrayDeque<>();
+    @GuardedBy("this") private TaskView[] lastStack = EMPTY_STACK;
+    @GuardedBy("this") private boolean stackDirty = true;
     
     private final TaskTracker tracker;
-    private final AtomicBoolean started      = new AtomicBoolean(false);
     private final AtomicBoolean cancelled    = new AtomicBoolean(false);
     private final AtomicInteger unitsRunning = new AtomicInteger(0);
     
@@ -49,7 +50,8 @@ public class Task implements TaskView {
     Task(Executor exec, TaskTracker tracker, TaskUnit firstUnit) {
         this.exec = exec;
         this.tracker = tracker;
-        this.curUnit = firstUnit;
+        
+        stack.addLast(firstUnit);
     }
     
     /**
@@ -60,10 +62,12 @@ public class Task implements TaskView {
      */
     public Task start() {
         if(!cancelled.get()) {
-            if(started.compareAndSet(false, true))
-                exec.execute(curUnit.setTask(this));
+            if(tracker.setState(State.UNSTARTED, State.RUNNING))
+                exec.execute(stack.getLast().setOwner(this)); // i.e. the only element
             else
                 throw new IllegalStateException("Already started");
+        } else {
+            failCause.compareAndSet(null, new CancellationException("Task cancelled"));
         }
         return this;
     }
@@ -78,21 +82,70 @@ public class Task implements TaskView {
         }
     }
     
-    /**
-     * Notifies this task that the specified unit is now the current top-level
-     * one.
-     * 
-     * @return true if the new unit may run; false if this task has been
-     * cancelled.
-     */
-    boolean setCurrent(TaskUnit unit) {
-        synchronized(this) {
-            if(cancelled())
-                return false;
-            this.curUnit = unit;
-            return true;
-        }
+    // Task stack operations
+    
+    synchronized void nextSequential(TaskUnit unit) {
+        stack.removeLast();
+        stack.addLast(unit);
+        stackDirty = true;
     }
+    
+    synchronized void beginSubtask(TaskUnit unit) {
+        stack.addLast(unit);
+        stackDirty = true;
+    }
+    
+    synchronized void endSubtask() {
+        stack.removeLast();
+        stackDirty = true;
+    }
+    
+    public synchronized TaskView[] getStack() {
+        if(stackDirty) {
+            stackDirty = false;
+            if(lastStack.length != 1 + stack.size()) {
+                lastStack = new TaskView[1 + stack.size()];
+                lastStack[0] = this;
+            }
+            int i = 1;
+            for(TaskUnit u : stack)
+                lastStack[i++] = u;
+        }
+        return lastStack.clone();
+    }
+    
+    @ForTestingPurposes
+    public void printStack() {
+        TaskView[] view = getStack();
+        StringBuilder sb = new StringBuilder();
+        for(TaskView t : view)
+            printProgressBar(sb, t);
+        System.out.println(sb.toString());
+    }
+    
+    private void printProgressBar(StringBuilder sb, TaskView view) {
+        sb.append("<");
+        String status = view.status();
+        String progStatus = " (" + view.partsCompleted() + "/" + view.totalParts() + ")";
+        if(status.length() + progStatus.length() > 80)
+            status = status.substring(0, 80 - progStatus.length());
+        int perc = view.percentCompleted();
+        int statLen = status.length() + progStatus.length();
+        int i;
+        for(i = 1; i <= Math.min(perc, 50 - statLen/2); i++)
+            sb.append('#');
+        for(; i <= 50-statLen/2; i++)
+            sb.append(' ');
+        sb.append(status).append(progStatus);
+        i += statLen;
+        for(; i <= Math.min(100, perc); i++)
+            sb.append('#');
+        for(; i <= 100; i++)
+            sb.append(' ');
+        sb.append(">\n");
+    }
+    
+    // End task stack operations
     
     /**
      * Sets the state and wakes all threads waiting in {@link #await()}, etc.
@@ -115,16 +168,16 @@ public class Task implements TaskView {
         }
     }
     
-    void fail(TaskUnit failurePoint) {
+    void fail(Throwable failurePoint) {
         // We'll restrict ourselves to a single failure cause since one task
-        // failing can set off others failing too, and their failures are
-        // redundant.
-        failCause.compareAndSet(null, failurePoint.getFailCause());
+        // failing can set off others failing too, and their failures could
+        // be redundant (but we have no way of knowing).
+        failCause.compareAndSet(null, failurePoint);
         
         // If the current unit is a group and one of its subtasks failed, we'll
         // need to throw out a cancellation to notify the rest of them to stop.
-        cancelled.set(true);
-        curUnit.cancel();
+        if(cancelled.compareAndSet(false, true))
+            stack.getFirst().cancel();
         
         // We don't invoke setState(State.FAILED) because we want to wait for
         // all currently-running tasks to finish up before notify anyone
@@ -139,11 +192,16 @@ public class Task implements TaskView {
      * considered to have {@link #failed() failed}.
      */
     public void cancel() {
-        if(!stopped() && cancelled.compareAndSet(false, true)) {
-            synchronized(this) {
-                curUnit.cancel();
-            }
+        if(canCancel() && cancelled.compareAndSet(false, true)) {
+            // Root propagates cancellation down to all subtasks, so we
+            // don't need to explicitly cancel everything in the stack.
+            stack.getFirst().cancel();
         }
+    }
+    
+    private boolean canCancel() {
+        State s = tracker.getState();
+        return s == State.UNSTARTED || s == State.RUNNING;
     }
     
     /** Polls cancellation status. */
@@ -152,11 +210,8 @@ public class Task implements TaskView {
     }
     
     /**
-     * Returns {@code true} if this task has stopped, either due to completion
-     * or failure; {@code false} otherwise.
-     * 
-     * <p>An invocation of this is the atomic equivalent to {@code completed()
-     * || failed()}.
+     * Returns {@code true} if this task is stopped (i.e. it either hasn't been
+     * started yet, has completed, or has failed); {@code false} otherwise.
      */
     public boolean stopped() {
         return tracker.getState() != State.RUNNING;
@@ -165,9 +220,6 @@ public class Task implements TaskView {
     /**
      * Returns {@code true} if this task has been successfully completed;
      * {@code false} otherwise.
-     * 
-     * <p>An invocation of this is the atomic equivalent to {@code stopped()
-     * && !failed()}.
      */
     public boolean completed() {
         return tracker.getState() == State.COMPLETED;
@@ -263,11 +315,6 @@ public class Task implements TaskView {
     }
     
     @Override
-    public double fractionCompleted() {
-        return tracker.fractionCompleted();
-    }
-    
-    @Override
     public long partsCompleted() {
         return tracker.getPartsCompleted();
     }
@@ -275,13 +322,6 @@ public class Task implements TaskView {
     @Override
     public long totalParts() {
         return tracker.getTotalParts();
-    }
-    
-    /**
-     * Returns a view of the current subtask.
-     */
-    public synchronized TaskView curSubtask() {
-        return curUnit;
     }
     
     /**

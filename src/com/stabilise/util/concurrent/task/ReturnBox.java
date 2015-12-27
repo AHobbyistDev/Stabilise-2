@@ -6,8 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.concurrent.ThreadSafe;
 
 /**
- * A ReturnBox encapsulates the return value of a ReturnTask. This class
- * implements Box for user convenience.
+ * A ReturnBox encapsulates the return value of a ReturnTask.
  */
 @ThreadSafe
 final class ReturnBox<T> {

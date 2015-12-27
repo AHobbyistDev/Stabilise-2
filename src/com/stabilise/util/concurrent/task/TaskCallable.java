@@ -1,5 +1,7 @@
 package com.stabilise.util.concurrent.task;
 
+import javax.annotation.Nonnull;
+
 /**
  * The common interface with which to implement value-returning tasks to run
  * under the Task framework. You can think of a {@code TaskCallable} as
@@ -7,7 +9,7 @@ package com.stabilise.util.concurrent.task;
  * which to communicate to the Task API.
  */
 @FunctionalInterface
-public interface TaskCallable<T> extends TaskExecutable {
+public interface TaskCallable<T> {
     
     /**
      * Runs the task and returns the resultant value.
@@ -18,6 +20,6 @@ public interface TaskCallable<T> extends TaskExecutable {
      * @throws Exception if an unrecoverable error occurred while running the
      * task.
      */
-    T run(TaskHandle handle) throws Exception;
+    T run(@Nonnull TaskHandle handle) throws Exception;
     
 }

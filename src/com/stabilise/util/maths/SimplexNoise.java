@@ -19,7 +19,7 @@ import com.badlogic.gdx.math.Vector2;
  * Better rank ordering method by Stefan Gustavson in 2012.<br>
  */
 @NotThreadSafe
-public class SimplexNoise {
+public class SimplexNoise implements INoise2D {
     
     //--------------------==========--------------------
     //-----=====Static Constants and Variables=====-----
@@ -88,9 +88,7 @@ public class SimplexNoise {
         rnd.setSeed(seed ^ n);
     }
     
-    /**
-     * Gets the noise value at (x,y), between 0 and 1.
-     */
+    @Override
     public double noise(double x, double y) {
         x /= scale;
         y /= scale;

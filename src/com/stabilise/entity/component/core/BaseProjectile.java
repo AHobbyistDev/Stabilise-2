@@ -60,6 +60,8 @@ public abstract class BaseProjectile extends CCore {
             onAdd(w, e);
         else if(ev.type() == EntityEvent.Type.TILE_COLLISION)
             onImpact(w, e);
+        else if(ev.type() == EntityEvent.Type.DAMAGED)
+            return true;
         return false;
     }
     

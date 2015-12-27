@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.Vector2;
  * A utility class which generates 2-dimensional perlin noise.
  */
 @NotThreadSafe
-public class PerlinNoise2D {
+public class PerlinNoise2D implements INoise2D {
     
     /** The pseudorandom number generator. */
     private final Random rnd;
@@ -63,9 +63,7 @@ public class PerlinNoise2D {
         rnd.setSeed(seed ^ n);
     }
     
-    /**
-     * Gets the noise value at (x,y), between 0 and 1.
-     */
+    @Override
     public double noise(double x, double y) {
         x /= wavelength;
         y /= wavelength;

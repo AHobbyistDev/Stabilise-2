@@ -1,14 +1,13 @@
 package com.stabilise.tests;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadLocalRandom;
 
 import com.stabilise.util.AppDriver;
 import com.stabilise.util.box.Box;
 import com.stabilise.util.box.Boxes;
 import com.stabilise.util.concurrent.Tasks;
-import com.stabilise.util.concurrent.task2.ReturnTask;
-import com.stabilise.util.concurrent.task2.Task;
+import com.stabilise.util.concurrent.task.ReturnTask;
+import com.stabilise.util.concurrent.task.Task;
 
 
 public class TaskTesting2 {
@@ -29,7 +28,10 @@ public class TaskTesting2 {
         Task task = Task.builder(Tasks.newThreadExecutor())
                 .name("Building stuff")
                 .begin()
-                .andThen(h -> saySleep(500, "Node 1"))
+                .andThen(h -> {
+                    h.setStatus("Diddily");
+                    saySleep(500, "Node 1");
+                 })
                 .andThen(h -> {
                     h.setStatus("Doing subtask thingies");
                     h.beginFlatten();
@@ -47,18 +49,22 @@ public class TaskTesting2 {
                 .build();
         Box<AppDriver> driver = Boxes.emptyMut();
         Runnable updater = () -> {
+            /*
             for(int i = 0; i < 20; i++)
                 System.out.println();
             task.printStack();
-            if(ThreadLocalRandom.current().nextInt(10) == 0) {
-                System.out.println("!!!!CANCEL!!!!");
-                task.cancel();
-            }
+            //*/
             if(task.stopped())
                 driver.get().stop();
         };
         driver.set(new AppDriver(3, updater, null));
         task.start();
+        new Thread(() -> {
+            try {
+                Thread.sleep(1200L);
+            } catch(Exception e) {}
+            task.cancel();
+        }).start();
         driver.get().run();
         System.out.println("End test");
     }

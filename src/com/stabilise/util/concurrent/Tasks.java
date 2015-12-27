@@ -21,7 +21,7 @@ public class Tasks {
     private Tasks() { Checks.badAssert(); } // non-instantiable
     
     private static final Runnable EMPTY_RUNNABLE      = () -> {};
-    private static final Executor EXEC_CURRENT_THREAD = r -> r.run();
+    private static final Executor EXEC_CURRENT_THREAD = Runnable::run;
     private static final Executor EXEC_NEW_THREAD     = r -> new Thread(r).start();
     
     

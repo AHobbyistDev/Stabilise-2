@@ -1,163 +1,289 @@
 package com.stabilise.util.concurrent.task;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import com.stabilise.util.concurrent.event.Event;
+import javaslang.Tuple2;
+import javaslang.control.Either;
+
+import com.stabilise.util.Checks;
+import com.stabilise.util.box.Box;
+import com.stabilise.util.box.Boxes;
 import com.stabilise.util.concurrent.event.EventDispatcher;
-import com.stabilise.util.concurrent.event.EventHandler;
-import com.stabilise.util.concurrent.task.Task.State;
+import com.stabilise.util.concurrent.task.TaskHandle;
+import com.stabilise.util.concurrent.task.TaskView;
 import com.stabilise.util.concurrent.task.TaskEvent.FailEvent;
 
 
 class TaskUnit implements Runnable, TaskHandle, TaskView {
     
-    /** Prototype tracker. Only ever used during construction; during operation
-     * this will always be null. */
-    PrototypeTracker protoTracker;
-    /** Tracker. Initially null, but set by {@link #build()} when the task
-     * hierarchy is built. */
-    protected TaskTracker tracker;
+    private final TaskRunnable task;
+    private final TaskTracker tracker;
     
-    /** The almighty owner task. This is set before run() is invoked by
-     * whatever gets this unit running. */
-    protected Task owner = null;
-    /** The group we belong to. null if we don't belong to a group. */
-    protected TaskGroup group = null;
-    /** The task queued to run when this one finishes. If null (and group is
-     * null), we are the last unit and need to clean up the main task. */
-    protected TaskUnit next = null;
+    /** Tuple cases:
+     * <br><tt>( (TaskRunnable queuedTask, Long parts), Boolean parallel)</tt>
+     * <br><tt>(Unit task, Boolean runDirectly)</tt> */
+    private final List<Tuple2<Either<Tuple2<TaskRunnable, Long>, TaskUnit>, Boolean>> children
+            = new ArrayList<>();
+    private FlattenedRunnable flattened = null;
+    private final AtomicInteger numSubtasks = new AtomicInteger(0);
     
-    /** The actual task! Only null for dummy units (e.g. TaskGroup instances). */
-    protected TaskRunnable task = null;
+    private final Executor exec;
+    private volatile Thread thread = null;
     
-    /** The thread upon which this unit is executing. This is set in run()
-     * before this unit begins executing. Used as a target for interrupts. */
-    private Thread thread;
-    /** References the throwable which caused this unit to fail, if it failed.
-     * null otherwise. */
-    private Throwable throwable = null;
+    private Task owner;
+    private boolean published;
+    private final boolean publishable;
+    private final boolean sequential;
+    private final boolean levelHead;
+    
+    private TaskUnit parent;
+    private TaskUnit next;
     
     private final EventDispatcher events;
     
+    /**
+     * Constructor for Prototype.build().
+     */
+    public TaskUnit(Executor exec, TaskRunnable task, TaskTracker tracker,
+            EventDispatcher events) {
+        this(exec, task, tracker, events, true, true, false);
+    }
     
     /**
-     * Creates a new task.
-     * 
-     * @param task The actual task to run. Null if this is a group.
-     * @param protoTracker The prototype for our tracker. Never null thanks to
-     * TaskBuilder.
+     * Constructor for buildSubtasks().
      */
-    public TaskUnit(TaskRunnable task, PrototypeTracker protoTracker) {
+    public TaskUnit(Executor exec, TaskRunnable task, TaskTracker tracker,
+            boolean publishable, boolean sequential, boolean levelHead) {
+        this(exec, task, tracker, EventDispatcher.concurrentRetained(),
+                publishable, sequential, levelHead);
+    }
+    
+    private TaskUnit(Executor exec, TaskRunnable task, TaskTracker tracker,
+            EventDispatcher events, boolean publishable, boolean sequential,
+            boolean levelHead) {
+        this.exec = exec;
         this.task = task;
-        this.protoTracker = protoTracker;
-        this.events = EventDispatcher.normal();
-    }
-    
-    /**
-     * Builds the hierarchy of units underneath and including this one by
-     * getting our trackers from the prototype trackers.
-     */
-    void buildHierarchy() {
-        // Use iteration instead of recursion to avoid unbounded stack growth
-        for(TaskUnit u = this; u != null; u = u.next) {
-            u.build();
-        }
-    }
-    
-    protected void build() {
-        tracker = protoTracker.get();
-        protoTracker = null; // gc pls
+        this.tracker = tracker;
+        this.events = events;
+        this.publishable = publishable;
+        this.sequential = sequential;
+        this.levelHead = levelHead;
+        
+        published = !sequential;
     }
     
     @Override
     public void run() {
-        owner.onUnitStart();
+        if(!tracker.setState(State.UNSTARTED, State.RUNNING))
+            throw new IllegalStateException();
         
-        setThread();
+        thread = Thread.currentThread();
         
-        tracker.start(task);
+        prepublish();
         
-        // Check for cancellation. We check in two ways:
-        // 1. via owner.setCurrent(), which does the check for us in a
-        //    synchronous manner. It is important that we do this after setting
-        //    thread = Thread.currentThread() (as we have above) to avoid a
-        //    race condition with Task.cancel().
-        // 2. polling owner.cancelled() otherwise
-        if((group == null && !owner.setCurrent(this)) || owner.cancelled()) {
-            if(group != null)
-                group.onSubtaskFinish(false);
+        // Note that we don't publish this unit to the owner Task's stack
+        // immediately; instead, we wait for something to trigger publishing,
+        // or force a publish after execution if nothing triggered it.
+        
+        if(testCancel())
             return;
-        }
         
         events.post(TaskEvent.START);
         
         try {
-            execute();
-        } catch(Exception e) {
+            task.run(this);
+        } catch(Throwable e) {
             fail(e);
             return;
         }
         
-        finish();
-    }
-    
-    /** Designed to be overridden by TaskGroup since a group doesn't really run
-     * on its own thread. */
-    protected void setThread() {
-        thread = Thread.currentThread();
-    }
-    
-    protected void fail(Exception e) {
-        throwable = e;
+        publish(); // force the publish here
         
-        tracker.setState(State.FAILED); // TODO: is this necessary?
-        events.post(TaskEvent.STOP);
-        events.post(new FailEvent(e));
+        if(testCancel())
+            return;
         
-        if(group != null)
-            group.onSubtaskFinish(false);
-        owner.fail(this); // bring the entire Task down with us
+        if(!tracker.setState(State.RUNNING, State.COMPLETION_PENDING))
+            throw new IllegalStateException();
         
-        clearInterrupt();
-        owner.onUnitStop();
+        buildSubtasks();
+        runSubtasks();
+        
+        tryFinish();
     }
     
-    protected boolean execute() throws Exception {
-        if(task != null)
-            task.run(this);
-        return true;
+    private void buildSubtasks() {
+        // I'd rather throw an exception here, but meh. It's not important.
+        if(flattened != null)
+            endFlatten();
+        
+        Box<TaskUnit> firstSeq = Boxes.emptyMut();
+        Box<TaskUnit> lastSeq  = Boxes.emptyMut();
+        
+        children.replaceAll(e -> {
+            Tuple2<TaskRunnable, Long> tup = e._1.left().get();
+            TaskRunnable r = tup._1;
+            long parts = tup._2;
+            boolean seq = !e._2; // !parallel
+            boolean runDirectly = true;
+            
+            // We only publish sequential units for obvious reasons, and only
+            // the first sequential unit may act as the head to start a new
+            // level.
+            TaskUnit u = new TaskUnit(exec, r, new TaskTracker(parts),
+                    publishable & seq, seq, seq && !firstSeq.isPresent());
+            u.parent = this;
+            u.owner = owner;
+            
+            if(seq) {
+                lastSeq.ifPresent(u2 -> u2.next = u);
+                lastSeq.set(u);
+                if(firstSeq.isPresent())
+                    runDirectly = false;
+                else
+                    firstSeq.set(u);
+            }
+            
+            if(runDirectly)
+                numSubtasks.getAndIncrement();
+            
+            return new Tuple2<>(Either.right(u), runDirectly);
+        });
     }
     
-    /**
-     * Invoked when this task successfully finishes. For a TaskUnit, this is
-     * invoked immediately after its TaskRunnable finishes, and for a
-     * TaskGroup, this is invoked once all subtasks have completed.
-     */
-    protected void finish() {
-        tracker.setState(State.COMPLETED); // TODO: is this necessary?
+    private void runSubtasks() {
+        children.forEach(e -> {
+            if(e._2) // if(runDirectly)
+                exec.execute(e._1.right().get());
+        });
+    }
+    
+    private boolean canFinish() {
+        return tracker.getState() == State.COMPLETION_PENDING && subtasksFinished();
+    }
+    
+    private boolean subtasksFinished() {
+        return children.stream().allMatch(t -> t._1.right().get().isFinished());
+    }
+    
+    private void tryFinish() {
+        if(!canFinish())
+            return;
+        
+        if(testCancel())
+            return;
+        
+        if(!tracker.setState(State.COMPLETION_PENDING, State.COMPLETED))
+            throw new IllegalStateException();
+        
         events.post(TaskEvent.STOP);
         events.post(TaskEvent.COMPLETE);
-        clearInterrupt();
-        owner.onUnitStop();
+        
         if(next != null) {
             next.owner = owner;
-            // Reuse current thread rather than submit to executor
-            next.run(); // TODO this is recursive
-        } else if(group != null) {
-            group.onSubtaskFinish(true);
-        } else { // we're the last task
-            owner.setState(State.COMPLETED);
+            // Submit to executor rather than reuse current thread as per
+            // next.run() to avoid unbounded recursive stack growth.
+            exec.execute(next);
+        } else
+            unpublish();
+    }
+    
+    private boolean isFinished() {
+        State s = tracker.getState();
+        return s == State.COMPLETED || s == State.FAILED;
+    }
+    
+    private void fail(Throwable t) {
+        if(!tracker.setState(State.RUNNING, State.FAILED) &&
+                !tracker.setState(State.COMPLETION_PENDING, State.FAILED))
+            throw new IllegalStateException();
+        
+        events.post(TaskEvent.STOP);
+        events.post(new FailEvent(t));
+        
+        owner.fail(t); // bring the entire Task down with us
+        
+        // Clear the interrupt flag to prevent it from leaking if this thread
+        // is reused as part of a pool.
+        Thread.interrupted();
+        
+        unpublish();
+    }
+    
+    private void prepublish() {
+        // Only invoke onUnitStart for parallel units and for the first unit in
+        // a sequential list.
+        if(!sequential || levelHead)
+            owner.onUnitStart();
+    }
+    
+    /** Publishes this unit to the public task stack, if it hasn't been
+     * published already. */
+    private void publish() {
+        if(publishable && !published) {
+            published = true;
+            if(levelHead)
+                owner.beginSubtask(this);
+            else
+                owner.nextSequential(this);
+        }
+    }
+    
+    private void unpublish() {
+        owner.onUnitStop();
+        
+        if(parent != null) {
+            // This was the last subtask in its group
+            if(sequential && publishable)
+                owner.endSubtask();
+            parent.onSubtaskComplete();
+        } else if(sequential) {
+            // This was the last unit
+            owner.endSubtask();
+            owner.setState(tracker.getState()); // i.e. COMPLETED or FAILED
         }
     }
     
     /**
-     * Sets the owner Task. This should be invoked by whatever runs or
-     * schedules this unit for runnning.
+     * Cancels this unit by posting an interrupt to its execution thread. If it
+     * has subtasks, also cancels the subtasks.
      */
-    TaskUnit setTask(Task task) {
-        this.owner = task;
-        return this;
+    public void cancel() {
+        Thread t = thread;
+        State s = tracker.getState();
+        if(t != null && s == State.RUNNING)
+            t.interrupt();
+        
+        // Cancel subtasks
+        children.forEach(e -> {
+            if(e._1.isRight())
+                e._1.right().get().cancel();
+        });
     }
+    
+    private boolean testCancel() {
+        if(owner.cancelled()) {
+            fail(new CancellationException("Cancelled"));
+            return true;
+        }
+        return false;
+    }
+    
+    private synchronized void onSubtaskComplete() {
+        int n = numSubtasks.decrementAndGet();
+        System.out.println("Subtasks for " + System.identityHashCode(this) + ": " + n);
+        if(n == 0)
+            tryFinish();
+        else {
+            
+        }
+    }
+    
+    // TaskHandle
     
     @Override
     public void setStatus(String status) {
@@ -167,30 +293,20 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
     @Override
     public void increment(long parts) {
         tracker.increment(parts);
+        publish();
     }
     
     @Override
     public void set(long parts) {
         tracker.set(parts);
+        publish();
     }
     
     @Override
-    public void post(Event e) {
-        events.post(e);
-    }
-    
-    /**
-     * Adds a multi-use event listener. For builder use only.
-     * 
-     * @see EventDispatcher#post(Event)
-     */
-    <E extends Event> void addListener(Executor exec, E e, EventHandler<? super E> h) {
-        events.addListener(exec, e, h);
-    }
-    
-    void cancel() {
-        if(thread != null && tracker.getState() == State.RUNNING)
-            thread.interrupt();
+    public void setTotal(long totalParts) {
+        if(published)
+            throw new IllegalStateException();
+        tracker.setTotal(totalParts);
     }
     
     @Override
@@ -199,37 +315,52 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
     }
     
     private boolean isTaskThread() {
-        // Check state too to avoid leaking ownership across the same thread,
+        // Check state to avoid leaking ownership across the same thread,
         // in case the thread is a part of a pool and is reused.
         return Thread.currentThread().equals(thread)
                 && tracker.getState() == State.RUNNING;
     }
     
-    /**
-     * Gets the failure cause of this task. Only guaranteed to be non-null when
-     * this unit is guaranteed to have failed.
-     */
-    Throwable getFailCause() {
-        return throwable;
+    @Override
+    public void spawn(boolean parallel, TaskRunnable r) {
+        spawn(parallel, 0, r);
     }
     
-    /**
-     * Clears the current thread's interrupt status as to block an interrupt
-     * from propagating from this task to whatever is next executed on this
-     * thread.
-     */
-    private void clearInterrupt() {
-        Thread.interrupted();
+    public void spawn(boolean parallel, long parts, TaskRunnable r) {
+        if(flattened != null) {
+            if(parallel)
+                throw new IllegalArgumentException("Parallel not allowed while flattening");
+            flattened.add(r);
+        } else
+            children.add(new Tuple2<>(Either.left(new Tuple2<>(
+                    Objects.requireNonNull(r),
+                    Checks.test(parts, TaskTracker.MIN_PARTS, TaskTracker.MAX_PARTS))),
+                    parallel));
     }
+    
+    @Override
+    public void beginFlatten() {
+        if(flattened != null)
+            throw new IllegalStateException("Already flattening");
+        flattened = new FlattenedRunnable();
+    }
+    
+    @Override
+    public void endFlatten() {
+        if(flattened == null)
+            throw new IllegalStateException("Not currently flattening");
+        if(flattened.runnables.size() != 0)
+            children.add(new Tuple2<>(Either.left(
+                    new Tuple2<>(flattened, (long)flattened.size())),
+                    false)); // false = not parallel
+        flattened = null;
+    }
+    
+    // TaskView
     
     @Override
     public String status() {
         return tracker.getStatus();
-    }
-    
-    @Override
-    public double fractionCompleted() {
-        return tracker.fractionCompleted();
     }
     
     @Override
@@ -242,9 +373,98 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
         return tracker.getTotalParts();
     }
     
+    // For use by Prototype and Task
+    
+    /**
+     * Sets the next task to be run after this one.
+     */
+    void setNext(TaskUnit unit) {
+        this.next = unit;
+    }
+    
+    TaskUnit setOwner(Task owner) {
+        this.owner = owner;
+        return this;
+    }
+    
+    // Generic Object methods
+    
     @Override
     public String toString() {
         return status() + "... " + percentCompleted() + "%";
+    }
+    
+    //--------------------==========--------------------
+    //-------------=====Nested Classes=====-------------
+    //--------------------==========--------------------
+    
+    /** A TaskRunnable which is composed of a sequence of other TaskRunnables. */
+    private static class FlattenedRunnable implements TaskRunnable {
+        
+        private final List<TaskRunnable> runnables = new ArrayList<>();
+        
+        public void add(TaskRunnable r) {
+            runnables.add(r);
+        }
+        
+        public int size() {
+            return runnables.size();
+        }
+        
+        @Override
+        public void run(TaskHandle handle) throws Throwable {
+            // We use a NonForwardingHandle as the only increments should come
+            // from completions of partial tasks.
+            TaskHandle h = new NonForwardingHandle(handle);
+            for(TaskRunnable r : runnables) {
+                r.run(h);
+                handle.increment();
+            }
+        }
+        
+    }
+    
+    /**
+     * A NonForwardingHandle wraps a TaskHandle, and blocks any attempt to
+     * increment the parts count.
+     */
+    private static class NonForwardingHandle implements TaskHandle {
+        
+        private final TaskHandle handle;
+        
+        private NonForwardingHandle(TaskHandle handle) {
+            this.handle = handle;
+        }
+        
+        @Override
+        public void setStatus(String status) {
+            handle.setStatus(status);
+        }
+        
+        @Override public void increment(long parts) {}
+        @Override public void set(long parts) {}
+        @Override public void setTotal(long totalParts) {}
+        
+        @Override
+        public boolean pollCancel() {
+            return handle.pollCancel();
+        }
+        
+        @Override
+        public void spawn(boolean parallel, TaskRunnable r) {
+            handle.spawn(parallel, r);
+        }
+        
+        @Override
+        public void beginFlatten() {
+            handle.beginFlatten();
+        }
+        
+        @Override
+        public void endFlatten() {
+            handle.endFlatten();
+        }
+        
     }
     
 }

@@ -2,6 +2,7 @@ package com.stabilise.world;
 
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.tile.Tile;
+import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -347,7 +348,15 @@ public class Slice {
     private static class DummySlice extends Slice {
         
         public DummySlice() {
-            super(0, 0, new int[0][0], new int[0][0], new byte[0][0]);
+            super(0, 0, new int[SLICE_SIZE][SLICE_SIZE],
+                    new int[SLICE_SIZE][SLICE_SIZE],
+                    new byte[SLICE_SIZE][SLICE_SIZE]);
+            
+            for(int y = 0; y < SLICE_SIZE; y++) {
+                for(int x = 0; x < SLICE_SIZE; x++) {
+                    tiles[y][x] = Tiles.barrier.getID();
+                }
+            }
         }
         
         @Override public int  getTileIDAt(int x, int y) { return 0; }

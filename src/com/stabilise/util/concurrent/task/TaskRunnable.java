@@ -1,5 +1,7 @@
 package com.stabilise.util.concurrent.task;
 
+import javax.annotation.Nonnull;
+
 /**
  * The common interface with which to implement tasks to run under the Task
  * framework. You can think of a {@code TaskRunnable} as equivalent to a {@code
@@ -7,7 +9,7 @@ package com.stabilise.util.concurrent.task;
  * the Task API.
  */
 @FunctionalInterface
-public interface TaskRunnable extends TaskExecutable {
+public interface TaskRunnable {
     
     /**
      * Runs the task.
@@ -15,9 +17,9 @@ public interface TaskRunnable extends TaskExecutable {
      * @param handle The handle to the task API. This should not escape the
      * scope of this method.
      * 
-     * @throws Exception if an unrecoverable error occurred while running the
+     * @throws Throwable if an unrecoverable error occurred while running the
      * task.
      */
-    void run(TaskHandle handle) throws Exception;
+    void run(@Nonnull TaskHandle handle) throws Throwable;
     
 }
