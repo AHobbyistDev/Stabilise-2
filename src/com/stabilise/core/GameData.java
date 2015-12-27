@@ -72,7 +72,6 @@ public class GameData {
         return fac;
     }
     
-    @SuppressWarnings("unused")
     private <T> GeneralTypeFactory<T> genFactory(Params params, Class<T> type) {
         GeneralTypeFactory<T> fac = new GeneralTypeFactory<>(
                 new RegistryParams(params.name, params.capacity, params.dupePolicy),

@@ -3,7 +3,6 @@ package com.stabilise.util.concurrent.task;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -11,6 +10,7 @@ import javaslang.Tuple2;
 import javaslang.control.Either;
 
 import com.stabilise.util.Checks;
+import com.stabilise.util.Printable;
 import com.stabilise.util.box.Box;
 import com.stabilise.util.box.Boxes;
 import com.stabilise.util.concurrent.event.EventDispatcher;
@@ -19,7 +19,7 @@ import com.stabilise.util.concurrent.task.TaskView;
 import com.stabilise.util.concurrent.task.TaskEvent.FailEvent;
 
 
-class TaskUnit implements Runnable, TaskHandle, TaskView {
+class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
     
     private final TaskRunnable task;
     private final TaskTracker tracker;
@@ -46,8 +46,9 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
     
     private final EventDispatcher events;
     
+    
     /**
-     * Constructor for Prototype.build().
+     * Constructor for use by Prototype.build().
      */
     public TaskUnit(Executor exec, TaskRunnable task, TaskTracker tracker,
             EventDispatcher events) {
@@ -55,7 +56,7 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
     }
     
     /**
-     * Constructor for buildSubtasks().
+     * Constructor for use by buildSubtasks().
      */
     public TaskUnit(Executor exec, TaskRunnable task, TaskTracker tracker,
             boolean publishable, boolean sequential, boolean levelHead) {
@@ -74,6 +75,8 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
         this.sequential = sequential;
         this.levelHead = levelHead;
         
+        // Cheaty way of preventing parallel units from being published to the
+        // stack.
         published = !sequential;
     }
     
@@ -177,6 +180,8 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
         if(testCancel())
             return;
         
+        //System.out.println("Completed \"" + status() + "\": " + tracker.getState());
+        
         if(!tracker.setState(State.COMPLETION_PENDING, State.COMPLETED))
             throw new IllegalStateException();
         
@@ -198,6 +203,8 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
     }
     
     private void fail(Throwable t) {
+        //System.out.println("Failed \"" + status() + "\": " + tracker.getState());
+        
         if(!tracker.setState(State.RUNNING, State.FAILED) &&
                 !tracker.setState(State.COMPLETION_PENDING, State.FAILED))
             throw new IllegalStateException();
@@ -210,6 +217,11 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
         // Clear the interrupt flag to prevent it from leaking if this thread
         // is reused as part of a pool.
         Thread.interrupted();
+        
+        // Fail all the units that come sequentially after us so that
+        // parent.subtasksFinished() returns true as appropriate
+        for(TaskUnit u = next; u != null; u = u.next)
+            u.tracker.setState(State.FAILED);
         
         unpublish();
     }
@@ -238,12 +250,12 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
         
         if(parent != null) {
             // This was the last subtask in its group
-            if(sequential && publishable)
-                owner.endSubtask();
-            parent.onSubtaskComplete();
-        } else if(sequential) {
+            if(sequential && publishable && published)
+                owner.endSubtask(this);
+            parent.onSubtaskComplete(this);
+        } else if(sequential && publishable && published) {
             // This was the last unit
-            owner.endSubtask();
+            owner.endSubtask(this);
             owner.setState(tracker.getState()); // i.e. COMPLETED or FAILED
         }
     }
@@ -267,20 +279,15 @@ class TaskUnit implements Runnable, TaskHandle, TaskView {
     
     private boolean testCancel() {
         if(owner.cancelled()) {
-            fail(new CancellationException("Cancelled"));
+            fail(owner.failurePoint());
             return true;
         }
         return false;
     }
     
-    private synchronized void onSubtaskComplete() {
-        int n = numSubtasks.decrementAndGet();
-        System.out.println("Subtasks for " + System.identityHashCode(this) + ": " + n);
-        if(n == 0)
+    private void onSubtaskComplete(TaskUnit sub) {
+        if(numSubtasks.decrementAndGet() == 0)
             tryFinish();
-        else {
-            
-        }
     }
     
     // TaskHandle

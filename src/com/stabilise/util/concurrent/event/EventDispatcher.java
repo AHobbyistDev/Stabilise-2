@@ -5,11 +5,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import com.stabilise.util.Log;
 import com.stabilise.util.concurrent.FakeLock;
 import com.stabilise.util.concurrent.Striper;
 
@@ -187,7 +189,11 @@ public class EventDispatcher {
         
         if(ls != null) {
             for(Listener<? super E> li : ls) {
-                li.execute(e);
+                try {
+                    li.execute(e);
+                } catch(RejectedExecutionException ex) {
+                    Log.get().postSevere("Event listener rejected! Did the executor shut down?", ex);
+                }
             }
         }
     }

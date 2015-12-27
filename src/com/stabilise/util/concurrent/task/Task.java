@@ -91,11 +91,15 @@ public class Task implements TaskView {
     }
     
     synchronized void beginSubtask(TaskUnit unit) {
+        //System.out.println("Adding " + unit.status() + " to stack: "
+        //        + stack.size() + " -> " + (stack.size() + 1));
         stack.addLast(unit);
         stackDirty = true;
     }
     
-    synchronized void endSubtask() {
+    synchronized void endSubtask(TaskUnit unit) {
+        //System.out.println("Removing " + unit.status() + " from stack: "
+        //            + stack.size() + " -> " + (stack.size() - 1));
         stack.removeLast();
         stackDirty = true;
     }
@@ -168,6 +172,12 @@ public class Task implements TaskView {
         }
     }
     
+    /**
+     * Fails the task and brings down all currently-running units, if the task
+     * hasn't failed or been cancelled already.
+     * 
+     * @param failurePoint The throwable to treat as the casue of the failure.
+     */
     void fail(Throwable failurePoint) {
         // We'll restrict ourselves to a single failure cause since one task
         // failing can set off others failing too, and their failures could
@@ -185,6 +195,14 @@ public class Task implements TaskView {
     }
     
     /**
+     * Gets the throwable which is being treated as the cause of this task
+     * failing.
+     */
+    Throwable failurePoint() {
+        return failCause.get();
+    }
+    
+    /**
      * Cancels this task. The speed at which a Task actually stops following a
      * cancellation request depends on the responsiveness of an implementation,
      * but it is guaranteed that a new task unit will not begin following an
@@ -193,6 +211,7 @@ public class Task implements TaskView {
      */
     public void cancel() {
         if(canCancel() && cancelled.compareAndSet(false, true)) {
+            failCause.compareAndSet(null, new CancellationException("Cancelled"));
             // Root propagates cancellation down to all subtasks, so we
             // don't need to explicitly cancel everything in the stack.
             stack.getFirst().cancel();
@@ -308,6 +327,8 @@ public class Task implements TaskView {
     public Waiter waiter(long time, TimeUnit unit) {
         return new Waiter(this::stopped, time, unit);
     }
+    
+    // TaskView methods
     
     @Override
     public String status() {

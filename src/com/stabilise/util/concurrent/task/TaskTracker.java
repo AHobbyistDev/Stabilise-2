@@ -205,4 +205,9 @@ class TaskTracker {
         return totalParts;
     }
     
+    @Override
+    public String toString() {
+        return "TaskTracker[" + status + ": " + parts.get() + "/" + totalParts + "]";
+    }
+    
 }

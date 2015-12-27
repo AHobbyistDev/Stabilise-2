@@ -10,6 +10,7 @@ import com.stabilise.util.concurrent.Waiter;
 import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.util.concurrent.task.Task;
 import com.stabilise.util.concurrent.task.TaskEvent;
+import com.stabilise.util.concurrent.task.TaskHandle;
 
 
 class TaskTesting {
@@ -42,19 +43,19 @@ class TaskTesting {
             .andThen(100, h -> {
                 h.spawn(false, h2 -> {
                     h2.setStatus("Print \"Hi!\"");
-                    sayWithSleep(100, "Hi!");
+                    say(h2, 100, "Hi!");
                 });
                 h.spawn(false, h2 -> {
                     h2.setStatus("Print \"Also hi!\"");
-                    sayWithSleep(100, "Also hi!");
+                    say(h2, 100, "Also hi!");
                 });
                 h.spawn(false, h2 -> {
                     h2.setStatus("Print \"Hi as well!\"");
-                    sayWithSleep(100, "Hi as well!");
+                    say(h2, 100, "Hi as well!");
                 });
                 h.spawn(false, h2 -> {
                     h2.setStatus("Say \"lo, \"");
-                    sayWithSleep(100, "Append \"lo, \"");
+                    say(h2, 100, "Append \"lo, \"");
                     buf.append("lo, ");
                 });
             })
@@ -62,41 +63,42 @@ class TaskTesting {
                 .onEvent(TaskEvent.COMPLETE, (e) -> System.out.println("Group completed!"))
                 .onEvent(TaskEvent.FAIL, (e) -> System.out.println("Group failed!"))
             .andThen(h -> {
-                h.spawn(false, (h2) -> sayWithSleep(100, "Node 1"));
-                h.spawn(true, (h2) -> sayWithSleep(100, "Node 2"));
-                h.spawn(true, (h2) -> sayWithSleep(0, "Node 3"));
+                h.setStatus("The almighty spawner");
+                h.spawn(false, (h2) -> say(h2, 100, "Node 1"));
+                h.spawn(true,  (h2) -> say(h2, 100, "Node 2"));
+                h.spawn(true,  (h2) -> say(h2, 0, "Node 3"));
                 h.spawn(false, (h2) -> {
-                    sayWithSleep(100, "Node 4");
-                    h2.spawn(false, h3 -> sayWithSleep(100, "Node 4.1"));
-                    h2.spawn(false, h3 -> sayWithSleep(0, "Node 4.2"));
-                    h2.spawn(true, h3 -> sayWithSleep(0, "Node 4.3"));
-                    h2.spawn(true, h3 -> sayWithSleep(100, "Node 4.4"));
-                    h2.spawn(false, h3 -> sayWithSleep(100, "Node 4.5"));
+                    say(h2, 100, "Node 4");
+                    h2.spawn(false, h3 -> say(h3, 100, "Node 4.1"));
+                    h2.spawn(false, h3 -> say(h3, 0, "Node 4.2"));
+                    h2.spawn(true,  h3 -> say(h3, 0, "Node 4.3"));
+                    h2.spawn(true,  h3 -> say(h3, 100, "Node 4.4"));
+                    h2.spawn(false, h3 -> say(h3, 100, "Node 4.5"));
                 });
-                h.spawn(true, (h2) -> sayWithSleep(100, "Node 5"));
+                h.spawn(true, (h2) -> say(h2, 100, "Node 5"));
                 h.beginFlatten();
-                h.spawn(false, (h2) -> sayWithSleep(100, "Node 6"));
-                h.spawn(false, (h2) -> sayWithSleep(1000, "Node 7"));
-                h.spawn(false, (h2) -> sayWithSleep(100, "Node 8"));
-                h.spawn(false, (h2) -> sayWithSleep(100, "Node 9"));
-                h.spawn(false, (h2) -> sayWithSleep(0, "Node 10"));
-                h.spawn(false, (h2) -> sayWithSleep(0, "Node 11"));
-                h.spawn(false, (h2) -> sayWithSleep(0, "Node 12"));
-                h.spawn(false, (h2) -> sayWithSleep(100, "Node 13"));
-                h.spawn(false, (h2) -> sayWithSleep(100, "Node 14"));
+                h.spawn(false, (h2) -> say(h2, 100, "Node 6"));
+                h.spawn(false, (h2) -> say(h2, 1000, "Node 7"));
+                h.spawn(false, (h2) -> say(h2, 100, "Node 8"));
+                h.spawn(false, (h2) -> say(h2, 100, "Node 9"));
+                h.spawn(false, (h2) -> say(h2, 0, "Node 10"));
+                h.spawn(false, (h2) -> say(h2, 0, "Node 11"));
+                h.spawn(false, (h2) -> say(h2, 0, "Node 12"));
+                h.spawn(false, (h2) -> say(h2, 100, "Node 13"));
+                h.spawn(false, (h2) -> say(h2, 100, "Node 14"));
                 h.endFlatten();
                 h.spawn(true, (h2) -> {
-                    sayWithSleep(100, "Node 15");
-                    h2.spawn(false, h3 -> sayWithSleep(100, "Node 15.1"));
-                    h2.spawn(true, h3 -> sayWithSleep(0, "Node 15.2"));
-                    h2.spawn(false, h3 -> sayWithSleep(100, "Node 15.3"));
+                    say(h2, 100,  "Node 15");
+                    h2.spawn(false, h3 -> say(h3, 100, "Node 15.1"));
+                    h2.spawn(true,  h3 -> say(h3, 0, "Node 15.2"));
+                    h2.spawn(false, h3 -> say(h3, 100, "Node 15.3"));
                 });
-                h.spawn(false, (h2) -> sayWithSleep(0, "Node 16"));
-                h.spawn(false, (h2) -> sayWithSleep(0, "Node 17"));
-                h.spawn(false, (h2) -> sayWithSleep(100, "Node 18"));
-                h.spawn(true, (h2) -> sayWithSleep(0, "Node 19"));
-                h.spawn(true, (h2) -> sayWithSleep(100, "Node 20"));
-                h.spawn(true, (h2) -> sayWithSleep(0, "Node 21"));
+                h.spawn(false, (h2) -> say(h2, 0, "Node 16"));
+                h.spawn(false, (h2) -> say(h2, 0, "Node 17"));
+                h.spawn(false, (h2) -> say(h2, 100, "Node 18"));
+                h.spawn(true,  (h2) -> say(h2, 0, "Node 19"));
+                h.spawn(true,  (h2) -> say(h2, 100, "Node 20"));
+                h.spawn(true,  (h2) -> say(h2, 0, "Node 21"));
             })
             .andThen(100, (h) -> {
                 h.setStatus("Say \"world\"");
@@ -117,7 +119,7 @@ class TaskTesting {
                 return buf.toString();
             })
             .build().start();
-        Waiter waiter = task.waiter(1030, TimeUnit.MILLISECONDS);
+        Waiter waiter = task.waiter(5000, TimeUnit.MILLISECONDS);
         loop: while(true) {
             switch(waiter.poll()) {
                 case COMPLETE:
@@ -156,7 +158,8 @@ class TaskTesting {
         exec.shutdown();
     }
     
-    public static void sayWithSleep(long millis, String msg) throws InterruptedException {
+    public static void say(TaskHandle h, long millis, String msg) throws InterruptedException {
+        h.setStatus(msg);
         System.out.println(msg);
         Thread.sleep(millis);
     }
