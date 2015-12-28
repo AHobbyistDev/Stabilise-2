@@ -1,7 +1,5 @@
 package com.stabilise.world.gen;
 
-import static com.stabilise.world.Region.REGION_SIZE;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,7 +14,6 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.RegionStore;
-import com.stabilise.world.Slice;
 import com.stabilise.world.WorldLoadTracker;
 import com.stabilise.world.loader.WorldLoader.DimensionLoader;
 import com.stabilise.world.multiverse.Multiverse;
@@ -165,11 +162,7 @@ public final class WorldGenerator {
             // Don't generate a region if we don't need to!
             if(!r.isGenerated()) {
                 // Set up the region's slices
-                for(int y = 0; y < REGION_SIZE; y++) {
-                    for(int x = 0; x < REGION_SIZE; x++) {
-                        r.slices[y][x] = new Slice(x + r.offsetX, y + r.offsetY);
-                    }
-                }
+                r.initSlices();
                 
                 GenProvider prov = new GenProvider(world, r);
                 // Generate the region, as per the generators

@@ -123,8 +123,13 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                         w.setWallAt(tx, ty, dirt);
                     } else if(noise <= 5.75D)
                         set(tx, ty, dirt);
-                    else
+                    else if(noise <= 200D)
                         set(tx, ty, w.rnd(30) ? glowstone : stone);
+                    else if(noise <= 210D)
+                        set(tx, ty, w.rnd(30) ? glowstone :
+                            (w.getRnd().nextDouble() > (210-noise)/10 ? bedrock : stone));
+                    else
+                        set(tx, ty, w.rnd(30) ? glowstone : bedrock);
                 }
             }
             

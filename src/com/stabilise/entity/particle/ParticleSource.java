@@ -228,8 +228,8 @@ public class ParticleSource<T extends Particle> {
     
     public void createCentredOutwardsBurst(Random rnd, int numParticles,
             float minV, float maxV, Entity e) {
-        double midX = e.x + e.aabb.width()/2;
-        double midY = e.y + e.aabb.height()/2;
+        double midX = e.x + e.aabb.centreX();
+        double midY = e.y + e.aabb.centreY();
         for(int i = 0; i < count(numParticles); i++) {
             this.createBurstParticle(midX, midY, minV, maxV, 0f, Maths.TAUf);
         }

@@ -31,10 +31,10 @@ public class RandomTests {
      * Compares fastFloor, fastCeil and fastRound in {@link Maths} to their
      * standard counterparts.
      */
-    @SuppressWarnings("unused")
-    private static void fastOperations() {
+    protected static void fastOperations() {
         final int elements = 10000000;
         double[] nums = new double[elements];
+        @SuppressWarnings("unused")
         int dump;
         Random rnd = new Random();
         

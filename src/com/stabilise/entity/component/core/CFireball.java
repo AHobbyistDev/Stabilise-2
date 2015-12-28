@@ -108,8 +108,8 @@ public class CFireball extends BaseProjectile {
     protected void onImpact(World w, Entity e) {
         e.destroy();
         
-        /*
-        final float range = 3.75f;
+        ///*
+        final float range = 5.75f;
         int xMin = Maths.floor(e.x - range);
         int xMax = Maths.floor(e.x + range);
         int yMin = Maths.floor(e.y - range);
@@ -117,11 +117,11 @@ public class CFireball extends BaseProjectile {
         
         for(int y = yMin; y <= yMax; y++) {
             for(int x = xMin; x <= xMax; x++) {
-                if(Maths.pointsInRange(e.x, e.y, x, y, range))
+                if(Maths.pointsInRange(e.x, e.y, x, y, range) && w.getTileAt(x, y).getHardness() <= 15f)
                     w.breakTileAt(x, y);
             }
         }
-        */
+        //*/
         
         Hitbox h = new Hitbox(ownerID, SPLASH_HITBOX, 2*damage);
         h.persistent = true;

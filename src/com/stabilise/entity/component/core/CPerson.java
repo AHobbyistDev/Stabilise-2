@@ -403,15 +403,15 @@ public class CPerson extends BaseMob {
                 break;
             case SPECIAL_DOWN_AIR:
                 if(stateTicks == SPECIAL_DOWN_AIR_FRAME_2_BEGIN) {
+                    fireballRain(w, e, SPECIAL_DOWN_AIR_COST_MANA, SPECIAL_DOWN_AIR_ORIGIN);
+                    /*
                     if(useMana(SPECIAL_DOWN_AIR_COST_MANA)) {
-                        /*
                         EntityBigFireball f = new EntityBigFireball(w, this);
                         f.x = e.x + (e.facingRight ? SPECIAL_DOWN_AIR_ORIGIN.x()
                                 : -SPECIAL_DOWN_AIR_ORIGIN.x());
                         f.y = e.y + SPECIAL_DOWN_AIR_ORIGIN.y();
                         f.dy = Math.min(0f, dy + w.getRnd().nextFloat() * 3.0f - 10f);
                         w.addEntity(f);
-                        */
                     } else {
                         double minAngle, maxAngle, px;
                         
@@ -427,6 +427,7 @@ public class CPerson extends BaseMob {
                         particleSrc.createBurst(6, px, e.y + SPECIAL_DOWN_AIR_ORIGIN.y(),
                                 0.03f, 0.08f, (float)minAngle, (float)maxAngle);
                     }
+                    */
                 }
                 break;
             default:
@@ -491,15 +492,40 @@ public class CPerson extends BaseMob {
                 float angle = (w.getRnd().nextFloat() * 0.47f + 0.03f) * MathUtils.PI;
                 float velocity = 18.5f + w.getRnd().nextFloat() * 6.5f;
                 boolean right = w.getRnd().nextBoolean();
-                Entity f = Entities.fireball(e.id(), 5 + w.getRnd().nextInt(5));
+                Entity f = Entities.fireball(e.id(), 5 + w.getRnd().nextInt(10));
                 f.dx = right ? MathUtils.cos(angle) * velocity : -MathUtils.cos(angle) * velocity;
                 f.dy = MathUtils.sin(angle)*velocity;
                 f.facingRight = right;
                 w.addEntity(f, px, e.y + originPoint.y());
             }
         } else {
-            particleSrc.createBurst(6, px, e.y + originPoint.y(),
+            particleSrc.createBurst(12, px, e.y + originPoint.y(),
                     1f, 5f, MathUtils.PI / 3f, MathUtils.PI * 0.6666f);
+        }
+    }
+    
+    private void fireballRain(World w, Entity e, int manaCost, Vec2 originPoint) {
+        double px = e.facingRight ? e.x + originPoint.x() : e.x - originPoint.x();
+        double py = e.y + originPoint.y();
+        
+        if(useMana(manaCost)) {
+            int n = 3 + w.getRnd().nextInt(4);
+            float minAngle = (1.5f - 0.25f) * MathUtils.PI;
+            float maxAngle = (1.5f + 0.25f) * MathUtils.PI;
+            float inc = (maxAngle - minAngle) / (float)(n - 1);
+            float angle = minAngle;
+            for(int i = 0; i < n; i++) {
+                float a = angle + (float)w.getRnd().nextGaussian() * MathUtils.PI / 20; 
+                angle += inc;
+                float v = 18.5f + w.getRnd().nextFloat() * 6.5f;
+                Entity f = Entities.fireball(e.id(), 5 + w.getRnd().nextInt(10));
+                f.dx = MathUtils.cos(a) * v;
+                f.dy = MathUtils.sin(a)*v;
+                w.addEntity(f, px, py);
+            }
+        } else {
+            particleSrc.createBurst(12, px, py, 
+                    1f, 5f, (1.5f - (1f/6))*MathUtils.PI, (1.5f + (1f/6))*MathUtils.PI);
         }
     }
     

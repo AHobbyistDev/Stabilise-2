@@ -146,6 +146,19 @@ public class Region {
         offsetY = y * REGION_SIZE;
         
         lastSaved = worldAge;
+        
+        initSlices();
+    }
+    
+    /**
+     * Initialises this slices in this region. Invoked on construction.
+     */
+    public void initSlices() {
+        for(int y = 0; y < REGION_SIZE; y++) {
+            for(int x = 0; x < REGION_SIZE; x++) {
+                slices[y][x] = new Slice(x + offsetX, y + offsetY);
+            }
+        }
     }
     
     /**

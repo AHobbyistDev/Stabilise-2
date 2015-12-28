@@ -16,16 +16,12 @@ import com.stabilise.util.concurrent.task.TaskHandle;
 class TaskTesting {
     private TaskTesting() {}
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         test4();
     }
     
-    public static void test3() {
-        try {
-            System.out.println(Tasks.exec(() -> "Hello, world!").get());
-        } catch(InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+    public static void test3() throws Exception {
+        System.out.println(Tasks.exec(() -> "Hello, world!").get());
     }
     
     public static void test4() {

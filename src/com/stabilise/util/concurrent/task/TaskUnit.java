@@ -93,7 +93,7 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
         // immediately; instead, we wait for something to trigger publishing,
         // or force a publish after execution if nothing triggered it.
         
-        if(testCancel())
+        if(testCancel()) // cancel test no.1
             return;
         
         events.post(TaskEvent.START);
@@ -107,7 +107,7 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
         
         publish(); // force the publish here
         
-        if(testCancel())
+        if(testCancel()) // cancel test no.2
             return;
         
         if(!tracker.setState(State.RUNNING, State.COMPLETION_PENDING))
@@ -177,7 +177,7 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
         if(!canFinish())
             return;
         
-        if(testCancel())
+        if(testCancel()) // cancel test no.3
             return;
         
         //System.out.println("Completed \"" + status() + "\": " + tracker.getState());
@@ -197,11 +197,17 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
             unpublish();
     }
     
+    /**
+     * Checks for whether or not this unit is considered finished.
+     */
     private boolean isFinished() {
         State s = tracker.getState();
         return s == State.COMPLETED || s == State.FAILED;
     }
     
+    /**
+     * Fails this unit.
+     */
     private void fail(Throwable t) {
         //System.out.println("Failed \"" + status() + "\": " + tracker.getState());
         
@@ -216,7 +222,14 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
         
         // Clear the interrupt flag to prevent it from leaking if this thread
         // is reused as part of a pool.
-        Thread.interrupted();
+        // We conservatively synchronise to avoid the unlikely race condition
+        // with cancel() which can cause us to miss the interrupt.
+        // Race start in this method is at the very start when we CAS the
+        // tracker state to FAILED, and race end is where we clear the
+        // interrupt.
+        synchronized(tracker) {
+            Thread.interrupted();
+        }
         
         // Fail all the units that come sequentially after us so that
         // parent.subtasksFinished() returns true as appropriate
@@ -226,6 +239,16 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
         unpublish();
     }
     
+    /**
+     * "Prepublishes"/"minipublishes" this unit by invoking {@link
+     * Task#onUnitStart()} if this unit is the first in a recognisably distinct
+     * stream of tasks (i.e. a standalone parallel unit or the first in a
+     * sequential list).
+     * 
+     * <p>It is absolutely critical for proper task execution that every
+     * invocation of onUnitStart() has an associated invocation of {@link
+     * Task#onUnitStop()} (see {@link #unpublish()}).
+     */
     private void prepublish() {
         // Only invoke onUnitStart for parallel units and for the first unit in
         // a sequential list.
@@ -233,8 +256,10 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
             owner.onUnitStart();
     }
     
-    /** Publishes this unit to the public task stack, if it hasn't been
-     * published already. */
+    /**
+     * Publishes this unit to the public task stack, if it hasn't been
+     * published already.
+     */
     private void publish() {
         if(publishable && !published) {
             published = true;
@@ -245,6 +270,9 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
         }
     }
     
+    /**
+     * Unpublishes this unit from the public task, if applicable.
+     */
     private void unpublish() {
         owner.onUnitStop();
         
@@ -265,10 +293,14 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
      * has subtasks, also cancels the subtasks.
      */
     public void cancel() {
-        Thread t = thread;
-        State s = tracker.getState();
-        if(t != null && s == State.RUNNING)
-            t.interrupt();
+        // Synchronised to avoid a race condition with fail() to prevent
+        // the interrupt from leaking.
+        synchronized(this) {
+            Thread t = thread;
+            State s = tracker.getState();
+            if(t != null && s == State.RUNNING) // s == State.RUNNING is race start
+                t.interrupt();                  // t.interrupt() is race end
+        }
         
         // Cancel subtasks
         children.forEach(e -> {
@@ -277,6 +309,13 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
         });
     }
     
+    /**
+     * Polls for task cancellation, and invokes {@link #fail(Throwable)} if
+     * the task has been cancelled.
+     * 
+     * @return {@code true} if the task has been cancelled; {@code false} if
+     * not.
+     */
     private boolean testCancel() {
         if(owner.cancelled()) {
             fail(owner.failurePoint());
@@ -285,6 +324,9 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
         return false;
     }
     
+    /**
+     * Invoked by a subtask when a subtask stream is completed.
+     */
     private void onSubtaskComplete(TaskUnit sub) {
         if(numSubtasks.decrementAndGet() == 0)
             tryFinish();
@@ -333,7 +375,13 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
         spawn(parallel, 0, r);
     }
     
-    public void spawn(boolean parallel, long parts, TaskRunnable r) {
+    /**
+     * General version of {@link #spawn(boolean, TaskRunnable)}.
+     * 
+     * <p>TODO: Make spawned tasks report parts to the parent if the parent has
+     * incomplete parts left over.
+     */
+    private void spawn(boolean parallel, long parts, TaskRunnable r) {
         if(flattened != null) {
             if(parallel)
                 throw new IllegalArgumentException("Parallel not allowed while flattening");

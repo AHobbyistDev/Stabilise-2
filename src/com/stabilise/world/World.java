@@ -4,6 +4,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.entity.particle.ParticleManager;
+import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.maths.Maths;
@@ -126,6 +127,15 @@ public interface World extends WorldProvider {
      * Gets this world's particle manager.
      */
     ParticleManager getParticleManager();
+    
+    /**
+     * Gets a {@code ParticleSource} for particles of the specified type. This
+     * method is equivalent to - and provided as a convenient alternative for -
+     * {@link #getParticleManager()}{@code .getSource(particleClass)}.
+     */
+    default <T extends Particle> ParticleSource<T> particleSource(Class<T> particleClass) {
+        return getParticleManager().getSource(particleClass);
+    }
     
     /**
      * Gets this world's camera.

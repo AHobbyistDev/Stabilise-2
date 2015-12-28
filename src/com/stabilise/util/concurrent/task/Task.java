@@ -15,7 +15,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
 
-import com.stabilise.util.annotation.ForTestingPurposes;
 import com.stabilise.util.concurrent.Waiter;
 
 /**
@@ -45,7 +44,8 @@ public class Task implements TaskView {
     
     
     /**
-     * Instantiated only by TaskBuilder.
+     * Instantiated only by TaskBuilder. It is trusted that none of the
+     * arguments are null.
      */
     Task(Executor exec, TaskTracker tracker, TaskUnit firstUnit) {
         this.exec = exec;
@@ -104,6 +104,12 @@ public class Task implements TaskView {
         stackDirty = true;
     }
     
+    /**
+     * Gets the stack of currently running task units. This method may be
+     * useful if you wish to display a dynamically growing stack of loading
+     * bars for each unit in the stack. This method should be polled
+     * regularly as the stack will evolve with time.
+     */
     public synchronized TaskView[] getStack() {
         if(stackDirty) {
             stackDirty = false;
@@ -118,7 +124,10 @@ public class Task implements TaskView {
         return lastStack.clone();
     }
     
-    @ForTestingPurposes
+    /**
+     * Prints a graphical representation of the {@link #getStack() task stack}
+     * to the console.
+     */
     public void printStack() {
         TaskView[] view = getStack();
         StringBuilder sb = new StringBuilder();
@@ -176,7 +185,8 @@ public class Task implements TaskView {
      * Fails the task and brings down all currently-running units, if the task
      * hasn't failed or been cancelled already.
      * 
-     * @param failurePoint The throwable to treat as the casue of the failure.
+     * @param failurePoint The throwable to treat as the cause of the failure.
+     * May be null.
      */
     void fail(Throwable failurePoint) {
         // We'll restrict ourselves to a single failure cause since one task
@@ -308,6 +318,8 @@ public class Task implements TaskView {
      * waiting.
      */
     public boolean await(long time, TimeUnit unit) throws InterruptedException {
+        if(stopped())
+            return true;
         lock.lock();
         try {
             return cond.await(time, unit);
@@ -351,7 +363,7 @@ public class Task implements TaskView {
      * <p>This implementation behaves as if by:
      * 
      * <pre>
-     * return getStatus() + "... " + percentCompleted();
+     * return getStatus() + "... " + percentCompleted() + "%";
      * </pre>
      * 
      * which returns a string of the form:
@@ -376,7 +388,8 @@ public class Task implements TaskView {
     }
     
     /**
-     * Creates a new TaskBuilderBuilder.
+     * Creates a new TaskBuilderBuilder. Equivalent to {@code
+     * builder().executor(executor)}.
      * 
      * @param executor The executor with which to run the task.
      * 
