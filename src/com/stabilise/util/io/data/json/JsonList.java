@@ -48,6 +48,11 @@ public class JsonList extends AbstractDataList {
     }
     
     @Override
+    public ITag getTag(int index) {
+        return null;
+    }
+    
+    @Override
     public ITag getNext() {
         return null;
     }

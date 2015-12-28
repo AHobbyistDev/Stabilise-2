@@ -53,4 +53,11 @@ public abstract class AbstractCompound implements ITag, DataCompound {
             throw new IllegalStateException("Not in writer mode!");
     }
     
+    @Override
+    public DataCompound copy(Format format) {
+        AbstractCompound clone = format.newAbstractCompound();
+        putAll(clone);
+        return clone;
+    }
+    
 }

@@ -35,7 +35,7 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
     private final Executor exec;
     private volatile Thread thread = null;
     
-    private Task owner;
+    private TaskImpl owner;
     private boolean published;
     private final boolean publishable;
     private final boolean sequential;
@@ -437,7 +437,7 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
         this.next = unit;
     }
     
-    TaskUnit setOwner(Task owner) {
+    TaskUnit setOwner(TaskImpl owner) {
         this.owner = owner;
         return this;
     }

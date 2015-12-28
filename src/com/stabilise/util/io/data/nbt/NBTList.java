@@ -74,6 +74,11 @@ public class NBTList extends AbstractDataList {
     }
     
     @Override
+    public ITag getTag(int index) {
+        return data.get(index);
+    }
+    
+    @Override
     protected ITag getNext() {
         return data.get(index++);
     }

@@ -9,7 +9,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  * This class is provided to make implementation of tile entities a little
  * easier.
  */
-public abstract class TileTE extends Tile {
+public abstract class TileTE<T extends TileEntity> extends Tile {
     
     TileTE(TileBuilder b) {
         super(b);
@@ -24,7 +24,20 @@ public abstract class TileTE extends Tile {
      * 
      * @return The tile entity. Never null.
      */
-    protected abstract TileEntity createTE(int x, int y);
+    protected abstract T createTE(int x, int y);
+    
+    /**
+     * Gets the tile entity at (x,y).
+     * 
+     * @param x The x-coordinate, in tile-lengths.
+     * @param y The y-coordinate, in tile-lengths.
+     * 
+     * @throws ClassCastException if the tile entity is not of type T.
+     */
+    @SuppressWarnings("unchecked")
+    protected T getTE(WorldProvider world, int x, int y) {
+        return (T) world.getTileEntityAt(x, y);
+    }
     
     @Override
     public void handlePlace(WorldProvider world, int x, int y) {

@@ -8,7 +8,7 @@ import com.stabilise.world.tile.tileentity.TileEntityChest;
 /**
  * A chest tile.
  */
-public class TileChest extends TileTE {
+public class TileChest extends TileTE<TileEntityChest> {
     
     /**
      * Creates a chest tile.
@@ -26,7 +26,7 @@ public class TileChest extends TileTE {
     public void handleInteract(World world, int x, int y, Entity e) {
         super.handleInteract(world, x, y, e);
         
-        TileEntityChest c = (TileEntityChest)world.getTileEntityAt(x, y);
+        TileEntityChest c = getTE(world, x, y);
         // TODO: temporary
         if(c == null)
             Log.get().postWarning("The chest tile entity is missing!");

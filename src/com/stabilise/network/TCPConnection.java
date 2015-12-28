@@ -52,13 +52,14 @@ public class TCPConnection {
     private static final AtomicInteger CONNECTIONS_SERVER = new AtomicInteger(0);
     private static final AtomicInteger CONNECTIONS_CLIENT = new AtomicInteger(0);
     
-    private static final Protocol DEFAULT_PROTOCOL = Protocol.HANDSHAKE;
-    
     /** Number of ms between consecutive ping requests. */
     private static final long PING_INTERVAL = 1000;
     /** Number of ms before a connection disconnects automatically due to
      * large ping. */
     private static final long TIMEOUT_PING = 15000L;
+    
+    /** Default protocol for TCPConnections. */
+    public static Protocol defaultProtocol = Protocol.HANDSHAKE;
     
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
@@ -68,11 +69,11 @@ public class TCPConnection {
      * client-side. */
     public final boolean server;
     
-    /** The current connection protocol. Default is {@link #DEFAULT_PROTOCOL}.
+    /** The current connection protocol. Default is {@link #defaultProtocol}.
      * When this is changed via {@link #setProtocol(Protocol)} we send out a
      * packet to tell our peer, to ensure it doesn't try to handle packets we
      * send across the new protocol while it is still using the old one. */
-    private Protocol protocol = DEFAULT_PROTOCOL;
+    private Protocol protocol = defaultProtocol;
     /** Protocol being used by the read thread. This updates when our peer
      * sends us a {@link P254ProtocolSwitch} packet. This is only ever modified
      * by the read thread, and NOT the main thread. */
@@ -125,8 +126,8 @@ public class TCPConnection {
     
     
     /**
-     * Creates a new TCPConnection, using the {@link #DEFAULT_PROTOCOL
-     * handshake protocol} by default.
+     * Creates a new TCPConnection, using the {@link #defaultProtocol
+     * default protocol}.
      * 
      * @param socket The socket upon which to base the connection.
      * @param server Whether or not this is a server-side connection.
@@ -139,11 +140,11 @@ public class TCPConnection {
     }
     
     /**
-     * Creates a new TCPConnection, using the {@link #DEFAULT_PROTOCOL
-     * handshake protocol} by default.
+     * Creates a new TCPConnection, using the {@link #defaultProtocol
+     * default protocol}.
      * 
      * <p>If {@code protocolSyncListener} is non-null, it will be invoked with
-     * the {@link #DEFAULT_PROTOCOL default protocol} when {@link
+     * the {@link #defaultProtocol default protocol} when {@link
      * #update(PacketHandler)} is first invoked. If using this constructor is
      * not preferred, then as long as the listener is manually set through
      * {@link #setProtocolSyncListener(BiConsumer)} before {@code update()} is
@@ -176,7 +177,7 @@ public class TCPConnection {
         out = new DataOutStream(new BufferedOutputStream(//new DeflaterOutputStream(
                 socket.getOutputStream()));
         
-        readThread = new TCPReadThread((server ? "ServerReader" : "ClientReader") + id);
+        readThread  = new TCPReadThread ((server ? "ServerReader" : "ClientReader") + id);
         writeThread = new TCPWriteThread((server ? "ServerWriter" : "ClientWriter") + id);
     }
     
@@ -205,7 +206,7 @@ public class TCPConnection {
     void update(PacketHandler handler) {
         if(!hasInitiallySynced) {
             hasInitiallySynced = true;
-            if(protocol == DEFAULT_PROTOCOL)
+            if(protocol == defaultProtocol)
                 tryProtocolSync();
             else
                 log.postWarning("Unexpected protocol " + protocol);
@@ -310,7 +311,7 @@ public class TCPConnection {
      * <p>If {@link #update(PacketHandler)} has not yet been invoked on this
      * connection, then the specified listener (if it is non-null), will be
      * invoked upon the first invocation of {@code update()} with the {@link
-     * #DEFAULT_PROTOCOL default protocol}.
+     * #defaultProtocol default protocol}.
      * 
      * @param listener The listener. A value of {@code null} removes the
      * current listener, if there is one.

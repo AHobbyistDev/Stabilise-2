@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.SerializationException;
 import com.badlogic.gdx.utils.JsonValue.ValueType;
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.box.*;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
@@ -21,6 +22,7 @@ import com.stabilise.util.io.data.Format;
 import com.stabilise.util.io.data.ITag;
 
 
+@Incomplete
 public class JsonCompound extends AbstractMapCompound {
     
     private boolean dirty = true;
@@ -126,28 +128,19 @@ public class JsonCompound extends AbstractMapCompound {
     
     @Override
     public void readData(DataInStream in) throws IOException {
-        Reader r = null;
-        try {
-            r = new InputStreamReader(in);
+        try(Reader r = new InputStreamReader(in)) {
             fromJson(new JsonReader().parse(r));
         } catch(SerializationException e) {
             // Necessary because JsonReader.parse catches IOExceptions...
             // and spits them out as SerializationExceptions. >.<
             throw new IOException("Error reading JSON!", e);
-        } finally {
-            if(r != null)
-                r.close();
         }
     }
     
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        Writer w = null;
-        try {
-            w = new OutputStreamWriter(out);
+        try(Writer w = new OutputStreamWriter(out)) {
             w.write(toJson().toString());
-        } finally {
-            if(w != null) w.close();
         }
     }
     

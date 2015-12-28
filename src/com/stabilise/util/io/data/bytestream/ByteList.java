@@ -3,6 +3,7 @@ package com.stabilise.util.io.data.bytestream;
 import java.io.IOException;
 import java.util.function.Consumer;
 
+import com.stabilise.util.Checks;
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
@@ -61,6 +62,11 @@ public class ByteList extends AbstractDataList {
         } catch(IOException e) {
             throw new AssertionError("This shouldn't ever happen", e);
         }
+    }
+    
+    @Override
+    public ITag getTag(int index) {
+        throw Checks.unsupported();
     }
     
     @Override

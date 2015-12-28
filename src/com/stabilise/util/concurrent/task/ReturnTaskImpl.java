@@ -1,6 +1,7 @@
 package com.stabilise.util.concurrent.task;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -10,7 +11,26 @@ import java.util.concurrent.TimeoutException;
  * computation. Asides from its associated return value, a ReturnTask is
  * otherwise equivalent to an ordinary Task.
  */
-public interface ReturnTask<T> extends Task {
+public class ReturnTaskImpl<T> extends TaskImpl implements ReturnTask<T> {
+    
+    private final ReturnBox<T> retVal;
+    
+    
+    /**
+     * Instantiated only by TaskBuilder.
+     */
+    ReturnTaskImpl(Executor exec, TaskTracker tracker, TaskUnit firstUnit,
+            ReturnBox<T> retVal) {
+        super(exec, tracker, firstUnit);
+        this.retVal = retVal;
+    }
+    
+    // Overridden as to return ReturnTask<T> instead of Task
+    @Override
+    public ReturnTaskImpl<T> start() {
+        super.start();
+        return this;
+    }
     
     /**
      * Waits if necessary for this task to complete, and then retrieves the
@@ -20,7 +40,15 @@ public interface ReturnTask<T> extends Task {
      * waiting.
      * @throws ExecutionException if the task failed, or didn't set the result.
      */
-    T get() throws InterruptedException, ExecutionException;
+    public T get() throws InterruptedException, ExecutionException {
+        if(!await()) {
+            Throwable t = failCause.get();
+            throw new ExecutionException("Task did not complete successfully ("
+                        + (t == null ? "no reason given" : t.getMessage()) + ")",
+                        failCause.get());
+        }
+        return retVal.get(failCause);
+    }
     
     /**
      * Waits if necessary for this task to complete, and then retrieves the
@@ -36,8 +64,14 @@ public interface ReturnTask<T> extends Task {
      * @throws TimeoutException if the specified time elapsed before this task
      * could finish.
      */
-    T get(long time, TimeUnit unit) throws InterruptedException,
-            ExecutionException, TimeoutException;
+    public T get(long time, TimeUnit unit) throws InterruptedException,
+            ExecutionException, TimeoutException {
+        if(!await(time, unit))
+            throw new TimeoutException();
+        if(failed())
+            throw new ExecutionException("Task did not complete successfully", failCause.get());
+        return retVal.get(failCause);
+    }
     
     /**
      * Tries to get the result of this task without blocking.
@@ -45,6 +79,10 @@ public interface ReturnTask<T> extends Task {
      * @throws IllegalStateException if this task is not yet done, or failed.
      * @throws ExecutionException if the task didn't set the result.
      */
-    T tryGet() throws ExecutionException;
+    public T tryGet() throws ExecutionException {
+        if(!completed())
+            throw new IllegalStateException("Task not completed");
+        return retVal.get(failCause);
+    }
     
 }

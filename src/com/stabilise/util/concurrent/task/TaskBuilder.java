@@ -220,8 +220,8 @@ public final class TaskBuilder<R, T extends Task> {
         
         @SuppressWarnings("unchecked")
         T t = (T) (isReturnTask()
-                ? new ReturnTask<R>(executor, root.get(), first.unit, retBox)
-                : new Task         (executor, root.get(), first.unit));
+                ? new ReturnTaskImpl<R>(executor, root.get(), first.unit, retBox)
+                : new TaskImpl         (executor, root.get(), first.unit));
         
         return t;
     }

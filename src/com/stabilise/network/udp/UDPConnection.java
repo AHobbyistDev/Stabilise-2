@@ -17,6 +17,7 @@ public class UDPConnection {
     
     
     
+    
     @SuppressWarnings("resource")
     public static void server() throws IOException {
         DatagramSocket serverSocket = new DatagramSocket(9999);

@@ -64,6 +64,24 @@ public interface DataList extends Sendable, IContainerTag<DataList> {
     void add(byte[]  data);
     void add(int[]   data);
     
+    /** Gets the {@code index-th} tag in this list. This method should
+     * generally be ignored in favour of the specific getter methods. */
+    ITag getTag(int index) throws IndexOutOfBoundsException;
+    
+    DataCompound getCompound(int index) throws IndexOutOfBoundsException;
+    DataList     getList    (int index) throws IndexOutOfBoundsException;
+    boolean getBool   (int index) throws IndexOutOfBoundsException;
+    byte    getByte   (int index) throws IndexOutOfBoundsException;
+    char    getChar   (int index) throws IndexOutOfBoundsException;
+    double  getDouble (int index) throws IndexOutOfBoundsException;
+    float   getFloat  (int index) throws IndexOutOfBoundsException;
+    int     getInt    (int index) throws IndexOutOfBoundsException;
+    long    getLong   (int index) throws IndexOutOfBoundsException;
+    short   getShort  (int index) throws IndexOutOfBoundsException;
+    String  getString (int index) throws IndexOutOfBoundsException;
+    byte[]  getByteArr(int index) throws IndexOutOfBoundsException;
+    int[]   getIntArr (int index) throws IndexOutOfBoundsException;
+    
     DataCompound getCompound();
     DataList     getList();
     boolean getBool   ();
@@ -77,5 +95,13 @@ public interface DataList extends Sendable, IContainerTag<DataList> {
     String  getString ();
     byte[]  getByteArr();
     int[]   getIntArr ();
+    
+    /**
+     * Wraps this {@code DataList} in an {@code ImmutableList}, or returns this
+     * list if it is already immutable.
+     */
+    default ImmutableList immutable() {
+        return ImmutableList.wrap(this);
+    }
     
 }

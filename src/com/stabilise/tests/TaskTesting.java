@@ -114,8 +114,8 @@ class TaskTesting {
                 buf.append("!");
                 return buf.toString();
             })
-            .build().start();
-        Waiter waiter = task.waiter(5000, TimeUnit.MILLISECONDS);
+            .start();
+        Waiter waiter = task.waiter(500, TimeUnit.MILLISECONDS);
         loop: while(true) {
             switch(waiter.poll()) {
                 case COMPLETE:

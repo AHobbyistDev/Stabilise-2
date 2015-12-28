@@ -27,6 +27,13 @@ public abstract class AbstractDataList implements DataList, ITag {
     protected abstract ITag getNext();
     
     /**
+     * Gets a tag from this list.
+     * 
+     * @throws IndexOutOfBoundsException if {@code index} is out of range.
+     */
+    public abstract ITag getTag(int index);
+    
+    /**
      * Adds a tag to this list. Every insertion into this list must go through
      * this method.
      */
@@ -74,42 +81,52 @@ public abstract class AbstractDataList implements DataList, ITag {
     @Override public void add(byte[] data)       { addData(box(data)); }
     @Override public void add(int[] data)        { addData(box(data)); }
     
-    @Override public DataCompound getCompound() { return (DataCompound) getNext(); }
-    @Override public DataList getList()         { return (DataList) getNext(); }
-    @Override public boolean getBool()          { return ((BoolBox)getNext()).get(); }
-    @Override public byte    getByte()          { return ((ByteBox)getNext()).get(); }
-    @Override public char    getChar()          { return ((CharBox)getNext()).get(); }
-    @Override public double  getDouble()        { return ((DoubleBox)getNext()).get(); }
-    @Override public float   getFloat()         { return ((FloatBox)getNext()).get(); }
-    @Override public int     getInt()           { return ((IntBox)getNext()).get(); }
-    @Override public long    getLong()          { return ((LongBox)getNext()).get(); }
-    @Override public short   getShort()         { return ((ShortBox)getNext()).get(); }
-    @Override public String  getString()        { return ((StringBox)getNext()).get(); }
-    @Override public byte[]  getByteArr()       { return ((ByteArrBox)getNext()).get(); }
-    @Override public int[]   getIntArr()        { return ((IntArrBox)getNext()).get(); }
+    @Override public DataCompound getCompound(int i) { return (DataCompound)getTag(i);        }
+    @Override public DataList getList(int i)         { return (DataList)    getTag(i);        }
+    @Override public boolean getBool(int i)          { return ((BoolBox)    getTag(i)).get(); }
+    @Override public byte    getByte(int i)          { return ((ByteBox)    getTag(i)).get(); }
+    @Override public char    getChar(int i)          { return ((CharBox)    getTag(i)).get(); }
+    @Override public double  getDouble(int i)        { return ((DoubleBox)  getTag(i)).get(); }
+    @Override public float   getFloat(int i)         { return ((FloatBox)   getTag(i)).get(); }
+    @Override public int     getInt(int i)           { return ((IntBox)     getTag(i)).get(); }
+    @Override public long    getLong(int i)          { return ((LongBox)    getTag(i)).get(); }
+    @Override public short   getShort(int i)         { return ((ShortBox)   getTag(i)).get(); }
+    @Override public String  getString(int i)        { return ((StringBox)  getTag(i)).get(); }
+    @Override public byte[]  getByteArr(int i)       { return ((ByteArrBox) getTag(i)).get(); }
+    @Override public int[]   getIntArr(int i)        { return ((IntArrBox)  getTag(i)).get(); }
+    
+    @Override public DataCompound getCompound() { return (DataCompound)getNext();        }
+    @Override public DataList getList()         { return (DataList)    getNext();        }
+    @Override public boolean getBool()          { return ((BoolBox)    getNext()).get(); }
+    @Override public byte    getByte()          { return ((ByteBox)    getNext()).get(); }
+    @Override public char    getChar()          { return ((CharBox)    getNext()).get(); }
+    @Override public double  getDouble()        { return ((DoubleBox)  getNext()).get(); }
+    @Override public float   getFloat()         { return ((FloatBox)   getNext()).get(); }
+    @Override public int     getInt()           { return ((IntBox)     getNext()).get(); }
+    @Override public long    getLong()          { return ((LongBox)    getNext()).get(); }
+    @Override public short   getShort()         { return ((ShortBox)   getNext()).get(); }
+    @Override public String  getString()        { return ((StringBox)  getNext()).get(); }
+    @Override public byte[]  getByteArr()       { return ((ByteArrBox) getNext()).get(); }
+    @Override public int[]   getIntArr()        { return ((IntArrBox)  getNext()).get(); }
     
     // From ValueExportable
     @Override
     public void io(String name, DataCompound o, boolean write) {
-        if(write)
-            o.put(name, this);
-        else
-            o.optList(name).peek((l) -> ((AbstractDataList)l).putAll(this));
+        if(write) o.put(name, this);
+        else      o.optList(name).peek(l -> ((AbstractDataList)l).putAll(this));
     }
     
     // From ValueExportable
     @Override
     public void io(DataList l, boolean write) {
-        if(write) {
-            l.add(this);
-        } else {
-            ((AbstractDataList) l.createList()).putAll(this);
-        }
+        if(write) l.add(this);
+        else      ((AbstractDataList) l.createList()).putAll(this);
     }
     
     @Override
     public DataList convert(Format format) {
-        if(format.sameTypeAs(format())) return this;
+        if(format.sameTypeAs(format()))
+            return this;
         AbstractDataList l = (AbstractDataList) format.newList();
         putAll(l);
         return l;

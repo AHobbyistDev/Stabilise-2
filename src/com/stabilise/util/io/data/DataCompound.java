@@ -168,4 +168,26 @@ public interface DataCompound extends Sendable, IContainerTag<DataCompound> {
      */
     void setWriteMode();
     
+    /**
+     * Clones this DataCompound.
+     */
+    default DataCompound copy() {
+        return copy(format());
+    }
+    
+    /**
+     * Clones this DataCompound.
+     * 
+     * @param format The desired format of the clone.
+     */
+    DataCompound copy(Format format);
+    
+    /**
+     * Wraps this {@code DataCompound} in an {@code ImmutableCompound}, or
+     * returns this compound if it is already immutable.
+     */
+    default ImmutableCompound immutable() {
+        return ImmutableCompound.wrap(this);
+    }
+    
 }

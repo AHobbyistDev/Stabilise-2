@@ -1,6 +1,5 @@
 package com.stabilise.world.tile;
 
-import com.stabilise.world.tile.tileentity.TileEntity;
 import com.stabilise.world.tile.tileentity.TileEntityMobSpawner;
 
 /**
@@ -8,14 +7,14 @@ import com.stabilise.world.tile.tileentity.TileEntityMobSpawner;
  * 
  * @see TileEntityMobSpawner
  */
-public class TileMobSpawner extends TileTE {
+public class TileMobSpawner extends TileTE<TileEntityMobSpawner> {
     
     public TileMobSpawner(TileBuilder b) {
         super(b);
     }
     
     @Override
-    public TileEntity createTE(int x, int y) {
+    public TileEntityMobSpawner createTE(int x, int y) {
         return new TileEntityMobSpawner(x, y);
     }
     

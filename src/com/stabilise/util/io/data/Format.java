@@ -108,10 +108,12 @@ public enum Format {
         return listSup.get();
     }
     
+    /** Convenience package-local method. */
     AbstractCompound newAbstractCompound() {
         return compoundSup.get();
     }
     
+    /** Convenience package-local method. */
     AbstractDataList newAbstractList() {
         return listSup.get();
     }

@@ -22,8 +22,8 @@ import com.stabilise.util.box.ShortBox;
 import com.stabilise.util.box.StringBox;
 
 /**
- * Skeletal implementation for a DataCompound backed by a hash map. This class
- * should never be referred to directly by client code.
+ * Implementation for a DataCompound backed by a hash map. This class should
+ * never be referred to directly by client code.
  */
 public abstract class AbstractMapCompound extends AbstractCompound {
     

@@ -6,11 +6,20 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.util.Deque;
+import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.google.common.io.Files;
+import com.stabilise.util.Checks;
+import com.stabilise.util.Log;
 import com.stabilise.util.io.data.Compression;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.Format;
@@ -301,6 +310,145 @@ public class IOUtil {
         
         return bcs.byteCount();
     }
+    
+    /**
+     * Exports a file (or directory and its contents) to a ZIP file.
+     * 
+     * @param dir The file/directory to export.
+     * @param zipFile The file to export to.
+     * 
+     * @throws NullPointerException if either argument is {@code null}.
+     * @throws IOException if an I/O error occurs.
+     * @see #unzip(FileHandle, FileHandle)
+     */
+    public static void zip(FileHandle dir, FileHandle zipFile) throws IOException {
+        URI base = dir.file().toURI();
+        
+        Deque<FileHandle> queue = new LinkedList<>();
+        queue.push(dir);
+        
+        OutputStream out = null;
+        ZipOutputStream zout = null;
+        
+        try {
+            out = zipFile.write(false);
+            zout = new ZipOutputStream(out);
+            
+            while(!queue.isEmpty()) {
+                dir = queue.pop();
+                
+                for(FileHandle f : dir.list()) {
+                    String name = base.relativize(f.file().toURI()).getPath();
+                    if(f.isDirectory()) {
+                        queue.push(f);
+                        name = name.endsWith("/") ? name : name + "/";
+                        zout.putNextEntry(new ZipEntry(name));
+                    } else {
+                        zout.putNextEntry(new ZipEntry(name));
+                        copy(f, zout);
+                        zout.closeEntry();
+                    }
+                }
+            }
+        } finally {
+            if(zout != null) zout.close();
+            else if(out != null) out.close();
+        }
+    }
+    
+    /**
+     * Imports a file or directory from a zip file.
+     * 
+     * @param zipFile The file to import from.
+     * @param dir The file or directory to import to.
+     * 
+     * @throws NullPointerException if either argument is {@code null}.
+     * @throws IOException if an I/O error occurs.
+     * @see #zip(FileHandle, FileHandle)
+     */
+    public static void unzip(FileHandle zipFile, FileHandle dir) throws IOException {
+        try(ZipFile zFile = new ZipFile(zipFile.file())) {
+            Enumeration<? extends ZipEntry> entries = zFile.entries();
+            while(entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                FileHandle file = dir.child(entry.getName());
+                if(entry.isDirectory()) {
+                    file.mkdirs();
+                } else {
+                    file.parent().mkdirs();
+                    try(InputStream in = zFile.getInputStream(entry)) {
+                        copy(in, file);
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Sets the size of the byte buffer to use for copying, in {@link
+     * #copy(InputStream, OutputStream)}. The default value is 1024*1024 (1MB).
+     * 
+     * @throws IllegalArgumentException if {@code size <= 0}.
+     * @see #copy(FileHandle, OutputStream)
+     * @see #copy(FileHandle, OutputStream)
+     * @see #copy(InputStream, FileHandle)
+     */
+    public static void setCopyBuffer(int size) {
+        bufSize = Checks.testMin(size, 1);
+        if(size < 1024)
+            Log.get().postWarning("Very small buffer size set! " + size + " < 1024 (1kb)");
+    }
+    
+    private static int bufSize = 1024*1024; // 1MB
+    
+    /**
+     * Copies everything from {@code in} into {@code out}.
+     * 
+     * @throws NullPointerException if either argument is {@code null}.
+     * @throws IOException if an I/O error occurs.
+     * @see #setCopyBuffer(int)
+     */
+    public static void copy(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[bufSize];
+        while(true) {
+            int readCount = in.read(buffer);
+            if(readCount < 0)
+                break;
+            out.write(buffer, 0, readCount);
+        }
+    }
+    
+    /**
+     * Copies everything from {@code in} into {@code out}.
+     * 
+     * @throws NullPointerException if either argument is {@code null}.
+     * @throws IOException if an I/O error occurs.
+     * @see #copy(InputStream, OutputStream)
+     * @see #setCopyBuffer(int)
+     */
+    public static void copy(FileHandle in, OutputStream out) throws IOException {
+        try(InputStream is = in.read()) {
+            copy(is, out);
+        }
+    }
+    
+    /**
+     * Copies everything from {@code in} into {@code out}.
+     * 
+     * @throws NullPointerException if either argument is {@code null}.
+     * @throws IOException if an I/O error occurs.
+     * @see #copy(InputStream, OutputStream)
+     * @see #setCopyBuffer(int)
+     */
+    public static void copy(InputStream in, FileHandle out) throws IOException {
+        try(OutputStream os = out.write(false)) {
+            copy(in, os);
+        }
+    }
+    
+    //--------------------==========--------------------
+    //-------------=====Nested Classes=====-------------
+    //--------------------==========--------------------
     
     /**
      * A alternative utility interface to {@link java.util.function.Consumer

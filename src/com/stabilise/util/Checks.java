@@ -231,29 +231,37 @@ public class Checks {
     
     /**
      * Throws an AssertionError.
+     * 
+     * @return ignored
      */
-    public static void badAssert() {
+    public static AssertionError badAssert() {
         throw new AssertionError();
     }
     
     /**
      * Throws an AssertionError with the specified message.
+     * 
+     * @return ignored
      */
-    public static void badAssert(String msg) {
+    public static AssertionError badAssert(String msg) {
         throw new AssertionError(msg);
     }
     
     /**
      * Throws an UnsupportedOperationException.
+     * 
+     * @return ignored
      */
-    public static void unsupported() {
+    public static UnsupportedOperationException unsupported() {
         throw new UnsupportedOperationException();
     }
     
     /**
      * Throws an UnsupportedOperationException with the specified message.
+     * 
+     * @return ignored
      */
-    public static void unsupported(String msg) {
+    public static UnsupportedOperationException unsupported(String msg) {
         throw new UnsupportedOperationException(msg);
     }
     

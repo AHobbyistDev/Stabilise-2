@@ -106,6 +106,8 @@ public interface TaskHandle {
      * @throws NullPointerException if {@code r} is {@code null}.
      * @throws IllegalArgumentException if {@code parallel} is {@code true},
      * and subtasks are being {@link #beginFlatten() flattened}.
+     * @throws UnsupportedOperationException if this is a lightweight task that
+     * cannot spawn subtasks.
      */
     void spawn(boolean parallel, TaskRunnable r);
     
@@ -117,6 +119,8 @@ public interface TaskHandle {
      * perspective of {@link Task#getStack()}.
      * 
      * @throws IllegalStateException if flattening is already in progress.
+     * @throws UnsupportedOperationException if this is a lightweight task that
+     * cannot spawn subtasks.
      */
     void beginFlatten();
     
@@ -125,6 +129,8 @@ public interface TaskHandle {
      * 
      * @throws IllegalStateException if flattening is not currently in
      * progress.
+     * @throws UnsupportedOperationException if this is a lightweight task that
+     * cannot spawn subtasks.
      */
     void endFlatten();
     
