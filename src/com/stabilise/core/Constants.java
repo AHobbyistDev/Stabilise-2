@@ -2,7 +2,6 @@ package com.stabilise.core;
 
 import static com.stabilise.util.io.data.Compression.*;
 import static com.stabilise.util.io.data.Format.*;
-
 import javaslang.control.Try;
 
 import com.badlogic.gdx.files.FileHandle;
@@ -11,6 +10,7 @@ import com.stabilise.util.Version;
 import com.stabilise.util.io.IOUtil;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.nbt.NBTCompound;
+import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
 
 /**
@@ -57,8 +57,11 @@ public class Constants {
      * threads if possible. */ // This may be temporary
     public static final boolean CONCURRENT_DIMENSIONS = true;
     
-    public static final int LOADED_TILE_RADIUS = 6 * 16;
-    public static final int LOADED_TILE_BUFFER = 3 * 16;
+    public static final int SLICE_SIZE = Slice.SLICE_SIZE;
+    public static final int REGION_SIZE = Region.REGION_SIZE;
+    
+    public static final int LOADED_TILE_RADIUS = 6 * SLICE_SIZE;
+    public static final int LOADED_TILE_BUFFER = 3 * SLICE_SIZE;
     /** The half-length of an edge of the square of loaded slices around the
      * player. */
     public static final int LOADED_SLICE_RADIUS = LOADED_TILE_RADIUS / Slice.SLICE_SIZE;
@@ -119,8 +122,6 @@ public class Constants {
                 } else {
                     tag = new NBTCompound();
                 }
-                
-                System.out.println(tag.toString());
                 
                 String[] fieldNames = { "major", "minor", "patch" };
                 int[] fields = { version.major(), version.minor(), version.patch() };

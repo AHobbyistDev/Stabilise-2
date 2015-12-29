@@ -48,7 +48,7 @@ public class Stabilise extends Application {
     
     @Override
     protected void init() {
-        Log.get().postInfo("Starting name... " + GAME_NAME + " " + Constants.VERSION);
+        Log.get().postInfo("Starting game: " + GAME_NAME + " " + Constants.VERSION);
     }
     
     @Override

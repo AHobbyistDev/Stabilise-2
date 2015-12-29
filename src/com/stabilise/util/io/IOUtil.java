@@ -2,6 +2,8 @@ package com.stabilise.util.io;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -384,7 +386,7 @@ public class IOUtil {
     
     /**
      * Sets the size of the byte buffer to use for copying, in {@link
-     * #copy(InputStream, OutputStream)}. The default value is 1024*1024 (1MB).
+     * #copy(InputStream, OutputStream)}. The default value is 8192 (8kb).
      * 
      * @throws IllegalArgumentException if {@code size <= 0}.
      * @see #copy(FileHandle, OutputStream)
@@ -397,7 +399,7 @@ public class IOUtil {
             Log.get().postWarning("Very small buffer size set! " + size + " < 1024 (1kb)");
     }
     
-    private static int bufSize = 1024*1024; // 1MB
+    private static int bufSize = 8*1024; // 8kb
     
     /**
      * Copies everything from {@code in} into {@code out}.
@@ -407,12 +409,29 @@ public class IOUtil {
      * @see #setCopyBuffer(int)
      */
     public static void copy(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[bufSize];
-        while(true) {
-            int readCount = in.read(buffer);
-            if(readCount < 0)
-                break;
-            out.write(buffer, 0, readCount);
+        byte[] buf = new byte[bufSize];
+        int count;
+        while((count = in.read(buf)) > 0) {
+            out.write(buf, 0, count);
+        }
+    }
+    
+    /**
+     * Copies up to {@code bytes} bytes from {@code in} into {@code out}.
+     * 
+     * @throws NullPointerException if any argument is {@code null}.
+     * @throws IllegalArgumentException if {@code bytes < 0}.
+     * @throws IOException if an I/O error occurs.
+     * @see #setCopyBuffer(int)
+     */
+    public static void copy(InputStream in, OutputStream out, long bytes) throws IOException {
+        Checks.testMin(bytes, 0);
+        int len = bufSize;
+        byte[] buf = new byte[len];
+        int count;
+        while((count = in.read(buf, 0, (int)Math.min(len, bytes))) > 0) {
+            out.write(buf, 0, count);
+            bytes -= count;
         }
     }
     
@@ -441,6 +460,33 @@ public class IOUtil {
     public static void copy(InputStream in, FileHandle out) throws IOException {
         try(OutputStream os = out.write(false)) {
             copy(in, os);
+        }
+    }
+    
+    /**
+     * Sends a file ({@code in}) across {@code out}.
+     * 
+     * @throws NullPointerException if either argument is {@code null}.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static void sendFile(FileHandle in, DataOutputStream out) throws IOException {
+        long bytes = in.length();
+        out.writeLong(bytes);
+        try(InputStream is = in.read()) {
+            copy(is, out, bytes);
+        }
+    }
+    
+    /**
+     * Receivs a file ({@code out}) from {@code in}.
+     * 
+     * @throws NullPointerException if either argument is {@code null}.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static void receiveFile(DataInputStream in, FileHandle out) throws IOException {
+        long bytes = in.readLong();
+        try(OutputStream os = out.write(false)) {
+            copy(in, os, bytes);
         }
     }
     
