@@ -8,6 +8,7 @@ import com.stabilise.core.Constants;
 import com.stabilise.network.Packet;
 import com.stabilise.network.TCPConnection;
 import com.stabilise.network.protocol.PacketHandler;
+import com.stabilise.util.Version;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 
@@ -33,12 +34,12 @@ public class C000VersionInfo extends Packet {
     
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        out.writeInt(senderVersion.release());
-        out.writeInt(senderVersion.patchMajor());
-        out.writeInt(senderVersion.patchMinor());
-        out.writeInt(senderBackwardsVersion.release());
-        out.writeInt(senderBackwardsVersion.patchMajor());
-        out.writeInt(senderBackwardsVersion.patchMinor());
+        out.writeInt(senderVersion.major());
+        out.writeInt(senderVersion.minor());
+        out.writeInt(senderVersion.patch());
+        out.writeInt(senderBackwardsVersion.major());
+        out.writeInt(senderBackwardsVersion.minor());
+        out.writeInt(senderBackwardsVersion.patch());
     }
     
     /**

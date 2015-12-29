@@ -401,7 +401,7 @@ public abstract class Shape {
     //--------------------==========--------------------
     
     /**
-     * A VertexFunction is a special function 
+     * A VertexFunction is a special function which transforms a vertex.
      */
     @FunctionalInterface
     public static interface VertexFunction {

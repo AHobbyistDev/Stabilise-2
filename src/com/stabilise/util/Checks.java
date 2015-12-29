@@ -231,8 +231,6 @@ public class Checks {
     
     /**
      * Throws an AssertionError.
-     * 
-     * @return ignored
      */
     public static AssertionError badAssert() {
         throw new AssertionError();
@@ -240,8 +238,6 @@ public class Checks {
     
     /**
      * Throws an AssertionError with the specified message.
-     * 
-     * @return ignored
      */
     public static AssertionError badAssert(String msg) {
         throw new AssertionError(msg);
@@ -249,8 +245,6 @@ public class Checks {
     
     /**
      * Throws an UnsupportedOperationException.
-     * 
-     * @return ignored
      */
     public static UnsupportedOperationException unsupported() {
         throw new UnsupportedOperationException();
@@ -258,8 +252,6 @@ public class Checks {
     
     /**
      * Throws an UnsupportedOperationException with the specified message.
-     * 
-     * @return ignored
      */
     public static UnsupportedOperationException unsupported(String msg) {
         throw new UnsupportedOperationException(msg);

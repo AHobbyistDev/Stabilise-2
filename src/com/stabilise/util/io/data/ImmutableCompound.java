@@ -151,9 +151,14 @@ public class ImmutableCompound implements DataCompound {
         Checks.unsupported();
     }
     
+    /**
+     * {@inheritDoc}
+     * 
+     * <p>Note: does not wrap the returned compound in an ImmutableCompound.
+     */
     @Override
     public DataCompound copy(Format format) {
-        return new ImmutableCompound(compound.copy(format));
+        return compound.copy(format);
     }
     
 }

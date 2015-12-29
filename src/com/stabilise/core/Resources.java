@@ -12,10 +12,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.stabilise.util.Log;
-import com.stabilise.util.io.IOUtil;
-import com.stabilise.util.io.data.Compression;
-import com.stabilise.util.io.data.DataCompound;
-import com.stabilise.util.io.data.Format;
 
 /**
  * Manages application resources.

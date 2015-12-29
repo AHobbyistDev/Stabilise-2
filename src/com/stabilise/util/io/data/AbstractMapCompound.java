@@ -2,6 +2,7 @@ package com.stabilise.util.io.data;
 
 import static com.stabilise.util.box.Boxes.box;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -212,7 +213,8 @@ public abstract class AbstractMapCompound extends AbstractCompound {
         String pre = prefix + "    ";
         StringBuilder sb = new StringBuilder("[\n");
         
-        for(Map.Entry<String, ITag> e : data.entrySet()) {
+        for(Iterator<Map.Entry<String, ITag>> itr = data.entrySet().iterator(); itr.hasNext();) {
+            Map.Entry<String, ITag> e = itr.next();
             sb.append(pre);
             sb.append("\"");
             sb.append(e.getKey());
@@ -221,7 +223,9 @@ public abstract class AbstractMapCompound extends AbstractCompound {
                 sb.append(((AbstractMapCompound) e.getValue()).toString(pre));
             else
                 sb.append(e.getValue().toString());
-            sb.append(",\n");
+            if(itr.hasNext())
+                sb.append(',');
+            sb.append('\n');
         }
         
         sb.append(prefix);

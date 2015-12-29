@@ -280,11 +280,26 @@ public abstract class Application {
                 state.predispose();
                 state.dispose();
             }
+            unload();
         } catch(Throwable t) {
             crash(t);
         }
         
         executor.shutdownNow();
+    }
+    
+    /**
+     * Disposes the application. Subclasses may override this to dispose of
+     * any global state when the application is closed.
+     * 
+     * <p>This method is invoked when the application is shut down, immediately
+     * after {@link State#dispose()} is invoked on the current state.
+     * 
+     * <p>This method does nothing in the default implementation and may be
+     * optionally overridden.
+     */
+    protected void unload() {
+        // nothing in the default implementation
     }
     
     /**

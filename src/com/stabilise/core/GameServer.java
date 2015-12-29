@@ -18,6 +18,7 @@ import com.stabilise.network.protocol.login.C000Login;
 import com.stabilise.network.protocol.login.IServerLogin;
 import com.stabilise.world.multiverse.HostMultiverse;
 
+@Deprecated
 public class GameServer extends Server implements IServerHandshake, IServerLogin {
     
     public final HostMultiverse provider;

@@ -3,8 +3,9 @@ package com.stabilise.util.concurrent.event;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
+
 /**
- * Package-private class encapsulating a registered listener.
+ * This class encapsulates a registered event listener.
  */
 class Listener<E extends Event> {
     
@@ -41,5 +42,6 @@ class Listener<E extends Event> {
     public final void execute(E e) {
         executor.execute(() -> handler.accept(e));
     }
+    
     
 }

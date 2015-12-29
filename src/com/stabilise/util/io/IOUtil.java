@@ -172,8 +172,6 @@ public class IOUtil {
      * @throws NullPointerException if {@code str} is {@code null}.
      */
     public static String getLegalString(String str) {
-        // See String#replaceAll() - I just pulled the regex out to avoid
-        // needing to repeatedly recompile.
         return ILLEGAL_FILENAME_REGEX.matcher(str).replaceAll("_");
     }
     
