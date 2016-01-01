@@ -37,7 +37,7 @@ public class GameServer extends Server implements IServerHandshake, IServerLogin
      */
     public GameServer(HostMultiverse world, int maxPlayers) {
         super(Constants.TICKS_PER_SECOND, (s) -> {
-            return new ServerTCPConnection(s);
+            return new ServerTCPConnection(s, Protocol.HANDSHAKE);
         });
         
         if(maxPlayers < 1)

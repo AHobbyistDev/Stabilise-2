@@ -115,9 +115,13 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
      * {@link #run()} or {@link #runConcurrently()}, as for this a {@code
      * ticksPerSecond} value must be specified. For this, refer to the other
      * constructor: {@link #Server(int)}.
+     * 
+     * @param initialProtocol The initial connection protocol.
+     * 
+     * @throws NullPointerException if {@code initialProtocol} is {@code null}.
      */
-    public Server() {
-        this(s -> new TCPConnection(s, true));
+    public Server(Protocol initialProtocol) {
+        this(s -> new TCPConnection(s, true, initialProtocol));
     }
     
     /**
@@ -125,11 +129,13 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
      * 
      * @param ticksPerSecond The number of update ticks per second to perform
      * while running as per {@link #run()} or {@link #runConcurrently()}.
+     * @param initialProtocol The initial connection protocol.
      * 
      * @throws IllegalArgumentException if {@code ticksPerSecond < 1}.
+     * @throws NullPointerException if {@code initialProtocol} is {@code null}.
      */
-    public Server(int ticksPerSecond) {
-        this(ticksPerSecond, s -> new TCPConnection(s, true));
+    public Server(int ticksPerSecond, Protocol initialProtocol) {
+        this(ticksPerSecond, s -> new TCPConnection(s, true, initialProtocol));
     }
     
     /**
@@ -154,6 +160,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
      * 
      * @param ticksPerSecond The number of update ticks per second to perform
      * while running as per {@link #run()} or {@link #runConcurrently()}.
+     * @param initialProtocol The initial connection protocol.
      * @param clientFactory The factory to use to create clients.
      * 
      * @throws NullPointerException if {@code clientFactory} is {@code null}.

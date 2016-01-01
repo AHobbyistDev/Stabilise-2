@@ -40,7 +40,7 @@ public class GameClient extends Client implements IClientHandshake, IClientLogin
     private WorldLoadHandle loadHandle;
     
     public GameClient(InetAddress address, int port) {
-        super(address, port);
+        super(address, port, Protocol.HANDSHAKE);
     }
     
     @Override

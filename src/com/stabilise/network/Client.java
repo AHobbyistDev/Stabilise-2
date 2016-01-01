@@ -36,45 +36,48 @@ public abstract class Client implements PacketHandler {
     /** The underlying connection. This is null if every connection attempt
      * has failed. */
     private TCPConnection connection;
+    private final Protocol initialProtocol;
     
     protected final Log log = Log.getAgent("CLIENT");
     
     
     /**
-     * Creates a new client to connect to the specified IP address and port,
-     * and immediately {@link #connect() connects}.
+     * Creates a new client to connect to the specified IP address and port.
      * 
      * @param address The IP to connect to.
      * @param port The port to use.
+     * @param initialProtocol The initial protocol.
      * 
-     * @throws NullPointerException if {@code address} is {@code null}.
+     * @throws NullPointerException if either {@code address} or {@code
+     * initialProtocol} are {@code null}.
      * @throws IllegalArgumentException if the port parameter is outside the
      * range of valid port values, which is between 0 and 65535, inclusive.
      */
-    public Client(InetAddress address, int port) {
-        this(address, port, null);
+    public Client(InetAddress address, int port, Protocol initialProtocol) {
+        this(address, port, initialProtocol, null);
     }
     
     /**
-     * Creates a new client to connect to the specified IP address and port,
-     * and immediately {@link #connect() connects}.
+     * Creates a new client to connect to the specified IP address and port.
      * 
      * @param address The IP to connect to.
      * @param port The port to use.
+     * @param initialProtocol The initial protocol.
      * @param The packet handler to use. If {@code null}, this client is used
      * as its own handler.
      * 
-     * @throws NullPointerException if {@code address} is {@code null}.
+     * @throws NullPointerException if either {@code address} or {@code
+     * initialProtocol} are {@code null}.
      * @throws IllegalArgumentException if the port parameter is outside the
      * specified range of valid port values, which is between 0 and 65535,
      * inclusive.
      */
-    public Client(InetAddress address, int port, PacketHandler handler) {
+    public Client(InetAddress address, int port, Protocol initialProtocol,
+            PacketHandler handler) {
         this.address = Objects.requireNonNull(address);
         this.port = port;
+        this.initialProtocol = Objects.requireNonNull(initialProtocol);
         this.handler = handler == null ? this : handler;
-        
-        connect();
     }
     
     /**
@@ -91,7 +94,8 @@ public abstract class Client implements PacketHandler {
             // some sense of continuity in handleProtocolSwitch() when it is
             // first invoked.
             state = STATE_CONNECTED;
-            connection = new TCPConnection(socket, false, this::handleProtocolSwitch);
+            connection = new TCPConnection(socket, false, initialProtocol,
+                    this::handleProtocolSwitch);
             connection.open();
         } catch(IOException e) {
             state = STATE_DISCONNECTED;

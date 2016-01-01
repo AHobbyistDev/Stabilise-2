@@ -69,11 +69,11 @@ public class TCPConnection {
      * client-side. */
     public final boolean server;
     
-    /** The current connection protocol. Default is {@link #defaultProtocol}.
-     * When this is changed via {@link #setProtocol(Protocol)} we send out a
-     * packet to tell our peer, to ensure it doesn't try to handle packets we
-     * send across the new protocol while it is still using the old one. */
-    private Protocol protocol = defaultProtocol;
+    /** The current connection protocol. When this is changed via {@link
+     * #setProtocol(Protocol)} we send out a packet to tell our peer, to
+     * ensure it doesn't try to handle packets we send across the new protocol
+     * while it is still using the old one. */
+    private Protocol protocol;
     /** Protocol being used by the read thread. This updates when our peer
      * sends us a {@link P254ProtocolSwitch} packet. This is only ever modified
      * by the read thread, and NOT the main thread. */
@@ -126,22 +126,22 @@ public class TCPConnection {
     
     
     /**
-     * Creates a new TCPConnection, using the {@link #defaultProtocol
-     * default protocol}.
+     * Creates a new TCPConnection.
      * 
      * @param socket The socket upon which to base the connection.
      * @param server Whether or not this is a server-side connection.
+     * @param initialProtocol The starting protocol to use.
      * 
-     * @throws NullPointerException if {@code socket} is {@code null}.
+     * @throws NullPointerException if any argument is {@code null}.
      * @throws IOException if the connection could not be established.
      */
-    public TCPConnection(Socket socket, boolean server) throws IOException {
-        this(socket, server, null);
+    public TCPConnection(Socket socket, boolean server, Protocol initialProtocol)
+            throws IOException {
+        this(socket, server, initialProtocol, null);
     }
     
     /**
-     * Creates a new TCPConnection, using the {@link #defaultProtocol
-     * default protocol}.
+     * Creates a new TCPConnection.
      * 
      * <p>If {@code protocolSyncListener} is non-null, it will be invoked with
      * the {@link #defaultProtocol default protocol} when {@link
@@ -153,17 +153,20 @@ public class TCPConnection {
      * 
      * @param socket The socket upon which to base the connection.
      * @param server Whether or not this is a server-side connection.
+     * @param initialProtocol The starting protocol to use.
      * @param protocolSyncListener This connection's {@link
      * #setProtocolSyncListener(BiConsumer) protocol synchronisation listener}.
      * This is allowed to be {@code null}.
      * 
-     * @throws NullPointerException if {@code socket} is {@code null}.
+     * @throws NullPointerException if either {@code socket} or {@code
+     * initialProtocol} are {@code null}.
      * @throws IOException if the connection could not be established.
      */
-    public TCPConnection(Socket socket, boolean server,
+    public TCPConnection(Socket socket, boolean server, Protocol initialProtocol,
             BiConsumer<TCPConnection, Protocol> protocolSyncListener) throws IOException {
-        this.socket = socket;
+        this.socket = Objects.requireNonNull(socket);
         this.server = server;
+        this.protocol = Objects.requireNonNull(initialProtocol);
         this.protocolSyncListener = protocolSyncListener;
         
         int id = server

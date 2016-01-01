@@ -3,6 +3,8 @@ package com.stabilise.network;
 import java.io.IOException;
 import java.net.Socket;
 
+import com.stabilise.network.protocol.Protocol;
+
 /**
  * The GameServerConnection class is essentially a TCPConnection, but with
  * extended functionality such that servers can more easily manage client
@@ -30,11 +32,11 @@ public class ServerTCPConnection extends TCPConnection {
     
     
     /**
-     * @see TCPConnection#TCPConnection(Socket, boolean)
-     * new TCPConnection(socket, true)
+     * @see TCPConnection#TCPConnection(Socket, boolean, Protocol)
+     * new TCPConnection(socket, true, initialProtocol)
      */
-    public ServerTCPConnection(Socket socket) throws IOException {
-        super(socket, true);
+    public ServerTCPConnection(Socket socket, Protocol initialProtocol) throws IOException {
+        super(socket, true, initialProtocol);
     }
     
     //--------------------==========--------------------

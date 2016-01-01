@@ -52,9 +52,11 @@ public class Constants {
     /** The port which the game will be hosted on by default. Note it is
      * completely arbitrary. */
     public static final int DEFAULT_PORT = 8224;
+    /** The port on which the update server is hosted. */
+    public static final int SERVER_PORT = 8225;
     
     /** True if different dimensions of the world should be hosted on different
-     * threads if possible. */ // This may be temporary
+     * threads if possible. NYI for now. */ // This may be temporary
     public static final boolean CONCURRENT_DIMENSIONS = true;
     
     public static final int SLICE_SIZE = Slice.SLICE_SIZE;

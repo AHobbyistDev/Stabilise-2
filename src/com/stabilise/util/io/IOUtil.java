@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -17,11 +20,14 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import javaslang.control.Try;
+
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.google.common.io.Files;
 import com.stabilise.util.Checks;
 import com.stabilise.util.Log;
+import com.stabilise.util.StringUtil;
 import com.stabilise.util.io.data.Compression;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.Format;
@@ -464,30 +470,98 @@ public class IOUtil {
     }
     
     /**
-     * Sends a file ({@code in}) across {@code out}.
+     * Sends a file ({@code in}) across {@code out}. The file should be
+     * received using {@link #receiveFile(DataInputStream, FileHandle)}.
+     * 
+     * @param checksum Whether or not to send a checksum of the file.
      * 
      * @throws NullPointerException if either argument is {@code null}.
      * @throws IOException if an I/O error occurs.
      */
-    public static void sendFile(FileHandle in, DataOutputStream out) throws IOException {
-        long bytes = in.length();
-        out.writeLong(bytes);
+    public static void sendFile(FileHandle in, DataOutputStream out, boolean checksum) throws IOException {
+        // We send the file in chunks: we load into the buffer, send our peer
+        // the amount loaded into the buffer, and send. Finally, we send an
+        // optional checksum.
+        byte[] buf = new byte[bufSize];
+        int count;
+        
+        MessageDigest md = null;
+        if(checksum) {
+            try {
+                md = MessageDigest.getInstance("MD5");
+            } catch(NoSuchAlgorithmException e) {
+                throw new Error(); // shouldn't happen
+            }
+        }
+        
+        out.writeBoolean(checksum);
+        
         try(InputStream is = in.read()) {
-            copy(is, out, bytes);
+            while((count = is.read(buf)) > 0) {
+                out.writeInt(count);
+                out.write(buf, 0, count);
+                
+                if(checksum)
+                    md.update(buf, 0, count);
+            }
+        }
+        out.writeInt(0); // tells our peer there are no more bytes to read
+        
+        if(checksum) {
+            buf = md.digest();
+            out.writeInt(buf.length);
+            out.write(buf);
         }
     }
     
     /**
-     * Receivs a file ({@code out}) from {@code in}.
+     * Receives a file ({@code out}) from {@code in}. The file should have been
+     * sent using {@link #sendFile(FileHandle, DataOutputStream, boolean)}.
      * 
      * @throws NullPointerException if either argument is {@code null}.
      * @throws IOException if an I/O error occurs.
      */
-    public static void receiveFile(DataInputStream in, FileHandle out) throws IOException {
-        long bytes = in.readLong();
-        try(OutputStream os = out.write(false)) {
-            copy(in, os, bytes);
+    public static Try<Void> receiveFile(DataInputStream in, FileHandle out) throws IOException {
+        int len = bufSize;
+        byte[] buf = new byte[len];
+        int count = 0, read;
+        MessageDigest md = null;
+        
+        boolean checksum = in.readBoolean();
+        if(checksum) {
+            try {
+                md = MessageDigest.getInstance("MD5");
+            } catch(NoSuchAlgorithmException e) {
+                throw new Error(); // shouldn't happen
+            }
         }
+        
+        try(OutputStream os = out.write(false)) {
+            while(count > 0 || (count = in.readInt()) > 0) {
+                read = in.read(buf, 0, Math.min(len, count));
+                if(read > 0) {
+                    count -= read;
+                    os.write(buf, 0, read);
+                    
+                    if(checksum)
+                        md.update(buf, 0, read);
+                } else {
+                    // this branch shouldn't happen unless our peer abruptly
+                    // disconnects or something
+                    break;
+                }
+            }
+        }
+        
+        if(checksum) {
+            byte[] ours = md.digest();
+            byte[] theirs = new byte[in.readInt()];
+            in.read(theirs);
+            if(!Arrays.equals(ours, theirs))
+                return Try.failure(new UnequalChecksumException(theirs, ours));
+        }
+        
+        return Try.success(null);
     }
     
     //--------------------==========--------------------
@@ -518,6 +592,34 @@ public class IOUtil {
     public static interface IORunnable {
         
         void run() throws IOException;
+        
+    }
+    
+    /**
+     * An exception indicating that a calculated checksum is not equal to the
+     * expected value.
+     */
+    public static class UnequalChecksumException extends RuntimeException {
+        private static final long serialVersionUID = 6321999553325845378L;
+        
+        public final byte[] expectedChecksum;
+        public final byte[] calculatedChecksum;
+        
+        public UnequalChecksumException(byte[] expectedChecksum, byte[] calculatedChecksum) {
+            super(msg(expectedChecksum, calculatedChecksum));
+            this.expectedChecksum = expectedChecksum;
+            this.calculatedChecksum = calculatedChecksum;
+        }
+        
+        private static String msg(byte[] expected, byte[] ours) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Unequal checksums! Expected value is \"");
+            sb.append(StringUtil.toHexString(expected));
+            sb.append("\", but we calculated \"");
+            sb.append(StringUtil.toHexString(ours));
+            sb.append("\".");
+            return sb.toString();
+        }
         
     }
 
