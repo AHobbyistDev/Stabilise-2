@@ -40,7 +40,21 @@ public class Resources {
             DIR_MODS = DIR_APP.child("mods/"),
             
             /** The directory in which console output logs should be saved. */
-            DIR_LOG = DIR_APP.child("log/");
+            DIR_LOG = DIR_APP.child("log/"),
+            
+            /** Where the game data is stored. */
+            DIR_GAMEDATA = DIR_APP.child("gamedata/"),
+            
+            /** Directory where update server files are stored. Used by update
+             * server only. */
+            DIR_UPDATE_SERVER = DIR_APP.child("updatefiles/"),
+            US_GAME_JAR = DIR_UPDATE_SERVER.child("Game.jar"),
+            US_LAUNCHER_JAR = DIR_UPDATE_SERVER.child("Launcher.jar"),
+            US_GAMEFILES = DIR_UPDATE_SERVER.child("gamefiles.zip"),
+            
+            /** The location of the game .jar */
+            GAME_JAR = DIR_GAMEDATA.child("Game.jar"),
+            LAUNCHER_JAR = DIR_GAMEDATA.child("Launcher.jar");
     
     
     /**

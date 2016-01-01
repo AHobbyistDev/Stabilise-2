@@ -17,6 +17,9 @@ public class IteratorUtils {
     
     private IteratorUtils() {}
     
+    public static final Iterator<Object> EMPTY_ITERATOR = new EmptyIterator();
+    
+    
     /**
      * Runs the given predicate for every element in the {@code Iterable},
      * removing each element for which {@code pred} returns {@code true}.
@@ -203,8 +206,32 @@ public class IteratorUtils {
     /**
      * Wraps {@code itr} in an {@code iterable}.
      */
-    public <T> Iterable<T> wrap(Iterator<T> itr) {
+    public static <T> Iterable<T> wrap(Iterator<T> itr) {
         return () -> itr;
+    }
+    
+    /**
+     * Returns an iterator which contains no elements.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> Iterator<T> emptyIterator() {
+        return (Iterator<T>) EMPTY_ITERATOR;
+    }
+    
+    
+    
+    private static class EmptyIterator implements Iterator<Object> {
+        
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+        
+        @Override
+        public Object next() {
+            return null;
+        }
+        
     }
     
 }

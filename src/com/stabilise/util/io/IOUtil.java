@@ -12,6 +12,7 @@ import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -20,14 +21,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import javaslang.control.Try;
-
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.google.common.io.Files;
 import com.stabilise.util.Checks;
 import com.stabilise.util.Log;
 import com.stabilise.util.StringUtil;
+import com.stabilise.util.collect.EmptyCollection;
 import com.stabilise.util.io.data.Compression;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.Format;
@@ -328,6 +328,26 @@ public class IOUtil {
      * @see #unzip(FileHandle, FileHandle)
      */
     public static void zip(FileHandle dir, FileHandle zipFile) throws IOException {
+        zip(dir, zipFile, EmptyCollection.get(), false);
+    }
+    
+    /**
+     * Exports a file (or directory and its contents) to a ZIP file.
+     * 
+     * @param dir The file/directory to export.
+     * @param zipFile The file to export to.
+     * @param excluded Files/directories to ignore if {@code invert} is false;
+     * otherwise the files/directories to include.
+     * @param invert If {@code excluded} should be treated as an inclusion list
+     * instead.
+     * 
+     * @throws NullPointerException if any argument is {@code null}.
+     * @throws IOException if an I/O error occurs.
+     * @see #unzip(FileHandle, FileHandle)
+     */
+    public static void zip(FileHandle dir, FileHandle zipFile,
+            Collection<FileHandle> excluded, boolean invert)
+            throws IOException {
         URI base = dir.file().toURI();
         
         Deque<FileHandle> queue = new LinkedList<>();
@@ -344,6 +364,10 @@ public class IOUtil {
                 dir = queue.pop();
                 
                 for(FileHandle f : dir.list()) {
+                    boolean excl = excluded.contains(f);
+                    if((excl && !invert) || (!excl && invert))
+                        continue;
+                    
                     String name = base.relativize(f.file().toURI()).getPath();
                     if(f.isDirectory()) {
                         queue.push(f);
@@ -521,7 +545,7 @@ public class IOUtil {
      * @throws NullPointerException if either argument is {@code null}.
      * @throws IOException if an I/O error occurs.
      */
-    public static Try<Void> receiveFile(DataInputStream in, FileHandle out) throws IOException {
+    public static void receiveFile(DataInputStream in, FileHandle out) throws IOException {
         int len = bufSize;
         byte[] buf = new byte[len];
         int count = 0, read;
@@ -558,10 +582,34 @@ public class IOUtil {
             byte[] theirs = new byte[in.readInt()];
             in.read(theirs);
             if(!Arrays.equals(ours, theirs))
-                return Try.failure(new UnequalChecksumException(theirs, ours));
+                throw new UnequalChecksumException(theirs, ours);
+        }
+    }
+    
+    /**
+     * Computes the MD5 checksum of the specified file.
+     * 
+     * @throws IOException if an I/O error occurs.
+     */
+    public static byte[] checksum(FileHandle file) throws IOException {
+        int len = bufSize;
+        byte[] buf = new byte[len];
+        int count = 0;
+        MessageDigest md = null;
+        
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch(NoSuchAlgorithmException e) {
+            throw new Error(); // shouldn't happen
         }
         
-        return Try.success(null);
+        try(InputStream is = file.read()) {
+            while((count = is.read(buf)) > 0) {
+                md.update(buf, 0, count);
+            }
+        }
+        
+        return md.digest();
     }
     
     //--------------------==========--------------------
@@ -599,7 +647,7 @@ public class IOUtil {
      * An exception indicating that a calculated checksum is not equal to the
      * expected value.
      */
-    public static class UnequalChecksumException extends RuntimeException {
+    public static class UnequalChecksumException extends IOException {
         private static final long serialVersionUID = 6321999553325845378L;
         
         public final byte[] expectedChecksum;

@@ -155,7 +155,7 @@ public class WorldRenderer implements Renderer {
         hudViewport = new ScreenViewport(hudCamera);
         
         FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(
-                Resources.DIR_FONT.child("arialbd.ttf"));
+                Gdx.files.classpath("arialbd.ttf"));
         FreeTypeFontParameter param = new FreeTypeFontParameter();
         param.size = 17;
         param.borderWidth = 1.5f;
@@ -174,7 +174,7 @@ public class WorldRenderer implements Renderer {
         
         fontGen.dispose();
         
-        FileHandle atlasSrc = Resources.DIR_IMG.child("textures.atlas");
+        FileHandle atlasSrc = Resources.DIR_IMG.child("atlasIngame.atlas");
         atlas = register(new TextureAtlas(atlasSrc));
         skin = register(new Skin(atlas));
         

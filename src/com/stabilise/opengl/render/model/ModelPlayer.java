@@ -106,7 +106,7 @@ public class ModelPlayer extends Model {
      * Creates a new player model.
      */
     public ModelPlayer() {
-        texSheet = new TextureSheet(Resources.texture("sheets/player"), NUM_COLS, NUM_ROWS);
+        texSheet = new TextureSheet(Resources.texture("player"), NUM_COLS, NUM_ROWS);
         texSheet.texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
         
         cell = texSheet.getRegion(0, 0); // default cell

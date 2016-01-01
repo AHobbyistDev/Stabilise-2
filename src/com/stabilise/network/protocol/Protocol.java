@@ -35,7 +35,10 @@ public enum Protocol {
     }},
     GAME {
         
-    };
+    },
+    UPDATE{{
+        
+    }};
     
     /** Registry of packets sent by the server to the client (i.e. clientbound
      * packets). */

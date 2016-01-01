@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.stabilise.core.Resources;
 
 
 public class MenuTestState implements State {
@@ -51,11 +52,12 @@ public class MenuTestState implements State {
         
         batch = new SpriteBatch(128);
         
-        texSplash = new Texture(Gdx.files.absolute("C:/Users/Adam/AppData/Roaming/.stabilise/res/img/loading.png"));
+        
+        texSplash = new Texture(Resources.DIR_IMG.child("loading.png"));
         sprSplash = new Sprite(texSplash);
         
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-                Gdx.files.absolute("C:/Users/Adam/AppData/Roaming/.stabilise/res/fonts/arialbd.ttf")
+                Resources.DIR_FONT.child("arialbd.ttf")
         );
         FreeTypeFontParameter param = new FreeTypeFontParameter();
         param.size = 16; // font size 16 pixels

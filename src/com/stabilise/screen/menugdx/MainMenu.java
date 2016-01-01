@@ -46,15 +46,15 @@ public class MainMenu implements Screen {
         stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
         
-        FileHandle atlasSrc = Resources.DIR_IMG.child("sheets/pack.atlas");
+        FileHandle atlasSrc = Gdx.files.classpath("atlasMenu.atlas");
         atlas = new TextureAtlas(atlasSrc);
         skin = new Skin(atlas);
         
         table = new Table(skin);
         
-        FreeTypeFontParameter textParam = new FreeTypeFontParameter();
-        textParam.size = 32;
-        font = Resources.font("arialbd.ttf", textParam);
+        FreeTypeFontParameter fontParam = new FreeTypeFontParameter();
+        fontParam.size = 32;
+        font = Resources.font(Gdx.files.classpath("arialbd.ttf"), fontParam);
         
         LabelStyle headingStyle = new LabelStyle(font, Color.WHITE);
         heading = new Label(Stabilise.GAME_NAME, headingStyle);

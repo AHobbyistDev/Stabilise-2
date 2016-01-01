@@ -111,7 +111,7 @@ public abstract class Client implements PacketHandler {
      * entering a protocol.
      * 
      * <p>This method is invoked by {@link #connect()} when a connection is
-     * established, with the {@link Protocol#HANDSHAKE HANDSHAKE} protocol.
+     * established, with the initial protocol.
      * 
      * <p>This method does nothing in the default implementation.
      * 

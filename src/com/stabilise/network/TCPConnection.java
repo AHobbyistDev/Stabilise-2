@@ -58,9 +58,6 @@ public class TCPConnection {
      * large ping. */
     private static final long TIMEOUT_PING = 15000L;
     
-    /** Default protocol for TCPConnections. */
-    public static Protocol defaultProtocol = Protocol.HANDSHAKE;
-    
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
     //--------------------==========--------------------
@@ -209,10 +206,7 @@ public class TCPConnection {
     void update(PacketHandler handler) {
         if(!hasInitiallySynced) {
             hasInitiallySynced = true;
-            if(protocol == defaultProtocol)
-                tryProtocolSync();
-            else
-                log.postWarning("Unexpected protocol " + protocol);
+            tryProtocolSync();
         }
         
         handleIncomingPackets(handler);
@@ -525,7 +519,7 @@ public class TCPConnection {
     
     /**
      * Returns {@code true} if this connection is active; {@code false}
-     * otherwise. If this returns {@code false}, it is important that you
+     * otherwise. Even if this returns {@code false}, it is important that you
      * invoke {@link #closeConnection()} to properly terminate this connection
      * (since it is possible for a connection to exist in a state where it is
      * inactive but still not terminated).
