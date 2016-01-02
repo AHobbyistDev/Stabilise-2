@@ -1,68 +1,79 @@
 package com.stabilise.core.state;
 
-import com.stabilise.core.UpdateClient;
+import java.io.IOException;
+
+import com.stabilise.core.Resources;
+import com.stabilise.core.app.Application;
 
 
 public class LauncherState implements State {
     
-    private UpdateClient client;
+    private static final String javaPath
+            = "\"" + System.getProperty("java.home").replace('\\', '/') + "/bin/javaw\"";
+    private static final String updater = Resources.DIR_APP.child(Resources.UPDATER_JAR).path();
+    private static final String game = Resources.DIR_APP.child(Resources.GAME_JAR).path();
     
-    
-    public LauncherState() {
-        
+    enum State {
+        starting, updating, running;
     }
+    
+    private State state = State.starting;
+    private Process curProcess = null;
     
     @Override
-    public void start() {
-        client = new UpdateClient();
-        
-        int maxAttempts = 10;
-        int attempts = 0;
-        do {
-            attempts++;
-            System.out.println("Connecting to update server... (attempt " + attempts + ")");
-            client.connect();
-            try {
-                if(attempts != 1)
-                    Thread.sleep(100L);
-            } catch(InterruptedException e) {
-                e.printStackTrace();
-            }
-        } while(!client.isConnected() && attempts < maxAttempts);
-        
-        if(!client.isConnected()) {
-            System.out.println("Could not connect to update server... aborting");
-        }
-    }
+    public void start() {}
     
     @Override
-    public void predispose() {
-        
-    }
+    public void predispose() {}
     
     @Override
     public void dispose() {
-        
+        if(state != State.running && curProcess!= null && curProcess.isAlive())
+            curProcess.destroy();
     }
     
     @Override
-    public void resize(int width, int height) {
-        
-    }
+    public void resize(int width, int height) {}
     
     @Override
-    public void pause() {
-        
-    }
+    public void pause() {}
     
     @Override
-    public void resume() {
-        
-    }
+    public void resume() {}
     
     @Override
     public void update() {
-        
+        if(state == State.starting) {
+            System.out.println("Running updater...");
+            ProcessBuilder pb = new ProcessBuilder(javaPath + " -jar" + " \"" + updater + "\"");
+            pb.directory(Resources.DIR_APP.file());
+            pb.inheritIO();
+            try {
+                curProcess = pb.start();
+            } catch(IOException e) {
+                System.out.println("Failed to start updater!");
+                e.printStackTrace();
+                Application.get().shutdown();
+            }
+            state = State.updating;
+        } else if(state == State.updating) {
+            if(!curProcess.isAlive()) {
+                System.out.println("Updater complete");
+                System.out.println("Starting game...");
+                ProcessBuilder pb = new ProcessBuilder(javaPath + " -jar" + " \"" + game + "\"");
+                pb.directory(Resources.DIR_APP.file());
+                pb.inheritIO();
+                try {
+                    curProcess = pb.start();
+                } catch(IOException e) {
+                    System.out.println("Failed to start game!");
+                    e.printStackTrace();
+                }
+                state = State.running;
+                // Game started = launcher no longer needed
+                Application.get().shutdown();
+            }
+        }
     }
     
     @Override

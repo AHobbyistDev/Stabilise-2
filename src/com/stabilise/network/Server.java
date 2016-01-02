@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.stabilise.network.protocol.PacketHandler;
 import com.stabilise.network.protocol.Protocol;
@@ -43,18 +43,6 @@ import com.stabilise.util.concurrent.Tasks;
  * 
  * <p>To close a server, either invoke {@link #requestShutdown()} and wait for
  * the server to close itself, or directly invoke {@link #shutdown()}.
- * 
- * <!--
- * <p>Each active {@code Server} associates with it the following resources:
- * 
- * <ul>
- * <li>A {@code ServerSocket} object.
- * <li>A thread which listens for client connections using {@link
- *     ServerSocket#accept()}.
- * <li>Any number of {@link TCPConnection} objects which represent connections
- *     to connected clients.
- * </ul>
- * -->
  */
 public abstract class Server implements Runnable, Drivable, PacketHandler {
     
@@ -72,14 +60,15 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
      * to close.
      * <p>{@code SHUTDOWN} indicates that a server is shutting down.
      * <p>{@code TERMINATED} indicates that a server has been terminated. */
-    private static final int
-            STATE_UNSTARTED = 0,
-            STATE_BOOTING = 1,
-            STATE_STARTING = 2,
-            STATE_ACTIVE = 3,
-            STATE_CLOSE_REQUESTED = 4,
-            STATE_SHUTDOWN = 5,
-            STATE_TERMINATED = 6;
+    private static enum State {
+            UNSTARTED,
+            BOOTING,
+            STARTING,
+            ACTIVE,
+            CLOSE_REQUESTED,
+            SHUTDOWN,
+            TERMINATED;
+    }
     
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
@@ -103,7 +92,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
     /** > 1 if valid; -1 indicates this server must be driven externally. */
     private final int tps;
     
-    private final AtomicInteger state = new AtomicInteger(STATE_UNSTARTED);
+    private final AtomicReference<State> state = new AtomicReference<>(State.UNSTARTED);
     
     protected final Log log = Log.getAgent("SERVER");
     
@@ -181,7 +170,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
      */
     public final void runConcurrently() {
         checkCanRun();
-        if(state.compareAndSet(STATE_UNSTARTED, STATE_BOOTING))
+        if(state.compareAndSet(State.UNSTARTED, State.BOOTING))
             new Thread(this, "ServerThread").start();
         else
             throw new IllegalStateException("Server is already running!");
@@ -222,8 +211,8 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
      * @throws IllegalStateException if this server has already been started.
      */
     public boolean start() {
-        if(!state.compareAndSet(STATE_UNSTARTED, STATE_STARTING) &&
-                !state.compareAndSet(STATE_BOOTING, STATE_STARTING))
+        if(!state.compareAndSet(State.UNSTARTED, State.STARTING) &&
+                !state.compareAndSet(State.BOOTING, State.STARTING))
             throw new IllegalStateException("Server has already been started!");
         
         try {
@@ -233,7 +222,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
             clientListenerThread = new ClientListenerThread();
             clientListenerThread.start();
             
-            if(!state.compareAndSet(STATE_STARTING, STATE_ACTIVE))
+            if(!state.compareAndSet(State.STARTING, State.ACTIVE))
                 throw new AssertionError();
             
             return true;
@@ -253,32 +242,14 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
     
     /**
      * This method is invoked when this server synchronises protocols with a
-     * client, but only when this {@code Server} is constructed using {@link
-     * #Server()} or {@link #Server(int)}. To make use of this method when
-     * either the {@link #Server(ClientConnectionFactory)} or {@link
-     * #Server(int, ClientConnectionFactory)} constructors are used, construct
-     * {@code TCPConnection} objects with protocol switch listeners which
-     * appropriately redirect to this method. For example:
-     * 
-     * <pre>
-     * class MyServer extends Server {
-     * public MyServer() {
-     *     super((s) ->
-     *         new TCPConnection(s, true, this::handleProtocolSwitch);
-     *     });
-     * }
-     * }</pre>
+     * client.
      * 
      * <p>This method does nothing in the default implementation.
      * 
      * @param con The {@code TCPConnection} connected to a client.
      * @param protocol The new protocol.
-     * 
-     * @deprecated Turns out we can't refer to an instance method in a
-     * constructor.
      */
-    @SuppressWarnings("unused")
-    private void handleProtocolSwitch(TCPConnection con, Protocol protocol) {
+    protected void handleProtocolSwitch(TCPConnection con, Protocol protocol) {
         // nothing in the default implementation
     }
     
@@ -348,19 +319,21 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
     }
     
     /**
-     * Requests for the server to shut down.
+     * Requests for the server to shut down but does not shut it down directly.
      */
+    /*
     public final void requestShutdown() {
         state.compareAndSet(STATE_ACTIVE, STATE_CLOSE_REQUESTED);
     }
+    */
     
     /**
      * Shuts the server down using the current thread. Invoking this does
      * nothing if the server is not currently running.
      */
     public void shutdown() {
-        if(!state.compareAndSet(STATE_ACTIVE, STATE_SHUTDOWN) &&
-                !state.compareAndSet(STATE_CLOSE_REQUESTED, STATE_SHUTDOWN))
+        if(!state.compareAndSet(State.ACTIVE, State.SHUTDOWN) &&
+                !state.compareAndSet(State.CLOSE_REQUESTED, State.SHUTDOWN))
             return;
         
         if(clientListenerThread != null)
@@ -389,7 +362,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
         
         log.postInfo("Shut down.");
         
-        Tasks.doThenNotify(state, () -> state.set(STATE_TERMINATED));
+        Tasks.doThenNotify(state, () -> state.set(State.TERMINATED));
     }
     
     @Override
@@ -402,14 +375,14 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
      * Returns {@code true} if this server is currently active.
      */
     public boolean isActive() {
-        return state.get() == STATE_ACTIVE;
+        return state.get() == State.ACTIVE;
     }
     
     /**
      * Returns {@code true} if this server has been terminated.
      */
     public boolean isTerminated() {
-        return state.get() == STATE_TERMINATED;
+        return state.get() == State.TERMINATED;
     }
     
     /**
@@ -428,6 +401,10 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
     private void addConnection(Socket socket) {
         try {
             TCPConnection con = clientFactory.create(socket);
+            con.addListener(Tasks.currentThreadExecutor(),
+                    TCPConnection.EVENT_PROTOCOL_SYNC,
+                    e -> handleProtocolSwitch(e.con, e.protocol)
+            );
             con.open();
             onClientConnect(con);
             connections.add(con);

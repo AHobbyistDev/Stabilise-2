@@ -1,6 +1,8 @@
 package com.stabilise.network.protocol.update;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.stabilise.network.Packet;
 import com.stabilise.network.TCPConnection;
@@ -11,26 +13,40 @@ import com.stabilise.util.io.DataOutStream;
 
 public class C000Checksums extends Packet {
     
-    public byte[] launcherChecksum;
-    public byte[] gameChecksum;
-    public byte[] gamefilesChecksum;
+    public Map<String, byte[]> checksums = new HashMap<>();
     
+    
+    /**
+     * Adds a file checksum for sending.
+     * 
+     * @param path The relativised path of the file.
+     * @param checksum That file's checksum. 
+     */
+    public void add(String path, byte[] checksum) {
+        checksums.put(path, checksum);
+    }
     
     @Override
     public void readData(DataInStream in) throws IOException {
-        in.read(launcherChecksum  = new byte[in.readInt()]);
-        in.read(gameChecksum      = new byte[in.readInt()]);
-        in.read(gamefilesChecksum = new byte[in.readInt()]);
+        int len = in.readInt();
+        for(int i = 0; i < len; i++) {
+            String path = in.readUTF();
+            int count = in.readInt();
+            byte[] checksum = new byte[count];
+            in.read(checksum);
+            checksums.put(path, checksum);
+        }
     }
     
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        out.writeInt(launcherChecksum.length);
-        out.write(launcherChecksum);
-        out.writeInt(gameChecksum.length);
-        out.write(gameChecksum);
-        out.writeInt(gamefilesChecksum.length);
-        out.write(gamefilesChecksum);
+        out.writeInt(checksums.size());
+        for(Map.Entry<String, byte[]> entry : checksums.entrySet()) {
+            out.writeUTF(entry.getKey());
+            byte[] checksum = entry.getValue();
+            out.writeInt(checksum.length);
+            out.write(checksum);
+        }
     }
     
     @Override

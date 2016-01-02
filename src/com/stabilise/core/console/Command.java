@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.world.World;
 
+@Incomplete
 public abstract class Command {
     
     private static final char cmdChar = '/';

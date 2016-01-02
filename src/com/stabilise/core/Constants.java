@@ -2,6 +2,10 @@ package com.stabilise.core;
 
 import static com.stabilise.util.io.data.Compression.*;
 import static com.stabilise.util.io.data.Format.*;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import javaslang.control.Try;
 
 import com.badlogic.gdx.files.FileHandle;
@@ -49,11 +53,27 @@ public class Constants {
     
     // Gameplay ---------------------------------------------------------------
     
+    public static final String LOCAL_BROADCAST_IP = "4.2.0.0";
+    
     /** The port which the game will be hosted on by default. Note it is
      * completely arbitrary. */
-    public static final int DEFAULT_PORT = 8224;
+    public static final int PORT_DEFAULT = 8224;
     /** The port on which the update server is hosted. */
-    public static final int SERVER_PORT = 8225;
+    public static final int PORT_SERVER = 8225;
+    /** Port for UDP broadcasts. */
+    public static final int PORT_BROADCAST = 8226;
+    public static final byte[] BROADCAST_MSG = "<<Stabilise II LAN search broadcast>>".getBytes();
+    public static final byte[] BROADCAST_RESPONSE = "<<Stabilise II LAN server reponse>>".getBytes();
+    public static final InetAddress BROADCAST_ADDRESS;
+    
+    static {
+        try {
+            // 255.255.255.255 is the default broadcast address
+            BROADCAST_ADDRESS = InetAddress.getByName("255.255.255.255");
+        } catch(UnknownHostException e) {
+            throw new Error(e);
+        }
+    }
     
     /** True if different dimensions of the world should be hosted on different
      * threads if possible. NYI for now. */ // This may be temporary

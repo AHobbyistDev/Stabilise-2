@@ -31,17 +31,16 @@ public enum Protocol {
         registerClientPacket(0, C000VersionInfo.class, C000VersionInfo::new);
         registerServerPacket(0, S000VersionInfo.class, S000VersionInfo::new);
     }},
-    LOGIN {{
-        
-    }},
+    LOGIN {
+        // TODO
+    },
     GAME {
-        
+        // TODO
     },
     UPDATE{{
         registerClientPacket(0, C000Checksums.class, C000Checksums::new);
-        registerServerPacket(0, S000LauncherJar.class, S000LauncherJar::new);
-        registerServerPacket(1, S001GameJar.class, S001GameJar::new);
-        registerServerPacket(2, S002GameFiles.class, S002GameFiles::new);
+        registerServerPacket(0, S000FileList.class, S000FileList::new);
+        registerServerPacket(1, S001FileTransfer.class, S001FileTransfer::new);
     }};
     
     /** Registry of packets sent by the server to the client (i.e. clientbound

@@ -8,6 +8,7 @@ import java.util.Objects;
 import com.stabilise.network.protocol.PacketHandler;
 import com.stabilise.network.protocol.Protocol;
 import com.stabilise.util.Log;
+import com.stabilise.util.concurrent.Tasks;
 
 /**
  * This class provides all the basis architecture for a client which can
@@ -94,8 +95,11 @@ public abstract class Client implements PacketHandler {
             // some sense of continuity in handleProtocolSwitch() when it is
             // first invoked.
             state = STATE_CONNECTED;
-            connection = new TCPConnection(socket, false, initialProtocol,
-                    this::handleProtocolSwitch);
+            connection = new TCPConnection(socket, false, initialProtocol);
+            connection.addListener(Tasks.currentThreadExecutor(),
+                    TCPConnection.EVENT_PROTOCOL_SYNC,
+                    e -> handleProtocolSwitch(e.con, e.protocol)
+            );
             connection.open();
         } catch(IOException e) {
             state = STATE_DISCONNECTED;

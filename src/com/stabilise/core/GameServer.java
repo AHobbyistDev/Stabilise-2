@@ -1,6 +1,6 @@
 package com.stabilise.core;
 
-import static com.stabilise.core.Constants.DEFAULT_PORT;
+import static com.stabilise.core.Constants.PORT_DEFAULT;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -16,6 +16,7 @@ import com.stabilise.network.protocol.handshake.IServerHandshake;
 import com.stabilise.network.protocol.handshake.S000VersionInfo;
 import com.stabilise.network.protocol.login.C000Login;
 import com.stabilise.network.protocol.login.IServerLogin;
+import com.stabilise.util.concurrent.Tasks;
 import com.stabilise.world.multiverse.HostMultiverse;
 
 @Deprecated
@@ -50,13 +51,14 @@ public class GameServer extends Server implements IServerHandshake, IServerLogin
     
     @Override
     protected ServerSocket createSocket() throws IOException {
-        return new ServerSocket(DEFAULT_PORT, maxPlayers, InetAddress.getLocalHost());
+        return new ServerSocket(PORT_DEFAULT, maxPlayers, InetAddress.getLocalHost());
     }
     
     /**
      * Handles a switch with a client to a new protocol.
      */
-    private void handleProtocolSwitch(ServerTCPConnection con, Protocol protocol) {
+    @Override
+    protected void handleProtocolSwitch(TCPConnection con, Protocol protocol) {
         switch(protocol) {
             case HANDSHAKE:
                 // Client sends first so it has a harder time providing valid
@@ -78,9 +80,10 @@ public class GameServer extends Server implements IServerHandshake, IServerLogin
     
     @Override
     protected void onClientConnect(TCPConnection con) {
-        con.setProtocolSyncListener((c,p) -> {
-            handleProtocolSwitch((ServerTCPConnection)c, p);
-        });
+        con.addListener(Tasks.currentThreadExecutor(),
+                TCPConnection.EVENT_PROTOCOL_SYNC,
+                e -> handleProtocolSwitch(e.con, e.protocol)
+        );
     }
     
     // HANDSHAKE --------------------------------------------------------------

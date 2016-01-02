@@ -1,6 +1,8 @@
 package com.stabilise.network.protocol.update;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.stabilise.network.Packet;
 import com.stabilise.network.TCPConnection;
@@ -9,29 +11,31 @@ import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 
 
-public class S003Confirmation extends Packet {
+public class S000FileList extends Packet {
     
-    public boolean launcherNeedsUpdate;
-    public boolean gameNeedsUpdate;
-    public boolean gameFilesNeedUpdate;
+    public final List<String> files = new ArrayList<>();
+    
     
     @Override
     public void readData(DataInStream in) throws IOException {
-        launcherNeedsUpdate = in.readBoolean();
-        gameNeedsUpdate = in.readBoolean();
-        gameFilesNeedUpdate = in.readBoolean();
+        int count = in.readInt();
+        for(int i = 0; i < count; i++) {
+            String localPath = in.readUTF();
+            files.add(localPath);
+        }
     }
     
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        out.writeBoolean(launcherNeedsUpdate);
-        out.writeBoolean(gameNeedsUpdate);
-        out.writeBoolean(gameFilesNeedUpdate);
+        out.writeInt(files.size());
+        for(String path : files) {
+            out.writeUTF(path);
+        }
     }
     
     @Override
     public void handle(PacketHandler handler, TCPConnection con) {
-        ((IClientUpdate)handler).handleConfirmation(con, this);
+        ((IClientUpdate)handler).handleFileList(con, this);
     }
     
 }

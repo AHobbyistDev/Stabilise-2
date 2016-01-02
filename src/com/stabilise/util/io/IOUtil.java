@@ -368,6 +368,17 @@ public class IOUtil {
                 
                 for(FileHandle f : dir.list()) {
                     boolean excl = excluded.contains(f);
+                    
+                    // check parents
+                    if(!excl) { 
+                        for(FileHandle h : excluded) {
+                            if(f.path().contains(h.path())) {
+                                excl = true;
+                                break;
+                            }
+                        }
+                    }
+                    
                     if((excl && !invert) || (!excl && invert))
                         continue;
                     

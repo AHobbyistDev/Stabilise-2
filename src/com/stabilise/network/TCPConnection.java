@@ -2,12 +2,14 @@ package com.stabilise.network;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -16,6 +18,9 @@ import com.stabilise.network.protocol.Protocol;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.ThreadSafeMethod;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.concurrent.event.Event;
+import com.stabilise.util.concurrent.event.EventDispatcher;
+import com.stabilise.util.concurrent.event.EventHandler;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 
@@ -33,6 +38,13 @@ public class TCPConnection {
     //--------------------==========--------------------
     //-----=====Static Constants and Variables=====-----
     //--------------------==========--------------------
+    
+    /** Posted when a TCPConnection synchronises protocols with its peer. */
+    public static final ProtocolSyncEvent EVENT_PROTOCOL_SYNC
+            = new ProtocolSyncEvent(null, null);
+    /** Posted when a TCPConnection is closed. */
+    public static final Event EVENT_CLOSED = new TCPEvent("connectionClosed");
+    
     
     /** State values.
      * 
@@ -76,21 +88,28 @@ public class TCPConnection {
     /** Protocol being used by the read thread. This updates when our peer
      * sends us a {@link P254ProtocolSwitch} packet. This is only ever modified
      * by the read thread, and NOT the main thread. */
-    private Protocol readThreadProtocol = protocol;
+    private Protocol readThreadProtocol;
     /** Protocol being used by the write thread. This updates when we send a
      * {@link P254ProtocolSwitch} packet. This is only ever modified by the
      * write thread, and NOT the main thread. */
-    private Protocol writeThreadProtocol = protocol;
+    private Protocol writeThreadProtocol;
     /** The protocol being used by our peer. This is basically the same as
      * {@link #readThreadProtocol}, but this is updated by the main thread when
-     * the protocol switch packet is handled, rather than read. */
-    private Protocol peerProtocol = protocol;
-    /** Listener which is invoked when we our protocol synchronises with our
-     * peer's, in order to perform some sort of action. */
-    private BiConsumer<TCPConnection, Protocol> protocolSyncListener = null;
+     * the protocol switch packet is handled, rather than read. This is null
+     * until initially synced. */
+    private Protocol peerProtocol = null;
+    /** Whether or not packets have been initially synced. While this is false,
+     * we allow packets to be queued via {@link #sendPacket(Packet)}, even
+     * though we haven't synced with our peer to avoid unpredictable packet
+     * dropping, and then flush all queued packets once we've synced. */
     private boolean hasInitiallySynced = false;
     
     private final AtomicReference<State> state = new AtomicReference<>(State.STARTING);
+    
+    /** Stateful events are retained (e.g. connection close) for convenience,
+     * and in the case of this class may be posted concurrently. */
+    private final EventDispatcher eventsStateful = EventDispatcher.concurrentRetained();
+    private final EventDispatcher eventsNormal = EventDispatcher.concurrentNormal();
     
     protected final Socket socket;
     
@@ -99,6 +118,7 @@ public class TCPConnection {
     
     private final BlockingDeque<Packet> packetQueueIn  = new LinkedBlockingDeque<>();
     private final BlockingDeque<Packet> packetQueueOut = new LinkedBlockingDeque<>();
+    private final List<Packet> syncQueue = new ArrayList<>();
     
     private final TCPReadThread readThread;
     private final TCPWriteThread writeThread;
@@ -134,39 +154,12 @@ public class TCPConnection {
      * @throws NullPointerException if any argument is {@code null}.
      * @throws IOException if the connection could not be established.
      */
-    public TCPConnection(Socket socket, boolean server, Protocol initialProtocol)
-            throws IOException {
-        this(socket, server, initialProtocol, null);
-    }
-    
-    /**
-     * Creates a new TCPConnection.
-     * 
-     * <p>If {@code protocolSyncListener} is non-null, it will be invoked with
-     * the {@link #defaultProtocol default protocol} when {@link
-     * #update(PacketHandler)} is first invoked. If using this constructor is
-     * not preferred, then as long as the listener is manually set through
-     * {@link #setProtocolSyncListener(BiConsumer)} before {@code update()} is
-     * first invoked, then it will behave as if you set it using this
-     * constructor.
-     * 
-     * @param socket The socket upon which to base the connection.
-     * @param server Whether or not this is a server-side connection.
-     * @param initialProtocol The starting protocol to use.
-     * @param protocolSyncListener This connection's {@link
-     * #setProtocolSyncListener(BiConsumer) protocol synchronisation listener}.
-     * This is allowed to be {@code null}.
-     * 
-     * @throws NullPointerException if either {@code socket} or {@code
-     * initialProtocol} are {@code null}.
-     * @throws IOException if the connection could not be established.
-     */
-    public TCPConnection(Socket socket, boolean server, Protocol initialProtocol,
-            BiConsumer<TCPConnection, Protocol> protocolSyncListener) throws IOException {
+    public TCPConnection(Socket socket, boolean server, Protocol initialProtocol) throws IOException {
         this.socket = Objects.requireNonNull(socket);
         this.server = server;
         this.protocol = Objects.requireNonNull(initialProtocol);
-        this.protocolSyncListener = protocolSyncListener;
+        this.readThreadProtocol = protocol;
+        this.writeThreadProtocol = protocol;
         
         int id = server
                 ? CONNECTIONS_SERVER.getAndIncrement()
@@ -195,6 +188,9 @@ public class TCPConnection {
         
         readThread.start();
         writeThread.start();
+        
+        // Initial protocol sync
+        sendPacket(new P254ProtocolSwitch(protocol));
     }
     
     /**
@@ -206,11 +202,6 @@ public class TCPConnection {
      * @param handler The PacketHandler with which to handle received packets.
      */
     void update(PacketHandler handler) {
-        if(!hasInitiallySynced) {
-            hasInitiallySynced = true;
-            tryProtocolSync();
-        }
-        
         handleIncomingPackets(handler);
         
         if(pingSent == 0L) // initialise pingSent
@@ -298,26 +289,11 @@ public class TCPConnection {
             sendPacket(new P254ProtocolSwitch(protocol));
             this.protocol = protocol;
             tryProtocolSync();
+            
+            // Force this to true to avoid the "queue anyway" concession, since
+            // now it is known for sure that the protocols aren't synced
+            hasInitiallySynced = true;
         }
-    }
-    
-    /**
-     * Sets this connection's protocol synchronisation listener. The specified
-     * listener is invoked when this connection synchronises protocols with its
-     * peer - i.e. when it is known that both us and our peer are now using the
-     * same protocol.
-     * 
-     * <p>If {@link #update(PacketHandler)} has not yet been invoked on this
-     * connection, then the specified listener (if it is non-null), will be
-     * invoked upon the first invocation of {@code update()} with the {@link
-     * #defaultProtocol default protocol}.
-     * 
-     * @param listener The listener. A value of {@code null} removes the
-     * current listener, if there is one.
-     */
-    public void setProtocolSyncListener(
-            BiConsumer<TCPConnection, Protocol> listener) {
-        this.protocolSyncListener = listener;
     }
     
     /**
@@ -339,8 +315,17 @@ public class TCPConnection {
     }
     
     private void tryProtocolSync() {
-        if(areProtocolsSynced() && protocolSyncListener != null)
-            protocolSyncListener.accept(this, protocol);
+        if(areProtocolsSynced()) {
+            // On the initial sync, add all packets in the sync queue to the
+            // real queue.
+            if(!hasInitiallySynced) {
+                hasInitiallySynced = true;
+                packetQueueOut.addAll(syncQueue);
+                syncQueue.clear();
+            }
+            
+            eventsNormal.post(new ProtocolSyncEvent(this, protocol));
+        }
     }
     
     /**
@@ -350,10 +335,18 @@ public class TCPConnection {
      */
     @UserThread("MainThread")
     public void sendPacket(Packet packet) {
+        boolean useSyncQueue = false;
         // Discard protocol-dependent packets until we synchronise protocols
-        // with our peer.
-        if(!areProtocolsSynced() && !packet.isUniversal())
-            return;
+        // with our peer. However, we allow packets queued before initial
+        // syncing to be queued to avoid unpredictable packet cutoffs.
+        if(!areProtocolsSynced() && !packet.isUniversal()) {
+            if(!hasInitiallySynced)
+                useSyncQueue = true;
+            else {
+                System.out.println("Ignoring packet " + packet);
+                return;
+            }
+        }
         
         if(server) {
             if(!protocol.isServerPacket(packet)) {
@@ -369,10 +362,15 @@ public class TCPConnection {
             }
         }
         
-        if(packet.isImportant())
-            packetQueueOut.addFirst(packet);
-        else
-            packetQueueOut.addLast(packet);
+        if(useSyncQueue) {
+            System.out.println("Putting " + packet + " in the sync queue");
+            syncQueue.add(packet);
+        } else {
+            if(packet.isImportant())
+                packetQueueOut.addFirst(packet);
+            else
+                packetQueueOut.addLast(packet);
+        }
     }
     
     /**
@@ -440,6 +438,7 @@ public class TCPConnection {
      */
     @UserThread("WriteThread")
     private void writePacketWithBlock() throws InterruptedException, IOException {
+        
         doWritePacket(packetQueueOut.take());
     }
     
@@ -499,6 +498,8 @@ public class TCPConnection {
                 + " sent (" + out.size() + " bytes), "
                 + packetsReceived + (packetsReceived == 1 ? " packet" : " packets")
                 + " received.");
+        
+        eventsStateful.post(EVENT_CLOSED);
     }
     
     /**
@@ -545,6 +546,25 @@ public class TCPConnection {
      */
     public String getDisconnectReason() {
         return disconnectReason;
+    }
+    
+    /**
+     * Adds an event listener to this connection.
+     * 
+     * @param exec The executor with which to execute the handler.
+     * @param event The event to listen for.
+     * @param handler The handler to invoke when the specified event is posted.
+     * 
+     * @throws NullPointerException if any argument is null.
+     * @see #EVENT_PROTOCOL_SYNC
+     * @see #EVENT_CLOSED
+     */
+    public <E extends Event> void addListener(Executor exec, E event,
+            EventHandler<? super E> handler) {
+        if(event == EVENT_CLOSED)
+            eventsStateful.addListener(exec, event, handler);
+        else
+            eventsNormal.addListener(exec, event, handler);
     }
     
     @Override
@@ -666,6 +686,32 @@ public class TCPConnection {
                     requestClose(e.getClass() + ": " + e.getMessage());
                 }
             }
+        }
+        
+    }
+    
+    /**
+     * Custom class for events to prevent cheap duplication.
+     */
+    private static class TCPEvent extends Event {
+        public TCPEvent(String name) {
+            super(name);
+        }
+    }
+    
+    /**
+     * A ProtocolSyncEvent is an event type which is posted when a {@code
+     * TCPConnection} synchronises protocols with its peer.
+     */
+    public static class ProtocolSyncEvent extends TCPEvent {
+        
+        public final TCPConnection con;
+        public final Protocol protocol;
+        
+        private ProtocolSyncEvent(TCPConnection con, Protocol protocol) {
+            super("protocolSync");
+            this.con = con;
+            this.protocol = protocol;
         }
         
     }
