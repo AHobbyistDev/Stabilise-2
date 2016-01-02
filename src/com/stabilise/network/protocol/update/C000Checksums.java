@@ -35,7 +35,7 @@ public class C000Checksums extends Packet {
     
     @Override
     public void handle(PacketHandler handler, TCPConnection con) {
-        
+        ((IServerUpdate)handler).handleChecksums(con, this);
     }
     
 }

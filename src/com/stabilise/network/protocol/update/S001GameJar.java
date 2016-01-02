@@ -25,7 +25,7 @@ public class S001GameJar extends Packet {
     
     @Override
     public void handle(PacketHandler handler, TCPConnection con) {
-        
+        ((IClientUpdate)handler).handleGameJar(con, this);
     }
     
 }

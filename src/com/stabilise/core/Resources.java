@@ -1,20 +1,12 @@
 package com.stabilise.core;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.stabilise.util.Log;
+import com.stabilise.core.main.LauncherLauncher;
 
 /**
- * Manages application resources.
+ * Holds a bunch of static FileHandles pertaining to application resources.
  */
 public class Resources {
     
@@ -54,7 +46,16 @@ public class Resources {
             
             /** The location of the game .jar */
             GAME_JAR = DIR_GAMEDATA.child("Game.jar"),
-            LAUNCHER_JAR = DIR_GAMEDATA.child("Launcher.jar");
+            LAUNCHER_JAR = DIR_GAMEDATA.child("Launcher.jar"),
+            LAUNCHER_FILES = DIR_GAMEDATA.child(LauncherLauncher.LAUNCHER_FILES);
+    
+    /** The fully-qualified classpath of the true launcher class. */
+    public static final String LAUNCHER_CLASS = LauncherLauncher.LAUNCHER_CLASS;
+    
+    /** Destination .zip for received gamefiles. */
+    public static final FileHandle GAMEFILES_DEST = DIR_GAMEDATA.child("gamefiles.zip");
+    /** Directories encapsulated by {@link #US_GAMEFILES} and {@link #GAMEFILES_DEST}. */
+    public static final FileHandle[] GAMEFILES_DIRS = { DIR_RESOURCES, DIR_CONFIG };
     
     
     /**
@@ -82,102 +83,11 @@ public class Resources {
         } else if(os.contains("linux")) {
             appDir = new File(dir, appName);
         } else {
-            Log.get().postSevere("OS not supported");
             throw new InternalError("OS not supported");
         }
         
         //return Gdx.files.external(appDir.getPath());
         return new FileHandle(appDir);
-    }
-    
-    /**
-     * Reads a text file from the file system. Each element in the returned
-     * array represents one line of the file.
-     * 
-     * @param file The file.
-     * 
-     * @return The file's contents.
-     * @throws NullPointerException if {@code file} is {@code null}.
-     * @throws IOException if the file does not exist, or an I/O error occurs.
-     */
-    public static List<String> readTextFile(FileHandle file) throws IOException {
-        if(!file.exists())
-            throw new IOException("Text resource does not exist!");
-        
-        BufferedReader br = new BufferedReader(file.reader());
-        
-        List<String> strings = new ArrayList<>();
-        String s;
-        
-        try {
-            while((s = br.readLine()) != null)
-                strings.add(s);
-        } finally {
-            br.close();
-        }
-        
-        return strings;
-    }
-    
-    /**
-     * Creates a texture from a .png image of the specified name in the {@link
-     * #DIR_IMG image directory}.
-     * 
-     * <p>Usage example:
-     * <pre>Texture myTexture = Resources.texture("myTexture");</pre>
-     * 
-     * @param name The name of the texture source on the filesystem.
-     * 
-     * @return The created texture.
-     */
-    public static Texture texture(String name) {
-        return new Texture(DIR_IMG.child(name + ".png"));
-    }
-    
-    /**
-     * Creates a texture from a .png image of the specified name in the {@link
-     * #DIR_IMG image directory}. The texture will be generated with mipmaps.
-     * 
-     * <p>Usage example:
-     * <pre>Texture myTexture = Resources.texture("myTexture");</pre>
-     * 
-     * @param name The name of the texture source on the filesystem.
-     * 
-     * @return The created texture.
-     */
-    public static Texture textureMipmaps(String name) {
-        return new Texture(DIR_IMG.child(name + ".png"), true);
-    }
-    
-    /**
-     * Generates a BitmapFont from the source file relative to the {@link
-     * FONT_DIR font directory}.
-     * 
-     * @param name The name of the font file.
-     * @param param The font parameters. May be {@code null}.
-     * 
-     * @return The generated font.
-     * @throws NullPointerException if {@code name} is {@code null}.
-     */
-    public static BitmapFont font(String name, FreeTypeFontParameter param) {
-        return font(DIR_FONT.child(name.endsWith(".ttf") ? name : name + ".ttf"), param);
-    }
-    
-    /**
-     * Generates a BitmapFont from the source file using the specified
-     * parameters.
-     * 
-     * @param file The font file (should be a .ttf file).
-     * @param param The font parameters. May be {@code null}.
-     * 
-     * @return The generated font.
-     * @throws NullPointerException if {@code file} is {@code null}.
-     */
-    public static BitmapFont font(FileHandle file, FreeTypeFontParameter param) {
-        FreeTypeFontGenerator gen = new FreeTypeFontGenerator(file);
-        BitmapFont font = gen.generateFont(param);
-        gen.dispose();
-        return font;
     }
     
     

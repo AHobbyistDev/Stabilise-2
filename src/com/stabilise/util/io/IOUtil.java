@@ -2,6 +2,7 @@ package com.stabilise.util.io;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -11,11 +12,13 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Enumeration;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -610,6 +613,35 @@ public class IOUtil {
         }
         
         return md.digest();
+    }
+    
+    /**
+     * Reads a text file from the file system. Each element in the returned
+     * array represents one line of the file.
+     * 
+     * @param file The file.
+     * 
+     * @return The file's contents.
+     * @throws NullPointerException if {@code file} is {@code null}.
+     * @throws IOException if the file does not exist, or an I/O error occurs.
+     */
+    public static List<String> readTextFile(FileHandle file) throws IOException {
+        if(!file.exists())
+            throw new IOException("Text resource does not exist!");
+        
+        BufferedReader br = new BufferedReader(file.reader());
+        
+        List<String> strings = new ArrayList<>();
+        String s;
+        
+        try {
+            while((s = br.readLine()) != null)
+                strings.add(s);
+        } finally {
+            br.close();
+        }
+        
+        return strings;
     }
     
     //--------------------==========--------------------

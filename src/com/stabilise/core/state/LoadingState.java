@@ -19,6 +19,7 @@ import com.stabilise.character.CharacterData;
 import com.stabilise.core.Resources;
 import com.stabilise.core.app.Application;
 import com.stabilise.core.main.Stabilise;
+import com.stabilise.opengl.GLUtil;
 import com.stabilise.util.concurrent.event.Event;
 import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.util.concurrent.task.TaskView;
@@ -71,7 +72,7 @@ public class LoadingState implements State {
         
         FreeTypeFontParameter param = new FreeTypeFontParameter();
         param.size = 16;
-        font = Resources.font("arialbd.ttf", param);
+        font = GLUtil.font(Gdx.files.classpath("arialbd.ttf"), param);
         
         shapes = new ShapeRenderer();
         

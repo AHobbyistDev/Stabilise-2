@@ -397,7 +397,7 @@ public class ConfigFile {
     public ConfigFile load() throws IOException {
         //tags.clear();
         
-        List<String> lines = Resources.readTextFile(getFile());
+        List<String> lines = IOUtil.readTextFile(getFile());
         String[] keyValuePair;
         for(String s : lines) {
             keyValuePair = s.split(":");

@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -42,12 +43,13 @@ public class TCPConnection {
      * thread encountered an exception and shut down.
      * <p>{@code SHUTDOWN} indicates that a connection is shutting down.
      * <p>{@code TERMINATED} indicates that a connection has been terminated. */
-    private static final int
-            STATE_STARTING = 0,
-            STATE_ACTIVE = 1,
-            STATE_CLOSE_REQUESTED = 2,
-            STATE_SHUTDOWN = 3,
-            STATE_TERMINATED = 4;
+    private static enum State {
+            STARTING,
+            ACTIVE,
+            CLOSE_REQUESTED,
+            SHUTDOWN,
+            TERMINATED;
+    }
     
     private static final AtomicInteger CONNECTIONS_SERVER = new AtomicInteger(0);
     private static final AtomicInteger CONNECTIONS_CLIENT = new AtomicInteger(0);
@@ -88,7 +90,7 @@ public class TCPConnection {
     private BiConsumer<TCPConnection, Protocol> protocolSyncListener = null;
     private boolean hasInitiallySynced = false;
     
-    private final AtomicInteger state = new AtomicInteger(STATE_STARTING);
+    private final AtomicReference<State> state = new AtomicReference<>(State.STARTING);
     
     protected final Socket socket;
     
@@ -188,7 +190,7 @@ public class TCPConnection {
      * opened.
      */
     void open() {
-        if(!state.compareAndSet(STATE_STARTING, STATE_ACTIVE))
+        if(!state.compareAndSet(State.STARTING, State.ACTIVE))
             throw new IllegalStateException("Already open!");
         
         readThread.start();
@@ -459,7 +461,7 @@ public class TCPConnection {
     @UserThread({"ReadThread", "WriteThread"})
     private void requestClose(String reason) {
         disconnectReason = Objects.requireNonNull(reason);
-        state.compareAndSet(STATE_ACTIVE, STATE_CLOSE_REQUESTED);
+        state.compareAndSet(State.ACTIVE, State.CLOSE_REQUESTED);
     }
     
     /**
@@ -469,8 +471,8 @@ public class TCPConnection {
      */
     @ThreadSafeMethod
     public void closeConnection() {
-        if(!state.compareAndSet(STATE_ACTIVE, STATE_SHUTDOWN) &&
-                !state.compareAndSet(STATE_CLOSE_REQUESTED, STATE_SHUTDOWN))
+        if(!state.compareAndSet(State.ACTIVE, State.SHUTDOWN) &&
+                !state.compareAndSet(State.CLOSE_REQUESTED, State.SHUTDOWN))
             return;
         
         if(disconnectReason.equals(""))
@@ -490,7 +492,7 @@ public class TCPConnection {
         //readThread.doJoin();
         //writeThread.doJoin();
         
-        state.set(STATE_TERMINATED);
+        state.set(State.TERMINATED);
         
         log.postInfo("Connection closed; "
                 + packetsSent + (packetsSent == 1 ? " packet" : " packets")
@@ -525,7 +527,7 @@ public class TCPConnection {
      * inactive but still not terminated).
      */
     public boolean isActive() {
-        return state.get() == STATE_ACTIVE;
+        return state.get() == State.ACTIVE;
     }
     
     /**
@@ -535,7 +537,7 @@ public class TCPConnection {
      * terminated via {@link #closeConnection()}.
      */
     public boolean isTerminated() {
-        return state.get() == STATE_TERMINATED;
+        return state.get() == State.TERMINATED;
     }
     
     /**
@@ -543,6 +545,12 @@ public class TCPConnection {
      */
     public String getDisconnectReason() {
         return disconnectReason;
+    }
+    
+    @Override
+    public String toString() {
+        return "TCPConnection[Connected to:" + socket.getInetAddress() +
+                ", state: " + state.get() + "]";
     }
     
     //--------------------==========--------------------
