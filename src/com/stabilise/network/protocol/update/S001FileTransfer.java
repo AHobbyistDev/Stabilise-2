@@ -35,22 +35,30 @@ public class S001FileTransfer extends Packet {
                 files.add(path);
                 prevZip = false;
             } else {
+                System.out.println("Downloading file " + f + "...");
+                
                 IOUtil.receiveFile(in, f);
-                if(path.endsWith(".zip"))
+                if(path.endsWith(".zip")) {
+                    files.add(path);
                     prevZip = true;
+                }
             }
         }
     }
     
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        out.writeInt(files.size());
+        int count = files.size();
+        out.writeInt(count);
         
         boolean prevZip = false;
-        for(int i = 0; i < files.size(); i++) {
+        for(int i = 0; i < count; i++) {
             String path = files.get(i);
             FileHandle f = Resources.DIR_UPDATE_SERVER.child(path);
             out.writeUTF(path);
+            
+            System.out.println("(" + (i+1) + "/" + count + ") - sending file " + path);
+            
             if(prevZip) {
                 prevZip = false;
                 continue;

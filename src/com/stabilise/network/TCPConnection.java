@@ -31,6 +31,9 @@ import com.stabilise.util.io.DataOutStream;
  * <p>A TCPConnection object has two threads associated with it, for managing
  * the input and output streams of the associated socket. The activity of these
  * threads is proportional to the amount of data traffic.
+ * 
+ * <p>A TCPConnection may not reconnect if it is closed; a new one must be
+ * created.
  */
 @NotThreadSafe
 public class TCPConnection {
@@ -42,6 +45,8 @@ public class TCPConnection {
     /** Posted when a TCPConnection synchronises protocols with its peer. */
     public static final ProtocolSyncEvent EVENT_PROTOCOL_SYNC
             = new ProtocolSyncEvent(null, null);
+    /** Posted when a TCPConnection is opened. */
+    public static final Event EVENT_OPENED = new TCPEvent("connectionOpened");
     /** Posted when a TCPConnection is closed. */
     public static final Event EVENT_CLOSED = new TCPEvent("connectionClosed");
     
@@ -70,7 +75,7 @@ public class TCPConnection {
     private static final long PING_INTERVAL = 1000;
     /** Number of ms before a connection disconnects automatically due to
      * large ping. */
-    private static final long TIMEOUT_PING = 15000L;
+    private static final long TIMEOUT_PING = 60000L; // 60 seconds
     
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
@@ -325,6 +330,12 @@ public class TCPConnection {
             }
             
             eventsNormal.post(new ProtocolSyncEvent(this, protocol));
+        } else {
+            if(!hasInitiallySynced)
+                log.postWarning("Our peer's initial protocol (" + peerProtocol
+                        + ") is not the same as ours (" + protocol + ")! This "
+                        + "will likely cause the connection to stall "
+                        + "indefinitely as no packets can be sent!");
         }
     }
     
@@ -342,10 +353,8 @@ public class TCPConnection {
         if(!areProtocolsSynced() && !packet.isUniversal()) {
             if(!hasInitiallySynced)
                 useSyncQueue = true;
-            else {
-                System.out.println("Ignoring packet " + packet);
+            else
                 return;
-            }
         }
         
         if(server) {
@@ -363,7 +372,6 @@ public class TCPConnection {
         }
         
         if(useSyncQueue) {
-            System.out.println("Putting " + packet + " in the sync queue");
             syncQueue.add(packet);
         } else {
             if(packet.isImportant())
@@ -556,12 +564,13 @@ public class TCPConnection {
      * @param handler The handler to invoke when the specified event is posted.
      * 
      * @throws NullPointerException if any argument is null.
-     * @see #EVENT_PROTOCOL_SYNC
+     * @see #EVENT_OPENED
      * @see #EVENT_CLOSED
+     * @see #EVENT_PROTOCOL_SYNC
      */
     public <E extends Event> void addListener(Executor exec, E event,
             EventHandler<? super E> handler) {
-        if(event == EVENT_CLOSED)
+        if(event == EVENT_CLOSED || event == EVENT_OPENED)
             eventsStateful.addListener(exec, event, handler);
         else
             eventsNormal.addListener(exec, event, handler);
@@ -570,7 +579,8 @@ public class TCPConnection {
     @Override
     public String toString() {
         return "TCPConnection[Connected to:" + socket.getInetAddress() +
-                ", state: " + state.get() + "]";
+                ", state:" + state.get() +
+                (isTerminated() ? ", d/c reason:" + disconnectReason : "") + "]";
     }
     
     //--------------------==========--------------------

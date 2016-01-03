@@ -490,6 +490,8 @@ public class IOUtil {
     public static void copy(FileHandle in, OutputStream out) throws IOException {
         try(InputStream is = in.read()) {
             copy(is, out);
+        } catch(GdxRuntimeException e) {
+            throw new IOException();
         }
     }
     
@@ -504,6 +506,8 @@ public class IOUtil {
     public static void copy(InputStream in, FileHandle out) throws IOException {
         try(OutputStream os = out.write(false)) {
             copy(in, os);
+        } catch(GdxRuntimeException e) {
+            throw new IOException();
         }
     }
     
@@ -542,7 +546,10 @@ public class IOUtil {
                 if(checksum)
                     md.update(buf, 0, count);
             }
+        } catch(GdxRuntimeException e) {
+            throw new IOException(e);
         }
+        
         out.writeInt(0); // tells our peer there are no more bytes to read
         
         if(checksum) {
@@ -589,6 +596,8 @@ public class IOUtil {
                     break;
                 }
             }
+        } catch(GdxRuntimeException e) {
+            throw new IOException(e);
         }
         
         if(checksum) {
@@ -621,6 +630,8 @@ public class IOUtil {
             while((count = is.read(buf)) > 0) {
                 md.update(buf, 0, count);
             }
+        } catch(GdxRuntimeException e) {
+            throw new IOException(e);
         }
         
         return md.digest();
@@ -640,16 +651,14 @@ public class IOUtil {
         if(!file.exists())
             throw new IOException("Text resource does not exist!");
         
-        BufferedReader br = new BufferedReader(file.reader());
-        
         List<String> strings = new ArrayList<>();
         String s;
         
-        try {
+        try(BufferedReader br = new BufferedReader(file.reader())) {
             while((s = br.readLine()) != null)
                 strings.add(s);
-        } finally {
-            br.close();
+        } catch(GdxRuntimeException e) {
+            throw new IOException(e);
         }
         
         return strings;

@@ -20,7 +20,6 @@ import com.stabilise.util.AppDriver;
 import com.stabilise.util.collect.IteratorUtils;
 import com.stabilise.util.concurrent.Tasks;
 import com.stabilise.util.concurrent.event.Event;
-import com.stabilise.util.concurrent.event.EventDispatcher;
 import com.stabilise.util.io.IOUtil;
 import com.stabilise.util.io.data.Compression;
 import com.stabilise.util.io.data.DataCompound;
@@ -49,11 +48,13 @@ public class UpdateClient extends Client implements IClientUpdate {
         
         UpdateClient client = new UpdateClient(adr);
         AppDriver driver = new AppDriver(24, client::update, null);
-        client.addListener(evtGameReady, () -> {
+        Runnable doClose = () -> {
             driver.stop();
             client.disconnect();
             System.exit(0);
-        });
+        };
+        client.addListener(evtGameReady, doClose);
+        client.addListener(EVENT_DISCONNECTED, doClose);
         client.tryConnect();
         driver.run();
     }
@@ -112,16 +113,10 @@ public class UpdateClient extends Client implements IClientUpdate {
     
     
     private DataCompound versionData;
-    private EventDispatcher events = EventDispatcher.concurrentRetained();
     
     
     public UpdateClient(InetAddress address) {
         super(address, Constants.PORT_SERVER, Protocol.UPDATE);
-    }
-    
-    @Override
-    protected void handleProtocolSwitch(TCPConnection con, Protocol protocol) {
-        System.out.println("Connected to server");
     }
     
     /**
@@ -136,7 +131,7 @@ public class UpdateClient extends Client implements IClientUpdate {
     }
     
     public void addListener(Event event, Runnable listener) {
-        events.addListener(Tasks.currentThreadExecutor(), event, e -> listener.run());
+        addListener(Tasks.currentThreadExecutor(), event, e -> listener.run());
     }
     
     @Override
@@ -163,15 +158,23 @@ public class UpdateClient extends Client implements IClientUpdate {
             } else {
                 FileHandle file = Resources.DIR_APP.child(path);
                 byte[] checksum = null;
-                try {
-                    checksum = IOUtil.checksum(file);
-                    versionData.put(path, checksum); // update versiondata
-                } catch(IOException e) {
-                    System.out.println("Could not calculate checksum for " + file);
-                    checksum = new byte[0];
+                if(file.exists()) {
+                    try {
+                        checksum = IOUtil.checksum(file);
+                        versionData.put(path, checksum); // update versiondata
+                    } catch(IOException e) {
+                        System.out.println("Could not calculate checksum for " + file);
+                    }
                 }
-                c.add(path, checksum);
+                c.add(path, checksum == null ? new byte[0] : checksum);
             }
+        }
+        
+        try {
+            IOUtil.write(versionData, Format.NBT, Compression.UNCOMPRESSED, VERSIONDATA);
+        } catch(IOException e) {
+            System.err.println("Could not save versiondata!");
+            e.printStackTrace();
         }
         
         System.out.println("Checksums generated. Sending...");
@@ -181,7 +184,26 @@ public class UpdateClient extends Client implements IClientUpdate {
     
     @Override
     public void handleFileTransfer(TCPConnection con, S001FileTransfer p) {
-        // TODO: unzip zips
+        System.out.println("Received files from server! Unzipping...");
+        
+        for(int i = 0; i < p.files.size(); i += 2) {
+            String s1 = p.files.get(i);
+            String s2 = p.files.get(i+1);
+            FileHandle zipFile = Resources.DIR_APP.child(s1);
+            FileHandle destination = Resources.DIR_APP.child(s2);
+            
+            System.out.println("Unzipping " + zipFile + " into " + destination);
+            
+            try {
+                IOUtil.unzip(zipFile, destination);
+            } catch(IOException e) {
+                System.out.println("Could not unzip " + zipFile);
+                e.printStackTrace();
+            }
+        }
+        
+        System.out.println("Update complete");
+        
         events.post(evtGameReady);
     }
     

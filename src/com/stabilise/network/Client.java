@@ -4,11 +4,20 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
+import com.stabilise.network.TCPConnection.ProtocolSyncEvent;
 import com.stabilise.network.protocol.PacketHandler;
 import com.stabilise.network.protocol.Protocol;
+import com.stabilise.util.Checks;
 import com.stabilise.util.Log;
 import com.stabilise.util.concurrent.Tasks;
+import com.stabilise.util.concurrent.event.Event;
+import com.stabilise.util.concurrent.event.EventDispatcher;
+import com.stabilise.util.concurrent.event.EventHandler;
+import com.stabilise.util.maths.Maths;
 
 /**
  * This class provides all the basis architecture for a client which can
@@ -20,13 +29,26 @@ import com.stabilise.util.concurrent.Tasks;
  * #disconnect()}. {@link #update()} should be invoked at regular intervals by
  * a driver loop.
  */
+@NotThreadSafe
 public abstract class Client implements PacketHandler {
     
-    private static final int STATE_DISCONNECTED = 0,
-            STATE_CONNECTED = 1;
+    /** This event is posted when a client successfully connects to a server. */
+    public static final Event EVENT_CONNECTED = TCPConnection.EVENT_OPENED;
+    /** This event is posted when a client disconnects from a server. */
+    public static final Event EVENT_DISCONNECTED = TCPConnection.EVENT_CLOSED;
+    /** This event is posted when a client synchronises protocols with the
+     * server. Such a hook may be used to perform initial protocol-dependent
+     * actions. */
+    public static final ProtocolSyncEvent EVENT_PROTOCOL_SYNC = TCPConnection.EVENT_PROTOCOL_SYNC;
+    
+    private static enum State {
+            DISCONNECTED,
+            CONNECTED;
+    }
+    
     
     /** Current client state. */
-    private int state = STATE_DISCONNECTED;
+    private State state = State.DISCONNECTED;
     
     // The IP and port to connect to
     private final InetAddress address;
@@ -40,6 +62,10 @@ public abstract class Client implements PacketHandler {
     private final Protocol initialProtocol;
     
     protected final Log log = Log.getAgent("CLIENT");
+    
+    /** Internal event dispatcher. Protected so subclasses can post additional
+     * lifecycle events if they wish. */
+    protected final EventDispatcher events = EventDispatcher.normal();
     
     
     /**
@@ -76,7 +102,7 @@ public abstract class Client implements PacketHandler {
     public Client(InetAddress address, int port, Protocol initialProtocol,
             PacketHandler handler) {
         this.address = Objects.requireNonNull(address);
-        this.port = port;
+        this.port = Checks.test(port, 0, Maths.USHORT_MAX_VALUE);
         this.initialProtocol = Objects.requireNonNull(initialProtocol);
         this.handler = handler == null ? this : handler;
     }
@@ -87,43 +113,31 @@ public abstract class Client implements PacketHandler {
      * @throws IllegalStateException if this client is already connected.
      */
     public final void connect() {
-        if(isConnected() && !recheckDisconnect())
+        if(isConnected())
             throw new IllegalStateException("Cannot connect unless disconnected!");
         try {
             Socket socket = new Socket(address, port);
             // Set state before actually establishing connection so there's
             // some sense of continuity in handleProtocolSwitch() when it is
             // first invoked.
-            state = STATE_CONNECTED;
+            state = State.CONNECTED;
             connection = new TCPConnection(socket, false, initialProtocol);
             connection.addListener(Tasks.currentThreadExecutor(),
                     TCPConnection.EVENT_PROTOCOL_SYNC,
-                    e -> handleProtocolSwitch(e.con, e.protocol)
+                    this::handleProtocolSwitch
+            );
+            connection.addListener(Tasks.currentThreadExecutor(),
+                    TCPConnection.EVENT_CLOSED,
+                    this::handleDisconnect
             );
             connection.open();
+            events.post(EVENT_CONNECTED);
         } catch(IOException e) {
-            state = STATE_DISCONNECTED;
+            state = State.DISCONNECTED;
             log.postWarning("Could not connect to server at "
                     + address.getHostAddress() + ":" + port + " (" +
                     e.getClass().getSimpleName() + ": " + e.getMessage() + ")");
         }
-    }
-    
-    /**
-     * This method is invoked when this client synchronises protocols with the
-     * server, and as such should be used to perform any desired actions upon
-     * entering a protocol.
-     * 
-     * <p>This method is invoked by {@link #connect()} when a connection is
-     * established, with the initial protocol.
-     * 
-     * <p>This method does nothing in the default implementation.
-     * 
-     * @param con This client's underlying {@code TCPConnection}.
-     * @param protocol The new protocol.
-     */
-    protected void handleProtocolSwitch(TCPConnection con, Protocol protocol) {
-        // nothing in the default implementation
     }
     
     /**
@@ -132,7 +146,7 @@ public abstract class Client implements PacketHandler {
     public final void disconnect() {
         if(isConnected()) {
             connection.closeConnection();
-            state = STATE_DISCONNECTED;
+            state = State.DISCONNECTED;
         }
     }
     
@@ -148,7 +162,7 @@ public abstract class Client implements PacketHandler {
      * Returns {@code true} if this client is connected to the server.
      */
     public final boolean isConnected() {
-        return state == STATE_CONNECTED;
+        return state == State.CONNECTED;
         //return !connection.isTerminated();
     }
     
@@ -156,7 +170,7 @@ public abstract class Client implements PacketHandler {
      * Performs an update tick.
      */
     public final void update() {
-        if(!checkDisconnect()) {
+        if(isConnected()) {
             connection.update(handler);
             doUpdate();
         }
@@ -171,42 +185,37 @@ public abstract class Client implements PacketHandler {
     protected void doUpdate() {}
     
     /**
-     * Checks for whether or not this client has been disconnected from the
-     * server. This should be invoked from within {@link #update()}.
-     * 
-     * @return {@code true} if this client has been disconnected; {@code false}
-     * otherwise.
-     */
-    private boolean checkDisconnect() {
-        if(!isConnected())
-            return true;
-        if(!connection.isActive()) {
-            disconnect();
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * Rechecks the disconnected status in case {@link #connection} has closed
-     * without this client finding out yet.
-     * 
-     * @returns true if disconnected
-     */
-    private boolean recheckDisconnect() {
-        if(connection != null && connection.isTerminated()) {
-            state = STATE_DISCONNECTED;
-            return true;
-        }
-        return false;
-    }
-    
-    /**
      * Gets this client's underlying connection. Returns {@code null} if this
      * client has not successfully established a connection.
      */
     public TCPConnection getConnection() {
         return connection;
+    }
+    
+    /**
+     * Adds an event listener to this client.
+     * 
+     * @param exec The executor with which to execute the handler.
+     * @param event The event to listen for.
+     * @param handler The handler to invoke when the specified event is posted.
+     * 
+     * @throws NullPointerException if any argument is null.
+     * @see #EVENT_CONNECTED
+     * @see #EVENT_DISCONNECTED
+     * @see #EVENT_PROTOCOL_SYNC
+     */
+    public <E extends Event> void addListener(Executor exec, E event,
+            EventHandler<? super E> handler) {
+        events.addListener(exec, event, handler);
+    }
+    
+    private void handleProtocolSwitch(ProtocolSyncEvent e) {
+        events.post(e);
+    }
+    
+    private void handleDisconnect(Event e) {
+        disconnect();
+        events.post(e);
     }
     
 }

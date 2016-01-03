@@ -37,7 +37,7 @@ public class Constants {
     public static final Version VERSION_RAW = new Version(0, 0, 0, "alpha");
     /** The current game version. */
     public static final Version VERSION = genVersion();
-    
+    /** The oldest version we're backwards-compatible with. */
     public static final Version BACKWARDS_VERSION = VERSION.clone();
     
     static {

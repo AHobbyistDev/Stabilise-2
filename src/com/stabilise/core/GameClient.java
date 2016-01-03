@@ -11,6 +11,7 @@ import com.stabilise.network.protocol.handshake.IClientHandshake;
 import com.stabilise.network.protocol.handshake.S000VersionInfo;
 import com.stabilise.network.protocol.login.IClientLogin;
 import com.stabilise.network.protocol.login.S000LoginRejected;
+import com.stabilise.util.concurrent.Tasks;
 import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.world.ClientWorld;
 import com.stabilise.world.Worlds;
@@ -41,10 +42,12 @@ public class GameClient extends Client implements IClientHandshake, IClientLogin
     
     public GameClient(InetAddress address, int port) {
         super(address, port, Protocol.HANDSHAKE);
+        
+        addListener(Tasks.currentThreadExecutor(), Client.EVENT_PROTOCOL_SYNC,
+                e -> handleProtocolSwitch(e.con, e.protocol));
     }
     
-    @Override
-    protected void handleProtocolSwitch(TCPConnection con, Protocol protocol) {
+    private void handleProtocolSwitch(TCPConnection con, Protocol protocol) {
         if(firstTimeConnecting) {
             firstTimeConnecting = false;
             // do something which i forgot here

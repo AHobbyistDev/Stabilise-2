@@ -79,8 +79,7 @@ public class UpdateServer extends Server implements IServerUpdate {
                 }
             }
         } catch(IOException e) {
-            System.out.println("Broadcast socket failed");
-            e.printStackTrace();
+            System.err.println("Broadcast socket failed (did it close?)");
         } finally {
             s.close();
         }
@@ -164,7 +163,7 @@ public class UpdateServer extends Server implements IServerUpdate {
     
     @Override
     public void handleChecksums(TCPConnection con, C000Checksums p) {
-        System.out.println("Received client checksums");
+        System.out.println("Received client checksums; preparing to send files");
         
         S001FileTransfer p2 = new S001FileTransfer();
         

@@ -10,9 +10,12 @@ import com.stabilise.core.Resources;
 public class Installer {
     
     public static void main(String[] args) {
-        FileHandle f = new FileHandle("files/");
-        f.copyTo(Resources.DIR_APP);
-        Resources.DIR_APP.child(Resources.LAUNCHER_JAR).copyTo(new FileHandle("Stabilise Launcher.jar"));
+        System.out.println("Copying game files to game directory at " + Resources.DIR_APP);
+        new FileHandle("files/").copyTo(Resources.DIR_APP);
+        System.out.println("Files successfully copied");
+        Resources.DIR_APP.child(Resources.LAUNCHER_JAR).copyTo(
+                new FileHandle("Stabilise Launcher.jar")
+        );
     }
     
 }
