@@ -401,6 +401,9 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
     private void addConnection(Socket socket) {
         try {
             TCPConnection con = clientFactory.create(socket);
+            
+            log.postInfo("Connected to client on " + socket.getLocalSocketAddress());
+            
             con.addListener(Tasks.currentThreadExecutor(),
                     TCPConnection.EVENT_PROTOCOL_SYNC,
                     e -> handleProtocolSwitch(e.con, e.protocol)
@@ -408,8 +411,6 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
             con.open();
             onClientConnect(con);
             connections.add(con);
-            
-            log.postInfo("Connected to client on " + socket.getLocalSocketAddress());
         } catch(IOException e) {
             log.postSevere("Error creating connection (" + e.getMessage() + ")");
             try {

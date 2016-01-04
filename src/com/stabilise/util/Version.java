@@ -33,7 +33,7 @@ public class Version implements Comparable<Version>, Printable {
      * @param minor Minor version. Must be non-negative.
      * @param patch Patch version. Must be non-negative.
      * 
-     * @throws IllegalArgumentException if the values given are invlaid.
+     * @throws IllegalArgumentException if the values given are invalid.
      */
     public Version(int major, int minor, int patch) {
         this(major, minor, patch, null, null);
@@ -47,7 +47,7 @@ public class Version implements Comparable<Version>, Printable {
      * @param patch Patch version. Must be non-negative.
      * @param preRe Pre-release. May be null.
      * 
-     * @throws IllegalArgumentException if the values given are invlaid.
+     * @throws IllegalArgumentException if the values given are invalid.
      */
     public Version(int major, int minor, int patch, String preRe) {
         this(major, minor, patch, preRe, null);
@@ -62,7 +62,7 @@ public class Version implements Comparable<Version>, Printable {
      * @param preRe Pre-release. May be null.
      * @param meta Metadata. May be null.
      * 
-     * @throws IllegalArgumentException if the values given are invlaid.
+     * @throws IllegalArgumentException if the values given are invalid.
      */
     public Version(int major, int minor, int patch, String preRe, String meta) {
         this.major = Checks.testMin(major, 0);

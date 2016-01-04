@@ -75,7 +75,7 @@ public class TCPConnection {
     private static final long PING_INTERVAL = 1000;
     /** Number of ms before a connection disconnects automatically due to
      * large ping. */
-    private static final long TIMEOUT_PING = 60000L; // 60 seconds
+    private static final long TIMEOUT_PING = 30000L; // 30 seconds
     
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------

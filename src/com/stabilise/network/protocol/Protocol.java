@@ -224,6 +224,7 @@ public enum Protocol {
         registerReservedPacket(255, P255Ping.class, P255Ping::new);
         registerReservedPacket(254, P254ProtocolSwitch.class, P254ProtocolSwitch::new);
         RESERVED_PACKETS.lock();
+        
         for(Protocol protocol : Protocol.values()) {
             checkPackets(protocol, protocol.clientPackets);
             checkPackets(protocol, protocol.serverPackets);
