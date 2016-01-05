@@ -1,6 +1,5 @@
 package com.stabilise.util.io;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,43 +9,41 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 
-public abstract class FileSource implements Closeable {
+public abstract class FileSource extends InputStream {
     
     protected FileSource() {}
     
     /**
-     * Returns an estimate of the number of bytes remaining in this source.
+     * {@inheritDoc}
+     * 
+     * @throws UnsupportedOperationException if this is a CachedFileSource.
+     * @throws IOException {@inheritDoc}
      */
-    public abstract int estimatedBytes() throws IOException;
+    @Override
+    public abstract int read() throws IOException;
     
     /**
-     * Reads the next chunk of bytes from the file into the given buffer.
+     * {@inheritDoc}
      * 
-     * @return The number of bytes written to {@code buf}, or {@code -1} if the
-     * end of this source has been reached.
-     * @throws IOException if an I/O error occurs.
-     * @see InputStream#read(byte[])
+     * @throws UnsupportedOperationException if this is a CachedFileSource.
+     * @throws NullPointerException {@inheritDoc}
+     * @throws IOException {@inheritDoc}
      */
+    @Override
     public int read(byte[] buf) throws IOException {
-        return read(buf, 0, buf.length);
+        return super.read(buf);
     }
     
     /**
-     * Reads {@code length}-many bytes into {@code buf}, starting at
-     * {@code offset}.
+     * {@inheritDoc}
      * 
-     * @throws IOException if an I/O error occurs.
-     * @see InputStream#read(byte[], int, int)
-     */
-    public abstract int read(byte[] buf, int off, int len) throws IOException;
-    
-    /**
-     * Closes this FileSource.
-     * 
-     * @throws IOException if an I/O error occurs.
+     * @throws UnsupportedOperationException if this is a CachedFileSource.
+     * @throws NullPointerException {@inheritDoc}
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     * @throws IOException {@inheritDoc}
      */
     @Override
-    public abstract void close() throws IOException;
+    public abstract int read(byte[] buf, int off, int len) throws IOException;
     
     /**
      * Returns a FileSource equivalent to this one, but which additionally
@@ -57,6 +54,12 @@ public abstract class FileSource implements Closeable {
      * 
      * <p>This FileSource is returned if it is already calculating the MD5
      * checksum.
+     * 
+     * <p>Also note that if this is a CachedFileSource, this method will, for
+     * technical reasons (read: it's annoying to try to implement), throw an
+     * UnsupportedOperationException.
+     * 
+     * @throws UnsupportedOperationException if this is a cached file source.
      */
     public final FileSource withChecksum() {
         try {
@@ -76,11 +79,16 @@ public abstract class FileSource implements Closeable {
      * <p>This FileSource is returned if it is already calculating the checksum
      * using the specified algorithm.
      * 
+     * <p>Also note that if this is a CachedFileSource, this method will, for
+     * technical reasons (read: it's annoying to try to implement), throw an
+     * UnsupportedOperationException.
+     * 
      * @param algorithm The checksum algorithm to use.
      * 
      * @throws NullPointerException if {@code algorithm} is {@code null}.
      * @throws NoSuchAlgorithmException if the {@code algorithm} parameter
      * specifies an invalid algorithm.
+     * @throws UnsupportedOperationException if this is a cached file source.
      * @see java.security.MessageDigest
      */
     public FileSource withChecksum(String algorithm) throws NoSuchAlgorithmException {
@@ -102,6 +110,18 @@ public abstract class FileSource implements Closeable {
         return false;
     }
     
+    /**
+     * Wraps this FileSource in a CachedFileSource. Closing the returned
+     * CachedFileSource will close this source.
+     * 
+     * <p>Returns this FileSource if it's already cached.
+     */
+    public CachedFileSource cached() throws IOException {
+        if(this instanceof CachedFileSource)
+            return (CachedFileSource)this;
+        return CachedFileSource.createFromStream(this);
+    }
+    
     //--------------------==========--------------------
     //------------=====Static Functions=====------------
     //--------------------==========--------------------
@@ -120,8 +140,11 @@ public abstract class FileSource implements Closeable {
      * Creates and returns a FileSource reading from the given InputStream.
      * 
      * @throws NullPointerException if {@code is} is {@code null}.
+     * @throws IOException if an I/O error occurs.
      */
-    public static FileSource createFromStream(InputStream is) {
+    public static FileSource createFromStream(InputStream is) throws IOException {
+        if(is instanceof FileSource)
+            return (FileSource)is;
         return new FileSourceFromStream(Objects.requireNonNull(is));
     }
     
@@ -138,8 +161,13 @@ public abstract class FileSource implements Closeable {
         }
         
         @Override
-        public int estimatedBytes() throws IOException {
+        public int available() throws IOException {
             return in.available();
+        }
+        
+        @Override
+        public int read() throws IOException {
+            return in.read();
         }
         
         @Override
@@ -167,8 +195,16 @@ public abstract class FileSource implements Closeable {
         }
         
         @Override
-        public int estimatedBytes() throws IOException {
-            return src.estimatedBytes();
+        public int available() throws IOException {
+            return src.available();
+        }
+        
+        @Override
+        public int read() throws IOException {
+            int next = src.read();
+            if(next != -1)
+                md.update((byte)next);
+            return next;
         }
         
         @Override
@@ -202,7 +238,5 @@ public abstract class FileSource implements Closeable {
         }
         
     }
-    
-    
     
 }
