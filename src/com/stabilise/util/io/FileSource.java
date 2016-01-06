@@ -9,6 +9,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 
+/**
+ * A FileSource is essentially an InputStream whose source is a file, with some
+ * additional in-built features such as {@link #checksum() checksum
+ * calculation} and {@link #cache() caching}.
+ */
 public abstract class FileSource extends InputStream {
     
     protected FileSource() {}
@@ -101,6 +106,10 @@ public abstract class FileSource extends InputStream {
      * 
      * @throws UnsupportedOperationException if this FileSource did not
      * calculate the checksum.
+     * @see #withChecksum()
+     * @see #withChecksum(String)
+     * @see CachedFileSource#calculateChecksum()
+     * @see CachedFileSource#calculateChecksum(String)
      */
     public byte[] checksum() {
         throw new UnsupportedOperationException();
@@ -116,7 +125,7 @@ public abstract class FileSource extends InputStream {
      * 
      * <p>Returns this FileSource if it's already cached.
      */
-    public CachedFileSource cached() throws IOException {
+    public CachedFileSource cache() throws IOException {
         if(this instanceof CachedFileSource)
             return (CachedFileSource)this;
         return CachedFileSource.createFromStream(this);

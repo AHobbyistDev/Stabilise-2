@@ -9,7 +9,16 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Objects;
 
-
+/**
+ * A CachedFileSource is a FileSource which caches the backing file as it is
+ * read, so that it may be read from multiple times without needing to reload
+ * each time.
+ * 
+ * <p>Due to this re-reading nature, conventional InputStream methods {@link
+ * #read()}, {@link #read(byte[])} and {@link #read(byte[], int, int)} will
+ * not work, and a cached source must be {@link #sourceFrom() wrapped} to read
+ * sequentially from it.
+ */
 public abstract class CachedFileSource extends FileSource {
     
     protected CachedFileSource() {}
@@ -166,6 +175,8 @@ public abstract class CachedFileSource extends FileSource {
                 int extraNeeded = length - available;
                 boolean endReached = false;
                 
+                // Read more from the underlying source if more bytes than we
+                // currently have available have been cached.
                 if(extraNeeded > 0) {
                     int canRead = fileBytes.length - len;
                     int count = 0;
@@ -173,6 +184,7 @@ public abstract class CachedFileSource extends FileSource {
                     while(((count = src.read(fileBytes, len, canRead)) > 0 || canRead == 0) && extraNeeded > 0) {
                         if((canRead != 0 && count == 0) || count < 0) {
                             endReached = true;
+                            break;
                         } else {
                             len += count;
                             extraNeeded -= count;
