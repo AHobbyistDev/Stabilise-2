@@ -1,4 +1,4 @@
-package com.stabilise.screen.menu;
+package com.stabilise.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;

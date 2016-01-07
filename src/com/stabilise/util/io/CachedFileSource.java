@@ -160,7 +160,7 @@ public abstract class CachedFileSource extends FileSource {
         
         @Override
         public int available() throws IOException {
-            return fileBytes.length + (src != null ? src.available() : 0);
+            return len + (src != null ? src.available() : 0);
         }
         
         /**
@@ -311,6 +311,11 @@ public abstract class CachedFileSource extends FileSource {
             int count = src.read(idx, buf, off, len);
             idx += count;
             return count;
+        }
+        
+        @Override
+        public int available() throws IOException {
+            return src.available() - idx;
         }
         
     }

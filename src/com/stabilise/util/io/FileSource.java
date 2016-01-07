@@ -120,15 +120,33 @@ public abstract class FileSource extends InputStream {
     }
     
     /**
-     * Wraps this FileSource in a CachedFileSource. Closing the returned
-     * CachedFileSource will close this source.
+     * Wraps this FileSource in a {@link CachedFileSource}. Closing the
+     * returned CachedFileSource will close this source.
      * 
      * <p>Returns this FileSource if it's already cached.
      */
     public CachedFileSource cache() throws IOException {
-        if(this instanceof CachedFileSource)
+        if(isCached())
             return (CachedFileSource)this;
         return CachedFileSource.createFromStream(this);
+    }
+    
+    /**
+     * Polls for whether or not this is a {@link CachedFileSource}.
+     */
+    public boolean isCached() {
+        return this instanceof CachedFileSource;
+    }
+    
+    /**
+     * Checks for whether or not this source has remaining bytes to send.
+     */
+    public boolean hasRemainingBytes() {
+        try {
+            return available() != 0;
+        } catch(IOException e) {
+            return false;
+        }
     }
     
     //--------------------==========--------------------

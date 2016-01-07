@@ -146,7 +146,7 @@ public class TCPConnection {
     
     private volatile String disconnectReason = "";
     
-    private final Log log;
+    final Log log;
     
     
     /**

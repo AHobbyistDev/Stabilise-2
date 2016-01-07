@@ -1,6 +1,6 @@
 package com.stabilise.core.state;
 
-import com.stabilise.screen.menu.MainMenu;
+import com.stabilise.menu.MainMenu;
 
 /**
  * The MainMenuState state is the state which will run while the player is
