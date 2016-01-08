@@ -16,6 +16,7 @@ public class CBasicArmour implements Component {
     
     private int durability = 50;
     
+    
     @Override
     public int getWeight() {
         return 0;
