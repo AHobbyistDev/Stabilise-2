@@ -30,7 +30,7 @@ public class ParticleSource<T extends Particle> {
         this.world = world;
         this.pool = pool;
         this.physical = physical;
-        this.rnd = world.getRnd();
+        this.rnd = world.rnd();
     }
     
     @SuppressWarnings("unchecked")

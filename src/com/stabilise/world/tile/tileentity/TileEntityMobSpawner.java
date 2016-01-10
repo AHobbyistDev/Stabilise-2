@@ -57,14 +57,14 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
             }
             
             if(--ticksUntilNextSpawn == 0) {
-                ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS + w.getRnd().nextInt(TICKS_BETWEEN_EXTRA);
+                ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS + w.rnd().nextInt(TICKS_BETWEEN_EXTRA);
                 
-                int spawns = MIN_SPAWNS + w.getRnd().nextInt(1 + MAX_SPAWNS - MIN_SPAWNS);
+                int spawns = MIN_SPAWNS + w.rnd().nextInt(1 + MAX_SPAWNS - MIN_SPAWNS);
                 while(spawns-- > 0)
                     trySpawn(w);
             }
             
-            if(w.getRnd().nextInt(5) == 0)
+            if(w.rnd().nextInt(5) == 0)
                 spawnParticle(w);
         }
     }

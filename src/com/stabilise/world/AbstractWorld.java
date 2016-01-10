@@ -103,7 +103,7 @@ public abstract class AbstractWorld implements World {
     
     /** An easy-access utility RNG which should be used by any GameObject with
      * a reference to this world in preference to constructing a new one.
-     * @see #getRnd() */
+     * @see #rnd() */
     public final Random rnd = new Random();
     
     /** Use this to profile the world's operation. */
@@ -355,7 +355,7 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
-    public Random getRnd() {
+    public Random rnd() {
         return rnd;
     }
     

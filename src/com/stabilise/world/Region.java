@@ -182,10 +182,6 @@ public class Region {
         } else if(isAnchored()) {
             // Tick any number of random tiles in the region each tick
             tickSlice(world, 4);
-            //tickTile(world);
-            //tickTile(world);
-            //tickTile(world);
-            //tickTile(world);
             
             // Save the region at 64-second intervals.
             // Regions whose x and y coordinates are congruent modulo 8 are

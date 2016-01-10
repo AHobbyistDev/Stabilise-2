@@ -210,14 +210,14 @@ public interface WorldProvider {
     /**
      * Utility method that provides a Random.
      */
-    Random getRnd();
+    Random rnd();
     
     /**
      * Returns {@code true} {@code 1/n}<sup><font size=-1>th</font></sup> of
-     * the time. Equivalent to {@code getRnd().nextInt(n) == 0}.
+     * the time. Equivalent to {@code rnd().nextInt(n) == 0}.
      */
-    default boolean rnd(int n) {
-        return getRnd().nextInt(n) == 0;
+    default boolean chance(int n) {
+        return rnd().nextInt(n) == 0;
     }
     
 }

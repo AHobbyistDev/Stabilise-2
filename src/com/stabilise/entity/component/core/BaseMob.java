@@ -404,11 +404,11 @@ public abstract class BaseMob extends CCore {
      * Spawns smoke particles at the Mob's location.
      */
     private void spawnSmokeParticles(World w, Entity e) {
-        srcSmoke.createCentredOutwardsBurst(w.getRnd(), 30, 1f, 7f, e);
+        srcSmoke.createCentredOutwardsBurst(w.rnd(), 30, 1f, 7f, e);
     }
     
     protected void dropItem(World w, Entity e, ItemStack stack, float chance) {
-        if(w.getRnd().nextFloat() < chance)
+        if(w.rnd().nextFloat() < chance)
             w.addEntity(Entities.item(w, stack), e.x, e.y);
     }
     

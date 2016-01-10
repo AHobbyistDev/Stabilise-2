@@ -186,8 +186,8 @@ public class PlayerController extends CController implements Controllable, Input
                     int max = 1000;// + game.world.getRnd().nextInt(250);
                     for(int i = 0; i < max; i++) {
                         Entity m = Entities.enemy();
-                        m.x = e.x - 10 + game.world.getRnd().nextFloat() * 20;
-                        m.y = 1 + e.y + game.world.getRnd().nextFloat() * 10;
+                        m.x = e.x - 10 + game.world.rnd().nextFloat() * 20;
+                        m.y = 1 + e.y + game.world.rnd().nextFloat() * 10;
                         game.world.addEntity(m);
                     }
                 }

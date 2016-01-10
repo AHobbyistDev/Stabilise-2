@@ -32,7 +32,7 @@ public class TileGrass extends Tile {
                 // grass to that tile with a 1/3 chance
                 t1 = t2;
                 t2 = world.getTileAt(tx, ty+1);
-                if(t1 == Tiles.dirt && !t2.isSolid() && world.rnd(3))
+                if(t1 == Tiles.dirt && !t2.isSolid() && world.chance(3))
                     world.setTileAt(tx, ty, getID());
             }
         }

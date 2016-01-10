@@ -124,12 +124,12 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                     } else if(noise <= 5.75D)
                         set(tx, ty, dirt);
                     else if(noise <= 200D)
-                        set(tx, ty, w.rnd(30) ? glowstone : stone);
+                        set(tx, ty, w.chance(30) ? glowstone : stone);
                     else if(noise <= 210D)
-                        set(tx, ty, w.rnd(30) ? glowstone :
-                            (w.getRnd().nextDouble() > (210-noise)/10 ? bedrock : stone));
+                        set(tx, ty, w.chance(30) ? glowstone :
+                            (w.rnd().nextDouble() > (210-noise)/10 ? bedrock : stone));
                     else
-                        set(tx, ty, w.rnd(30) ? glowstone : bedrock);
+                        set(tx, ty, w.chance(30) ? glowstone : bedrock);
                 }
             }
             
@@ -151,7 +151,7 @@ public class PerlinNoiseGenerator implements IWorldGenerator {
                         te.items.addItem(Items.ARROW, rnd.nextInt(7)+1);
                     }
                     
-                    if(w.rnd(1))
+                    if(w.chance(1))
                         addOres(s, rnd);
                     
                     s.buildLight();

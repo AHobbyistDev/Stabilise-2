@@ -235,7 +235,7 @@ public class CPerson extends BaseMob {
         switch(state) {
             case ATTACK_SIDE_GROUND:
                 if(stateTicks == ATTACK_SIDE_GROUND_FRAME_2_BEGIN) {
-                    damageDealt = w.getRnd().nextInt(16) + 5;
+                    damageDealt = w.rnd().nextInt(16) + 5;
                     Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_SIDE_GROUND_HITBOX_1
                             : ATTACK_SIDE_GROUND_HITBOX_1_FLIPPED, damageDealt);
@@ -258,7 +258,7 @@ public class CPerson extends BaseMob {
                     Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_UP_GROUND_HITBOX
                             : ATTACK_UP_GROUND_HITBOX_FLIPPED,
-                            w.getRnd().nextInt(16) + 20);
+                            w.rnd().nextInt(16) + 20);
                     h.hits = -1;
                     h.force = ATTACK_UP_GROUND_FORCE;
                     h.fy = 1.0f;
@@ -272,7 +272,7 @@ public class CPerson extends BaseMob {
                     Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_DOWN_GROUND_HITBOX
                             : ATTACK_DOWN_GROUND_HITBOX_FLIPPED,
-                            w.getRnd().nextInt(16) + 5);
+                            w.rnd().nextInt(16) + 5);
                     h.hits = -1;
                     h.force = ATTACK_DOWN_GROUND_FORCE;
                     h.fx = e.facingRight ? 1.0f : -1.0f;
@@ -281,7 +281,7 @@ public class CPerson extends BaseMob {
                 break;
             case ATTACK_SIDE_AIR:
                 if(stateTicks == ATTACK_SIDE_AIR_FRAME_2_BEGIN) {
-                    damageDealt = w.getRnd().nextInt(16) + 5;
+                    damageDealt = w.rnd().nextInt(16) + 5;
                     Hitbox h = new Hitbox(e.id(), e.facingRight ?
                             ATTACK_SIDE_AIR_HITBOX_1
                             : ATTACK_SIDE_AIR_HITBOX_1_FLIPPED, damageDealt);
@@ -301,7 +301,7 @@ public class CPerson extends BaseMob {
                 break;
             case ATTACK_UP_AIR:
                 if(stateTicks == ATTACK_UP_AIR_FRAME_2_BEGIN) {
-                    damageDealt = w.getRnd().nextInt(16) + 5;
+                    damageDealt = w.rnd().nextInt(16) + 5;
                     Hitbox h1 = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_UP_AIR_HITBOX_1_1
                             : ATTACK_UP_AIR_HITBOX_1_1_FLIPPED, damageDealt);
@@ -331,7 +331,7 @@ public class CPerson extends BaseMob {
                 break;
             case ATTACK_DOWN_AIR:
                 if(stateTicks == ATTACK_DOWN_AIR_FRAME_2_BEGIN) {
-                    damageDealt = w.getRnd().nextInt(16) + 5;
+                    damageDealt = w.rnd().nextInt(16) + 5;
                     Hitbox h1 = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_DOWN_AIR_HITBOX_1_1
                             : ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED, damageDealt);
@@ -370,7 +370,7 @@ public class CPerson extends BaseMob {
                 if(stateTicks == SPECIAL_DOWN_GROUND_FRAME_2_BEGIN) {
                     if(useMana(SPECIAL_DOWN_GROUND_COST_MANA)) {
                         Hitbox h1 = new Hitbox(e.id(), SPECIAL_DOWN_GROUND_HITBOX_1,
-                                w.getRnd().nextInt(16)+5);
+                                w.rnd().nextInt(16)+5);
                         h1.hits = -1;
                         h1.force = 0.3f;
                         h1.fx = 0.5f;
@@ -379,7 +379,7 @@ public class CPerson extends BaseMob {
                         w.addHitbox(h1, e.x, e.y);
                         
                         Hitbox h2 = new Hitbox(e.id(), SPECIAL_DOWN_GROUND_HITBOX_2,
-                                w.getRnd().nextInt(16)+5);
+                                w.rnd().nextInt(16)+5);
                         h2.hits = -1;
                         h2.force = 0.3f;
                         h2.fx = -0.5f;
@@ -443,18 +443,18 @@ public class CPerson extends BaseMob {
     
     private void fireball(World w, Entity e, int manaCost, Vec2 originPoint) {
         if(useMana(manaCost)) {
-            Entity f = Entities.fireball(e.id(), 5 + w.getRnd().nextInt(5));
+            Entity f = Entities.fireball(e.id(), 5 + w.rnd().nextInt(5));
             
             if(e.facingRight) {
                 f.x = e.x + originPoint.x();
-                f.dx = 30f + w.getRnd().nextFloat() * 10f;
+                f.dx = 30f + w.rnd().nextFloat() * 10f;
             } else {
                 f.x = e.x - originPoint.x();
-                f.dx = -30f - w.getRnd().nextFloat() * 10f;
+                f.dx = -30f - w.rnd().nextFloat() * 10f;
             }
             
             f.y = e.y + originPoint.y();
-            f.dy = 1.0f + w.getRnd().nextFloat() * 1.8f;
+            f.dy = 1.0f + w.rnd().nextFloat() * 1.8f;
             
             f.facingRight = e.facingRight;
             
@@ -487,12 +487,12 @@ public class CPerson extends BaseMob {
         double px = e.facingRight ? e.x + originPoint.x() : e.x - originPoint.x();
         
         if(useMana(manaCost)) {
-            int max = 30 + w.getRnd().nextInt(11);
+            int max = 30 + w.rnd().nextInt(11);
             for(int i = 0; i < max; i++) {
-                float angle = (w.getRnd().nextFloat() * 0.47f + 0.03f) * MathUtils.PI;
-                float velocity = 18.5f + w.getRnd().nextFloat() * 6.5f;
-                boolean right = w.getRnd().nextBoolean();
-                Entity f = Entities.fireball(e.id(), 5 + w.getRnd().nextInt(10));
+                float angle = (w.rnd().nextFloat() * 0.47f + 0.03f) * MathUtils.PI;
+                float velocity = 18.5f + w.rnd().nextFloat() * 6.5f;
+                boolean right = w.rnd().nextBoolean();
+                Entity f = Entities.fireball(e.id(), 5 + w.rnd().nextInt(10));
                 f.dx = right ? MathUtils.cos(angle) * velocity : -MathUtils.cos(angle) * velocity;
                 f.dy = MathUtils.sin(angle)*velocity;
                 f.facingRight = right;
@@ -509,16 +509,16 @@ public class CPerson extends BaseMob {
         double py = e.y + originPoint.y();
         
         if(useMana(manaCost)) {
-            int n = 3 + w.getRnd().nextInt(4);
+            int n = 3 + w.rnd().nextInt(4);
             float minAngle = (1.5f - 0.25f) * MathUtils.PI;
             float maxAngle = (1.5f + 0.25f) * MathUtils.PI;
             float inc = (maxAngle - minAngle) / (float)(n - 1);
             float angle = minAngle;
             for(int i = 0; i < n; i++) {
-                float a = angle + (float)w.getRnd().nextGaussian() * MathUtils.PI / 20; 
+                float a = angle + (float)w.rnd().nextGaussian() * MathUtils.PI / 20; 
                 angle += inc;
-                float v = 18.5f + w.getRnd().nextFloat() * 6.5f;
-                Entity f = Entities.fireball(e.id(), 5 + w.getRnd().nextInt(10));
+                float v = 18.5f + w.rnd().nextFloat() * 6.5f;
+                Entity f = Entities.fireball(e.id(), 5 + w.rnd().nextInt(10));
                 f.dx = MathUtils.cos(a) * v;
                 f.dy = MathUtils.sin(a)*v;
                 w.addEntity(f, px, py);

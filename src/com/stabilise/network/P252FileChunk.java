@@ -18,7 +18,7 @@ public class P252FileChunk extends Packet {
     
     /** Used only on sender side. We read from the source directly in writeData
      * to keep all IO on the sender thread as to minimise blocking on the main
-     * thread. */
+     * thread. This is synchronised on when read from in writeData(). */
     public FileSource src;
     /** Sender-side only. */
     public int bufferSize;

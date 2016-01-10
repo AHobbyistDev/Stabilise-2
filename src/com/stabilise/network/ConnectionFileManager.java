@@ -90,6 +90,9 @@ public class ConnectionFileManager {
         send.add(new FileSendOp(nextSendID++, name, src, checksum));
     }
     
+    /**
+     * Closes all running files-in-transfer.
+     */
     public void close() {
         for(FileSendOp op : send) {
             op.closeSrc();
@@ -111,6 +114,9 @@ public class ConnectionFileManager {
             this.checksum = checksum;
         }
         
+        /**
+         * Polls {@link FileSource#available() src.available()}.
+         */
         public int availableBytes(Log log) {
             try {
                 synchronized(src) {
@@ -122,12 +128,18 @@ public class ConnectionFileManager {
             }
         }
         
+        /**
+         * Polls {@link FileSource#hasRemainingBytes() !src.hasRemainingBytes()}.
+         */
         public boolean isFullySent() {
             synchronized(src) {
                 return !src.hasRemainingBytes();
             }
         }
         
+        /**
+         * Closes src and silently ignores exceptions.
+         */
         public void closeSrc() {
             try {
                 src.close();

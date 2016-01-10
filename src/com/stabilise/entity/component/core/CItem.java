@@ -132,7 +132,7 @@ public class CItem extends CCore {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
-            pop(e, w.getRnd());
+            pop(e, w.rnd());
         return false;
     }
     

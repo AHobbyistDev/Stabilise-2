@@ -16,8 +16,6 @@ public class CBasicArmour implements Component {
     
     private int durability = 50;
     
-    
-    
     @Override
     public int getWeight() {
         return 0;
@@ -43,7 +41,7 @@ public class CBasicArmour implements Component {
             if(d.src.type() != DamageType.ATTACK)
                 return false;
             int dmg = d.src.damage();
-            int sub = Maths.min(DMG_BLOCK + w.getRnd().nextInt(BLOCK_EXTRA+1), durability, dmg);
+            int sub = Maths.min(DMG_BLOCK + w.rnd().nextInt(BLOCK_EXTRA+1), durability, dmg);
             dmg -= sub;
             durability -= sub;
             d.src.setDamage(dmg);

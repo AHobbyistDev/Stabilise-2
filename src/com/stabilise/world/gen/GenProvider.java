@@ -75,7 +75,7 @@ class GenProvider implements WorldProvider {
     }
     
     @Override
-    public Random getRnd() {
+    public Random rnd() {
         return rnd;
     }
     

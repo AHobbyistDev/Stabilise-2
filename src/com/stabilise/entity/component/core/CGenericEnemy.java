@@ -51,7 +51,7 @@ public class CGenericEnemy extends BaseMob {
         Hitbox h = new Hitbox(e.id(), e.facingRight
                 ? p
                 : p.reflect(),
-                w.getRnd().nextInt(5) + 8);
+                w.rnd().nextInt(5) + 8);
         h.hits = -1;
         h.force = 75f;
         h.fx = e.facingRight ? 1f : -1f;
@@ -77,7 +77,7 @@ public class CGenericEnemy extends BaseMob {
         Hitbox h = new Hitbox(e.id(), e.facingRight
                 ? p
                 : p.reflect(),
-                w.getRnd().nextInt(5) + 8);
+                w.rnd().nextInt(5) + 8);
         h.hits = -1;
         h.force = 45f;
         h.fx = e.facingRight ? 1f : -1f;

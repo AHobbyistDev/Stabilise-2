@@ -46,7 +46,7 @@ public class EffectFire extends Effect {
             createFireParticle(w, e);
         
         if(age % Constants.TICKS_PER_SECOND == 0)
-            e.damage(w, GeneralSource.fire(2 + w.getRnd().nextInt(2)));
+            e.damage(w, GeneralSource.fire(2 + w.rnd().nextInt(2)));
     }
     
     /**

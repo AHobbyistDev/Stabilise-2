@@ -38,7 +38,7 @@ public class ParticleSmoke extends ParticlePhysical {
         super.update(world);
         
         if(despawn == -1)
-            despawn = 120 + (int)(30*world.getRnd().nextGaussian());
+            despawn = 120 + (int)(30*world.rnd().nextGaussian());
         
         opacity = 1f - Interpolation.CUBIC.easeInTransform((float)age/despawn);
         

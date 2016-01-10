@@ -53,8 +53,8 @@ public class GameCamera extends FreeGameObject implements WorldCamera {
         
         shakes.iterate(s -> {
             float mod = (float) s.duration / s.maxDuration;
-            x += s.strength * (2 * w.getRnd().nextFloat() - 1) * mod;
-            y += s.strength * (2 * w.getRnd().nextFloat() - 1) * mod;
+            x += s.strength * (2 * w.rnd().nextFloat() - 1) * mod;
+            y += s.strength * (2 * w.rnd().nextFloat() - 1) * mod;
             return --s.duration == 0;
         });
         

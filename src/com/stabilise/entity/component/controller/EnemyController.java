@@ -46,22 +46,22 @@ public class EnemyController extends CController {
     }
     
     private void refreshAction(World w, Entity e) {
-        float rnd = w.getRnd().nextFloat();
+        float rnd = w.rnd().nextFloat();
         if(rnd < 0.45) {
             action = EnumAction.IDLE;
-            actionTimeout = 180 + (int)(w.getRnd().nextFloat() * 180);
+            actionTimeout = 180 + (int)(w.rnd().nextFloat() * 180);
         } else if(rnd < 0.55) {
             action = EnumAction.IDLE;
             e.facingRight = (!e.facingRight);
-            actionTimeout = 120 + (int)(w.getRnd().nextFloat() * 180);
+            actionTimeout = 120 + (int)(w.rnd().nextFloat() * 180);
         } else if(rnd < 0.70) {
             action = EnumAction.IDLE;
             mob.jump();
-            actionTimeout = 180 + (int)(w.getRnd().nextFloat() * 180);
+            actionTimeout = 180 + (int)(w.rnd().nextFloat() * 180);
         } else {
             if(rnd < 0.85) e.facingRight = (!e.facingRight);
             action = EnumAction.MOVE;
-            actionTimeout = 30 + (int)(w.getRnd().nextFloat() * 90);
+            actionTimeout = 30 + (int)(w.rnd().nextFloat() * 90);
         }
     }
     
