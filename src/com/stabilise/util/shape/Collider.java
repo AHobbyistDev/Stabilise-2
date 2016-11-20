@@ -6,6 +6,9 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import com.stabilise.util.maths.Maths;
 
+// To be honest I'm not entirely certain a vtable is the way to go here, but
+// for now I'm keeping it as-is since it seems to work.
+
 /**
  * A class which facilitates shape collision computation.
  */

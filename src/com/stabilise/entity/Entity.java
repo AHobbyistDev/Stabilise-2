@@ -36,8 +36,9 @@ public class Entity extends FreeGameObject {
     
     
     /**
-     * Creates a new Entity. It is implicitly trusted that none of the
-     * arguments are null.
+     * Creates a new Entity.
+     * 
+     * @throws NullPointerException if any argument is null.
      */
     public Entity(CPhysics p, CController co, CCore c) {
         physics    = p;

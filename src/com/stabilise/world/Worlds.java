@@ -9,9 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
-import com.stabilise.core.GameClient;
 import com.stabilise.core.Resources;
-import com.stabilise.core.GameClient.WorldLoadHandle;
 import com.stabilise.entity.Entity;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
@@ -23,13 +21,11 @@ import com.stabilise.util.concurrent.task.Task;
 import com.stabilise.util.concurrent.task.TaskCallable;
 import com.stabilise.util.concurrent.task.TaskHandle;
 import com.stabilise.util.io.IOUtil;
-import com.stabilise.world.multiverse.ClientMultiverse;
 import com.stabilise.world.multiverse.HostMultiverse;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.multiverse.HostMultiverse.PlayerBundle;
 import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
 
-@SuppressWarnings("deprecation")
 public class Worlds {
     
     private Worlds() {}
@@ -173,9 +169,6 @@ public class Worlds {
         private WorldInfo worldInfo = null;
         /** The data of the integrated player. Null if server only. */
         private CharacterData integratedPlayer = null;
-        /** The GameClient through which to communicate to the host server.
-         * Null unless multiplayer client. */
-        private GameClient client = null;
         /** Profiler to use for the world. May be null. */
         private Profiler profiler = null;
         
@@ -223,8 +216,8 @@ public class Worlds {
             checkState();
             if(this.worldInfo != null)
                 throw new IllegalStateException("World already set!");
-            if(client != null)
-                throw new IllegalStateException("Cannot set both client and world");
+            //if(client != null)
+            //    throw new IllegalStateException("Cannot set both client and world");
             this.worldInfo = Objects.requireNonNull(worldInfo);
             return this;
         }
@@ -279,6 +272,7 @@ public class Worlds {
          * multiverse, or the client has already been set, or the world
          * has been set.
          */
+        /*
         @Deprecated
         public WorldBuilder setClient(GameClient client, WorldLoadHandle loadHandle) {
             checkState();
@@ -291,6 +285,7 @@ public class Worlds {
             //----this.loadHandle = Objects.requireNonNull(loadHandle);
             return this;
         }
+        */
         
         /**
          * Sets the profiler to use to profile each world.
@@ -341,9 +336,9 @@ public class Worlds {
                     throw new IllegalStateException("Cannot create a host "
                             + "world without setting the world!");
             } else {
-                if(client == null)
-                    throw new IllegalStateException("Cannot create a client "
-                            + "world without setting the game client!");
+                //if(client == null)
+                //    throw new IllegalStateException("Cannot create a client "
+                //            + "world without setting the game client!");
                 if(integratedPlayer == null)
                     throw new IllegalStateException("Cannot create a client "
                             + "world without setting the player!");
@@ -442,11 +437,13 @@ public class Worlds {
          * 
          * @throws IllegalStateException if this is a host bundle.
          */
+        /*
         public ClientMultiverse getClientMultiverse() {
             if(!(multiverse instanceof ClientMultiverse))
                 throw new IllegalStateException("Not a client bundle!");
             return (ClientMultiverse)multiverse;
         }
+        */
         
         /**
          * Gets the integrated player's initial world.
@@ -468,6 +465,7 @@ public class Worlds {
          * @throws IllegalStateException if there is no integrated player, or
          * this is a host bundle.
          */
+        /*
         public ClientWorld getClientWorld() {
             if(world == null)
                 throw new IllegalStateException("No integrated player!");
@@ -475,6 +473,7 @@ public class Worlds {
                 throw new IllegalStateException("Not a client bundle!");
             return (ClientWorld)world;
         }
+        */
         
         /**
          * Gets the integrated player's PlayerData, for use by a host.

@@ -23,8 +23,9 @@ public class Simulation implements Comparable<Simulation> {
     
     public static final int range = 12;
     public static final int size = 2*range + 1;
-    public static final int maxLife = 60;
-    public static final int manaPerGen = 150;
+    public static final int maxLife = 120;     // formerly 40; now infinity but I'm setting it to 80
+    public static final int manaPerGen = 60;  // formerly 150
+    public static final int maxMana = 100*manaPerGen; // mana caps at 100 rounds
     public static final int eatRange = 1;
     public static final int noSpawnRange = 1;
     
@@ -33,7 +34,7 @@ public class Simulation implements Comparable<Simulation> {
     public int[][] board = new int[size][size];
     public int[][] initial;
     public int mana = 0;
-    public int fitness = 0;
+    public float fitness = 0f;
     
     public Simulation() {
         
@@ -82,7 +83,7 @@ public class Simulation implements Comparable<Simulation> {
         }
     }
     
-    public int run() {
+    public float run() {
         begin();
         while(step()) {}
         genFitness();
@@ -140,7 +141,7 @@ public class Simulation implements Comparable<Simulation> {
         }
         
         if(winners != 0 || age == maxLife) {
-            mana = winners * age * manaPerGen;
+            mana = Math.min(winners * age * manaPerGen, winners * maxMana);
             return false;
         }
         
@@ -169,14 +170,15 @@ public class Simulation implements Comparable<Simulation> {
     }
     
     private void genFitness() {
-        fitness = mana - countCells(initial) - age;
+        fitness = (float)(mana - age) / countCells(initial) + mana/100;
+        //fitness = mana - countCells(initial) - age;
         //fitness = (int)(mana / Math.sqrt(countCells(initial)));
         //fitness = (int)(mana / (double) countCells(initial) + Math.sqrt((maxLife - age) * 200));
     }
     
     @Override
     public int compareTo(Simulation o) {
-        return o.fitness - fitness;
+        return Float.compare(o.fitness, fitness);
     }
     
     public void printInitial() {
@@ -406,6 +408,64 @@ public class Simulation implements Comparable<Simulation> {
             "_________________________" +
             "_________________________" +
             "_________________________";
+    
+    // ========================= POST-RULE CHANGE ==========================
+    
+    // non-reflectable, sadly
+    public static final String s12000_6c =
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "____O_O__________________" +
+            "____O____________________" +
+            "___OO____________________" +
+            "______O__________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "___________XXX___________" +
+            "___________XXX___________" +
+            "___________XXX___________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________";
+    
+    // a good reflection!
+    public static final String s24000_12c =
+            "_______OO________________" +
+            "_________________________" +
+            "_____O_O_________________" +
+            "_______O_________________" +
+            "________O________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "___________XXX___________" +
+            "___________XXX___________" +
+            "___________XXX___________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "_________________________" +
+            "________________O________" +
+            "_________________O_______" +
+            "_________________O_O_____" +
+            "_________________________" +
+            "________________OO_______";
     
     public static int[][] deserialize(String str) {
         return deserialize(str, 'O');

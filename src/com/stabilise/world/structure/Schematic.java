@@ -1,5 +1,8 @@
 package com.stabilise.world.structure;
 
+import com.stabilise.util.annotation.Incomplete;
+
+@Incomplete
 public abstract class Schematic extends Structure {
     
     public int x, y;

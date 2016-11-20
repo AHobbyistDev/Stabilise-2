@@ -3,6 +3,8 @@ package com.stabilise.util.concurrent;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+// Why did I even make this class if I don't use it?
+
 /**
  * A GuardedObject guards a value behind some object's intrinsic lock.
  */

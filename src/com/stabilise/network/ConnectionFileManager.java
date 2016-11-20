@@ -13,6 +13,7 @@ import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.io.FileSource;
 
 @Incomplete
+@SuppressWarnings("unused")
 public class ConnectionFileManager {
     
     /** Temporary maximum number of bytes to send per packet. */

@@ -18,7 +18,7 @@ public abstract class Effect implements Component {
     /**
      * Creates a new Effect.
      * 
-     * @param duration The duration of the effect.
+     * @param duration The duration of the effect, in ticks.
      */
     protected Effect(int duration) {
         if(duration < 1)

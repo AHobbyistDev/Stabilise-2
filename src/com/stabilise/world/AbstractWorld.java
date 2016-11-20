@@ -38,7 +38,7 @@ public abstract class AbstractWorld implements World {
     /** This world's dimension. */
     protected final Dimension dimension;
     
-    /** All players in the world. Maps IDs -> players' EntityMobs. */
+    /** All players in the world. Maps IDs -> players' Entity-s. */
     protected final Map<Long, Entity> players = new HashMap<>(4);
     private final FunctionalIterable<Entity> itrPlayers =
             FunctionalIterable.wrap(players.values(), players::size);

@@ -131,7 +131,8 @@ public class IDRegistry<K, V> extends Registry<K, V> {
     }
     
     /**
-     * Performs the given action for each entry in this registry.
+     * Performs the given action for each entry in this registry. Each entry is
+     * a tuple containing (Key, ID, Value).
      */
     public void forEachEntry(Consumer<Tuple3<K, Integer, V>> action) {
         for(Map.Entry<K, V> entry : objects.entrySet()) {

@@ -2,6 +2,9 @@ package com.stabilise.item.resource;
 
 import com.stabilise.util.annotation.Incomplete;
 
+// Honestly this class has no purpose at the moment and is just filled with
+// random arbitrary values that I came up with 3 or so year ago.
+
 /**
  * A resource represents a class of material.
  */

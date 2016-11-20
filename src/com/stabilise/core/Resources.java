@@ -41,7 +41,7 @@ public class Resources {
             /** Where all dependencies are stored. */
             DIR_LIB = DIR_APP.child("lib/"),
             
-            /** Directory where update server files are stored. Used by update
+            /** Directory where Update Server files are stored. Used by update
              * server only. */
             DIR_UPDATE_SERVER = DIR_APP.child("updatefiles/"),
             US_GAME_JAR = DIR_UPDATE_SERVER.child("gamedata/Game.jar"),

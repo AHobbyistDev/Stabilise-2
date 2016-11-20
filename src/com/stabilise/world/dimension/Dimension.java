@@ -14,7 +14,6 @@ import com.stabilise.util.io.data.Compression;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.Format;
 import com.stabilise.world.AbstractWorld;
-import com.stabilise.world.ClientWorld;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
@@ -68,19 +67,6 @@ public abstract class Dimension {
      */
     public HostWorld createHost(Multiverse<? extends AbstractWorld> multiverse) {
         return new HostWorld(multiverse, this);
-    }
-    
-    /**
-     * Creates the ClientWorld object upon which this dimension will be used.
-     * Subclasses may override this to return a custom implementation of
-     * ClientWorld to implement dimension-specific features.
-     * 
-     * @param multiverse The multiverse.
-     * 
-     * @throws NullPointerException if {@code multiverse} is {@code null}.
-     */
-    public ClientWorld createClient(Multiverse<AbstractWorld> multiverse) {
-        return new ClientWorld(multiverse, this);
     }
     
     /**

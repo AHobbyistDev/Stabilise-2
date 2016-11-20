@@ -7,6 +7,9 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import com.stabilise.util.concurrent.Waiter;
 
+// This entire package looks like a huge clusterfuck and it's been so long
+// since I touched it that I have no idea if it even works.
+
 /**
  * A Task is essentially a {@code Runnable} with additional useful facilities.
  * 

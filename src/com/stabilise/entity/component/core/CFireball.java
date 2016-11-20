@@ -117,7 +117,7 @@ public class CFireball extends BaseProjectile {
         
         for(int y = yMin; y <= yMax; y++) {
             for(int x = xMin; x <= xMax; x++) {
-                if(Maths.pointsInRange(e.x, e.y, x, y, range) && w.getTileAt(x, y).getHardness() <= 15f)
+                if(Maths.pointsInRange(e.x, e.y, x, y, range) && w.getTileAt(x, y).getHardness() <= 5f)
                     w.breakTileAt(x, y);
             }
         }

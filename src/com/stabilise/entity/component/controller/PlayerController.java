@@ -91,7 +91,7 @@ public class PlayerController extends CController implements Controllable, Input
             worldRenderer = ((SingleplayerState)Application.get().getState()).renderer;
         }
         
-        if(Gdx.input.isButtonPressed(Buttons.LEFT))
+        if(Gdx.input.isButtonPressed(Buttons.LEFT) && !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
             doInRadius(worldRenderer, (x,y) -> game.world.breakTileAt(x, y));
         else if(Gdx.input.isButtonPressed(Buttons.RIGHT))
             doInRadius(worldRenderer, (x,y) -> game.world.setTileAt(x, y, tileID));
@@ -277,15 +277,11 @@ public class PlayerController extends CController implements Controllable, Input
 
     @Override
     public boolean touchDown(int x, int y, int pointer, int button) {
-        if(button < 2) {
+        // Ctrl + leftclick = teleport
+        if(button == Buttons.LEFT && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
             Vector2 wc = worldRenderer.mouseCoords();
-            x = Maths.floor(wc.x);
-            y = Maths.floor(wc.y);
-            
-            if(button == 0)
-                game.getWorld().breakTileAt(x, y);
-            else
-                game.getWorld().setTileAt(x, y, tileID);
+            e.x = wc.x;
+            e.y = wc.y;
         }
         return false;
     }
@@ -312,7 +308,7 @@ public class PlayerController extends CController implements Controllable, Input
             if(radius < 1)
                 radius = 0.5f;
         } else
-            tileID = 1 + Maths.remainder(tileID + amount - 1, 23);
+            tileID = 1 + Maths.remainder(tileID + amount - 1, 24);
         return true;
     }
     

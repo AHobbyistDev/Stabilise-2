@@ -61,10 +61,10 @@ public class GeneticDriver {
     }
     
     private Params[] genParams() {
-        float[] fillCh = { 0.10f };
+        float[] fillCh = { 0.02f, 0.05f };
         float[] mutBestCh = { 0.01f, 0.1f, 0.25f };
-        float[] mutCh = { 0.01f, 0.1f, 0.20f };
-        float[] prefWeakCh = { 0.05f };
+        float[] mutCh = { 0.01f, 0.05f };
+        float[] prefWeakCh = { 0.05f, 0.15f };
         int[] centreClearDist = { 2, 16 };
         int len = fillCh.length * mutBestCh.length * mutCh.length * prefWeakCh.length * centreClearDist.length;
         System.out.println(len + " different param combinations");

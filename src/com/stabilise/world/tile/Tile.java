@@ -293,6 +293,7 @@ public class Tile {
         register(STONE, 21, "glass");
         register(AIR,   22, "torch").light((byte)13);
         register(STONE, 23, "glowstone").light((byte)15);
+        register(STONE, 24, "voidRock").light((byte)10);
         
         builder.end();
         builder = null;

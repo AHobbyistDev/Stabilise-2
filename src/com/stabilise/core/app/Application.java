@@ -330,7 +330,7 @@ public abstract class Application {
      */
     public final void crash(Throwable t) {
         if(crashing)        // TODO: Possibly append a log entry detailing the
-            return;            // double-crash and re-save the log?
+            return;         // double-crash and re-save the log?
         crashing = true;
         if(t == null)
             t = new Exception(dummyExceptionMsg());

@@ -33,37 +33,6 @@ import com.stabilise.world.loader.WorldLoader;
  */
 public abstract class Multiverse<W extends AbstractWorld> {
     
-    /*
-     * TYPES OF WORLDPROVIDER
-     * 
-     * 1. Singleplayer
-     *     Fairly straightforward
-     * 2. Multiplayer
-     *     Hosts the world such that multiple players may play. No integrated
-     *     client.
-     * 3. Singleplayer with integrated server
-     *     Combination of 1 & 2; features an integrated client, but also hosts
-     *     a server.
-     * 4. ClientImpl
-     *     Plays on a world provided by a server.
-     * 
-     * 1, 2 & 3 are variants of the 'host provider', which hosts each world.
-     * 4 is a 'client provider', which merely views a world but does not own
-     * it.
-     * 
-     * Furthermore, clients (all but 2.) are able to maintain a single client-
-     * only dimension, unique to each player character. This is to be an
-     * important gameplay feature.
-     *     
-     * DESIGN GOALS
-     * 
-     * - Achieve all of the above four types of provider with all desired
-     *   features.
-     * - Minimal repetition of code across all four types.
-     * - Conversion between types while playing is not necessary, but do if
-     *   able.
-     */
-    
     /** The ExecutorService to use for delegating loader and generator threads. */
     private final ExecutorService executor;
     /** The global WorldLoader to use for loading regions. */

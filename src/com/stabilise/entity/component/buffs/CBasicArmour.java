@@ -14,7 +14,7 @@ public class CBasicArmour implements Component {
     private static final int DMG_BLOCK = 8;
     private static final int BLOCK_EXTRA = 2;
     
-    private int durability = 50;
+    private int durability = 15;
     
     @Override
     public int getWeight() {
@@ -36,7 +36,7 @@ public class CBasicArmour implements Component {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        if(ev.type() == EntityEvent.Type.DAMAGED) {
+        if(ev.type() == EntityEvent.Type.DAMAGED && durability != 0) {
             EDamaged d = (EDamaged)ev;
             if(d.src.type() != DamageType.ATTACK)
                 return false;

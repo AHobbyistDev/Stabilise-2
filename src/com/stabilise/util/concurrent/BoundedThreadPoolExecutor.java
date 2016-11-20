@@ -66,7 +66,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * returned by Executors.newCachedThreadPool().
  * 
  * <p>Since ThreadPoolExecutor does not make subclassing easy, we instead
- * duplicate it and tweak a few lines.
+ * duplicate it and tweak a few lines. (Search for "TODO" to find the modified
+ * lines).
  * 
  * @see ThreadPoolExecutor
  */

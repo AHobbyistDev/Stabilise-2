@@ -17,6 +17,7 @@ import com.stabilise.util.collect.registry.RegisterMe;
 import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.collect.registry.TypeFactory;
 
+
 @Incomplete
 @SuppressWarnings("unused")
 public class GameData {

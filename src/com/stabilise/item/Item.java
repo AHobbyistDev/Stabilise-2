@@ -6,6 +6,9 @@ import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.tile.Tile;
 
+// This entire package is subject to rewriting when the day comes that I
+// actually bother deciding on how I want items in this game to work.
+
 /**
  * Items are essentially ownable game objects.
  */
@@ -234,11 +237,11 @@ public class Item {
         if(registered)
             throw new IllegalStateException("Items have already been registered!");
         
-        registerItem(0, "",         NO_ITEM);
-        registerItem(1, "tile",     new ItemTile());
-        registerItem(2, "sword",    new Item());
-        registerItem(3, "apple",    new Item());
-        registerItem(4, "arrow",    new Item());
+        register(0, "",         NO_ITEM);
+        register(1, "tile",     new ItemTile());
+        register(2, "sword",    new Item());
+        register(3, "apple",    new Item());
+        register(4, "arrow",    new Item());
         
         // Create an item for every tile
         //for(Tile tile : Tile.TILES)
@@ -257,7 +260,7 @@ public class Item {
      * @param name The name of the item.
      * @param item The item.
      */
-    private static void registerItem(int id, String name, Item item) {
+    private static void register(int id, String name, Item item) {
         ITEMS.register(id, name, item);
         item.id = id;
         item.name = name;

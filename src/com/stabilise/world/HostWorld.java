@@ -68,7 +68,7 @@ public class HostWorld extends AbstractWorld {
         spawnSliceX = dimension.info.spawnSliceX;
         spawnSliceY = dimension.info.spawnSliceY;
         
-        // We instatiate the loader, generator and cache, and then safely hand
+        // We instantiate the loader, generator and cache, and then safely hand
         // them references to each other as required.
         loader = multiverse.loader.loaderFor(this);
         generator = dimension.generatorFor(multiverse, this);

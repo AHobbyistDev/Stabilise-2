@@ -8,7 +8,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.stabilise.util.Log;
@@ -122,7 +121,7 @@ public class EventDispatcher {
             l.unlock();
         }
         
-        // No return = listener rejected = we should execute it now
+        // Method hasn't returned = listener rejected = we should execute it now
         li.execute(e);
     }
     
@@ -205,6 +204,7 @@ public class EventDispatcher {
         handlers.clear();
     }
     
+    // No point exposing this method since Listener is a package-private class.
     /**
      * Clears any listeners satisfying the specified predicate. This is
      * exposed for subclasses to utilise if they wish; however it is not a
@@ -212,6 +212,7 @@ public class EventDispatcher {
      * 
      * @throws NullPointerException if {@code pred} is {@code null}.
      */
+    /*
     public final void clearListeners(Predicate<Listener<?>> pred) {
         Objects.requireNonNull(pred);
         handlers.entrySet().removeIf(e -> {
@@ -226,6 +227,7 @@ public class EventDispatcher {
             }
         });
     }
+    */
     
     //--------------------==========--------------------
     //------------=====Static Functions=====------------

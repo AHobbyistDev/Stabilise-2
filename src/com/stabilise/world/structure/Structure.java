@@ -1,5 +1,6 @@
 package com.stabilise.world.structure;
 
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.world.Region;
 import com.stabilise.world.RegionStore;
 
@@ -10,6 +11,7 @@ import com.stabilise.world.RegionStore;
  * height, though it's highly unlikely one would find a use for schematics of
  * such dimensions anyway.
  */
+@Incomplete
 public class Structure {
     
     /**

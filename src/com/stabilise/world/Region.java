@@ -36,6 +36,8 @@ import com.stabilise.world.gen.action.Action;
  * <p>We take a very loose approach to saving regions.
  * 
  * <!--wow such detail-->
+ * <!--seriously though this section was wiped when I changed things up and
+ * now needs rewriting-->
  */
 public class Region {
     

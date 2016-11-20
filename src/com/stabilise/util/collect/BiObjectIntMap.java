@@ -110,7 +110,7 @@ public class BiObjectIntMap<V> implements Iterable<V> {
     
     /**
      * Resizes the backing array to {@code size} if its length significantly
-     * exceeds size.
+     * exceeds size (namely, exceeds size+16).
      * 
      * @throws NegativeArraySizeException if size is negative.
      */

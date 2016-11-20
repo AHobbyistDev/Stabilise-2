@@ -20,18 +20,24 @@ public class GameOfLife {
     public static final FileHandle destFile = destFolder.child("GoL_LastResults.nbt");
     
     public static void main(String[] args) throws Exception {
-        simulate();
+        //simulate();
         //retrieveLastResults();
-        //sim(Simulation.s34200_10c);
+        sim(Simulation.s24000_12c);
     }
     
     public static void simulate() throws IOException {
         List<Result> results = new GeneticDriver().run();
         
         for(Result r : results) {
-            System.out.println(String.format("%5d", r.mana) + " (" +
-                    String.format("%3d", r.cellsReduced) + "/" +
-                    String.format("%2d", r.gen) + "): " + r.params);
+            System.out.println(
+                    String.format("%5d (%3d/%2d): ", r.mana, r.cellsReduced, r.gen)
+                    + r.params + " (score: " + r.score + ")");
+        }
+        
+        // again but no params
+        for(Result r : results) {
+            System.out.println(
+                    String.format("%5d (%3d/%2d)", r.mana, r.cellsReduced, r.gen));
         }
         
         DataCompound saveData = DataCompound.create();
@@ -58,7 +64,7 @@ public class GameOfLife {
     
     public static void sim(String board) {
         Simulation s = new Simulation(board);
-        s.playSim(500);
+        s.playSim(300);
         new Result(s, null).print();
     }
     

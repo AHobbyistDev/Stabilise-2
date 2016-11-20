@@ -175,6 +175,10 @@ public class Polygon extends Shape {
         return p;
     }
     
+    /**
+     * Constructs a polygon approximation of a circle with centre (x,y) and
+     * with the specified number of points/vertices.
+     */
     public static Polygon circle(float x, float y, float radius, int points) {
         Checks.testMin(points, 3);
         float[] verts = new float[2*points];

@@ -10,6 +10,8 @@ import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Resources;
 import com.stabilise.util.io.IOUtil;
 
+// Yet Another File Format.
+
 /**
  * A config file is a file containing simple tags representing config values.
  * Such a config file typically has the layout:

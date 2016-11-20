@@ -41,7 +41,7 @@ public class GeneticSim implements Callable<Result> {
         public final int[][] board;
         public final int[][] reducedBoard;
         public final int mana;
-        public final int score;
+        public final float score;
         public final int gen;
         public final int cells;
         public final int cellsReduced;
@@ -63,7 +63,7 @@ public class GeneticSim implements Callable<Result> {
         
         @Override
         public int compareTo(Result o) {
-            return o.score - score;
+            return Float.compare(o.score, score);
         }
         
         public void print() {
@@ -77,8 +77,8 @@ public class GeneticSim implements Callable<Result> {
         
     }
     
-    public static final int nSim = 24;
-    public static final int generations = 4*4*1024;
+    public static final int nSim = 18; //24
+    public static final int generations = 1024; //16*1024
     
     public final Params params;
     private final Simulation[] sims = new Simulation[nSim];

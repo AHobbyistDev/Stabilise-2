@@ -36,8 +36,9 @@ interface ListenerBucket<E extends Event> {
     
     /**
      * Posts the event. It is implicitly trusted that {@code e} is not null.
-     * Returns an array of triggered listeners (so they can be executed while
-     * not in a synchronised block, for concurrent event dispatchers).
+     * 
+     * <p>To avoid causing a bottleneck in the mutex we return an array of
+     * triggered listeners rather than executing them directly.
      */
     @Nullable Listener<? super E>[] post(E e);
     

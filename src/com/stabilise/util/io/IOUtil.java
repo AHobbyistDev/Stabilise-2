@@ -57,7 +57,7 @@ public class IOUtil {
      * 
      * @return {@code handle}, for chaining operations.
      * @throws NullPointerException if {@code handle} is {@code null}.
-     * @throws GDXRuntimeException if {@code handle} is an internal or
+     * @throws GdxRuntimeException if {@code handle} is an internal or
      * classpath handle.
      */
     public static FileHandle createDir(FileHandle handle) {
@@ -74,7 +74,7 @@ public class IOUtil {
      * 
      * @return {@code handle}, for chaining operations.
      * @throws NullPointerException if {@code handle} is {@code null}.
-     * @throws GDXRuntimeException if {@code handle} is an internal or
+     * @throws GdxRuntimeException if {@code handle} is an internal or
      * classpath handle.
      */
     public static FileHandle createParentDir(FileHandle handle) {

@@ -109,12 +109,14 @@ public class TileRenderer implements Renderer {
         int rMin = Math.max(0, yMin - y*SLICE_SIZE);
         int cMin = Math.max(0, xMin - x*SLICE_SIZE);
         
-        wr.batch.setColor(lightLevels[2]); // walls have light level 2 for now
+        //wr.batch.setColor(lightLevels[2]); // walls have light level 2 for now
         
         for(int r = rMin, ty = yMin; r < SLICE_SIZE && ty < yMax; r++, ty++) {
             for(int c = cMin, tx = xMin; c < SLICE_SIZE && tx < xMax; c++, tx++) {
                 int id = slice.getWallIDAt(c, r);
                 if(id != 0) { // i.e. not air
+                    // Temporary wall lighting; 2 + light/2
+                    wr.batch.setColor(lightLevels[1 + slice.getLightAt(c, r)/4]);
                     wr.batch.draw(tiles[id], tx, ty, 1f, 1f);
                 }
             }

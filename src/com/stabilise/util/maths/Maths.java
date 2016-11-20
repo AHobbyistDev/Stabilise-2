@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.MathUtils;
  * This class provides some utility methods and fields with mathematical
  * purpose.
  */
+// Named "Maths" because "Math" and "MathUtils" are already taken.
 public class Maths {
     
     // non-instantiable
@@ -463,10 +464,15 @@ public class Maths {
         return x2*x2 + y2*y2 <= range*range;
     }
     
+    // This really shouldn't need documenting
     public static int min(int a, int b, int c) {
         return Math.min(Math.min(a, b), c);
     }
     
+    /**
+     * Returns the maximum element in the given array, or throws an exception
+     * if {@code b.length == 0}.
+     */
     public static byte max(byte[] b) {
         byte max = b[0];
         for(int i = 1; i < b.length; i++) {
