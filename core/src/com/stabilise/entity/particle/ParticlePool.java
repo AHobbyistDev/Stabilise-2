@@ -68,6 +68,10 @@ class ParticlePool<T extends Particle> {
         return pool.get(--poolSize);
     }
     
+    /**
+     * Equivalent to {@link #get()}, but casts the {@code Particle} to {@code
+     * T}.
+     */
     @SuppressWarnings("unchecked")
     T getCasted() {
         return (T) get();

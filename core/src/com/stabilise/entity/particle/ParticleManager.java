@@ -56,6 +56,7 @@ public class ParticleManager {
                     new ParticlePool<>(particleClass),
                     ParticlePhysical.class.isAssignableFrom(particleClass)
             );
+            sources.put(particleClass, source);
         }
         return source;
     }

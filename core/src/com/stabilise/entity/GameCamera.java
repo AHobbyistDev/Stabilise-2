@@ -19,11 +19,9 @@ public class GameCamera extends FreeGameObject implements WorldCamera {
     /** Real x, y values (i.e. ignoring shake). */
     private double rx, ry;
     
-    /** The number of tiles to view horizontally/vertically. */
-    public int width, height;
-    
     /** The coordinates of the slice in which the camera is located, in
-     * slice-lengths. These are cached values recalculated every tick. */
+     * slice-lengths. These are cached values recalculated every tick. Used by
+     * the world renderer to decide which slices to render. */
     public int sliceX, sliceY;
     
     /** The strength with which the camera follows the focus. */
@@ -98,7 +96,7 @@ public class GameCamera extends FreeGameObject implements WorldCamera {
      * the range {@code 0 < followStrength <= 1}.
      */
     public void setFollowStrength(float followStrength) {
-        this.followStrength = Checks.testExclIncl(followStrength, 0f, 1);
+        this.followStrength = Checks.testExclIncl(followStrength, 0f, 1f);
     }
     
     /**

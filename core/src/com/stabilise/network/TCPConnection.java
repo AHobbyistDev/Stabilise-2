@@ -38,10 +38,6 @@ import com.stabilise.util.io.DataOutStream;
 @NotThreadSafe
 public class TCPConnection {
     
-    //--------------------==========--------------------
-    //-----=====Static Constants and Variables=====-----
-    //--------------------==========--------------------
-    
     /** Posted when a TCPConnection synchronises protocols with its peer. */
     public static final ProtocolSyncEvent EVENT_PROTOCOL_SYNC
             = new ProtocolSyncEvent(null, null);

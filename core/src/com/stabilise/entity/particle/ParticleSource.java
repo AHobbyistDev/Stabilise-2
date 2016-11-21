@@ -38,10 +38,17 @@ public class ParticleSource<T extends Particle> {
         pool.reclaim((T)p);
     }
     
+    /**
+     * {@link ParticlePool#flush() Flushes} the pool.
+     */
     void cleanup() {
         pool.flush();
     }
     
+    /**
+     * Modulates a given quantity of particles to generate based on the game's
+     * {@link Settings#getSettingParticles() particles setting}.
+     */
     private int count(int baseCount) {
         switch(Settings.getSettingParticles()) {
             case Settings.PARTICLES_ALL:

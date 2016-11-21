@@ -20,10 +20,6 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  */
 public class Stabilise extends Application {
     
-    //--------------------==========--------------------
-    //-----=====Static Constants and Variables=====-----
-    //--------------------==========--------------------
-    
     /** The game name. */
     public static final String GAME_NAME = "Stabilise II";
     

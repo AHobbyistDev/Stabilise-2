@@ -22,6 +22,7 @@ import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.box.Box;
 import com.stabilise.util.box.Boxes;
+import com.stabilise.util.concurrent.Striper;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
 import com.stabilise.world.loader.WorldLoader.DimensionLoader;
@@ -103,7 +104,7 @@ public class RegionStore {
     /** Locks to use for managing cache-local data. These locks double as
      * mutable points for convenience, which should only be used while
      * synchronised on themselves. */
-    private final Striper<Point> cacheLocks = new Striper<>(Region::createMutableLoc);
+    private final Striper2D<Point> cacheLocks = new Striper2D<>(Region::createMutableLoc);
     /** Locks to synchronise on when adding/removing from storage. These locks
      * are designed to be used to ensure mutual exclusion between the two
      * following operations:
@@ -120,7 +121,7 @@ public class RegionStore {
      *     <li>If it is not in main storage, create it and add it to the cache.
      *     </ul>
      * </ul> */
-    private final Striper<Object> storeLocks = new Striper<>(Object::new);
+    private final Striper2D<Object> storeLocks = new Striper2D<>(Object::new);
     
     /** Dummy key for {@link #regions} whose mutability may be abused for
      * optimisation purposes on the main thread. */
@@ -657,12 +658,12 @@ public class RegionStore {
     }
     
     /**
-     * Convenience class which extends {@link
-     * com.stabilise.util.concurrent.Striper} to provide {@code get(x, y)}.
+     * Convenience class which extends {@link Striper} to provide {@code
+     * get(x, y)}.
      */
-    private static class Striper<T> extends com.stabilise.util.concurrent.Striper<T> {
+    private static class Striper2D<T> extends Striper<T> {
         
-        public Striper(Supplier<T> supplier) {
+        public Striper2D(Supplier<T> supplier) {
             super(STRIPE_FACTOR, supplier);
         }
         
