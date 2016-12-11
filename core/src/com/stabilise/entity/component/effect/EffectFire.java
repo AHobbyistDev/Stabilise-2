@@ -3,6 +3,7 @@ package com.stabilise.entity.component.effect;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.Component;
 import com.stabilise.entity.damage.GeneralSource;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.particle.ParticleFlame;
@@ -62,6 +63,23 @@ public class EffectFire extends Effect {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         return false;
+    }
+
+    @Override
+    public int getWeight() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public Action resolve(Component c) {
+        // If we get a new fire effect while active just add the durations.
+        if(c instanceof EffectFire) {
+            EffectFire e = (EffectFire)c;
+            duration += e.duration;
+            return Action.REJECT;
+        } else
+            return Action.KEEP_BOTH;
     }
     
 }

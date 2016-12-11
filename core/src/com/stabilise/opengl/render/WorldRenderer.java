@@ -34,6 +34,7 @@ import com.stabilise.item.Item;
 import com.stabilise.item.Items;
 import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
+import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
@@ -116,6 +117,7 @@ public class WorldRenderer implements Renderer {
     // List for automatic resource disposal
     private List<Disposable> disposables = new ArrayList<>();
     
+    private final Log log = Log.getAgent("WorldRenderer");
     private final Profiler profiler = Application.get().profiler;
     
     
@@ -299,24 +301,24 @@ public class WorldRenderer implements Renderer {
         batch.setColor(DEFAULT_COL);
         
         profiler.next("entities"); // root.render.entities
+        profiler.start("nonplayer"); // root.render.entities.nonplayer
         
-        profiler.start("findPlayer");
         // Temporary way of ensuring the player is rendered on top
         Entity playerEntity = null;
-        for(Entity e : world.getPlayers()) {
-            playerEntity = e;
-            break;
-        }
         
-        profiler.next("nonplayer");
         for(Entity e : world.getEntities()) {
-            if(e != playerEntity)
+            if(e.isPlayerControlled())
+                playerEntity = e;
+            else
                 e.render(this);
         }
         batch.flush();
         
         profiler.next("player");
-        playerEntity.render(this); // render the player on top
+        if(playerEntity != null)
+            playerEntity.render(this); // render the player on top
+        else
+            log.postWarning("No player entity to render!");
         profiler.end();
         
         profiler.next("particles"); // root.render.particles

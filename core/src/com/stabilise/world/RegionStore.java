@@ -151,7 +151,7 @@ public class RegionStore {
     RegionStore(HostWorld world) {
         this.world = Objects.requireNonNull(world);
         
-        log = Log.getAgent(world.getDimensionName() + "RegionCache");
+        log = Log.getAgent(world.getDimensionName() + "_RegionStore");
     }
     
     /**

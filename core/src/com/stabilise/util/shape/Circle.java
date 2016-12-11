@@ -120,9 +120,16 @@ class Circle extends Shape {
      * otherwise.
      */
     public boolean contains(Circle c) {
+        if(c.radius > radius) return false;
         float dx = x() - c.x();
         float dy = y() - c.y();
-        return radius >= dx*dx + dy*dy + c.radius;
+        float dr = radius - c.radius;
+        // radius >= sqrt(dx*dx + dy*dy) + c.radius
+        // radius - c.radius >= sqrt(dx*dx + dy*dy)
+        // We want to avoid computing sqrt so instead we use
+        // (radius - c.radius)^2 >= dx*dx + dy*dy,
+        // Which requires the c.radius <= radius check at the start.
+        return dr*dr >= dx*dx + dy*dy;
     }
     
     @Override

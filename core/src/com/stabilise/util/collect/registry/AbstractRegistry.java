@@ -26,7 +26,7 @@ abstract class AbstractRegistry<E> implements Iterable<E> {
     
     /** The number of entries in this registry. Increment this when an object
      * is registered. */
-    protected int size = 0; 
+    protected int size = 0;
     
     private boolean locked = false;
     

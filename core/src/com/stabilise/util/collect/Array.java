@@ -13,7 +13,7 @@ import com.google.common.collect.Iterators;
 
 /**
  * This class provides a thin wrapper for an object array with some added
- * convenience methods.
+ * convenience methods such as resizability.
  */
 @NotThreadSafe
 public class Array<E> implements Iterable<E> {

@@ -77,7 +77,7 @@ public final class WorldGenerator {
         loadTracker = world.loadTracker();
         
         // TODO: de-hardcodify
-        generators.add(new PerlinNoiseGenerator());
+        generators.add(new OverworldGenerator());
     }
     
     /**

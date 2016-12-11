@@ -26,10 +26,20 @@ public class ParticleSource<T extends Particle> {
     private final Random rnd;
     
     
-    ParticleSource(AbstractWorld world, ParticlePool<T> pool, boolean physical) {
+    /**
+     * Creates a new particle source.
+     * 
+     * @param world The world in which to generate particles.
+     * @param clazz The class of the particle to generate.
+     * 
+     * @throws NullPointerException if {@code clazz} is null.
+     * @throws IllegalArgumentException if particles of the given class have
+     * not been registered.
+     */
+    ParticleSource(AbstractWorld world, Class<T> clazz) {
         this.world = world;
-        this.pool = pool;
-        this.physical = physical;
+        this.pool = new ParticlePool<>(clazz);
+        this.physical = ParticlePhysical.class.isAssignableFrom(clazz);
         this.rnd = world.rnd();
     }
     
@@ -84,7 +94,7 @@ public class ParticleSource<T extends Particle> {
      * the particle.
      */
     public T create() {
-        T p = pool.getCasted();
+        T p = pool.get();
         p.reset();
         world.addParticle(p);
         return p;
@@ -96,7 +106,7 @@ public class ParticleSource<T extends Particle> {
      * addParticle(particle, x, y)}, and then returns the particle.
      */
     public T createAt(double x, double y) {
-        T p = pool.getCasted();
+        T p = pool.get();
         addParticle(p, x, y);
         return p;
     }

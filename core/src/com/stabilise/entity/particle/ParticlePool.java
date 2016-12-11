@@ -1,5 +1,7 @@
 package com.stabilise.entity.particle;
 
+import java.util.function.Supplier;
+
 import javax.annotation.concurrent.NotThreadSafe;
 
 import com.stabilise.util.collect.Array;
@@ -7,8 +9,8 @@ import com.stabilise.world.World;
 
 
 /**
- * Provides a pool of particles of the same type to avoid unnecessary
- * object instantiation and to reduce the strain on the GC.
+ * Provides a pool of particles of the same type to avoid unnecessary object
+ * instantiation and to reduce the strain on the GC.
  */
 @NotThreadSafe
 class ParticlePool<T extends Particle> {
@@ -28,7 +30,8 @@ class ParticlePool<T extends Particle> {
     private static final int RETENTION_ON_FLUSH = 8;
     
     
-    private final int id;
+    /** Particle supplier, provided by {@link Particle#REGISTRY}. */
+    private final Supplier<T> generator;
     
     private final Array<T> pool = new Array<>(CAPACITY_INITIAL);
     /** Number of particles in the pool. Always < pool.length(). */
@@ -47,34 +50,27 @@ class ParticlePool<T extends Particle> {
      * @throws IllegalStateException if the given class has not been
      * registered.
      */
+    @SuppressWarnings("unchecked")
     ParticlePool(Class<T> clazz) {
-        id = Particle.REGISTRY.getID(clazz);
+        int id = Particle.REGISTRY.getID(clazz);
         if(id == -1)
             throw new IllegalStateException("Particle class " + clazz
                     + " not registered!");
+        generator = (Supplier<T>)Particle.REGISTRY.get(id);
     }
     
     /**
      * Gets a particle from this pool, instantiating a new one if
      * necessary.
      */
-    Particle get() {
+    T get() {
         activeParticles++;
         if(poolSize == 0) {
-            Particle p = Particle.REGISTRY.create(id);
+            T p = generator.get();
             p.reset();
             return p;
         }
         return pool.get(--poolSize);
-    }
-    
-    /**
-     * Equivalent to {@link #get()}, but casts the {@code Particle} to {@code
-     * T}.
-     */
-    @SuppressWarnings("unchecked")
-    T getCasted() {
-        return (T) get();
     }
     
     /**
@@ -92,8 +88,8 @@ class ParticlePool<T extends Particle> {
     }
     
     /**
-     * Reclaims a particle into this pool. This should only be invoked by
-     * a particle when it is registered as destroyed (i.e. from within
+     * Reclaims a particle into this pool. This should only be invoked by a
+     * particle when it is registered as destroyed (i.e. from within
      * {@link Particle#updateAndCheck(World)}).
      */
     public void reclaim(T p) {
@@ -106,10 +102,9 @@ class ParticlePool<T extends Particle> {
     }
     
     /**
-     * Flushes this pool by garbage-collecting all but a few pooled
-     * particles, and shrinking the internal size if necessary. This
-     * shouldn't be invoked too frequently as this can be an expensive
-     * operation.
+     * Flushes this pool by garbage-collecting all but a few pooled particles
+     * and shrinking the internal size if necessary. This shouldn't be invoked
+     * too frequently as this can be an expensive operation.
      */
     void flush() {
         // Dump all but RETENTION_ON_FLUSH-many pooled particles.

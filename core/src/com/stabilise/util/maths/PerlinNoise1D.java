@@ -24,19 +24,19 @@ public class PerlinNoise1D {
     private final Random rnd;
     /** The base seed. */
     private final long seed;
-    /** The wavelength of noise to generate. */
-    private final float wavelength;
+    /** The frequency of noise to generate (1/period). */
+    private final float frequency;
     
     
     /**
      * Creates a new 1-dimensional perlin noise generator.
      * 
      * @param seed The seed to use for noise generation.
-     * @param wavelength The wavelength of noise to generate.
+     * @param period The wavelength of noise to generate.
      */
-    public PerlinNoise1D(long seed, float wavelength) {
-        this.wavelength = wavelength;
-        this.seed = hash(seed, Double.doubleToLongBits((double)wavelength));
+    public PerlinNoise1D(long seed, float period) {
+        this.frequency = 1/period;
+        this.seed = hash(seed, Double.doubleToLongBits((double)period));
         
         rnd = new Random(seed);
     }
@@ -71,7 +71,7 @@ public class PerlinNoise1D {
      * @return The noise value at x, between 0.0 and 1.0.
      */
     public double noise(float x) {
-        x /= wavelength;
+        x *= frequency;
         int flooredX = Maths.floor(x);
         
         // Note: this implementation is technically that of value noise

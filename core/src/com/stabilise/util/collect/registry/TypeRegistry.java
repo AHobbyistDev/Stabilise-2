@@ -10,8 +10,13 @@ import javax.annotation.concurrent.NotThreadSafe;
 import com.stabilise.util.collect.Array;
 
 /**
- * A TypeRegistry is a specialised registry which enables an ID and a 'special
- * object' to be mapped to a class.
+ * A TypeRegistry is a specialised registry which offers the following mapping
+ * profile:
+ * 
+ * <ul>
+ * <li>{@code Class<T>} -> ID, and
+ * <li>ID -> Value.
+ * </ul>
  * 
  * <p>This class is typically used as an instantiation registry, in which case
  * the value mapped to each class is of type {@link Supplier}{@code <T>}. See

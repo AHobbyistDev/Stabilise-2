@@ -50,7 +50,8 @@ public class Tiles {
             mobSpawner   = get("mobSpawner"),
             glass        = get("glass"),
             torch        = get("torch"),
-            glowstone    = get("glowstone");
+            glowstone    = get("glowstone"),
+            voidRock     = get("voidRock");
     public static final TileChest
             chest        = get("chest");
     

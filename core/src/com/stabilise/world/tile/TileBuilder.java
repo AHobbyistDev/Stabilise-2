@@ -40,7 +40,7 @@ class TileBuilder {
         SPWNR(H_STONE, F_DEF, b -> new TileMobSpawner(b)),
         ORE(H_STONE, F_DEF, b -> new TileOre(b));
         
-        private final Function<TileBuilder, Tile> builder;
+        private final Function<TileBuilder, Tile> constructor;
         
         private final boolean solid;
         private final float hardness;
@@ -52,7 +52,7 @@ class TileBuilder {
         
         /** Air tile */
         private Template() {
-            builder = b -> new TileAir(b);
+            constructor = b -> new TileAir(b);
             solid = false;
             hardness = 0f;
             friction = F_AIR;
@@ -68,7 +68,7 @@ class TileBuilder {
         
         /** Solid tile */
         private Template(float hardness, float friction, Function<TileBuilder, Tile> b) {
-            this.builder = b;
+            this.constructor = b;
             solid = true;
             this.hardness = hardness;
             this.friction = friction;
@@ -79,7 +79,7 @@ class TileBuilder {
         
         /** Fluid tile */
         private Template(float viscosity) {
-            builder = b -> new TileFluid(b);
+            constructor = b -> new TileFluid(b);
             solid = false;
             hardness = friction = 0f;
             this.viscosity = viscosity;
@@ -92,6 +92,7 @@ class TileBuilder {
     private boolean registered = true;
     
     private Template template = null;
+    private Function<TileBuilder, Tile> constructor;
     int id;
     String name;
     boolean solid;
@@ -126,6 +127,7 @@ class TileBuilder {
         this.id = id;
         this.name = Objects.requireNonNull(name);
         
+        constructor = template.constructor;
         solid = t.solid;
         hardness = t.hardness;
         friction = t.friction;
@@ -146,6 +148,11 @@ class TileBuilder {
             register();
     }
     
+    public TileBuilder constructor(Function<TileBuilder, Tile> constructor) {
+        this.constructor = Objects.requireNonNull(constructor);
+        return this;
+    }
+    
     public TileBuilder solid(boolean solid) {
         this.solid = solid;
         return this;
@@ -161,8 +168,9 @@ class TileBuilder {
         return this;
     }
     
-    public TileBuilder light(byte light) {
-        this.light = light;
+    /** Casted to byte */
+    public TileBuilder light(int light) {
+        this.light = (byte) light;
         return this;
     }
     
@@ -180,7 +188,7 @@ class TileBuilder {
      * this builder wasn't reset since the last registration.
      */
     public void register() {
-        register(template.builder);
+        register(constructor);
     }
     
     /**

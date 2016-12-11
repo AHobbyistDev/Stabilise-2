@@ -23,7 +23,8 @@ public class Polygon extends Shape {
     /** The projection axes - lazily initialised by genCollisionData(). */
     float[] axes = null;
     /** The projections corresponding to each axis - lazily initialised by
-     * genCollisionData(). */
+     * genCollisionData(). The first element is set to Float.NaN if these
+     * projections haven't been generated. */
     float[] projs = null;
     
     
@@ -61,6 +62,8 @@ public class Polygon extends Shape {
     @Override
     public Shape rotate(float rads) {
         Polygon p = (Polygon)super.rotate(rads);
+        // A polygon's projections are invariant under a rotation, thus we have
+        // the child polygon share the same projs array.
         if(projs == null) {
             projs = new float[verts.length];
             projs[0] = Float.NaN; // flag value
@@ -158,12 +161,16 @@ public class Polygon extends Shape {
      * 
      * @return The new polygon.
      */
-    public static Polygon newPolygon(float[] vertices) {
+    public static Polygon newPoly(float[] vertices) {
         Polygon p = new Polygon();
         p.verts = vertices;
         return p;
     }
     
+    /**
+     * Creates a rectangular polygon with the specified origin, width and
+     * height.
+     */
     public static Polygon rectangle(float x, float y, float width, float height) {
         Polygon p = new Polygon();
         p.verts = new float[] {
@@ -189,7 +196,7 @@ public class Polygon extends Shape {
             verts[i+1] = y + radius * MathUtils.sin(angle);
             angle += increment;
         }
-        return newPolygon(verts);
+        return newPoly(verts);
     }
     
 }

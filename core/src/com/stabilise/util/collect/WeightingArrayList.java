@@ -59,7 +59,12 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
             for(int i = 0; i < size; i++) {
                 w2 = data[i].getWeight();
                 if(w2 < w) continue;
-                else if(w2 == w) {
+                else if(w2 > w) {
+                    shift(i);
+                    data[i] = e;
+                    size++;
+                    return true;
+                } else { // w2 == w
                     if(data[i].equals(e)) {
                         Action a = data[i].resolve(e);
                         if(a == Action.OVERWRITE) {
@@ -68,11 +73,6 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
                         } else if(a == Action.REJECT) return false;
                         else continue;
                     }
-                } else { // w2 > w
-                    shift(i);
-                    data[i] = e;
-                    size++;
-                    return true;
                 }
             }
             

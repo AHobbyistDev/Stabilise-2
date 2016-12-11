@@ -57,5 +57,5 @@ public class FreeGameObject extends GameObject {
     public final int getSliceY() {
         return sliceCoordFromTileCoord(y);
     }
-
+    
 }

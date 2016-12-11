@@ -50,4 +50,14 @@ public abstract class CCore implements Component {
         e.destroy();
     }
     
+    @Override
+    public int getWeight() {
+        throw new RuntimeException("A CCore should not be put in the components list!");
+    }
+    
+    @Override
+    public Action resolve(Component other) {
+        throw new RuntimeException("A CCore should not be put in the components list!");
+    }
+    
 }

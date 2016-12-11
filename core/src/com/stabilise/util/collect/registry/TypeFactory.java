@@ -59,7 +59,9 @@ public class TypeFactory<T> extends TypeRegistry<T, Supplier<T>> {
      * @throws IndexOutOfBoundsException if {@code id < 0}.
      */
     public T create(int id) {
-        return getOrDefault(id, () -> null).get();
+        //return getOrDefault(id, () -> null).get();
+        Supplier<T> supp = get(id);
+        return supp == null ? null : supp.get();
     }
     
     /**

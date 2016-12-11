@@ -10,8 +10,9 @@ import com.stabilise.world.World;
 public abstract class Effect implements Component {
     
     /** The duration of the effect, in ticks. */
-    public final int duration;
-    /** The age of the effect, in ticks. */
+    public int duration;
+    /** The age of the effect, in ticks. When this reaches {@link #duration},
+     * this effect will be removed. */
     public int age = 0;
     
     
@@ -35,6 +36,17 @@ public abstract class Effect implements Component {
     @Override
     public boolean shouldRemove() {
         return age >= duration;
+    }
+    
+    // Get rid of the default implementation; we want to force effects to
+    // handle overlapping ones.
+    @Override
+    public abstract Action resolve(Component c);
+    
+    @Override
+    public boolean equals(Object o) {
+        // Effects are considered equal if they're the same class.
+        return o != null && o.getClass().equals(getClass());
     }
     
 }

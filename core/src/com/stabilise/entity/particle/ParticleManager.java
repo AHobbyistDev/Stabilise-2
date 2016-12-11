@@ -23,8 +23,7 @@ import com.stabilise.world.AbstractWorld;
 public class ParticleManager {
     
     private final AbstractWorld world;
-    /** Caches all the particle pools used and shared by each
-     * ParticleSource. */
+    /** Caches all the particle pools used and shared by each ParticleSource. */
     private final Map<Class<? extends Particle>, ParticleSource<? extends Particle>> sources =
             new IdentityHashMap<>();
     
@@ -48,17 +47,15 @@ public class ParticleManager {
      * registered.
      */
     public <T extends Particle> ParticleSource<T> getSource(Class<T> particleClass) {
+        // Don't try to change this to map.computeIfAbsent(), it isn't worth
+        // the hassle
         @SuppressWarnings("unchecked")
-        ParticleSource<T> source = (ParticleSource<T>)sources.get(particleClass);
-        if(source == null) {
-            source = new ParticleSource<>(
-                    world,
-                    new ParticlePool<>(particleClass),
-                    ParticlePhysical.class.isAssignableFrom(particleClass)
-            );
-            sources.put(particleClass, source);
+        ParticleSource<T> src = (ParticleSource<T>) sources.get(particleClass);
+        if(src == null) {
+            src = new ParticleSource<T>(world, particleClass);
+            sources.put(particleClass, src);
         }
-        return source;
+        return src;
     }
     
     /**
@@ -66,8 +63,7 @@ public class ParticleManager {
      * free up memory.
      */
     public void cleanup() {
-        for(ParticleSource<?> src : sources.values())
-            src.cleanup();
+        sources.values().forEach(ParticleSource::cleanup);
     }
     
 }
