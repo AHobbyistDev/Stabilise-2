@@ -23,6 +23,8 @@ public class Maths {
     
     /** Holds the value given by Math.sqrt(2). */
     public static final float SQRT_2f = (float)SQRT_2;
+    /** Holds the value given by 1/Math.sqrt(2). */
+    public static final float INV_SQRT_2f = 1f/SQRT_2f;
     /** Holds the value given by Math.PI * 2. */
     public static final float TAUf = (float)TAU;
     /** Holds the value given by Math.PI / 2. */

@@ -19,11 +19,16 @@ import com.badlogic.gdx.math.Vector2;
  * Better rank ordering method by Stefan Gustavson in 2012.<br>
  */
 @NotThreadSafe
-public class SimplexNoise implements INoise2D {
+public class SimplexNoise implements INoise {
     
     //--------------------==========--------------------
     //-----=====Static Constants and Variables=====-----
     //--------------------==========--------------------
+    
+    // Skew factor general formula found at:
+    // https://math.stackexchange.com/questions/464713/changing-a-simplex-grid-to-an-orthogonal-grid
+    // A bit of a derivation for the 2D case:
+    // kristiannielsen.livejournal.com/18962.html
     
     // Skewing and unskewing factors for 2, 3, and 4 dimensions
     private static final double SKEW_2D = 0.5*(Math.sqrt(3.0)-1.0);
@@ -41,12 +46,8 @@ public class SimplexNoise implements INoise2D {
     //-------------=====Member Variables=====-----------
     //--------------------==========--------------------
     
-    /** The pseudorandom number generator. */
-    private final Random rnd;
-    /** The base seed. */
+    private final Random rnd = new Random();
     private final long seed;
-    /** The scale of noise to generate. */
-    private final float scale;
     
     /** Gradient vector. */
     private final Vector2 grad = new Vector2();
@@ -56,22 +57,9 @@ public class SimplexNoise implements INoise2D {
      * Creates a simplex noise generator.
      * 
      * @param seed The seed to use for noise generation.
-     * @param scale The scale of the noise to generate.
      */
-    public SimplexNoise(long seed, float scale) {
-        this.scale = scale;
-        this.seed = hash(seed, Double.doubleToLongBits((double)scale));
-        
-        rnd = new Random(seed);
-    }
-    
-    /**
-     * Hashes two long values in a really simple and stupid way
-     */
-    private long hash(long x, long y) {
-        x ^= y;
-        x ^= x << 32;
-        return x;
+    public SimplexNoise(long seed) {
+        this.seed = seed;
     }
     
     /**
@@ -89,11 +77,13 @@ public class SimplexNoise implements INoise2D {
     }
     
     @Override
-    public double noise(double x, double y) {
-        x /= scale;
-        y /= scale;
-        
-        double n0, n1, n2;    // Noise contributions from the three corners
+    public float noise(double x) {
+        throw new UnsupportedOperationException("No 1D simplex noise.");
+    }
+    
+    @Override
+    public float noise(double x, double y) {
+        float n0, n1, n2;    // Noise contributions from the three corners
         
         // Skew the input space to determine which simplex cell we're in
         double s = (x + y) * SKEW_2D;        // Skew factor for 2D
@@ -102,7 +92,7 @@ public class SimplexNoise implements INoise2D {
         double t = (i + j) * UNSKEW_2D;
         double X0 = i - t;        // Unskew the cell origin back to (x,y) space
         double Y0 = j - t;
-        double x0 = x - X0;        // The x,y distances from the cell origin
+        double x0 = x - X0;       // The x,y distances from the cell origin
         double y0 = y - Y0;
         
         // For the 2D case, the simplex shape is an equilateral triangle.
@@ -122,7 +112,7 @@ public class SimplexNoise implements INoise2D {
         // c = (3-sqrt(3))/6 [the value of UNSKEW_2D]
         double x1 = x0 - i1 + UNSKEW_2D;            // Offsets for middle corner in (x,y) unskewed coords
         double y1 = y0 - j1 + UNSKEW_2D;
-        double x2 = x0 - 1.0 + 2.0 * UNSKEW_2D;        // Offsets for last corner in (x,y) unskewed coords
+        double x2 = x0 - 1.0 + 2.0 * UNSKEW_2D;      // Offsets for last corner in (x,y) unskewed coords
         double y2 = y0 - 1.0 + 2.0 * UNSKEW_2D;
         
         // Work out the hashed gradient indices of the three simplex corners
@@ -135,39 +125,37 @@ public class SimplexNoise implements INoise2D {
         */
         
         // Calculate the contribution from the three corners
-        double t0 = 0.5D - x0*x0 - y0*y0;
+        double t0 = 0.5f - x0*x0 - y0*y0;
         if(t0 < 0D) {
-            n0 = 0.0D;
+            n0 = 0;
         } else {
             t0 *= t0;
-            n0 = t0 * t0 * genGradient(i, j).dot((float)x0, (float)y0);    // (x,y) of grad3 used for 2D gradient
+            n0 = (float)(t0*t0) * genGradient(i, j).dot((float)x0, (float)y0);    // (x,y) of grad3 used for 2D gradient
         }
-        double t1 = 0.5D - x1*x1 - y1*y1;
+        double t1 = 0.5f - x1*x1 - y1*y1;
         if(t1 < 0D) {
-            n1 = 0.0D;
+            n1 = 0;
         } else {
             t1 *= t1;
-            n1 = t1 * t1 * genGradient(i+i1, j+j1).dot((float)x1, (float)y1);
+            n1 = (float)(t1*t1) * genGradient(i+i1, j+j1).dot((float)x1, (float)y1);
         }
-        double t2 = 0.5D - x2*x2 - y2*y2;
+        double t2 = 0.5f - x2*x2 - y2*y2;
         if(t2 < 0D) {
-            n2 = 0.0D;
+            n2 = 0;
         } else {
             t2 *= t2;
-            n2 = t2 * t2 * genGradient(i+1, j+1).dot((float)x2, (float)y2);
+            n2 = (float)(t2*t2) * genGradient(i+1, j+1).dot((float)x2, (float)y2);
         }
         
         // Add contributions from each corner to get the final noise value.
         // The result is scaled to return values in the interval [0,1].
         
-        //return 70.0 * (n0 + n1 + n2) * Maths.SQRT_2;     // -1 to 1
-        return 0.5 + 35.0 * (n0 + n1 + n2) * Maths.SQRT_2; // 0 to 1
+        //return 70.0 * (n0 + n1 + n2) * Maths.SQRT_2f;     // -1 to 1
+        return 0.5f + 35f * (n0 + n1 + n2) * Maths.SQRT_2f; // 0 to 1
     }
     
     /**
      * Generates the noise 'gradient' at a given gridpoint.
-     * 
-     * @return The noise gradient at (x,y).
      */
     private Vector2 genGradient(int x, int y) {
         setSeed(x, y);
