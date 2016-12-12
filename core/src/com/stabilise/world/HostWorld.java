@@ -49,7 +49,7 @@ public class HostWorld extends AbstractWorld {
     private final List<SliceMap> sliceMaps = new UnorderedArrayList<>(4, 2);
     
     /** Whether or not the world has been {@link #prepare() prepared}. */
-    private boolean prepared = false;
+    private volatile boolean prepared = false;
     
     public final WorldStatistics stats = new WorldStatistics();
     
@@ -57,16 +57,13 @@ public class HostWorld extends AbstractWorld {
     /**
      * Creates a new HostWorld.
      * 
-     * @param multiverse The multiverse..
+     * @param multiverse The multiverse.
      * @param dimension The dimension of this world.
      * 
      * @throws NullPointerException if either argument is {@code null}.
      */
     public HostWorld(Multiverse<?> multiverse, Dimension dimension) {
         super(multiverse, dimension);
-        
-        spawnSliceX = dimension.info.spawnSliceX;
-        spawnSliceY = dimension.info.spawnSliceY;
         
         // We instantiate the loader, generator and cache, and then safely hand
         // them references to each other as required.
@@ -78,6 +75,21 @@ public class HostWorld extends AbstractWorld {
         loader.prepare(generator);
         generator.prepare(loader, regions);
         regions.prepare(loader);
+    }
+    
+    @UserThread("PoolThread")
+    public void preload() {
+        try {
+            dimension.loadData();
+        } catch(IOException e) {
+            throw new RuntimeException("Could not load dimension info! (dim: " +
+                    dimension.info.name + ") (" + e.getMessage() + ")" , e);
+        }
+        
+        spawnSliceX = dimension.info.spawnSliceX;
+        spawnSliceY = dimension.info.spawnSliceY;
+        
+        prepare();
     }
     
     @ThreadUnsafeMethod
@@ -164,6 +176,8 @@ public class HostWorld extends AbstractWorld {
     
     @Override
     public boolean update() {
+        if(!prepared)
+            return false;
         doUpdate();
         return regions.numRegions() == 0;
     }

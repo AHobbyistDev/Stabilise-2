@@ -22,11 +22,11 @@ public class PrivateGenerator implements IWorldGenerator {
     private static class RegionGenerator {
         
         private static final float
-                guaranteedAir = 20f,
-                normalCaveNoise = 30f,
+                guaranteedAir = 20f, // guaranteed air up to this radius
+                normalCaveNoise = 30f, // interp from guaranteed air to normal cave noise ends here
                 blockTypeSwitchStart = 50f,
                 blockTypeSwitchEnd = 90f,
-                caveExtent = 200f;
+                caveExtent = 200f; // cave noise stops here
         
         private final WorldProvider w;
         

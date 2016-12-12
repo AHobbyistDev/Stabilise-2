@@ -19,7 +19,7 @@ import com.stabilise.world.World;
 import com.stabilise.world.loader.WorldLoader;
 
 /**
- * A WorldProvider manages and 'provides' all the dimensions/worlds of a
+ * A Multiverse manages and 'provides' all the dimensions/worlds of a
  * world.<sup><font size=-1>1</font></sup>
  * 
  * <p>{@code 1.} The terminology is somewhat confusing here. From the user's
@@ -34,7 +34,7 @@ import com.stabilise.world.loader.WorldLoader;
 public abstract class Multiverse<W extends AbstractWorld> {
     
     /** The ExecutorService to use for delegating loader and generator threads. */
-    private final ExecutorService executor;
+    protected final ExecutorService executor;
     /** The global WorldLoader to use for loading regions. */
     public final WorldLoader loader;
     
@@ -107,7 +107,10 @@ public abstract class Multiverse<W extends AbstractWorld> {
     }
     
     /**
-     * Loads a dimension into memory.
+     * Loads a dimension into memory. If the dimension is already loaded, it
+     * will be returned as per {@link #getDimension(String)}. Note that the
+     * returned world may not yet be loaded nor ready (as I/O or other
+     * preparative operations may be being performed asynchronously).
      * 
      * @param name The name of the dimension.
      * 

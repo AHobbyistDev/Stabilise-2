@@ -41,6 +41,8 @@ public abstract class Dimension {
      * set by {@link #registerDimensions()}. */
     private static String privateDim = null;
     
+    public static final String PLAYER_DIM_PREFIX = "$";
+    
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
     //--------------------==========--------------------
@@ -98,8 +100,10 @@ public abstract class Dimension {
      * @throws IOException if an I/O error occurs.
      */
     public final void loadData() throws IOException {
-        if(info.getFile().exists())
-            loadExtraData(info.load());
+        if(info.getFile().exists()) {
+            DataCompound c = info.load();
+            loadCustomData(c);
+        }
     }
     
     /**
@@ -111,7 +115,7 @@ public abstract class Dimension {
      * 
      * @param tag The NBT compound tag from which to read the data.
      */
-    protected void loadExtraData(DataCompound tag) {
+    protected void loadCustomData(DataCompound tag) {
         // nothing to see here, move along
     }
     
@@ -152,6 +156,32 @@ public abstract class Dimension {
     //--------------------==========--------------------
     //------------=====Static Functions=====------------
     //--------------------==========--------------------
+    
+    /**
+     * Returns {@code true} if the given dimension name is that of a
+     * character's personal dimension.
+     */
+    public static boolean isPlayerDimension(String dimensionName) {
+        return dimensionName.startsWith(PLAYER_DIM_PREFIX);
+    }
+    
+    /**
+     * 
+     */
+    public static String extractPlayerHash(String dimensionName) {
+        // Can't be bothered checking to see if this is a valid player
+        // dimension name for now.
+        int idx = dimensionName.lastIndexOf('_');
+        return dimensionName.substring(idx + 1);
+    }
+    
+    /**
+     * Gets the internal dimension name for a given player. This takes the form
+     * "$playerName_hash".
+     */
+    public static String getDimensionName(CharacterData data) {
+        return PLAYER_DIM_PREFIX + data.name + "_" + data.hash;
+    }
     
     /**
      * Gets an instance of a Dimension. This method should be used to get the
@@ -228,8 +258,8 @@ public abstract class Dimension {
      * @throws RuntimeException if the Dimension object could not be
      * instantiated.
      */
-    public static Dimension getPrivateDimension(CharacterData character) {
-        return getDimension(new Info(character)); // should never be null
+    public static Dimension getPlayerDimension(CharacterData character) {
+        return getDimension(new Info(character));
     }
     
     /**

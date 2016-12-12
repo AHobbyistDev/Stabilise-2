@@ -135,7 +135,7 @@ public abstract class AbstractWorld implements World {
      * 
      * @throws IllegalStateException if the world has already been prepared.
      */
-    public abstract void prepare();
+    protected abstract void prepare();
     
     /**
      * Polls the loaded status of the world.

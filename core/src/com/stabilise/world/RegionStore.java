@@ -1,7 +1,7 @@
 package com.stabilise.world;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -128,11 +128,8 @@ public class RegionStore {
     private final Point unguardedDummyLoc = Region.createMutableLoc();
     
     /** Regions which have been cached by the current worker thread. */
-    // Note: Sometime in the future it might be a good idea to switch from a
-    // List to a Map, especially if some implementation decides to rapid-fire
-    // on cache() to fetch tons of different regions.
-    private final ThreadLocal<List<Region>> localCachedRegions =
-            ThreadLocal.withInitial(ArrayList::new);
+    private final ThreadLocal<Map<Point, Region>> localCachedRegions =
+            ThreadLocal.withInitial(HashMap::new);
     
     // A Lock and its associated Condition to wait on in waitUntilDone().
     private final Lock doneLock = new ReentrantLock();
@@ -142,14 +139,10 @@ public class RegionStore {
     
     
     /**
-     * Creates a new region cache.
-     * 
-     * @param world The world to cache regions for.
-     * 
-     * @throws NullPointerException if {@code world} is {@code null}.
+     * Creates a new region store for the given world.
      */
     RegionStore(HostWorld world) {
-        this.world = Objects.requireNonNull(world);
+        this.world = world;
         
         log = Log.getAgent(world.getDimensionName() + "_RegionStore");
     }
@@ -342,13 +335,12 @@ public class RegionStore {
      */
     @UserThread("Any")
     public Region cache(int x, int y) {
-        List<Region> localRegions = localCachedRegions.get();
-        
         // If the region is locally cached by this thread, use it.
-        for(Region r : localRegions) {
-            if(r.isAt(x, y))
-                return r;
-        }
+        Map<Point, Region> localMap = localCachedRegions.get();
+        Point loc = Region.createImmutableLoc(x, y);
+        Region r = localMap.get(loc);
+        if(r != null)
+            return r;
         
         // Otherwise, if the region is cached, we locally cache it, and then
         // return it.
@@ -368,7 +360,7 @@ public class RegionStore {
                     // If the region is in primary storage, we take it and put
                     // it in the cache. If it isn't, we create the region in
                     // the cache.
-                    Region region = getRegionAt(p); // p is (x,y)
+                    Region region = getRegionAt(p); // p is already (x,y)
                     if(region == null)
                         region = new Region(x, y, world.getAge());
                     regionHandle = new CachedRegion(region);
@@ -379,7 +371,7 @@ public class RegionStore {
             regionHandle.mark();
         }
         
-        localRegions.add(regionHandle.region);
+        localMap.put(loc, regionHandle.region);
         
         // We need the region to be loaded such that when we save it we don't
         // lose any old data.
@@ -395,8 +387,8 @@ public class RegionStore {
      */
     @UserThread("Any")
     public void uncacheAll() {
-        List<Region> localRegions = localCachedRegions.get();
-        for(Region cRegion : localRegions)
+        Map<Point, Region> localRegions = localCachedRegions.get();
+        for(Region cRegion : localRegions.values())
             uncache(cRegion);
         localRegions.clear();
     }

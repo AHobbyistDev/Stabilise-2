@@ -26,6 +26,7 @@ import com.stabilise.util.io.data.Compression;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.Format;
 import com.stabilise.util.io.data.nbt.NBTCompound;
+import com.stabilise.world.dimension.Dimension;
 
 /**
  * Data about a character.
@@ -230,6 +231,14 @@ public class CharacterData implements Sendable {
      */
     public FileHandle getDimensionDir() {
         return getDir().child(DIR_PRIVATE_WORLD);
+    }
+    
+    /**
+     * Gets the internal dimension name for this character's personal
+     * dimension.
+     */
+    public String getDimensionName() {
+        return Dimension.getDimensionName(this);
     }
     
     @Override

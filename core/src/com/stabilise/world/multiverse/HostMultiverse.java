@@ -70,21 +70,27 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         if(world != null)
             return world;
         
-        Dimension dim = Dimension.getDimension(info, name);
+        Dimension dim = null;
+        if(Dimension.isPlayerDimension(name)) {
+            String hash = Dimension.extractPlayerHash(name);
+            PlayerData dat = players.get(hash);
+            if(dat == null)
+                throw new RuntimeException("No player present for this dimension!");
+            if(name != dat.data.getDimensionName())
+                throw new RuntimeException("Given dimension name != expected name");
+            dim = Dimension.getPlayerDimension(dat.data);
+        } else {
+            dim = Dimension.getDimension(info, name);
+        }
+        
         if(dim == null)
             throw new IllegalArgumentException("Invalid dim: \"" + name + "\"");
         
-        try {
-            dim.loadData();
-        } catch(IOException e) {
-            throw new RuntimeException("Could not load dimension info! (dim: " +
-                    name + ") (" + e.getMessage() + ")" , e);
-        }
-        
         world = dim.createHost(this);
-        world.prepare();
-        
         dimensions.put(name, world);
+        
+        final HostWorld w = world;
+        executor.execute(() -> w.preload());
         
         return world;
     }

@@ -10,6 +10,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.stabilise.util.Log;
 import com.stabilise.util.concurrent.FakeLock;
 import com.stabilise.util.concurrent.Striper;
@@ -34,6 +36,7 @@ import com.stabilise.util.concurrent.Striper;
  * method - that is, a listener will be triggered if a posted event {@code
  * equals} its registered event.
  */
+@ThreadSafe
 public class EventDispatcher {
     
     protected final boolean retained;
