@@ -1,5 +1,6 @@
 package com.stabilise.world.gen;
 
+import com.stabilise.util.annotation.ThreadSafeMethod;
 import com.stabilise.world.Region;
 import com.stabilise.world.WorldProvider;
 import com.stabilise.world.tile.Tiles;
@@ -22,6 +23,7 @@ public interface IWorldGenerator {
      * @param w Worldprovider.
      * @param seed The world seed.
      */
+    @ThreadSafeMethod
     void generate(Region r, WorldProvider w, long seed);
     
 }

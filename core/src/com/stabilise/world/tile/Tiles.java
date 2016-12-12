@@ -28,32 +28,33 @@ public class Tiles {
     private static <T extends Tile> T get(String name) { return (T)Tile.getTile(name); }
     
     public static final Tile
-            air          = get("air"),
-            darkness     = get("void"),
-            bedrock      = get("bedrock"),
-            barrier      = get("invisibleBedrock"),
-            stone        = get("stone"),
-            dirt         = get("dirt"),
-            grass        = get("grass"),
-            wood         = get("wood"),
-            leaves       = get("leaves"),
-            planks       = get("planks"),
-            water        = get("water"),
-            lava         = get("lava"),
-            ice          = get("ice"),
-            stoneBrick   = get("stoneBrick"),
-            oreIron      = get("oreIron"),
-            oreCopper    = get("oreCopper"),
-            oreGold      = get("oreGold"),
-            oreSilver    = get("oreSilver"),
-            oreDiamond   = get("oreDiamond"),
-            mobSpawner   = get("mobSpawner"),
-            glass        = get("glass"),
-            torch        = get("torch"),
-            glowstone    = get("glowstone"),
-            voidRock     = get("voidRock");
+            air           = get("air"),
+            darkness      = get("void"),
+            bedrock       = get("bedrock"),
+            barrier       = get("invisibleBedrock"),
+            stone         = get("stone"),
+            dirt          = get("dirt"),
+            grass         = get("grass"),
+            wood          = get("wood"),
+            leaves        = get("leaves"),
+            planks        = get("planks"),
+            water         = get("water"),
+            lava          = get("lava"),
+            ice           = get("ice"),
+            stoneBrick    = get("stoneBrick"),
+            oreIron       = get("oreIron"),
+            oreCopper     = get("oreCopper"),
+            oreGold       = get("oreGold"),
+            oreSilver     = get("oreSilver"),
+            oreDiamond    = get("oreDiamond"),
+            mobSpawner    = get("mobSpawner"),
+            glass         = get("glass"),
+            torch         = get("torch"),
+            glowstone     = get("glowstone"),
+            voidRock      = get("voidRock"),
+            voidRockDense = get("voidRockDense");
     public static final TileChest
-            chest        = get("chest");
+            chest         = get("chest");
     
     
 }

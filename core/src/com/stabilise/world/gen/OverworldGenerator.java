@@ -34,7 +34,7 @@ public class OverworldGenerator implements IWorldGenerator {
      * should be much less than the synchronisation overhead if more than one
      * region is to be generated simultaneously.
      */
-    private class PerlinRegionGenerator {
+    private static class PerlinRegionGenerator {
         private OctaveNoise landNoise;
         private OctaveNoise caveNoise;
         private OctaveNoise maskNoise;
@@ -43,7 +43,11 @@ public class OverworldGenerator implements IWorldGenerator {
         private boolean isCave;
         
         private PerlinRegionGenerator(WorldProvider w, long seed) {
-            landNoise = OctaveNoise.perlin(7, seed)
+            long mix1 = 0x3ce575a3c1e97863L;
+            long mix2 = 0xd74a9ad1417d79a0L;
+            long mix3 = 0x7227bebc43323e77L;
+
+            landNoise = OctaveNoise.perlin(7, seed^mix1)
                     .doNotNormalise()
                     .addOctave(4096, 256)
                     .addOctave(128,  64 )
@@ -52,12 +56,12 @@ public class OverworldGenerator implements IWorldGenerator {
                     .addOctave(16,   8  )
                     .addOctave(8,    4  )
                     .addOctave(4,    2  );
-            caveNoise = OctaveNoise.simplex(4, seed)
+            caveNoise = OctaveNoise.simplex(4, seed^mix2)
                     .addOctave(128, 2)
                     .addOctave(64,  8)
                     .addOctave(32,  4)
                     .addOctave(16,  1);
-            maskNoise = OctaveNoise.simplex(1, seed).addOctave(512, 1);
+            maskNoise = OctaveNoise.simplex(1, seed^mix3).addOctave(512, 1);
             
             this.w = w;
         }
@@ -70,7 +74,7 @@ public class OverworldGenerator implements IWorldGenerator {
             n = n * (n * n * 15731 + 789221) + 1376312589;
             Random rnd = new Random(seed + n);
             
-            double[] noiseVec = new double[REGION_SIZE_IN_TILES];
+            float[] noiseVec = new float[REGION_SIZE_IN_TILES];
             for(int x = 0; x < REGION_SIZE_IN_TILES; x++) {
                 noiseVec[x] = landNoise.noise(x+offsetX) - offsetY;
             }
@@ -78,12 +82,12 @@ public class OverworldGenerator implements IWorldGenerator {
             for(int y = 0, ty = offsetY; y < REGION_SIZE_IN_TILES; y++, ty++) {
                 for(int x = 0, tx = offsetX; x < REGION_SIZE_IN_TILES; x++, tx++) {
                     isCave = false;
-                    double noise = noiseVec[x]--;
-                    double cave = caveNoise.noise(tx, ty);
+                    float noise = noiseVec[x];
+                    float cave = caveNoise.noise(tx, ty);
                     // This should produce varying cave types across the world as
                     // the noise forms characteristically different contours at
                     // different points between 0.25-0.75.
-                    double caveMask = 0.25D + transformCaveMask(maskNoise.noise(tx,ty))/2;
+                    float caveMask = 0.25f + transformCaveMask(maskNoise.noise(tx,ty))/2;
                     
                     // Multiply caveNoise or caveMask by 0 to 1 based on the depth
                     // to try to deter a great multitude of surface cave entrances
@@ -91,10 +95,10 @@ public class OverworldGenerator implements IWorldGenerator {
                     //    caveMask *= Interpolation.QUADRATIC.easeIn(0.5f, 1, (float)noise / 20);
                     
                     //if((y < -200 && caveNoise > 0.8D) || (y < -180 && caveNoise > (0.8 - 0.2 * (180+y)/20f)))
-                    if(ty < -200 && cave > 0.8D)
+                    if(ty < -200 && cave > 0.8f)
                         set(tx, ty, lava);
                     //else if(noise <= 0 || (caveNoise > 0.45D && caveNoise < 0.55D))
-                    else if(noise <= -1 || (cave > caveMask - 0.05D && cave < caveMask + 0.05D)) {
+                    else if(noise <= -1 || (cave > caveMask - 0.05f && cave < caveMask + 0.05f)) {
                     //else if(noise <= 0 || caveNoise > 0.8D)
                         isCave = true;
                         w.setTileAt(tx, ty, air);
@@ -110,11 +114,11 @@ public class OverworldGenerator implements IWorldGenerator {
                         if(!isCave)
                             w.setTileAt(tx, ty, grass);
                         w.setWallAt(tx, ty, dirt);
-                    } else if(noise <= 5.75D)
+                    } else if(noise <= 5.75f)
                         set(tx, ty, dirt);
-                    else if(noise <= 200D)
+                    else if(noise <= 200f)
                         set(tx, ty, w.chance(30) ? glowstone : stone);
-                    else if(noise <= 210D)
+                    else if(noise <= 210f)
                         set(tx, ty, w.chance(30) ? glowstone :
                             (w.rnd().nextDouble() > (210-noise)/10 ? bedrock : stone));
                     else
@@ -164,11 +168,11 @@ public class OverworldGenerator implements IWorldGenerator {
          * 
          * @return The noise transformed such that the value tends toward 0.5.
          */
-        private double transformCaveMask(double caveMask) {
+        private float transformCaveMask(float caveMask) {
             //f(x) = ((2x - 1)^3 + 1) / 2
             caveMask = 2*caveMask - 1;
             caveMask *= caveMask*caveMask;
-            return (caveMask+1)/2D;
+            return (caveMask+1)/2;
         }
         
         /**

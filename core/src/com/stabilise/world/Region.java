@@ -89,7 +89,8 @@ public class Region {
     private int anchors = 0;
     
     /** Number of adjacent regions which are active. We do not unload a region
-     * unless it has no active neighbours. */
+     * unless it has no active neighbours. A region counts itself as a
+     * neighbour as itself being active must prevent it from being unloaded. */
     private int activeNeighbours = 0;
     
     /** The slices contained by this region.
@@ -293,20 +294,28 @@ public class Region {
      * Returns {@code true} if this region is anchored/active, and may be
      * updated.
      */
+    @UserThread("MainThread")
+    @ThreadUnsafeMethod
     private boolean isAnchored() {
         return anchors > 0;
     }
     
     /**
-     * Informs this region that is has an anchored neighbour.
+     * Informs this region that is has an anchored neighbour. Invoked by
+     * RegionStore.
      */
+    @UserThread("MainThread")
+    @ThreadUnsafeMethod
     void addNeighbour() {
         activeNeighbours++;
     }
     
     /**
      * Informs this region that one of its neighbours has been de-anchored.
+     * Invoked by RegionStore.
      */
+    @UserThread("MainThread")
+    @ThreadUnsafeMethod
     void removeNeighbour() {
         if(--activeNeighbours == 0)
             ticksToUnload = REGION_UNLOAD_TICK_BUFFER;

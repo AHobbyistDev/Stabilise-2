@@ -77,7 +77,8 @@ public final class WorldGenerator {
         loadTracker = world.loadTracker();
         
         // TODO: de-hardcodify
-        generators.add(new OverworldGenerator());
+        //generators.add(new OverworldGenerator());
+        generators.add(new PrivateGenerator());
     }
     
     /**

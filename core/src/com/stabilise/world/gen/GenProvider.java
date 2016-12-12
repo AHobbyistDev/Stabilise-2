@@ -45,7 +45,7 @@ class GenProvider implements WorldProvider {
     public Slice getSliceAt(int x, int y) {
         if(x == lastX && y == lastY) return lastSlice;
         if(!checkXBound(x) || !checkYBound(y))
-            throw new IllegalArgumentException("Accessing outside region!");
+            throw new IllegalArgumentException("Accessing outside region (" + x + "," + y + ")!");
         lastX = x;
         lastY = y;
         return lastSlice = r.getSliceAt(

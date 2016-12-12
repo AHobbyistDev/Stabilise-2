@@ -235,7 +235,8 @@ public class RegionStore {
         if(r != null)
             return r;
         
-        // If it is not loaded directly, try getting it from the cache.
+        // If it is not in primary storage, try getting it from the cache.
+        // If not in the cache, create it in primary storage.
         // Synchronised to make this atomic. See cache()
         synchronized(storeLocks.get(x, y)) {
             CachedRegion c = cache.get(unguardedDummyLoc); // dummy is (x,y)
@@ -285,15 +286,16 @@ public class RegionStore {
         if(r.anchor()) {
             r.addNeighbour(); // r counts itself as a neighbour
             
-            final int d = NEIGHBOUR_LOAD_RADIUS; // reducing verbosity
+            final int d = NEIGHBOUR_LOAD_RADIUS; // to reduce verbosity
             
             // Load all regions adjacent to r.
-            for(x = r.x() - d; x <= r.x() + d; x++) {
-                for(y = r.y() - d; y <= r.y() + d; y++) {
+            for(int u = x-d; u <= x+d; u++) {
+                for(int v = y-d; v <= y+d; v++) {
                     // We don't anchor r here as to avoid a superfluous
-                    // invocation of loadRegion()
-                    if(!r.isAt(x, y))
-                        loadRegion(x, y).addNeighbour();
+                    // invocation of loadRegion(). (We're really just saving
+                    // a hash table lookup).
+                    if(u != x || v != y)
+                        loadRegion(u, v).addNeighbour();
                 }
             }
         }

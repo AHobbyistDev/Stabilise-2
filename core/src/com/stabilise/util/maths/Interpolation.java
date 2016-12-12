@@ -16,8 +16,8 @@ import com.badlogic.gdx.math.MathUtils;
  * {@code f(x)}. That is, the interpolation is performed as if by
  * {@link #lerp(float, float, float) lerp(start, end, f(x))}.
  * 
- * <p>There are three typical modes of interpolation, {@link EaseIn ease in},
- * {@link EaseOut ease out}, and {@link EaseInOut ease in-out}. Each of these
+ * <p>There are three typical modes of interpolation, {@link All#in ease in},
+ * {@link All#out ease out}, and {@link All#inOut ease in-out}. Each of these
  * types may be mathematically defined in terms of a single function: the
  * "standard transformation function", which for convenience is labelled {@code
  * f(x)}, and is used directly for ease-in interpolation. Hence, a standard
