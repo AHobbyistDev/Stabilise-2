@@ -252,8 +252,6 @@ public class Region {
     /**
      * Performs the specified task on every slice in this region.
      * 
-     * @param task The task.
-     * 
      * @throws NullPointerException if {@code task} is {@code null}.
      */
     public void forEachSlice(Consumer<Slice> task) {

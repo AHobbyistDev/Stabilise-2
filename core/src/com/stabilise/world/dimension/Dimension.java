@@ -18,6 +18,7 @@ import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
 import com.stabilise.world.gen.WorldGenerator;
+import com.stabilise.world.gen.WorldGenerator.GeneratorRegistrant;
 import com.stabilise.world.multiverse.Multiverse;
 
 /**
@@ -80,17 +81,25 @@ public abstract class Dimension {
      * @return The world generator.
      * @throws NullPointerException if either argument is {@code null}.
      */
-    public WorldGenerator generatorFor(Multiverse<?> multiverse,
+    public final WorldGenerator generatorFor(Multiverse<?> multiverse,
             HostWorld world) {
-        return new WorldGenerator(multiverse, world);
+        WorldGenerator gen = new WorldGenerator(multiverse, world);
+        addGenerators(new GeneratorRegistrant(gen));
+        return gen;
     }
+    
+    /**
+     * Adds generators to the WorldGenerator for this dimension. Subclasses
+     * should override this to add their desired generators.
+     */
+    protected abstract void addGenerators(GeneratorRegistrant gr);
     
     /**
      * Returns {@code true} if this dimension should have perpetually-loaded
      * spawn regions; {@code false} otherwise.
      */
     public boolean hasSpawnRegions() {
-        // For now, only the default dimension has spawn regions
+        // TODO: For now, only the default dimension has spawn regions
         return info.name.equals(defaultDimensionName());
     }
     
@@ -278,7 +287,8 @@ public abstract class Dimension {
      * registered.
      */
     public static void registerDimensions() {
-        registerDimension(true, "overworld", DimOverworld.class);
+        registerDimension(false, "overworld", DimOverworld.class);
+        registerDimension(true, "private(Temp)", DimPrivate.class);
         registerPrivateDimension("privateDim", DimPrivate.class);
         
         DIMENSIONS.lock();

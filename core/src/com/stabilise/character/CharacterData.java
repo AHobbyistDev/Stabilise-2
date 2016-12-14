@@ -41,7 +41,7 @@ public class CharacterData implements Sendable {
     /** The file name of the character data file. */
     public static final String FILE_DATA = "data";
     /** The name of the directory holding a player's private world. */
-    public static final String DIR_PRIVATE_WORLD = "privatedimension/";
+    public static final String DIR_PRIVATE_WORLD = "playerDim/";
     
     //--------------------==========--------------------
     //------------=====Member Variables=====------------

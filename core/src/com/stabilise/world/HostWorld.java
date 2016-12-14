@@ -133,8 +133,8 @@ public class HostWorld extends AbstractWorld {
             // slice. In practice, we'll need to check to see whether or not
             // this location is valid, and keep searching until a valid
             // location is found.
-            data.lastX = tileCoordFromSliceCoord(dimension.info.spawnSliceX);
-            data.lastY = tileCoordFromSliceCoord(dimension.info.spawnSliceY);
+            data.lastX = tileCoordFromSliceCoord(spawnSliceX);
+            data.lastY = tileCoordFromSliceCoord(spawnSliceY);
         }
         addEntity(p, data.lastX, data.lastY);
         setPlayer(p);

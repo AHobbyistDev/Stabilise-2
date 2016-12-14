@@ -104,6 +104,23 @@ public interface WorldProvider {
     }
     
     /**
+     * Gets the ID of the tile at the given coordinates.
+     * 
+     * @param x The x-coordinate of the tile, in tile-lengths.
+     * @param y The y-coordinate of the tile, in tile-lengths.
+     * 
+     * @return The ID of the tile at the given coordinates, or the
+     * {@link com.stabilise.world.tile.Tiles#barrier invisible
+     * bedrock} tile if no such tile is loaded.
+     */
+    default int getTileIDAt(int x, int y) {
+        return getSliceAtTile(x, y).getTileIDAt(
+                tileCoordRelativeToSliceFromTileCoord(x),
+                tileCoordRelativeToSliceFromTileCoord(y)
+        );
+    }
+    
+    /**
      * Sets the tile at the specified coordinates.
      * 
      * @param x The x-coordinate of the tile, in tile-lengths.

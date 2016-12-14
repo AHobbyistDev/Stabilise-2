@@ -1,5 +1,21 @@
 TOP PRIORITY
 - Menus
+- Get multidimensional worlds working
+    - Portals
+- Character model
+
+HIGH PRIORITY
+- Entity saving in worlds
+
+TODO EVENTUALLY
+- Structure generation
+
+
+
+------ OLD TODO LIST ----------
+
+TOP PRIORITY
+- Menus
 - Get both singleplayer and multiplayer architecture working
 - WorldProvider architecture
 - Implement structure generation

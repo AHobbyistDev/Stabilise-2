@@ -1,8 +1,7 @@
 package com.stabilise.world.dimension;
 
-import com.stabilise.world.HostWorld;
-import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.multiverse.Multiverse;
+import com.stabilise.world.gen.WorldGenerator.GeneratorRegistrant;
+import com.stabilise.world.gen.terrain.PrivateTerrainGen;
 
 /**
  * The private player-local client-only dimension.
@@ -14,9 +13,9 @@ public class DimPrivate extends Dimension {
     }
     
     @Override
-    public WorldGenerator generatorFor(Multiverse<?> multiverse, 
-            HostWorld world) {
-        return null;
+    protected void addGenerators(GeneratorRegistrant gr) {
+        //gr.add(new PrivateTerrainGenOld());
+        gr.add((w,s) -> new PrivateTerrainGen(w,s));
     }
     
 }

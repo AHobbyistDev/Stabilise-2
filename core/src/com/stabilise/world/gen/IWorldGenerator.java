@@ -17,10 +17,12 @@ public interface IWorldGenerator {
      * 
      * <p>Implementors should note that this method may be invoked by various
      * worker threads concurrently, and it is hence the responsibility of
-     * implementors to ensure correct thread safety techniques are observed.
+     * implementors to ensure correct thread safety techniques are observed. To
+     * avoid concurrency problems altogether, consider using {@link
+     * InstancedWorldgen}.
      * 
      * @param r The region to generate.
-     * @param w Worldprovider.
+     * @param w WorldProvider.
      * @param seed The world seed.
      */
     @ThreadSafeMethod
