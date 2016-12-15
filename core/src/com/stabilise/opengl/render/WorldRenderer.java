@@ -32,7 +32,6 @@ import com.stabilise.entity.component.core.*;
 import com.stabilise.entity.particle.*;
 import com.stabilise.item.Item;
 import com.stabilise.item.Items;
-import com.stabilise.opengl.TextureSheet;
 import com.stabilise.opengl.render.model.ModelPlayer;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
@@ -95,12 +94,12 @@ public class WorldRenderer implements Renderer {
     // Textures for different game objects
     TextureRegion texEnemy;
     TextureRegion texFireball;
+    TextureRegion texPortalClosed;
+    TextureRegion texPortalOpened;
     TextureRegion texExplosion;
     TextureRegion texFlame;
     TextureRegion texSmoke;
     TextureRegion[] texItems;
-    TextureSheet shtItems;
-    TextureSheet shtParticles;
     
     ModelPlayer personModel;
     
@@ -188,6 +187,9 @@ public class WorldRenderer implements Renderer {
         
         texEnemy = skin.getRegion("entity/enemy");
         texFireball = skin.getRegion("entity/fireball");
+        texPortalClosed = skin.getRegion("entity/portalClosed");
+        texPortalOpened = skin.getRegion("entity/portalOpen");
+        
         texExplosion = skin.getRegion("particle/explosion");
         texFlame = skin.getRegion("particle/flame");
         texSmoke = skin.getRegion("particle/smoke");
@@ -364,10 +366,18 @@ public class WorldRenderer implements Renderer {
     
     // ----------Entity rendering----------
     
+    private void renderOn(TextureRegion tex, Entity e) {
+        batch.draw(
+                tex, // region
+                (float)e.x + e.aabb.minX(), // x
+                (float)e.y + e.aabb.minY(), // y
+                e.aabb.width(), // width
+                e.aabb.height() // height
+        );
+    }
+    
     /**
      * Renders an enemy entity.
-     * 
-     * @param e The enemy entity.
      */
     public void renderEnemy(Entity e, CGenericEnemy c) {
         if(c.hasTint) {
@@ -416,8 +426,6 @@ public class WorldRenderer implements Renderer {
     
     /**
      * Renders a fireball entity.
-     * 
-     * @param e The fireball entity.
      */
     public void renderFireball(Entity e, CFireball c) {
         /*
@@ -456,8 +464,6 @@ public class WorldRenderer implements Renderer {
     
     /**
      * Renders an item entity.
-     * 
-     * @param e The item entity.
      */
     public void renderItem(Entity e, CItem c) {
         if(c.stack.getItem().equals(Items.TILE))
@@ -467,25 +473,17 @@ public class WorldRenderer implements Renderer {
             //renderOn(shtItems.getRegion(c.stack.getItem().getID() - 1), e);
     }
     
-    private void renderOn(TextureRegion tex, Entity e) {
-        batch.draw(
-                tex, // region
-                (float)e.x + e.aabb.minX(), // x
-                (float)e.y + e.aabb.minY(), // y
-                e.aabb.width(), // width
-                e.aabb.height() // height
-        );
-    }
-    
     /**
      * Renders a person entity.
-     * 
-     * @param e The person entity.
      */
     public void renderPerson(Entity e, CPerson s) {
         personModel.setFlipped(!e.facingRight);
         personModel.setState(s.getState(), s.stateTicks);
         personModel.render(batch, (float)e.x, (float)e.y);
+    }
+    
+    public void renderPortal(Entity e, CPortal c) {
+        renderOn(c.isOpen() ? texPortalOpened : texPortalClosed, e);
     }
     
     // ----------Particle rendering----------

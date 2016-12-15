@@ -16,7 +16,6 @@ public class DimOverworld extends Dimension {
     
     @Override
     protected void addGenerators(GeneratorRegistrant gr) {
-        //gr.add(new OverworldTerrainGenOld());
         gr.add((w,s) -> new OverworldTerrainGen(w,s));
         gr.add(new OreGen(2));
         gr.add(new ChestGen());

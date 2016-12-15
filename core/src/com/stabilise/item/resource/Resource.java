@@ -3,7 +3,7 @@ package com.stabilise.item.resource;
 import com.stabilise.util.annotation.Incomplete;
 
 // Honestly this class has no purpose at the moment and is just filled with
-// random arbitrary values that I came up with 3 or so year ago.
+// random arbitrary values that I came up with 3 or so years ago.
 
 /**
  * A resource represents a class of material.
@@ -136,8 +136,6 @@ public class Resource {
     
     /**
      * Gets the ID of the resource.
-     * 
-     * @return The resource's ID.
      */
     public int getID() {
         return id;
@@ -145,8 +143,6 @@ public class Resource {
     
     /**
      * Gets the name of the resource.
-     * 
-     * @return The resource's name.
      */
     public String getName() {
         return name;
@@ -154,8 +150,6 @@ public class Resource {
     
     /**
      * Gets the rarity of the resource.
-     * 
-     * @return The rarity value.
      */
     public float getRarity() {
         return rarity;
@@ -163,8 +157,6 @@ public class Resource {
     
     /**
      * Gets the density of the resource.
-     * 
-     * @return The density value.
      */
     public float getDensity() {
         return density;
@@ -172,8 +164,6 @@ public class Resource {
     
     /**
      * Gets the hardness of the resource.
-     * 
-     * @return The hardness value.
      */
     public float getHardness() {
         return hardness;
@@ -181,8 +171,6 @@ public class Resource {
     
     /**
      * Gets the toughness of the resource.
-     * 
-     * @return The toughness value.
      */
     public float getToughness() {
         return toughness;
@@ -190,8 +178,6 @@ public class Resource {
     
     /**
      * Gets the malleability of the resource.
-     * 
-     * @return The malleability value.
      */
     public float getMalleability() {
         return malleability;
@@ -199,8 +185,6 @@ public class Resource {
     
     /**
      * Gets the enchantability of the resource.
-     * 
-     * @return The enchantability value.
      */
     public float getEnchantability() {
         return enchantability;
@@ -208,10 +192,6 @@ public class Resource {
     
     /**
      * Sets the rarity of the resource.
-     * 
-     * @param rarity The rarity value.
-     * 
-     * @return The resource, for chain construction.
      */
     protected Resource setRarity(float rarity) {
         this.rarity = rarity;
@@ -220,10 +200,6 @@ public class Resource {
     
     /**
      * Sets the density of the resource.
-     * 
-     * @param density The density value.
-     * 
-     * @return The resource, for chain construction.
      */
     protected Resource setDensity(float density) {
         this.density = density;
@@ -232,10 +208,6 @@ public class Resource {
     
     /**
      * Sets the hardness of the resource.
-     * 
-     * @param hardness The hardness value.
-     * 
-     * @return The resource, for chain construction.
      */
     protected Resource setHardness(float hardness) {
         this.hardness = hardness;
@@ -244,10 +216,6 @@ public class Resource {
     
     /**
      * Sets the toughness of the resource.
-     * 
-     * @param toughness The toughness value.
-     * 
-     * @return The resource, for chain construction.
      */
     protected Resource setToughness(float toughness) {
         this.toughness = toughness;
@@ -256,10 +224,6 @@ public class Resource {
     
     /**
      * Sets the malleability of the resource.
-     * 
-     * @param malleability The malleability value.
-     * 
-     * @return The malleability, for chain construction.
      */
     protected Resource setMalleability(float malleability) {
         this.malleability = malleability;
@@ -268,10 +232,6 @@ public class Resource {
     
     /**
      * Sets the enchantability of the resource.
-     * 
-     * @param enchantability The enchantability value.
-     * 
-     * @return The resource, for chain construction.
      */
     protected Resource setEnchantability(float enchantability) {
         this.enchantability = enchantability;

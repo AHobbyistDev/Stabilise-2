@@ -44,4 +44,8 @@ public class Entities {
         return e(p(), new EnemyController(), new CPerson());
     }
     
+    public static Entity portal(String dimension) {
+        return e(NoPhysics.INSTANCE, co(), new CPortal(dimension));
+    }
+    
 }

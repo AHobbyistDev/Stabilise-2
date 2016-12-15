@@ -18,12 +18,8 @@ public abstract class CCore implements Component {
     
     /**
      * Renders the entity.
-     * 
-     * <p>The default implementation does nothing.
      */
-    public void render(WorldRenderer renderer, Entity e) {
-        // do nothing
-    }
+    public abstract void render(WorldRenderer renderer, Entity e);
     
     /**
      * Returns the entity's AABB.

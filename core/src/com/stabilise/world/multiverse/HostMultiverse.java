@@ -42,6 +42,11 @@ public class HostMultiverse extends Multiverse<HostWorld> {
     /** Stores players using this world. Maps player hash -> PlayerData. */
     private final Map<String, PlayerData> players = new HashMap<>(2);
     
+    /** The total number of entities which have existed during the lifetime of
+     * all worlds. When a new entity is created this is incremented and set as
+     * its ID. */
+    private long entityCount = 0;
+    
     
     /**
      * Creates a new HostProvider.
@@ -127,10 +132,19 @@ public class HostMultiverse extends Multiverse<HostWorld> {
     
     /**
      * doesn't do anything yet
-     * @param player
      */
     public void removePlayer(CharacterData player) {
         // TODO
+    }
+    
+    @Override
+    public long getNextEntityID() {
+        return ++entityCount;
+    }
+    
+    @Override
+    public long getTotalEntityCount() {
+        return entityCount;
     }
     
     @Override

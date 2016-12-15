@@ -14,7 +14,6 @@ public class DimPrivate extends Dimension {
     
     @Override
     protected void addGenerators(GeneratorRegistrant gr) {
-        //gr.add(new PrivateTerrainGenOld());
         gr.add((w,s) -> new PrivateTerrainGen(w,s));
     }
     

@@ -8,6 +8,7 @@ import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.maths.Maths;
+import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
@@ -30,6 +31,11 @@ public interface World extends WorldProvider {
      * <p>TODO: Arbitrary, and probably temporary. */
     public static final int HOSTILE_MOB_CAP = 100;
     
+    
+    /**
+     * Gets the Multiverse to which this World belongs.
+     */
+    Multiverse<?> multiverse();
     
     /**
      * Gets the entity with the specified ID.

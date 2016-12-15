@@ -140,6 +140,17 @@ public abstract class Multiverse<W extends AbstractWorld> {
     }
     
     /**
+     * Generates and returns a unique entity ID.
+     */
+    public abstract long getNextEntityID();
+    
+    /**
+     * Returns the total number of entities which have existed in all worlds of
+     * this multiverse.
+     */
+    public abstract long getTotalEntityCount();
+    
+    /**
      * Gets the executor with which to run concurrent tasks.
      */
     public final Executor getExecutor() {

@@ -100,7 +100,8 @@ public abstract class Dimension {
      */
     public boolean hasSpawnRegions() {
         // TODO: For now, only the default dimension has spawn regions
-        return info.name.equals(defaultDimensionName());
+        //return info.name.equals(defaultDimensionName());
+        return true;
     }
     
     /**
@@ -175,7 +176,9 @@ public abstract class Dimension {
     }
     
     /**
-     * 
+     * Pulls the player hash from the dimension name.A player's personal
+     * dimension name takes the form "$playerName_hash", so this simply pulls
+     * out everything after the underscore.
      */
     public static String extractPlayerHash(String dimensionName) {
         // Can't be bothered checking to see if this is a valid player

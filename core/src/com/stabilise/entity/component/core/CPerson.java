@@ -7,6 +7,7 @@ import com.stabilise.entity.component.effect.EffectFire;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
+import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.opengl.render.WorldRenderer;
@@ -146,7 +147,10 @@ public class CPerson extends BaseMob {
     public static final int SPECIAL_DOWN_AIR_DURATION = 30;
     public static final int SPECIAL_DOWN_AIR_FRAME_2_BEGIN = 10;
     public static final Vec2 SPECIAL_DOWN_AIR_ORIGIN = Vec2.immutable(0.33f,0.36f);
-        
+    
+    
+    private static final AABB AABB = new AABB(-0.4f, 0f, 0.8f, 1.8f);
+    
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
     //--------------------==========--------------------
@@ -178,11 +182,11 @@ public class CPerson extends BaseMob {
      * frames. */
     private int damageDealt = 0;
     
-    private ParticleSource<?> particleSrc;
+    private ParticleSource<?> fireParticles;
     
     @Override
     public AABB getAABB() {
-        return new AABB(-0.4f, 0f, 0.8f, 1.8f);
+        return AABB;
     }
     
     @Override
@@ -387,9 +391,11 @@ public class CPerson extends BaseMob {
                         h2.effects = tgt -> tgt.addComponent(new EffectFire(300));
                         w.addHitbox(h2, e.x, e.y);
                         
-                        particleSrc.createBurst(300, e.x, e.y, 0.1f, 5f, 0, (float)Math.PI);
+                        fireParticles.createBurst(300, e.x, e.y, 0.1f, 5f, 0, (float)Math.PI);
+                        w.getParticleManager().getSource(ParticleExplosion.class).createAt(e.x, e.y);
+                        w.getCamera().shake(0.1f, 30);
                     } else {
-                        particleSrc.createBurst(100, e.x, e.y, 0.1f, 5f, 0, (float)Math.PI);
+                        fireParticles.createBurst(100, e.x, e.y, 0.1f, 5f, 0, (float)Math.PI);
                     }
                 }
                 break;
@@ -472,7 +478,7 @@ public class CPerson extends BaseMob {
                 maxAngle = Math.PI * 7.0D / 7.0D;
             }
             
-            particleSrc.createBurst(6, px, e.y + originPoint.y(),
+            fireParticles.createBurst(6, px, e.y + originPoint.y(),
                     1f, 5f, (float)minAngle, (float)maxAngle);
         }
     }
@@ -499,7 +505,7 @@ public class CPerson extends BaseMob {
                 w.addEntity(f, px, e.y + originPoint.y());
             }
         } else {
-            particleSrc.createBurst(12, px, e.y + originPoint.y(),
+            fireParticles.createBurst(12, px, e.y + originPoint.y(),
                     1f, 5f, MathUtils.PI / 3f, MathUtils.PI * 0.6666f);
         }
     }
@@ -524,7 +530,7 @@ public class CPerson extends BaseMob {
                 w.addEntity(f, px, py);
             }
         } else {
-            particleSrc.createBurst(12, px, py, 
+            fireParticles.createBurst(12, px, py, 
                     1f, 5f, (1.5f - (1f/6))*MathUtils.PI, (1.5f + (1f/6))*MathUtils.PI);
         }
     }
@@ -745,7 +751,7 @@ public class CPerson extends BaseMob {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
-            particleSrc = w.getParticleManager().getSource(ParticleFlame.class);
+            fireParticles = w.getParticleManager().getSource(ParticleFlame.class);
         return super.handle(w, e, ev);
     }
     

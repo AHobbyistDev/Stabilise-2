@@ -241,6 +241,9 @@ public class PlayerController extends CController implements Controllable, Input
             case PROFILER:
                 Log.get().postDebug(game.profiler.getData().toString());
                 break;
+            case PORTAL:
+                game.world.addEntity(Entities.portal("overworld"), e.x + 3, e.y);
+                break;
             default:
                 return false;
         }

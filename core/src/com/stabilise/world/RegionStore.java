@@ -310,10 +310,13 @@ public class RegionStore {
             final int d = NEIGHBOUR_LOAD_RADIUS; // reducing verbosity
             
             // Unload all regions adjacent to r.
-            for(x = r.x() - d; x <= r.x() + d; x++) {
-                for(y = r.y() - d; y <= r.y() + d; y++) {
+            for(int u = x-d; u <= x+d; u++) {
+                for(int v = y-d; v <= y+d; v++) {
+                    // We don't de-anchor r here as to avoid a superfluous
+                    // invocation of getRegionAt(). (We're really just saving
+                    // a hash table lookup).
                     // n.b. we assume the surrounding regions are loaded
-                    if(!r.isAt(x, y))
+                    if(u != x || v != y)
                         getRegionAt(x,y).removeNeighbour();
                 }
             }

@@ -34,7 +34,8 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  */
 public abstract class AbstractWorld implements World {
     
-    public final Multiverse<?> multiverse;
+    /** The multiverse to which this world belongs. */
+    protected final Multiverse<?> multiverse;
     /** This world's dimension. */
     protected final Dimension dimension;
     
@@ -50,7 +51,8 @@ public abstract class AbstractWorld implements World {
     /** The total number of entities which have existed during the lifetime of
      * the world. When a new entity is created this is incremented and set as
      * its ID. */
-    public long entityCount = 0;
+    //@Deprecated
+    //public long entityCount = 0; // Moved to Multiverse
     /** Entities queued to be added to the world at the end of the tick.
      * <p>This is a ClearingQueue as entities may be added to a world from
      * from another dimension, which can be hosted on another thread. */
@@ -128,6 +130,11 @@ public abstract class AbstractWorld implements World {
         log = Log.getAgent("World_" + dimension.info.name);
     }
     
+    @Override
+    public Multiverse<?> multiverse() {
+        return this.multiverse;
+    }
+    
     /**
      * Prepares the world by performing any necessary preemptive loading
      * operations, such as preparing the spawn regions, etc. Polling {@link
@@ -181,7 +188,7 @@ public abstract class AbstractWorld implements World {
         
         if(!entitiesToAdd.isEmpty()) {
             entitiesToAdd.consume(e -> {
-                e.setID(++entityCount);
+                e.setID(multiverse().getNextEntityID());
                 entities.put(e.id(), e);
                 e.onAdd(this);
             });

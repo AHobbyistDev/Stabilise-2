@@ -270,5 +270,7 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Refactored NBT
 28/12/15
 	- Refactored util.concurrent.task framework
+14/12/16
+	- Gave dimensions the ability to properly register their desired generators.
 	
 

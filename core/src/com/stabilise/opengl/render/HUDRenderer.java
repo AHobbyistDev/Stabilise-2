@@ -73,7 +73,7 @@ public class HUDRenderer implements Renderer {
                     "FPS: " + Application.get().getFPS() + "\n" +
                     "x: " + String.format("%1.2f", player.x) + "\n" +
                     "y: " + String.format("%1.2f", player.y) + "\n" +
-                    "Entities:  " + wr.world.getEntities().size() + "/" + wr.world.entityCount + "\n" +
+                    "Entities:  " + wr.world.getEntities().size() + "/" + wr.world.multiverse().getTotalEntityCount() + "\n" +
                     "Hitboxes:  " + wr.world.getHitboxes().size() + "/" + wr.world.hitboxCount + "\n" +
                     "Particles: " + wr.world.getParticles().size() + "/" + wr.world.particleCount + "\n" +
                     "\n" +

@@ -58,7 +58,8 @@ public class Controller implements InputProcessor {
         PREV_TILE       ("prevTile",     Keys.COMMA,   true),
         CLEAR_INVENTORY ("clearInv",     Keys.C,       true),
         PRINT_INVENTORY ("printInv",     Keys.I,       true),
-        PROFILER        ("printProfiler",Keys.P,       true);
+        PROFILER        ("printProfiler",Keys.P,       true),
+        PORTAL          ("portal",       Keys.ENTER,   true);
         
         /** The field's name in the config file. */
         public final String fieldName;

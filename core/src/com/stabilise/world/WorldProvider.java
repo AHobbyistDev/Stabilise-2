@@ -76,9 +76,8 @@ public interface WorldProvider {
      * @param x The x-coordinate of the tile, in tile-lengths.
      * @param y The y-coordinate of the tile, in tile-lengths.
      * 
-     * @return The tile at the given coordinates, or the
-     * {@link Tiles#barrier invisible bedrock} tile if no such tile
-     * is loaded.
+     * @return The tile at the given coordinates, or the {@link Tiles#barrier
+     * barrier} tile if no such tile is loaded.
      */
     default Tile getTileAt(double x, double y) {
         return getTileAt(
@@ -92,9 +91,8 @@ public interface WorldProvider {
      * @param x The x-coordinate of the tile, in tile-lengths.
      * @param y The y-coordinate of the tile, in tile-lengths.
      * 
-     * @return The tile at the given coordinates, or the
-     * {@link com.stabilise.world.tile.Tiles#barrier invisible
-     * bedrock} tile if no such tile is loaded.
+     * @return The tile at the given coordinates, or the {@link Tiles#barrier
+     * barrier} tile if no such tile is loaded.
      */
     default Tile getTileAt(int x, int y) {
         return getSliceAtTile(x, y).getTileAt(
@@ -109,9 +107,8 @@ public interface WorldProvider {
      * @param x The x-coordinate of the tile, in tile-lengths.
      * @param y The y-coordinate of the tile, in tile-lengths.
      * 
-     * @return The ID of the tile at the given coordinates, or the
-     * {@link com.stabilise.world.tile.Tiles#barrier invisible
-     * bedrock} tile if no such tile is loaded.
+     * @return The ID of the tile at the given coordinates, or the ID of the
+     * {@link Tiles#barrier barrier} tile if no such tile is loaded.
      */
     default int getTileIDAt(int x, int y) {
         return getSliceAtTile(x, y).getTileIDAt(
