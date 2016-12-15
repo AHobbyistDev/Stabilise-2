@@ -1,5 +1,7 @@
 package com.stabilise.core.main;
 
+import com.stabilise.core.Resources;
+
 /**
  * The game uninstaller
  */
@@ -7,6 +9,10 @@ public class Uninstaller {
     
     private Uninstaller() {
         // non-instantiable
+    }
+    
+    public static void main(String[] args) {
+        Resources.DIR_APP.deleteDirectory();
     }
     
     /**

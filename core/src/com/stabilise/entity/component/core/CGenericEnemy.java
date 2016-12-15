@@ -24,8 +24,8 @@ public class CGenericEnemy extends BaseMob {
     public void init(Entity e) {
         super.init(e);
         // Temporary initial value setting
-        maxHealth = 20;
-        health = 20;
+        maxHealth = 30;
+        health = 30;
         
         jumpVelocity = 15f;
         jumpCrouchDuration = 8;

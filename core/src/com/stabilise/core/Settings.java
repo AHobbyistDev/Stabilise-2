@@ -73,6 +73,10 @@ public class Settings {
     /** The default particles setting. */
     private static final int PARTICLES_DEFAULT = PARTICLES_ALL;
     
+    // TEMPORARY: Default dimension
+    private static boolean DEFAULT_DIM = true;
+    private static final String DEFAULT_DIM_NAME = "overworldDefault";
+    
     // --------Misc--------
     
     /** Whether or not the settings have been set up. */
@@ -125,6 +129,7 @@ public class Settings {
     public static void setDefaults() {
         GUI_SCALE = GUI_SCALE_DEFAULT;
         GUI_SCALE_EFFECTIVE = getEffectiveGUIScale(GUI_SCALE);
+        DEFAULT_DIM = true;
     }
     
     /**
@@ -177,6 +182,20 @@ public class Settings {
             settingsChanged = true;
         }
         
+        // Default dim setting
+        hasTag = true;
+        if(config.hasTag(DEFAULT_DIM_NAME)) {
+            DEFAULT_DIM = config.getBoolean(DEFAULT_DIM_NAME);
+        } else {
+            hasTag = false;
+        }
+        
+        if(!hasTag) {
+            DEFAULT_DIM = true;
+            config.addBoolean(DEFAULT_DIM_NAME, DEFAULT_DIM);
+            settingsChanged = true;
+        }
+        
         // TODO: Load more settings here
         
         if(settingsChanged) {
@@ -198,6 +217,7 @@ public class Settings {
         
         config.addInteger(GUI_SCALE_NAME, GUI_SCALE);
         config.addInteger(PARTICLES_NAME, PARTICLES);
+        config.addBoolean(DEFAULT_DIM_NAME, DEFAULT_DIM);
         
         try {
             config.safeSave();
@@ -356,6 +376,13 @@ public class Settings {
             Log.get().postWarning("Attempting to set the particles setting to an invalid value!");
         else
             PARTICLES = particles;
+    }
+    
+    /**
+     * True if overworld should be the default dimension; false otherwise.
+     */
+    public static boolean getOverworldDefault() {
+        return DEFAULT_DIM;
     }
     
 }

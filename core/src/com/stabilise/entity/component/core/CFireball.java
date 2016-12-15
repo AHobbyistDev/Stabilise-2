@@ -51,7 +51,7 @@ public class CFireball extends BaseProjectile {
         super.onAdd(w, e);
         
         hitbox.force = 3f;
-        hitbox.effects = tgt -> tgt.addComponent(new EffectFire(300));
+        hitbox.effects = tgt -> tgt.addComponent(new EffectFire(60*7, 2));
         hitbox.hits = 1000000; // TODO: temporary for fun
         hitbox.persistenceTimer = -1;
         
@@ -127,7 +127,7 @@ public class CFireball extends BaseProjectile {
         h.persistent = true;
         h.persistenceTimer = 3;
         h.stickToOwner = false;
-        h.effects = tgt -> tgt.addComponent(new EffectFire(300));
+        h.effects = tgt -> tgt.addComponent(new EffectFire(60*5, 1));
         w.addHitbox(h, e.x, e.y);
         
         explosionSrc.createAt(e.x, e.y);

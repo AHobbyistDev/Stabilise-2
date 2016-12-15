@@ -100,12 +100,13 @@ public class Stabilise extends Application {
             try {
                 Log.get().postDebug("Bootstrapping...");
                 
+                Settings.initialise(); // needs to go before dimensions for now
+                
                 Tile.registerTiles();
                 Item.registerItems();
                 Dimension.registerDimensions();
                 TileEntity.poke();
                 
-                Settings.initialise();
                 Controller.poke();
                 
                 //new GameData().register();

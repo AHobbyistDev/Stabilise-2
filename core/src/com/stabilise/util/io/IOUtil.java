@@ -3,6 +3,7 @@ package com.stabilise.util.io;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -662,6 +663,24 @@ public class IOUtil {
         }
         
         return strings;
+    }
+    
+    /**
+     * Writes a text file to the file system.
+     * 
+     * @param file The file.
+     * @param lines The lines to write.
+     * 
+     * @throws NullPointerException if {@code file} is {@code null}.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static void writeTextFile(FileHandle file, String... lines) throws IOException {
+        try(BufferedWriter bw = new BufferedWriter(file.writer(true))) {
+            for(String line : lines)
+                bw.append(line);
+        } catch(GdxRuntimeException e) {
+            throw new IOException(e);
+        }
     }
     
     //--------------------==========--------------------

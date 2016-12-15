@@ -21,14 +21,18 @@ public class EffectFire extends Effect {
     
     private ParticleSource<?> particleSrc;
     
+    private int damage;
+    private int extra = 1;
+    
     
     /**
      * Creates a new fire effect.
      * 
      * @param duration The duration of the effect, in ticks.
      */
-    public EffectFire(int duration) {
+    public EffectFire(int duration, int damage) {
         super(duration);
+        this.damage = damage;
     }
     
     @Override
@@ -47,7 +51,7 @@ public class EffectFire extends Effect {
             createFireParticle(w, e);
         
         if(age % Constants.TICKS_PER_SECOND == 0)
-            e.damage(w, GeneralSource.fire(2 + w.rnd().nextInt(2)));
+            e.damage(w, GeneralSource.fire(damage + w.rnd().nextInt(extra)));
     }
     
     /**
@@ -70,13 +74,15 @@ public class EffectFire extends Effect {
         // TODO Auto-generated method stub
         return 0;
     }
-
+    
     @Override
     public Action resolve(Component c) {
         // If we get a new fire effect while active just add the durations.
         if(c instanceof EffectFire) {
             EffectFire e = (EffectFire)c;
             duration += e.duration;
+            damage += e.damage;
+            extra++;
             return Action.REJECT;
         } else
             return Action.KEEP_BOTH;

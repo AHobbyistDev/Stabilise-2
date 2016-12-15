@@ -53,11 +53,11 @@ public class LauncherState implements State {
             } catch(IOException e) {
                 System.out.println("Failed to start updater!");
                 e.printStackTrace();
-                Application.get().shutdown();
+                //Application.get().shutdown();
             }
             state = State.updating;
         } else if(state == State.updating) {
-            if(!curProcess.isAlive()) {
+            if(curProcess == null || !curProcess.isAlive()) {
                 System.out.println("Updater complete");
                 System.out.println("Starting game...");
                 ProcessBuilder pb = new ProcessBuilder(javaPath + " -jar" + " \"" + game + "\"");
