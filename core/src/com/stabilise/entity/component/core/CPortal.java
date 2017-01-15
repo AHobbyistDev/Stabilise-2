@@ -26,6 +26,7 @@ public class CPortal extends CCore {
     private static final AABB AABB = new AABB(-0.25f, 0f, 0.5f, 2f);
     
     private String pairedDimension;
+    @SuppressWarnings("unused")
     private long pairedPortalID = -1;
     private State state = State.WAITING_FOR_DIMENSION;
     

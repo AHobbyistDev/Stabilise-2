@@ -11,7 +11,7 @@ import com.stabilise.world.World;
 import com.stabilise.world.tile.tileentity.TileEntity.Updated;
 
 /**
- * The tile entity for mob spawners. For now I'm having this try to mimick
+ * The tile entity for mob spawners. For now I'm having this try to mimic
  * minecraft mob spawner behaviour to a fair extent.
  */
 public class TileEntityMobSpawner extends TileEntity implements Updated {

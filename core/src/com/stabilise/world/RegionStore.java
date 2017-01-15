@@ -204,7 +204,7 @@ public class RegionStore {
      * @param point The region's location, whose coordinates are in
      * region-lengths.
      * 
-     * @return The region, or {@code null} if no such region exists.
+     * @return The region, or {@code null} if no such region is loaded.
      */
     @ThreadSafeMethod
     private Region getRegionAt(Point point) {

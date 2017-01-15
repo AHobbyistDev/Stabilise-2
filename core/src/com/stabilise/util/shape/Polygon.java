@@ -111,7 +111,7 @@ public class Polygon extends Shape {
      * instead.
      */
     protected Polygon newInstance(float[] vertices) {
-        Polygon p = newInstance();
+        Polygon p = new Polygon();
         p.verts = vertices;
         return p;
     }
