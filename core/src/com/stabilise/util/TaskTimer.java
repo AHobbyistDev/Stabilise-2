@@ -14,7 +14,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  * otherwise, once {@code start} is invoked; it merely compares the system
  * times when {@code start} and {@code stop} are invoked.
  * 
- * <p>For comparison purposes, a SpeedComparator may be used as such:
+ * <p>For comparison purposes, a TaskTimer may be used as such:
  * 
  * <pre>
  * TaskTimer t1 = new TaskTimer("Task 1");

@@ -37,8 +37,8 @@ public class AABBOld extends AbstractPolygon {
      * @param height The AABB's height.
      */
     public AABBOld(float x, float y, float width, float height) {
-        v00 = Vec2.immutable(x, y);
-        v11 = Vec2.immutable(x + width, y + height);
+        v00 = new Vec2(x, y);
+        v11 = new Vec2(x + width, y + height);
     }
     
     /**
@@ -71,18 +71,18 @@ public class AABBOld extends AbstractPolygon {
         // of v11, as we make algorithmic simplifications on the assumption
         // that v00 is always to the left of v11.
         return new AABBOld(
-                Vec2.immutable(-v11.x(), v00.y()),
-                Vec2.immutable(-v00.x(), v11.y())
+                new Vec2(-v11.x, v00.y),
+                new Vec2(-v00.x, v11.y)
         );
     }
     
     /*
     private Vec2[] genVertices() {
-        return Vec2.immutable[] {
+        return new Vec2[] {
                 v00,
-                Vec2.immutable(v11.x(), v00.y()),//v10
+                new Vec2(v11.x, v00.y),//v10
                 v11,
-                Vec2.immutable(v00.x(), v11.y()) //v01
+                new Vec2(v00.x, v11.y) //v01
         };
     }
     */
@@ -93,9 +93,9 @@ public class AABBOld extends AbstractPolygon {
         //        + "for getVertices()!");
         return new Vec2[] {
                 v00,
-                Vec2.immutable(v11.x(), v00.y()),//v10
+                new Vec2(v11.x, v00.y),//v10
                 v11,
-                Vec2.immutable(v00.x(), v11.y()) //v01
+                new Vec2(v00.x, v11.y) //v01
         };
     }
     
@@ -110,8 +110,8 @@ public class AABBOld extends AbstractPolygon {
     protected boolean intersectsOnOwnAxes(Shape s) {
         //return getHorizontalProjection().intersects(s.getHorizontalProjection()) &&
         //        getVerticalProjection().intersects(s.getVerticalProjection());
-        return s.getHorizontalProjection().intersects(v00.x(), v11.x()) &&
-                s.getVerticalProjection().intersects(v00.y(), v11.y());
+        return s.getHorizontalProjection().intersects(v00.x, v11.x) &&
+                s.getVerticalProjection().intersects(v00.y, v11.y);
     }
     
     /**
@@ -123,8 +123,8 @@ public class AABBOld extends AbstractPolygon {
      * otherwise.
      */
     public boolean intersectsAABB(AABBOld a) {
-        return v00.x() <= a.v11.x() && v11.x() >= a.v00.x()
-                && v00.y() <= a.v11.y() && v11.y() >= a.v00.y();
+        return v00.x <= a.v11.x && v11.x >= a.v00.x
+                && v00.y <= a.v11.y && v11.y >= a.v00.y;
     }
     
     @Override
@@ -142,13 +142,13 @@ public class AABBOld extends AbstractPolygon {
      * otherwise.
      */
     public boolean containsAABB(AABBOld a) {
-        return v00.x() <= a.v00.x() && v11.x() >= a.v11.x()
-                && v00.y() <= a.v00.y() && v11.y() >= a.v11.y();
+        return v00.x <= a.v00.x && v11.x >= a.v11.x
+                && v00.y <= a.v00.y && v11.y >= a.v11.y;
     }
     
     @Override
     public boolean containsPoint(float x, float y) {
-        return x >= v00.x() && x <= v11.x() && y >= v00.y() && y <= v11.y();
+        return x >= v00.x && x <= v11.x && y >= v00.y && y <= v11.y;
     }
     
     @Override
@@ -163,8 +163,8 @@ public class AABBOld extends AbstractPolygon {
         
         float p0 = axis.dot(v00);
         float p1 = axis.dot(v11);
-        float p2 = axis.dot(v00.x(), v11.y());
-        float p3 = axis.dot(v11.x(), v00.y());
+        float p2 = axis.dot(v00.x, v11.y);
+        float p3 = axis.dot(v11.x, v00.y);
         
         return new ShapeProjection(
                 Maths.min(Maths.min(p0, p1), Maths.min(p2, p3)),
@@ -174,12 +174,12 @@ public class AABBOld extends AbstractPolygon {
     
     @Override
     ShapeProjection getHorizontalProjection() {
-        return new ShapeProjection(v00.x(), v11.x());
+        return new ShapeProjection(v00.x, v11.x);
     }
     
     @Override
     ShapeProjection getVerticalProjection() {
-        return new ShapeProjection(v00.y(), v11.y());
+        return new ShapeProjection(v00.y, v11.y);
     }
     
     /**
@@ -189,7 +189,7 @@ public class AABBOld extends AbstractPolygon {
      * @return The x-coordinate of this AABB's origin.
      */
     public float getOriginX() {
-        return v00.x();
+        return v00.x;
     }
     
     /**
@@ -199,35 +199,35 @@ public class AABBOld extends AbstractPolygon {
      * @return The y-coordinate of this AABB's origin.
      */
     public float getOriginY() {
-        return v00.y();
+        return v00.y;
     }
     
     /**
      * Gets the x-coordinate of the top-right vertex of this AABB.
      */
     public float getMaxX() {
-        return v11.x();
+        return v11.x;
     }
     
     /**
      * Gets the y-coordinate of the top-right vertex of this AABB.
      */
     public float getMaxY() {
-        return v11.y();
+        return v11.y;
     }
     
     /**
      * Calculates and returns the width of this AABB.
      */
     public float width() {
-        return v11.x() - v00.x();
+        return v11.x - v00.x;
     }
     
     /**
      * Calculates and returns the height of this AABB.
      */
     public float height() {
-        return v11.y() - v00.y();
+        return v11.y - v00.y;
     }
     
 }

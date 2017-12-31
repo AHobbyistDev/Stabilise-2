@@ -60,7 +60,7 @@ public class CollisionTest {
         Vec2[] verts = new Vec2[n];
         float angle = Maths.TAUf / n;
         for(int i = 0; i < n; i++) {
-            verts[i] = Vec2.immutable(
+            verts[i] = new Vec2(
                     MathUtils.cos(i*angle),
                     MathUtils.sin(i*angle)
             );

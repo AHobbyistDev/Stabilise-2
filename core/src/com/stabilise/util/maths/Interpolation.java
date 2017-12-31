@@ -511,24 +511,11 @@ public interface Interpolation {
      */
     public static All newInterpolation(Interpolation easeIn, Interpolation easeOut,
             Interpolation easeInOut) {
-        Objects.requireNonNull(easeIn);
-        Objects.requireNonNull(easeOut);
-        Objects.requireNonNull(easeInOut);
-        
-        return new All() {
-            @Override
-            public float easeInTransform(float x) {
-                return easeIn.transform(x);
-            }
-            @Override
-            public float easeOutTransform(float x) {
-                return easeOut.transform(x);
-            }
-            @Override
-            public float easeInOutTransform(float x) {
-                return easeInOut.transform(x);
-            }
-        };
+        return new All(
+            Objects.requireNonNull(easeIn),
+            Objects.requireNonNull(easeOut),
+            Objects.requireNonNull(easeInOut)
+        );
     }
     
     /**
@@ -541,7 +528,7 @@ public interface Interpolation {
      * easeInOut} respectively.
      */
     @Immutable
-    public static abstract class All implements Interpolation {
+    public static final class All implements Interpolation {
         
         /**
          * An ease-in interpolation function f(x) is broadly characterised by:
@@ -554,7 +541,7 @@ public interface Interpolation {
          * <p>This results in an interpolative function which smoothly tends
          * towards {@code start} and sharply tends toward {@code end}.
          */
-        public final Interpolation in = x -> easeInTransform(x);
+        public final Interpolation in;
         
         /**
          * An ease-out interpolation function f(x) is broadly characterised by:
@@ -567,7 +554,7 @@ public interface Interpolation {
          * <p>This results in an interpolative function which sharply tends
          * towards {@code start} and smoothly tends toward {@code end}.
          */
-        public final Interpolation out = x -> easeOutTransform(x);
+        public final Interpolation out;
         
         /**
          * An ease-in-out interpolation function f(x) is broadly characterised
@@ -583,8 +570,14 @@ public interface Interpolation {
          * <p>This results in an interpolative function which smoothly tends
          * towards both {@code start} and {@code end}.
          */
-        public final Interpolation inOut = x -> easeInOutTransform(x);
+        public final Interpolation inOut;
         
+        
+        public All(Interpolation in, Interpolation out, Interpolation inOut) {
+            this.in = in;
+            this.out = out;
+            this.inOut = inOut;
+        }
         
         @Override
         public float transform(float x) {
@@ -602,7 +595,7 @@ public interface Interpolation {
          * @return A value interpolated between {@code start} and {@code end}.
          * @see {@link #in} for implementation details.
          */
-        public final float easeIn(float start, float end, float x) {
+        public float easeIn(float start, float end, float x) {
             return lerp(start, end, easeInTransform(x));
         }
         
@@ -617,7 +610,9 @@ public interface Interpolation {
          * @return The transformed position.
          * @see {@link #in} for implementation details.
          */
-        public abstract float easeInTransform(float x);
+        public float easeInTransform(float x) {
+            return in.transform(x);
+        }
         
         /**
          * Interpolates between two values using ease out interpolation.
@@ -630,7 +625,7 @@ public interface Interpolation {
          * @return A value interpolated between {@code start} and {@code end}.
          * @see {@link #out} for implementation details.
          */
-        public final float easeOut(float start, float end, float x) {
+        public float easeOut(float start, float end, float x) {
             return lerp(start, end, easeOutTransform(x));
         }
         
@@ -645,7 +640,9 @@ public interface Interpolation {
          * @return The transformed position.
          * @see {@link #out} for implementation details.
          */
-        public abstract float easeOutTransform(float x);
+        public float easeOutTransform(float x) {
+            return out.transform(x);
+        }
         
         /**
          * Interpolates between two values using ease in-out interpolation.
@@ -658,7 +655,7 @@ public interface Interpolation {
          * @return A value interpolated between {@code start} and {@code end}.
          * {@link #inOut} for implementation details.
          */
-        public final float easeInOut(float start, float end, float x) {
+        public float easeInOut(float start, float end, float x) {
             return lerp(start, end, easeInOutTransform(x));
         }
         
@@ -675,7 +672,9 @@ public interface Interpolation {
          * @return The transformed value.
          * @see {@link #inOut} for implementation details.
          */
-        public abstract float easeInOutTransform(float x);
+        public float easeInOutTransform(float x) {
+            return inOut.transform(x);
+        }
         
     }
     

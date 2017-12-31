@@ -34,13 +34,13 @@ public class Maths {
     public static final float PIf = (float)Math.PI;
     
     /** The x-axis unit vector with components (1,0). */
-    public static final Vec2 VEC_X = Vec2.immutable(1f, 0f);
+    public static final Vec2 VEC_X = new Vec2(1f, 0f);
     /** The y-axis unit vector with components (0,1). */
-    public static final Vec2 VEC_Y = Vec2.immutable(0f, 1f);
+    public static final Vec2 VEC_Y = new Vec2(0f, 1f);
     /** A vector with components (1, 1). */
-    public static final Vec2 VEC_1_1 = Vec2.immutable(1f, 1f);
+    public static final Vec2 VEC_1_1 = new Vec2(1f, 1f);
     /** Zero-vector. */
-    public static final Vec2 VEC_ZERO = Vec2.immutable(0f, 0f);
+    public static final Vec2 VEC_ZERO = new Vec2();
     
     /** The maximum value which can be held by an unsigned byte
      * (<tt>2<sup><font size=-1>8</font></sup>-1</tt>). */
@@ -49,7 +49,8 @@ public class Maths {
      * (<tt>2<sup><font size=-1>16</font></sup>-1</tt>). */
     public static final int USHORT_MAX_VALUE = 0xFFFF;
     /** The maximum value which can be held by an unsigned int
-     * (<tt>2<sup><font size=-1>32</font></sup>-1</tt>). */
+     * (<tt>2<sup><font size=-1>32</font></sup>-1</tt>). (Note: since this is
+     * itself an int, the value reads <tt>-1</tt>.) */
     public static final int UINT_MAX_VALUE = 0xFFFFFFFF;
     
     

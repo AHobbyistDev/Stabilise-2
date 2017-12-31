@@ -6,6 +6,7 @@ import java.util.Arrays;
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.maths.Matrix2;
+import com.stabilise.util.maths.TransMat;
 
 /**
  * A shape is a 2D object usually consisting of a number of vertices, which may
@@ -75,6 +76,26 @@ public abstract class Shape {
         return transform((dest,o,x,y) -> {
             dest[o]   = m.m00*x + m.m01*y;
             dest[o+1] = m.m10*x + m.m10*y;
+        });
+    }
+    
+    /**
+     * Transforms this shape by applying the given transformation matrix to
+     * each of its vertices, where applicable, and returns the transformed
+     * shape. Each vertex is transformed by
+     * <a href=http://en.wikipedia.org/wiki/Matrix_multiplication> multiplying
+     * </a> the the given transformation matrix by said vertex's representative
+     * 2D vector. This shape is unmodified.
+     * 
+     * @param m The transformation matrix.
+     * 
+     * @return The transformed shape.
+     * @throws NullPointerException if {@code m} is {@code null}.
+     */
+    public Shape transform(TransMat m) {
+        return transform((dest,o,x,y) -> {
+            dest[o]   = m.m00*x + m.m01*y + m.tx;
+            dest[o+1] = m.m10*x + m.m10*y + m.ty;
         });
     }
     
@@ -218,7 +239,7 @@ public abstract class Shape {
     }
     
     /** For use by {@link Collider}. */
-    abstract int getKey();
+    protected abstract int getKey();
     
     @Override
     public String toString() {
@@ -266,7 +287,7 @@ public abstract class Shape {
      * 
      * @throws NullPointerException if either argument is null.
      */
-    static float[] transformVerts(float[] verts, VertexFunction f) {
+    protected static float[] transformVerts(float[] verts, VertexFunction f) {
         float[] dest = new float[verts.length];
         transformVerts(verts, dest, f);
         return dest;
@@ -281,7 +302,7 @@ public abstract class Shape {
      * @throws ArrayIndexOutOfBoundsException if {@code dest.length <
      * verts.length}.
      */
-    static void transformVerts(float[] verts, float[] dest, VertexFunction f) {
+    protected static void transformVerts(float[] verts, float[] dest, VertexFunction f) {
         for(int i = 0; i < verts.length; i += 2)
             f.apply(dest, i, verts[i], verts[i+1]);
     }
@@ -294,7 +315,7 @@ public abstract class Shape {
      * @throws ArrayIndexOutOfBoundsException if {@code dest.length <
      * verts.length}
      */
-    static void generateAxes(float[] verts, float[] dest) {
+    protected static void generateAxes(float[] verts, float[] dest) {
         int n = verts.length - 2;
         for(int i = 2; i < n; i += 2)
             getAxis(dest, i, verts[i-2], verts[i-1], verts[i], verts[i+1]);
@@ -305,6 +326,11 @@ public abstract class Shape {
     /**
      * Gets the projection axis for two adjacent vertices. This takes the form
      * of a vector perpendicular to the edge joining the vertices.
+     * 
+     * <p>Note: the axes will not in general be normalised. Even though, for a
+     * projection to reduce to a simple dot product, you want your axes to be
+     * normalised, this does NOT matter, as the relative scale for all
+     * projections will be the same.
      * 
      * @param dest The destination array.
      * @param offset The array index offset for this axis.
@@ -329,12 +355,23 @@ public abstract class Shape {
     /**
      * This is O(n<font size=-1><sup>2</sup></font>).
      */
-    static void genProjections(float[] verts, float[] axes, float[] dest) {
+    protected static void genProjections(float[] verts, float[] axes, float[] dest) {
         for(int i = 0; i < axes.length; i += 2)
             getProjection(verts, axes[i], axes[i+1], dest, i);
     }
     
-    static void getProjection(float[] verts, float x, float y, float[] dest, int offset) {
+    /**
+     * This is O(n).
+     * 
+     * @param verts the vertices of the shape
+     * @param x the x-component of the projection axis
+     * @param y the y-component of the projection axis
+     * @param dest where to store the projection. The min projection value is
+     * stored in dest[offset], and the max projection value is stored in
+     * dest[offset+1].
+     * @param offset see above
+     */
+    protected static void getProjection(float[] verts, float x, float y, float[] dest, int offset) {
         /*
          * It is worth noting that for projecting a shape onto one of its own
          * axes, the two vertices which generated said axis will have identical
@@ -361,15 +398,14 @@ public abstract class Shape {
         dest[offset+1] = max;
     }
     
-    static boolean projectionsOverlap(float[] verts, float x, float y,
+    
+    /**
+     * This function is mostly identical to getProjection(), except we test for
+     * overlap with another projection rather than dump the resultant data into
+     * an array.
+     */
+    protected static boolean projectionsOverlap(float[] verts, float x, float y,
             float projMin, float projMax) {
-        /*
-         * Note: This function is identical to (and thus duplicated from)
-         * getProjection() asides from the final part, where we test for
-         * overlap with another projection rather than dump the resultant data
-         * into an array.
-         */
-        
         float min = x*verts[0] + y*verts[1]; // dot product <=> projection
         float max = min;
         float p;
@@ -385,7 +421,7 @@ public abstract class Shape {
         return min <= projMax && max >= projMin;
     }
     
-    static boolean projectionsOverlapAABB(float[] verts, float x, float y,
+    protected static boolean projectionsOverlapAABB(float[] verts, float x, float y,
             float projMin, float projMax) {
         float p1 = x*verts[AABB.XMIN] + y*verts[AABB.YMIN];
         float p2 = x*verts[AABB.XMAX] + y*verts[AABB.YMIN];
@@ -421,10 +457,10 @@ public abstract class Shape {
         public void apply(float[] dest, int offset, float x, float y);
         
         /**
-         * Sets the resultant x and y in the destination array. This should
-         * only be invoked from within {@link #apply(float[],int,float,float)
-         * apply}, with the {@code dest} and {@code offset} args forwarded to
-         * this methd.
+         * Sets the resultant x and y in the destination array. This is a 
+         * convenience method that should only be invoked from within {@link
+         * #apply(float[],int,float,float) apply}, with the {@code dest} and
+         * {@code offset} args forwarded to this method.
          * 
          * @param dest The destination array in which to store the result.
          * @param offset The destination array offset.

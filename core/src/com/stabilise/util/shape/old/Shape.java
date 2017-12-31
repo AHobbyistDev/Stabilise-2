@@ -87,7 +87,7 @@ public abstract class Shape {
         //return transform(new Matrix2().setToRotation(rotation));
         final float cos = MathUtils.cos(rads);
         final float sin = MathUtils.sin(rads);
-        return transform(v -> v.rotate(cos, sin));
+        return transform(v -> v.rotate(cos, sin, v));
     }
     
     /**
@@ -99,7 +99,7 @@ public abstract class Shape {
      * @return The new translated shape.
      */
     public Shape translate(float x, float y) {
-        return transform(v -> Vec2.immutable(v.x() + x, v.y() + y));
+        return transform(v -> new Vec2(v.x + x, v.y + y));
     }
     
     /**
@@ -108,7 +108,7 @@ public abstract class Shape {
      * @return The reflected clone of this shape.
      */
     public Shape reflect() {
-        return transform(v -> Vec2.immutable(-v.x(), v.y()));
+        return transform(v -> new Vec2(-v.x, v.y));
     }
     
     /**
@@ -254,14 +254,14 @@ public abstract class Shape {
     ShapeProjection getHorizontalProjection() {
         Vec2[] vertices = getVertices();
         
-        float min = vertices[0].x();
+        float min = vertices[0].x;
         float max = min;
         
         for(int i = 1; i < vertices.length; i++) {
-            if(vertices[i].x() < min)
-                min = vertices[i].x();
-            else if(vertices[i].x() > max)
-                max = vertices[i].x();
+            if(vertices[i].x < min)
+                min = vertices[i].x;
+            else if(vertices[i].x > max)
+                max = vertices[i].x;
         }
         
         return new ShapeProjection(min, max);
@@ -282,14 +282,14 @@ public abstract class Shape {
     ShapeProjection getVerticalProjection() {
         Vec2[] vertices = getVertices();
         
-        float min = vertices[0].y();
+        float min = vertices[0].y;
         float max = min;
         
         for(int i = 1; i < vertices.length; i++) {
-            if(vertices[i].y() < min)
-                min = vertices[i].y();
-            else if(vertices[i].y() > max)
-                max = vertices[i].y();
+            if(vertices[i].y < min)
+                min = vertices[i].y;
+            else if(vertices[i].y > max)
+                max = vertices[i].y;
         }
         
         return new ShapeProjection(min, max);
@@ -345,7 +345,7 @@ public abstract class Shape {
         // This is what we're really doing:
         //return v1.sub(v2).rotate90Degrees();
         // However, if we simplify that algebraically, we get:
-        return Vec2.immutable(v2.y() - v1.y(), v1.x() - v2.x());
+        return new Vec2(v2.y - v1.y, v1.x - v2.x);
     }
     
     //--------------------==========--------------------

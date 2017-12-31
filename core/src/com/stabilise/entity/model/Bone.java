@@ -1,8 +1,7 @@
 package com.stabilise.entity.model;
 
-import com.badlogic.gdx.math.Vector2;
 import com.stabilise.util.annotation.Incomplete;
-import com.stabilise.util.maths.Matrix2;
+import com.stabilise.util.maths.TransMat;
 import com.stabilise.util.shape.Shape;
 
 /**
@@ -11,17 +10,30 @@ import com.stabilise.util.shape.Shape;
 @Incomplete
 public class Bone {
     
-    /** The position of the bone. */
-    protected final Position position;
-    
-    // Emulating the function of a RotatableShape, but maintaining the rotation
-    // matrix for optimisation purposes.
-    /** The bone's base hitbox.*/
+    /** The bone's base, untransformed hitbox.*/
     protected final Shape baseHitbox;
     /** The bone's effective hitbox. */
-    protected Shape rotatedHitbox;
-    /** The rotation matrix corresponding to the bone's rotation. */
-    protected final Matrix2 rotationMatrix;
+    protected Shape hitbox;
+    /** The local transformation matrix of this bone (encapsulates rotation &
+     * translation). */
+    public final TransMat localTransMat;
+    /** The total transformation matrix of this bone. If this bone does not
+     * have a parent, this is just a reference to localTransMat. If this bone
+     * <i>does</i> have a parent, this is equal to {@code parent.totalTransMat
+     * * this.localTransMat}. */
+    public final TransMat totalTransMat;
+    
+    /** This bone's parent. The bone is located relative to the parent, and
+     * transformations to the parent propagate down to us. May be null, which
+     * means no parent. */
+    public Bone parent = null;
+    
+    /** True if a property has been changed without updating the local/total
+     * trans matrices. */
+    private boolean dirty = false;
+    /** True if the totalTransMat was recently updated. Used to indicate to any
+     * child bones that they will need to update. */
+    private boolean flushed = false;
     
     
     /**
@@ -30,19 +42,22 @@ public class Bone {
      * @param hitbox
      */
     public Bone(Shape hitbox) {
-        baseHitbox = rotatedHitbox = hitbox;
-        rotationMatrix = new Matrix2(); // identity matrix
-        
-        position = new Position();
+        baseHitbox = this.hitbox = hitbox;
+        localTransMat = totalTransMat = new TransMat();
+    }
+    
+    public Bone(Shape hitbox, Bone parent) {
+        baseHitbox = this.hitbox = hitbox;
+        localTransMat = new TransMat();
+        totalTransMat = new TransMat();
+        this.parent = parent;
     }
     
     /**
-     * Gets this bone's hitbox.
-     * 
-     * @return The hitbox.
+     * Gets this bone's (appropriately transformed) hitbox.
      */
     public Shape getHitbox() {
-        return rotatedHitbox;
+        return hitbox;
     }
     
     /**
@@ -52,31 +67,28 @@ public class Bone {
      * from its originally-defined position, in radians.
      */
     public void setRotation(float rotation) {
-        //rotationMatrix.setToRotation(rotation);
-        rotatedHitbox = baseHitbox.transform(rotationMatrix);
+        
+    }
+    
+    private void updateLocalTransMat() {
+        
     }
     
     /**
      * Flushes positional changes to this bone. If this is a child bone, it
      * will be positioned appropriately relative to its parent.
      */
-    void flush() {
-        // nothing to see here, move along
-    }
-    
-    static class Position {
-        
-        /** The position itself. */
-        Vector2 pos;
-        /** The rotation, in radians. */
-        float rotation;
-        
-        
-        Position() {
-            pos = new Vector2();
-            rotation = 0f;
+    protected void flush() {
+        if(dirty) {
+            updateLocalTransMat();
+            if(parent != null)
+                parent.totalTransMat.mul(localTransMat, totalTransMat);
+            dirty = false;
+            flushed = true;
+        } else if(parent != null && parent.flushed){
+            parent.totalTransMat.mul(localTransMat, totalTransMat);
+            flushed = true;
         }
-        
     }
     
 }

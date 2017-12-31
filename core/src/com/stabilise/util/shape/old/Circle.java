@@ -38,7 +38,7 @@ public class Circle extends Shape {
      * @param radius The circle's radius.
      */
     public Circle(Vec2 centre, float radius) {
-        this(centre.x(), centre.y(), radius);
+        this(centre.x, centre.y, radius);
     }
     
     /**
@@ -78,7 +78,7 @@ public class Circle extends Shape {
     @Incomplete
     public Circle transform(UnaryOperator<Vec2> f) {
         // TODO: Wasteful as this results in the instantiation of two Vec2s.
-        return new Circle(f.apply(Vec2.immutable(x,y)), radius);
+        return new Circle(f.apply(new Vec2(x,y)), radius);
     }
     
     @Override
@@ -96,7 +96,7 @@ public class Circle extends Shape {
     
     @Override
     protected Vec2[] getVertices() {
-        return new Vec2[] {Vec2.immutable(x, y)};
+        return new Vec2[] {new Vec2(x, y)};
     }
     
     /**

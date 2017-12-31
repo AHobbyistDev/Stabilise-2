@@ -60,11 +60,9 @@ public class Collider {
      * 
      * - A translated shape shares axes with its parent.
      *     - Foreseen complexity: parent shape may not yet have axes generated.
-     * - A translated shape can derive its self-projections from its parent
-     *   by simple O(n) addition (O(1) per projection). Note, however, that
-     *   this could lead to significant rounding errors if applied repeatedly!
-     *     - Foreseen complexity: parent shape may not yet have projections
-     *       generated.
+     * - [IMPLEMENTED IN VARIANTS OF INTERSECTS...()] A translated shape can
+     *   derive its self-projections from its parent by simple O(n) addition
+     *   (O(1) per projection).
      * - Vertex arrays can be reused.
      * - Cache optimisation [do not do until more experienced]
      * - We could create a big vertex array which is shared between shapes, but

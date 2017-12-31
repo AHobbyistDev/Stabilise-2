@@ -80,7 +80,8 @@ public class Polygon extends Shape {
     @Override
     public void genCollisionData() {
         if(axes == null) {
-            Shape.generateAxes(verts, axes = new float[verts.length]);
+            axes = new float[verts.length];
+            Shape.generateAxes(verts, axes);
             if(projs == null)
                 Shape.genProjections(verts, axes, projs = new float[verts.length]);
             else if(Float.isNaN(projs[0]))
@@ -89,7 +90,7 @@ public class Polygon extends Shape {
     }
     
     @Override
-    int getKey() {
+    protected int getKey() {
         return Collider.K_POLY;
     }
     

@@ -158,7 +158,7 @@ class Circle extends Shape {
     }
 
     @Override
-    int getKey() {
+    protected int getKey() {
         // TODO Auto-generated method stub
         return 0;
     }

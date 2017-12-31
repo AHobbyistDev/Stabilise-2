@@ -21,6 +21,7 @@ public interface IDuplicateResolver<T> {
         KEEP_BOTH
     }
     
+    
     Action resolve(T other);
     
 }

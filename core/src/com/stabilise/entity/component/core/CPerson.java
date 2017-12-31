@@ -113,13 +113,13 @@ public class CPerson extends BaseMob {
     public static final int SPECIAL_SIDE_GROUND_COST_MANA = 50;
     public static final int SPECIAL_SIDE_GROUND_DURATION = 40;
     public static final int SPECIAL_SIDE_GROUND_FRAME_2_BEGIN = 16;
-    public static final Vec2 SPECIAL_SIDE_GROUND_ORIGIN = Vec2.immutable(1.09f, 1.25f);
+    public static final Vec2 SPECIAL_SIDE_GROUND_ORIGIN = new Vec2(1.09f, 1.25f);
     
     // Up special (ground)
     public static final int SPECIAL_UP_GROUND_COST_MANA = 100;
     public static final int SPECIAL_UP_GROUND_DURATION = 40;
     public static final int SPECIAL_UP_GROUND_FRAME_2_BEGIN = 16;
-    public static final Vec2 SPECIAL_UP_GROUND_ORIGIN = Vec2.immutable(0.25f,2.25f);
+    public static final Vec2 SPECIAL_UP_GROUND_ORIGIN = new Vec2(0.25f,2.25f);
     
     // Down special (ground)
     public static final int SPECIAL_DOWN_GROUND_COST_MANA = 100;
@@ -134,19 +134,19 @@ public class CPerson extends BaseMob {
     public static final int SPECIAL_SIDE_AIR_COST_MANA = 50;
     public static final int SPECIAL_SIDE_AIR_DURATION = 30;
     public static final int SPECIAL_SIDE_AIR_FRAME_2_BEGIN = 10;
-    public static final Vec2 SPECIAL_SIDE_AIR_ORIGIN = Vec2.immutable(1.02f,1.33f);
+    public static final Vec2 SPECIAL_SIDE_AIR_ORIGIN = new Vec2(1.02f,1.33f);
     
     // Up special (air)
     public static final int SPECIAL_UP_AIR_COST_MANA = 100;
     public static final int SPECIAL_UP_AIR_DURATION = 30;
     public static final int SPECIAL_UP_AIR_FRAME_2_BEGIN = 10;
-    public static final Vec2 SPECIAL_UP_AIR_ORIGIN = Vec2.immutable(0.27f,2.18f);
+    public static final Vec2 SPECIAL_UP_AIR_ORIGIN = new Vec2(0.27f,2.18f);
     
     // Down special (air)
     public static final int SPECIAL_DOWN_AIR_COST_MANA = 100;
     public static final int SPECIAL_DOWN_AIR_DURATION = 30;
     public static final int SPECIAL_DOWN_AIR_FRAME_2_BEGIN = 10;
-    public static final Vec2 SPECIAL_DOWN_AIR_ORIGIN = Vec2.immutable(0.33f,0.36f);
+    public static final Vec2 SPECIAL_DOWN_AIR_ORIGIN = new Vec2(0.33f,0.36f);
     
     
     private static final AABB AABB = new AABB(-0.4f, 0f, 0.8f, 1.8f);
@@ -413,9 +413,9 @@ public class CPerson extends BaseMob {
                     /*
                     if(useMana(SPECIAL_DOWN_AIR_COST_MANA)) {
                         EntityBigFireball f = new EntityBigFireball(w, this);
-                        f.x = e.x + (e.facingRight ? SPECIAL_DOWN_AIR_ORIGIN.x()
-                                : -SPECIAL_DOWN_AIR_ORIGIN.x());
-                        f.y = e.y + SPECIAL_DOWN_AIR_ORIGIN.y();
+                        f.x = e.x + (e.facingRight ? SPECIAL_DOWN_AIR_ORIGIN.x
+                                : -SPECIAL_DOWN_AIR_ORIGIN.x);
+                        f.y = e.y + SPECIAL_DOWN_AIR_ORIGIN.y;
                         f.dy = Math.min(0f, dy + w.getRnd().nextFloat() * 3.0f - 10f);
                         w.addEntity(f);
                     } else {
@@ -425,12 +425,12 @@ public class CPerson extends BaseMob {
                         maxAngle = -2.0D * Math.PI / 3.0D;
                         
                         if(e.facingRight) {
-                            px = e.x + SPECIAL_DOWN_AIR_ORIGIN.x();
+                            px = e.x + SPECIAL_DOWN_AIR_ORIGIN.x;
                         } else {
-                            px = e.x - SPECIAL_DOWN_AIR_ORIGIN.x();
+                            px = e.x - SPECIAL_DOWN_AIR_ORIGIN.x;
                         }
                         
-                        particleSrc.createBurst(6, px, e.y + SPECIAL_DOWN_AIR_ORIGIN.y(),
+                        particleSrc.createBurst(6, px, e.y + SPECIAL_DOWN_AIR_ORIGIN.y,
                                 0.03f, 0.08f, (float)minAngle, (float)maxAngle);
                     }
                     */
@@ -452,14 +452,14 @@ public class CPerson extends BaseMob {
             Entity f = Entities.fireball(e.id(), 5 + w.rnd().nextInt(5));
             
             if(e.facingRight) {
-                f.x = e.x + originPoint.x();
+                f.x = e.x + originPoint.x;
                 f.dx = 30f + w.rnd().nextFloat() * 10f;
             } else {
-                f.x = e.x - originPoint.x();
+                f.x = e.x - originPoint.x;
                 f.dx = -30f - w.rnd().nextFloat() * 10f;
             }
             
-            f.y = e.y + originPoint.y();
+            f.y = e.y + originPoint.y;
             f.dy = 1.0f + w.rnd().nextFloat() * 1.8f;
             
             f.facingRight = e.facingRight;
@@ -469,16 +469,16 @@ public class CPerson extends BaseMob {
             double minAngle, maxAngle, px;
             
             if(e.facingRight) {
-                px = e.x + originPoint.x();
+                px = e.x + originPoint.x;
                 minAngle = -Math.PI / 6.0D;
                 maxAngle = Math.PI / 6.0D;
             } else {
-                px = e.x - originPoint.x();
+                px = e.x - originPoint.x;
                 minAngle = Math.PI * 5.0D / 6.0D;
                 maxAngle = Math.PI * 7.0D / 7.0D;
             }
             
-            fireParticles.createBurst(6, px, e.y + originPoint.y(),
+            fireParticles.createBurst(6, px, e.y + originPoint.y,
                     1f, 5f, (float)minAngle, (float)maxAngle);
         }
     }
@@ -490,7 +490,7 @@ public class CPerson extends BaseMob {
      * @param originPoint The point from which the storm is to originate.
      */
     private void fireballStorm(World w, Entity e, int manaCost, Vec2 originPoint) {
-        double px = e.facingRight ? e.x + originPoint.x() : e.x - originPoint.x();
+        double px = e.facingRight ? e.x + originPoint.x : e.x - originPoint.x;
         
         if(useMana(manaCost)) {
             int max = 30 + w.rnd().nextInt(11);
@@ -502,17 +502,17 @@ public class CPerson extends BaseMob {
                 f.dx = right ? MathUtils.cos(angle) * velocity : -MathUtils.cos(angle) * velocity;
                 f.dy = MathUtils.sin(angle)*velocity;
                 f.facingRight = right;
-                w.addEntity(f, px, e.y + originPoint.y());
+                w.addEntity(f, px, e.y + originPoint.y);
             }
         } else {
-            fireParticles.createBurst(12, px, e.y + originPoint.y(),
+            fireParticles.createBurst(12, px, e.y + originPoint.y,
                     1f, 5f, MathUtils.PI / 3f, MathUtils.PI * 0.6666f);
         }
     }
     
     private void fireballRain(World w, Entity e, int manaCost, Vec2 originPoint) {
-        double px = e.facingRight ? e.x + originPoint.x() : e.x - originPoint.x();
-        double py = e.y + originPoint.y();
+        double px = e.facingRight ? e.x + originPoint.x : e.x - originPoint.x;
+        double py = e.y + originPoint.y;
         
         if(useMana(manaCost)) {
             int n = 3 + w.rnd().nextInt(4);

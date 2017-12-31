@@ -138,7 +138,8 @@ public class AABB extends Shape {
         return (maxY() + minY()) / 2;
     }
     
-    int getKey() {
+    @Override
+    protected int getKey() {
         return Collider.K_AABB;
     }
     
