@@ -7,7 +7,6 @@ import com.stabilise.entity.component.Component;
 import com.stabilise.entity.damage.GeneralSource;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.particle.ParticleFlame;
-import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
 
@@ -17,9 +16,7 @@ import com.stabilise.world.World;
  * <p>A mob which is on fire will take 2 damage a second and constantly produce
  * flame particles.
  */
-public class EffectFire extends Effect {
-    
-    private ParticleSource<?> particleSrc;
+public class EffectFire extends ParticleEffect<ParticleFlame> {
     
     private int damage;
     private int extra = 1;
@@ -39,11 +36,13 @@ public class EffectFire extends Effect {
     public void init(Entity e) {}
     
     @Override
+    protected Class<ParticleFlame> particleClass() {
+        return ParticleFlame.class;
+    }
+    
+    @Override
     public void update(World w, Entity e) {
         super.update(w, e);
-        
-        if(particleSrc == null)
-            particleSrc = w.getParticleManager().getSource(ParticleFlame.class);
         
         if(Settings.settingParticlesAll())
             createFireParticle(w, e);

@@ -8,7 +8,8 @@ import com.stabilise.item.ItemStack;
 import com.stabilise.world.World;
 
 /**
- * Provides static factory methods for entities.
+ * A convenience class for producing certain entity types. Almost certainly
+ * temporary.
  */
 public class Entities {
     

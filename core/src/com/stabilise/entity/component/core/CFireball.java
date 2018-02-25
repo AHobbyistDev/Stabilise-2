@@ -127,6 +127,7 @@ public class CFireball extends BaseProjectile {
         h.persistent = true;
         h.persistenceTimer = 3;
         h.stickToOwner = false;
+        h.hits = -1;
         h.effects = tgt -> tgt.addComponent(new EffectFire(60*5, 1));
         w.addHitbox(h, e.x, e.y);
         

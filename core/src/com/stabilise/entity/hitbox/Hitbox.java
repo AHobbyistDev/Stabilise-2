@@ -29,7 +29,7 @@ public class Hitbox extends FreeGameObject {
     /** The number of entities the hitbox may hit. A value less than 0 means
      * the hitbox may hit an unlimited number of entities.<br>
      * <b>Note:</b> a value of 0 can result in the hitbox not colliding with
-     * anything, and as such, do <i>NOT</i> set it to 0. */
+     * anything, and as such, do <i>NOT</i> set it to 0. (use -1 instead) */
     public int hits = 1;
     
     public boolean stickToOwner = true;

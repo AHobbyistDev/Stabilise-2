@@ -1,9 +1,11 @@
 package com.stabilise.entity.component.core;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.stabilise.core.Constants;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.effect.EffectFire;
+import com.stabilise.entity.component.effect.EffectFireTrail;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
@@ -410,6 +412,8 @@ public class CPerson extends BaseMob {
             case SPECIAL_DOWN_AIR:
                 if(stateTicks == SPECIAL_DOWN_AIR_FRAME_2_BEGIN) {
                     fireballRain(w, e, SPECIAL_DOWN_AIR_COST_MANA, SPECIAL_DOWN_AIR_ORIGIN);
+                    e.dy += 10f;
+                    e.addComponent(new EffectFireTrail(Constants.TICKS_PER_SECOND / 3));
                     /*
                     if(useMana(SPECIAL_DOWN_AIR_COST_MANA)) {
                         EntityBigFireball f = new EntityBigFireball(w, this);
