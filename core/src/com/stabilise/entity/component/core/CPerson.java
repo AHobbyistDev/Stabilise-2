@@ -202,6 +202,7 @@ public class CPerson extends BaseMob {
         maxMana = 500000;
         mana = 500000;
         
+        maxJumpCount = 2;
         jumpVelocity = 16f;
         jumpCrouchDuration = 8;
         swimAcceleration = 0.08f;
@@ -378,7 +379,7 @@ public class CPerson extends BaseMob {
                         Hitbox h1 = new Hitbox(e.id(), SPECIAL_DOWN_GROUND_HITBOX_1,
                                 w.rnd().nextInt(16)+5);
                         h1.hits = -1;
-                        h1.force = 0.3f;
+                        h1.force = 14f;
                         h1.fx = 0.5f;
                         h1.fy = 0.7f;
                         h1.effects = tgt -> tgt.addComponent(new EffectFire(60*7, 3));
@@ -387,7 +388,7 @@ public class CPerson extends BaseMob {
                         Hitbox h2 = new Hitbox(e.id(), SPECIAL_DOWN_GROUND_HITBOX_2,
                                 w.rnd().nextInt(16)+5);
                         h2.hits = -1;
-                        h2.force = 0.3f;
+                        h2.force = 14f;
                         h2.fx = -0.5f;
                         h2.fy = 0.7f;
                         h2.effects = tgt -> tgt.addComponent(new EffectFire(60*7, 3));
@@ -449,6 +450,13 @@ public class CPerson extends BaseMob {
     @Override
     public void render(WorldRenderer renderer, Entity e) {
         renderer.renderPerson(e, this);
+    }
+    
+    @Override
+    protected void doNthJump(int n) {
+        super.doNthJump(n);
+        if(n > 1)
+            e.addComponent(new EffectFireTrail(Constants.TICKS_PER_SECOND / 2));
     }
     
     private void fireball(World w, Entity e, int manaCost, Vec2 originPoint) {
@@ -541,32 +549,36 @@ public class CPerson extends BaseMob {
     
     @Override
     protected void onVerticalCollision(Entity e, ETileCollision ev) {
-        if(e.dy < 0 && !wasOnGround && state.priority != StatePriority.UNOVERRIDEABLE) {
-            if(e.dy < 2 * -jumpVelocity) {
-                setState(State.LAND_CROUCH, false, 20);        // TODO: temporary constant duration
-            } else {
-                switch(state) {
-                    case ATTACK_SIDE_AIR:
-                        if(ATTACK_SIDE_AIR_DURATION - stateTicks > 10)
-                            setState(State.LAND_CROUCH, false, 20);
-                        else
+        // TODO: OVERRIDING THIS IS NOT SMART
+        if(ev.dv < 0 && !wasOnGround) {
+            jumpCount = 0;
+            if(state.priority != StatePriority.UNOVERRIDEABLE) {
+                if(e.dy < 2 * -jumpVelocity) {
+                    setState(State.LAND_CROUCH, false, 20);        // TODO: temporary constant duration
+                } else {
+                    switch(state) {
+                        case ATTACK_SIDE_AIR:
+                            if(ATTACK_SIDE_AIR_DURATION - stateTicks > 10)
+                                setState(State.LAND_CROUCH, false, 20);
+                            else
+                                stateLockDuration = 0;
+                            break;
+                        case ATTACK_UP_AIR:
+                            if(ATTACK_UP_AIR_DURATION - stateTicks > 10)
+                                setState(State.LAND_CROUCH, false, 20);
+                            else
+                                stateLockDuration = 0;
+                            break;
+                        case ATTACK_DOWN_AIR:
+                            if(ATTACK_DOWN_AIR_DURATION - stateTicks > 10)
+                                setState(State.LAND_CROUCH, false, 20);
+                            else
+                                stateLockDuration = 0;
+                            break;
+                        default:
                             stateLockDuration = 0;
-                        break;
-                    case ATTACK_UP_AIR:
-                        if(ATTACK_UP_AIR_DURATION - stateTicks > 10)
-                            setState(State.LAND_CROUCH, false, 20);
-                        else
-                            stateLockDuration = 0;
-                        break;
-                    case ATTACK_DOWN_AIR:
-                        if(ATTACK_DOWN_AIR_DURATION - stateTicks > 10)
-                            setState(State.LAND_CROUCH, false, 20);
-                        else
-                            stateLockDuration = 0;
-                        break;
-                    default:
-                        stateLockDuration = 0;
-                        break;
+                            break;
+                    }
                 }
             }
         }

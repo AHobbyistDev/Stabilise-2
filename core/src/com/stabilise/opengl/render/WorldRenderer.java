@@ -381,11 +381,10 @@ public class WorldRenderer implements Renderer {
      */
     public void renderEnemy(Entity e, CGenericEnemy c) {
         if(c.hasTint) {
-            if(c.dead) {
+            if(c.dead)
                 batch.setColor(c.tintStrength, 0f, 0f, 1f);
-            } else {
+            else
                 batch.setColor(c.tintStrength, c.tintStrength, c.tintStrength, 1);
-            }
         }
         
         /*
@@ -410,13 +409,13 @@ public class WorldRenderer implements Renderer {
         */
         batch.draw(
                 texEnemy, // region
-                (float)e.x - 0.5f, // x
+                (float)e.x - (e.facingRight ? 0.5f : -0.5f), // x
                 (float)e.y, // y
                 0f, // originX
                 0f, // originY
                 1f, // width
                 2f, // height
-                1f, // scaleX
+                e.facingRight ? 1f : -1f, // scaleX
                 1f, // scaleY
                 0f // rotation
         );

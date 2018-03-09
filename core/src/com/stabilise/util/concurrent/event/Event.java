@@ -20,8 +20,8 @@ import java.util.Objects;
  *     public MyEvent(String name) { super(name); }
  * }
  * 
- * assert(!new Event("hi").equals(new   Event("hi"))); // crash
- * assert(!new Event("hi").equals(new MyEvent("hi"))); // no crash
+ * assert(new Event("hi").equals(new   Event("hi"))); // works - they are equal
+ * assert(new Event("hi").equals(new MyEvent("hi"))); // doesn't - not equal
  * </pre>
  */
 public class Event {

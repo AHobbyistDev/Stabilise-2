@@ -191,6 +191,11 @@ public abstract class BaseMob extends CCore {
     /** The pre-jump crouch duration, in ticks. */
     public int jumpCrouchDuration;
     
+    /** Max number of jumps we can do. Set to 2 for double-jump, etc. */
+    public int maxJumpCount = 1;
+    /** Our jump count. */
+    public int jumpCount = 0;
+    
     // Visual things
     
     protected ParticleSource<ParticleIndicator> srcDmgIndicator;
@@ -216,10 +221,8 @@ public abstract class BaseMob extends CCore {
             return;
         }
         
-        if(state == State.JUMP_CROUCH && stateTicks == stateLockDuration) {
-            setState(State.JUMP, false);        // No need, checked above
-            e.dy = jumpVelocity;
-        }
+        if(state == State.JUMP_CROUCH && stateTicks == stateLockDuration)
+            doJump();
         
         if(invulnerable) {
             if(--invulnerabilityTicks == 0)
@@ -279,13 +282,16 @@ public abstract class BaseMob extends CCore {
     */
     
     protected void onVerticalCollision(Entity e, ETileCollision ev) {
-        if(e.dy < 0 && !wasOnGround && state.priority != StatePriority.UNOVERRIDEABLE) {
-            if(e.dy < -2*jumpVelocity) {
-                //if(dy < -2*jumpVelocity)
-                //    damage(-(int)(dy * dy * 2), -1, 0, 0);
-                setState(State.LAND_CROUCH, false, 5);        // TODO: temporary constant duration
-            } else {
-                stateLockDuration = 0;
+        if(ev.dv < 0 && !wasOnGround) {
+            jumpCount = 0;
+            if(state.priority != StatePriority.UNOVERRIDEABLE) {
+                if(e.dy < -2*jumpVelocity) {
+                    //if(dy < -2*jumpVelocity)
+                    //    damage(-(int)(dy * dy * 2), -1, 0, 0);
+                    setState(State.LAND_CROUCH, false, 5);        // TODO: temporary constant duration
+                } else {
+                    stateLockDuration = 0;
+                }
             }
         }
     }
@@ -345,6 +351,20 @@ public abstract class BaseMob extends CCore {
     public void jump() {
         if(e.physics.onGround() && state.ground && state.canAct)
             setState(State.JUMP_CROUCH, true, jumpCrouchDuration);
+        else if(state.canAct)
+            doJump(); // straight to double-jump
+    }
+    
+    protected void doJump() {
+        if(jumpCount >= maxJumpCount)
+            return;
+        setState(State.JUMP, false); // no need to validate -- checked elsewhere
+        jumpCount++;
+        doNthJump(jumpCount);
+    }
+    
+    protected void doNthJump(int n) {
+        e.dy = jumpVelocity;
     }
     
     /**

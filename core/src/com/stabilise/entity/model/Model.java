@@ -9,7 +9,7 @@ public class Model {
      * parent so positional updates may proliferate. */
     public final Bone[] bones;
     /** The model's controller. */
-    private AnimationController controller;
+//    private AnimationController controller;
     
     
     
@@ -22,8 +22,8 @@ public class Model {
     }
     
     public void update() {
-        if(controller != null)
-            controller.update();
+//        if(controller != null)
+//            controller.update();
     }
     
 }
