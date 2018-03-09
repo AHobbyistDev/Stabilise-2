@@ -7,9 +7,9 @@ import java.util.concurrent.TimeUnit;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Align;
+import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
-import com.stabilise.core.Game;
-import com.stabilise.core.app.Application;
+import com.stabilise.core.game.Game;
 import com.stabilise.entity.Entity;
 import com.stabilise.util.Profiler;
 
@@ -82,6 +82,18 @@ public class HUDRenderer implements Renderer {
                     getProfilerStrings(),
                 -Gdx.graphics.getWidth() / 2 + 5, // x
                 Gdx.graphics.getHeight() / 2 - 5, // y
+                Gdx.graphics.getWidth(), // targetWidth
+                Align.left, // align
+                true // wrap
+            );
+        }
+        
+        if(game.ticks - game.messages.getLastMsgTick() < 3*Constants.TICKS_PER_SECOND) {
+            wr.msgFont.setColor(Color.WHITE);
+            wr.msgFont.draw(wr.batch,
+                game.messages.getLastMsg(), // str
+                -Gdx.graphics.getWidth() / 2 + 5, // x
+                -Gdx.graphics.getHeight() / 2 + 5 + wr.msgFont.getCapHeight(), // y
                 Gdx.graphics.getWidth(), // targetWidth
                 Align.left, // align
                 true // wrap

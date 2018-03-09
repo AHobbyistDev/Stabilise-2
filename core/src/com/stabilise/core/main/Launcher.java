@@ -1,7 +1,7 @@
 package com.stabilise.core.main;
 
+import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
-import com.stabilise.core.app.Application;
 import com.stabilise.core.state.LauncherState;
 import com.stabilise.core.state.State;
 

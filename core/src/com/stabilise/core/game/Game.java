@@ -1,9 +1,9 @@
-package com.stabilise.core;
+package com.stabilise.core.game;
 
 import static com.badlogic.gdx.Input.Keys;
 
 import com.badlogic.gdx.InputProcessor;
-import com.stabilise.core.app.Application;
+import com.stabilise.core.Application;
 import com.stabilise.core.state.MainMenuState;
 import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.Entity;
@@ -30,6 +30,9 @@ public class Game implements Controllable, InputProcessor {
     /** Whether or not the game is currently paused. */
     public boolean paused = false;
     
+    /** Tracks the number of 'elapsed' ticks. Increments even if the game is
+     * paused. */
+    public long ticks = 0;
     /** True if a single game tick should be run despite the game being paused. */
     private boolean advanceTick = false;
     
@@ -46,6 +49,9 @@ public class Game implements Controllable, InputProcessor {
     
     /** The current active menu. */
     //public Menu menu;
+    
+    /** Holds the message history. */
+    public final Messages messages;
     
     /** A reference to the HUD renderer. TODO: Temporary */
     public HUDRenderer hudRenderer;
@@ -80,6 +86,8 @@ public class Game implements Controllable, InputProcessor {
         playerController = new PlayerController(controller, this);
         player.controller = playerController;
         playerController.init(player);
+        
+        this.messages = new Messages(this);
     }
     
     /**
@@ -88,6 +96,8 @@ public class Game implements Controllable, InputProcessor {
     public void update() {
         if(running) {
             try {
+                ticks++;
+                
                 profiler.start("menu"); // root.update.game.menu
                 //if(menu != null)
                 //    menu.update();
@@ -199,6 +209,10 @@ public class Game implements Controllable, InputProcessor {
         switch(control) {
             case PAUSE:
                 togglePause();
+                if(paused)
+                    messages.send("Paused");
+                else
+                    messages.send("Unpaused");
                 break;
             case ADVANCE_TICK:
                 advanceTick();
@@ -213,6 +227,10 @@ public class Game implements Controllable, InputProcessor {
             case TOG_HITBOX_RENDER:
                 WorldRenderer r = ((SingleplayerState)Application.get().getState()).renderer;
                 r.renderHitboxes = !r.renderHitboxes;
+                if(r.renderHitboxes)
+                    messages.send("Turning on hitboxes");
+                else
+                    messages.send("Turning off hitboxes");
                 break;
             default:
                 return playerController.handleControlPress(control);

@@ -2,9 +2,9 @@ package com.stabilise.core.main;
 
 import java.util.Arrays;
 
+import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
-import com.stabilise.core.app.Application;
 import com.stabilise.core.state.State;
 import com.stabilise.input.Controller;
 import com.stabilise.item.Item;

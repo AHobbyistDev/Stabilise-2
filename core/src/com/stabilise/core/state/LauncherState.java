@@ -2,8 +2,8 @@ package com.stabilise.core.state;
 
 import java.io.IOException;
 
+import com.stabilise.core.Application;
 import com.stabilise.core.Resources;
-import com.stabilise.core.app.Application;
 
 
 public class LauncherState implements State {

@@ -1,6 +1,6 @@
 package com.stabilise.core.state;
 
-import com.stabilise.core.app.Application;
+import com.stabilise.core.Application;
 
 /**
  * States allow for the circumstantial execution of the application's logic.

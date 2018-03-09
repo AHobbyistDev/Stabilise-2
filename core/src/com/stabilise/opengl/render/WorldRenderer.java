@@ -23,9 +23,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.stabilise.core.Game;
+import com.stabilise.core.Application;
 import com.stabilise.core.Resources;
-import com.stabilise.core.app.Application;
+import com.stabilise.core.game.Game;
 import com.stabilise.entity.*;
 import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.entity.component.core.*;
@@ -90,6 +90,7 @@ public class WorldRenderer implements Renderer {
     BitmapFont indicatorFontRed;
     BitmapFont indicatorFontOrange;
     BitmapFont debugFont;
+    BitmapFont msgFont;
     
     // Textures for different game objects
     TextureRegion texEnemy;
@@ -172,6 +173,7 @@ public class WorldRenderer implements Renderer {
         param.shadowOffsetY = 2;
         param.shadowColor = Color.BLACK;
         debugFont = register(fontGen.generateFont(param));
+        msgFont = register(fontGen.generateFont(param));
         
         fontGen.dispose();
         

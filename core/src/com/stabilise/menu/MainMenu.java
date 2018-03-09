@@ -18,7 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.stabilise.core.app.Application;
+import com.stabilise.core.Application;
 import com.stabilise.core.main.Stabilise;
 import com.stabilise.core.state.LoadingState;
 import com.stabilise.opengl.GLUtil;

@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.stabilise.core.app.Application;
 import com.stabilise.network.Server;
 import com.stabilise.network.TCPConnection;
 import com.stabilise.network.protocol.Protocol;

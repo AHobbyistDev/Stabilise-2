@@ -102,6 +102,14 @@ public class RingBuffer<E> extends AbstractQueue<E> {
     }
     
     /**
+     * Retrieves, but does not remove, the tail of this ring buffer, or returns
+     * null if this ring buffer is empty.
+     */
+    public E peekTail() {
+        return buf[(end - 1 + buf.length) & mask];
+    }
+    
+    /**
      * Returns the capacity of this queue.
      */
     public int capacity() {

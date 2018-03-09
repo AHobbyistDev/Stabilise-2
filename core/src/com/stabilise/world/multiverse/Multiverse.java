@@ -72,7 +72,7 @@ public abstract class Multiverse<W extends AbstractWorld> {
         
         final int coreThreads = 2; // region loading typically happens in pairs
         final int maxThreads = Math.max(coreThreads,
-                Runtime.getRuntime().availableProcessors());
+                Runtime.getRuntime().availableProcessors()-1); // -1 because main thread already exists
         
         BoundedThreadPoolExecutor tpe = new BoundedThreadPoolExecutor(
                 coreThreads, maxThreads,

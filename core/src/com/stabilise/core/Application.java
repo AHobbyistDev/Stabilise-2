@@ -1,4 +1,4 @@
-package com.stabilise.core.app;
+package com.stabilise.core;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;

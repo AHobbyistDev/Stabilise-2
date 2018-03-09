@@ -11,7 +11,6 @@ import java.util.Arrays;
 import javaslang.control.Option;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.stabilise.core.app.Application;
 import com.stabilise.network.Client;
 import com.stabilise.network.TCPConnection;
 import com.stabilise.network.protocol.Protocol;
