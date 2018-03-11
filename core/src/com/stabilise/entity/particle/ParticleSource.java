@@ -5,6 +5,7 @@ import java.util.Random;
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.AbstractWorld;
@@ -22,8 +23,12 @@ public class ParticleSource<T extends Particle> {
     
     private final AbstractWorld world;
     private final ParticlePool<T> pool;
-    private final boolean physical;
+    private final boolean physical; // true if T extends ParticlePhysical
     private final Random rnd;
+    /** Dummy Position object that's used within this class. I've left this
+     * public for convenience. */
+    public final Position dummyPos = new Position(); // DON'T USE THIS ONE IN HERE
+    private final Position dummyPos2 = new Position(); // Use this one!
     
     
     /**
@@ -71,23 +76,6 @@ public class ParticleSource<T extends Particle> {
         return 0;
     }
     
-    private void addParticle(Particle p, double x, double y) {
-        p.x = x;
-        p.y = y;
-        world.addParticle(p);
-    }
-    
-    private void create(double x, double y, float dx, float dy) {
-        if(physical) {
-            ParticlePhysical p = (ParticlePhysical)pool.get();
-            p.dx = dx;
-            p.dy = dy;
-            addParticle(p, x, y);
-        } else {
-            addParticle(pool.get(), x + dx, y + dy);
-        }
-    }
-    
     /**
      * Creates a particle and adds it to the world as if by {@link
      * World#addParticle(Particle) addParticle(particle)}, and then returns
@@ -102,15 +90,33 @@ public class ParticleSource<T extends Particle> {
     
     /**
      * Creates a particle and adds it to the world as if by {@link
-     * World#addParticle(Particle, double, double)
-     * addParticle(particle, x, y)}, and then returns the particle.
+     * World#addParticle(Particle) addParticle(particle)}, and then returns
+     * the particle.
      */
-    public T createAt(double x, double y) {
+    public T createAt(Position pos) {
         T p = pool.get();
-        addParticle(p, x, y);
+        p.reset();
+        p.pos.set(pos);
+        world.addParticle(p);
         return p;
     }
     
+    private void create(Position pos, float dx, float dy) {
+        if(physical) {
+            ParticlePhysical p = (ParticlePhysical)pool.get();
+            p.reset();
+            p.pos.set(pos);
+            p.dx = dx;
+            p.dy = dy;
+            world.addParticle(p);
+        } else {
+            Particle p = pool.get();
+            p.reset();
+            p.pos.set(pos, dx, dy);
+            world.addParticle(p);
+        }
+    }
+    
     /**
      * Creates a directed burst of particles at the specified coordinates.
      * If the particles created by this source are {@link ParticlePhysical
@@ -120,10 +126,8 @@ public class ParticleSource<T extends Particle> {
      * in that direction by that much.
      * 
      * @param numParticles The number of particles to create.
-     * @param x The x-coordinate at which to place the particles, in
-     * tile-lengths.
-     * @param y The y-coordinate at which to place the particles, in
-     * tile-lengths.
+     * @param pos The position at which to place the particle. This method does
+     * not modify {@code pos}.
      * @param minV The minimum velocity, in tiles per second.
      * @param maxV The maximum velocity, in tiles per second.
      * @param minAngle The minimum angle at which to direct the particles,
@@ -131,10 +135,10 @@ public class ParticleSource<T extends Particle> {
      * @param maxAngle The maximum angle at which to direct the particles,
      * in radians.
      */
-    public void createBurst(int numParticles, double x, double y,
+    public void createBurst(int numParticles, Position pos,
             float minV, float maxV, float minAngle, float maxAngle) {
         for(int i = 0; i < count(numParticles); i++)
-            createBurstParticle(x, y, minV, maxV, minAngle, maxAngle);
+            createBurstParticle(pos, minV, maxV, minAngle, maxAngle);
     }
     
     /**
@@ -153,34 +157,67 @@ public class ParticleSource<T extends Particle> {
      * @param maxAngle The maximum angle at which to direct the particles,
      * in radians.
      */
+    @Deprecated
     public void createBurst(int numParticles,
             double minX, double maxX, double minY, double maxY,
             float minV, float maxV, float minAngle, float maxAngle) {
+        /*
         for(int i = 0; i < count(numParticles); i++)
             createBurstParticle(
                     minX + rnd.nextDouble() * (maxX-minX),
                     minY + rnd.nextDouble() * (maxY-minY),
                     minV, maxV, minAngle, maxAngle);
+        */
     }
     
     /**
-     * Same as {@link
-     * #createBurst(int, double, double, float, float, float, float)}, but
-     * the particles are placed at a random location on the specified AABB
-     * (which is in turn considered to be defined relative to the specified
-     * x and y).
+     * Creates a directed burst of particles. The particles will spawn randomly
+     * in the box specified by {@code cornerPos}, {@code width} and {@code
+     * height}.
      * 
-     * @param aabb
+     * If the particles created by this source are {@link ParticlePhysical
+     * physical particles}, they will be created with a velocity of
+     * magnitude between {@code minV} and {@code maxV} directed between the
+     * specified angles; otherwise, the particles will simply be displaced
+     * in that direction by that much.
+     * 
+     * @param numParticles The number of particles to create.
+     * @param cornerPos The position of the corner of the box in which to spawn
+     * the particles.
+     * @param width The width of the box.
+     * @param height The height of the box.
+     * @param minV The minimum velocity, in tiles per second.
+     * @param maxV The maximum velocity, in tiles per second.
+     * @param minAngle The minimum angle at which to direct the particles,
+     * in radians.
+     * @param maxAngle The maximum angle at which to direct the particles,
+     * in radians.
+     */
+    public void createBurst(int numParticles, Position cornerPos, float width,
+            float height, float minV, float maxV, float minAngle, float maxAngle) {
+        for(int i = 0; i < count(numParticles); i++)
+            createBurstParticle(
+                    dummyPos2.set(cornerPos, rnd.nextFloat()*width, rnd.nextFloat()*height),
+                    minV, maxV, minAngle, maxAngle);
+    }
+    
+    /**
+     * Same as {@link #createBurst(int, Position, float, float, float, float,
+     * float, float)}, but the particles are placed at a random location on the
+     * specified AABB (which is in turn considered to be defined relative to
+     * the specified position).
      * 
      * @throws NullPointerException if {@code aabb} is {@code null}.
      */
-    public void createBurst(int numParticles, double x, double y,
+    public void createBurst(int numParticles, Position pos,
             float minV, float maxV, float minAngle, float maxAngle,
             AABB aabb) {
         for(int i = 0; i < count(numParticles); i++)
             createBurstParticle(
-                    x + aabb.minX() + rnd.nextFloat() * aabb.width(),
-                    y + aabb.minY() + rnd.nextFloat() * aabb.height(),
+                    dummyPos2.set(pos,
+                            aabb.minX() + rnd.nextFloat() * aabb.width(),
+                            aabb.minY() + rnd.nextFloat() * aabb.height()
+                    ),
                     minV, maxV, minAngle, maxAngle);
     }
     
@@ -194,32 +231,31 @@ public class ParticleSource<T extends Particle> {
     public void createBurst(int numParticles,
             float minV, float maxV, float minAngle, float maxAngle,
             Entity e) {
-        createBurst(numParticles, e.x, e.y, minV, maxV, minAngle, maxAngle,
-                e.aabb);
+        createBurst(numParticles, e.pos, minV, maxV, minAngle, maxAngle, e.aabb);
     }
     
     /**
      * Same as {@link
-     * #createBurst(int, double, double, float, float, float, float)}, but
+     * #createBurst(int, Position, float, float, float, float)}, but
      * the particles are placed somewhere on the tile specified by the
      * given tile coordinates.
      */
-    public void createBurstOnTile(int numParticles, int x, int y,
+    public void createBurstOnTile(int numParticles, Position pos,
             float minV, float maxV, float minAngle, float maxAngle) {
-        createBurst(numParticles, x + rnd.nextDouble(), y + rnd.nextDouble(),
+        createBurst(numParticles, pos.copy().add(rnd.nextFloat(), rnd.nextFloat()),
                 minV, maxV, minAngle, maxAngle);
     }
     
-    private void createBurstParticle(double x, double y,
+    private void createBurstParticle(Position pos,
             float minV, float maxV, float minAngle, float maxAngle) {
         float v = minV + rnd.nextFloat() * (maxV - minV);
         float angle = minAngle + rnd.nextFloat() * (maxAngle - minAngle);
         float dx = v * MathUtils.cos(angle);
         float dy = v * MathUtils.sin(angle);
-        create(x, y, dx, dy);
+        create(pos, dx, dy);
     }
     
-    public void createOutwardsBurst(int numParticles, double x, double y,
+    public void createOutwardsBurst(int numParticles, Position pos,
             boolean burstX, boolean burstY, float maxX, float maxY,
             AABB aabb) {
         float w = aabb.width();
@@ -228,8 +264,7 @@ public class ParticleSource<T extends Particle> {
             float xp = rnd.nextFloat();
             float yp = rnd.nextFloat();
             create(
-                    x + w*xp,
-                    y + h*yp,
+                    dummyPos2.set(pos, w, h),
                     burstX ? (2*xp - 1) * maxX : 0f,
                     burstY ? (2*yp - 1) * maxY : 0f
             );
@@ -239,16 +274,15 @@ public class ParticleSource<T extends Particle> {
     public void createOutwardsBurst(int numParticles,
             boolean burstX, boolean burstY, float maxX, float maxY,
             Entity e) {
-        createOutwardsBurst(numParticles, e.x, e.y, burstX, burstY,
-                maxX, maxY, e.aabb);
+        createOutwardsBurst(numParticles, e.pos,
+                burstX, burstY, maxX, maxY, e.aabb);
     }
     
     public void createCentredOutwardsBurst(Random rnd, int numParticles,
             float minV, float maxV, Entity e) {
-        double midX = e.x + e.aabb.centreX();
-        double midY = e.y + e.aabb.centreY();
+        dummyPos2.set(e.pos, e.aabb.centreX(), e.aabb.centreY());
         for(int i = 0; i < count(numParticles); i++) {
-            this.createBurstParticle(midX, midY, minV, maxV, 0f, Maths.TAUf);
+            this.createBurstParticle(dummyPos2, minV, maxV, 0f, Maths.TAUf);
         }
     }
     

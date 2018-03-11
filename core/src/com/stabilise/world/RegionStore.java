@@ -391,8 +391,7 @@ public class RegionStore {
     @UserThread("Any")
     public void uncacheAll() {
         Map<Point, Region> localRegions = localCachedRegions.get();
-        for(Region cRegion : localRegions.values())
-            uncache(cRegion);
+        localRegions.values().forEach(r -> uncache(r));
         localRegions.clear();
     }
     

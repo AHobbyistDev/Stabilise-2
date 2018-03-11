@@ -2,6 +2,7 @@ package com.stabilise.world.tile.tileentity;
 
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.item.BoundedContainer;
 import com.stabilise.item.Container;
 import com.stabilise.item.ItemStack;
@@ -25,31 +26,20 @@ public class TileEntityChest extends TileEntity {
     //--------------------==========--------------------
     
     /** The chest's contents. */
-    public final Container items;
+    public final Container items = new BoundedContainer(CAPACITY);
     
-    
-    /**
-     * Creates a new chest tile entity.
-     * 
-     * @param x The x-coordinate of the tile entity, in tile-lengths.
-     * @param y The y-coordinate of the tile entity, in tile-lengths.
-     */
-    public TileEntityChest(int x, int y) {
-        super(x, y);
-        
-        items = new BoundedContainer(CAPACITY);
-    }
     
     @Override
-    public void handleAdd(World world, int x, int y) {
+    public void handleAdd(World world, Position pos) {
         // nothing to see here, move along
     }
     
     @Override
-    public void handleRemove(World world, int x, int y) {
+    public void handleRemove(World world, Position pos) {
         for(ItemStack s : items) {
             Entity e = Entities.item(world, s);
-            world.addEntity(e, x + 0.5f, y + 0.5f);
+            e.pos.set(pos, 0.5f, 0.5f);
+            world.addEntity(e);
         }
     }
     
@@ -65,7 +55,7 @@ public class TileEntityChest extends TileEntity {
     
     @Override
     public String toString() {
-        return "Chest at (" + x + "," + y + "): " + items.toString();
+        return "Chest at " + pos.toGlobalString() + ": " + items.toString();
     }
     
 }

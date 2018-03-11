@@ -1,6 +1,7 @@
 package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.ParticleFlame;
@@ -58,16 +59,19 @@ public class CGenericEnemy extends BaseMob {
         h.fy = 0.2f;
         h.persistent = true;
         h.persistenceTimer = 5;
-        w.addHitbox(h, e.x, e.y);
+        w.addHitbox(h, e.pos);
         
         float d = Math.abs(e.dx);
         
+        Position dummyPos = srcSmoke.dummyPos;
         if(e.facingRight) {
-            srcSmoke.createBurst(150, e.x+0.5d, e.x+0.5d, e.y, e.y+2d, 3f+d, 30f+d, -Maths.PIf/4, Maths.PIf/4);
-            srcFlame.createBurst(150, e.x+0.5d, e.x+0.5d, e.y, e.y+2d, 2f+d, 10f+d, -Maths.PIf/4, Maths.PIf/4);
+            dummyPos.set(e.pos, 0.5f, 0f);
+            srcSmoke.createBurst(150, dummyPos, 0f, 2f, 3f+d, 30f+d, -Maths.PIf/4, Maths.PIf/4);
+            srcFlame.createBurst(150, dummyPos, 0f, 2f, 2f+d, 10f+d, -Maths.PIf/4, Maths.PIf/4);
         } else {
-            srcSmoke.createBurst(150, e.x-0.5d, e.x-0.5d, e.y, e.y+2d, 3f+d, 30f+d, 3*Maths.PIf/4, 5*Maths.PIf/4);
-            srcFlame.createBurst(150, e.x-0.5d, e.x-0.5d, e.y, e.y+2d, 2f+d, 10f+d, 3*Maths.PIf/4, 5*Maths.PIf/4);
+            dummyPos.set(e.pos, -0.5f, 0f);
+            srcSmoke.createBurst(150, dummyPos, 0f, 2f, 3f+d, 30f+d, 3*Maths.PIf/4, 5*Maths.PIf/4);
+            srcFlame.createBurst(150, dummyPos, 0f, 2f, 2f+d, 10f+d, 3*Maths.PIf/4, 5*Maths.PIf/4);
         }
     }
     
@@ -84,16 +88,19 @@ public class CGenericEnemy extends BaseMob {
         h.fy = 0.2f;
         h.persistent = true;
         h.persistenceTimer = 5;
-        w.addHitbox(h, e.x, e.y);
+        w.addHitbox(h, e.pos);
         
         float d = Math.abs(e.dx);
         
+        Position dummyPos = srcSmoke.dummyPos;
         if(e.facingRight) {
-            srcSmoke.createBurst(150, e.x+0.5d, e.x+0.5d, e.y, e.y+2d, 2f+d, 90f+d, -Maths.PIf/16, Maths.PIf/16);
-            srcFlame.createBurst(150, e.x+0.5d, e.x+0.5d, e.y, e.y+2d, 2f+d, 35f+d, -Maths.PIf/16, Maths.PIf/16);
+            dummyPos.set(e.pos, 0.5f, 0f);
+            srcSmoke.createBurst(150, dummyPos, 0f, 2f, 2f+d, 90f+d, -Maths.PIf/16, Maths.PIf/16);
+            srcFlame.createBurst(150, dummyPos, 0f, 2f, 2f+d, 35f+d, -Maths.PIf/16, Maths.PIf/16);
         } else {
-            srcSmoke.createBurst(150, e.x-0.5d, e.x-0.5d, e.y, e.y+2d, 2f+d, 90f+d, 15*Maths.PIf/16, 17*Maths.PIf/16);
-            srcFlame.createBurst(150, e.x-0.5d, e.x-0.5d, e.y, e.y+2d, 2f+d, 35f+d, 15*Maths.PIf/16, 17*Maths.PIf/16);
+            dummyPos.set(e.pos, -0.5f, 0f);
+            srcSmoke.createBurst(150, dummyPos, 0f, 2f, 2f+d, 90f+d, 15*Maths.PIf/16, 17*Maths.PIf/16);
+            srcFlame.createBurst(150, dummyPos, 0f, 2f, 2f+d, 35f+d, 15*Maths.PIf/16, 17*Maths.PIf/16);
         }
     }
     

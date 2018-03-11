@@ -30,10 +30,9 @@ public class LinkedHitbox extends Hitbox {
     @Override
     protected void moveToOwner(World w) {
         Entity e = w.getEntity(linkedID);
-        if(e != null) {
-            x = e.x;
-            y = e.y;
-        } else
+        if(e != null)
+            pos.set(e.pos);
+        else
             destroy();
     }
     

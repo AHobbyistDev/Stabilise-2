@@ -1,7 +1,7 @@
 package com.stabilise.world.loader;
 
+import static com.stabilise.entity.Position.*;
 import static com.stabilise.world.Region.REGION_SIZE;
-import static com.stabilise.world.World.*;
 
 import java.io.IOException;
 import java.util.ArrayList;

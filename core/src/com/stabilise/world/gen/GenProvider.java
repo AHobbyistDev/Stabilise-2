@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Random;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
-import com.stabilise.world.World;
 import com.stabilise.world.WorldProvider;
 import com.stabilise.world.gen.action.*;
 import com.stabilise.world.tile.Tile;
@@ -49,16 +49,16 @@ class GenProvider implements WorldProvider {
         lastX = x;
         lastY = y;
         return lastSlice = r.getSliceAt(
-                World.sliceCoordRelativeToRegionFromSliceCoord(x),
-                World.sliceCoordRelativeToRegionFromSliceCoord(y));
+                Position.sliceCoordRelativeToRegionFromSliceCoord(x),
+                Position.sliceCoordRelativeToRegionFromSliceCoord(y));
     }
     
     @Override
     public void setTileAt(int x, int y, int id) {
         getTileAt(x, y).handleRemove(this, x, y);
         getSliceAtTile(x,y).setTileIDAt(
-                World.tileCoordRelativeToSliceFromTileCoord(x),
-                World.tileCoordRelativeToSliceFromTileCoord(y),
+                Position.tileCoordRelativeToSliceFromTileCoord(x),
+                Position.tileCoordRelativeToSliceFromTileCoord(y),
                 id);
         Tile.getTile(id).handlePlace(this, x, y);
     }
@@ -66,8 +66,8 @@ class GenProvider implements WorldProvider {
     @Override
     public void setTileEntityAt(int x, int y, TileEntity t) {
         getSliceAtTile(x, y).setTileEntityAt(
-                World.tileCoordRelativeToSliceFromTileCoord(x),
-                World.tileCoordRelativeToSliceFromTileCoord(y),
+                Position.tileCoordRelativeToSliceFromTileCoord(x),
+                Position.tileCoordRelativeToSliceFromTileCoord(y),
                 t);
         ActionAddTileEntity a = new ActionAddTileEntity();
         a.t = t;

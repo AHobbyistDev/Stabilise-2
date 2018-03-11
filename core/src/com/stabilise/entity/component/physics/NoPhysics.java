@@ -6,6 +6,10 @@ import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.world.World;
 
 
+/**
+ * An empty physics component implementation that does not attempt to simulate
+ * any physics.
+ */
 public class NoPhysics extends CPhysics {
     
     public static final NoPhysics INSTANCE = new NoPhysics();

@@ -76,8 +76,8 @@ public class CItem extends CCore {
             if(!(p.core instanceof IContainer)) continue;
             IContainer c = (IContainer)p.core;
             if(c.canAddStack(stack)) {
-                float distX = (float) (e.x - p.x);
-                float distY = (float) (e.y - p.y);
+                float distX = p.pos.diffX(e.pos);
+                float distY = p.pos.diffY(e.pos);
                 float distSquared = distX*distX + distY*distY;
                 if(distSquared == 0)
                     distSquared = 0.0001f;
@@ -107,8 +107,8 @@ public class CItem extends CCore {
         // Don't add to a destroyed stack or self
         if(o.isDestroyed() || o == e) return false;
         
-        double dx = e.x - o.x;
-        double dy = e.y - o.y;
+        float dx = o.pos.diffX(e.pos); // e.x - o.x;
+        float dy = o.pos.diffY(e.pos); // e.y - o.y;
         if(dx*dx + dy*dy <= MERGE_RANGE_SQ) {
             if(c.stack.add(stack)) {
                 o.age = 0; // reset the other's timer

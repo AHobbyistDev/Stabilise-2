@@ -1,10 +1,11 @@
 package com.stabilise.world;
 
-import static com.stabilise.world.World.*;
+import static com.stabilise.entity.Position.*;
 
 import java.util.Random;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -22,12 +23,10 @@ public interface WorldProvider {
      * ConcurrentModificationException} during iteration.
      * 
      * @param e The entity.
-     * @param x The x-coordinate at which to place the entity, in tile-lengths.
-     * @param y The y-coordinate at which to place the entity, in tile-lengths.
+     * @param p The position at which to place the entity.
      */
-    default void addEntity(Entity e, double x, double y) {
-        e.x = x;
-        e.y = y;
+    default void addEntity(Entity e, Position p) {
+        e.pos.set(p);
         addEntity(e);
     }
     
@@ -70,6 +69,25 @@ public interface WorldProvider {
     }
     
     /**
+     * Gets a tile at the given position. Fractional coordinates are rounded
+     * down.
+     * 
+     * <p>IMPORTANT NOTE: make sure the position is {@link Position#realign()
+     * aligned} before invoking this, or this will chuck an exception.
+     * 
+     * @param pos The position of the tile.
+     * 
+     * @return The tile at the given coordinates, or the {@link Tiles#barrier
+     * barrier} tile if no such tile is loaded.
+     * @throws ArrrayIndexOutOfBoundsException if {@code pos} is not {@link
+     * Position#realign() aligned}.
+     */
+    default Tile getTileAt(Position pos) {
+        return getSliceAt(pos.getSliceX(), pos.getSliceY())
+                .getTileAt(pos.getLocalTileX(), pos.getLocalTileY());
+    }
+    
+    /**
      * Gets a tile at the given coordinates. Fractional coordinates are rounded
      * down.
      * 
@@ -78,6 +96,10 @@ public interface WorldProvider {
      * 
      * @return The tile at the given coordinates, or the {@link Tiles#barrier
      * barrier} tile if no such tile is loaded.
+     * 
+     * @deprecated Not actually deprecated, but I'd like warnings of where this
+     * is used so that I may replace instances of this with the more preferable
+     * {@link #getTileAt(Position)}.
      */
     default Tile getTileAt(double x, double y) {
         return getTileAt(
@@ -139,6 +161,23 @@ public interface WorldProvider {
      */
     void setTileAt(int x, int y, int id);
     
+    /**
+     * Sets a tile at the specified position.
+     * 
+     * <p>IMPORTANT NOTE: make sure the position is {@link Position#realign()
+     * aligned} before invoking this, or this will chuck an exception.
+     * 
+     * @param pos The position. <!-- wow such documentation -->
+     * @param tile The tile to set.
+     * 
+     * @throws ArrrayIndexOutOfBoundsException if {@code pos} is not {@link
+     * Position#realign() aligned}.
+     */
+    default void setTileAt(Position pos, Tile tile) {
+        getSliceAt(pos.getSliceX(), pos.getSliceY())
+                .setTileAt(pos.getLocalTileX(), pos.getLocalTileY(), tile);
+    }
+    
     default Tile getWallAt(int x, int y) {
         return getSliceAtTile(x, y).getWallAt(
                 tileCoordRelativeToSliceFromTileCoord(x),
@@ -185,6 +224,8 @@ public interface WorldProvider {
      * 
      * @return The tile entity at the given coordinates, or {@code null} if no
      * such tile entity is loaded.
+     * 
+     * @deprecated use {@link #getTileEntityAt(Position)} instead.
      */
     default TileEntity getTileEntityAt(int x, int y) {
         return getSliceAtTile(x, y).getTileEntityAt(
@@ -194,30 +235,34 @@ public interface WorldProvider {
     }
     
     /**
-     * Sets a tile entity at the given coordinates.
+     * Gets the tile entity at the given position.
      * 
-     * @param x The x-coordinate of the tile at which to place the tile entity,
-     * in tile-lengths.
-     * @param y The y-coordinate of the tile at which to place the tile entity,
-     * in tile-lengths.
-     * @param t The tile entity. Setting this to {@code null} will remove the
-     * tile entity at the specified location, if it exists.
+     * <p>IMPORTANT NOTE: make sure the position is {@link Position#realign()
+     * aligned} before invoking this, or this will chuck an exception.
+     * 
+     * @return The tile entity at the given position, or {@code null} if no
+     * such tile entity is present or loaded.
      */
-    void setTileEntityAt(int x, int y, TileEntity t);
+    default TileEntity getTileEntityAt(Position pos) {
+        return getSliceAt(pos.getSliceX(), pos.getSliceY())
+                .getTileEntityAt(pos.getLocalTileX(), pos.getLocalTileY());
+    }
     
     /**
-     * Removes a tile entity at the given coordinates. Invoking this method is
-     * equivalent to invoking {@link #setTileEntityAt(int, int, TileEntity)}
-     * with a {@code null} parameter.
+     * Sets a tile entity at the given coordinates. The given position will be
      * 
-     * @param x The x-coordinate of the tile at which the tile entity to remove
-     * is placed.
-     * @param y The y-coordinate of the tile at which the tile entity to remove
-     * is placed.
+     * @param t The tile entity.
+     * 
+     * @throws NullPointerException if {@code t} is {@code null}.
      */
-    default void removeTileEntityAt(int x, int y) {
-        setTileEntityAt(x, y, null);
-    }
+    void setTileEntity(TileEntity t);
+    
+    /**
+     * Removes a tile entity at the given position.
+     * 
+     * @throws NullPointerException if {@code pos} is {@code null}.
+     */
+    void removeTileEntityAt(Position pos);
     
     // ========== Utility Methods ==========
     

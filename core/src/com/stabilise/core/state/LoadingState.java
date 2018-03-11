@@ -20,7 +20,6 @@ import com.stabilise.core.Application;
 import com.stabilise.core.Resources;
 import com.stabilise.core.main.Stabilise;
 import com.stabilise.opengl.GLUtil;
-import com.stabilise.util.concurrent.event.Event;
 import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.util.concurrent.task.TaskView;
 import com.stabilise.world.Worlds;
@@ -91,10 +90,6 @@ public class LoadingState implements State {
                 .setPlayer(CharacterData.defaultCharacter())
                 .setProfiler(Application.get().profiler)
                 .buildHost();
-    }
-    
-    public void consumeEvent(Event e) {
-        
     }
     
     @Override

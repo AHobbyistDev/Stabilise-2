@@ -112,6 +112,21 @@ public class Maths {
     
     /**
      * Calculates the remainder of a division operation; negative remainders
+     * are wrapped by adding {@code div} to such remainders.
+     * 
+     * @param num The numerator.
+     * @param div The divisor.
+     * 
+     * @return The wrapped remainder of {@code num % div}.
+     * @throws ArithmeticException if {@code div == 0}.
+     */
+    public static float remainder(float num, float div) {
+        num %= div;
+        return num >= 0 ? num : num + div;
+    }
+    
+    /**
+     * Calculates the remainder of a division operation; negative remainders
      * are wrapped as if by adding {@code div} to such remainders.
      * 
      * <p><b>Note</b>: This method is faster than {@link

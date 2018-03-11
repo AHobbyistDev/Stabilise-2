@@ -1,6 +1,6 @@
 package com.stabilise.entity.particle;
 
-import com.stabilise.entity.FreeGameObject;
+import com.stabilise.entity.GameObject;
 import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.collect.registry.TypeFactory;
 import com.stabilise.world.World;
@@ -13,7 +13,7 @@ import com.stabilise.world.World;
  * particles may be initialised {@link TheUnsafe unsafely} at runtime);
  * instead, any initialisation code should be performed by {@link #reset()}.
  */
-public abstract class Particle extends FreeGameObject {
+public abstract class Particle extends GameObject {
     
     public static final TypeFactory<Particle> REGISTRY = new TypeFactory<>(
             new RegistryParams("ParticleRegistry", 8));

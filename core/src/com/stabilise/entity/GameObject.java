@@ -6,22 +6,15 @@ import com.stabilise.world.World;
 /**
  * A GameObject is an object which exists within the game world. GameObjects
  * may be updated every tick, rendered if appropriate, and destroyed.
- * 
- * <p>This class can not be directly subclassed; see {@link FixedGameObject}
- * and {@link FreeGameObject} instead.
- * 
- * @see FixedGameObject
- * @see FreeGameObject
  */
 public abstract class GameObject {
     
     /** If {@code true}, this GameObject should be removed from the world ASAP. */
     protected boolean destroyed = false;
     
+    /** The position of this GameObject. Initialises to (0,0). */
+    public final Position pos = new Position();
     
-    // Package-private default constructor so this cannot be directly
-    // subclassed externally.
-    GameObject() {}
     
     
     /**
@@ -86,38 +79,5 @@ public abstract class GameObject {
         return destroyed;
     }
     
-    /**
-     * @return The x-coordinate of this GameObject, in tile-lengths.
-     */
-    public abstract double getX();
-    
-    /**
-     * @return The y-coordinate of this GameObject, in tile-lengths.
-     */
-    public abstract double getY();
-    
-    /**
-     * @return The x-coordinate of the tile this GameObject is in, in
-     * tile-lengths.
-     */
-    public abstract int getTileX();
-    
-    /**
-     * @return The y-coordinate of the tile this GameObject is in, in
-     * tile-lengths.
-     */
-    public abstract int getTileY();
-    
-    /**
-     * @return The x-coordinate of the slice this GameObject is in, in
-     * slice-lengths.
-     */
-    public abstract int getSliceX();
-    
-    /**
-     * @return The y-coordinate of the slice this GameObject is in, in
-     * slice-lengths.
-     */
-    public abstract int getSliceY();
     
 }

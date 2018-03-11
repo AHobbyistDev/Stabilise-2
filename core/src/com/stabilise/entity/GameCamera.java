@@ -11,18 +11,18 @@ import com.stabilise.world.WorldCamera;
  * The GameCamera controls the player's perspective, and hence which parts of
  * the world are visible to them.
  */
-public class GameCamera extends FreeGameObject implements WorldCamera {
+public class GameCamera extends GameObject implements WorldCamera {
     
     /** The entity upon which to focus the camera. */
     private Entity focus;
     
-    /** Real x, y values (i.e. ignoring shake). */
-    private double rx, ry;
+    /** Real position (i.e. ignoring shake). */
+    private Position realPos = new Position();
     
     /** The coordinates of the slice in which the camera is located, in
      * slice-lengths. These are cached values recalculated every tick. Used by
      * the world renderer to decide which slices to render. */
-    public int sliceX, sliceY;
+    //public int sliceX, sliceY;
     
     /** The strength with which the camera follows the focus. */
     private float followStrength = 0.25f;
@@ -35,29 +35,28 @@ public class GameCamera extends FreeGameObject implements WorldCamera {
      */
     public GameCamera() {
         setFocus(null);
-        rx = x;
-        ry = y;
     }
     
     @Override
     public void update(World w) {
         if(focus != null) {
-            rx += (focus.x - rx) * followStrength;
-            ry += (focus.y + focus.aabb.centreY() - ry) * followStrength;
+            realPos.lx += realPos.diffX(focus.pos) * followStrength;
+            realPos.ly += (realPos.diffY(focus.pos) + focus.aabb.centreY()) * followStrength;
+            //rx += (focus.x - rx) * followStrength;
+            //ry += (focus.y + focus.aabb.centreY() - ry) * followStrength;
         }
         
-        x = rx;
-        y = ry;
+        realPos.realign();
+        pos.set(realPos);
         
         shakes.iterate(s -> {
             float mod = (float) s.duration / s.maxDuration;
-            x += s.strength * (2 * w.rnd().nextFloat() - 1) * mod;
-            y += s.strength * (2 * w.rnd().nextFloat() - 1) * mod;
+            pos.lx += s.strength * (2 * w.rnd().nextFloat() - 1) * mod;
+            pos.ly += s.strength * (2 * w.rnd().nextFloat() - 1) * mod;
             return --s.duration == 0;
         });
         
-        sliceX = getSliceX();
-        sliceY = getSliceY();
+        pos.realign();
         
         // Unimportant TODOs:
         // Focus on multiple entities
@@ -79,10 +78,9 @@ public class GameCamera extends FreeGameObject implements WorldCamera {
         focus = e;
         
         if(e != null) {
-            rx = e.x;
-            ry = e.y + e.aabb.centreY();
-            sliceX = getSliceX();
-            sliceY = getSliceY();
+            realPos.set(e.pos);
+            realPos.ly += e.aabb.centreY();
+            realPos.realign();
         }
     }
     
@@ -103,8 +101,9 @@ public class GameCamera extends FreeGameObject implements WorldCamera {
      * Moves the camera to the same coordinates as its focus.
      */
     public void snapToFocus() {
-        rx = focus.x;
-        ry = focus.y + focus.aabb.centreY();
+        realPos.set(focus.pos);
+        realPos.ly += focus.aabb.centreY();
+        realPos.realign();
     }
     
     @Override

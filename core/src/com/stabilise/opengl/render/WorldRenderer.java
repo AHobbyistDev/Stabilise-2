@@ -600,8 +600,8 @@ public class WorldRenderer implements Renderer {
         TextureRegion r = tileRenderer.tiles[controller.tileID];
         controller.doInRadius(this, (x,y) -> batch.draw(
                 r, // region
-                World.tileCoordFreeToTileCoordFixed(x), // x
-                World.tileCoordFreeToTileCoordFixed(y), // y
+                Position.tileCoordFreeToTileCoordFixed(x), // x
+                Position.tileCoordFreeToTileCoordFixed(y), // y
                 1f, // width
                 1f // height
         ));

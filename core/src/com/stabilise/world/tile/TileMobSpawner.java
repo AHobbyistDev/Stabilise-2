@@ -14,8 +14,8 @@ public class TileMobSpawner extends TileTE<TileEntityMobSpawner> {
     }
     
     @Override
-    public TileEntityMobSpawner createTE(int x, int y) {
-        return new TileEntityMobSpawner(x, y);
+    public TileEntityMobSpawner createTE() {
+        return new TileEntityMobSpawner();
     }
     
 }

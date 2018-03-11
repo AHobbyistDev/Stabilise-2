@@ -25,7 +25,7 @@ public abstract class BaseProjectile extends CCore {
         baseShape = hitbox.boundingBox;
         hitbox.persistent = true;
         rotate(e);
-        w.addHitbox(hitbox, e.x, e.y);
+        w.addHitbox(hitbox, e.pos);
     }
     
     @Override

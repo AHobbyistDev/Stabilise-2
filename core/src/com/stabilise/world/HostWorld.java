@@ -1,6 +1,6 @@
 package com.stabilise.world;
 
-import static com.stabilise.world.World.*;
+import static com.stabilise.entity.Position.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -240,10 +240,10 @@ public class HostWorld extends AbstractWorld {
         int maxY = minY + Region.REGION_SIZE_IN_TILES;
         
         getEntities().forEach(e -> {
-            if(e.x + e.aabb.maxX() >= minX
-                    && e.x + e.aabb.minX() <= maxX
-                    && e.y + e.aabb.maxY() >= minY
-                    && e.y + e.aabb.minY() <= maxY)
+            if(e.pos.getGlobalX() + e.aabb.maxX() >= minX
+                    && e.pos.getGlobalX() + e.aabb.minX() <= maxX
+                    && e.pos.getGlobalY() + e.aabb.maxY() >= minY
+                    && e.pos.getGlobalY() + e.aabb.minY() <= maxY)
                 e.destroy();
         });
     }

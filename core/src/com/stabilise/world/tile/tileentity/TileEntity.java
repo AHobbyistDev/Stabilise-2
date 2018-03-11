@@ -1,9 +1,10 @@
 package com.stabilise.world.tile.tileentity;
 
-import com.stabilise.entity.FixedGameObject;
+import com.stabilise.entity.GameObject;
+import com.stabilise.entity.Position;
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.util.collect.registry.GeneralTypeFactory;
 import com.stabilise.util.collect.registry.RegistryParams;
+import com.stabilise.util.collect.registry.TypeFactory;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
@@ -14,17 +15,16 @@ import com.stabilise.world.World;
  * <p>Tile entities may not be added to the world by another tile entity, and
  * and a queue for tile entities is hence not required.
  */
-public abstract class TileEntity extends FixedGameObject {
+public abstract class TileEntity extends GameObject {
     
     /** The tile entity registry. */
-    private static final GeneralTypeFactory<TileEntity> TILE_ENTITIES =
-            new GeneralTypeFactory<>(new RegistryParams("TileEntities", 4),
-                    int.class, int.class);
+    private static final TypeFactory<TileEntity> TILE_ENTITIES =
+            new TypeFactory<>(new RegistryParams("TileEntities", 4));
     
     // Register all tile entity types.
     static {
-        TILE_ENTITIES.register(0, TileEntityChest.class);
-        TILE_ENTITIES.register(1, TileEntityMobSpawner.class);
+        TILE_ENTITIES.register(0, TileEntityChest.class, TileEntityChest::new);
+        TILE_ENTITIES.register(1, TileEntityMobSpawner.class, TileEntityMobSpawner::new);
         
         TILE_ENTITIES.lock();
     }
@@ -35,14 +35,11 @@ public abstract class TileEntity extends FixedGameObject {
     /**
      * Creates a new tile entity.
      * 
-     * <p>Subclasses should implement a constructor with identical arguments
-     * to this one for factory construction.
-     * 
-     * @param x The x-coordinate of the tile entity, in tile-lengths.
-     * @param y The y-coordinate of the tile entity, in tile-lengths.
+     * <p>Subclasses should implement a constructor with identical arguments to
+     * this one (that is to say, no arguments) for factory construction.
      */
-    protected TileEntity(int x, int y) {
-        super(x, y);
+    protected TileEntity() {
+        // nothing to see here, move along
     }
     
     
@@ -95,19 +92,17 @@ public abstract class TileEntity extends FixedGameObject {
      * Handles being added to the world.
      * 
      * @param world The world.
-     * @param x The x-coordinate of the tile entity, in tile-lengths.
-     * @param y The y-coordinate of the tile entity, in tile-lengths.
+     * @param pos The position of the tile entity.
      */
-    public abstract void handleAdd(World world, int x, int y);
+    public abstract void handleAdd(World world, Position pos);
     
     /**
      * Handles being removed from the world.
      * 
      * @param world The world.
-     * @param x The x-coordinate of the tile entity, in tile-lengths.
-     * @param y The y-coordinate of the tile entity, in tile-lengths.
+     * @param pos The position of the tile entity.
      */
-    public abstract void handleRemove(World world, int x, int y);
+    public abstract void handleRemove(World world, Position pos);
     
     /**
      * @return The ID of this tile entity's type.
@@ -127,8 +122,7 @@ public abstract class TileEntity extends FixedGameObject {
     public final DataCompound toNBT() {
         DataCompound tag = DataCompound.create();
         tag.put("id", getID());
-        tag.put("x", x);
-        tag.put("y", y);
+        pos.io(tag, true);
         writeNBT(tag);
         return tag;
     }
@@ -150,14 +144,11 @@ public abstract class TileEntity extends FixedGameObject {
     /**
      * Instantiates a tile entity with the specified ID.
      * 
-     * @param id The ID of the tile entity type.
-     * @param args The constructor arguments.
-     * 
      * @return A new tile entity, or {@code null} if the specified ID is
      * invalid.
      */
-    public static TileEntity createTileEntity(int id, int x, int y) {
-        return TILE_ENTITIES.create(id, x, y);
+    public static TileEntity createTileEntity(int id) {
+        return TILE_ENTITIES.create(id);
     }
     
     /**
@@ -172,9 +163,10 @@ public abstract class TileEntity extends FixedGameObject {
      * @throws RuntimeException if tile entity creation failed.
      */
     public static TileEntity createTileEntityFromNBT(DataCompound tag) {
-        TileEntity t = createTileEntity(tag.getInt("id"), tag.getInt("x"), tag.getInt("y"));
+        TileEntity t = createTileEntity(tag.getInt("id"));
         if(t == null)
             return null;
+        t.pos.io(tag, false);
         t.fromNBT(tag);
         return t;
     }
