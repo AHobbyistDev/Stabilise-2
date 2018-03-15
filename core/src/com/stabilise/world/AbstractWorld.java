@@ -24,7 +24,6 @@ import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.collect.SimpleList;
 import com.stabilise.util.concurrent.ClearingQueue;
-import com.stabilise.util.maths.Maths;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -275,8 +274,8 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
-    public void sendToDimension(String dimension, Entity e, double x, double y) {
-        multiverse.sendToDimension(this, dimension, e, x, y);
+    public void sendToDimension(String dimension, Entity e, Position pos) {
+        multiverse.sendToDimension(this, dimension, e, pos);
     }
     
     // ==========Collection getters==========
@@ -406,6 +405,8 @@ public abstract class AbstractWorld implements World {
      * @param pos The position at which to place the mob.
      */
     public void spawnMob(Entity mob, Position pos) {
+    	this.log.postWarning("Attempted to call spawnMob (is NYI for now out of laziness)");
+    	/*
         if(hostileMobCount >= HOSTILE_MOB_CAP)
             return;
         
@@ -415,9 +416,9 @@ public abstract class AbstractWorld implements World {
         for(Entity p : players.values()) {
             float dist2 = pos.diffSq(p.pos);
             
-            if(dist2 <= 1024D)//32*32
+            if(dist2 <= 1024f)//32*32
                 return;
-            else if(dist2 <= 16384D)//128*128
+            else if(dist2 <= 16384f)//128*128
                 inRange = true;
         }
         if(!inRange)
@@ -436,6 +437,7 @@ public abstract class AbstractWorld implements World {
                     return;
         mob.pos.set(pos);
         addEntity(mob);
+        */
     }
     
     /**

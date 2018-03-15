@@ -270,6 +270,17 @@ public class Position implements Exportable {
     }
     
     /**
+     * Checks for whether or not another position is within a radius of {@code
+     * dist} from this one.
+     * 
+     * @return {@code true} if {@code diffSq(other) <= dist*dist}.
+     * @throws NullPointerException if {@code other} is {@code null}.
+     */
+    public boolean isWithinRange(Position other, float dist) {
+    	return diffSq(other) <= dist*dist;
+    }
+    
+    /**
      * Clones this Position object.
      */
     public Position copy() {

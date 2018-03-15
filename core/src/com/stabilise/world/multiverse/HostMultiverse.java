@@ -217,7 +217,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         /** The dimension the player is in. */
         public String dimension;
         /** The player's last known position. */
-        public Position lastPos = new Position();
+        public Position lastPos = Position.create();
         
         
         private PlayerData(CharacterData data) {

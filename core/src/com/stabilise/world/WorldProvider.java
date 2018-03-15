@@ -99,6 +99,24 @@ public interface WorldProvider {
     }
     
     /**
+     * Gets the ID of the tile at the given position. Fractional coordinates 
+     * are rounded down.
+     * 
+     * <p>IMPORTANT NOTE: make sure the position is {@link Position#realign()
+     * aligned} before invoking this, or this will chuck an exception.
+     * 
+     * @param pos The position of the tile.
+     * 
+     * @return The ID of the tile at the given coordinates, or the ID of the
+     * {@link Tiles#barrier barrier} tile if no such tile is loaded.
+     * @throws ArrrayIndexOutOfBoundsException if {@code pos} is not {@link
+     * Position#realign() aligned}.
+     */
+    default int getTileIDAt(Position pos) {
+        return getSliceAt(pos).getTileIDAt(pos.getLocalTileX(), pos.getLocalTileY());
+    }
+    
+    /**
      * Gets a tile at the given coordinates. Fractional coordinates are rounded
      * down.
      * 

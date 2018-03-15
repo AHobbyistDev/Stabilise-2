@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
@@ -130,13 +131,13 @@ public abstract class Multiverse<W extends AbstractWorld> {
      * @param dimension The name of the new dimension, as per {@link
      * #loadDimension(String)}.
      * @param e The entity to move.
-     * @param x The x-coordinate at which to place the entity, in tile-lengths.
-     * @param y The y-coordinate at which to place the entity, in tile-lengths.
+     * @param pos The position at which to place the entity,
      */
-    public void sendToDimension(World oldDim, String dimension, Entity e, double x, double y) {
+    public void sendToDimension(World oldDim, String dimension, Entity e, Position pos) {
         oldDim.removeEntity(e);
         W dim = loadDimension(dimension);
-        dim.addEntity(e, x, y);
+        e.pos.set(pos);
+        dim.addEntity(e);
     }
     
     /**

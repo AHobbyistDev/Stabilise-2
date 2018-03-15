@@ -11,7 +11,6 @@ import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
 import com.stabilise.world.WorldProvider;
 import com.stabilise.world.gen.action.*;
-import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 class GenProvider implements WorldProvider {
@@ -53,6 +52,7 @@ class GenProvider implements WorldProvider {
                 Position.sliceCoordRelativeToRegionFromSliceCoord(y));
     }
     
+    /*
     @Override
     public void setTileAt(int x, int y, int id) {
         getTileAt(x, y).handleRemove(this, x, y);
@@ -62,7 +62,9 @@ class GenProvider implements WorldProvider {
                 id);
         Tile.getTile(id).handlePlace(this, x, y);
     }
+    */
     
+    /*
     @Override
     public void setTileEntityAt(int x, int y, TileEntity t) {
         getSliceAtTile(x, y).setTileEntityAt(
@@ -72,6 +74,46 @@ class GenProvider implements WorldProvider {
         ActionAddTileEntity a = new ActionAddTileEntity();
         a.t = t;
         actions().add(a);
+    }
+    */
+    
+	@Override
+	public void setTileEntity(TileEntity t) {
+		doSetTileEntity(t, t.pos);
+	}
+	
+	@Override
+	public void removeTileEntityAt(Position pos) {
+		doSetTileEntity(null, pos);
+	}
+	
+    /**
+     * @param t may be null -- null means remove whatever TE is there
+     * @param pos never null
+     */
+    private void doSetTileEntity(TileEntity t, Position pos) {
+        Slice s = getSliceAt(pos);
+        
+        if(!s.isDummy()) {
+            int tx = pos.getLocalTileX();
+            int ty = pos.getLocalTileY();
+            
+            TileEntity t2 = s.getTileEntityAt(tx, ty);
+            if(t2 != null) {
+            	// TODO
+            	//t2.handleRemove(this, pos);
+                //removeTileEntity(t2);
+            }
+            
+            s.setTileEntityAt(tx, ty, t);
+            
+            if(t != null) {
+            	ActionAddTileEntity a = new ActionAddTileEntity();
+            	a.t = t;
+            	actions().add(a);
+                //addTileEntity(t);
+            }
+        }
     }
     
     @Override

@@ -210,12 +210,11 @@ public interface World extends WorldProvider {
      * 
      * @param dimension The name of the dimension to which to send the entity.
      * @param e The entity.
-     * @param x The x-coordinate at which to place the entity, in tile-lengths.
-     * @param y The y-coordinate at which to place the entity, in tile-lengths.
+     * @param pos The position at which to place the entity.
      * 
      * @throws NullPointerException if either argument is {@code null}.
      */
-    void sendToDimension(String dimension, Entity e, double x, double y);
+    void sendToDimension(String dimension, Entity e, Position pos);
     
     // ========== Time delta stuff ==========
     

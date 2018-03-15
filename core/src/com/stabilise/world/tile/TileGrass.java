@@ -28,14 +28,14 @@ public class TileGrass extends Tile {
         Tile t1, t2;
         
         for(int tx = -1; tx <= 1; tx++) {
-            t2 = world.getTileAt(tmp.set(pos, tx, -2));
+            t2 = world.getTileAt(tmp.set(pos, tx, -2).realign());
             for(int ty = -2; ty <= 1; ty ++) {
                 // If a tile is dirt and it has an air tile above it, spread
                 // grass to that tile with a 1/3 chance
                 t1 = t2;
-                t2 = world.getTileAt(tmp.set(pos, tx, ty+1));
+                t2 = world.getTileAt(tmp.set(pos, tx, ty+1).realign());
                 if(t1 == Tiles.dirt && !t2.isSolid() && world.chance(3))
-                    world.setTileAt(tx, ty, getID());
+                    world.setTileAt(tmp, getID());
             }
         }
     }

@@ -92,10 +92,11 @@ public class PlayerController extends CController implements Controllable, Input
             worldRenderer = ((SingleplayerState)Application.get().getState()).renderer;
         }
         
+        Position tmp = Position.create();
         if(Gdx.input.isButtonPressed(Buttons.LEFT) && !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
-            doInRadius(worldRenderer, (x,y) -> game.world.breakTileAt(x, y));
+            doInRadius(worldRenderer, (x,y) -> game.world.breakTileAt(tmp.set(x, y)));
         else if(Gdx.input.isButtonPressed(Buttons.RIGHT))
-            doInRadius(worldRenderer, (x,y) -> game.world.setTileAt(x, y, tileID));
+            doInRadius(worldRenderer, (x,y) -> game.world.setTileAt(tmp.set(x, y), tileID));
     }
     
     public void doInRadius(WorldRenderer renderer, BiIntConsumer func) {
