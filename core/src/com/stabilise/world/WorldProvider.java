@@ -1,7 +1,5 @@
 package com.stabilise.world;
 
-import static com.stabilise.entity.Position.*;
-
 import java.util.Random;
 
 import com.stabilise.entity.Entity;
@@ -53,6 +51,18 @@ public interface WorldProvider {
     Slice getSliceAt(int x, int y);
     
     /**
+     * Gets the slice in which the given position lies. Equivalent to
+     * <tt>getSliceAt(pos.getSliceX(), pos.getSliceY())</tt>.
+     * 
+     * @return The slice at the given coordinates, or {@link Slice#DUMMY_SLICE}
+     * if no such slice is loaded.
+     * @throws NullPointerException if {@code pos} is {@code null}.
+     */
+    default Slice getSliceAt(Position pos) {
+        return getSliceAt(pos.getSliceX(), pos.getSliceY());
+    }
+    
+    /**
      * Gets the slice at the given coordinates.
      * 
      * @param x The slice's x-coordinate, in tile lengths.
@@ -61,12 +71,14 @@ public interface WorldProvider {
      * @return The slice at the given coordinates, or {@link Slice#DUMMY_SLICE}
      * if no such slice is loaded.
      */
+    /*
     default Slice getSliceAtTile(int x, int y) {
         // This should be optimised for worlds which deal with regions
         return getSliceAt(
                 sliceCoordFromTileCoord(x),
                 sliceCoordFromTileCoord(y));
     }
+    */
     
     /**
      * Gets a tile at the given position. Fractional coordinates are rounded
@@ -83,8 +95,7 @@ public interface WorldProvider {
      * Position#realign() aligned}.
      */
     default Tile getTileAt(Position pos) {
-        return getSliceAt(pos.getSliceX(), pos.getSliceY())
-                .getTileAt(pos.getLocalTileX(), pos.getLocalTileY());
+        return getSliceAt(pos).getTileAt(pos.getLocalTileX(), pos.getLocalTileY());
     }
     
     /**
@@ -101,11 +112,13 @@ public interface WorldProvider {
      * is used so that I may replace instances of this with the more preferable
      * {@link #getTileAt(Position)}.
      */
+    /*
     default Tile getTileAt(double x, double y) {
         return getTileAt(
                 tileCoordFreeToTileCoordFixed(x),
                 tileCoordFreeToTileCoordFixed(y));
     }
+    */
     
     /**
      * Gets a tile at the given coordinates.
@@ -116,12 +129,14 @@ public interface WorldProvider {
      * @return The tile at the given coordinates, or the {@link Tiles#barrier
      * barrier} tile if no such tile is loaded.
      */
+    /*
     default Tile getTileAt(int x, int y) {
         return getSliceAtTile(x, y).getTileAt(
                 tileCoordRelativeToSliceFromTileCoord(x),
                 tileCoordRelativeToSliceFromTileCoord(y)
         );
     }
+    */
     
     /**
      * Gets the ID of the tile at the given coordinates.
@@ -132,12 +147,14 @@ public interface WorldProvider {
      * @return The ID of the tile at the given coordinates, or the ID of the
      * {@link Tiles#barrier barrier} tile if no such tile is loaded.
      */
+    /*
     default int getTileIDAt(int x, int y) {
         return getSliceAtTile(x, y).getTileIDAt(
                 tileCoordRelativeToSliceFromTileCoord(x),
                 tileCoordRelativeToSliceFromTileCoord(y)
         );
     }
+    */
     
     /**
      * Sets the tile at the specified coordinates.
@@ -148,9 +165,11 @@ public interface WorldProvider {
      * 
      * @throws NullPointerException if {@code tile} is {@code null}.
      */
+    /*
     default void setTileAt(int x, int y, Tile tile) {
         setTileAt(x, y, tile.getID());
     }
+    */
     
     /**
      * Sets a tile at the specified coordinates.
@@ -159,7 +178,9 @@ public interface WorldProvider {
      * @param y The y-coordinate of the tile, in tile-lengths.
      * @param id The ID of the tile to set.
      */
+    /*
     void setTileAt(int x, int y, int id);
+    */
     
     /**
      * Sets a tile at the specified position.
@@ -174,44 +195,55 @@ public interface WorldProvider {
      * Position#realign() aligned}.
      */
     default void setTileAt(Position pos, Tile tile) {
-        getSliceAt(pos.getSliceX(), pos.getSliceY())
-                .setTileAt(pos.getLocalTileX(), pos.getLocalTileY(), tile);
+        //getSliceAt(pos.getSliceX(), pos.getSliceY())
+        //        .setTileAt(pos.getLocalTileX(), pos.getLocalTileY(), tile);
+        setTileAt(pos, tile.getID());
     }
     
-    default Tile getWallAt(int x, int y) {
-        return getSliceAtTile(x, y).getWallAt(
-                tileCoordRelativeToSliceFromTileCoord(x),
-                tileCoordRelativeToSliceFromTileCoord(y)
+    /**
+     * Sets a tile at the specified position.
+     * 
+     * <p>IMPORTANT NOTE: make sure the position is {@link Position#realign()
+     * aligned} before invoking this, or this will chuck an exception.
+     * 
+     * @param pos The position. <!-- wow such documentation -->
+     * @param id The ID of the tile to set.
+     * 
+     * @throws ArrrayIndexOutOfBoundsException if {@code pos} is not {@link
+     * Position#realign() aligned}.
+     */
+    default void setTileAt(Position pos, int id) {
+        getSliceAt(pos.getSliceX(), pos.getSliceY())
+                .setTileIDAt(pos.getLocalTileX(), pos.getLocalTileY(), id);
+    }
+    
+    default Tile getWallAt(Position pos) {
+        return getSliceAt(pos).getWallAt(
+                pos.getLocalTileX(), pos.getLocalTileY()
         );
     }
     
-    default void setWallAt(int x, int y, Tile wall) {
-        getSliceAtTile(x, y).setWallAt(
-                tileCoordRelativeToSliceFromTileCoord(x),
-                tileCoordRelativeToSliceFromTileCoord(y),
+    default void setWallAt(Position pos, Tile wall) {
+        getSliceAt(pos).setWallAt(
+                pos.getLocalTileX(), pos.getLocalTileY(),
                 wall
         );
     }
     
-    default void setWallAt(int x, int y, int id) {
-        getSliceAtTile(x, y).setWallIDAt(
-                tileCoordRelativeToSliceFromTileCoord(x),
-                tileCoordRelativeToSliceFromTileCoord(y),
+    default void setWallAt(Position pos, int id) {
+        getSliceAt(pos).setWallIDAt(
+                pos.getLocalTileX(), pos.getLocalTileY(),
                 id
         );
     }
     
-    default byte getLightAt(int x, int y) {
-        return getSliceAtTile(x, y).getLightAt(
-                tileCoordRelativeToSliceFromTileCoord(x),
-                tileCoordRelativeToSliceFromTileCoord(y)
-        );
+    default byte getLightAt(Position pos) {
+        return getSliceAt(pos).getLightAt(pos.getLocalTileX(), pos.getLocalTileY());
     }
     
-    default void setLightAt(int x, int y, byte light) {
-        getSliceAtTile(x, y).setLightAt(
-                tileCoordRelativeToSliceFromTileCoord(x),
-                tileCoordRelativeToSliceFromTileCoord(y),
+    default void setLightAt(Position pos, byte light) {
+        getSliceAt(pos).setLightAt(
+                pos.getLocalTileX(), pos.getLocalTileY(),
                 light
         );
     }
@@ -227,12 +259,14 @@ public interface WorldProvider {
      * 
      * @deprecated use {@link #getTileEntityAt(Position)} instead.
      */
+    /*
     default TileEntity getTileEntityAt(int x, int y) {
         return getSliceAtTile(x, y).getTileEntityAt(
                 tileCoordRelativeToSliceFromTileCoord(x),
                 tileCoordRelativeToSliceFromTileCoord(y)
         );
     }
+    */
     
     /**
      * Gets the tile entity at the given position.
@@ -244,7 +278,7 @@ public interface WorldProvider {
      * such tile entity is present or loaded.
      */
     default TileEntity getTileEntityAt(Position pos) {
-        return getSliceAt(pos.getSliceX(), pos.getSliceY())
+        return getSliceAt(pos)
                 .getTileEntityAt(pos.getLocalTileX(), pos.getLocalTileY());
     }
     

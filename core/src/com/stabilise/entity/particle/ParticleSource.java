@@ -27,8 +27,8 @@ public class ParticleSource<T extends Particle> {
     private final Random rnd;
     /** Dummy Position object that's used within this class. I've left this
      * public for convenience. */
-    public final Position dummyPos = new Position(); // DON'T USE THIS ONE IN HERE
-    private final Position dummyPos2 = new Position(); // Use this one!
+    public final Position dummyPos = Position.create(); // DON'T USE THIS ONE IN HERE
+    private final Position dummyPos2 = Position.create(); // Use this one!
     
     
     /**

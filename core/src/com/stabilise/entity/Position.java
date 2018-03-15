@@ -36,24 +36,8 @@ public class Position implements Exportable {
     /**
      * Creates a new Position at (0,0).
      */
-    public Position() {
-        this(0, 0, 0f, 0f);
-    }
-    
-    /**
-     * Creates a new Position from the given slice coordinates and local
-     * coordinates.
-     */
-    public Position(int sliceX, int sliceY, float localX, float localY) {
-        set(sliceX, sliceY, localX, localY);
-    }
-    
-    /**
-     * Creates a position from the given global coordinates. x and y are
-     * decomposed into slice and local coordinates.
-     */
-    public Position(double x, double y) {
-        set(x, y);
+    protected Position() {
+        // fields are initialised to default values of all zeros, ty java
     }
     
     /**
@@ -289,7 +273,7 @@ public class Position implements Exportable {
      * Clones this Position object.
      */
     public Position copy() {
-        return new Position(sx, sy, lx, ly);
+        return new Position().set(this);
     }
     
     @Override
@@ -345,6 +329,29 @@ public class Position implements Exportable {
     //--------------------==========--------------------
     //------------=====Static Functions=====------------
     //--------------------==========--------------------
+    
+    /**
+     * Creates a new Position at (0,0).
+     */
+    public static Position create() {
+        return new Position();
+    }
+    
+    /**
+     * Creates a new Position from the given slice coordinates and local
+     * coordinates.
+     */
+    public static Position create(int sliceX, int sliceY, float localX, float localY) {
+        return new Position().set(sliceX, sliceY, localX, localY);
+    }
+    
+    /**
+     * Creates a position from the given global coordinates. x and y are
+     * decomposed into slice and local coordinates.
+     */
+    public static Position create(double x, double y) {
+        return new Position().set(x, y);
+    }
     
     /**
      * Gets the coordinate of the region at the given tile coordinate.
