@@ -59,7 +59,7 @@ public class CPortal extends CCore {
                     CPortal otherCore = (CPortal)otherEnd.core;
                     otherCore.direction = new Vector2(-direction.x, -direction.y);
                     otherCore.state = State.OPEN;
-                    w2.addEntity(otherEnd, new Position(0, 0, 8f, 8f));
+                    w2.addEntity(otherEnd, Position.create(0, 0, 8f, 8f));
                     
                     otherCore.pairedPortalID = e.id();
                     pairedPortalID = otherEnd.id();

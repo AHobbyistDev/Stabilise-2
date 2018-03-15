@@ -151,10 +151,9 @@ public interface World extends WorldProvider {
     /**
      * Breaks a tile.
      * 
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
+     * @param pos The position of the tile to break.
      */
-    void breakTileAt(int x, int y);
+    void breakTileAt(Position pos);
     
     /**
      * Adds a tile entity to the "update list" of tile entities, so that it may
@@ -197,13 +196,12 @@ public interface World extends WorldProvider {
     }
     
     /**
-     * Attempts to blow up a tile at the given coordinates.
+     * Attempts to blow up a tile.
      * 
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
+     * @param pos The position of the tile.
      * @param explosionPower The power of the explosion.
      */
-    void blowUpTile(int x, int y, float explosionPower);
+    void blowUpTile(Position pos, float explosionPower);
     
     // ========== Dimensional stuff ==========
     
