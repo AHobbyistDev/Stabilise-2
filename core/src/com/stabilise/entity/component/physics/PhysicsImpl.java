@@ -86,6 +86,7 @@ public class PhysicsImpl extends CPhysics {
             //collideHorizontal(xp, yp);
             
             // TODO: This is broken now that I use dyi instead of dy
+            // TODO: what does the above comment even mean? it's been so long I don't remember
             // The following is necessary because otherwise gravity will offset the vertical
             // wall being checked for sideways collisions slightly when on the ground.
             horizontalCollisions(w, e, projPos.set(e.pos, 0f, dyi));
@@ -149,7 +150,7 @@ public class PhysicsImpl extends CPhysics {
      * @return {@code true} if a collision is detected.
      */
     private boolean horizontalCollisions(World w, Entity e, Position proj) {
-        if(e.dx == 0) return false;
+        if(dxi == 0) return false;
         
         float leadingEdge = dxp ? e.aabb.maxX() : e.aabb.minX();
         
@@ -254,7 +255,7 @@ public class PhysicsImpl extends CPhysics {
         // question that the width of the entity's bounding box would require.
         int max = Maths.ceil(e.aabb.width());
         for(int i = 1; i <= max; i++) {
-            if(w.getTileAt(tmp3.set(pos).add(0f, dxp ? -i : i).realign()).isSolid())
+            if(w.getTileAt(tmp3.set(pos).add(dxp ? -i : i, 0f).realign()).isSolid())
                 return false;
         }
         return true;
@@ -279,7 +280,7 @@ public class PhysicsImpl extends CPhysics {
         	e.pos.lx = Maths.floor(collisionPos.lx) - e.aabb.maxX();
             //e.x = Math.floor(xp) - e.aabb.maxX();
         } else {
-        	e.pos.lx = Maths.ceil(collisionPos.lx - e.aabb.minX());
+        	e.pos.lx = Maths.ceil(collisionPos.lx) - e.aabb.minX();
             //e.x = Math.ceil(xp) - e.aabb.minX();
         }
     }
