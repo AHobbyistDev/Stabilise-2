@@ -39,7 +39,6 @@ import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.AbstractWorld;
-import com.stabilise.world.World;
 import com.stabilise.world.Slice;
 
 /**
@@ -280,7 +279,7 @@ public class WorldRenderer implements Renderer {
         
         profiler.next("camera"); // root.update.renderer.camera
         playerCamera.update(world);
-        camera.position.set((float)playerCamera.x, (float)playerCamera.y, 0f);
+        camera.position.set((float)playerCamera.pos.getGlobalX(), (float)playerCamera.pos.getGlobalY(), 0f);
         camera.update();
         batch.setProjectionMatrix(camera.combined);
         shapes.setProjectionMatrix(camera.combined);
@@ -337,11 +336,11 @@ public class WorldRenderer implements Renderer {
             shapes.begin(ShapeType.Line);
             shapes.setColor(Color.BLUE);
             world.getEntities().forEach(
-                    e -> renderAABB(e.aabb, (float)e.x, (float)e.y)
+                    e -> renderAABB(e.aabb, (float)e.pos.getGlobalX(), (float)e.pos.getGlobalY())
             );
             shapes.setColor(Color.RED);
             world.getHitboxes().forEach(
-                    h -> renderShape(h.boundingBox, (float)h.x, (float)h.y)
+                    h -> renderShape(h.boundingBox, (float)h.pos.getGlobalX(), (float)h.pos.getGlobalY())
             );
             shapes.end();
         }
@@ -371,8 +370,8 @@ public class WorldRenderer implements Renderer {
     private void renderOn(TextureRegion tex, Entity e) {
         batch.draw(
                 tex, // region
-                (float)e.x + e.aabb.minX(), // x
-                (float)e.y + e.aabb.minY(), // y
+                (float)e.pos.getGlobalX() + e.aabb.minX(), // x
+                (float)e.pos.getGlobalY() + e.aabb.minY(), // y
                 e.aabb.width(), // width
                 e.aabb.height() // height
         );
@@ -411,8 +410,8 @@ public class WorldRenderer implements Renderer {
         */
         batch.draw(
                 texEnemy, // region
-                (float)e.x - (e.facingRight ? 0.5f : -0.5f), // x
-                (float)e.y, // y
+                (float)e.pos.getGlobalX() - (e.facingRight ? 0.5f : -0.5f), // x
+                (float)e.pos.getGlobalY(), // y
                 0f, // originX
                 0f, // originY
                 1f, // width
@@ -451,8 +450,8 @@ public class WorldRenderer implements Renderer {
         */
         batch.draw(
                 texFireball, // region
-                (float)e.x - 0.75f, // x
-                (float)e.y - 0.25f, // y
+                (float)e.pos.getGlobalX() - 0.75f, // x
+                (float)e.pos.getGlobalY() - 0.25f, // y
                 0.75f, // originX
                 0.25f, // originY
                 1f, // width
@@ -480,7 +479,7 @@ public class WorldRenderer implements Renderer {
     public void renderPerson(Entity e, CPerson s) {
         personModel.setFlipped(!e.facingRight);
         personModel.setState(s.getState(), s.stateTicks);
-        personModel.render(batch, (float)e.x, (float)e.y);
+        personModel.render(batch, (float)e.pos.getGlobalX(), (float)e.pos.getGlobalY());
     }
     
     public void renderPortal(Entity e, CPortal c) {
@@ -502,7 +501,7 @@ public class WorldRenderer implements Renderer {
         updateMatrices(true);
         for(ParticleIndicator p : indicators) {
             BitmapFont fnt = p.orange ? indicatorFontOrange : indicatorFontRed;
-            hudViewport.unproject(viewport.project(vec.set((float)p.x, (float)p.y)));
+            hudViewport.unproject(viewport.project(vec.set((float)p.pos.getGlobalX(), (float)p.pos.getGlobalY())));
             fnt.draw(batch, p.text, vec.x - 25, -vec.y, 50, Align.center, false);
         }
         indicators.clear();
@@ -538,8 +537,8 @@ public class WorldRenderer implements Renderer {
         */
         batch.draw(
                 texExplosion, // region
-                (float)p.x - 0.5f, // x
-                (float)p.y - 0.5f, // y
+                (float)p.pos.getGlobalX() - 0.5f, // x
+                (float)p.pos.getGlobalY() - 0.5f, // y
                 0.5f, // originX
                 0.5f, // originY
                 1f, // width
@@ -560,8 +559,8 @@ public class WorldRenderer implements Renderer {
         batch.setColor(1f, 1f, 1f, p.opacity);
         batch.draw(
                 texFlame, // region
-                (float)p.x - 0.125f, // x
-                (float)p.y - 0.125f, // y
+                (float)p.pos.getGlobalX() - 0.125f, // x
+                (float)p.pos.getGlobalY() - 0.125f, // y
                 0.25f, // originX
                 0.25f, // originY
                 0.25f, // width
@@ -582,8 +581,8 @@ public class WorldRenderer implements Renderer {
         batch.setColor(1f, 1f, 1f, p.opacity);
         batch.draw(
                 texSmoke, // region
-                (float)p.x - 0.25f, // x
-                (float)p.y - 0.25f, // y
+                (float)p.pos.getGlobalX() - 0.25f, // x
+                (float)p.pos.getGlobalY() - 0.25f, // y
                 0.25f, // originX
                 0.25f, // originY
                 0.25f, // width

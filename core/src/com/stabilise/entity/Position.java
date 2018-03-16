@@ -96,6 +96,34 @@ public class Position implements Exportable {
     }
     
     /**
+     * Sets the x-component values of this Position to the same as those of the
+     * given position, but with dx added to lx. This method does not invoke
+     * {@link #realignX()}, so lx may fall outside of the slice bounds.
+     *  
+     * @return this Position.
+     * @throws NullPointerException if {@code p} is {@code null}.
+     */
+    public Position setX(Position p, float dx) {
+    	sx = p.sx;
+    	lx = p.lx;
+    	return this;
+    }
+    
+    /**
+     * Sets the y-component values of this Position to the same as those of the
+     * given position, but with dy added to ly. This method does not invoke
+     * {@link #realignY()}, so ly may fall outside of the slice bounds.
+     *  
+     * @return this Position.
+     * @throws NullPointerException if {@code p} is {@code null}.
+     */
+    public Position setY(Position p, float dy) {
+    	sy = p.sy;
+    	ly = p.ly;
+    	return this;
+    }
+    
+    /**
      * Adds dx and dy to lx and ly respectively. This method does not invoke
      * {@link #realign()}, so lx and ly may fall outside of the slice bounds.
 

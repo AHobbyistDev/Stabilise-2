@@ -5,6 +5,7 @@ import static com.stabilise.world.Slice.SLICE_SIZE;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.stabilise.world.World;
+import com.stabilise.entity.Position;
 import com.stabilise.world.Slice;
 import com.stabilise.world.tile.Tile;
 
@@ -75,11 +76,11 @@ public class TileRenderer implements Renderer {
     public void render() {
         //worldRenderer.batch.disableBlending();
         slicesRendered = 0;
-        for(int c = wr.playerCamera.sliceX - wr.slicesHorizontal;
-                c <= wr.playerCamera.sliceX + wr.slicesHorizontal;
+        for(int c = wr.playerCamera.pos.getSliceX() - wr.slicesHorizontal;
+                c <= wr.playerCamera.pos.getSliceX() + wr.slicesHorizontal;
                 c++)
-            for(int r = wr.playerCamera.sliceY - wr.slicesVertical;
-                    r <= wr.playerCamera.sliceY + wr.slicesVertical;
+            for(int r = wr.playerCamera.pos.getSliceY() - wr.slicesVertical;
+                    r <= wr.playerCamera.pos.getSliceY() + wr.slicesVertical;
                     r++)
                 renderSlice(c, r);
         //worldRenderer.batch.enableBlending();
@@ -133,12 +134,13 @@ public class TileRenderer implements Renderer {
         }
     }
     
+    // TODO: temporary methods
     private int camX() {
-        return wr.playerCamera.getTileX();
+        return Position.tileCoordFreeToTileCoordFixed(wr.playerCamera.pos.getGlobalX());
     }
     
     private int camY() {
-        return wr.playerCamera.getTileY();
+        return Position.tileCoordFreeToTileCoordFixed(wr.playerCamera.pos.getGlobalY());
     }
     
 }

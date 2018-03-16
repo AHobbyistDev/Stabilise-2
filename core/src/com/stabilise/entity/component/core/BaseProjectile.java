@@ -2,6 +2,7 @@ package com.stabilise.entity.component.core;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.LinkedHitbox;
 import com.stabilise.util.shape.Shape;
@@ -58,7 +59,7 @@ public abstract class BaseProjectile extends CCore {
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
             onAdd(w, e);
-        else if(ev.type() == EntityEvent.Type.TILE_COLLISION)
+        else if(ev instanceof ETileCollision)
             onImpact(w, e);
         else if(ev.type() == EntityEvent.Type.DAMAGED)
             return true;
