@@ -231,14 +231,11 @@ public interface WorldProvider {
      * Position#realign() aligned}.
      */
     default void setTileAt(Position pos, int id) {
-        getSliceAt(pos.getSliceX(), pos.getSliceY())
-                .setTileIDAt(pos.getLocalTileX(), pos.getLocalTileY(), id);
+        getSliceAt(pos).setTileIDAt(pos.getLocalTileX(), pos.getLocalTileY(), id);
     }
     
     default Tile getWallAt(Position pos) {
-        return getSliceAt(pos).getWallAt(
-                pos.getLocalTileX(), pos.getLocalTileY()
-        );
+        return getSliceAt(pos).getWallAt(pos.getLocalTileX(), pos.getLocalTileY());
     }
     
     default void setWallAt(Position pos, Tile wall) {

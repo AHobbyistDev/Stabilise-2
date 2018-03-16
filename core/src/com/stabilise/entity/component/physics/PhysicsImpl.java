@@ -105,7 +105,7 @@ public class PhysicsImpl extends CPhysics {
      * Gets the frictive force acting on the entity.
      */
     protected float getXFriction(World w, Entity e) {
-        Tile groundTile = w.getTileAt(tmp.set(e.pos, 0f, -0.01f));
+        Tile groundTile = w.getTileAt(tmp.set(e.pos, 0f, -0.01f).realign());
         return 1 - groundTile.getFriction();
     }
     
@@ -167,7 +167,7 @@ public class PhysicsImpl extends CPhysics {
         
         // TODO: < vs <= - watch out for this, it may cause problems in the future
         for(float v = proj.ly + e.aabb.minY(); v < max; v++) {
-        	tmp.set(proj.sx, proj.sy, proj.lx, v);
+        	tmp.set(proj.sx, proj.sy, proj.lx, v).realign();
             if(w.getTileAt(tmp).isSolid() && rowValid(w, e, tmp)) {
                 //x = dxp ? Math.floor(xp) - boundingBox.p11.x : Math.ceil(xp) - boundingBox.p00.x;
                 // Alternatively... (doesn't really matter though)
@@ -206,7 +206,7 @@ public class PhysicsImpl extends CPhysics {
         
         // TODO: < vs <= - watch out for this, it may cause problems in the future
         for(float h = proj.lx + e.aabb.minX(); h < max; h++) {
-        	tmp.set(proj.sx, proj.sy, h, proj.ly);
+        	tmp.set(proj.sx, proj.sy, h, proj.ly).realign();
             if(w.getTileAt(tmp).isSolid() && columnValid(w, e, tmp)) {
                 //y = dyp ? Math.floor(yp) - boundingBox.p11.y : Math.ceil(yp) - boundingBox.p00.y;
                 //onGround = dy < 0;
@@ -307,7 +307,7 @@ public class PhysicsImpl extends CPhysics {
             //e.y = Math.ceil(yp) - e.aabb.minY();
             
             // TODO: Find a better way of doing this
-        	tmp4.set(e.pos).add(0f, -0.001f).clampToTile();
+        	tmp4.set(e.pos).add(0f, -0.001f).clampToTile().realign();
         	Tile t = w.getTileAt(tmp4);
         	t.handleStep(w, tmp4, e);
         	floorTile = t.getID();

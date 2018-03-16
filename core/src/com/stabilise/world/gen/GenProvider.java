@@ -11,6 +11,7 @@ import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
 import com.stabilise.world.WorldProvider;
 import com.stabilise.world.gen.action.*;
+import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 class GenProvider implements WorldProvider {
@@ -76,6 +77,13 @@ class GenProvider implements WorldProvider {
         actions().add(a);
     }
     */
+    
+    @Override
+    public void setTileAt(Position pos, int id) {
+        getTileAt(pos).handleRemove(this, pos);
+        getSliceAt(pos).setTileIDAt(pos.getLocalTileX(), pos.getLocalTileY(), id);
+        Tile.getTile(id).handlePlace(this, pos);
+    }
     
 	@Override
 	public void setTileEntity(TileEntity t) {

@@ -13,7 +13,7 @@ public abstract class GameObject {
     protected boolean destroyed = false;
     
     /** The position of this GameObject. Initialises to (0,0). */
-    public final Position pos = new Position();
+    public final Position pos = Position.create();
     
     
     

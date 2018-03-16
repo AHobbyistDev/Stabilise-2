@@ -1,5 +1,7 @@
 package com.stabilise.entity.particle;
 
+import java.util.function.Supplier;
+
 import com.stabilise.entity.GameObject;
 import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.collect.registry.TypeFactory;
@@ -19,14 +21,17 @@ public abstract class Particle extends GameObject {
             new RegistryParams("ParticleRegistry", 8));
     
     static {
-        register(0, ParticleFlame.class);
-        register(1, ParticleSmoke.class);
-        register(2, ParticleIndicator.class);
-        register(3, ParticleExplosion.class);
+        register(0, ParticleFlame.class, ParticleFlame::new);
+        register(1, ParticleSmoke.class, ParticleSmoke::new);
+        register(2, ParticleIndicator.class, ParticleIndicator::new);
+        register(3, ParticleExplosion.class, ParticleExplosion::new);
     }
     
-    private static void register(int id, Class<? extends Particle> clazz) {
-        REGISTRY.registerUnsafe(id, clazz);
+    private static void register(int id, Class<? extends Particle> clazz, Supplier<Particle> constructor) {
+        REGISTRY.register(id, clazz, constructor);
+        // Can't use registerUnsafe anymore since particles have a Position
+        // object which needs to be initialised.
+        //REGISTRY.registerUnsafe(id, clazz);
     }
     
     /** The age of the particle, in ticks. */
