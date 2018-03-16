@@ -1,5 +1,6 @@
 package com.stabilise.world;
 
+import com.stabilise.entity.Position;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
@@ -20,6 +21,10 @@ public class Slice {
     public static final int SLICE_SIZE_MINUS_ONE = SLICE_SIZE - 1;
     /** The power of 2 of {@link SLICE_SIZE}; minor optimisation purposes. */
     public static final int SLICE_SIZE_SHIFT = Maths.log2(SLICE_SIZE);
+    /** See {@link Position#tileCoordRelativeToSliceFromTileCoordFree(double)}. */
+    public static final double SLICE_SIZE_MINUS_EPSd = 15.9999995d; // TODO: calculate better epsilon
+    /** See {@link Position#tileCoordRelativeToSliceFromTileCoordFree2(float)}. */
+    public static final float SLICE_SIZE_MINUS_EPSf = 15.9999995f;
     
     /** Dummy slice to indicate the lack of a slice in preference to a null
      * pointer. */

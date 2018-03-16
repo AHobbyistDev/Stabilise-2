@@ -5,6 +5,7 @@ import com.stabilise.entity.Position;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Direction;
+import com.stabilise.util.Log;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.Tile;
@@ -208,13 +209,17 @@ public class PhysicsImpl extends CPhysics {
         // TODO: < vs <= - watch out for this, it may cause problems in the future
         for(float h = proj.lx + e.aabb.minX(); h < max; h++) {
         	tmp.set(proj.sx, proj.sy, h, proj.ly).realign();
-            if(w.getTileAt(tmp).isSolid() && columnValid(w, e, tmp)) {
-                //y = dyp ? Math.floor(yp) - boundingBox.p11.y : Math.ceil(yp) - boundingBox.p00.y;
-                //onGround = dy < 0;
-                //dy = 0;
-                collideVertical(w, e, tmp, dyp ? Direction.UP : Direction.DOWN);
-                return true;
-            }
+        	try {
+                if(w.getTileAt(tmp).isSolid() && columnValid(w, e, tmp)) { // TODO: THIS HAS CAUSED AN INDEXOUTOFBOUNDS BEFORE
+                    //y = dyp ? Math.floor(yp) - boundingBox.p11.y : Math.ceil(yp) - boundingBox.p00.y;
+                    //onGround = dy < 0;
+                    //dy = 0;
+                    collideVertical(w, e, tmp, dyp ? Direction.UP : Direction.DOWN);
+                    return true;
+                }
+        	} catch(ArrayIndexOutOfBoundsException ex) {
+        	    Log.getAgent("ASDFGHJKL").postSevere("It hath strucketh", ex);
+        	}
         }
         return false;
     }

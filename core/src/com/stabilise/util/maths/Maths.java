@@ -99,6 +99,14 @@ public class Maths {
      * Calculates the remainder of a division operation; negative remainders
      * are wrapped by adding {@code div} to such remainders.
      * 
+     * <p>IMPORTANT NOTE: Ordinarily the returned value should strictly lie in
+     * the range: {@code 0 <= remainder < div}. However, if {@code num} is a
+     * sufficiently small negative number, then due to machine rounding errors,
+     * the returned number will in fact be {@code div}. This function makes no
+     * attempt to remedy this; if you require that the returned value be
+     * strictly smaller than {@code div}, then be careful to handle that
+     * special case yourself.
+     * 
      * @param num The numerator.
      * @param div The divisor.
      * 
@@ -113,6 +121,14 @@ public class Maths {
     /**
      * Calculates the remainder of a division operation; negative remainders
      * are wrapped by adding {@code div} to such remainders.
+     * 
+     * <p>IMPORTANT NOTE: Ordinarily the returned value should strictly lie in
+     * the range: {@code 0 <= remainder < div}. However, if {@code num} is a
+     * sufficiently small negative number, then due to machine rounding errors,
+     * the returned number will in fact be {@code div}. This function makes no
+     * attempt to remedy this; if you require that the returned value be
+     * strictly smaller than {@code div}, then be careful to handle that
+     * special case yourself.
      * 
      * @param num The numerator.
      * @param div The divisor.

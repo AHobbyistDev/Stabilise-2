@@ -70,6 +70,8 @@ public class Entity extends GameObject {
         world.profiler().next("physics");
         physics.update(world, this);
         world.profiler().end();
+        
+        this.pos.realign(); // TODO: temporary?
     }
     
     @Override

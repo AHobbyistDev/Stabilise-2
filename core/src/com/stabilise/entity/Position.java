@@ -595,7 +595,11 @@ public class Position implements Exportable {
      * parent slice.
      */
     public static double tileCoordRelativeToSliceFromTileCoordFree(double c) {
-        return Maths.remainder(c, Slice.SLICE_SIZE);
+        double rem = Maths.remainder(c, Slice.SLICE_SIZE);
+        // See comment in function below this for why we do this check.
+        if(rem == 16.0d) // TODO: hardcoded 16 is bad
+            rem = Slice.SLICE_SIZE_MINUS_EPSd;
+        return rem;
     }
     
     /**
@@ -608,10 +612,31 @@ public class Position implements Exportable {
      * @param c The coordinate, in tile-lengths.
      * 
      * @return The coordinate of the tile, in tile-lengths, relative to its
-     * parent slice.
+     * parent slice. The value returned will be greater than or equal to 0, and
+     * strictly less than {@link Slice#SLICE_SIZE}.
      */
     public static float tileCoordRelativeToSliceFromTileCoordFree2(float c) {
-        return Maths.remainder(c, Slice.SLICE_SIZE);
+        float rem = Maths.remainder(c, Slice.SLICE_SIZE);
+        // This is a very important adjustment that needs to be made in order
+        // to ensure a correct result. To see this, let's peek at the code of
+        // Maths.remainder():
+        //     num %= div;
+        //     return num >= 0 ? num : num + div;
+        // The problem lies in "num >= 0 ? num : num + div". If num (in our
+        // case, c) is negative but with sufficiently small absolute value,
+        // then that precision may be lost when we add div (here, SLICE_SIZE)
+        // to it. That is,
+        //     num + div == div.
+        // Thus, e.g. -0.0000001 may become 16.0. We do not want this. This
+        // function should never return 16, only numbers strictly below it.
+        // Hence if rem comes out as 16.0f, we return a value as close as
+        // possible to -- but still less than -- 16 within machine precision.
+        // 
+        // Strictly speaking, the error lies in Maths.remainder() and the fix
+        // belongs in there, but it's too much work and I won't bother.
+        if(rem == 16.0f) // TODO: hardcoded 16 is bad
+            rem = Slice.SLICE_SIZE_MINUS_EPSf;
+        return rem;
     }
     
     /**

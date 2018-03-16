@@ -205,7 +205,7 @@ public class RandomTests {
     
     // ---------- MAIN ----------
     public static void main(String[] args) {
-        
+        System.out.println(15.9999995f == 16.0f);
     }
 
 }
