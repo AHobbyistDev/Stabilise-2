@@ -1,14 +1,13 @@
 package com.stabilise.entity.component.controller;
 
+import java.util.function.Consumer;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.math.Vector2;
 import com.stabilise.core.Application;
-import com.stabilise.core.Constants;
 import com.stabilise.core.game.Game;
-import com.stabilise.core.main.Stabilise;
 import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
@@ -20,7 +19,6 @@ import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
 import com.stabilise.item.IContainer;
 import com.stabilise.opengl.render.WorldRenderer;
-import com.stabilise.util.BiIntConsumer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
 import com.stabilise.util.maths.Maths;
@@ -92,18 +90,34 @@ public class PlayerController extends CController implements Controllable, Input
             worldRenderer = ((SingleplayerState)Application.get().getState()).renderer;
         }
         
-        Position tmp = Position.create();
         if(Gdx.input.isButtonPressed(Buttons.LEFT) && !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
-            doInRadius(worldRenderer, (x,y) -> game.world.breakTileAt(tmp.set(x, y)));
+            doInRadius(worldRenderer, (pos) -> game.world.breakTileAt(pos));
         else if(Gdx.input.isButtonPressed(Buttons.RIGHT))
-            doInRadius(worldRenderer, (x,y) -> game.world.setTileAt(tmp.set(x, y), tileID));
+            doInRadius(worldRenderer, (pos) -> game.world.setTileAt(pos, tileID));
     }
     
-    public void doInRadius(WorldRenderer renderer, BiIntConsumer func) {
-        Vector2 wc = renderer.mouseCoords();
+    /**
+     * Performs a given action on all tiles within {@link #radius} of the
+     * cursor as given by {@link WorldRenderer#mouseCoords()}. The position
+     * given to the consumer will always be {@link Position#realign() aligned}.
+     */
+    public void doInRadius(WorldRenderer renderer, Consumer<Position> func) {
+        Position mc = renderer.mouseCoords();
+        mc.clampToTile();
+        Position pos = Position.create();
+        int rad = Maths.ceil(radius);
+        float r2 = radius*radius;
+        
+        for(int ty = -rad; ty <= rad; ty++) {
+            for(int tx = -rad; tx <= rad; tx++) {
+                if(tx*tx + ty*ty < r2)
+                    func.accept(pos.set(mc, tx, ty).realign());
+            }
+        }
+        
+        /*
         float x = Maths.floor(wc.x);
         float y = Maths.floor(wc.y);
-        float r2 = radius*radius;
         int minX = (int)(x - radius);
         int maxX = (int)Math.ceil(x + radius);
         int minY = (int)(y - radius);
@@ -117,6 +131,7 @@ public class PlayerController extends CController implements Controllable, Input
                     func.accept(tx, ty);
             }
         }
+        */
     }
     
     /**
@@ -134,7 +149,7 @@ public class PlayerController extends CController implements Controllable, Input
     @SuppressWarnings("unused")
     private int mouseXToWorldSpace(int x) {
         // TODO: improve maybe?
-        return Maths.floor(((x + worldRenderer.playerCamera.pos.getGlobalX()) / worldRenderer.getPixelsPerTile()));
+        return Maths.floor(((x + worldRenderer.camObj.pos.getGlobalX()) / worldRenderer.getPixelsPerTile()));
     }
     
     /**
@@ -149,7 +164,7 @@ public class PlayerController extends CController implements Controllable, Input
     @SuppressWarnings("unused")
     private int mouseYToWorldSpace(int y) {
         // TODO: improve maybe?
-        return Maths.floor(((y + worldRenderer.playerCamera.pos.getGlobalY()) / worldRenderer.getPixelsPerTile()));
+        return Maths.floor(((y + worldRenderer.camObj.pos.getGlobalY()) / worldRenderer.getPixelsPerTile()));
     }
     
     @Override
@@ -174,13 +189,10 @@ public class PlayerController extends CController implements Controllable, Input
                 else
                     mob.specialAttack(game.world, e.facingRight ? Direction.RIGHT : Direction.LEFT);
                 break;
-            case SAVE_LOG:
-                Log.saveLog(false, Stabilise.GAME_NAME + " v" + Constants.VERSION);
-                break;
             case SUMMON:
                 {
                     Entity m = Entities.enemy();
-                    e.pos.set(e.pos, (e.facingRight ? 5 : -5), 0f);
+                    m.pos.set(e.pos, (e.facingRight ? 5 : -5), 0f);
                     game.world.addEntity(m);
                 }
                 break;
@@ -202,18 +214,6 @@ public class PlayerController extends CController implements Controllable, Input
                 break;
             case RESTORE:
                 mob.restore();
-                break;
-            case ZOOM_IN:
-                {
-                    SingleplayerState state = (SingleplayerState)Application.get().getState();
-                    state.renderer.setPixelsPerTile(state.renderer.getPixelsPerTile() * 2, true);
-                }
-                break;
-            case ZOOM_OUT:
-                {
-                    SingleplayerState state = (SingleplayerState)Application.get().getState();
-                    state.renderer.setPixelsPerTile(state.renderer.getPixelsPerTile() / 2, true);
-                }
                 break;
             case INTERACT:
                 Position p = e.pos.copy().clampToTile().add(0,-1).realign();
@@ -242,9 +242,6 @@ public class PlayerController extends CController implements Controllable, Input
                 break;
             case PRINT_INVENTORY:
                 Log.get().postInfo(e.core.toString());
-                break;
-            case PROFILER:
-                Log.get().postDebug(game.profiler.getData().toString());
                 break;
             case PORTAL:
                 //game.world.addEntity(Entities.portal("overworld"), e.x + 3, e.y);
@@ -288,8 +285,7 @@ public class PlayerController extends CController implements Controllable, Input
     public boolean touchDown(int x, int y, int pointer, int button) {
         // Ctrl + leftclick = teleport
         if(button == Buttons.LEFT && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
-            Vector2 wc = worldRenderer.mouseCoords();
-            e.pos.set(wc.x, wc.y).realign();
+            e.pos.set(worldRenderer.mouseCoords());
         }
         return false;
     }

@@ -274,6 +274,16 @@ public class Position implements Exportable {
     }
     
     /**
+     * Returns the relative distance along the x-axis between the given
+     * position and this one.
+     * 
+     * @return other.x - x, in tile-lengths.
+     */
+    public float diffX(int otherSliceX, float otherTileX) {
+        return (otherSliceX - sx) * Slice.SLICE_SIZE + otherTileX - lx;
+    }
+    
+    /**
      * Returns the relative distance along the y-axis between the given
      * position and this one.
      * 
@@ -282,6 +292,16 @@ public class Position implements Exportable {
      */
     public float diffY(Position other) {
         return (other.sy - sy) * Slice.SLICE_SIZE + other.ly - ly;
+    }
+    
+    /**
+     * Returns the relative distance along the y-axis between the given
+     * position and this one.
+     * 
+     * @return other.y - y, in tile-lengths.
+     */
+    public float diffY(int otherSliceY, float otherTileY) {
+        return (otherSliceY - sy) * Slice.SLICE_SIZE + otherTileY - ly;
     }
     
     /**
@@ -306,6 +326,24 @@ public class Position implements Exportable {
      */
     public boolean isWithinRange(Position other, float dist) {
     	return diffSq(other) <= dist*dist;
+    }
+    
+    /**
+     * Returns {@code true} if this Position is in the same slice as the given
+     * Position. This method does not realign either positions, so if either
+     * position is unaligned this method may return the erroneous naive result.
+     * 
+     * @throws NullPointerException if {@code other} is {@code null}.
+     */
+    public boolean inSameSlice(Position other) {
+        return sx == other.sx && sy == other.sy;
+    }
+    
+    /**
+     * Returns {@code getSliceX() == sx && getSliceY() == sy}.
+     */
+    public boolean isInSlice(int sx, int sy) {
+        return this.sx == sx && this.sy == sy;
     }
     
     /**

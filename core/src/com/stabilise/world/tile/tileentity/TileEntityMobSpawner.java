@@ -24,7 +24,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     private static final int MAX_SPAWNS = 2;
     
     private int ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS;
-    private Position centrePos;
+    private Position centrePos = Position.create();
     
     private ParticleSource<?> fireGen;
     private ParticleSource<?> smokeGen;
@@ -34,12 +34,10 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     public void update(World w) {
         if(playerInRange(w)) {
             // Ugly way of lazily initialising...
-            if(centrePos == null)
-                centrePos = pos.copy().clampToTile().add(0.5f, 0.5f);
-            
             if(fireGen == null) {
                 fireGen = w.getParticleManager().getSource(ParticleFlame.class);
                 smokeGen = w.getParticleManager().getSource(ParticleSmoke.class);
+                centrePos.set(pos).clampToTile().add(0.5f, 0.5f); // TODO: should be set sooner
             }
             
             if(--ticksUntilNextSpawn == 0) {

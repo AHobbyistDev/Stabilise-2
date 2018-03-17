@@ -51,7 +51,7 @@ public class SingleplayerState implements State {
         Gdx.input.setInputProcessor(input);
         
         renderer = new WorldRenderer(game, game.getWorld(), game.player, game.playerController);
-        game.hudRenderer = renderer.hudRenderer;
+        game.renderer = renderer;
         
         pop = Gdx.audio.newSound(Resources.DIR_SOUND.child("pop.mp3"));
     }
