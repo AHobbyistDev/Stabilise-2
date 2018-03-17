@@ -10,6 +10,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.io.IOUtil;
@@ -169,8 +170,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
             dim.save();
         
         for(PlayerData p : players.values()) {
-            p.lastX = p.playerMob.x;
-            p.lastY = p.playerMob.y;
+            p.lastPos.set(p.playerMob.pos);
             try {
                 p.save();
             } catch(IOException e) {
@@ -182,8 +182,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
     @Override
     protected void closeExtra() {
         for(PlayerData p : players.values()) {
-            p.lastX = p.playerMob.x;
-            p.lastY = p.playerMob.y;
+            p.lastPos.set(p.playerMob.pos);
             try {
                 p.save();
             } catch(IOException e) {
@@ -217,9 +216,8 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         public boolean newToWorld = true;
         /** The dimension the player is in. */
         public String dimension;
-        /** The coordinates of the player's last known location, in
-         * tile-lengths. */
-        public double lastX, lastY;
+        /** The player's last known position. */
+        public Position lastPos = Position.create();
         
         
         private PlayerData(CharacterData data) {
@@ -233,7 +231,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         private void defaultData() {
             newToWorld = true;
             dimension = Dimension.defaultDimensionName();
-            lastX = lastY = 0D; // TODO: let the default dimension initialise this
+            lastPos.set(0, 0, 0f, 0f); // TODO: let the default dimension initialise this
         }
         
         /**
@@ -245,8 +243,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
                 try {
                     DataCompound tag = IOUtil.read(Format.NBT, Compression.GZIP, file);
                     dimension = tag.getString("dimension");
-                    lastX = tag.getDouble("lastX");
-                    lastY = tag.getDouble("lastY");
+                    lastPos.io(tag.getCompound("lastPos"), false);
                     newToWorld = false;
                 } catch(IOException e) {
                     log.postSevere("Could not load data for " + data + "!");
@@ -264,8 +261,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         public void save() throws IOException {
             DataCompound tag = Format.NBT.newCompound(true);
             tag.put("dimension", dimension);
-            tag.put("lastX", lastX);
-            tag.put("lastY", lastY);
+            lastPos.io(tag.createCompound("lastPos"), true);
             IOUtil.writeSafe(tag, Format.NBT, Compression.GZIP, file);
         }
         

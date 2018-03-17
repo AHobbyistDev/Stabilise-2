@@ -1,7 +1,6 @@
 package com.stabilise.world.loader;
 
 import static com.stabilise.world.Region.REGION_SIZE;
-import static com.stabilise.world.World.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,9 +71,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
                     for(int i = 0; i < tileEntities.size(); i++) {
                         DataCompound tc = tileEntities.getCompound();
                         TileEntity te = TileEntity.createTileEntityFromNBT(tc);
-                        s.tileEntities        // I just love really long method names!
-                            [tileCoordRelativeToSliceFromTileCoord(te.y)]
-                            [tileCoordRelativeToSliceFromTileCoord(te.x)] = te; 
+                        s.tileEntities[te.pos.getLocalTileY()][te.pos.getLocalTileX()] = te; 
                     }
                     
                     r.slices[y][x] = s;

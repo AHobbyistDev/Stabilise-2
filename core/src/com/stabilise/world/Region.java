@@ -10,6 +10,7 @@ import java.util.function.IntBinaryOperator;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Constants;
+import com.stabilise.entity.Position;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.ThreadSafeMethod;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
@@ -213,9 +214,10 @@ public class Region {
         int sy = world.rnd.nextInt(REGION_SIZE);
         int tx = world.rnd.nextInt(Slice.SLICE_SIZE);
         int ty = world.rnd.nextInt(Slice.SLICE_SIZE);
-        getSliceAt(sx, sy).getTileAt(tx, ty).update(world,
-                (offsetX + sx) * Slice.SLICE_SIZE + tx,
-                (offsetY + sy) * Slice.SLICE_SIZE + ty);
+        Position tmp = Position.create();
+        getSliceAt(sx, sy).getTileAt(tx, ty).update(world, tmp.set(sx, sy, tx, ty));
+        //        (offsetX + sx) * Slice.SLICE_SIZE + tx,
+        //        (offsetY + sy) * Slice.SLICE_SIZE + ty);
     }
     
     /**
@@ -224,12 +226,13 @@ public class Region {
     private void tickSlice(HostWorld world, int tiles) {
         int sx = world.rnd.nextInt(REGION_SIZE);
         int sy = world.rnd.nextInt(REGION_SIZE);
+        Position tmp = Position.create();
         while(tiles-- > 0) {
             int tx = world.rnd.nextInt(Slice.SLICE_SIZE);
             int ty = world.rnd.nextInt(Slice.SLICE_SIZE);
-            getSliceAt(sx, sy).getTileAt(tx, ty).update(world,
-                    (offsetX + sx) * Slice.SLICE_SIZE + tx,
-                    (offsetY + sy) * Slice.SLICE_SIZE + ty);
+            getSliceAt(sx, sy).getTileAt(tx, ty).update(world, tmp.set(sx, sy, tx, ty));
+            //        (offsetX + sx) * Slice.SLICE_SIZE + tx,
+            //        (offsetY + sy) * Slice.SLICE_SIZE + ty);
         }
     }
     

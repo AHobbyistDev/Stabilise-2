@@ -3,7 +3,7 @@ package com.stabilise.entity.hitbox;
 import java.util.function.Consumer;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.FreeGameObject;
+import com.stabilise.entity.GameObject;
 import com.stabilise.entity.damage.DamageType;
 import com.stabilise.entity.damage.GeneralSource;
 import com.stabilise.entity.damage.IDamageSource;
@@ -15,7 +15,7 @@ import com.stabilise.world.World;
  * A Hitbox is an object which, when overlapping with an entity, may damage or
  * otherwise influence it.
  */
-public class Hitbox extends FreeGameObject {
+public class Hitbox extends GameObject {
     
     /** The entity which owns the hitbox. */
     public final long ownerID;
@@ -80,7 +80,7 @@ public class Hitbox extends FreeGameObject {
         for(Entity e : world.getEntities()) {
             if(e.id() == ownerID) continue;
             // TODO: broadphase
-            if(e.aabb.intersects(boundingBox, (float)(e.x-x), (float)(e.y-y))) {
+            if(e.aabb.intersects(boundingBox, pos.diffX(e.pos), pos.diffY(e.pos))) {
                 hit(world, e);
                 if(hits == 0)
                     break;
@@ -97,8 +97,7 @@ public class Hitbox extends FreeGameObject {
     protected void moveToOwner(World w) {
         if(stickToOwner) {
             Entity e = w.getEntity(ownerID);
-            x = e.x;
-            y = e.y;
+            pos.set(e.pos);
         }
     }
     

@@ -4,14 +4,14 @@ import static com.badlogic.gdx.Input.Keys;
 
 import com.badlogic.gdx.InputProcessor;
 import com.stabilise.core.Application;
+import com.stabilise.core.Constants;
+import com.stabilise.core.main.Stabilise;
 import com.stabilise.core.state.MainMenuState;
-import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
-import com.stabilise.opengl.render.HUDRenderer;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
@@ -53,8 +53,8 @@ public class Game implements Controllable, InputProcessor {
     /** Holds the message history. */
     public final Messages messages;
     
-    /** A reference to the HUD renderer. TODO: Temporary */
-    public HUDRenderer hudRenderer;
+    /** A reference to the game renderer. TODO: Temporary */
+    public WorldRenderer renderer;
     
     /** Whether or not the debug display is active. */
     public boolean debug = false;
@@ -225,12 +225,30 @@ public class Game implements Controllable, InputProcessor {
                     profiler.disable();
                 break;
             case TOG_HITBOX_RENDER:
-                WorldRenderer r = ((SingleplayerState)Application.get().getState()).renderer;
-                r.renderHitboxes = !r.renderHitboxes;
-                if(r.renderHitboxes)
+                renderer.renderHitboxes = !renderer.renderHitboxes;
+                if(renderer.renderHitboxes)
                     messages.send("Turning on hitboxes");
                 else
                     messages.send("Turning off hitboxes");
+                break;
+            case TOG_SLICE_BORDERS:
+                renderer.renderSliceBorders = !renderer.renderSliceBorders;
+                if(renderer.renderSliceBorders)
+                    messages.send("Turning on slice borders");
+                else
+                    messages.send("Turning off slice borders");
+                break;
+            case ZOOM_IN:
+                renderer.setPixelsPerTile(renderer.getPixelsPerTile() * 2, true);
+                break;
+            case ZOOM_OUT:
+                renderer.setPixelsPerTile(renderer.getPixelsPerTile() / 2, true);
+                break;
+            case PROFILER:
+                Log.get().postDebug(profiler.getData().toString());
+                break;
+            case SAVE_LOG:
+                Log.saveLog(false, Stabilise.GAME_NAME + " v" + Constants.VERSION);
                 break;
             default:
                 return playerController.handleControlPress(control);
@@ -245,7 +263,7 @@ public class Game implements Controllable, InputProcessor {
     
     @Override
     public boolean keyDown(int keycode) {
-        hudRenderer.setProfilerSection(keyValue(keycode));
+        renderer.hudRenderer.setProfilerSection(keyValue(keycode));
         return false;
     }
     

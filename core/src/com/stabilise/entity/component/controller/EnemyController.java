@@ -58,7 +58,7 @@ public class EnemyController extends CController {
                     return;
                 }
                 // run away from the player
-                e.facingRight = p.x - e.x < 0;
+                e.facingRight = e.pos.diffX(p.pos) < 0;
                 action = EnumAction.MOVE;
                 actionTimeout = 30 + (int)(w.rnd().nextFloat() * 60);
             } else {

@@ -1,8 +1,6 @@
 package com.stabilise.desktop;
 
 import com.badlogic.gdx.Files.FileType;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.stabilise.core.ResourcesRaw;
@@ -18,6 +16,7 @@ public class DesktopGame {
     }
     
     public static void startLwjgl2(String[] args) {
+        /*
     	LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.backgroundFPS = 5;
         config.foregroundFPS = 60;
@@ -32,6 +31,7 @@ public class DesktopGame {
         config.addIcon("icon32.png", FileType.Classpath);
         config.addIcon("icon16.png", FileType.Classpath);
         new LwjglApplication(new Stabilise(args).getListener(), config);
+        */
     }
     
     public static void startLwjgl3(String[] args) {

@@ -1,0 +1,314 @@
+
+atlasIngame.png
+size: 256,256
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+entity/enemy
+  rotate: false
+  xy: 7, 17
+  size: 8, 16
+  orig: 8, 16
+  offset: 0, 0
+  index: -1
+entity/fireball
+  rotate: false
+  xy: 137, 155
+  size: 16, 8
+  orig: 16, 8
+  offset: 0, 0
+  index: -1
+entity/portalClosed
+  rotate: false
+  xy: 1, 1
+  size: 4, 32
+  orig: 4, 32
+  offset: 0, 0
+  index: -1
+entity/portalOpen
+  rotate: false
+  xy: 131, 131
+  size: 4, 32
+  orig: 4, 32
+  offset: 0, 0
+  index: -1
+item/apple
+  rotate: false
+  xy: 7, 7
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+item/arrow
+  rotate: false
+  xy: 17, 25
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+item/sword
+  rotate: false
+  xy: 197, 145
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+particle/explosion
+  rotate: false
+  xy: 1, 35
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+particle/flame
+  rotate: false
+  xy: 175, 155
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+particle/smoke
+  rotate: false
+  xy: 205, 155
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+particle/strike
+  rotate: false
+  xy: 187, 135
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/bedrock
+  rotate: false
+  xy: 137, 145
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/break/break1
+  rotate: false
+  xy: 155, 155
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/break/break2
+  rotate: false
+  xy: 17, 15
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/break/break3
+  rotate: false
+  xy: 27, 25
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/break/break4
+  rotate: false
+  xy: 137, 135
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/break/break5
+  rotate: false
+  xy: 147, 145
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/break/break6
+  rotate: false
+  xy: 165, 155
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/break/break7
+  rotate: false
+  xy: 27, 15
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/break/break8
+  rotate: false
+  xy: 37, 25
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/chest
+  rotate: false
+  xy: 147, 135
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/dirt
+  rotate: false
+  xy: 157, 145
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/glass
+  rotate: false
+  xy: 37, 15
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/glowstone
+  rotate: false
+  xy: 47, 25
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/grass
+  rotate: false
+  xy: 157, 135
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/ice
+  rotate: false
+  xy: 167, 145
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/invisibleBedrock
+  rotate: false
+  xy: 185, 155
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/lava
+  rotate: false
+  xy: 47, 15
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/leaves
+  rotate: false
+  xy: 57, 25
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/mobSpawner
+  rotate: false
+  xy: 167, 135
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/oreCopper
+  rotate: false
+  xy: 177, 145
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/oreDiamond
+  rotate: false
+  xy: 195, 155
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/oreGold
+  rotate: false
+  xy: 57, 15
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/oreIron
+  rotate: false
+  xy: 67, 25
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/oreSilver
+  rotate: false
+  xy: 177, 135
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/planks
+  rotate: false
+  xy: 187, 145
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/stone
+  rotate: false
+  xy: 67, 15
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/stoneBrick
+  rotate: false
+  xy: 77, 25
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/torch
+  rotate: false
+  xy: 215, 155
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/void
+  rotate: false
+  xy: 77, 15
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/voidRock
+  rotate: false
+  xy: 87, 25
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/voidRockDense
+  rotate: false
+  xy: 197, 135
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/water
+  rotate: false
+  xy: 207, 145
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/wood
+  rotate: false
+  xy: 225, 155
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1

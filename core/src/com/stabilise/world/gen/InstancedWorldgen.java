@@ -1,5 +1,6 @@
 package com.stabilise.world.gen;
 
+import com.stabilise.entity.Position;
 import com.stabilise.util.Log;
 import com.stabilise.world.Region;
 import com.stabilise.world.WorldProvider;
@@ -16,6 +17,7 @@ public abstract class InstancedWorldgen implements IWorldGenerator {
     
     protected final WorldProvider w;
     protected final long seed;
+    protected final Position tmpPos = Position.create();
     
     
     /**
@@ -50,8 +52,9 @@ public abstract class InstancedWorldgen implements IWorldGenerator {
      * </pre>
      */
     protected void set(int x, int y, Tile t) {
-        w.setTileAt(x, y, t);
-        w.setWallAt(x, y, t);
+    	tmpPos.set(x, y).realign();
+        w.setTileAt(tmpPos, t);
+        w.setWallAt(tmpPos, t);
     }
     
     

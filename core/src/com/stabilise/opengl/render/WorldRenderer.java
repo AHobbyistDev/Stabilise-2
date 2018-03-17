@@ -39,7 +39,6 @@ import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.AbstractWorld;
-import com.stabilise.world.World;
 import com.stabilise.world.Slice;
 
 /**
@@ -64,7 +63,7 @@ public class WorldRenderer implements Renderer {
     /** Holds a reference to the world. */
     public final AbstractWorld world;
     /** The camera. */
-    public final GameCamera playerCamera;
+    public final GameCamera camObj;
     public final Entity player;
     public final PlayerController controller;
     
@@ -110,6 +109,7 @@ public class WorldRenderer implements Renderer {
     // Shape renderer for debug
     ShapeRenderer shapes;
     public boolean renderHitboxes = false;
+    public boolean renderSliceBorders = false;
     
     private final Vector2 vec = new Vector2();
     private final List<ParticleIndicator> indicators = new ArrayList<>();
@@ -134,7 +134,7 @@ public class WorldRenderer implements Renderer {
         this.world = world;
         
         this.player = player;
-        playerCamera = world.camera;
+        camObj = world.camera;
         this.controller = controller;
         
         tileRenderer = new TileRenderer(this);
@@ -262,10 +262,12 @@ public class WorldRenderer implements Renderer {
     }
     
     /**
-     * Gets the world coordinates over which the mouse is hovering.
+     * Gets the position of the cursor in the world. The returned Position will
+     * be {@link Position#realign() aligned}.
      */
-    public Vector2 mouseCoords() {
-        return viewport.unproject(vec.set(Gdx.input.getX(), Gdx.input.getY()));
+    public Position mouseCoords() {
+        Vector2 coords = viewport.unproject(vec.set(Gdx.input.getX(), Gdx.input.getY()));
+        return camObj.pos.copy().add(coords.x, coords.y).realign();
     }
     
     @Override
@@ -279,11 +281,12 @@ public class WorldRenderer implements Renderer {
         tileRenderer.update();
         
         profiler.next("camera"); // root.update.renderer.camera
-        playerCamera.update(world);
-        camera.position.set((float)playerCamera.x, (float)playerCamera.y, 0f);
-        camera.update();
-        batch.setProjectionMatrix(camera.combined);
-        shapes.setProjectionMatrix(camera.combined);
+        camObj.update(world);
+        // Updating camera matrix not needed anymore since we don't use global coords
+        //camera.position.set((float)playerCamera.pos.getGlobalX(), (float)playerCamera.pos.getGlobalY(), 0f);
+        //camera.update();
+        //batch.setProjectionMatrix(camera.combined);
+        //shapes.setProjectionMatrix(camera.combined);
         
         profiler.end(); // root.update.renderer
     }
@@ -337,12 +340,20 @@ public class WorldRenderer implements Renderer {
             shapes.begin(ShapeType.Line);
             shapes.setColor(Color.BLUE);
             world.getEntities().forEach(
-                    e -> renderAABB(e.aabb, (float)e.x, (float)e.y)
+                    e -> renderAABB(e.aabb, camObj.pos.diffX(e.pos), camObj.pos.diffY(e.pos))
             );
             shapes.setColor(Color.RED);
             world.getHitboxes().forEach(
-                    h -> renderShape(h.boundingBox, (float)h.x, (float)h.y)
+                    h -> renderShape(h.boundingBox, camObj.pos.diffX(h.pos), camObj.pos.diffY(h.pos))
             );
+            shapes.end();
+        }
+        
+        profiler.next("slideborders");
+        if(renderSliceBorders) {
+            shapes.begin(ShapeType.Line);
+            shapes.setColor(Color.YELLOW);
+            tileRenderer.renderSliceBorders(shapes);
             shapes.end();
         }
         
@@ -371,8 +382,8 @@ public class WorldRenderer implements Renderer {
     private void renderOn(TextureRegion tex, Entity e) {
         batch.draw(
                 tex, // region
-                (float)e.x + e.aabb.minX(), // x
-                (float)e.y + e.aabb.minY(), // y
+                camObj.pos.diffX(e.pos) + e.aabb.minX(), // x
+                camObj.pos.diffY(e.pos) + e.aabb.minY(), // y
                 e.aabb.width(), // width
                 e.aabb.height() // height
         );
@@ -411,8 +422,8 @@ public class WorldRenderer implements Renderer {
         */
         batch.draw(
                 texEnemy, // region
-                (float)e.x - (e.facingRight ? 0.5f : -0.5f), // x
-                (float)e.y, // y
+                camObj.pos.diffX(e.pos) - (e.facingRight ? 0.5f : -0.5f), // x
+                camObj.pos.diffY(e.pos), // y
                 0f, // originX
                 0f, // originY
                 1f, // width
@@ -451,8 +462,8 @@ public class WorldRenderer implements Renderer {
         */
         batch.draw(
                 texFireball, // region
-                (float)e.x - 0.75f, // x
-                (float)e.y - 0.25f, // y
+                camObj.pos.diffX(e.pos) - 0.75f, // x
+                camObj.pos.diffY(e.pos) - 0.25f, // y
                 0.75f, // originX
                 0.25f, // originY
                 1f, // width
@@ -480,7 +491,7 @@ public class WorldRenderer implements Renderer {
     public void renderPerson(Entity e, CPerson s) {
         personModel.setFlipped(!e.facingRight);
         personModel.setState(s.getState(), s.stateTicks);
-        personModel.render(batch, (float)e.x, (float)e.y);
+        personModel.render(batch, camObj.pos.diffX(e.pos), camObj.pos.diffY(e.pos));
     }
     
     public void renderPortal(Entity e, CPortal c) {
@@ -502,7 +513,7 @@ public class WorldRenderer implements Renderer {
         updateMatrices(true);
         for(ParticleIndicator p : indicators) {
             BitmapFont fnt = p.orange ? indicatorFontOrange : indicatorFontRed;
-            hudViewport.unproject(viewport.project(vec.set((float)p.x, (float)p.y)));
+            hudViewport.unproject(viewport.project(vec.set(camObj.pos.diffX(p.pos), camObj.pos.diffY(p.pos))));
             fnt.draw(batch, p.text, vec.x - 25, -vec.y, 50, Align.center, false);
         }
         indicators.clear();
@@ -538,8 +549,8 @@ public class WorldRenderer implements Renderer {
         */
         batch.draw(
                 texExplosion, // region
-                (float)p.x - 0.5f, // x
-                (float)p.y - 0.5f, // y
+                camObj.pos.diffX(p.pos) - 0.5f, // x
+                camObj.pos.diffY(p.pos) - 0.5f, // y
                 0.5f, // originX
                 0.5f, // originY
                 1f, // width
@@ -553,15 +564,13 @@ public class WorldRenderer implements Renderer {
     
     /**
      * Renders a flame particle.
-     * 
-     * @param p The flame particle.
      */
     public void renderFlame(ParticleFlame p) {
         batch.setColor(1f, 1f, 1f, p.opacity);
         batch.draw(
                 texFlame, // region
-                (float)p.x - 0.125f, // x
-                (float)p.y - 0.125f, // y
+                camObj.pos.diffX(p.pos) - 0.125f, // x
+                camObj.pos.diffY(p.pos) - 0.125f, // y
                 0.25f, // originX
                 0.25f, // originY
                 0.25f, // width
@@ -575,15 +584,13 @@ public class WorldRenderer implements Renderer {
     
     /**
      * Renders a smoke particle.
-     * 
-     * @param p The smoke particle.
      */
     public void renderSmoke(ParticleSmoke p) {
         batch.setColor(1f, 1f, 1f, p.opacity);
         batch.draw(
                 texSmoke, // region
-                (float)p.x - 0.25f, // x
-                (float)p.y - 0.25f, // y
+                camObj.pos.diffX(p.pos) - 0.25f, // x
+                camObj.pos.diffY(p.pos) - 0.25f, // y
                 0.25f, // originX
                 0.25f, // originY
                 0.25f, // width
@@ -598,10 +605,10 @@ public class WorldRenderer implements Renderer {
     private void renderCursorItem() {
         batch.setColor(1f, 1f, 1f, 0.5f);
         TextureRegion r = tileRenderer.tiles[controller.tileID];
-        controller.doInRadius(this, (x,y) -> batch.draw(
+        controller.doInRadius(this, (pos) -> batch.draw(
                 r, // region
-                World.tileCoordFreeToTileCoordFixed(x), // x
-                World.tileCoordFreeToTileCoordFixed(y), // y
+                camObj.pos.diffX(pos), // x
+                camObj.pos.diffY(pos), // y
                 1f, // width
                 1f // height
         ));

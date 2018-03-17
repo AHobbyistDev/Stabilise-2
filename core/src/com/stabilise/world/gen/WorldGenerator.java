@@ -179,8 +179,7 @@ public final class WorldGenerator {
                 
                 GenProvider prov = new GenProvider(world, r);
                 // Generate the region, as per the generators
-                for(IWorldGenerator generator : generators)
-                    generator.generate(r, prov, seed);
+                generators.forEach(g -> g.generate(r, prov, seed));
             }
             
             // After normal generation processes have been completed, add any

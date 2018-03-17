@@ -1,6 +1,8 @@
 package com.stabilise.entity.particle;
 
-import com.stabilise.entity.FreeGameObject;
+import java.util.function.Supplier;
+
+import com.stabilise.entity.GameObject;
 import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.collect.registry.TypeFactory;
 import com.stabilise.world.World;
@@ -13,20 +15,23 @@ import com.stabilise.world.World;
  * particles may be initialised {@link TheUnsafe unsafely} at runtime);
  * instead, any initialisation code should be performed by {@link #reset()}.
  */
-public abstract class Particle extends FreeGameObject {
+public abstract class Particle extends GameObject {
     
     public static final TypeFactory<Particle> REGISTRY = new TypeFactory<>(
             new RegistryParams("ParticleRegistry", 8));
     
     static {
-        register(0, ParticleFlame.class);
-        register(1, ParticleSmoke.class);
-        register(2, ParticleIndicator.class);
-        register(3, ParticleExplosion.class);
+        register(0, ParticleFlame.class, ParticleFlame::new);
+        register(1, ParticleSmoke.class, ParticleSmoke::new);
+        register(2, ParticleIndicator.class, ParticleIndicator::new);
+        register(3, ParticleExplosion.class, ParticleExplosion::new);
     }
     
-    private static void register(int id, Class<? extends Particle> clazz) {
-        REGISTRY.registerUnsafe(id, clazz);
+    private static void register(int id, Class<? extends Particle> clazz, Supplier<Particle> constructor) {
+        REGISTRY.register(id, clazz, constructor);
+        // Can't use registerUnsafe anymore since particles have a Position
+        // object which needs to be initialised.
+        //REGISTRY.registerUnsafe(id, clazz);
     }
     
     /** The age of the particle, in ticks. */

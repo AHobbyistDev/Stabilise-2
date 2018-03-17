@@ -1,6 +1,7 @@
 package com.stabilise.entity.component.effect;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.util.maths.Maths;
@@ -30,7 +31,8 @@ public class EffectFireTrail extends ParticleEffect<ParticleFlame> {
         
         //particleSrc.createAt(e.x, e.y); // one particle per tick for now
         //particleSrc.createBurst(2, e.x, e.y, 0.2f, 1.0f, 0f, Maths.TAUf);
-        particleSrc.createBurst(5, e.x - 0.2, e.x + 0.2, e.y - 0.2, e.y + 0.2, 0.2f, 1.0f, 0f, Maths.TAUf);
+        Position dummyPos = particleSrc.dummyPos;
+        particleSrc.createBurst(5, dummyPos.set(e.pos, -0.2f, -0.2f), 0.4f, 0.4f, 0.2f, 1.0f, 0f, Maths.TAUf);
     }
     
     @Override

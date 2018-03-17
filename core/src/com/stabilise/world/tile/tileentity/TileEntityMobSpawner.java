@@ -2,6 +2,7 @@ package com.stabilise.world.tile.tileentity;
 
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.entity.particle.ParticleSource;
@@ -23,37 +24,20 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     private static final int MAX_SPAWNS = 2;
     
     private int ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS;
-    private double xPos, yPos;
+    private Position centrePos = Position.create();
     
     private ParticleSource<?> fireGen;
     private ParticleSource<?> smokeGen;
     
     
-    /**
-     * Creates a new mob spawner tile entity.
-     * 
-     * @param x The x-coordinate of the tile entity, in tile-lengths.
-     * @param y The y-coordinate of the tile entity, in tile-lengths.
-     */
-    public TileEntityMobSpawner(int x, int y) {
-        super(x, y);
-        init();
-    }
-    
-    /**
-     * Sets up the mob spawner.
-     */
-    private void init() {
-        xPos = x + 0.5;
-        yPos = y + 0.5;
-    }
-    
     @Override
     public void update(World w) {
         if(playerInRange(w)) {
+            // Ugly way of lazily initialising...
             if(fireGen == null) {
                 fireGen = w.getParticleManager().getSource(ParticleFlame.class);
                 smokeGen = w.getParticleManager().getSource(ParticleSmoke.class);
+                centrePos.set(pos).clampToTile().add(0.5f, 0.5f); // TODO: should be set sooner
             }
             
             if(--ticksUntilNextSpawn == 0) {
@@ -76,9 +60,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      */
     private boolean playerInRange(World world) {
         for(Entity p : world.getPlayers()) {
-            double dx = xPos - p.x;
-            double dy = yPos - p.y;
-            if(dx*dx + dy*dy <= ACTIVATION_RANGE_SQUARED)
+            if(centrePos.diffSq(p.pos) <= ACTIVATION_RANGE_SQUARED)
                 return true;
         }
         return false;
@@ -92,7 +74,8 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      */
     private boolean trySpawn(World world) {
         Entity e = Entities.enemy();
-        world.addEntity(e, xPos, yPos+1);
+        e.pos.set(pos).clampToTile().add(0f, 1f);
+        world.addEntity(e);
         
         for(int i = 0; i < 10; i++) {
             spawnParticle(world);
@@ -106,7 +89,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      * Spawns a flame particle on the spawner.
      */
     private void spawnParticle(World world) {
-        fireGen.createBurstOnTile(1, x, y, 0.02f, 0.07f,
+        fireGen.createBurstOnTile(1, pos, 0.02f, 0.07f,
                 (float)Math.PI / 6.0f, (float)Math.PI * 5.0f / 6.0f);
     }
     
@@ -120,13 +103,13 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     }
     
     @Override
-    public void handleAdd(World world, int x, int y) {
-        
+    public void handleAdd(World world, Position pos) {
+        // nothing to see here, move along
     }
     
     @Override
-    public void handleRemove(World world, int x, int y) {
-        
+    public void handleRemove(World world, Position pos) {
+        // nothing to see here, move along
     }
     
     @Override

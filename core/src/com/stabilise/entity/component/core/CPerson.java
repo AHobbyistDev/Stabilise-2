@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.core.Constants;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.entity.component.effect.EffectFire;
 import com.stabilise.entity.component.effect.EffectFireTrail;
 import com.stabilise.entity.event.ETileCollision;
@@ -14,6 +15,7 @@ import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.Direction;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Polygon;
@@ -249,7 +251,7 @@ public class CPerson extends BaseMob {
                     h.hits = -1;
                     h.force = ATTACK_SIDE_GROUND_FORCE;
                     h.fx = e.facingRight ? 1.0f : -1.0f;
-                    w.addHitbox(h, e.x, e.y);
+                    w.addHitbox(h, e.pos);
                 } else if(stateTicks == ATTACK_SIDE_GROUND_FRAME_3_BEGIN) {
                     Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_SIDE_GROUND_HITBOX_2
@@ -257,7 +259,7 @@ public class CPerson extends BaseMob {
                     h.hits = -1;
                     h.force = ATTACK_SIDE_GROUND_FORCE;
                     h.fx = e.facingRight ? -1.0f : 1.0f;
-                    w.addHitbox(h, e.x, e.y);
+                    w.addHitbox(h, e.pos);
                 }
                 break;
             case ATTACK_UP_GROUND:
@@ -271,7 +273,7 @@ public class CPerson extends BaseMob {
                     h.fy = 1.0f;
                     h.persistent = true;
                     h.persistenceTimer = ATTACK_UP_GROUND_HITBOX_DURATION;
-                    w.addHitbox(h, e.x, e.y);
+                    w.addHitbox(h, e.pos);
                 }
                 break;
             case ATTACK_DOWN_GROUND:
@@ -283,7 +285,7 @@ public class CPerson extends BaseMob {
                     h.hits = -1;
                     h.force = ATTACK_DOWN_GROUND_FORCE;
                     h.fx = e.facingRight ? 1.0f : -1.0f;
-                    w.addHitbox(h, e.x, e.y);
+                    w.addHitbox(h, e.pos);
                 }
                 break;
             case ATTACK_SIDE_AIR:
@@ -295,7 +297,7 @@ public class CPerson extends BaseMob {
                     h.hits = -1;
                     h.force = 0.3f;
                     h.fx = e.facingRight ? 1.0f : -1.0f;
-                    w.addHitbox(h, e.x, e.y);
+                    w.addHitbox(h, e.pos);
                 } else if(stateTicks == ATTACK_SIDE_AIR_FRAME_3_BEGIN) {
                     Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_SIDE_AIR_HITBOX_2
@@ -303,7 +305,7 @@ public class CPerson extends BaseMob {
                     h.hits = -1;
                     h.force = 0.3f;
                     h.fx = e.facingRight ? 1.0f : -1.0f;
-                    w.addHitbox(h, e.x, e.y);
+                    w.addHitbox(h, e.pos);
                 }
                 break;
             case ATTACK_UP_AIR:
@@ -316,7 +318,7 @@ public class CPerson extends BaseMob {
                     h1.force = 0.3f;
                     //h1.fx = e.facingRight ? 0.86f : -0.85f;
                     h1.fy = 1.0f;
-                    w.addHitbox(h1, e.x, e.y);
+                    w.addHitbox(h1, e.pos);
                     
                     Hitbox h2 = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_UP_AIR_HITBOX_1_2
@@ -325,7 +327,7 @@ public class CPerson extends BaseMob {
                     h2.force = 0.3f;
                     //h2.fx = e.facingRight ? 0.5f : -0.5f;
                     h2.fy = 1.0f;
-                    w.addHitbox(h2, e.x, e.y);
+                    w.addHitbox(h2, e.pos);
                 } else if(stateTicks == ATTACK_UP_AIR_FRAME_3_BEGIN) {
                     Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_UP_AIR_HITBOX_2
@@ -333,7 +335,7 @@ public class CPerson extends BaseMob {
                     h.hits = -1;
                     h.force = 0.3f;
                     h.fy = 1.0f;
-                    w.addHitbox(h, e.x, e.y);
+                    w.addHitbox(h, e.pos);
                 }
                 break;
             case ATTACK_DOWN_AIR:
@@ -345,7 +347,7 @@ public class CPerson extends BaseMob {
                     h1.hits = -1;
                     h1.force = 0.3f;
                     h1.fy = -1.0f;
-                    w.addHitbox(h1, e.x, e.y);
+                    w.addHitbox(h1, e.pos);
                     
                     Hitbox h2 = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_DOWN_AIR_HITBOX_1_2
@@ -353,7 +355,7 @@ public class CPerson extends BaseMob {
                     h2.hits = -1;
                     h2.force = 0.3f;
                     h2.fy = -1.0f;
-                    w.addHitbox(h2, e.x, e.y);
+                    w.addHitbox(h2, e.pos);
                 } else if(stateTicks == ATTACK_DOWN_AIR_FRAME_3_BEGIN) {
                     Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_DOWN_AIR_HITBOX_2
@@ -361,7 +363,7 @@ public class CPerson extends BaseMob {
                     h.hits = -1;
                     h.force = 0.3f;
                     h.fy = -1.0f;
-                    w.addHitbox(h, e.x, e.y);
+                    w.addHitbox(h, e.pos);
                 }
                 break;
             case SPECIAL_SIDE_GROUND:
@@ -383,7 +385,7 @@ public class CPerson extends BaseMob {
                         h1.fx = 0.5f;
                         h1.fy = 0.7f;
                         h1.effects = tgt -> tgt.addComponent(new EffectFire(60*7, 3));
-                        w.addHitbox(h1, e.x, e.y);
+                        w.addHitbox(h1, e.pos);
                         
                         Hitbox h2 = new Hitbox(e.id(), SPECIAL_DOWN_GROUND_HITBOX_2,
                                 w.rnd().nextInt(16)+5);
@@ -392,13 +394,13 @@ public class CPerson extends BaseMob {
                         h2.fx = -0.5f;
                         h2.fy = 0.7f;
                         h2.effects = tgt -> tgt.addComponent(new EffectFire(60*7, 3));
-                        w.addHitbox(h2, e.x, e.y);
+                        w.addHitbox(h2, e.pos);
                         
-                        fireParticles.createBurst(300, e.x, e.y, 0.1f, 5f, 0, (float)Math.PI);
-                        w.getParticleManager().getSource(ParticleExplosion.class).createAt(e.x, e.y);
+                        fireParticles.createBurst(300, e.pos, 0.1f, 5f, 0, (float)Math.PI);
+                        w.getParticleManager().getSource(ParticleExplosion.class).createAt(e.pos);
                         w.getCamera().shake(0.1f, 30);
                     } else {
-                        fireParticles.createBurst(100, e.x, e.y, 0.1f, 5f, 0, (float)Math.PI);
+                        fireParticles.createBurst(100, e.pos, 0.1f, 5f, 0, (float)Math.PI);
                     }
                 }
                 break;
@@ -464,34 +466,33 @@ public class CPerson extends BaseMob {
             Entity f = Entities.fireball(e.id(), 5 + w.rnd().nextInt(5));
             
             if(e.facingRight) {
-                f.x = e.x + originPoint.x;
+                f.pos.set(e.pos, originPoint.x, originPoint.y);
                 f.dx = 30f + w.rnd().nextFloat() * 10f;
             } else {
-                f.x = e.x - originPoint.x;
+                f.pos.set(e.pos, -originPoint.x, originPoint.y);
                 f.dx = -30f - w.rnd().nextFloat() * 10f;
             }
             
-            f.y = e.y + originPoint.y;
             f.dy = 1.0f + w.rnd().nextFloat() * 1.8f;
             
             f.facingRight = e.facingRight;
             
             w.addEntity(f);
         } else {
-            double minAngle, maxAngle, px;
+            float minAngle, maxAngle;
+            Position dummyPos = fireParticles.dummyPos;
             
             if(e.facingRight) {
-                px = e.x + originPoint.x;
-                minAngle = -Math.PI / 6.0D;
-                maxAngle = Math.PI / 6.0D;
+                dummyPos.set(e.pos, originPoint.x, originPoint.y);
+                minAngle = -Maths.PIf / 6;
+                maxAngle = Maths.PIf / 6;
             } else {
-                px = e.x - originPoint.x;
-                minAngle = Math.PI * 5.0D / 6.0D;
-                maxAngle = Math.PI * 7.0D / 7.0D;
+                dummyPos.set(e.pos, -originPoint.x, originPoint.y);
+                minAngle = Maths.PIf * 5/6;
+                maxAngle = Maths.PIf * 7/6;
             }
             
-            fireParticles.createBurst(6, px, e.y + originPoint.y,
-                    1f, 5f, (float)minAngle, (float)maxAngle);
+            fireParticles.createBurst(6, dummyPos, 1f, 5f, minAngle, maxAngle);
         }
     }
     
@@ -502,7 +503,7 @@ public class CPerson extends BaseMob {
      * @param originPoint The point from which the storm is to originate.
      */
     private void fireballStorm(World w, Entity e, int manaCost, Vec2 originPoint) {
-        double px = e.facingRight ? e.x + originPoint.x : e.x - originPoint.x;
+        float px = e.facingRight ? originPoint.x : -originPoint.x;
         
         if(useMana(manaCost)) {
             int max = 30 + w.rnd().nextInt(11);
@@ -514,17 +515,18 @@ public class CPerson extends BaseMob {
                 f.dx = right ? MathUtils.cos(angle) * velocity : -MathUtils.cos(angle) * velocity;
                 f.dy = MathUtils.sin(angle)*velocity;
                 f.facingRight = right;
-                w.addEntity(f, px, e.y + originPoint.y);
+                f.pos.set(e.pos, px, originPoint.y);
+                w.addEntity(f);
             }
         } else {
-            fireParticles.createBurst(12, px, e.y + originPoint.y,
+            Position dummyPos = fireParticles.dummyPos;
+            fireParticles.createBurst(12, dummyPos.set(e.pos, px, originPoint.y),
                     1f, 5f, MathUtils.PI / 3f, MathUtils.PI * 0.6666f);
         }
     }
     
     private void fireballRain(World w, Entity e, int manaCost, Vec2 originPoint) {
-        double px = e.facingRight ? e.x + originPoint.x : e.x - originPoint.x;
-        double py = e.y + originPoint.y;
+        float px = e.facingRight ? originPoint.x : -originPoint.x;
         
         if(useMana(manaCost)) {
             int n = 3 + w.rnd().nextInt(4);
@@ -539,17 +541,20 @@ public class CPerson extends BaseMob {
                 Entity f = Entities.fireball(e.id(), 5 + w.rnd().nextInt(10));
                 f.dx = MathUtils.cos(a) * v;
                 f.dy = MathUtils.sin(a)*v;
-                w.addEntity(f, px, py);
+                f.pos.set(e.pos, px, originPoint.y);
+                w.addEntity(f);
             }
         } else {
-            fireParticles.createBurst(12, px, py, 
+            Position dummyPos = fireParticles.dummyPos;
+            fireParticles.createBurst(12, dummyPos.set(e.pos, px, originPoint.y), 
                     1f, 5f, (1.5f - (1f/6))*MathUtils.PI, (1.5f + (1f/6))*MathUtils.PI);
         }
     }
     
     @Override
     protected void onVerticalCollision(Entity e, ETileCollision ev) {
-        // TODO: OVERRIDING THIS IS NOT SMART
+        // TODO: OVERRIDING THIS IS NOT SMART (there's a lot of duplicated code,
+        // and it fucked up the current crappy double jump implementation).
         if(ev.dv < 0 && !wasOnGround) {
             jumpCount = 0;
             if(state.priority != StatePriority.UNOVERRIDEABLE) {

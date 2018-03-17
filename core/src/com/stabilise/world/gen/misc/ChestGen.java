@@ -8,6 +8,7 @@ import static com.stabilise.world.tile.Tiles.stone;
 
 import java.util.Random;
 
+import com.stabilise.entity.Position;
 import com.stabilise.item.Items;
 import com.stabilise.world.Region;
 import com.stabilise.world.WorldProvider;
@@ -24,15 +25,17 @@ public class ChestGen implements IWorldGenerator {
     public void generate(Region r, WorldProvider w, long seed) {
         long mix1 = 0x225bc9168ac6c9efL;
         final Random rnd = new Random(seed*mix1);
+        Position tmp = Position.create();
+        Position tmp2 = Position.create();
         
         r.forEachSlice(s -> {
             int x = s.x*SLICE_SIZE + rnd.nextInt(SLICE_SIZE);
             int y = s.y*SLICE_SIZE + rnd.nextInt(SLICE_SIZE - 1);
-            int id = w.getTileIDAt(x, y);
+            int id = w.getTileIDAt(tmp.set(x, y).realign());
             if((id == stone.getID() || id == grass.getID()) &&
-                        w.getTileIDAt(x, y+1) == air.getID()) {
-                w.setTileAt(x, y, chest);
-                TileEntityChest te = (TileEntityChest)w.getTileEntityAt(x, y);
+                        w.getTileIDAt(tmp2.set(x, y+1).realign()) == air.getID()) {
+                w.setTileAt(tmp, chest);
+                TileEntityChest te = (TileEntityChest)w.getTileEntityAt(tmp);
                 te.items.addItem(Items.APPLE, rnd.nextInt(7)+1);
                 te.items.addItem(Items.SWORD, rnd.nextInt(7)+1);
                 te.items.addItem(Items.ARROW, rnd.nextInt(7)+1);

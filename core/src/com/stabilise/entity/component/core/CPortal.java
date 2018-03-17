@@ -3,6 +3,7 @@ package com.stabilise.entity.component.core;
 import com.badlogic.gdx.math.Vector2;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
@@ -11,6 +12,10 @@ import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 
 
+/**
+ * Extremely crappy pre-placeholder portal implementation. Absolutely nothing
+ * like the (hopefully) intended final product.
+ */
 public class CPortal extends CCore {
     
     public static final Vector2 LEFT = new Vector2(-1, 0);
@@ -24,6 +29,7 @@ public class CPortal extends CCore {
     }
     
     private static final AABB AABB = new AABB(-0.25f, 0f, 0.5f, 2f);
+    private static final Position SEND_TO_POS = Position.create(0, 0, 8f, 8f);
     
     private String pairedDimension;
     @SuppressWarnings("unused")
@@ -58,7 +64,7 @@ public class CPortal extends CCore {
                     CPortal otherCore = (CPortal)otherEnd.core;
                     otherCore.direction = new Vector2(-direction.x, -direction.y);
                     otherCore.state = State.OPEN;
-                    w2.addEntity(otherEnd, 8, 8);
+                    w2.addEntity(otherEnd, Position.create(0, 0, 8f, 8f));
                     
                     otherCore.pairedPortalID = e.id();
                     pairedPortalID = otherEnd.id();
@@ -76,8 +82,8 @@ public class CPortal extends CCore {
         
         w.getEntities().forEach(e2 -> {
             if(!(e2.core instanceof CPortal)) {
-                if(e2.core.getAABB().intersects(getAABB(), (float)(e2.x-e.x), (float)(e2.y-e.y))) {
-                    w.multiverse().sendToDimension(w2, pairedDimension, e2, 8, 8);
+                if(e2.core.getAABB().intersects(getAABB(), e.pos.diffX(e2.pos), e.pos.diffY(e2.pos))) {
+                    w.multiverse().sendToDimension(w2, pairedDimension, e2, SEND_TO_POS);
                 }
             }
         });

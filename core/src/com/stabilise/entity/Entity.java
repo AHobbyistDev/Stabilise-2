@@ -16,7 +16,7 @@ import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
 
-public class Entity extends FreeGameObject {
+public class Entity extends GameObject {
     
     private      long        id;
     public       long        age;
@@ -70,6 +70,8 @@ public class Entity extends FreeGameObject {
         world.profiler().next("physics");
         physics.update(world, this);
         world.profiler().end();
+        
+        this.pos.realign(); // TODO: temporary?
     }
     
     @Override

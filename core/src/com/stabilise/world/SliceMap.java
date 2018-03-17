@@ -63,8 +63,8 @@ public class SliceMap {
      * loaded, and which need to be unloaded.
      */
     public void update() {
-        int sliceX = target.getSliceX();
-        int sliceY = target.getSliceY();
+        int sliceX = target.pos.getSliceX();
+        int sliceY = target.pos.getSliceY();
         
         // If the target hasn't moved slices, nothing needs to be changed
         if(centreX == sliceX && centreY == sliceY)
@@ -202,8 +202,8 @@ public class SliceMap {
      * Loads the slices which should be loaded about the target.
      */
     private void reload() {
-        centreX = target.getSliceX();
-        centreY = target.getSliceY();
+        centreX = target.pos.getSliceX();
+        centreY = target.pos.getSliceY();
         minSliceX = centreX - LOADED_SLICE_RADIUS;
         maxSliceX = centreX + LOADED_SLICE_RADIUS;
         minSliceY = centreY - LOADED_SLICE_RADIUS;

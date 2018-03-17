@@ -393,7 +393,7 @@ public abstract class BaseMob extends CCore {
         hasTint = true;
         //tintStrength = 1.0f;
         
-        ParticleIndicator p = srcDmgIndicator.createAt(e.x, e.y+e.aabb.maxY());
+        ParticleIndicator p = srcDmgIndicator.createAt(srcDmgIndicator.dummyPos.set(e.pos, 0f, e.aabb.maxY()));
         p.text = String.valueOf(src.damage());
         p.orange = src.damage() == 0;
         
@@ -429,7 +429,7 @@ public abstract class BaseMob extends CCore {
     
     protected void dropItem(World w, Entity e, ItemStack stack, float chance) {
         if(w.rnd().nextFloat() < chance)
-            w.addEntity(Entities.item(w, stack), e.x, e.y);
+            w.addEntity(Entities.item(w, stack), e.pos);
     }
     
     /**

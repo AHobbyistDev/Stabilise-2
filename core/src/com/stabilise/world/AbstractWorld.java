@@ -10,6 +10,7 @@ import com.stabilise.core.Constants;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.GameCamera;
 import com.stabilise.entity.GameObject;
+import com.stabilise.entity.Position;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.entity.particle.ParticleManager;
@@ -23,7 +24,6 @@ import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.collect.SimpleList;
 import com.stabilise.util.concurrent.ClearingQueue;
-import com.stabilise.util.maths.Maths;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -274,8 +274,8 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
-    public void sendToDimension(String dimension, Entity e, double x, double y) {
-        multiverse.sendToDimension(this, dimension, e, x, y);
+    public void sendToDimension(String dimension, Entity e, Position pos) {
+        multiverse.sendToDimension(this, dimension, e, pos);
     }
     
     // ==========Collection getters==========
@@ -402,43 +402,42 @@ public abstract class AbstractWorld implements World {
      * Attempts to spawn a mob at a given location.
      * 
      * @param mob The mob.
-     * @param x The x-coordinate at which to attempt to spawn the mob, in
-     * tile-lengths.
-     * @param y The y-coordinate at which to attempt to spawn the mob, in
-     * tile-lengths.
+     * @param pos The position at which to place the mob.
      */
-    public void spawnMob(Entity mob, double x, double y) {
+    public void spawnMob(Entity mob, Position pos) {
+    	this.log.postWarning("Attempted to call spawnMob (is NYI for now out of laziness)");
+    	/*
         if(hostileMobCount >= HOSTILE_MOB_CAP)
             return;
         
         // For now, mobs must spawn in a radius from a player in the
         // bounds of 32 <= r <= 128
         boolean inRange = false;        // In range of at least 1 player
-        double dx, dy, dist2;
         for(Entity p : players.values()) {
-            dx = p.x - x;
-            dy = p.y - y;
-            dist2 = dx*dx + dy*dy;
+            float dist2 = pos.diffSq(p.pos);
             
-            if(dist2 <= 1024D)//32*32
+            if(dist2 <= 1024f)//32*32
                 return;
-            else if(dist2 <= 16384D)//128*128
+            else if(dist2 <= 16384f)//128*128
                 inRange = true;
         }
         if(!inRange)
             return;
         
-        int minX = Maths.floor(x + mob.aabb.minX());
-        int maxX = Maths.ceil(x + mob.aabb.maxX());
-        int minY = Maths.floor(y + mob.aabb.minY());
-        int maxY = Maths.ceil(y + mob.aabb.maxY());
+        // TODO: inelegant using globals
+        int minX = Maths.floor(pos.getGlobalX() + mob.aabb.minX());
+        int maxX = Maths.ceil(pos.getGlobalX() + mob.aabb.maxX());
+        int minY = Maths.floor(pos.getGlobalY() + mob.aabb.minY());
+        int maxY = Maths.ceil(pos.getGlobalY() + mob.aabb.maxY());
         
         // Check to see if the mob would be spawning in any tiles
         for(int tileX = minX; tileX < maxX; tileX++)
             for(int tileY = minY; tileY < maxY; tileY++)
                 if(getTileAt(tileX, tileY).isSolid())
                     return;
-        addEntity(mob, x, y);
+        mob.pos.set(pos);
+        addEntity(mob);
+        */
     }
     
     /**

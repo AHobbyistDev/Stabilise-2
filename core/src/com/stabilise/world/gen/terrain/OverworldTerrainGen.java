@@ -70,6 +70,8 @@ public class OverworldTerrainGen extends InstancedWorldgen {
         
         for(int y = 0, ty = offsetY; y < REGION_SIZE_IN_TILES; y++, ty++) {
             for(int x = 0, tx = offsetX; x < REGION_SIZE_IN_TILES; x++, tx++) {
+            	tmpPos.set(tx, ty).realign();
+            	
                 isCave = false;
                 float noise = noiseVec[x]--;
                 float cave = caveNoise.noise(tx, ty);
@@ -90,19 +92,19 @@ public class OverworldTerrainGen extends InstancedWorldgen {
                 else if(noise <= -1 || (cave > caveMask - 0.05f && cave < caveMask + 0.05f)) {
                 //else if(noise <= 0 || caveNoise > 0.8D)
                     isCave = true;
-                    w.setTileAt(tx, ty, air);
+                    w.setTileAt(tmpPos, air);
                 }
                 
                 if(noise <= -1) {}
                 else if(noise <= 0) {
                     if(rnd.nextInt(10) == 0) {
-                        w.setTileAt(tx, ty, torch);
+                        w.setTileAt(tmpPos.set(tx, ty).realign(), torch);
                     } else
                         set(tx, ty, air);
                 } else if(noise <= 1) {
                     if(!isCave)
-                        w.setTileAt(tx, ty, grass);
-                    w.setWallAt(tx, ty, dirt);
+                        w.setTileAt(tmpPos, grass);
+                    w.setWallAt(tmpPos, dirt);
                 } else if(noise <= 5.75f)
                     set(tx, ty, dirt);
                 else if(noise <= 200f)
@@ -118,9 +120,10 @@ public class OverworldTerrainGen extends InstancedWorldgen {
     
     @Override
     protected void set(int x, int y, Tile t) {
+    	tmpPos.set(x, y).realign();
         if(!isCave)
-            w.setTileAt(x, y, t);
-        w.setWallAt(x, y, t);
+            w.setTileAt(tmpPos, t);
+        w.setWallAt(tmpPos, t);
     }
     
     /**

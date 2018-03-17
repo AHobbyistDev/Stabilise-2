@@ -1,10 +1,13 @@
 package com.stabilise.opengl.render;
 
 import static com.stabilise.world.Slice.SLICE_SIZE;
+import static com.stabilise.world.Slice.SLICE_SIZE_MINUS_ONE;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.stabilise.world.World;
+import com.stabilise.entity.Position;
 import com.stabilise.world.Slice;
 import com.stabilise.world.tile.Tile;
 
@@ -28,6 +31,10 @@ public class TileRenderer implements Renderer {
     
     TextureRegion[] tiles;
     private float[] lightLevels;
+    
+    
+    private Position minCorner = Position.create();
+    private Position maxCorner = Position.create();
     
     
     /**
@@ -63,25 +70,33 @@ public class TileRenderer implements Renderer {
     
     @Override
     public void resize(int width, int height) {
-        // le nothing
+        // nothing
     }
     
     @Override
     public void update() {
-        // le nothing
+        // nothing
     }
 
     @Override
     public void render() {
         //worldRenderer.batch.disableBlending();
         slicesRendered = 0;
-        for(int c = wr.playerCamera.sliceX - wr.slicesHorizontal;
-                c <= wr.playerCamera.sliceX + wr.slicesHorizontal;
-                c++)
-            for(int r = wr.playerCamera.sliceY - wr.slicesVertical;
-                    r <= wr.playerCamera.sliceY + wr.slicesVertical;
-                    r++)
+        Position camPos = wr.camObj.pos;
+        minCorner.set(camPos, -wr.tilesHorizontal, -wr.tilesVertical).realign().clampToTile();
+        maxCorner.set(camPos, wr.tilesHorizontal, wr.tilesVertical + 1).realign().clampToTile();
+        int camSliceX = camPos.getSliceX();
+        int camSliceY = camPos.getSliceY();
+        for(int c = camSliceX - wr.slicesHorizontal;
+                c <= camSliceX + wr.slicesHorizontal;
+                c++) {
+            for(int r = camSliceY - wr.slicesVertical;
+                    r <= camSliceY + wr.slicesVertical;
+                    r++) {
                 renderSlice(c, r);
+                slicesRendered++;
+            }
+        }
         //worldRenderer.batch.enableBlending();
         //System.out.println(slicesRendered + " slices rendered");
     }
@@ -98,47 +113,93 @@ public class TileRenderer implements Renderer {
         if(slice.isDummy())
             return;
         
-        slicesRendered++;
+        Position camPos = wr.camObj.pos;
         
-        int xMin = Math.max(x    *SLICE_SIZE, camX() - wr.tilesHorizontal    );
-        int xMax = Math.min((x+1)*SLICE_SIZE, camX() + wr.tilesHorizontal + 1);
-        int yMin = Math.max(y    *SLICE_SIZE, camY() - wr.tilesVertical      );
-        int yMax = Math.min((y+1)*SLICE_SIZE, camY() + wr.tilesVertical   + 1);
+        // Relative to the camera, where the origin of this slice is
+        float sliceOriginX = camPos.diffX(x, 0f);
+        float sliceOriginY = camPos.diffY(y, 0f);
         
-        // These two are to adjust the 0 index if we don't render all of the slice
-        int rMin = Math.max(0, yMin - y*SLICE_SIZE);
-        int cMin = Math.max(0, xMin - x*SLICE_SIZE);
+        // Casting the corners' localX/Y to int is fine since we already
+        // clamped minCorner and maxCorner in render().
+        int xMin = x == minCorner.getSliceX() ? (int)minCorner.getLocalX() : 0;
+        int yMin = y == minCorner.getSliceY() ? (int)minCorner.getLocalY() : 0;
+        int xMax = x == maxCorner.getSliceX() ? (int)maxCorner.getLocalX() : SLICE_SIZE_MINUS_ONE;
+        int yMax = y == maxCorner.getSliceY() ? (int)maxCorner.getLocalY() : SLICE_SIZE_MINUS_ONE;
         
-        //wr.batch.setColor(lightLevels[2]); // walls have light level 2 for now
+        // Camera x/y at which to place the tile.
+        float cx, cy;
         
-        for(int r = rMin, ty = yMin; r < SLICE_SIZE && ty < yMax; r++, ty++) {
-            for(int c = cMin, tx = xMin; c < SLICE_SIZE && tx < xMax; c++, tx++) {
-                int id = slice.getWallIDAt(c, r);
+        // Draw background tiles
+        cy = sliceOriginY + yMin;
+        for(int ty = yMin; ty <= yMax; ty++) {
+            cx = sliceOriginX + xMin;
+            for(int tx = xMin; tx <= xMax; tx++) {
+                int id = slice.getWallIDAt(tx, ty);
                 if(id != 0) { // i.e. not air
                     // Temporary wall lighting; 2 + light/2
-                    wr.batch.setColor(lightLevels[1 + slice.getLightAt(c, r)/4]);
-                    wr.batch.draw(tiles[id], tx, ty, 1f, 1f);
+                    wr.batch.setColor(lightLevels[1 + slice.getLightAt(tx, ty)/4]);
+                    wr.batch.draw(tiles[id], cx, cy, 1f, 1f);
                 }
+                cx += 1f;
             }
+            cy += 1f;
         }
         
-        for(int r = rMin, ty = yMin; r < SLICE_SIZE && ty < yMax; r++, ty++) {
-            for(int c = cMin, tx = xMin; c < SLICE_SIZE && tx < xMax; c++, tx++) {
-                int id = slice.getTileIDAt(c, r);
+        // Draw tiles
+        cy = sliceOriginY + yMin;
+        for(int ty = yMin; ty <= yMax; ty++) {
+            cx = sliceOriginX + xMin;
+            for(int tx = xMin; tx <= xMax; tx++) {
+                int id = slice.getTileIDAt(tx, ty);
                 if(id != 0) { // i.e. not air
-                    wr.batch.setColor(lightLevels[slice.getLightAt(c, r)]);
-                    wr.batch.draw(tiles[id], tx, ty, 1f, 1f);
+                    wr.batch.setColor(lightLevels[slice.getLightAt(tx, ty)]);
+                    wr.batch.draw(tiles[id], cx, cy, 1f, 1f);
                 }
+                cx += 1f;
+            }
+            cy += 1f;
+        }
+        
+        //if(x == 0 && y == -9)
+        //    System.out.println("ayy lmao");
+    }
+    
+    public void renderSliceBorders(ShapeRenderer shapes) {
+        /*
+        for(int c = wr.camObj.pos.getSliceX() - wr.slicesHorizontal;
+                c <= wr.camObj.pos.getSliceX() + wr.slicesHorizontal;
+                c++) {
+            for(int r = wr.camObj.pos.getSliceY() - wr.slicesVertical;
+                    r <= wr.camObj.pos.getSliceY() + wr.slicesVertical;
+                    r++) {
+                shapes.rect(c*SLICE_SIZE, r*SLICE_SIZE, SLICE_SIZE, SLICE_SIZE);
+            }
+        }
+        */
+        
+        int camSliceX = wr.camObj.pos.getSliceX();
+        int camSliceY = wr.camObj.pos.getSliceY();
+        Position camPos = wr.camObj.pos;
+        for(int c = camSliceX - wr.slicesHorizontal;
+                c <= camSliceX + wr.slicesHorizontal;
+                c++) {
+            for(int r = camSliceY - wr.slicesVertical;
+                    r <= camSliceY + wr.slicesVertical;
+                    r++) {
+                shapes.rect(camPos.diffX(c, 0f), camPos.diffY(r, 0f), SLICE_SIZE, SLICE_SIZE);
             }
         }
     }
     
+    /*
+    // TODO: temporary methods
     private int camX() {
-        return wr.playerCamera.getTileX();
+        return Position.tileCoordFreeToTileCoordFixed(wr.camObj.pos.getGlobalX());
     }
     
     private int camY() {
-        return wr.playerCamera.getTileY();
+        return Position.tileCoordFreeToTileCoordFixed(wr.camObj.pos.getGlobalY());
     }
+    */
     
 }

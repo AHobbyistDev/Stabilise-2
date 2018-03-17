@@ -50,8 +50,7 @@ public class PrivateTerrainGen extends InstancedWorldgen {
         for(int ry = 0, y = offsetY; ry < REGION_SIZE_IN_TILES; ry++, y++) {
             for(int rx = 0, x = offsetX; rx < REGION_SIZE_IN_TILES; rx++, x++) {
                 if(Math.abs(x) > caveExtent || Math.abs(y) > caveExtent) {
-                    w.setTileAt(x, y, Tiles.voidRockDense);
-                    w.setWallAt(x, y, Tiles.voidRockDense);
+                	set(x, y, Tiles.voidRockDense);
                 } else {
                     float d = (float)Math.sqrt(x*x + y*y); // 0 to caveExtent
                     float cave = caveNoise.noise(x, y) + attenuation(d);
@@ -63,12 +62,16 @@ public class PrivateTerrainGen extends InstancedWorldgen {
                             ? Tiles.voidRockDense
                             : Tiles.voidRock;
                     
+                    tmpPos.set(x, y).realign();
                     if(cave > caveAbove) {
-                        w.setTileAt(x, y, Tiles.air);
+                        //w.setTileAt(x, y, Tiles.air);
+                    	w.setTileAt(tmpPos, Tiles.air);
                     } else {
-                        w.setTileAt(x, y, rockType);
+                        //w.setTileAt(x, y, rockType);
+                    	w.setTileAt(tmpPos, rockType);
                     }
-                    w.setWallAt(x, y, rockType);
+                    //w.setWallAt(x, y, rockType);
+                    w.setWallAt(tmpPos, rockType);
                 }
             }
         }

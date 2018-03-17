@@ -87,6 +87,7 @@ public class LineCounter {
         }
         return true; // blank line is considered a comment
     }
+    
     public static void main(String[] args) throws IOException {
         new LineCounter(
                 "C:/Users/Adam/Documents/GitHub/Stabilise-2/core/src",

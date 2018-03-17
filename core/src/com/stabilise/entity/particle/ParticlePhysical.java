@@ -16,8 +16,11 @@ public abstract class ParticlePhysical extends Particle {
     public void update(World world) {
         super.update(world);
         
-        x += dx * world.getTimeIncrement();
-        y += dy * world.getTimeIncrement();
+        // Crude euler integration.
+        pos.lx += dx * world.getTimeIncrement();
+        pos.ly += dy * world.getTimeIncrement();
+        // Not such a big deal if we're not slice-aligned, so don't bother.
+        // pos.realign();
     }
     
     @Override

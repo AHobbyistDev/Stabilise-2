@@ -1,6 +1,7 @@
 package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.entity.component.effect.EffectFire;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
@@ -94,14 +95,14 @@ public class CFireball extends BaseProjectile {
     }
     
     private void addFlightParticles(World w, Entity e, int particles) {
-        particleSrc.createBurst(particles, e.x, e.y, 0.5f, 2.5f, 0f, Maths.TAUf);
+        particleSrc.createBurst(particles, e.pos, 0.5f, 2.5f, 0f, Maths.TAUf);
     }
     
     /**
      * Creates fire particles about the fireball's location of impact.
      */
     private void addImpactParticles(World w, Entity e, int particles) {
-        particleSrc.createBurst(particles, e.x, e.y, 0.01f, 4.0f, 0f, (float)Maths.TAU);
+        particleSrc.createBurst(particles, e.pos, 0.01f, 4.0f, 0f, (float)Maths.TAU);
     }
     
     @Override
@@ -109,18 +110,33 @@ public class CFireball extends BaseProjectile {
         e.destroy();
         
         ///*
+        // Destroy a bunch of nearby blocks
         final float range = 5.75f;
-        int xMin = Maths.floor(e.x - range);
-        int xMax = Maths.floor(e.x + range);
-        int yMin = Maths.floor(e.y - range);
-        int yMax = Maths.floor(e.y + range);
+        int min = Maths.floor(-range);
+        int max = Maths.floor(range);
+        //int xMin = Maths.floor(e.pos.getGlobalX() - range);
+        //int xMax = Maths.floor(e.pos.getGlobalX() + range);
+        //int yMin = Maths.floor(e.pos.getGlobalY() - range);
+        //int yMax = Maths.floor(e.pos.getGlobalY() + range);
+        Position tmp = Position.create().set(e.pos, -range, -range);
         
-        for(int y = yMin; y <= yMax; y++) {
-            for(int x = xMin; x <= xMax; x++) {
-                if(Maths.pointsInRange(e.x, e.y, x, y, range) && w.getTileAt(x, y).getHardness() <= 5f)
-                    w.breakTileAt(x, y);
-            }
+        //for(int y = yMin; y <= yMax; y++) {
+        //    for(int x = xMin; x <= xMax; x++) {
+        //        if(Maths.pointsInRange(e.pos.getGlobalX(), e.pos.getGlobalY(), x, y, range)
+        //                && w.getTileAt(x, y).getHardness() <= 5f)
+        //            w.breakTileAt(x, y);
+        //    }
+        //}
+        
+        for(int y = min; y <= max; y++) {
+        	for(int x = min; x <= max; x++) {
+        		if(tmp.isWithinRange(e.pos, range) && w.getTileAt(tmp.realign()).getHardness() <= 5f)
+        			w.breakTileAt(tmp);
+        		tmp.add(1f, 0f);
+        	}
+        	tmp.add(max - min + 1, 1f);
         }
+        
         //*/
         
         Hitbox h = new Hitbox(ownerID, SPLASH_HITBOX, 2*damage);
@@ -129,9 +145,9 @@ public class CFireball extends BaseProjectile {
         h.stickToOwner = false;
         h.hits = -1;
         h.effects = tgt -> tgt.addComponent(new EffectFire(60*5, 1));
-        w.addHitbox(h, e.x, e.y);
+        w.addHitbox(h, e.pos);
         
-        explosionSrc.createAt(e.x, e.y);
+        explosionSrc.createAt(e.pos);
         addImpactParticles(w, e, 500);
         
         w.getCamera().shake(0.1f, 30);

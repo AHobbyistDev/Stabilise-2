@@ -1,6 +1,7 @@
 package com.stabilise.world.tile;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.util.Log;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.tileentity.TileEntityChest;
@@ -18,15 +19,15 @@ public class TileChest extends TileTE<TileEntityChest> {
     }
     
     @Override
-    public TileEntityChest createTE(int x, int y) {
-        return new TileEntityChest(x, y);
+    public TileEntityChest createTE() {
+        return new TileEntityChest();
     }
     
     @Override
-    public void handleInteract(World world, int x, int y, Entity e) {
-        super.handleInteract(world, x, y, e);
+    public void handleInteract(World world, Position pos, Entity e) {
+        super.handleInteract(world, pos, e);
         
-        TileEntityChest c = getTE(world, x, y);
+        TileEntityChest c = getTE(world, pos);
         // TODO: temporary
         if(c == null)
             Log.get().postWarning("The chest tile entity is missing!");

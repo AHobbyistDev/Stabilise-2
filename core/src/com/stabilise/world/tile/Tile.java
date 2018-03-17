@@ -4,6 +4,7 @@ import static com.stabilise.world.tile.TileBuilder.Template.*;
 
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.item.ItemStack;
 import com.stabilise.item.Items;
 import com.stabilise.util.collect.registry.RegistryNamespacedDefaulted;
@@ -74,10 +75,9 @@ public class Tile {
      * Updates the tile.
      * 
      * @param world The world.
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
+     * @param pos The position of the tile.
      */
-    public void update(World world, int x, int y) {
+    public void update(World world, Position pos) {
         // nothing to see here in the default implementation
     }
     
@@ -85,10 +85,9 @@ public class Tile {
      * Handles being placed in the world.
      * 
      * @param world The world.
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
+     * @param pos The position of the tile.
      */
-    public void handlePlace(WorldProvider world, int x, int y) {
+    public void handlePlace(WorldProvider world, Position pos) {
         // TODO
     }
     
@@ -96,37 +95,34 @@ public class Tile {
      * Handles being removed from the world.
      * 
      * @param world The world.
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
+     * @param pos The position of the tile.
      */
-    public void handleRemove(WorldProvider world, int x, int y) {
+    public void handleRemove(WorldProvider world, Position pos) {
         // TODO
     }
     
     /**
-     * Handles being broken. {@link #handleRemove(World, int, int)} is invoked
+     * Handles being broken. {@link #handleRemove(World, Position)} is invoked
      * in addition to any functionality here.
      * 
      * @param world The world.
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
+     * @param pos The position of the tile.
      */
-    public void handleBreak(World world, int x, int y) {
-        handleRemove(world, x, y);
+    public void handleBreak(World world, Position pos) {
+        handleRemove(world, pos);
         
         if(isSolid())
-            createItemEntity(world, x, y, createStack(1));
+            createItemEntity(world, pos, createStack(1));
     }
     
     /**
      * Handles the tile being stepped on by an entity.
      * 
      * @param world The world.
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
+     * @param pos The position of the tile.
      * @param e The entity which stepped on the tile.
      */
-    public void handleStep(World world, int x, int y, Entity e) {
+    public void handleStep(World world, Position pos, Entity e) {
         // TODO
     }
     
@@ -134,11 +130,10 @@ public class Tile {
      * Handles the tile being overlapped by an entity.
      * 
      * @param world The world.
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
+     * @param pos The position of the tile.
      * @param e The entity which is overlapping the tile.
      */
-    public void handleOverlap(World world, int x, int y, Entity e) {
+    public void handleOverlap(World world, Position pos, Entity e) {
         // TODO
     }
     
@@ -146,11 +141,10 @@ public class Tile {
      * Handles being touched, as per a left-click.
      * 
      * @param world The world.
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
+     * @param pos The position of the tile.
      * @param mob The mob to touch the tile.
      */
-    public void handleTouch(World world, int x, int y, Entity mob) {
+    public void handleTouch(World world, Position pos, Entity mob) {
         // nothing in the default implementation
     }
     
@@ -158,11 +152,10 @@ public class Tile {
      * Handles being interacted with, as per a right-click.
      * 
      * @param world The world.
-     * @param x The x-coordinate of the tile, in tile-lengths.
-     * @param y The y-coordinate of the tile, in tile-lengths.
+     * @param pos The position of the tile.
      * @param mob The mob to interact with the tile.
      */
-    public void handleInteract(World world, int x, int y, Entity mob) {
+    public void handleInteract(World world, Position pos, Entity mob) {
         // nothing in the default implementation
     }
     
@@ -170,10 +163,10 @@ public class Tile {
      * Creates an item entity on this tile. Does nothing if {@code stack} is
      * {@link ItemStack#NO_STACK}.
      */
-    protected void createItemEntity(World world, int x, int y, ItemStack stack) {
+    protected void createItemEntity(World world, Position pos, ItemStack stack) {
         if(stack != ItemStack.NO_STACK) {
             Entity e = Entities.item(world, createStack(1));
-            world.addEntity(e, x + 0.5, y + 0.1);
+            world.addEntity(e, pos.copy().add(0.5f, 0.1f));
         }
     }
     

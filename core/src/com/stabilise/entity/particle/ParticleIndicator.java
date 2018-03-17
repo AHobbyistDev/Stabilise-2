@@ -38,7 +38,8 @@ public class ParticleIndicator extends Particle {
     public void update(World world) {
         super.update(world);
         
-        y += dy;
+        pos.ly += dy;
+        pos.realignY();
         dy *= 0.95f;
         
         if(age > FADE_OUT_MARK) {
