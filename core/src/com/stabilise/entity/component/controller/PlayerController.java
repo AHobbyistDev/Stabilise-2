@@ -134,39 +134,6 @@ public class PlayerController extends CController implements Controllable, Input
         */
     }
     
-    /**
-     * Converts the x-coordinate of the mouse to world space.
-     * 
-     * <p>TODO: Libgdx treats the top-left as the origin instead of the
-     * bottom-left, which is really annoying.
-     * 
-     * @param x The x-coordinate of the mouse, as defined by
-     * {@link Controllable#handleControlPress(int, int, int)}.
-     * 
-     * @return The x-coordinate of the tile the mouse is pointing at, in
-     * tile-lengths.
-     */
-    @SuppressWarnings("unused")
-    private int mouseXToWorldSpace(int x) {
-        // TODO: improve maybe?
-        return Maths.floor(((x + worldRenderer.camObj.pos.getGlobalX()) / worldRenderer.getPixelsPerTile()));
-    }
-    
-    /**
-     * Converts the y-coordinate of the mouse to world space.
-     * 
-     * @param y The y-coordinate of the mouse, as defined by
-     * {@link Controllable#handleButtonPress(int, int, int)}.
-     * 
-     * @return The y-coordinate of the tile the mouse is pointing at, in
-     * tile-lengths.
-     */
-    @SuppressWarnings("unused")
-    private int mouseYToWorldSpace(int y) {
-        // TODO: improve maybe?
-        return Maths.floor(((y + worldRenderer.camObj.pos.getGlobalY()) / worldRenderer.getPixelsPerTile()));
-    }
-    
     @Override
     public boolean handleControlPress(Control control) {
         switch(control) {
