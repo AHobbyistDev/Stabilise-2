@@ -43,18 +43,18 @@ public abstract class InstancedWorldgen implements IWorldGenerator {
     public abstract void generate(Region r);
     
     /**
-     * Sets both the tile and wall at the given (absolute) coordinates to the
-     * specified tile. Equivalent to the following:
+     * Sets both the tile and wall at the given position to the specified tile.
+     * It's recommended to use {@link #tmpPos} as the position. Equivalent to
+     * the following:
      * 
      * <pre>
-     * w.setTileAt(x, y, t);
-     * w.setWallAt(x, y, t);
+     * w.setTileAt(pos, t);
+     * w.setWallAt(pos, t);
      * </pre>
      */
-    protected void set(int x, int y, Tile t) {
-    	tmpPos.set(x, y).realign();
-        w.setTileAt(tmpPos, t);
-        w.setWallAt(tmpPos, t);
+    protected void set(Position pos, Tile t) {
+        w.setTileAt(pos, t);
+        w.setWallAt(pos, t);
     }
     
     

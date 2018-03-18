@@ -38,7 +38,8 @@ class TileBuilder {
         LAVA(0.12f),
         CHEST(H_WOOD, F_DEF, b -> new TileChest(b)),
         SPWNR(H_STONE, F_DEF, b -> new TileMobSpawner(b)),
-        ORE(H_STONE, F_DEF, b -> new TileOre(b));
+        ORE(H_STONE, F_DEF, b -> new TileOre(b)),
+        SPREAD(H_STONE, F_DEF, b -> new TileVoidSpread(b));
         
         private final Function<TileBuilder, Tile> constructor;
         

@@ -304,7 +304,7 @@ public class RegionStore {
     void deAnchorRegion(int x, int y) {
         Region r = getRegionAt(x, y); // shouldn't be null
         
-        if(r.deAnchor()) {
+        if(r.deAnchor()) { // TODO: <-- has caused an NPE once. Need to hunt down and fix!
             r.removeNeighbour(); // r counts itself as a neighbour
             
             final int d = NEIGHBOUR_LOAD_RADIUS; // reducing verbosity

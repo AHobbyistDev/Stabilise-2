@@ -113,7 +113,7 @@ public class Game implements Controllable, InputProcessor {
                 log.postSevere("Game encountered error!", e);
                 profiler.disable();
                 Application a = Application.get();
-                //a.produceCrashLog();
+                Log.saveLog(true, "Game crashed by did not shut down.");
                 //close();            // Simply calling close() makes the game freeze
                 a.setState(new MainMenuState());
                 return;

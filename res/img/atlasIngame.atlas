@@ -284,30 +284,37 @@ tile/void
   orig: 8, 8
   offset: 0, 0
   index: -1
-tile/voidRock
+tile/voidDirt
   rotate: false
   xy: 87, 25
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
   index: -1
-tile/voidRockDense
+tile/voidRock
   rotate: false
   xy: 197, 135
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
   index: -1
-tile/water
+tile/voidRockDense
   rotate: false
   xy: 207, 145
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
   index: -1
-tile/wood
+tile/water
   rotate: false
   xy: 225, 155
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+tile/wood
+  rotate: false
+  xy: 87, 15
   size: 8, 8
   orig: 8, 8
   offset: 0, 0

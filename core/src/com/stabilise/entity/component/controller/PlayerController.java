@@ -23,6 +23,7 @@ import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
+import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
 
 /**
@@ -43,8 +44,10 @@ public class PlayerController extends CController implements Controllable, Input
     
     /** The ID of the tile currently selected. */
     public int tileID = Tiles.stone.getID();
+    private final int maxTileID;
     /** Radius of the tile brush. */
     public float radius = 0.5f;
+    
     
     
     /**
@@ -57,6 +60,11 @@ public class PlayerController extends CController implements Controllable, Input
     public PlayerController(Controller controller, Game game) {
         this.controller = controller;
         this.game = game;
+        
+        int tmpMaxID = 1;
+        while(Tile.TILES.containsID(tmpMaxID))
+            tmpMaxID++;
+        maxTileID = tmpMaxID - 1;
     }
     
     @Override
@@ -279,7 +287,7 @@ public class PlayerController extends CController implements Controllable, Input
             if(radius < 1)
                 radius = 0.5f;
         } else
-            tileID = 1 + Maths.remainder(tileID + amount - 1, 24);
+            tileID = 1 + Maths.remainder(tileID + amount - 1, maxTileID);
         return true;
     }
     

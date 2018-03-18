@@ -49,8 +49,10 @@ public class PrivateTerrainGen extends InstancedWorldgen {
         // x,y, and relative x,y
         for(int ry = 0, y = offsetY; ry < REGION_SIZE_IN_TILES; ry++, y++) {
             for(int rx = 0, x = offsetX; rx < REGION_SIZE_IN_TILES; rx++, x++) {
+                tmpPos.set(x, y);
+                
                 if(Math.abs(x) > caveExtent || Math.abs(y) > caveExtent) {
-                	set(x, y, Tiles.voidRockDense);
+                	set(tmpPos, Tiles.voidRockDense);
                 } else {
                     float d = (float)Math.sqrt(x*x + y*y); // 0 to caveExtent
                     float cave = caveNoise.noise(x, y) + attenuation(d);

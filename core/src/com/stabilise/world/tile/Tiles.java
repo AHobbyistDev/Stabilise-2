@@ -52,7 +52,8 @@ public class Tiles {
             torch         = get("torch"),
             glowstone     = get("glowstone"),
             voidRock      = get("voidRock"),
-            voidRockDense = get("voidRockDense");
+            voidRockDense = get("voidRockDense"),
+            voidDirt      = get("voidDirt");
     public static final TileChest
             chest         = get("chest");
     

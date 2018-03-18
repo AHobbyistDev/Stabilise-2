@@ -29,7 +29,7 @@ public class TileGrass extends Tile {
         
         for(int tx = -1; tx <= 1; tx++) {
             t2 = world.getTileAt(tmp.set(pos, tx, -2).realign());
-            for(int ty = -2; ty <= 1; ty ++) {
+            for(int ty = -2; ty <= 1; ty++) {
                 // If a tile is dirt and it has an air tile above it, spread
                 // grass to that tile with a 1/3 chance
                 t1 = t2;

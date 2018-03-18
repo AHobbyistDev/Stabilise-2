@@ -74,30 +74,30 @@ public class Tile {
     /**
      * Updates the tile.
      * 
-     * @param world The world.
+     * @param w The world.
      * @param pos The position of the tile.
      */
-    public void update(World world, Position pos) {
+    public void update(World w, Position pos) {
         // nothing to see here in the default implementation
     }
     
     /**
      * Handles being placed in the world.
      * 
-     * @param world The world.
+     * @param w The world.
      * @param pos The position of the tile.
      */
-    public void handlePlace(WorldProvider world, Position pos) {
+    public void handlePlace(WorldProvider w, Position pos) {
         // TODO
     }
     
     /**
      * Handles being removed from the world.
      * 
-     * @param world The world.
+     * @param w The world.
      * @param pos The position of the tile.
      */
-    public void handleRemove(WorldProvider world, Position pos) {
+    public void handleRemove(WorldProvider w, Position pos) {
         // TODO
     }
     
@@ -105,57 +105,57 @@ public class Tile {
      * Handles being broken. {@link #handleRemove(World, Position)} is invoked
      * in addition to any functionality here.
      * 
-     * @param world The world.
+     * @param w The world.
      * @param pos The position of the tile.
      */
-    public void handleBreak(World world, Position pos) {
-        handleRemove(world, pos);
+    public void handleBreak(World w, Position pos) {
+        handleRemove(w, pos);
         
         if(isSolid())
-            createItemEntity(world, pos, createStack(1));
+            createItemEntity(w, pos, createStack(1));
     }
     
     /**
      * Handles the tile being stepped on by an entity.
      * 
-     * @param world The world.
+     * @param w The world.
      * @param pos The position of the tile.
      * @param e The entity which stepped on the tile.
      */
-    public void handleStep(World world, Position pos, Entity e) {
+    public void handleStep(World w, Position pos, Entity e) {
         // TODO
     }
     
     /**
      * Handles the tile being overlapped by an entity.
      * 
-     * @param world The world.
+     * @param w The world.
      * @param pos The position of the tile.
      * @param e The entity which is overlapping the tile.
      */
-    public void handleOverlap(World world, Position pos, Entity e) {
+    public void handleOverlap(World w, Position pos, Entity e) {
         // TODO
     }
     
     /**
      * Handles being touched, as per a left-click.
      * 
-     * @param world The world.
+     * @param w The world.
      * @param pos The position of the tile.
      * @param mob The mob to touch the tile.
      */
-    public void handleTouch(World world, Position pos, Entity mob) {
+    public void handleTouch(World w, Position pos, Entity mob) {
         // nothing in the default implementation
     }
     
     /**
      * Handles being interacted with, as per a right-click.
      * 
-     * @param world The world.
+     * @param w The world.
      * @param pos The position of the tile.
      * @param mob The mob to interact with the tile.
      */
-    public void handleInteract(World world, Position pos, Entity mob) {
+    public void handleInteract(World w, Position pos, Entity mob) {
         // nothing in the default implementation
     }
     
@@ -163,10 +163,10 @@ public class Tile {
      * Creates an item entity on this tile. Does nothing if {@code stack} is
      * {@link ItemStack#NO_STACK}.
      */
-    protected void createItemEntity(World world, Position pos, ItemStack stack) {
+    protected void createItemEntity(World w, Position pos, ItemStack stack) {
         if(stack != ItemStack.NO_STACK) {
-            Entity e = Entities.item(world, createStack(1));
-            world.addEntity(e, pos.copy().add(0.5f, 0.1f));
+            Entity e = Entities.item(w, createStack(1));
+            w.addEntity(e, pos.copy().add(0.5f, 0.1f));
         }
     }
     
@@ -286,8 +286,9 @@ public class Tile {
         register(STONE, 21, "glass");
         register(AIR,   22, "torch").light(13);
         register(STONE, 23, "glowstone").light(15);
-        register(STONE, 24, "voidRock").light(10);
-        register(STONE, 25, "voidRockDense").light(10).hardness(50f);
+        register(SPREAD,24, "voidRock").light(10);
+        register(SPREAD,25, "voidRockDense").light(10).hardness(50f);
+        register(SPREAD,26, "voidDirt").hardness(2f).light(10);
         
         builder.end();
         builder = null;
