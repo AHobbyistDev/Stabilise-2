@@ -22,6 +22,7 @@ import com.stabilise.util.io.IOUtil;
  * etc.
  * </pre>
  */
+@Deprecated
 public class ConfigFile {
     
     //--------------------==========--------------------

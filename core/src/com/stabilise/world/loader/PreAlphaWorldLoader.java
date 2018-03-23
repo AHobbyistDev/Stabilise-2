@@ -43,7 +43,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
     protected void load(Region r, FileHandle file) {
         DataCompound regionTag;
         try {
-            regionTag = IOUtil.read(Format.NBT, Compression.GZIP, file);
+            regionTag = IOUtil.read(file, Format.NBT, Compression.GZIP);
         } catch(IOException e) {
             log.postSevere("Could not load the NBT data for region " + r.x()
                     + "," + r.y() + "!", e);
@@ -157,7 +157,7 @@ public class PreAlphaWorldLoader extends WorldLoader {
         }
         
         try {
-            IOUtil.writeSafe(regionTag, Format.NBT, Compression.GZIP, file);
+            IOUtil.writeSafe(file, regionTag, Compression.GZIP);
         } catch(IOException e) {
             log.postSevere("Could not save " + r + "!", e);
         }

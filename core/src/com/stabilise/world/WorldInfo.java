@@ -65,7 +65,7 @@ public class WorldInfo implements Comparable<WorldInfo> {
         if(loaded)
             return;
         
-        DataCompound infoTag = IOUtil.read(Format.NBT, Compression.GZIP, getFile());
+        DataCompound infoTag = IOUtil.read(getFile(), Format.NBT, Compression.GZIP);
         
         name = infoTag.getString("worldName");
         seed = infoTag.getLong("seed");
@@ -100,7 +100,7 @@ public class WorldInfo implements Comparable<WorldInfo> {
         infoTag.put("formatVersion", worldFormatVersion);
         infoTag.put("sliceFormatVersion", sliceFormatVersion);
         
-        IOUtil.writeSafe(infoTag, Format.NBT, Compression.GZIP, getFile());
+        IOUtil.writeSafe(getFile(), infoTag, Compression.GZIP);
     }
     
     /**

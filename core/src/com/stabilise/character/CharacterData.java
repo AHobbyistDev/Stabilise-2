@@ -147,7 +147,7 @@ public class CharacterData implements Sendable {
         if(loaded)
             return;
         
-        DataCompound tag = IOUtil.read(Format.NBT, Compression.GZIP, getFile());
+        DataCompound tag = IOUtil.read(getFile(), Format.NBT, Compression.GZIP);
         
         hash = tag.getString("hash");
         
@@ -189,7 +189,7 @@ public class CharacterData implements Sendable {
         
         tag.put("inventory", inventory.toNBT());
         
-        IOUtil.writeSafe(tag, Format.NBT, Compression.GZIP, getFile());
+        IOUtil.writeSafe(getFile(), tag, Compression.GZIP);
     }
     
     @Override

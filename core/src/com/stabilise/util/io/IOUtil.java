@@ -216,13 +216,14 @@ public class IOUtil {
     }
     
     /**
-     * Reads a file. The returned compound will be in read mode.
+     * Reads a file into a compound of the given format. The returned compound
+     * will be in read mode.
      * 
      * @throws NullPointerException if any argument is null.
      * @throws IOException if an I/O error occurs.
      */
-    public static DataCompound read(Format format, Compression compression,
-            FileHandle file) throws IOException {
+    public static DataCompound read(FileHandle file, Format format,
+    		Compression compression) throws IOException {
         InputStream is1 = null;
         InputStream is2 = null;
         BufferedInputStream bis = null;
@@ -247,13 +248,44 @@ public class IOUtil {
     }
     
     /**
+     * Reads a file into the given compound.
+     * 
+     * @throws NullPointerException if any argument is null.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static DataCompound read(FileHandle file, DataCompound c,
+    		Compression compression) throws IOException {
+        InputStream is1 = null;
+        InputStream is2 = null;
+        BufferedInputStream bis = null;
+        DataInStream dis = null;
+        
+        try {
+            is1 = file.read();
+            is2 = compression.wrap(is1);
+            bis = new BufferedInputStream(is2);
+            dis = new DataInStream(bis);
+            c.format().read(dis, c);
+            c.setReadMode();
+            return c;
+        } catch(GdxRuntimeException e) {
+            throw new IOException(e);
+        } finally {
+            if(dis != null) dis.close();
+            else if(bis != null) bis.close();
+            else if(is2 != null) is2.close();
+            else if(is1 != null) is1.close();
+        }
+    }
+    
+    /**
      * Writes a file. If the file already exists, it will be overwritten.
      * 
      * @throws NullPointerException if any argument is null.
      * @throws IOException if an I/O error occurs.
      */
-    public static void write(DataCompound data, Format format,
-            Compression compression, FileHandle file) throws IOException {
+    public static void write(FileHandle file, DataCompound data,
+    		Compression compression) throws IOException {
         OutputStream os1 = null;
         OutputStream os2 = null;
         BufferedOutputStream bos = null;
@@ -264,7 +296,7 @@ public class IOUtil {
             os2 = compression.wrap(os1);
             bos = new BufferedOutputStream(os2);
             dos = new DataOutStream(bos);
-            format.write(data.convert(format), dos);
+            data.format().write(dos, data);
         } catch(GdxRuntimeException e) {
             throw new IOException(e);
         } finally {
@@ -278,14 +310,14 @@ public class IOUtil {
     /**
      * Safely (as per {@link #safelySaveFile(FileHandle, IOConsumer)
      * safelySaveFile}{@code ()}) saves a file (as per {@link
-     * #write(DataCompound, Format, Compression, FileHandle) write}{@code ()}).
+     * #write(FileHandle, DataCompound, Compression) write}{@code ()}).
      * 
      * @throws NullPointerException if any argument is null.
      * @throws IOException if an I/O error occurs.
      */
-    public static void writeSafe(DataCompound data, Format format,
-            Compression compression, FileHandle file) throws IOException {
-        safelySaveFile(file, f -> write(data, format, compression, f));
+    public static void writeSafe(FileHandle file, DataCompound data,
+            Compression compression) throws IOException {
+        safelySaveFile(file, f -> write(f, data, compression));
     }
     
     
@@ -305,7 +337,7 @@ public class IOUtil {
             os = compression.wrap(bcs);
             bos = new BufferedOutputStream(os);
             dos = new DataOutStream(bos);
-            format.write(data.convert(format), dos);
+            format.write(dos, data.convert(format));
         } catch(Throwable t) {
             return 0;
         } finally {
@@ -314,7 +346,7 @@ public class IOUtil {
                 else if(bos != null) bos.close();
                 else if(os != null) os.close();
             } catch(IOException e) {
-                throw new AssertionError("y u do dis to me");
+                throw new AssertionError();
             } 
         }
         

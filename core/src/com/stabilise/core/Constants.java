@@ -136,7 +136,7 @@ public class Constants {
                 DataCompound tag = null;
                 
                 if(file.exists()) {
-                    tag = Try.of(() -> IOUtil.read(NBT, UNCOMPRESSED, file))
+                    tag = Try.of(() -> IOUtil.read(file, NBT, UNCOMPRESSED))
                             .recover(e -> {
                         Log.get().postWarning("Couldn't load revision file", e);
                         return new NBTCompound();
@@ -151,7 +151,7 @@ public class Constants {
                 tag.put("builds", tag.getInt("builds") + 1);
                 int buildCompilations = buildTags(tag, fieldNames, fields, 0);
                 
-                IOUtil.writeSafe(tag, NBT, UNCOMPRESSED, file);
+                IOUtil.writeSafe(file, tag, UNCOMPRESSED);
                 
                 return buildCompilations;
             } catch(Exception e) {

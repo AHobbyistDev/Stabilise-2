@@ -214,10 +214,8 @@ public class Region {
         int sy = world.rnd.nextInt(REGION_SIZE);
         int tx = world.rnd.nextInt(Slice.SLICE_SIZE);
         int ty = world.rnd.nextInt(Slice.SLICE_SIZE);
-        Position tmp = Position.create();
-        getSliceAt(sx, sy).getTileAt(tx, ty).update(world, tmp.set(sx, sy, tx, ty));
-        //        (offsetX + sx) * Slice.SLICE_SIZE + tx,
-        //        (offsetY + sy) * Slice.SLICE_SIZE + ty);
+        Position tmp = Position.create().set(sx + offsetX, sy + offsetY, tx, ty);
+        getSliceAt(sx, sy).getTileAt(tx, ty).update(world, tmp);
     }
     
     /**
@@ -230,9 +228,8 @@ public class Region {
         while(tiles-- > 0) {
             int tx = world.rnd.nextInt(Slice.SLICE_SIZE);
             int ty = world.rnd.nextInt(Slice.SLICE_SIZE);
-            getSliceAt(sx, sy).getTileAt(tx, ty).update(world, tmp.set(sx, sy, tx, ty));
-            //        (offsetX + sx) * Slice.SLICE_SIZE + tx,
-            //        (offsetY + sy) * Slice.SLICE_SIZE + ty);
+            tmp.set(sx + offsetX, sy + offsetY, tx, ty);
+            getSliceAt(sx, sy).getTileAt(tx, ty).update(world, tmp);
         }
     }
     

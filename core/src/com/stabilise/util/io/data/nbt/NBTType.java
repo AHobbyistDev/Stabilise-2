@@ -3,7 +3,6 @@ package com.stabilise.util.io.data.nbt;
 import java.util.function.Supplier;
 
 import com.stabilise.util.box.BoolBox;
-import com.stabilise.util.box.BoolBox.ImmutableBoolBox;
 import com.stabilise.util.box.ByteArrBox;
 import com.stabilise.util.box.ByteBox;
 import com.stabilise.util.box.CharBox;
@@ -14,7 +13,6 @@ import com.stabilise.util.box.IntBox;
 import com.stabilise.util.box.LongBox;
 import com.stabilise.util.box.ShortBox;
 import com.stabilise.util.box.StringBox;
-import com.stabilise.util.collect.registry.DuplicatePolicy;
 import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.collect.registry.TypeFactory;
 import com.stabilise.util.io.data.ITag;
@@ -33,10 +31,6 @@ public enum NBTType {
     LIST      (9,  NBTList.class, NBTList::new),
     COMPOUND  (10, NBTCompound.class, NBTCompound::new),
     INT_ARRAY (11, IntArrBox.class),
-    // We abuse DuplicatePolicy.OVERWRITE for now (crude and temp solution) to
-    // make BOOLEAN overwrite BOOLEAN2 as the main bool type, but to make sure
-    // ImmutableBoolBox maps to the correct ID.
-    BOOLEAN2  (12, ImmutableBoolBox.class),
     BOOLEAN   (12, BoolBox.class),
     CHAR      (13, CharBox.class);
     
@@ -56,14 +50,14 @@ public enum NBTType {
     }
     
     private static final TypeFactory<ITag> registry =
-            new TypeFactory<>(new RegistryParams("NBTTypeRegistry", DuplicatePolicy.OVERWRITE));
+            new TypeFactory<>(new RegistryParams("NBTTypeRegistry"));
     
     static {
         for(NBTType t : NBTType.values()) {
             if(t.fac == null)
                 registry.registerUnsafe(t.id, t.type);
             else
-                registry.register(t.id, t.type, t.fac);
+            	registry.register(t.id, t.type, t.fac);
         }
         registry.lock();
     }

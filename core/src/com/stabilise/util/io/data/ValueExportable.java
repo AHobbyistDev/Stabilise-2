@@ -7,6 +7,11 @@ package com.stabilise.util.io.data;
  * <p>Unlike, {@code Exportables}, {@code ValueExportables} are not assigned
  * their own {@code DataObject}; that is, they can read and write from a parent
  * object or list without being encapsulated in their own.
+ * 
+ * <p>External implementors should consider using {@link Exportable} instead;
+ * this interface is primarly used as the base for tags in here.
+ * 
+ * @see Exportable
  */
 public interface ValueExportable {
     

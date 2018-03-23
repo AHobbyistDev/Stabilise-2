@@ -5,12 +5,12 @@ import java.util.Map;
 
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
-import com.stabilise.util.io.data.AbstractMapCompound;
+import com.stabilise.util.io.data.MapCompound;
 import com.stabilise.util.io.data.Format;
 import com.stabilise.util.io.data.ITag;
 
 
-public class NBTCompound extends AbstractMapCompound {
+public class NBTCompound extends MapCompound {
     
     @Override
     public void writeData(DataOutStream out) throws IOException {

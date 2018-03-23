@@ -413,7 +413,7 @@ public abstract class Dimension {
          * otherwise occurs.
          */
         private DataCompound load() throws IOException {
-            DataCompound tag = IOUtil.read(Format.NBT, Compression.GZIP, getFile());
+            DataCompound tag = IOUtil.read(getFile(), Format.NBT, Compression.GZIP);
             
             if(!name.equals(tag.getString("dimName")))
                 throw new IOException("Dimension name does not match stored name \""
@@ -439,7 +439,7 @@ public abstract class Dimension {
             tag.put("spawnX", spawnSliceX);
             tag.put("spawnY", spawnSliceY);
             
-            IOUtil.writeSafe(tag, Format.NBT, Compression.GZIP, getFile());
+            IOUtil.writeSafe(getFile(), tag, Compression.GZIP);
         }
         
         /**

@@ -17,13 +17,19 @@ import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.box.*;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
-import com.stabilise.util.io.data.AbstractMapCompound;
+import com.stabilise.util.io.data.MapCompound;
 import com.stabilise.util.io.data.Format;
 import com.stabilise.util.io.data.ITag;
 
 
+/**
+ * Internally a MapCompound just like NBT, but converts to/from a JsonValue
+ * object when reading/writing since there's no way in hell that I'm gonna
+ * write code that reads/writes files properly compliant with the JSON
+ * standard.
+ */
 @Incomplete
-public class JsonCompound extends AbstractMapCompound {
+public class JsonCompound extends MapCompound {
     
     private boolean dirty = true;
     private JsonValue json = null;

@@ -8,4 +8,12 @@ import com.stabilise.util.io.Sendable;
  */
 public interface ITag extends Sendable, ValueExportable {
     
+	/**
+	 * Returns {@code true} if the given tag holds the same type of data as
+	 * this tag.
+	 */
+	default boolean isSameType(ITag other) {
+		return getClass().equals(other.getClass());
+	}
+	
 }

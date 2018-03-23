@@ -70,7 +70,7 @@ public class TypeRegistry<T, V> extends AbstractRegistry<Class<? extends T>> {
             return;
         if(idMap.containsKey(objClass) && dupePolicy.handle(log, "Duplicate class " + objClass.getSimpleName()))
             return;
-        values.setWithExpand(id, value, 1.25f);
+        values.setWithExpand(id, value, 2f);
         idMap.put(objClass, Integer.valueOf(id));
         size++;
         if(id > maxID)

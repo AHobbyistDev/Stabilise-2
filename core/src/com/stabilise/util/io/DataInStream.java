@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 
+/**
+ * An extension of DataInputStream which also provides convenience methods to
+ * read strings and int arrays.
+ */
 public class DataInStream extends DataInputStream {
     
     public DataInStream(InputStream in) {

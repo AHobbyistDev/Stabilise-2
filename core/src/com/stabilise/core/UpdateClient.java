@@ -141,7 +141,7 @@ public class UpdateClient extends Client implements IClientUpdate {
         // We send the server our checksums for every file on the list, using
         // the cached values from the versiondata file if possible.
         try {
-            versionData = IOUtil.read(Format.NBT, Compression.UNCOMPRESSED, VERSIONDATA);
+            versionData = IOUtil.read(VERSIONDATA, Format.NBT, Compression.UNCOMPRESSED);
         } catch(IOException e) {
             System.out.println("Could not load versiondata file. Resetting...");
             versionData = DataCompound.create();
@@ -170,7 +170,7 @@ public class UpdateClient extends Client implements IClientUpdate {
         }
         
         try {
-            IOUtil.write(versionData, Format.NBT, Compression.UNCOMPRESSED, VERSIONDATA);
+            IOUtil.write(VERSIONDATA, versionData, Compression.UNCOMPRESSED);
         } catch(IOException e) {
             System.err.println("Could not save versiondata!");
             e.printStackTrace();

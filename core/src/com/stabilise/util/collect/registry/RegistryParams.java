@@ -9,7 +9,7 @@ import com.stabilise.util.Checks;
  * Contains construction parameters for registries.
  * 
  * <p>For all cases, {@code name} and {@code dupePolicy} must be non-null, and
- * {@code initialCapacity} must be greater than zero.
+ * {@code initialCapacity} must be positive.
  * 
  * <p>If not specified, the default values are:
  * 

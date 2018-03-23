@@ -2,7 +2,7 @@ package com.stabilise.util.io.data;
 
 
 /**
- * Unifying interface for {@link DataCompound} and {@link DataList}.
+ * Share parent interface for {@link DataCompound} and {@link DataList}.
  */
 public interface IContainerTag<T extends IContainerTag<T>> {
     

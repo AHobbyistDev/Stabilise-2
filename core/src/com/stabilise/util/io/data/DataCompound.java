@@ -190,4 +190,15 @@ public interface DataCompound extends Sendable, IContainerTag<DataCompound> {
         return ImmutableCompound.wrap(this);
     }
     
+    /**
+     * Casts this DataCompound to a MapCompound if able, and throws a
+     * RuntimeException if not. This may be done to expose a number of
+     * additional utility methods that MapCompound provides.
+     */
+    default MapCompound asMapCompound() {
+    	if(this instanceof MapCompound)
+    		return (MapCompound)this;
+    	throw new RuntimeException("This DataCompound is not a map compound!");
+    }
+    
 }

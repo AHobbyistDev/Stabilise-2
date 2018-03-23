@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import com.stabilise.util.Checks;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.bytestream.ByteCompound;
 import com.stabilise.util.io.data.json.JsonCompound;
-import com.stabilise.util.io.data.json.JsonList;
 import com.stabilise.util.io.data.nbt.NBTCompound;
 import com.stabilise.util.io.data.nbt.NBTList;
 import com.stabilise.util.io.data.nbt.NBTType;
@@ -21,29 +21,26 @@ public enum Format {
     /**
      * The standard NBT format, as used by Minecraft.
      */
-    NBT(EquivalenceClass.NBT, NBTCompound::new, NBTList::new) {
+    NBT(NBTCompound::new, NBTList::new) {
         
+    	// We need to overwrite write the following dummy data in order to be compatible
+    	// with minecraft.
+    	
         @Override
-        public DataCompound read(DataInStream in) throws IOException {
+        public void read(DataInStream in, DataCompound c) throws IOException {
             if(in.readByte() != NBTType.COMPOUND.id)
                 throw new IOException("Root tag must be a named compound");
             in.readUTF(); // discard root name
-            return super.read(in);
+            super.read(in, c);
         }
         
         @Override
-        public void write(DataCompound o, DataOutStream out) throws IOException {
+        public void write(DataOutStream out, DataCompound c) throws IOException {
             out.writeByte(NBTType.COMPOUND.id);
             out.writeUTF(""); // dummy root name
-            super.write(o, out);
+            super.write(out, c);
         }
     },
-    
-    /**
-     * A slightly simplified NBT format which doesn't write the ID and tag name
-     * for the root compound tag.
-     */
-    NBT_SIMPLE(EquivalenceClass.NBT, NBTCompound::new, NBTList::new),
     
     /**
      * This format writes data as a byte stream. Under this format, field names
@@ -59,22 +56,20 @@ public enum Format {
      * and compounds of other formats do not translate perfectly into this
      * format for technical reasons (see: NBTList).
      */
-    BYTE_STREAM(EquivalenceClass.BYTES, ByteCompound::new, () -> { throw new UnsupportedOperationException(); }),
+    BYTE_STREAM(ByteCompound::new, () -> { throw new UnsupportedOperationException(); }),
     
     /**
      * The JSON format that everyone knows and loves.
      */
-    JSON(EquivalenceClass.JSON, JsonCompound::new, JsonList::new);
+    //JSON(JsonCompound::new, JsonList::new);
+    JSON(JsonCompound::new, () -> {Checks.unsupported("JSON list is NYI"); return null;});
     
     // ------------------------------------------------------------------------
     
-    private final EquivalenceClass equivClass;
     private final Supplier<AbstractCompound> compoundSup;
     private final Supplier<AbstractDataList> listSup;
     
-    private Format(EquivalenceClass equivClass, Supplier<AbstractCompound> compoundSup,
-            Supplier<AbstractDataList> listSup) {
-        this.equivClass = equivClass;
+    private Format(Supplier<AbstractCompound> compoundSup, Supplier<AbstractDataList> listSup) {
         this.compoundSup = compoundSup;
         this.listSup = listSup;
     }
@@ -119,39 +114,50 @@ public enum Format {
     }
     
     /**
-     * Reads a DataObject from the given input stream and returns it.
+     * Reads a DataCompound from the given input stream and returns it.
      * 
      * @throws IOException if an I/O error occurs.
      */
     public DataCompound read(DataInStream in) throws IOException {
-        DataCompound o = newCompound();
-        o.readData(in);
-        return o;
+        DataCompound c = newCompound();
+        read(in, c);
+        return c;
     }
     
     /**
-     * Writes the given DataObject to an output stream.
+     * Reads from the given input stream into the given DataCompound. In
+     * addition to invoking {@code c.readData(in)}, this method may perform
+     * additional work peculiar to this format.
      * 
      * @throws IOException if an I/O error occurs.
      */
-    public void write(DataCompound o, DataOutStream out) throws IOException {
-        o.writeData(out);
+    public void read(DataInStream in, DataCompound c) throws IOException {
+    	c.readData(in);
+    }
+    
+    /**
+     * Writes the given DataCompound to an output stream. In addition to
+     * invoking {@code c.writeData(out)}, this method may perform additional
+     * work peculiar to this format.
+     * 
+     * @throws IOException if an I/O error occurs.
+     */
+    public void write(DataOutStream out, DataCompound c) throws IOException {
+        c.writeData(out);
     }
     
     /**
      * Returns true if this format is of the same type as the given format.
-     * e.g. {@link #NBT} is of the same type as {@link #NBT_SIMPLE}.
      */
     public boolean sameTypeAs(Format f) {
-        return f.equivClass == equivClass;
+        return f == this;
     }
     
-    private static enum EquivalenceClass {
-        NBT, JSON, BYTES;
-    }
     
-    private static final ThreadLocal<Format> DEFAULTS =
-            ThreadLocal.withInitial(() -> NBT_SIMPLE);
+    
+    // Thread-local default format stuff
+    
+    private static final ThreadLocal<Format> DEFAULTS = ThreadLocal.withInitial(() -> NBT);
     
     /**
      * Sets the default format for use by the current thread.

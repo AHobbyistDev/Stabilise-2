@@ -241,7 +241,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         public boolean load() {
             if(file.exists()) {
                 try {
-                    DataCompound tag = IOUtil.read(Format.NBT, Compression.GZIP, file);
+                    DataCompound tag = IOUtil.read(file, Format.NBT, Compression.GZIP);
                     dimension = tag.getString("dimension");
                     lastPos.io(tag.getCompound("lastPos"), false);
                     newToWorld = false;
@@ -262,7 +262,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
             DataCompound tag = Format.NBT.newCompound(true);
             tag.put("dimension", dimension);
             lastPos.io(tag.createCompound("lastPos"), true);
-            IOUtil.writeSafe(tag, Format.NBT, Compression.GZIP, file);
+            IOUtil.writeSafe(file, tag, Compression.GZIP);
         }
         
     }

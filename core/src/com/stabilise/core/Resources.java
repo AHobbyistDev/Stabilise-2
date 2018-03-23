@@ -41,6 +41,9 @@ public class Resources {
             /** Where all dependencies are stored. */
             DIR_LIB = DIR_APP.child("lib/"),
             
+            /** Where test files are stored. */
+            DIR_TESTS = DIR_APP.child("tests/"),
+            
             /** Directory where Update Server files are stored. Used by update
              * server only. */
             DIR_UPDATE_SERVER = DIR_APP.child("updatefiles/"),

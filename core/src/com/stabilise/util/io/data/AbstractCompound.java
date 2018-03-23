@@ -2,7 +2,7 @@ package com.stabilise.util.io.data;
 
 /**
  * Skeletal implementation for {@link DataCompound}. Every {@code DataCompound}
- * should be an instance of this class; however, client code should never
+ * should be an instance of this class; however, external code should never
  * refer to this class directly and should always use {@code DataCompound}
  * instead.
  */
@@ -16,14 +16,14 @@ public abstract class AbstractCompound implements ITag, DataCompound {
      * specified name already exists, it will be overwritten. Throws NPE if
      * name is null.
      * 
-     * <p>This method is public for convenience; as client code should never
-     * use this class directly, this method should similarly not be used.
+     * <p>This method is public for convenience; external code should probably
+     * try to avoid using this.
      */
     public abstract <T extends ITag> T putData(String name, T t);
     
     /**
-     * Puts everything in this compound into {@code c}. This method should
-     * never be used by client code.
+     * Puts everything in this compound into {@code c}. This method is public
+     * for convenience; external code should probably try to avoid using this.
      */
     public abstract void putAll(AbstractCompound c);
     

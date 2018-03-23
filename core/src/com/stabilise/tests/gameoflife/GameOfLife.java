@@ -46,13 +46,13 @@ public class GameOfLife {
             resList.add(ArrayUtil.to1D(r.reducedBoard));
         }
         
-        IOUtil.write(saveData, Format.NBT_SIMPLE, Compression.UNCOMPRESSED, destFile);
+        IOUtil.write(destFile, saveData, Compression.UNCOMPRESSED);
     }
     
     public static void retrieveLastResults() throws IOException {
         List<Result> results = new ArrayList<>();
         
-        DataCompound saveData = IOUtil.read(Format.NBT_SIMPLE, Compression.UNCOMPRESSED, destFile);
+        DataCompound saveData = IOUtil.read(destFile, Format.NBT, Compression.UNCOMPRESSED);
         DataList resList = saveData.getList("results");
         for(int i = 0; i < resList.size(); i++) {
             results.add(new Result(ArrayUtil.to2D(resList.getIntArr(), Simulation.size, Simulation.size)));

@@ -9,8 +9,9 @@ import com.stabilise.util.io.data.DataList;
 
 public class BoolBox implements IBox {
     
-    public static final BoolBox TRUE  = new ImmutableBoolBox(true);
-    public static final BoolBox FALSE = new ImmutableBoolBox(false);
+	// Please don't go changing these
+    public static final BoolBox TRUE  = new BoolBox(true);
+    public static final BoolBox FALSE = new BoolBox(false);
     
     
     /**
@@ -73,17 +74,6 @@ public class BoolBox implements IBox {
     @Override
     public String toString() {
         return "" + value;
-    }
-    
-    public static final class ImmutableBoolBox extends BoolBox {
-        public ImmutableBoolBox(boolean value) {
-            super(value);
-        }
-        
-        @Override
-        public void set(boolean ignored) {
-            throw new UnsupportedOperationException();
-        }
     }
     
 }
