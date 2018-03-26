@@ -111,6 +111,36 @@ public class ArrayUtil {
     }
     
     /**
+     * Performs the given action on each element of the array. Equivalent to
+     * 
+     * <pre>
+     * for(int i = 0; i < arr.length; i++)
+     *     action.accept(arr[i]);
+     * </pre>
+     */
+    public static <T> void forEach(T[] arr, Consumer<T> action) {
+        for(int i = 0; i < arr.length; i++)
+            action.accept(arr[i]);
+    }
+    
+    /**
+     * Performs the given action on each non-null element of the array.
+     * Equivalent to
+     * 
+     * <pre>
+     * for(int i = 0; i < arr.length; i++)
+     *     if(arr[i] != null)
+     *         action.accept(arr[i]);
+     * </pre>
+     */
+    public static <T> void forEachNonNull(T[] arr, Consumer<T> action) {
+        for(int i = 0; i < arr.length; i++) {
+            if(arr[i] != null)
+                action.accept(arr[i]);
+        }
+    }
+    
+    /**
      * Ensures an array's length is at least the specified value.
      * 
      * @param array The array.

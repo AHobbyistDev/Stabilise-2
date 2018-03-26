@@ -3,11 +3,13 @@ package com.stabilise.util.box;
 import java.io.IOException;
 import java.util.Objects;
 
+import com.stabilise.util.Checks;
 import com.stabilise.util.box.Boxes.MutBox;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
+import com.stabilise.util.io.data.ITag;
 
 public class StringBox extends MutBox<String> implements IBox {
     
@@ -67,5 +69,30 @@ public class StringBox extends MutBox<String> implements IBox {
     public String toString() {
         return value;
     }
+    
+    
+    
+    
+    @Override
+    public boolean isCompatibleType(ITag other) {
+        return other.isString();
+    }
+    
+    @Override
+    public ITag convertToSameType(ITag other) {
+        if(isSameType(other))
+            return other;
+        return new StringBox(other.getAsString());
+    }
+    
+    @Override public boolean isBoolean() { return false; }
+    @Override public boolean isLong()    { return false; }
+    @Override public boolean isDouble()  { return false; }
+    @Override public boolean isString()  { return true;  }
+    
+    @Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert string to boolean... yet"); }
+    @Override public long    getAsLong()    { throw Checks.ISE("Can't convert string to long... yet");    }
+    @Override public double  getAsDouble()  { throw Checks.ISE("Can't convert string to double... yet");  }
+    @Override public String  getAsString()  { return value;                                               }
     
 }

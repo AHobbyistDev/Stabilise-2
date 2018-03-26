@@ -91,9 +91,7 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
      * Exposed for convenience.
      */
     public final void forEachTag(BiConsumer<String, ITag> action) {
-        for(Map.Entry<String, ITag> pair : data.entrySet()) {
-            action.accept(pair.getKey(), pair.getValue());
-        }
+        data.entrySet().forEach(e -> action.accept(e.getKey(), e.getValue()));
     }
     
     // DON'T YOU JUST LOVE HOW WONDERFULLY REPETITIVE THIS IS

@@ -6,6 +6,7 @@ import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
+import com.stabilise.util.io.data.ITag;
 
 public class BoolBox implements IBox {
     
@@ -18,6 +19,9 @@ public class BoolBox implements IBox {
      * Returns a BoolBox encapsulating the specified value. This method may be
      * preferable to constructing a new BoolBox as it reuses {@link TRUE} and
      * {@link FALSE}.
+     * 
+     * <p>Warning: ONLY use this if you don't plan on changing the boxed value,
+     * or things will go very wrong.
      */
     public static BoolBox valueOf(boolean bool) {
         return bool ? TRUE : FALSE;
@@ -45,7 +49,7 @@ public class BoolBox implements IBox {
     public void readData(DataInStream in) throws IOException {
         value = in.readBoolean();
     }
-
+    
     @Override
     public void writeData(DataOutStream out) throws IOException {
         out.writeBoolean(value);
@@ -55,7 +59,7 @@ public class BoolBox implements IBox {
     public void write(String name, DataCompound o) {
         o.put(name, value);
     }
-
+    
     @Override
     public void read(String name, DataCompound o) {
         value = o.getBool(name);
@@ -75,5 +79,31 @@ public class BoolBox implements IBox {
     public String toString() {
         return "" + value;
     }
+    
+    
+    
+    
+    
+    @Override
+    public boolean isCompatibleType(ITag other) {
+        return other.isBoolean();
+    }
+    
+    @Override
+    public ITag convertToSameType(ITag other) {
+        if(isSameType(other))
+            return other;
+        return new BoolBox(other.getAsBoolean());
+    }
+    
+    @Override public boolean isBoolean() { return true; }
+    @Override public boolean isLong()    { return true; }
+    @Override public boolean isDouble()  { return true; }
+    @Override public boolean isString()  { return true; }
+    
+    @Override public boolean getAsBoolean() { return value;                   }
+    @Override public long    getAsLong()    { return value ? 1L : 0L;         }
+    @Override public double  getAsDouble()  { return value ? 1D : 0D;         }
+    @Override public String  getAsString()  { return Boolean.toString(value); }
     
 }

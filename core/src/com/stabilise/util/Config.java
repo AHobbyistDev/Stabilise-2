@@ -3,9 +3,10 @@ package com.stabilise.util;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.stabilise.util.annotation.Incomplete;
+import com.stabilise.util.box.BoolBox;
 import com.stabilise.util.io.data.MapCompound;
 import com.stabilise.util.io.IOUtil;
 import com.stabilise.util.io.data.Compression;
@@ -14,27 +15,51 @@ import com.stabilise.util.io.data.Format;
 import com.stabilise.util.io.data.ITag;
 
 /**
- * A robust Settings/Configuration class.
+ * A robust configuration/settings class. Is backed by a {@code DataCompound},
+ * {@link #values}, from which the config options may be read or written to.
+ * Config files are saved in the JSON format, so that people may edit them
+ * easily using their favourite text editor.
+ * 
+ * <p>A separate {@code DataCompound} of default values is passed into this
+ * class. This class uses this set of default values to determine which config
+ * options are valid -- if an option doesn't show up in the defaults, or has
+ * mismatched types, it may be {@link #sanitise() sanitised}.
  */
 public class Config {
+    
+    // TODO: allow comments in a config file, so that users reading the text
+    // file know what the options are and the valid ranges for those options.
+    // Since I delegate the JSON I/O to libgdx, this probably isn't gonna
+    // happen anytime soon.
 	
 	public static final Format CONFIG_FORMAT = Format.JSON;
 	
-	/** Holds the types of all accepted values and their default values. */
-	private final MapCompound defaults;
 	
 	/** Contains the actual config data. */
 	public final DataCompound values = CONFIG_FORMAT.newCompound();
 	private final MapCompound valuesAsMap = values.asMapCompound();
 	
+	/** Holds the types of all accepted values and their default values. */
+	public final DataCompound defaults;
+	private final MapCompound defaultsAsMap;
+	
 	/** The location where this config/settings file is saved. May be null. */
 	private final FileHandle fileLoc;
 	
 	
+	
+	/**
+	 * Creates a new config/settings with the specified defaults and file
+	 * location.
+	 * 
+	 * @throws NullPointerException if either argument is null.
+	 */
 	public Config(DataCompound defaults, FileHandle fileLoc) {
-		this.defaults = defaults.convert(CONFIG_FORMAT).asMapCompound();
-		this.defaults.putAll(valuesAsMap); // fill up the values with the defaults
-		this.fileLoc = fileLoc;
+	    DataCompound def = defaults.convert(CONFIG_FORMAT);
+	    this.defaults = def.immutable();
+		this.defaultsAsMap = def.asMapCompound();
+		this.defaultsAsMap.putAll(valuesAsMap); // fill up the values with the defaults
+		this.fileLoc = Objects.requireNonNull(fileLoc);
 	}
 	
 	/**
@@ -42,10 +67,18 @@ public class Config {
 	 * anything if no such default exists.
 	 */
 	public void reset(String name) {
-		ITag tag = defaults.getData(name);
+		ITag tag = defaultsAsMap.getData(name);
 		if(tag == null) // isn't even a valid setting that we're resetting
 			return;
 		valuesAsMap.putData(name, tag); // overwrite with the default
+	}
+	
+	/**
+	 * Resets all values to their defaults.
+	 */
+	public void resetToDefaults() {
+	    valuesAsMap.clear();
+	    defaultsAsMap.putAll(valuesAsMap);
 	}
 	
 	/**
@@ -65,13 +98,30 @@ public class Config {
 	 * #removeExcessEntries()} to do this); and to correct 4) we need a
 	 * knowledge of the space of valid values, so this must be corrected
 	 * elsewhere.
+	 * 
+	 * <p>This method is automatically invoked by {@link #load()}.
+	 * 
+	 * @return {@code true} if any entries were changed by this method.
 	 */
-	public void sanitise() {
-		defaults.forEachTag((name,tag) -> {
+	public boolean sanitise() {
+	    BoolBox changes = new BoolBox(false);
+		defaultsAsMap.forEachTag((name,defTag) -> {
 			ITag valueTag = valuesAsMap.getData("name");
-			if(valueTag == null || tag.isSameType(valueTag))
-				valuesAsMap.putData(name, tag);
+			// If tag isn't present or is of the completely wrong type, set to
+			// the default.
+			if(valueTag == null || !defTag.isCompatibleType(valueTag)) {
+				valuesAsMap.putData(name, defTag);
+				changes.set(true);
+			// If tag is there and is of the wrong -- but compatible -- type,
+			// just convert and put it in. A type can be of a compatibly wrong
+			// type if e.g., the JSON format doesn't distinguish between
+			// byte/short/int/long and float/double, so we just correct it.
+			} else if(defTag.isCompatibleType(valueTag)) {
+			    valuesAsMap.putData(name, defTag.convertToSameType(valueTag));
+			    changes.set(true);
+			}
 		});
+		return changes.get();
 	}
 	
 	/**
@@ -81,7 +131,7 @@ public class Config {
 		Iterator<Map.Entry<String, ITag>> itr = valuesAsMap.iterator();
 		while(itr.hasNext()) {
 			Map.Entry<String, ITag> e = itr.next();
-			if(!defaults.contains(e.getKey()))
+			if(!defaultsAsMap.contains(e.getKey()))
 				itr.remove();
 		}
 	}
@@ -93,11 +143,31 @@ public class Config {
 		return fileLoc;
 	}
 	
-	public void load() throws IOException {
+	/**
+	 * Loads this config/settings file from its given file location given by
+	 * {@link #getFile()}, and then {@link #sanitise() sanitises} whatever is
+	 * loaded.
+	 * 
+	 * @return the result of {@link #sanitise()}.
+	 * @throws IOException if an I/O error occurs.
+	 */
+	public boolean load() throws IOException {
 		valuesAsMap.clear();
-		IOUtil.read(fileLoc, values, Compression.UNCOMPRESSED);
+		boolean sanitised = false;
+		try {
+		    if(fileLoc.exists())
+		        IOUtil.read(fileLoc, values, Compression.UNCOMPRESSED);
+		} finally {
+		    sanitised = sanitise();
+		}
+		return sanitised;
 	}
 	
+	/**
+	 * Saves this config/settings file.
+	 * 
+	 * @throws IOException if an I/O error occurs.
+	 */
 	public void save() throws IOException {
 		IOUtil.writeSafe(fileLoc, values, Compression.UNCOMPRESSED);
 	}

@@ -248,14 +248,14 @@ public class Checks {
     /**
      * Throws an AssertionError.
      */
-    public static AssertionError badAssert() {
+    public static <T> T badAssert() {
         throw new AssertionError();
     }
     
     /**
      * Throws an AssertionError with the specified message.
      */
-    public static AssertionError badAssert(String msg) {
+    public static <T> T badAssert(String msg) {
         throw new AssertionError(msg);
     }
     
@@ -271,6 +271,20 @@ public class Checks {
      */
     public static UnsupportedOperationException unsupported(String msg) {
         throw new UnsupportedOperationException(msg);
+    }
+    
+    /**
+     * Throws an IllegalStateException.
+     */
+    public static IllegalStateException ISE() {
+        throw new IllegalStateException();
+    }
+    
+    /**
+     * Throws an IllegalStateException with the specified message.
+     */
+    public static IllegalStateException ISE(String msg) {
+        throw new IllegalStateException(msg);
     }
     
 }

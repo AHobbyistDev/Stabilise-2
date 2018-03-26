@@ -1,12 +1,15 @@
 package com.stabilise.util.box;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 
+import com.stabilise.util.Checks;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
+import com.stabilise.util.io.data.ITag;
 
 public class IntArrBox implements IBox {
     
@@ -70,5 +73,25 @@ public class IntArrBox implements IBox {
     public String toString() {
         return "[" + value.length + (value.length == 1 ? " int]" : " ints]");
     }
+    
+    
+    
+    
+    @Override
+    public ITag convertToSameType(ITag other) {
+        if(isSameType(other))
+            return other;
+        throw Checks.ISE("Can't convert " + other.getClass().getSimpleName() + "to byte array");
+    }
+    
+    @Override public boolean isBoolean() { return false; }
+    @Override public boolean isLong()    { return false; }
+    @Override public boolean isDouble()  { return false; }
+    @Override public boolean isString()  { return true;  }
+    
+    @Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert int array to boolean... yet"); }
+    @Override public long    getAsLong()    { throw Checks.ISE("Can't convert int array to long... yet");    }
+    @Override public double  getAsDouble()  { throw Checks.ISE("Can't convert int array to double... yet");  }
+    @Override public String  getAsString()  { return Arrays.toString(value);                                 }
     
 }

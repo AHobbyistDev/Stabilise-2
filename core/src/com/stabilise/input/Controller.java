@@ -10,8 +10,11 @@ import com.badlogic.gdx.InputProcessor;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.stabilise.core.Constants;
-import com.stabilise.util.ConfigFile;
+import com.stabilise.core.Resources;
+import com.stabilise.util.ArrayUtil;
+import com.stabilise.util.Config;
 import com.stabilise.util.Log;
+import com.stabilise.util.io.data.DataCompound;
 
 /**
  * A Controller translates key input into configurable controls.
@@ -106,6 +109,9 @@ public class Controller implements InputProcessor {
         }
         
     };
+    
+    /** The actual config data. */
+    private static final Config CONFIG = new Config(getDefaults(), Resources.DIR_CONFIG.child("controls.txt"));
     
     /** The key mappings. Maps keycodes to controls. */
     private static final BiMap<Integer, Control> CONTROL_MAP = HashBiMap.create();
@@ -218,31 +224,17 @@ public class Controller implements InputProcessor {
      * key.
      */
     public static boolean bindKey(int key, Control control) {
+        /*
         if(key < 0 || (CONTROL_MAP.containsValue(control) && KEY_MAP.get(control) != key))
             return false;
         
         CONTROL_MAP.put(key, control);
         
         return true;
-    }
-    
-    /**
-     * Weakly binds a key to a control - that is, only binds it if the control
-     * lacks a mapped key and the key is not in use.
-     * 
-     * @param key The key.
-     * @param control The control.
-     * 
-     * @return {@code true} if the control was successfully bound;
-     * {@code false} otherwise.
-     */
-    private static boolean bindKeyWeak(int key, Control control) {
-        if(key < 0 || CONTROL_MAP.containsKey(key) || CONTROL_MAP.containsValue(control))
-            return false;
+        */
         
-        CONTROL_MAP.put(key, control);
-        
-        return true;
+        Log.get().postWarning("Attempted to bind a key -- functionality is currently NYI.");
+        return false;
     }
     
     /**
@@ -252,100 +244,99 @@ public class Controller implements InputProcessor {
     private static void initialise() {
         if(!initialised) {
             initialised = true;
-            setupConfig();
+            loadConfig();
         }
     }
     
     /**
-     * Sets up the control configuration. If the configuration is already set
-     * up, it will be reset.
+     * Gets the DataCompound of default config values to feed into the
+     * constructor of {@link #CONFIG}.
      */
-    public static void setupConfig() {
-        if(!loadConfig()) {
-            Log.get().postWarning("Controls config could not be loaded - "
-                    + "resetting to default values.");
-            defaultConfig();
-            saveConfig();
-        }
-    }
-    
-    /**
-     * Sets each config value to its default.
-     */
-    public static void defaultConfig() {
-        Control[] controls = Control.values();
-        for(int i = 0; i < controls.length; i++) {
-            bindKey(controls[i].defaultKey, controls[i]);
-        }
+    private static DataCompound getDefaults() {
+        DataCompound defaults = DataCompound.create();
+        ArrayUtil.forEach(Control.values(), c -> {
+            if(c.valid)
+                defaults.put(c.fieldName, c.defaultKey);
+        });
+        return defaults;
     }
     
     /**
      * Loads the key controls config.
-     * 
-     * @return {@code true} if the controls were successfully loaded and set,
-     * {@code false} otherwise.
      */
-    public static boolean loadConfig() {
-        ConfigFile config = new ConfigFile("controls");
+    public static void loadConfig() {
+        boolean changes = false;
         try {
-            config.load();
+            changes = CONFIG.load();
         } catch(IOException e) {
-            Log.get().postWarning("Could not load controls config (" + e.getClass().getSimpleName() + ")!");
-            return false;
+            changes = true;
+            Log.get().postWarning("Could not load controls config: " + e.getMessage());
         }
+        
+        changes |= updateMaps();
+        
+        if(changes)
+            saveConfig();
+    }
+    
+    private static boolean updateMaps() {
+        boolean changes = false;
+        
+        CONTROL_MAP.clear();
         
         Control[] controls = Control.values();
-        // If there are any missing values, we'll need to save the config after loading it
-        boolean missingConfigs = false;
-        
-        // Attempt to bind every control, whether it was stored or not
-        for(Control c : controls) {
-            if(!bindKey(config.getInteger(c.fieldName), c))
-                return false;
-        }
-        
-        // Check to see if any configs are missing from the config file, and
-        // bind them to the default value if so
-        for(Control c : controls) {
-            if(!CONTROL_MAP.containsValue(c) && c.valid) {
-                bindKey(c.defaultKey, c);
-                missingConfigs = true;
+        for(int i = 0; i < controls.length; i++) {
+            Control c = controls[i];
+            if(!c.valid)
+                continue;
+            int key = CONFIG.values.getInt(c.fieldName);
+            // If key has already been bound to another control, reset this
+            // control to the default value.
+            if(CONTROL_MAP.containsKey(key)) {
+                CONFIG.reset(c.fieldName);
+                key = CONFIG.values.getInt(c.fieldName);
+                changes = true;
+                // If however the default value is also taken by something,
+                // then we give up on trying to make things work and reset
+                // everything to the defaults.
+                if(CONTROL_MAP.containsKey(key)) {
+                    Log.get().postWarning("Incompatible control config loaded --"
+                            + " resetting to default values.");
+                    resetToDefaults();
+                    return true;
+                }
             }
+            
+            // Update the entry in CONTROL_MAP. We don't need to update KEY_MAP
+            // since it's backed by CONTROL_MAP.
+            CONTROL_MAP.put(key, c);
         }
         
-        // Lastly, weakly bind any unbound controls (e.g., if a new control was
-        // added since last the config was saved, it will need to be added)
-        for(Control c : controls) {
-            if(c.valid && bindKeyWeak(c.defaultKey, c))
-                missingConfigs = true;
-        }
+        return changes;
+    }
+    
+    /**
+     * Resets all the controls to their default values.
+     */
+    private static void resetToDefaults() {
+        // Reset true config
+        CONFIG.resetToDefaults();
         
-        // Finally, check to see if there remain any unbound configs
-        for(Control c : controls) {
-            if(!CONTROL_MAP.containsValue(c) && c.valid)
-                return false;
-        }
+        // Fill up CONTROL_MAP
+        CONTROL_MAP.clear();
+        ArrayUtil.forEach(Control.values(), c -> {
+            if(c.valid)
+                CONTROL_MAP.put(CONFIG.values.getInt(c.fieldName), c);
+        });
         
-        if(missingConfigs)
-            saveConfig();
-        
-        return true;
     }
     
     /**
      * Saves the key controls config.
      */
     public static void saveConfig() {
-        ConfigFile config = new ConfigFile("controls");
-        
-        Control[] controls = Control.values();
-        for(Control c : controls) {
-            if(c.valid)
-                config.addInteger(c.fieldName, KEY_MAP.get(c));
-        }
-        
         try {
-            config.safeSave();
+            CONFIG.save();
         } catch(IOException e) {
             Log.get().postWarning("Could not save controls config!", e);
         }

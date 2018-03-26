@@ -6,10 +6,11 @@ import java.util.Objects;
  * An Event represents an occurrence which may be distributed to listeners via
  * an {@link EventDispatcher}.
  * 
- * <p>An Event is identified by the name assigned to it in its constructor, so
- * {@code new Event("Hello, world!").equals(new Event("Hello, world!"))} will
- * return {@code true}, as they are indistinguishable. This is acceptable for
- * many cases, but poses a security threat for others. To make an event
+ * <p>An Event is identified by the two things: its class and the name assigned
+ * to it in its constructor, so {@code
+ * new Event("Hello, world!").equals(new Event("Hello, world!"))} will return
+ * {@code true}, as they are indistinguishable. This is acceptable for many
+ * cases, but poses a security threat for others. To make an event
  * unduplicatable, simply subclass Event and instantiate your event as a
  * member of that class. e.g.,
  * 

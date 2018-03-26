@@ -1,5 +1,7 @@
 package com.stabilise.util.io.data;
 
+import com.stabilise.util.Checks;
+
 /**
  * Skeletal implementation for {@link DataCompound}. Every {@code DataCompound}
  * should be an instance of this class; however, external code should never
@@ -59,5 +61,24 @@ public abstract class AbstractCompound implements ITag, DataCompound {
         putAll(clone);
         return clone;
     }
+    
+    
+    
+    @Override
+    public ITag convertToSameType(ITag other) {
+        if(isSameType(other))
+            return other;
+        throw Checks.ISE("Can't convert " + other.getClass().getSimpleName() + " to compound type.");
+    }
+    
+    @Override public boolean isBoolean() { return false; }
+    @Override public boolean isLong()    { return false; }
+    @Override public boolean isDouble()  { return false; }
+    @Override public boolean isString()  { return false; }
+    
+    @Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert compound to boolean"); }
+    @Override public long    getAsLong()    { throw Checks.ISE("Can't convert compound to long");    }
+    @Override public double  getAsDouble()  { throw Checks.ISE("Can't convert compound to double");  }
+    @Override public String  getAsString()  { throw Checks.ISE("Can't convert compound to string");  }
     
 }

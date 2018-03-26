@@ -4,6 +4,7 @@ import static com.stabilise.util.box.Boxes.box;
 
 import java.util.function.Consumer;
 
+import com.stabilise.util.Checks;
 import com.stabilise.util.box.BoolBox;
 import com.stabilise.util.box.ByteArrBox;
 import com.stabilise.util.box.ByteBox;
@@ -131,5 +132,25 @@ public abstract class AbstractDataList implements DataList, ITag {
         putAll(l);
         return l;
     }
+    
+    
+    
+    
+    @Override
+    public ITag convertToSameType(ITag other) {
+        if(isSameType(other))
+            return other;
+        throw Checks.ISE("Can't convert " + other.getClass().getSimpleName() + " to list type.");
+    }
+    
+    @Override public boolean isBoolean() { return false; }
+    @Override public boolean isLong()    { return false; }
+    @Override public boolean isDouble()  { return false; }
+    @Override public boolean isString()  { return false; }
+    
+    @Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert lost to boolean"); }
+    @Override public long    getAsLong()    { throw Checks.ISE("Can't convert list to long");    }
+    @Override public double  getAsDouble()  { throw Checks.ISE("Can't convert list to double");  }
+    @Override public String  getAsString()  { throw Checks.ISE("Can't convert list to string");  }
     
 }

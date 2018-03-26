@@ -20,6 +20,15 @@ public class CompoundBuilder {
 	}
 	
 	/**
+     * Creates a new CompoundBuilder wrapping a compound of the given format.
+     * 
+     * @see DataCompound#create()
+     */
+    public CompoundBuilder(Format format) {
+        this(format.newCompound());
+    }
+	
+	/**
 	 * Creates a new CompoundBuilder wrapping the given compound.
 	 */
 	public CompoundBuilder(DataCompound c) {

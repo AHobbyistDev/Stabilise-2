@@ -6,6 +6,7 @@ import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
+import com.stabilise.util.io.data.ITag;
 
 public class LongBox implements IBox {
     
@@ -60,5 +61,32 @@ public class LongBox implements IBox {
     public String toString() {
         return "" + value;
     }
+    
+    
+    
+    
+    
+    
+    @Override
+    public boolean isCompatibleType(ITag other) {
+        return other.isLong();
+    }
+    
+    @Override
+    public ITag convertToSameType(ITag other) {
+        if(isSameType(other))
+            return other;
+        return new LongBox(other.getAsLong());
+    }
+    
+    @Override public boolean isBoolean() { return true; }
+    @Override public boolean isLong()    { return true; }
+    @Override public boolean isDouble()  { return true; }
+    @Override public boolean isString()  { return true; }
+    
+    @Override public boolean getAsBoolean() { return value != 0;           }
+    @Override public long    getAsLong()    { return value;                }
+    @Override public double  getAsDouble()  { return (double) value;       }
+    @Override public String  getAsString()  { return Long.toString(value); }
     
 }
