@@ -17,7 +17,7 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.loader.WorldLoader.DimensionLoader;
+import com.stabilise.world.loader.DimensionLoader;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
 import com.stabilise.world.tile.Tile;
@@ -36,7 +36,8 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  */
 public class HostWorld extends AbstractWorld {
     
-    /** This world's region cache. */
+    /** This world's region store, which as the name suggests, stores and
+     * manages all the regions. */
     private final RegionStore regions;
     
     /** The world loader. */
@@ -287,7 +288,7 @@ public class HostWorld extends AbstractWorld {
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
-    public void loadSlice(int x, int y) {
+    public void anchorSlice(int x, int y) {
         regions.anchorRegion(
                 regionCoordFromSliceCoord(x),
                 regionCoordFromSliceCoord(y)
@@ -295,12 +296,12 @@ public class HostWorld extends AbstractWorld {
     }
     
     /**
-     * Unloads a slice.
+     * Removes an anchor from a slice.
      * 
      * @param x The x-coordinate of the slice, in slice lengths.
      * @param y The y-coordinate of the slice, in slice lengths.
      */
-    public void unloadSlice(int x, int y) {
+    public void deanchorSlice(int x, int y) {
         regions.deAnchorRegion(
                 regionCoordFromSliceCoord(x),
                 regionCoordFromSliceCoord(y)

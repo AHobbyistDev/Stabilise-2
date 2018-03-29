@@ -2,10 +2,12 @@ package com.stabilise.world.multiverse;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,9 +16,9 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
-import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.World;
+import com.stabilise.world.WorldInfo;
 import com.stabilise.world.loader.WorldLoader;
 
 /**
@@ -42,6 +44,9 @@ public abstract class Multiverse<W extends AbstractWorld> {
     /** Stores all dimensions. Maps dimension names -> dimensions. */
     protected final Map<String, W> dimensions = new HashMap<>(2);
     
+    /** The WorldInfo. Dimensions should treat this as read-only. */
+    public final WorldInfo info;
+    
     /** Profile any world's operation with this. Never {@code null}. */
     protected Profiler profiler;
     protected final Log log = Log.getAgent("Multiverse");
@@ -61,30 +66,32 @@ public abstract class Multiverse<W extends AbstractWorld> {
     /**
      * Creates a new Multiverse.
      * 
+     * @param info The world info.
      * @param profiler The profiler to use to profile this multiverse and its
      * worlds. If {@code null}, a default disabled profiler is instead set.
+     * 
+     * @throws NullPointerException if {@code info} is {@code null}.
      */
-    public Multiverse(Profiler profiler) {
+    public Multiverse(WorldInfo info, Profiler profiler) {
+    	this.info = Objects.requireNonNull(info);
+    	
         this.profiler = profiler != null
                 ? profiler
                 : new Profiler(false, "root", false);
         
         // Start up the executor
         
-        final int coreThreads = 2; // region loading typically happens in pairs
-        final int maxThreads = Math.max(coreThreads,
-                Runtime.getRuntime().availableProcessors()-1); // -1 because main thread already exists
-        
-        BoundedThreadPoolExecutor tpe = new BoundedThreadPoolExecutor(
-                coreThreads, maxThreads,
-                30L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(),
-                new WorldThreadFactory()
+        // availProcessors-1 because the main thread already exists.
+        final int coreThreads = Runtime.getRuntime().availableProcessors() - 1;
+        executor = new ThreadPoolExecutor(
+        		coreThreads,
+        		Integer.MAX_VALUE,
+        		30L, TimeUnit.SECONDS,
+        		new LinkedBlockingQueue<>(),
+        		new WorldThreadFactory()
         );
-        executor = tpe;
         
-        log.postDebug("Started thread pool with [" + coreThreads + ","
-                + maxThreads + "] threads.");
+        log.postDebug("Started thread pool with " + coreThreads + " threads.");
         
         // Start up the world loader
         loader = WorldLoader.getLoader(this);

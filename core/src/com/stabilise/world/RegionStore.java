@@ -25,7 +25,7 @@ import com.stabilise.util.box.Boxes;
 import com.stabilise.util.concurrent.Striper;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
-import com.stabilise.world.loader.WorldLoader.DimensionLoader;
+import com.stabilise.world.loader.DimensionLoader;
 
 /**
  * Stores and manages regions. Every {@link HostWorld} owns a {@code
@@ -102,7 +102,7 @@ public class RegionStore {
             new ConcurrentHashMap<>();
     
     /** Locks to use for managing cache-local data. These locks double as
-     * mutable points for convenience, which should only be used while
+     * mutable Points for convenience, which should only be used while
      * synchronised on themselves. */
     private final Striper2D<Point> cacheLocks = new Striper2D<>(Region::createMutableLoc);
     /** Locks to synchronise on when adding/removing from storage. These locks
@@ -124,7 +124,7 @@ public class RegionStore {
     private final Striper2D<Object> storeLocks = new Striper2D<>(Object::new);
     
     /** Dummy key for {@link #regions} whose mutability may be abused for
-     * optimisation purposes on the main thread. */
+     * convenience, but ONLY on the main thread. */
     private final Point unguardedDummyLoc = Region.createMutableLoc();
     
     /** Regions which have been cached by the current worker thread. */
@@ -218,7 +218,7 @@ public class RegionStore {
      * @param x The x-coordinate of the region, in region-lengths.
      * @param y The y-coordinate of the region, in region-lengths.
      * 
-     * @return The region.
+     * @return The region. Never null.
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod

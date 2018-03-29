@@ -94,7 +94,7 @@ public class SliceMap {
         // characteristics:
         // > It isn't as efficient as using 'if' conditionals for when the
         //   target moves only 1 slice in a tick (which should be the case 99%
-        //   of the time).
+        //   of the time). Ah well.
         // > It capably loads and unloads slices no matter how fast the target
         //   moves.
         // > However, it becomes extremely inefficient when the target
@@ -123,11 +123,11 @@ public class SliceMap {
     }
     
     private void loadCol(int x, int minY, int maxY) {
-        for(int y = minY; y <= maxY; y++) world.loadSlice(x, y);
+        for(int y = minY; y <= maxY; y++) world.anchorSlice(x, y);
     }
     
     private void loadRow(int y, int minX, int maxX) {
-        for(int x = minX; x <= maxX; x++) world.loadSlice(x, y);
+        for(int x = minX; x <= maxX; x++) world.anchorSlice(x, y);
     }
     
     /**
@@ -137,7 +137,7 @@ public class SliceMap {
      */
     protected void loadCol(int x) {
         for(int y = minSliceY; y <= maxSliceY; y++)
-            world.loadSlice(x, y);
+            world.anchorSlice(x, y);
     }
     
     /**
@@ -147,7 +147,7 @@ public class SliceMap {
      */
     protected void loadRow(int y) {
         for(int x = minSliceX; x <= maxSliceX; x++)
-            world.loadSlice(x, y);
+            world.anchorSlice(x, y);
     }
     
     /**
@@ -161,7 +161,7 @@ public class SliceMap {
      */
     protected void unloadCol(int x, int minY, int maxY) {
         for(int y = minY; y <= maxY; y++)
-            world.unloadSlice(x, y);
+            world.deanchorSlice(x, y);
     }
     
     /**
@@ -175,7 +175,7 @@ public class SliceMap {
      */
     protected void unloadRow(int y, int minX, int maxX) {
         for(int x = minX; x <= maxX; x++)
-            world.unloadSlice(x, y);
+            world.deanchorSlice(x, y);
     }
     
     /**

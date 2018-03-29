@@ -17,7 +17,7 @@ import com.stabilise.world.Region;
 import com.stabilise.world.RegionStore;
 import com.stabilise.world.WorldLoadTracker;
 import com.stabilise.world.gen.InstancedWorldgen.InstancedWorldgenSupplier;
-import com.stabilise.world.loader.WorldLoader.DimensionLoader;
+import com.stabilise.world.loader.DimensionLoader;
 import com.stabilise.world.multiverse.Multiverse;
 
 /**
@@ -165,8 +165,6 @@ public final class WorldGenerator {
             world.stats.gen.aborted.increment();
             return;
         }
-        
-        //log.logMessage("Generating " + r);
         
         TaskTimer timer = new TaskTimer("Generating " + r);
         timer.start();

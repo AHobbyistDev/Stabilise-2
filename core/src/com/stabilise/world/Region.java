@@ -87,11 +87,13 @@ public class Region {
     /** The number of slices anchored due to having been loaded by a client
      * within the region. Used to determine whether the region should begin the
      * 'unload countdown'. */
+    @Deprecated
     private int anchors = 0;
     
     /** Number of adjacent regions which are active. We do not unload a region
      * unless it has no active neighbours. A region counts itself as a
      * neighbour as itself being active must prevent it from being unloaded. */
+    @Deprecated
     private int activeNeighbours = 0;
     
     /** The slices contained by this region.
@@ -110,12 +112,16 @@ public class Region {
     
     /** The state of this region. See the documentation for {@link #State.NEW}
      * and all other states. */
-    private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
+    @Deprecated
+    private final AtomicReference<State> stateOld = new AtomicReference<>(State.NEW);
     /** Save state. Encapsulated in a Box so it can be safely passed off to
      * the lambda in getSavePermit(). */
+    @Deprecated
     private final Box<SaveState> saveState = Boxes.box(SaveState.IDLE);
     /** Whether or not this region has been generated. */
+    @Deprecated
     private boolean generated = false;
+    @Deprecated
     /** Whether or not the entities & tile entities stored in this region have
      * been loaded into the world. This should be {@code false} until
      * isPrepared() returns true in the main thread, from which we set this to
@@ -124,6 +130,9 @@ public class Region {
     
     /** The time the region was last saved, in terms of the world age. */
     public long lastSaved;
+    
+    
+    public final RegionState state = new RegionState();
     
     /** Actions to perform when added to the world. */
     public List<Action> queuedActions = null;
@@ -270,6 +279,7 @@ public class Region {
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
+    @Deprecated
     boolean anchor() {
         return anchors++ == 0;
     }
@@ -284,6 +294,7 @@ public class Region {
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
+    @Deprecated
     boolean deAnchor() {
         return --anchors == 0;
     }
@@ -294,6 +305,7 @@ public class Region {
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
+    @Deprecated
     private boolean isAnchored() {
         return anchors > 0;
     }
@@ -304,6 +316,7 @@ public class Region {
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
+    @Deprecated
     void addNeighbour() {
         activeNeighbours++;
     }
@@ -314,6 +327,7 @@ public class Region {
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
+    @Deprecated
     void removeNeighbour() {
         if(--activeNeighbours == 0)
             ticksToUnload = REGION_UNLOAD_TICK_BUFFER;
@@ -384,13 +398,15 @@ public class Region {
      * Returns {@code true} if this region has been prepared and may be safely
      * used.
      */
+    @Deprecated
     public boolean isPrepared() {
-        return state.get().equals(State.PREPARED);
+        return stateOld.get().equals(State.PREPARED);
     }
     
     /**
      * Checks for whether or not this region has been generated.
      */
+    @Deprecated
     public boolean isGenerated() {
         return generated;
     }
@@ -405,6 +421,7 @@ public class Region {
      * <li>When the WorldGenerator finishes generating this region.
      * </ul>
      */
+    @Deprecated
     public void setGenerated() {
         generated = true;
         
@@ -423,12 +440,12 @@ public class Region {
         // 2: The WorldGenerator just finished generating this region. We
         //    change to State.ACTIVE as this region is now usable.
         
-        State s = state.get();
+        State s = stateOld.get();
         if(s.equals(State.LOADING)) {
             if(!hasQueuedStructures())
-                state.compareAndSet(State.LOADING, State.PREPARED);
+                stateOld.compareAndSet(State.LOADING, State.PREPARED);
         } else if(s == State.GENERATING)
-            state.compareAndSet(State.GENERATING, State.PREPARED);
+            stateOld.compareAndSet(State.GENERATING, State.PREPARED);
         else
             Log.get().postWarning("Invalid state " + s + " on setGenerated for "
                     + this);
@@ -439,10 +456,11 @@ public class Region {
      * {@code true}, the caller may load the region. This method is provided
      * for WorldLoader use only.
      */
+    @Deprecated
     public boolean getLoadPermit() {
         // We can load only when this region is newly-created, so the only
         // valid state transition is from State.NEW to State.LOADING.
-        return state.compareAndSet(State.NEW, State.LOADING);
+        return stateOld.compareAndSet(State.NEW, State.LOADING);
     }
     
     /**
@@ -450,8 +468,9 @@ public class Region {
      * {@code true}, the caller may generate this region. This method is
      * provided for WorldGenerator use only.
      */
+    @Deprecated
     public boolean getGenerationPermit() {
-        return state.compareAndSet(State.LOADING, State.GENERATING);
+        return stateOld.compareAndSet(State.LOADING, State.GENERATING);
     }
     
     /**
@@ -461,6 +480,7 @@ public class Region {
      * <p>Note that this method may block for a while if this region is
      * currently being saved.
      */
+    @Deprecated
     public boolean getSavePermit() {
         synchronized(saveState) {
             // We synchronise on this region to make this atomic. This is much
@@ -501,6 +521,7 @@ public class Region {
      * notifying relevant threads.
      */
     @UserThread("WorldLoaderThread")
+    @Deprecated
     public void finishSaving() {
         synchronized(saveState) {
             saveState.set(saveState.get() == SaveState.WAITING
@@ -516,6 +537,7 @@ public class Region {
      * set when this method returns.
      */
     @SuppressWarnings("unused")
+    @Deprecated
     private void waitUntilSaved() {
         Tasks.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE);
     }
@@ -591,7 +613,7 @@ public class Region {
     }
     
     private String stateToString() {
-        return state.get().toString();
+        return stateOld.get().toString();
     }
     
     private String saveStateToString() {
@@ -637,6 +659,7 @@ public class Region {
     /**
      * Values for a region's state.
      */
+    @Deprecated
     private static enum State {
         /** A region is newly-instantiated and is not ready to be used.
          * Transitions to {@code LOADING} via {@link Region#getLoadPermit()}. */
@@ -664,6 +687,7 @@ public class Region {
      * <p>All save state control is localised to {@link Region#getSavePermit()}
      * and {@link Region#finishSaving()}.
      */
+    @Deprecated
     private static enum SaveState {
         /** A region is not currently being saved. */
         IDLE,
