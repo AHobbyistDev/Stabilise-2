@@ -28,6 +28,10 @@ public class Entities {
         return e(new CPlayerPerson()).addComponent(new CInvulnerability());
     }
     
+    public static Entity player2() {
+        return e(new CPlayerAsGenericEnemy()).addComponent(new CInvulnerability());
+    }
+    
     public static Entity fireball(long ownerID, int damage) {
         return e(new CFireball(ownerID, damage));
     }

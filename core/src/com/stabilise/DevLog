@@ -272,5 +272,8 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Refactored util.concurrent.task framework
 14/12/16
 	- Gave dimensions the ability to properly register their desired generators.
-	
+16/03/18
+	- Added Position class and refactored game to use it instead of double/int pairs.
+
+
 
