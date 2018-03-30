@@ -21,6 +21,7 @@ import com.stabilise.util.concurrent.task.Task;
 import com.stabilise.util.concurrent.task.TaskCallable;
 import com.stabilise.util.concurrent.task.TaskHandle;
 import com.stabilise.util.io.IOUtil;
+import com.stabilise.world.loader.WorldFormat;
 import com.stabilise.world.multiverse.HostMultiverse;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.multiverse.HostMultiverse.PlayerBundle;
@@ -73,10 +74,9 @@ public class Worlds {
         info.name = originalWorldName;
         info.age = 0;
         info.seed = worldSeed;
-        info.worldFormatVersion = -1;            // TODO: temporary value
-        info.sliceFormatVersion = -1;            // TODO: temporary value
         info.creationDate = System.currentTimeMillis();
         info.lastPlayedDate = info.creationDate;
+        WorldFormat.putLatest(info);
         
         try {
             info.save();
@@ -378,7 +378,7 @@ public class Worlds {
                         do {
                             t.set(bStatus.get().numDone());
                             bStatus.get().waitUntilNext();
-                            w.forEachRegion(r -> { if(r.isPrepared()) r.tryImport(w); });
+                            w.forEachRegion(r -> { if(r.state.isPrepared()) r.tryImport(w); });
                         } while(!bStatus.get().isDone());
                         return new WorldBundle(bMulti.get(), w,
                                 bPlayer.get().playerEntity, bPlayer.get().playerData);

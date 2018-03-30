@@ -33,7 +33,6 @@ public class Settings {
     private static final Config config = new Config(
             new CompoundBuilder(Config.CONFIG_FORMAT)
                 .put("particles", PARTICLES_ALL)
-                .put("overworldDefault", true)
                 .get(),
             Resources.DIR_CONFIG.child("settings.txt")
     );

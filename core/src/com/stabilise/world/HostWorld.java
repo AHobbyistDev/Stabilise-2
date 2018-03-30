@@ -17,7 +17,7 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.loader.DimensionLoader;
+import com.stabilise.world.loader.WorldLoader;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
 import com.stabilise.world.tile.Tile;
@@ -41,7 +41,7 @@ public class HostWorld extends AbstractWorld {
     private final RegionStore regions;
     
     /** The world loader. */
-    private final DimensionLoader loader;
+    private final WorldLoader loader;
     /** The world generator. */
     private final WorldGenerator generator;
     private final WorldLoadTracker loadTracker = new WorldLoadTracker();
@@ -68,14 +68,19 @@ public class HostWorld extends AbstractWorld {
         
         // We instantiate the loader, generator and cache, and then safely hand
         // them references to each other as required.
-        loader = multiverse.loader.loaderFor(this);
-        generator = dimension.generatorFor(multiverse, this);
+        
+        loader = new WorldLoader(this);
+        dimension.addLoaders(loader, multiverse.info);
+        
+        generator = new WorldGenerator(multiverse, this);
+        dimension.addGenerators(generator);
+        
         regions = new RegionStore(this);
         regions.setUnloadHandler(this::unloadRegion);
         
-        loader.prepare(generator);
-        generator.prepare(loader, regions);
-        regions.prepare(loader);
+        loader.passReferences(generator);
+        generator.passReferences(loader, regions);
+        regions.passReferences(loader);
     }
     
     @UserThread("PoolThread")

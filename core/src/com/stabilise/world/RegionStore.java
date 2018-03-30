@@ -2,7 +2,6 @@ package com.stabilise.world;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +24,7 @@ import com.stabilise.util.box.Boxes;
 import com.stabilise.util.concurrent.Striper;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
-import com.stabilise.world.loader.DimensionLoader;
+import com.stabilise.world.loader.WorldLoader;
 
 /**
  * Stores and manages regions. Every {@link HostWorld} owns a {@code
@@ -85,7 +84,7 @@ public class RegionStore {
     
     
     private final HostWorld world;
-    private DimensionLoader loader = null;
+    private WorldLoader loader = null;
     
     /** Consumer which is invoked right before a region is unloaded, to perform
      * any unload logic as required by the world. */
@@ -157,16 +156,10 @@ public class RegionStore {
     }
     
     /**
-     * Prepares this WorldGenerator by providing it with a reference to the
-     * world's loader.
-     * 
-     * @throws IllegalStateException if this cache has already been prepared.
-     * @throws NullPointerException if loader is null.
+     * Passes this RegionStore a reference to the world's loader.
      */
-    void prepare(DimensionLoader loader) {
-        if(this.loader != null)
-            throw new IllegalStateException("Loader already set");
-        this.loader = Objects.requireNonNull(loader);
+    void passReferences(WorldLoader loader) {
+        this.loader = loader;
     }
     
     /**

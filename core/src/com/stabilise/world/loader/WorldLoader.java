@@ -1,16 +1,24 @@
 package com.stabilise.world.loader;
 
-import java.util.Objects;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.Log;
+import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.io.IOUtil;
+import com.stabilise.util.io.data.Compression;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.Format;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
+import com.stabilise.world.WorldLoadTracker;
 import com.stabilise.world.RegionStore.CachedRegion;
 import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.multiverse.Multiverse;
+
 
 /**
  * A {@code WorldLoader} instance manages the loading and saving of regions for
@@ -38,94 +46,201 @@ import com.stabilise.world.multiverse.Multiverse;
  *     preferable to losing data)
  * </ul>
  */
-public abstract class WorldLoader {
+public class WorldLoader {
+	
+    /** A reference to the world that this WorldLoader handles the loading for. */
+    private final HostWorld world;
+    /** A reference to the world's generator. We need this so that we can hand
+     * off regions to be generated if necessary after they've been loaded. */
+    private WorldGenerator generator = null;
+    /** A reference to the Executor with which we send off all asynchronous
+     * loading tasks. */
+    private final Executor executor;
     
-    /** The multiverse for which the loader is loading. */
-    protected final Multiverse<?> multiverse;
-    final Executor executor;
+    private volatile boolean cancelLoadOperations = false;
+    private final WorldLoadTracker tracker;
     
-    protected final Log log = Log.getAgent("WORLDLOADER");
+    private final List<IRegionLoader> loaders = new ArrayList<>();
+    private final List<IRegionLoader> savers = new ArrayList<>();
+    
+    private final Log log;
     
     
     /**
-     * Creates a new WorldLoader.
-     * 
-     * @param multiverse The multiverse.
-     * 
-     * @throws NullPointerException if {@code multiverse} is {@code null}.
-     */
-    public WorldLoader(Multiverse<?> multiverse) {
-        this.multiverse = Objects.requireNonNull(multiverse);
-        executor = multiverse.getExecutor();
-    }
-    
-    /**
-     * Gets the handle to this WorldLoader to use for the specified world.
-     * 
-     * @param world The world to get the loader for.
+     * Creates a new WorldLoader for the given world.
      * 
      * @throws NullPointerException if world is null.
      */
-    public DimensionLoader loaderFor(HostWorld world) {
-        return new DimensionLoader(this, Objects.requireNonNull(world));
+    public WorldLoader(HostWorld world) {
+        this.world = world;
+        this.executor = world.multiverse().getExecutor();
+        this.tracker = world.loadTracker();
+        
+        this.log = Log.getAgent("WORLDLOADER: " + world.getDimensionName());
+        
+        // Register all the base loaders in accordance with the world's save
+        // format.
+        WorldFormat.registerLoaders(this, world.multiverse().info);
+        // Any additional dimension-specific loaders are added immediately
+        // after this constructor in the HostWorld constructor.
     }
     
+    /**
+     * Passes this WorldLoader a reference to the world's generator.
+     */
+    public void passReferences(WorldGenerator generator) {
+        this.generator = generator;
+    }
+    
+    /**
+     * Registers a loader. Loaders are run in the order they are registered.
+     * 
+     * <p>This method is not thread-safe and should only be invoked when
+     * setting up this WorldLoader.
+     */
+    @ThreadUnsafeMethod
+    void addLoader(IRegionLoader loader) {
+        loaders.add(loader);
+    }
+    
+    /**
+     * Registers a saver. Savers are run in the order they are registered.
+     * 
+     * <p>This method is not thread-safe and should only be invoked when
+     * setting up this WorldLoader.
+     */
+    @ThreadUnsafeMethod
+    void addSaver(IRegionLoader saver) {
+        savers.add(saver);
+    }
+    
+    /**
+     * Registers an IRegionLoader as both a loader and saver.
+     * 
+     * @see #addLoader(IRegionLoader)
+     * @see #addSaver(IRegionLoader)
+     */
+    @ThreadUnsafeMethod
+    void addLoaderAndSaver(IRegionLoader loader) {
+        loaders.add(loader);
+        savers.add(loader);
+    }
+    
+    /**
+     * Instructs the WorldLoader to asynchronously load a region. This
+     * method does nothing if {@link RegionState#getLoadPermit()
+     * r.state.getLoadPermit()} returns {@code false}.
+     * 
+     * TODO: not true, failing that it will attempt to generate
+     * 
+     * @param r The region to load.
+     * @param generate Whether or not the region should also be generated,
+     * if it is not already.
+     * 
+     * @throws NullPointerException if {@code region} is {@code null}.
+     */
     @UserThread("Any")
-    void loadRegion(DimensionLoader handle, Region r, boolean generate) {
-        handle.world.stats.load.requests.increment();
+    public void loadRegion(Region r, boolean generate) {
+        world.stats.load.requests.increment();
         
-        if(r.getLoadPermit()) {
-            handle.tracker.startLoadOp();
-            executor.execute(new RegionLoader(handle, r, generate));
+        if(r.state.getLoadPermit()) {
+            tracker.startLoadOp();
+            executor.execute(() -> doLoad(r, generate));
         } else if(generate) {
-            handle.tracker.startLoadOp();
-            handle.world.stats.load.rejected.increment();
-            handle.generator.generate(r);
+            tracker.startLoadOp();
+            world.stats.load.rejected.increment();
+            generator.generate(r);
         }
     }
     
+    /**
+     * Instructs the WorldLoader to asynchronously save a region.
+     * 
+     * <p>The request will be ignored if the region does not grant its
+     * {@link Region#getSavePermit() save permit}.
+     * 
+     * @param region The region to save.
+     * @param cacheHandle The handle to this region's cache entry. {@code
+     * null} is allowed.
+     */
     @UserThread("Any")
-    void saveRegion(DimensionLoader handle, Region region,
-            CachedRegion cacheHandle) {
-        handle.world.stats.save.requests.increment();
-        executor.execute(new RegionSaver(handle, region, cacheHandle));
-        region.lastSaved = handle.world.getAge();
+    public void saveRegion(Region region, CachedRegion cacheHandle) {
+    	world.stats.save.requests.increment();
+        executor.execute(() -> doSave(region, cacheHandle));
+        region.lastSaved = world.getAge();
+    }
+    
+    private void doLoad(Region r, boolean generate) {
+    	world.stats.load.started.increment();
+        
+        if(cancelLoadOperations) {
+            tracker.endLoadOp();
+            world.stats.load.aborted.increment();
+            return;
+        }
+        
+    	FileHandle file = r.getFile(world);
+    	if(file.exists()) {
+            try {
+            	DataCompound c = IOUtil.read(file, Format.NBT, Compression.GZIP);
+                boolean generated = c.optBool("generated").orElse(false);
+                
+                loaders.forEach(l -> l.load(r, c, generated));
+                
+                if(generated)
+                	r.state.setGenerated();
+            	
+                world.stats.load.completed.increment();
+            } catch(Exception e) {
+                log.postSevere("Loading " + r + " failed!", e);
+                world.stats.load.failed.increment();
+            }
+    	}
+    	
+        if(generate)
+            generator.generateSynchronously(r);
+        else
+            tracker.endLoadOp();
+    }
+    
+    private void doSave(Region r, CachedRegion cacheHandle) {
+    	world.stats.save.started.increment();
+        
+        if(r.state.getSavePermit()) {
+            DataCompound c = Format.NBT.newCompound();
+            boolean generated = r.state.isGenerated();
+            c.put("generated", generated);
+            
+            savers.forEach(s -> s.save(r, c, generated));
+            
+            try {
+               try {
+                    IOUtil.writeSafe(r.getFile(world), c, Compression.GZIP);
+                } catch(IOException e) {
+                    log.postSevere("Could not save " + r + "!", e);
+                }
+                r.state.finishSaving();
+                world.stats.save.completed.increment();
+            } catch(Throwable t) {
+                world.stats.save.failed.increment();
+                log.postSevere("Saving " + r + " failed!", t);
+            }
+        } else
+            world.stats.save.aborted.increment();
+        
+        // Extremely important final step in the lifecycle of a region: try
+        // to uncache a region after it has been saved.
+        if(cacheHandle != null)
+            cacheHandle.dispose();
     }
     
     /**
-     * Loads a region.
-     * 
-     * @param r The region to load.
-     * @param file The region's file.
+     * Shuts down the WorldLoader; region loading operations will be cancelled
+     * but region saves will be permitted to complete.
      */
-    @UserThread("WorkerThread")
-    @Deprecated
-    protected abstract void load(Region r, FileHandle file);
-    
-    /**
-     * Saves a region.
-     * 
-     * @param r The region to save.
-     * @param file The region's file.
-     */
-    @UserThread("WorkerThread")
-    @Deprecated
-    protected abstract void save(Region r, FileHandle file);
-    
-    //--------------------==========--------------------
-    //------------=====Static Functions=====------------
-    //--------------------==========--------------------
-    
-    /**
-     * Gets the loader to use for world loading.
-     * 
-     * @param multiverse The multiverse.
-     * 
-     * @return The loader to use for world loading.
-     * @throws NullPointerException if multiverse is null.
-     */
-    public static WorldLoader getLoader(Multiverse<?> multiverse) {
-        return new PreAlphaWorldLoader(multiverse);
+    @UserThread("MainThread")
+    public void shutdown() {
+        cancelLoadOperations = true;
     }
-    
+	
 }

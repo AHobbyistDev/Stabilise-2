@@ -17,7 +17,7 @@ import com.stabilise.world.Region;
 import com.stabilise.world.RegionStore;
 import com.stabilise.world.WorldLoadTracker;
 import com.stabilise.world.gen.InstancedWorldgen.InstancedWorldgenSupplier;
-import com.stabilise.world.loader.DimensionLoader;
+import com.stabilise.world.loader.WorldLoader;
 import com.stabilise.world.multiverse.Multiverse;
 
 /**
@@ -27,7 +27,7 @@ import com.stabilise.world.multiverse.Multiverse;
  * <h3>Usage Guidelines</h3>
  * 
  * <p>Firstly, a {@code WorldGenerator} must be prepared via {@link
- * #prepare(DimensionLoader, RegionStore) prepare()} before it can be used.
+ * #passReferences(WorldLoader, RegionStore) prepare()} before it can be used.
  * 
  * <p>A {@code WorldGenerator} should be used exclusively by the {@code
  * WorldLoader}, as region generation happens immediately after loading.
@@ -45,7 +45,7 @@ public final class WorldGenerator {
     
     /** The world for which the generator is generating. */
     private final HostWorld world;
-    private DimensionLoader loader;
+    private WorldLoader loader;
     private final long seed;
     
     /** The executor which delegates threads. */
@@ -94,18 +94,12 @@ public final class WorldGenerator {
     }
     
     /**
-     * Prepares this WorldGenerator by providing it with references to the
-     * world loader and the world's region store.
-     * 
-     * @throws IllegalStateException if this generator has already been
-     * prepared.
-     * @throws NullPointerException if either argument is null.
+     * Passes this WorldGenerator references to the world loader and the
+     * world's region store.
      */
-    public void prepare(DimensionLoader loader, RegionStore regions) {
-        if(this.regionStore != null || this.loader != null)
-            throw new IllegalStateException("Already prepared");
-        this.loader = Objects.requireNonNull(loader);
-        this.regionStore = Objects.requireNonNull(regions);
+    public void passReferences(WorldLoader loader, RegionStore regions) {
+        this.loader = loader;
+        this.regionStore = regions;
     }
     
     /**

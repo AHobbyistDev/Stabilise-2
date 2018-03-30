@@ -367,6 +367,13 @@ public abstract class AbstractWorld implements World {
     }
     
     /**
+     * Returns this world's Dimension.
+     */
+    public Dimension getDimension() {
+        return dimension;
+    }
+    
+    /**
      * The name of this world's dimension.
      */
     public String getDimensionName() {

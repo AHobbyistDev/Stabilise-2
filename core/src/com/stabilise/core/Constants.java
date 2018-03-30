@@ -75,9 +75,6 @@ public class Constants {
         }
     }
     
-    /** True if different dimensions of the world should be hosted on different
-     * threads if possible. NYI for now. */ // This may be temporary
-    public static final boolean CONCURRENT_DIMENSIONS = true;
     
     public static final int SLICE_SIZE = Slice.SLICE_SIZE;
     public static final int REGION_SIZE = Region.REGION_SIZE;

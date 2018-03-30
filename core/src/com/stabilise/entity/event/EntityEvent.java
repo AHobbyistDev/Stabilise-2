@@ -11,7 +11,6 @@ public class EntityEvent extends Event {
      */
     public static enum Type {
         ADDED_TO_WORLD,
-        //TILE_COLLISION,
         /** Horizontal tile collision. */
         TILE_COLLISION_H,
         /** Vertical tile collision. */

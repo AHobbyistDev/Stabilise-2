@@ -19,7 +19,6 @@ import com.stabilise.util.Profiler;
 import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
-import com.stabilise.world.loader.WorldLoader;
 
 /**
  * A Multiverse manages and 'provides' all the dimensions/worlds of a
@@ -38,8 +37,6 @@ public abstract class Multiverse<W extends AbstractWorld> {
     
     /** The ExecutorService to use for delegating loader and generator threads. */
     protected final ExecutorService executor;
-    /** The global WorldLoader to use for loading regions. */
-    public final WorldLoader loader;
     
     /** Stores all dimensions. Maps dimension names -> dimensions. */
     protected final Map<String, W> dimensions = new HashMap<>(2);
@@ -92,9 +89,6 @@ public abstract class Multiverse<W extends AbstractWorld> {
         );
         
         log.postDebug("Started thread pool with " + coreThreads + " threads.");
-        
-        // Start up the world loader
-        loader = WorldLoader.getLoader(this);
     }
     
     /**
