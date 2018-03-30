@@ -253,7 +253,7 @@ public class Controller implements InputProcessor {
      * constructor of {@link #CONFIG}.
      */
     private static DataCompound getDefaults() {
-        DataCompound defaults = DataCompound.create();
+        DataCompound defaults = Config.CONFIG_FORMAT.newCompound();
         ArrayUtil.forEach(Control.values(), c -> {
             if(c.valid)
                 defaults.put(c.fieldName, c.defaultKey);
