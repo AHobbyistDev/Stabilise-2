@@ -20,42 +20,41 @@ import com.stabilise.util.concurrent.Tasks;
  * clarity of mind I've thought it best to separate out into its own thing.
  */
 public class RegionState {
-	
-	/* Alright, let's plan this out.
-	 * 
-	 * A region should be considered active if it is ANCHORED and PREPARED, and
-	 * all 8 of its neighbours are PREPARED.
-	 * 
-	 * A region should be unloaded when it it NOT ANCHORED, and none of its
-	 * neighbours are ANCHORED.
-	 * 
-	 * A region is called PREPARED if it is LOADED and GENERATED. A region is
-	 * made to prepare itself if either it, or a neighbouring region is
-	 * ANCHORED.
-	 * 
-	 * A region is called ACTIVE if it is ANCHORED and PREPARED, and all its
-	 * neighbours are PREPARED.
-	 * 
-	 * From an outside perspective, regions are never anchored directly. All
-	 * anchoring takes place through HostWorld.loadSlice() and
-	 * HostWorld.unloadSlice(). For now at least we don't care about the slices
-	 * and instead stick the anchor on the region in which each requested slice
-	 * lies. (QUESTION: In the future, might we care to distinguish which
-	 * slices have anchors?)
-	 * 
-	 * When a region is ANCHORED for the first time, we initiate a PREPARE if
-	 * it is not already PREPARED, and do the same for all its neighbours.
-	 * 
-	 * When a region is NOT ANCHORED, and none of its neighbours are ANCHORED,
-	 * it is eligible to be UNLOADED. A region is generally unloaded after a
-	 * time delay as to provide a buffer time.
-	 * 
-	 * A region is eligible to be SAVED if it is PREPARED.
-	 * 
-	 * When a region is UNLOADED, it is SAVED first.
-	 */
-	
-	/** The state of this region. See the documentation for {@link #State.NEW}
+    
+    /* Alright, let's plan this out.
+     * 
+     * A region should be considered active if it is ANCHORED and PREPARED, and
+     * all 8 of its neighbours are PREPARED.
+     * 
+     * A region should be loaded when it is ANCHORED, or any of its neighbours
+     * are ANCHORED. Region generation should be performed as part of the
+     * loading process. A region is called PREPARED if it is LOADED and
+     * GENERATED.
+     * 
+     * When a region is NOT ANCHORED, and none of its neighbours are ANCHORED,
+     * it is eligible to be UNLOADED. A region is generally unloaded after a
+     * time delay as to provide a buffer time.
+     * 
+     * From an outside perspective, regions are never anchored directly. All
+     * anchoring takes place through HostWorld.loadSlice() and
+     * HostWorld.unloadSlice(). For now at least we don't care about the slices
+     * and instead stick the anchor on the region in which each requested slice
+     * lies. (QUESTION: In the future, might we care to distinguish which
+     * slices have anchors?)
+     * 
+     * A region is eligible to be SAVED if it is PREPARED.
+     * 
+     * When a region is UNLOADED, it is SAVED first.
+     * 
+     * 
+     * 
+     * 
+     * Unfortunate as it may be, implementation of the above functionality is
+     * spread throughout this class, RegionStore, WorldLoader, and
+     * WorldGenerator.
+     */
+    
+    /** The state of this region. See the documentation for {@link #State.NEW}
      * and all other states. */
     private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
     /** Save state. Encapsulated in a Box so it can be safely passed off to
@@ -77,17 +76,26 @@ public class RegionState {
      * <p>A region can only be anchored on the main thread, so we don't need to
      * be careful with synchronisation. */
     private int anchors = 0;
-    /** Number of adjacent regions which are anchored. We do not unload a
-     * region unless it has no anchored neighbours. A region counts itself as a
-     * neighbour as being anchored itself must prevent it from being unloaded.
+    /** Number of adjacent regions (a region counts itself as a neighbour too)
+     * which are anchored. We do not unload a region unless it has no anchored
+     * neighbours.
      * 
      * <p>A region (and its neighbours) can only be anchored on the main
      * thread, so we don't need to be careful with synchronisation. */
     private int anchoredNeighbours = 0;
+    /** Number of adjacent regions (a region counts itself as a neighbour too)
+     * which are 'prepared'. A region is only considered active if it is
+     * anchored and all its neighbours are prepared.
+     * 
+     * Question: on what threads may this be modified? */
+    private int preparedNeighbours = 0;
+    /** Whether we've informed the region's neighbours that it's been prepared.
+     * Once set to true, this will remain true until the region is unloaded. */
+    private boolean hasInformedNeighbours = false;
     
     /** The number of ticks until the region should be unloaded.  */
     private int ticksToUnload = REGION_UNLOAD_TICK_BUFFER;
-	
+    
     
     /**
      * Anchors this region. An anchored region remains loaded, and additionally
@@ -129,13 +137,13 @@ public class RegionState {
     
     /**
      * Returns {@code true} if the region is considered 'active' -- that is, if
-     * it is {@link #isPrepared() prepared} and all its neighbours (including
-     * itself) are {@link #isAnchored() anchored}.
+     * it is {@link #isAnchored() anchored} and all its neighbours (including
+     * itself) are {@link #isPrepared() prepared}.
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
     public boolean isActive() {
-    	return isPrepared() && anchoredNeighbours == 9;
+        return isAnchored() && preparedNeighbours == 9;
     }
     
     /**
@@ -144,7 +152,7 @@ public class RegionState {
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
-    public void addNeighbour() {
+    public void addAnchoredNeighbour() {
         anchoredNeighbours++;
     }
     
@@ -154,7 +162,7 @@ public class RegionState {
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
-    public void removeNeighbour() {
+    public void removeAnchoredNeighbour() {
         if(--anchoredNeighbours == 0)
             ticksToUnload = REGION_UNLOAD_TICK_BUFFER;
     }
@@ -244,8 +252,8 @@ public class RegionState {
      */
     public synchronized boolean getSavePermit() {
         // ^^^^^^^^^^^^ We synchronise on ourselves to make this atomic. This
-    	// is much less painful than trying to do fancy stuff with an atomic
-    	// variable; see finishSaving().
+        // is much less painful than trying to do fancy stuff with an atomic
+        // variable; see finishSaving().
         
         switch(saveState.get()) {
             case IDLE:
@@ -282,8 +290,8 @@ public class RegionState {
      */
     @UserThread("WorldLoaderThread")
     public synchronized void finishSaving() {
-    	// ^^^^^^^^^^^^ synchronize on ourself; see getSavePermit().
-    	
+        // ^^^^^^^^^^^^ synchronize on ourself; see getSavePermit().
+        
         saveState.set(saveState.get() == SaveState.WAITING
                 ? SaveState.IDLE_WAITER
                 : SaveState.IDLE);
@@ -299,7 +307,7 @@ public class RegionState {
     private void waitUntilSaved() {
         Tasks.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE);
     }
-	
+    
     //--------------------==========--------------------
     //-------------=====Nested Classes=====-------------
     //--------------------==========--------------------
@@ -346,5 +354,5 @@ public class RegionState {
          * save the region again. */
         IDLE_WAITER;
     }
-	
+    
 }

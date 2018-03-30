@@ -40,7 +40,7 @@ import com.stabilise.world.loader.WorldLoader;
  * #loadRegion(int, int, boolean) loadRegion()}, and can be retrieved through
  * {@link #getRegionAt(int, int) getRegionAt()}. Every Region in primary
  * storage is {@link Region#update(HostWorld, RegionStore) updated} by {@link
- * #updateRegions()}, and is only removed from primary storage if {@code
+ * #update()}, and is only removed from primary storage if {@code
  * update} returns {@code true}.
  * 
  * <p>Primary storage is not thread-safe and should only be interacted with on
@@ -73,9 +73,6 @@ public class RegionStore {
     /** Wait time in seconds for {@link #waitUntilDone()}. */
     private static final int WAIT_TIME = 5;
     
-    /** Radius of neighbouring regions about a loaded region to semi-load. */
-    private static final int NEIGHBOUR_LOAD_RADIUS = 1;
-    
     /** The number of locks to stripe {@link #cacheLocks} and {@link
      * #storeLocks} into. */
     private static final int STRIPE_FACTOR = 8;
@@ -100,10 +97,8 @@ public class RegionStore {
     private final ConcurrentMap<Point, CachedRegion> cache =
             new ConcurrentHashMap<>();
     
-    /** Locks to use for managing cache-local data. These locks double as
-     * mutable Points for convenience, which should only be used while
-     * synchronised on themselves. */
-    private final Striper2D<Point> cacheLocks = new Striper2D<>(Region::createMutableLoc);
+    /** Locks to use for managing cache-local data. */
+    private final Striper2D<Object> cacheLocks = new Striper2D<>(Object::new);
     /** Locks to synchronise on when adding/removing from storage. These locks
      * are designed to be used to ensure mutual exclusion between the two
      * following operations:
@@ -166,7 +161,7 @@ public class RegionStore {
      * Updates all regions.
      */
     @UserThread("MainThread")
-    void updateRegions() {
+    void update() {
         regions.values().removeIf(r -> r.update(world, this) && unloadRegion(r));
     }
     
@@ -269,19 +264,11 @@ public class RegionStore {
     void anchorRegion(int x, int y) {
         Region r = loadRegion(x, y);
         
-        if(r.anchor()) {
-            r.addNeighbour(); // r counts itself as a neighbour
-            
-            final int d = NEIGHBOUR_LOAD_RADIUS; // to reduce verbosity
-            
-            // Load all regions adjacent to r.
-            for(int u = x-d; u <= x+d; u++) {
-                for(int v = y-d; v <= y+d; v++) {
-                    // We don't anchor r here as to avoid a superfluous
-                    // invocation of loadRegion(). (We're really just saving
-                    // a hash table lookup).
-                    if(u != x || v != y)
-                        loadRegion(u, v).addNeighbour();
+        if(r.state.anchor()) {
+            // Load and notify all regions adjacent to r (including itself)
+            for(int u = x-1; u <= x+1; u++) {
+                for(int v = y-1; v <= y+1; v++) {
+                    loadRegion(u, v).state.addAnchoredNeighbour();
                 }
             }
         }
@@ -297,20 +284,15 @@ public class RegionStore {
     void deAnchorRegion(int x, int y) {
         Region r = getRegionAt(x, y); // shouldn't be null
         
-        if(r.deAnchor()) { // TODO: <-- has caused an NPE once. Need to hunt down and fix!
-            r.removeNeighbour(); // r counts itself as a neighbour
-            
-            final int d = NEIGHBOUR_LOAD_RADIUS; // reducing verbosity
-            
-            // Unload all regions adjacent to r.
-            for(int u = x-d; u <= x+d; u++) {
-                for(int v = y-d; v <= y+d; v++) {
-                    // We don't de-anchor r here as to avoid a superfluous
-                    // invocation of getRegionAt(). (We're really just saving
-                    // a hash table lookup).
-                    // n.b. we assume the surrounding regions are loaded
-                    if(u != x || v != y)
-                        getRegionAt(x,y).removeNeighbour();
+        // TODO: It turns out r can be null somehow because this has crashed
+        // on an NPE once! Need to find out why.
+        if(r.state.deAnchor()) {
+            // Notify all regions adjacent to r, including r
+            for(int u = x-1; u <= x+1; u++) {
+                for(int v = y-1; v <= y+1; v++) {
+                    // We assume the surrounding regions are also present and
+                    // therefore not null.
+                    getRegionAt(x,y).state.removeAnchoredNeighbour();
                 }
             }
         }
@@ -331,22 +313,21 @@ public class RegionStore {
      */
     @UserThread("Any")
     public Region cache(int x, int y) {
-        // If the region is locally cached by this thread, use it.
+        // If the region is already locally cached by this thread, use it.
         Map<Point, Region> localMap = localCachedRegions.get();
         Point loc = Region.createImmutableLoc(x, y);
         Region r = localMap.get(loc);
         if(r != null)
             return r;
         
-        // Otherwise, if the region is cached, we locally cache it, and then
-        // return it.
+        // Otherwise, we cache the region (unless it is already cached) and
+        // then locally cache it.
         
         CachedRegion regionHandle;
-        Point p = cacheLocks.get(x, y);
         
         // Synchronised to make the put-if-absent atomic
-        synchronized(p) {
-            regionHandle = cache.get(p.set(x, y));
+        synchronized(cacheLocks.get(x, y)) {
+            regionHandle = cache.get(loc);
             
             // If the region isn't in the cache, we check to see if the world
             // has it.
@@ -356,7 +337,7 @@ public class RegionStore {
                     // If the region is in primary storage, we take it and put
                     // it in the cache. If it isn't, we create the region in
                     // the cache.
-                    Region region = getRegionAt(p); // p is already (x,y)
+                    Region region = getRegionAt(loc);
                     if(region == null)
                         region = new Region(x, y, world.getAge());
                     regionHandle = new CachedRegion(region);
@@ -369,8 +350,8 @@ public class RegionStore {
         
         localMap.put(loc, regionHandle.region);
         
-        // We need the region to be loaded such that when we save it we don't
-        // lose any old data.
+        // We need the region to be loaded so that when we save our changes
+        // we don't lose any old data.
         loader.loadRegion(regionHandle.region, false);
         
         return regionHandle.region;
@@ -522,8 +503,9 @@ public class RegionStore {
      * Region#isPrepared() prepared}.
      */
     boolean isLoaded() {
+        // TODO: pretty crude implementation
         for(Region r : regions.values()) {
-            if(!r.isPrepared()) {
+            if(!r.state.isPrepared()) {
                 //log.postInfo("Not all regions loaded (" + r + ": "
                 //        + r.isLoaded() + ", " + r.isGenerated() + ")");
                 return false;
