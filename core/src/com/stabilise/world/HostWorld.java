@@ -78,9 +78,9 @@ public class HostWorld extends AbstractWorld {
         regions = new RegionStore(this);
         regions.setUnloadHandler(this::unloadRegion);
         
-        loader.passReferences(generator);
-        generator.passReferences(loader, regions);
-        regions.passReferences(loader);
+        //loader.passReferences(generator);
+        generator.passReferences(regions);
+        regions.passReferences(loader, generator);
     }
     
     @UserThread("PoolThread")
@@ -224,7 +224,7 @@ public class HostWorld extends AbstractWorld {
     @UserThread("MainThread")
     @ThreadUnsafeMethod
     public Region getRegionAt(int x, int y) {
-        Region r = regions.getRegionAt(x, y);
+        Region r = regions.getRegion(x, y);
         return r == null ? Region.DUMMY_REGION : r;
     }
     
@@ -257,23 +257,10 @@ public class HostWorld extends AbstractWorld {
     
     /**
      * Saves a region.
-     * 
-     * @param r The region to save.
      */
     public void saveRegion(Region r) {
-        loader.saveRegion(r, null);
+        loader.saveRegion(r, false, null);
     }
-    
-    /**
-     * Returns the region occupying the specified tile coord, or
-     * {@link Region#DUMMY_REGION} if it is not loaded.
-     */
-    /*
-    private Region getRegionFromTileCoords(int x, int y) {
-        return getRegionAt(regionCoordFromTileCoord(x),
-                regionCoordFromTileCoord(y));
-    }
-    */
     
     /**
      * Returns the region occupying the specified slice coord, or

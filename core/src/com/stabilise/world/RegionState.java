@@ -4,12 +4,10 @@ import static com.stabilise.core.Constants.REGION_UNLOAD_TICK_BUFFER;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.stabilise.util.Checks;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.box.Box;
-import com.stabilise.util.box.Boxes;
-import com.stabilise.util.concurrent.Tasks;
 
 
 /**
@@ -57,9 +55,9 @@ public class RegionState {
     /** The state of this region. See the documentation for {@link #State.NEW}
      * and all other states. */
     private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
-    /** Save state. Encapsulated in a Box so it can be safely passed off to
-     * the lambda in getSavePermit(). */
-    private final Box<SaveState> saveState = Boxes.box(SaveState.IDLE);
+    /** Save state. Access to this should only be done while synchronised on
+     * this RegionState object. */
+    private SaveState saveState = SaveState.NOT_SAVING;
     /** Whether or not this region has been generated. */
     private boolean generated = false;
     /** Whether or not the entities & tile entities stored in this region have
@@ -183,16 +181,47 @@ public class RegionState {
     }
     
     /**
-     * Marks this region as generated, and induces an appropriate state change.
+     * Attempts to obtain the permit to load the region. If this returns {@code
+     * true}, the caller may load the region.
+     */
+    public boolean getLoadPermit() {
+        // We only need to load once, and that's when the region is initially
+        // created. The only valid state transition is from NEW to LOADING.
+        return state.compareAndSet(State.NEW, State.LOADING);
+    }
+    
+    /**
+     * Declares that the region has been loaded. This should be called by the
+     * WorldLoader once loading of the region is completed.
+     */
+    public void setLoaded() {
+        if(state.compareAndSet(State.LOADING, State.LOADED))
+            throw new RuntimeException("Couldn't transition from loading to loaded?");
+    }
+    
+    /**
+     * Attempts to obtain the permit to generate this region. If this returns
+     * {@code true}, the caller may generate this region.
+     */
+    public boolean getGenerationPermit() {
+        return state.compareAndSet(State.LOADED, State.GENERATING);
+    }
+    
+    /**
+     * Marks the region as generated, and induces an appropriate state change.
      * This is invoked in two scenarios:
      * 
      * <ul>
-     * <li>When the WorldLoader finishes loading this region and finds it to be
-     *     generated.
+     * <li>When the WorldLoader has finished loading this region and found it
+     *     to be generated.
      * <li>When the WorldGenerator finishes generating this region.
      * </ul>
+     * 
+     * @param queuedStructures Whether or not the region has {@link
+     * Region#hasQueuedStructures()} that need adding. (Having to be passed
+     * this is a bit inelegant but I can't think of anything better.)
      */
-    public void setGenerated() {
+    public void setGenerated(boolean queuedStructures) {
         generated = true;
         
         // This method is invoked in two scenarios:
@@ -201,111 +230,101 @@ public class RegionState {
         //    this region has already been generated. From here, there are two
         //    options:
         // 
-        //    a: There are queued structures. We remain in State.LOADING so
-        //       that getGenerationPermit() returns true so that the world
-        //       generator can generate those structures concurrently.
-        //    b: There are no queued structures. We change to State.ACTIVE as
-        //       this region is now usable.
+        //    a: There are queued structures. We remain in LOADED so that
+        //       getGenerationPermit() returns true so that the world generator
+        //       can generate those structures concurrently.
+        //    b: There are no queued structures. We change to PREPARED as this
+        //       region is now usable.
         // 
         // 2: The WorldGenerator just finished generating this region. We
-        //    change to State.ACTIVE as this region is now usable.
+        //    change to PREPARED as this region is now usable.
         
         State s = state.get();
-        if(s.equals(State.LOADING)) {
-            //if(!hasQueuedStructures())
-                state.compareAndSet(State.LOADING, State.PREPARED);
+        if(s == State.LOADED) {
+            if(!queuedStructures)
+                state.set(State.PREPARED);
         } else if(s == State.GENERATING)
-            state.compareAndSet(State.GENERATING, State.PREPARED);
+            state.set(State.PREPARED);
         else
-            Log.get().postWarning("Invalid state " + s + " on setGenerated for "
-                    + this);
+            Log.get().postWarning("Invalid state " + s + " on setGenerated");
     }
     
     /**
-     * Attempts to obtain the permit to load this region. If this returns
-     * {@code true}, the caller may load the region.
-     * 
-     * <p>This method is provided for WorldLoader use only.
+     * Returns true if the region is currently being saved.
      */
-    public boolean getLoadPermit() {
-        // We can load only when this region is newly-created, so the only
-        // valid state transition is from State.NEW to State.LOADING.
-        return state.compareAndSet(State.NEW, State.LOADING);
+    public synchronized boolean isSaving() {
+        // ^^^^^^^^^^^^ Synchronised to make this atomic
+        return saveState == SaveState.SAVING || saveState == SaveState.SAVE_QUEUED;
     }
     
     /**
-     * Attempts to obtain the permit to generate this region. If this returns
-     * {@code true}, the caller may generate this region.
-     * 
-     * <p>This method is provided for WorldGenerator use only.
+     * Attempts to obtain a permit to save the region. If this returns {@code
+     * true}, the caller may save this region. Even if this returns false, we
+     * take note that a save was requested -- see {@link #finishSaving()}.
      */
-    public boolean getGenerationPermit() {
-        return state.compareAndSet(State.LOADING, State.GENERATING);
-    }
-    
-    /**
-     * Attempts to obtain a permit to save this region. If this returns {@code
-     * true}, the caller may save this region.
-     * 
-     * <p>Note that this method may block for a while if this region is
-     * currently being saved.
-     */
+    @UserThread("Any")
     public synchronized boolean getSavePermit() {
-        // ^^^^^^^^^^^^ We synchronise on ourselves to make this atomic. This
-        // is much less painful than trying to do fancy stuff with an atomic
-        // variable; see finishSaving().
+        // ^^^^^^^^^^^^ Synchronised to make this atomic
         
-        switch(saveState.get()) {
-            case IDLE:
+        switch(saveState) {
+            case NOT_SAVING:
                 // If we're in IDLE, we switch to SAVING and save.
-                saveState.set(SaveState.SAVING);
+                saveState = SaveState.SAVING;
                 return true;
             case SAVING:
                 // If we're in SAVING, this means another thread is
                 // currently saving this region. However, since we have no
-                // guarantee that it is saving up-to-date data, we wait for
-                // it to finish and then save again on this thread.
-                saveState.set(SaveState.WAITING);
-                Tasks.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE
-                                || saveState.get() == SaveState.IDLE_WAITER);
-                saveState.set(SaveState.SAVING);
-                return true;
-            case WAITING:
-            case IDLE_WAITER:
-                // As above, except another thread is waiting to save the
-                // updated state. We abort and let that thread do it.
+                // guarantee that it is saving up-to-date data, we queue up
+                // another save. After completing the current save, the
+                // WorldLoader will pick up on our new save request via
+                // finishSaving() and save again.
+                saveState = SaveState.SAVE_QUEUED;
+                return false;
+            case SAVE_QUEUED:
+                // As above, except a save is already queued, so we don't do
+                // anything.
                 // 
                 // As an added bonus, since we just grabbed the sync lock,
-                // we've established a happens-before with the waiter and thus
+                // we've established a happens-before with the saver and
                 // provided it with a more recent batch of region state. Yay!
                 return false;
         }
         
-        throw new AssertionError(); // impossible
+        throw Checks.badAssert();
     }
     
     /**
-     * Finalises a save operation by inducing an appropriate state change and
-     * notifying relevant threads.
+     * This is called when a save operation is completed.
+     *
+     * @return true if another save was queued in the meantime and the region
+     * should be saved again.
      */
-    @UserThread("WorldLoaderThread")
-    public synchronized void finishSaving() {
-        // ^^^^^^^^^^^^ synchronize on ourself; see getSavePermit().
+    @UserThread("WorkerThread")
+    public synchronized boolean finishSaving() {
+        // ^^^^^^^^^^^^ Synchronised
+        if(saveState == SaveState.SAVE_QUEUED) {
+            saveState = SaveState.SAVING;
+            return true;
+        } else if(saveState == SaveState.SAVING) {
+            saveState = SaveState.NOT_SAVING;
+            return false;
+        }
         
-        saveState.set(saveState.get() == SaveState.WAITING
-                ? SaveState.IDLE_WAITER
-                : SaveState.IDLE);
-        saveState.notifyAll();
+        throw Checks.badAssert();
     }
     
-    /**
-     * Blocks the current thread until this region has finished saving. If the
-     * current thread was interrupted while waiting, the interrupt flag will be
-     * set when this method returns.
-     */
-    @SuppressWarnings("unused")
-    private void waitUntilSaved() {
-        Tasks.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE);
+    @Override
+    public String toString() {
+        return stateToString() + "/" + saveStateToString();
+    }
+    
+    private String stateToString() {
+        return state.get().toString();
+    }
+    
+    private synchronized String saveStateToString() {
+        //  ^^^^^^^^^^^^ Synchronised
+        return saveState.toString();
     }
     
     //--------------------==========--------------------
@@ -317,21 +336,22 @@ public class RegionState {
      */
     private static enum State {
         /** A region is newly-instantiated and is not ready to be used.
-         * Transitions to {@code LOADING} via {@link Region#getLoadPermit()}. */
+         * Transitions to {@link #LOADING} via {@link Region#getLoadPermit()}. */
         NEW,
-        /** A region is currently being loaded by the world loader. This state
-         * is also occupied by a cached region which has not yet been
-         * generated. This may transition to GENERATING via {@link
-         * Region#getGenerationPermit()}, but may also transition to PREPARED
-         * via {@link Region#setGenerated()} if a region does not need
-         * generating. */
+        /** A region is currently being loaded by the world loader. Transitions
+         * to {@link #LOADED} via {@link RegionState#setLoaded()}. */
         LOADING,
+        /** A region has finished loading, but has not been generated or begun
+         * generating. May transition to {@link #GENERATING} via {@link
+         * RegionState#getGenerationPermit()} or to {@link #PREPARED} via
+         * {@link RegionState#setGenerated()}. */
+        LOADED,
         /** A region is currently being generated by the world generator.
-         * Transitions to ACTIVE via {@link Region#setGenerated()}. */
+         * Transitions to {@link #PREPARED} via {@link Region#setGenerated()}. */
         GENERATING,
         /** A region is prepared - that is, loaded and generated, and may be
          * used. */
-        PREPARED;
+        PREPARED
     }
     
     /**
@@ -344,15 +364,12 @@ public class RegionState {
      */
     private static enum SaveState {
         /** A region is not currently being saved. */
-        IDLE,
+        NOT_SAVING,
         /** A region is currently being saved. */
         SAVING,
-        /** A region is currently being saved, and another thread is waiting in
-         * line to save the region again. */
-        WAITING,
-        /** A region just finished saving, but another thread is waiting to
-         * save the region again. */
-        IDLE_WAITER;
+        /** A region is currently being saved, and another save has been
+         * requested. */
+        SAVE_QUEUED
     }
     
 }

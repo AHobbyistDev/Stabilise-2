@@ -245,17 +245,27 @@ public class Checks {
         return val;
     }
     
+    // memes
+    private static final String[] assertMessages = {
+        "This shouldn't happen",
+        "NANI?!",
+        "N-NANI?!",
+        "Impossible!",
+        "I can't believe you've done this",
+        "asdfghjkl",
+    };
+    
     /**
      * Throws an AssertionError.
      */
-    public static <T> T badAssert() {
-        throw new AssertionError();
+    public static AssertionError badAssert() {
+        throw new AssertionError(ArrayUtil.random(assertMessages));
     }
     
     /**
      * Throws an AssertionError with the specified message.
      */
-    public static <T> T badAssert(String msg) {
+    public static AssertionError badAssert(String msg) {
         throw new AssertionError(msg);
     }
     

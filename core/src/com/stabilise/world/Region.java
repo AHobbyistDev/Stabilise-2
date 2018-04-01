@@ -82,20 +82,6 @@ public class Region {
     //-------------=====Member Variables=====-----------
     //--------------------==========--------------------
     
-    /** The number of ticks until this region should be unloaded.  */
-    private int ticksToUnload = REGION_UNLOAD_TICK_BUFFER;
-    /** The number of slices anchored due to having been loaded by a client
-     * within the region. Used to determine whether the region should begin the
-     * 'unload countdown'. */
-    @Deprecated
-    private int anchors = 0;
-    
-    /** Number of adjacent regions which are active. We do not unload a region
-     * unless it has no active neighbours. A region counts itself as a
-     * neighbour as itself being active must prevent it from being unloaded. */
-    @Deprecated
-    private int activeNeighbours = 0;
-    
     /** The slices contained by this region.
      * <i>Note slices are indexed in the form <b>[y][x]</b>; {@link
      * #getSliceAt(int, int)} provides such an accessor.</i> */
@@ -110,29 +96,13 @@ public class Region {
      * the region, in slice-lengths. */
     public final int offsetX, offsetY;
     
-    /** The state of this region. See the documentation for {@link #State.NEW}
-     * and all other states. */
-    @Deprecated
-    private final AtomicReference<State> stateOld = new AtomicReference<>(State.NEW);
-    /** Save state. Encapsulated in a Box so it can be safely passed off to
-     * the lambda in getSavePermit(). */
-    @Deprecated
-    private final Box<SaveState> saveState = Boxes.box(SaveState.IDLE);
-    /** Whether or not this region has been generated. */
-    @Deprecated
-    private boolean generated = false;
-    @Deprecated
-    /** Whether or not the entities & tile entities stored in this region have
-     * been loaded into the world. This should be {@code false} until
-     * isPrepared() returns true in the main thread, from which we set this to
-     * true and add all the stuff in this region to the world. */
-    private boolean imported = false;
-    
+
     /** The time the region was last saved, in terms of the world age. */
-    public long lastSaved;
+    public long lastSaved = 0L;
     
     
     public final RegionState state = new RegionState();
+    private int ticksToUnload = REGION_UNLOAD_TICK_BUFFER;
     
     /** Actions to perform when added to the world. */
     public List<Action> queuedActions = null;
@@ -150,15 +120,12 @@ public class Region {
      * 
      * @param x The region's x-coordinate, in region lengths.
      * @param y The region's y-coordinate, in region lengths.
-     * @param worldAge The age of the world.
      */
-    Region(int x, int y, long worldAge) {
+    Region(int x, int y) {
         loc = createImmutableLoc(x, y);
         
         offsetX = x * REGION_SIZE;
         offsetY = y * REGION_SIZE;
-        
-        lastSaved = worldAge;
         
         initSlices();
     }
@@ -183,9 +150,6 @@ public class Region {
      * if it should remain in memory.
      */
     public boolean update(HostWorld world, RegionStore store) {
-        if(!isPrepared())
-            return false;
-        
         tryImport(world);
         
         if(activeNeighbours == 0) {
@@ -270,91 +234,6 @@ public class Region {
     }
     
     /**
-     * Anchors this region. An anchored region remains loaded, and additionally
-     * loads its neighbours.
-     * 
-     * <p>Anchors will not be reset when a region is loaded or generated.
-     * 
-     * @return {@code true} if this region is newly-anchored.
-     */
-    @UserThread("MainThread")
-    @ThreadUnsafeMethod
-    @Deprecated
-    boolean anchor() {
-        return anchors++ == 0;
-    }
-    
-    /**
-     * Removes an anchor from this region. This method is the inverse of {@link
-     * #anchor()}, and invocations of these methods should be paired to ensure
-     * an eventual equilibrium.
-     * 
-     * @return {@code true} if this region is no longer anchored as of this
-     * method call.
-     */
-    @UserThread("MainThread")
-    @ThreadUnsafeMethod
-    @Deprecated
-    boolean deAnchor() {
-        return --anchors == 0;
-    }
-    
-    /**
-     * Returns {@code true} if this region is anchored/active, and may be
-     * updated.
-     */
-    @UserThread("MainThread")
-    @ThreadUnsafeMethod
-    @Deprecated
-    private boolean isAnchored() {
-        return anchors > 0;
-    }
-    
-    /**
-     * Informs this region that is has an anchored neighbour. Invoked by
-     * RegionStore.
-     */
-    @UserThread("MainThread")
-    @ThreadUnsafeMethod
-    @Deprecated
-    void addNeighbour() {
-        activeNeighbours++;
-    }
-    
-    /**
-     * Informs this region that one of its neighbours has been de-anchored.
-     * Invoked by RegionStore.
-     */
-    @UserThread("MainThread")
-    @ThreadUnsafeMethod
-    @Deprecated
-    void removeNeighbour() {
-        if(--activeNeighbours == 0)
-            ticksToUnload = REGION_UNLOAD_TICK_BUFFER;
-    }
-    
-    /**
-     * @param world This region's parent world.
-     * 
-     * @return This region's file.
-     */
-    public FileHandle getFile(HostWorld world) {
-        return world.getWorldDir().child("r_" + x() + "_" + y() + ".region");
-    }
-    
-    /**
-     * Checks for whether or not this region's file exists.
-     * 
-     * @param world This region's parent world.
-     * 
-     * @return {@code true} if this region has a saved file; {@code false}
-     * otherwise.
-     */
-    public boolean fileExists(HostWorld world) {
-        return getFile(world).exists();
-    }
-    
-    /**
      * Queues a structure for generation in this region.
      * 
      * @throws NullPointerException if {@code struct} is {@code null}.
@@ -364,7 +243,7 @@ public class Region {
         structures.add(Objects.requireNonNull(struct));
     }
     
-    private void doAddStructure(QueuedStructure s, RegionStore regionCache) {
+    private void doAddStructure(QueuedStructure s, RegionStore regionStore) {
         //s.add(world);
     }
     
@@ -390,156 +269,8 @@ public class Region {
      */
     @ThreadUnsafeMethod
     public void implantStructures(RegionStore cache) {
-        for(QueuedStructure s : structures) // clears the queue
+        for(QueuedStructure s : structures) // clears the queue since ClearingQueue
             doAddStructure(s, cache);
-    }
-    
-    /**
-     * Returns {@code true} if this region has been prepared and may be safely
-     * used.
-     */
-    @Deprecated
-    public boolean isPrepared() {
-        return stateOld.get().equals(State.PREPARED);
-    }
-    
-    /**
-     * Checks for whether or not this region has been generated.
-     */
-    @Deprecated
-    public boolean isGenerated() {
-        return generated;
-    }
-    
-    /**
-     * Marks this region as generated, and induces an appropriate state change.
-     * This is invoked in two scenarios:
-     * 
-     * <ul>
-     * <li>When the WorldLoader finishes loading this region and finds it to be
-     *     generated.
-     * <li>When the WorldGenerator finishes generating this region.
-     * </ul>
-     */
-    @Deprecated
-    public void setGenerated() {
-        generated = true;
-        
-        // This method is invoked in two scenarios:
-        // 
-        // 1: When this region is loaded by the WorldLoader, and it finds that
-        //    this region has already been generated. From here, there are two
-        //    options:
-        // 
-        //    a: There are queued structures. We remain in State.LOADING so
-        //       that getGenerationPermit() returns true so that the world
-        //       generator can generate those structures concurrently.
-        //    b: There are no queued structures. We change to State.ACTIVE as
-        //       this region is now usable.
-        // 
-        // 2: The WorldGenerator just finished generating this region. We
-        //    change to State.ACTIVE as this region is now usable.
-        
-        State s = stateOld.get();
-        if(s.equals(State.LOADING)) {
-            if(!hasQueuedStructures())
-                stateOld.compareAndSet(State.LOADING, State.PREPARED);
-        } else if(s == State.GENERATING)
-            stateOld.compareAndSet(State.GENERATING, State.PREPARED);
-        else
-            Log.get().postWarning("Invalid state " + s + " on setGenerated for "
-                    + this);
-    }
-    
-    /**
-     * Attempts to obtain the permit to load this region. If this returns
-     * {@code true}, the caller may load the region. This method is provided
-     * for WorldLoader use only.
-     */
-    @Deprecated
-    public boolean getLoadPermit() {
-        // We can load only when this region is newly-created, so the only
-        // valid state transition is from State.NEW to State.LOADING.
-        return stateOld.compareAndSet(State.NEW, State.LOADING);
-    }
-    
-    /**
-     * Attempts to obtain the permit to generate this region. If this returns
-     * {@code true}, the caller may generate this region. This method is
-     * provided for WorldGenerator use only.
-     */
-    @Deprecated
-    public boolean getGenerationPermit() {
-        return stateOld.compareAndSet(State.LOADING, State.GENERATING);
-    }
-    
-    /**
-     * Attempts to obtain a permit to save this region. If this returns {@code
-     * true}, the caller may save this region.
-     * 
-     * <p>Note that this method may block for a while if this region is
-     * currently being saved.
-     */
-    @Deprecated
-    public boolean getSavePermit() {
-        synchronized(saveState) {
-            // We synchronise on this region to make this atomic. This is much
-            // less painful than trying to work with an atomic variable.
-            
-            switch(saveState.get()) {
-                case IDLE:
-                    // If we're in IDLE, we switch to SAVING and save.
-                    saveState.set(SaveState.SAVING);
-                    return true;
-                case SAVING:
-                    // If we're in SAVING, this means another thread is
-                    // currently saving this region. However, since we have no
-                    // guarantee that it is saving up-to-date data, we wait for
-                    // it to finish and then save again on this thread.
-                    saveState.set(SaveState.WAITING);
-                    Tasks.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE
-                                    || saveState.get() == SaveState.IDLE_WAITER);
-                    saveState.set(SaveState.SAVING);
-                    return true;
-                case WAITING:
-                case IDLE_WAITER:
-                    // As above, except another thread is waiting to save the
-                    // updated state. We abort and let that thread do it.
-                    // 
-                    // As an added bonus, since we just grabbed the sync lock,
-                    // we've established a happens-before with the waiter and thus
-                    // provided it with a more recent batch of region state. Yay!
-                    return false;
-            }
-        }
-        
-        throw new AssertionError(); // impossible
-    }
-    
-    /**
-     * Finalises a save operation by inducing an appropriate state change and
-     * notifying relevant threads.
-     */
-    @UserThread("WorldLoaderThread")
-    @Deprecated
-    public void finishSaving() {
-        synchronized(saveState) {
-            saveState.set(saveState.get() == SaveState.WAITING
-                    ? SaveState.IDLE_WAITER
-                    : SaveState.IDLE);
-            saveState.notifyAll();
-        }
-    }
-    
-    /**
-     * Blocks the current thread until this region has finished saving. If the
-     * current thread was interrupted while waiting, the interrupt flag will be
-     * set when this method returns.
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    private void waitUntilSaved() {
-        Tasks.waitUntil(saveState, () -> saveState.get() == SaveState.IDLE);
     }
     
     public void tryImport(HostWorld world) {
@@ -581,6 +312,27 @@ public class Region {
     }
     
     /**
+     * @param world This region's parent world.
+     * 
+     * @return This region's file.
+     */
+    public FileHandle getFile(HostWorld world) {
+        return world.getWorldDir().child("r_" + x() + "_" + y() + ".region");
+    }
+    
+    /**
+     * Checks for whether or not this region's file exists.
+     * 
+     * @param world This region's parent world.
+     * 
+     * @return {@code true} if this region has a saved file; {@code false}
+     * otherwise.
+     */
+    public boolean fileExists(HostWorld world) {
+        return getFile(world).exists();
+    }
+    
+    /**
      * Gets this region's hash code.
      */
     @Override
@@ -605,21 +357,9 @@ public class Region {
         sb.append(',');
         sb.append(loc.y());
         sb.append(": ");
-        sb.append(stateToString());
-        sb.append('/');
-        sb.append(saveStateToString());
+        sb.append(state);
         sb.append("]");
         return sb.toString();
-    }
-    
-    private String stateToString() {
-        return stateOld.get().toString();
-    }
-    
-    private String saveStateToString() {
-        synchronized(saveState) {
-            return saveState.toString();
-        }
     }
     
     /**
@@ -778,7 +518,7 @@ public class Region {
     private static class DummyRegion extends Region {
         
         DummyRegion() {
-            super(0, 0, 0);
+            super(0, 0);
         }
         
         @Override

@@ -40,24 +40,25 @@ public class BaseRegionLoader implements IRegionLoader {
 	
 	@Override
 	public void save(Region r, DataCompound c, boolean generated) {
-		if(generated) {
-			for(int y = 0; y < REGION_SIZE; y++) {            // Row (y)
-                for(int x = 0; x < REGION_SIZE; x++) {        // Col (x)
-                    DataCompound sliceTag = c.createCompound("slice" + x + "_" + y);
-                    Slice s = r.slices[y][x];
-                    sliceTag.put("tiles", Slice.to1DArray(s.tiles));
-                    sliceTag.put("walls", Slice.to1DArray(s.walls));
-                    sliceTag.put("light", Slice.to1DArray(s.light));
+		if(!generated)
+		    return;
+		
+		for(int y = 0; y < REGION_SIZE; y++) {
+            for(int x = 0; x < REGION_SIZE; x++) {
+                DataCompound sliceTag = c.createCompound("slice" + x + "_" + y);
+                Slice s = r.slices[y][x];
+                sliceTag.put("tiles", Slice.to1DArray(s.tiles));
+                sliceTag.put("walls", Slice.to1DArray(s.walls));
+                sliceTag.put("light", Slice.to1DArray(s.light));
+                
+                if(s.tileEntities != null) {
+                    DataList tileEntities = sliceTag.createList("tileEntities");
                     
-                    if(s.tileEntities != null) {
-                        DataList tileEntities = sliceTag.createList("tileEntities");
-                        
-                        TileEntity t;
-                        for(int tileX = 0; tileX < Slice.SLICE_SIZE; tileX++) {
-                            for(int tileY = 0; tileY < Slice.SLICE_SIZE; tileY++) {
-                                if((t = s.tileEntities[tileY][tileX]) != null) {
-                                    tileEntities.add(t.toNBT());
-                                }
+                    TileEntity t;
+                    for(int tileX = 0; tileX < Slice.SLICE_SIZE; tileX++) {
+                        for(int tileY = 0; tileY < Slice.SLICE_SIZE; tileY++) {
+                            if((t = s.tileEntities[tileY][tileX]) != null) {
+                                tileEntities.add(t.toNBT());
                             }
                         }
                     }

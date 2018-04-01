@@ -1,6 +1,5 @@
 package com.stabilise.world.loader;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -15,9 +14,9 @@ import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.Format;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
+import com.stabilise.world.RegionState;
+import com.stabilise.world.RegionStore.RegionCallback;
 import com.stabilise.world.WorldLoadTracker;
-import com.stabilise.world.RegionStore.CachedRegion;
-import com.stabilise.world.gen.WorldGenerator;
 
 
 /**
@@ -50,9 +49,6 @@ public class WorldLoader {
 	
     /** A reference to the world that this WorldLoader handles the loading for. */
     private final HostWorld world;
-    /** A reference to the world's generator. We need this so that we can hand
-     * off regions to be generated if necessary after they've been loaded. */
-    private WorldGenerator generator = null;
     /** A reference to the Executor with which we send off all asynchronous
      * loading tasks. */
     private final Executor executor;
@@ -85,12 +81,6 @@ public class WorldLoader {
         // after this constructor in the HostWorld constructor.
     }
     
-    /**
-     * Passes this WorldLoader a reference to the world's generator.
-     */
-    public void passReferences(WorldGenerator generator) {
-        this.generator = generator;
-    }
     
     /**
      * Registers a loader. Loaders are run in the order they are registered.
@@ -127,58 +117,36 @@ public class WorldLoader {
     }
     
     /**
-     * Instructs the WorldLoader to asynchronously load a region. This
-     * method does nothing if {@link RegionState#getLoadPermit()
-     * r.state.getLoadPermit()} returns {@code false}.
-     * 
-     * TODO: not true, failing that it will attempt to generate
+     * Instructs this WorldLoader to asynchronously load a region. It is
+     * assumed the called has already acquired a {@link
+     * RegionState#getLoadPermit() permit} to load the region.
      * 
      * @param r The region to load.
-     * @param generate Whether or not the region should also be generated,
-     * if it is not already.
+     * @param generate true if the the region should also be generated, if it
+     * has not already been generated.
+     * @param callback The function to call once loading/generation is
+     * completed.
      * 
      * @throws NullPointerException if {@code region} is {@code null}.
      */
     @UserThread("Any")
-    public void loadRegion(Region r, boolean generate) {
+    public void loadRegion(Region r, boolean generate, RegionCallback callback) {
         world.stats.load.requests.increment();
-        
-        if(r.state.getLoadPermit()) {
-            tracker.startLoadOp();
-            executor.execute(() -> doLoad(r, generate));
-        } else if(generate) {
-            tracker.startLoadOp();
-            world.stats.load.rejected.increment();
-            generator.generate(r);
-        }
+        tracker.startLoadOp();
+        executor.execute(() -> doLoad(r, generate, callback));
     }
     
-    /**
-     * Instructs the WorldLoader to asynchronously save a region.
-     * 
-     * <p>The request will be ignored if the region does not grant its
-     * {@link Region#getSavePermit() save permit}.
-     * 
-     * @param region The region to save.
-     * @param cacheHandle The handle to this region's cache entry. {@code
-     * null} is allowed.
-     */
-    @UserThread("Any")
-    public void saveRegion(Region region, CachedRegion cacheHandle) {
-    	world.stats.save.requests.increment();
-        executor.execute(() -> doSave(region, cacheHandle));
-        region.lastSaved = world.getAge();
-    }
-    
-    private void doLoad(Region r, boolean generate) {
+    private void doLoad(Region r, boolean generate, RegionCallback callback) {
     	world.stats.load.started.increment();
         
         if(cancelLoadOperations) {
-            tracker.endLoadOp();
             world.stats.load.aborted.increment();
+            tracker.endLoadOp();
+            callback.accept(r, false);
             return;
         }
         
+        boolean success = false;
     	FileHandle file = r.getFile(world);
     	if(file.exists()) {
             try {
@@ -187,9 +155,11 @@ public class WorldLoader {
                 
                 loaders.forEach(l -> l.load(r, c, generated));
                 
+                r.state.setLoaded();
                 if(generated)
-                	r.state.setGenerated();
+                	r.state.setGenerated(r.hasQueuedStructures());
             	
+                success = true;
                 world.stats.load.completed.increment();
             } catch(Exception e) {
                 log.postSevere("Loading " + r + " failed!", e);
@@ -197,41 +167,58 @@ public class WorldLoader {
             }
     	}
     	
-        if(generate)
-            generator.generateSynchronously(r);
-        else
-            tracker.endLoadOp();
+    	tracker.endLoadOp();
+    	callback.accept(r, success);
     }
     
-    private void doSave(Region r, CachedRegion cacheHandle) {
+    /**
+     * Saves a region.
+     * 
+     * <p>The request will be ignored if the region does not grant its
+     * {@link Region#getSavePermit() save permit}.
+     * 
+     * @param region The region to save.
+     * @param useCurrentThread true to save on the current thread, false to
+     * spawn a worker thread.
+     * @param callback The function to call once saving is completed.
+     */
+    @UserThread("Any")
+    public void saveRegion(Region region, boolean useCurrentThread, RegionCallback callback) {
+        world.stats.save.requests.increment();
+        region.lastSaved = world.getAge();
+        if(useCurrentThread)
+            doSave(region, callback);
+        else
+            executor.execute(() -> doSave(region, callback));
+    }
+    
+    private void doSave(Region r, RegionCallback callback) {
     	world.stats.save.started.increment();
-        
-        if(r.state.getSavePermit()) {
+        boolean success;
+    	
+        do {
             DataCompound c = Format.NBT.newCompound();
             boolean generated = r.state.isGenerated();
             c.put("generated", generated);
             
-            savers.forEach(s -> s.save(r, c, generated));
-            
             try {
-               try {
-                    IOUtil.writeSafe(r.getFile(world), c, Compression.GZIP);
-                } catch(IOException e) {
-                    log.postSevere("Could not save " + r + "!", e);
-                }
-                r.state.finishSaving();
+                // Include the savers in the try-catch because it'd be foolish
+                // to trust them.
+                savers.forEach(s -> s.save(r, c, generated));
+                
+                IOUtil.writeSafe(r.getFile(world), c, Compression.GZIP);
+                success = true;
                 world.stats.save.completed.increment();
             } catch(Throwable t) {
                 world.stats.save.failed.increment();
                 log.postSevere("Saving " + r + " failed!", t);
+                success = false;
+                // Don't break on a fail; if another save was requested, we
+                // might get lucky and it may work.
             }
-        } else
-            world.stats.save.aborted.increment();
+        } while(r.state.finishSaving()); // save again if another save was requested
         
-        // Extremely important final step in the lifecycle of a region: try
-        // to uncache a region after it has been saved.
-        if(cacheHandle != null)
-            cacheHandle.dispose();
+        callback.accept(r, success);
     }
     
     /**
