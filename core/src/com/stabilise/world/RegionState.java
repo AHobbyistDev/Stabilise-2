@@ -2,6 +2,7 @@ package com.stabilise.world;
 
 import static com.stabilise.core.Constants.REGION_UNLOAD_TICK_BUFFER;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.stabilise.util.Checks;
@@ -60,11 +61,6 @@ public class RegionState {
     private SaveState saveState = SaveState.NOT_SAVING;
     /** Whether or not this region has been generated. */
     private boolean generated = false;
-    /** Whether or not the entities & tile entities stored in this region have
-     * been loaded into the world. This should be {@code false} until
-     * isPrepared() returns true in the main thread, from which we set this to
-     * true and add all the stuff in this region to the world. */
-    private boolean imported = false;
     
     
     /** The number of slices anchored due to having been loaded by a client
@@ -74,22 +70,26 @@ public class RegionState {
      * <p>A region can only be anchored on the main thread, so we don't need to
      * be careful with synchronisation. */
     private int anchors = 0;
-    /** Number of adjacent regions (a region counts itself as a neighbour too)
-     * which are anchored. We do not unload a region unless it has no anchored
-     * neighbours.
+    /** Number of adjacent regions which are anchored. We do not unload a
+     * region unless it has no anchored neighbours.
      * 
      * <p>A region (and its neighbours) can only be anchored on the main
      * thread, so we don't need to be careful with synchronisation. */
     private int anchoredNeighbours = 0;
-    /** Number of adjacent regions (a region counts itself as a neighbour too)
-     * which are 'prepared'. A region is only considered active if it is
-     * anchored and all its neighbours are prepared.
+    /** Number of adjacent regions which are 'prepared'. A region is considered
+     * active if it is anchored and all its neighbours are prepared. */
+    private AtomicInteger preparedNeighbours = new AtomicInteger();
+    /** true if all this region's neighbours are prepared. A region is
+     * considered active if it is anchored and all its neighbours are prepared.
      * 
-     * Question: on what threads may this be modified? */
-    private int preparedNeighbours = 0;
-    /** Whether we've informed the region's neighbours that it's been prepared.
-     * Once set to true, this will remain true until the region is unloaded. */
-    private boolean hasInformedNeighbours = false;
+     * <p>This value is cached as to avoid reading from an AtomicInteger on a
+     * per-tick basis. Since this is not volatile, the correct value is updated
+     * in the main thread by establishing a happens-before using the
+     * ConcurrentMap in RegionStore. (TODO: not actually airtight -- will 
+     * backfire on me when I use this to assume all neighbouring regions are
+     * definitely present in the region store. Ah well, I'll deal with it when
+     * I get the first NPE.) */
+    private boolean allNeighboursPrepared = false;
     
     /** The number of ticks until the region should be unloaded.  */
     private int ticksToUnload = REGION_UNLOAD_TICK_BUFFER;
@@ -141,7 +141,7 @@ public class RegionState {
     @UserThread("MainThread")
     @ThreadUnsafeMethod
     public boolean isActive() {
-        return isAnchored() && preparedNeighbours == 9;
+        return isAnchored() && allNeighboursPrepared;
     }
     
     /**
@@ -163,6 +163,42 @@ public class RegionState {
     public void removeAnchoredNeighbour() {
         if(--anchoredNeighbours == 0)
             ticksToUnload = REGION_UNLOAD_TICK_BUFFER;
+    }
+    
+    /**
+     * Returns true if the region has anchored neighbours.
+     */
+    public boolean hasAnchoredNeihbours() {
+        return anchoredNeighbours > 0;
+    }
+    
+    /**
+     * Informs this region that is has a prepared neighbour. This is called by
+     * RegionStore.
+     */
+    @UserThread("Any")
+    public void addPreparedNeighbour() {
+        if(preparedNeighbours.incrementAndGet() == 8) // 8 neighbours; don't count self
+            allNeighboursPrepared = true;
+    }
+    
+    /**
+     * Informs this region that one of its neighbours has been removed from the
+     * world. This is called by RegionStore.
+     */
+    @UserThread("Any")
+    public void removePreparedNeighbour() {
+        preparedNeighbours.getAndDecrement();
+        allNeighboursPrepared = false;
+    }
+    
+    /**
+     * Counts down another tick until the region is scheduled to be unloaded.
+     * 
+     * @return true if the region should be unloaded
+     */
+    public boolean tickDown() {
+        return --ticksToUnload == 0;
     }
     
     /**
@@ -195,7 +231,7 @@ public class RegionState {
      * WorldLoader once loading of the region is completed.
      */
     public void setLoaded() {
-        if(state.compareAndSet(State.LOADING, State.LOADED))
+        if(!state.compareAndSet(State.LOADING, State.LOADED))
             throw new RuntimeException("Couldn't transition from loading to loaded?");
     }
     
@@ -240,7 +276,7 @@ public class RegionState {
         //    change to PREPARED as this region is now usable.
         
         State s = state.get();
-        if(s == State.LOADED) {
+        if(s == State.LOADING || s == State.LOADED) {
             if(!queuedStructures)
                 state.set(State.PREPARED);
         } else if(s == State.GENERATING)

@@ -116,16 +116,6 @@ public final class WorldGenerator {
     @UserThread("Any")
     public void generate(Region r, boolean useCurrentThread, RegionCallback callback) {
         world.stats.gen.requests.increment();
-        if(isShutdown) { // || !r.state.getGenerationPermit()) {
-            world.stats.gen.rejected.increment();
-            // If we're using the current thread it means we're following
-            // directly off a load operation, so we do the courtesy of ending
-            if(useCurrentThread)
-                loadTracker.endLoadOp();
-            callback.accept(r, false);
-            return;
-        }
-        
         if(useCurrentThread)
             genRegion(r, callback);
         else
@@ -143,6 +133,7 @@ public final class WorldGenerator {
         if(isShutdown) {
             loadTracker.endLoadOp();
             world.stats.gen.aborted.increment();
+            callback.accept(r, false);
             return;
         }
         

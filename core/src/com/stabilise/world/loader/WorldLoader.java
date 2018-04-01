@@ -146,7 +146,7 @@ public class WorldLoader {
             return;
         }
         
-        boolean success = false;
+        boolean success = true;
     	FileHandle file = r.getFile(world);
     	if(file.exists()) {
             try {
@@ -159,11 +159,11 @@ public class WorldLoader {
                 if(generated)
                 	r.state.setGenerated(r.hasQueuedStructures());
             	
-                success = true;
                 world.stats.load.completed.increment();
             } catch(Exception e) {
                 log.postSevere("Loading " + r + " failed!", e);
                 world.stats.load.failed.increment();
+                success = false;
             }
     	}
     	
