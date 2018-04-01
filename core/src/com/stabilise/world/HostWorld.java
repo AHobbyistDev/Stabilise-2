@@ -38,7 +38,7 @@ public class HostWorld extends AbstractWorld {
     
     /** This world's region store, which as the name suggests, stores and
      * manages all the regions. */
-    private final RegionStore regions;
+    public final RegionStore regions;
     
     /** The world loader. */
     private final WorldLoader loader;

@@ -378,7 +378,7 @@ public class Worlds {
                         do {
                             t.set(bStatus.get().numDone());
                             bStatus.get().waitUntilNext();
-                            w.forEachRegion(r -> { if(r.state.isPrepared()) r.tryImport(w); });
+                            w.forEachRegion(r -> { if(r.state.isPrepared()) r.importContents(w); });
                         } while(!bStatus.get().isDone());
                         return new WorldBundle(bMulti.get(), w,
                                 bPlayer.get().playerEntity, bPlayer.get().playerData);

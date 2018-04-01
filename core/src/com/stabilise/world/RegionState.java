@@ -5,6 +5,8 @@ import static com.stabilise.core.Constants.REGION_UNLOAD_TICK_BUFFER;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.annotation.concurrent.GuardedBy;
+
 import com.stabilise.util.Checks;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
@@ -56,10 +58,12 @@ public class RegionState {
     /** The state of this region. See the documentation for {@link #State.NEW}
      * and all other states. */
     private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
-    /** Save state. Access to this should only be done while synchronised on
-     * this RegionState object. */
+    /** Keeps track of whether the region is being saved. */
+    @GuardedBy("this")
     private SaveState saveState = SaveState.NOT_SAVING;
-    /** Whether or not this region has been generated. */
+    /** Whether or not this region has been generated. Note that this is
+     * distinct from {@link State#PREPARED}, since a region can be generated at
+     * time of loading, but still in need of preparation to implant structures. */
     private boolean generated = false;
     
     
@@ -90,6 +94,11 @@ public class RegionState {
      * definitely present in the region store. Ah well, I'll deal with it when
      * I get the first NPE.) */
     private boolean allNeighboursPrepared = false;
+    
+    /** Whether a region's contents have been imported into the world.
+     * Importing is done on the first tick after a region is added into the
+     * world. */
+    private boolean imported = false;
     
     /** The number of ticks until the region should be unloaded.  */
     private int ticksToUnload = REGION_UNLOAD_TICK_BUFFER;
@@ -168,7 +177,7 @@ public class RegionState {
     /**
      * Returns true if the region has anchored neighbours.
      */
-    public boolean hasAnchoredNeihbours() {
+    public boolean hasAnchoredNeighbours() {
         return anchoredNeighbours > 0;
     }
     
@@ -193,15 +202,6 @@ public class RegionState {
     }
     
     /**
-     * Counts down another tick until the region is scheduled to be unloaded.
-     * 
-     * @return true if the region should be unloaded
-     */
-    public boolean tickDown() {
-        return --ticksToUnload == 0;
-    }
-    
-    /**
      * Returns {@code true} if this region has been prepared and may be safely
      * used.
      */
@@ -221,8 +221,6 @@ public class RegionState {
      * true}, the caller may load the region.
      */
     public boolean getLoadPermit() {
-        // We only need to load once, and that's when the region is initially
-        // created. The only valid state transition is from NEW to LOADING.
         return state.compareAndSet(State.NEW, State.LOADING);
     }
     
@@ -347,6 +345,36 @@ public class RegionState {
         }
         
         throw Checks.badAssert();
+    }
+    
+    /**
+     * Counts down another tick until the region is scheduled to be unloaded.
+     * 
+     * @return true if the region should be unloaded
+     */
+    public boolean tickDown() {
+        return --ticksToUnload == 0;
+    }
+    
+    /**
+     * This is called when the region is removed from the world.
+     */
+    public void removedFromWorld() {
+        // Might need to be reimported if the region is added back before it is
+        // flushed from the cache
+        imported = false;
+    }
+    
+    /**
+     * Checks to see if the region should have its contents imported into the
+     * world.
+     */
+    public boolean tryImport() {
+        if(!imported) {
+            imported = true;
+            return true;
+        }
+        return false;
     }
     
     @Override

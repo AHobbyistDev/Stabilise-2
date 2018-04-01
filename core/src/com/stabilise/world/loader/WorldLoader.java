@@ -54,6 +54,8 @@ public class WorldLoader {
     private final Executor executor;
     
     private volatile boolean cancelLoadOperations = false;
+    
+    /** Tracker used for producing nice load bars while loading the world. */
     private final WorldLoadTracker tracker;
     
     private final List<IRegionLoader> loaders = new ArrayList<>();
@@ -165,6 +167,9 @@ public class WorldLoader {
                 world.stats.load.failed.increment();
                 success = false;
             }
+    	} else {
+    	    world.stats.load.completed.increment(); // we'll count this as completed
+    	    r.state.setLoaded();
     	}
     	
     	tracker.endLoadOp();
@@ -185,7 +190,6 @@ public class WorldLoader {
     @UserThread("Any")
     public void saveRegion(Region region, boolean useCurrentThread, RegionCallback callback) {
         world.stats.save.requests.increment();
-        region.lastSaved = world.getAge();
         if(useCurrentThread)
             doSave(region, callback);
         else
@@ -213,8 +217,9 @@ public class WorldLoader {
                 world.stats.save.failed.increment();
                 log.postSevere("Saving " + r + " failed!", t);
                 success = false;
-                // Don't break on a fail; if another save was requested, we
-                // might get lucky and it may work.
+                // Don't break from the do..while on a fail; if another save
+                // was requested, we might get lucky and it may work the second
+                // time.
             }
         } while(r.state.finishSaving()); // save again if another save was requested
         

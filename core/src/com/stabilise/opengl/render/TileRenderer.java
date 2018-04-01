@@ -1,11 +1,13 @@
 package com.stabilise.opengl.render;
 
+import static com.stabilise.world.Region.REGION_SIZE_IN_TILES;
 import static com.stabilise.world.Slice.SLICE_SIZE;
 import static com.stabilise.world.Slice.SLICE_SIZE_MINUS_ONE;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 import com.stabilise.entity.Position;
 import com.stabilise.world.Slice;
@@ -16,6 +18,10 @@ import com.stabilise.world.tile.Tile;
  * world.
  */
 public class TileRenderer implements Renderer {
+    
+    private static final Color transparentRed = new Color(0xFF000030);
+    private static final Color transparentYellow = new Color(0xFFFF0030);
+    private static final Color transparentGreen = new Color(0x00FF0030);
     
     //--------------------==========--------------------
     //------------=====Member Variables=====------------
@@ -165,18 +171,6 @@ public class TileRenderer implements Renderer {
     }
     
     public void renderSliceBorders(ShapeRenderer shapes) {
-        /*
-        for(int c = wr.camObj.pos.getSliceX() - wr.slicesHorizontal;
-                c <= wr.camObj.pos.getSliceX() + wr.slicesHorizontal;
-                c++) {
-            for(int r = wr.camObj.pos.getSliceY() - wr.slicesVertical;
-                    r <= wr.camObj.pos.getSliceY() + wr.slicesVertical;
-                    r++) {
-                shapes.rect(c*SLICE_SIZE, r*SLICE_SIZE, SLICE_SIZE, SLICE_SIZE);
-            }
-        }
-        */
-        
         int camSliceX = wr.camObj.pos.getSliceX();
         int camSliceY = wr.camObj.pos.getSliceY();
         Position camPos = wr.camObj.pos;
@@ -191,15 +185,23 @@ public class TileRenderer implements Renderer {
         }
     }
     
-    /*
-    // TODO: temporary methods
-    private int camX() {
-        return Position.tileCoordFreeToTileCoordFixed(wr.camObj.pos.getGlobalX());
+    public void renderRegionTint(ShapeRenderer shapes) {
+        if(!(world instanceof HostWorld))
+            return;
+        HostWorld w = (HostWorld)world;
+        
+        Position camPos = wr.camObj.pos;
+        
+        w.regions.forEach(r -> {
+            if(r.state.isActive())
+                shapes.setColor(transparentGreen);
+            else if(r.state.hasAnchoredNeighbours())
+                shapes.setColor(transparentYellow);
+            else
+                shapes.setColor(transparentRed);
+            shapes.rect(camPos.diffX(r.offsetX, 0f), camPos.diffY(r.offsetY, 0f),
+                    REGION_SIZE_IN_TILES, REGION_SIZE_IN_TILES);
+        });
     }
-    
-    private int camY() {
-        return Position.tileCoordFreeToTileCoordFixed(wr.camObj.pos.getGlobalY());
-    }
-    */
     
 }

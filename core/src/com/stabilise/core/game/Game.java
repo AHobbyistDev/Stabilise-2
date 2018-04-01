@@ -238,6 +238,13 @@ public class Game implements Controllable, InputProcessor {
                 else
                     messages.send("Turning off slice borders");
                 break;
+            case TOG_REGION_TINT:
+                renderer.renderRegionTint = !renderer.renderRegionTint;
+                if(renderer.renderRegionTint)
+                    messages.send("Turning on region tint");
+                else
+                    messages.send("Turning off region tint");
+                break;
             case ZOOM_IN:
                 renderer.setPixelsPerTile(renderer.getPixelsPerTile() * 2, true);
                 break;
@@ -249,6 +256,17 @@ public class Game implements Controllable, InputProcessor {
                 break;
             case SAVE_LOG:
                 Log.saveLog(false, Stabilise.GAME_NAME + " v" + Constants.VERSION);
+                break;
+            case TEST_RANDOM:
+                //mob.x = 0;
+                //mob.y = 0;
+                //game.getWorld().camera.snapToFocus();
+                //Log.message(Texture.texturesToString());
+                //Runtime r = Runtime.getRuntime();
+                //Log.get().postDebug(r.freeMemory()/(1024*1024) + "/" +
+                //        r.totalMemory()/(1024*1024) + "/" + r.maxMemory()/(1024*1024));
+                //System.out.println(game.profiler.getData().toString());
+                Log.get().postDebug(world.regions.toStringDebug());
                 break;
             default:
                 return playerController.handleControlPress(control);

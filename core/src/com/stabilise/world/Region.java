@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 import java.util.function.IntBinaryOperator;
 
 import com.badlogic.gdx.files.FileHandle;
-import com.stabilise.core.Constants;
 import com.stabilise.entity.Position;
 import com.stabilise.util.annotation.ThreadSafeMethod;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
@@ -88,18 +87,9 @@ public class Region {
      * the region, in slice-lengths. */
     public final int offsetX, offsetY;
     
-
-    /** The time the region was last saved, in terms of the world age. */
-    public long lastSaved = 0L;
-    
     
     public final RegionState state = new RegionState();
     
-    /** Whether or not the entities & tile entities stored in this region have
-     * been loaded into the world. This should be {@code false} until
-     * isPrepared() returns true in the main thread, from which we set this to
-     * true and add all the stuff in this region to the world. */
-    private boolean imported = false;
     
     /** Actions to perform when added to the world. */
     public List<Action> queuedActions = null;
@@ -139,50 +129,13 @@ public class Region {
     }
     
     /**
-     * @return {@code true} if this region should be unloaded; {@code false}
-     * if it should remain in memory.
+     * Updates this region. This is invoked on a per-tick basis by the
+     * {@link RegionStore} if this region is {@link RegionState#isActive()
+     * active}.
      */
-    public boolean update(HostWorld world, RegionStore store) {
-        // TODO: should I move everything but the actual update stuff over to
-        // the RegionStore update method?
-        tryImport(world);
-        
-        if(state.isActive()) {
-            // Tick any number of random tiles in the region each tick
-            tickSlice(world, 4);
-            
-            // Save the region at 64-second intervals.
-            // Regions whose x and y coordinates are congruent modulo 8 are
-            // saved simultaneously, but nearby regions are saved sequentially,
-            // which distributes the IO overhead nicely.
-            // N.B. loc.y & 7 == loc.y % 8
-            //if(world.getAge() % (8*8 * Constants.TICKS_PER_SECOND) ==
-            //        (((y() & 7) * 8 + (x() & 7)) * Constants.TICKS_PER_SECOND))
-            //    world.saveRegion(this);
-        } else if(!state.hasAnchoredNeihbours()) {
-            if(state.tickDown())
-                return true;
-        }
-        
-        implantStructures(store);
-        
-        return false;
-    }
-    
-    /**
-     * Updates a random tile within the region.
-     * 
-     * <p>Given there are 65536 tiles in a region, a tile will, on average, be
-     * updated once every 18 minutes if this is invoked once per tick.
-     */
-    @SuppressWarnings("unused")
-    private void tickTile(HostWorld world) {
-        int sx = world.rnd.nextInt(REGION_SIZE);
-        int sy = world.rnd.nextInt(REGION_SIZE);
-        int tx = world.rnd.nextInt(Slice.SLICE_SIZE);
-        int ty = world.rnd.nextInt(Slice.SLICE_SIZE);
-        Position tmp = Position.create().set(sx + offsetX, sy + offsetY, tx, ty);
-        getSliceAt(sx, sy).getTileAt(tx, ty).update(world, tmp);
+    public void update(HostWorld world) {
+        // Tick any number of random tiles in the region each tick
+        tickSlice(world, 4);
     }
     
     /**
@@ -267,20 +220,21 @@ public class Region {
             doAddStructure(s, cache);
     }
     
-    public void tryImport(HostWorld world) {
-        if(!imported) {
-            imported = true;
-            forEachSlice(s -> {
-                //s.buildLight();
-                s.importEntities(world);
-                s.importTileEntities(world);
-            });
-            if(queuedActions != null) {
-                for(Action a : queuedActions) {
-                    a.apply(world, this);
-                }
-                queuedActions = null;
+    /**
+     * Imports this region's contents (e.g. entities, tile entities, lighting)
+     * into the world.
+     */
+    public void importContents(HostWorld world) {
+        forEachSlice(s -> {
+            //s.buildLight();
+            s.importEntities(world);
+            s.importTileEntities(world);
+        });
+        if(queuedActions != null) {
+            for(Action a : queuedActions) {
+                a.apply(world, this);
             }
+            queuedActions = null;
         }
     }
     
@@ -391,38 +345,6 @@ public class Region {
     //--------------------==========--------------------
     
     /**
-     * The QueuedSlice class contains information about a slice queued to be
-     * sent to a client while a region is generating.
-     * 
-     * @deprecated Due to the removal of networking architecture.
-     */
-    @SuppressWarnings("unused")
-    private static class QueuedSlice {
-        
-        /** The hash of the client to send the slice to. */
-        private int clientHash;
-        /** The x-coordinate of the slice, in slice-lengths. */
-        private int sliceX;
-        /** The y-coordinate of the slice, in slice-lengths. */
-        private int sliceY;
-        
-        
-        /**
-         * Creates a new queued slice.
-         * 
-         * @param clientHash The hash of the client to send the slice to.
-         * @param sliceX The x-coordinate of the slice, in slice-lengths.
-         * @param sliceY The y-coordinate of the slice, in slice-lengths.
-         */
-        private QueuedSlice(int clientHash, int sliceX, int sliceY) {
-            this.clientHash = clientHash;
-            this.sliceX = sliceX;
-            this.sliceY = sliceY;
-        }
-        
-    }
-    
-    /**
      * The QueuedStructure class contains information about a structure queued
      * to be generated within the region.
      * 
@@ -471,7 +393,7 @@ public class Region {
         }
         
         @Override
-        public boolean update(HostWorld world, RegionStore store) {
+        public void update(HostWorld world) {
             throw new IllegalStateException("Dummy region is getting updated!");
         }
         

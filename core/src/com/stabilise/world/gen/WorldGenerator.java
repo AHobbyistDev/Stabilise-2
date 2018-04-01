@@ -16,8 +16,8 @@ import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.RegionState;
 import com.stabilise.world.RegionStore;
-import com.stabilise.world.RegionStore.RegionCallback;
 import com.stabilise.world.WorldLoadTracker;
+import com.stabilise.world.RegionStore.RegionCallback;
 import com.stabilise.world.gen.InstancedWorldgen.InstancedWorldgenSupplier;
 import com.stabilise.world.loader.WorldLoader;
 import com.stabilise.world.multiverse.Multiverse;
@@ -58,7 +58,8 @@ public final class WorldGenerator {
     
     private final List<IWorldGenerator> generators = new ArrayList<>(1);
     
-    private final WorldLoadTracker loadTracker;
+    /** Tracker used for producing nice load bars while loading the world. */
+    private final WorldLoadTracker tracker;
     
     private final Log log;
     
@@ -74,10 +75,9 @@ public final class WorldGenerator {
     public WorldGenerator(Multiverse<?> multiverse, HostWorld world) {
         this.world = Objects.requireNonNull(world);
         this.executor = multiverse.getExecutor();
+        this.tracker = world.loadTracker();
         
         seed = multiverse.getSeed();
-        
-        loadTracker = world.loadTracker();
         
         log = Log.getAgent("Generator_" + world.getDimensionName());
     }
@@ -116,6 +116,7 @@ public final class WorldGenerator {
     @UserThread("Any")
     public void generate(Region r, boolean useCurrentThread, RegionCallback callback) {
         world.stats.gen.requests.increment();
+        tracker.startLoadOp();
         if(useCurrentThread)
             genRegion(r, callback);
         else
@@ -131,8 +132,8 @@ public final class WorldGenerator {
         world.stats.gen.started.increment();
         
         if(isShutdown) {
-            loadTracker.endLoadOp();
             world.stats.gen.aborted.increment();
+            tracker.endLoadOp();
             callback.accept(r, false);
             return;
         }
@@ -178,11 +179,10 @@ public final class WorldGenerator {
             log.postSevere("Worldgen of " + r + " failed!", t);
         }
         
-        //loadTracker.endLoadOp(); // TODO
-        
         // Clean up all regions cached during generation.
         regionStore.uncacheAll();
         
+        tracker.endLoadOp();
         callback.accept(r, success);
     }
     
