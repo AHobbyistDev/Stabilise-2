@@ -122,32 +122,20 @@ public class SliceMap {
         for(int y = oldMaxY; y > maxSliceY; y--) unloadRow(y, minX, maxX);
     }
     
+    /**
+     * Loads a column of slices with the specified x, and between minY
+     * (inclusive) and maxY (inclusive).
+     */
     private void loadCol(int x, int minY, int maxY) {
         for(int y = minY; y <= maxY; y++) world.anchorSlice(x, y);
     }
     
+    /**
+     * Loads a column of slices with the specified y, and between minX
+     * (inclusive) and maxX (inclusive).
+     */
     private void loadRow(int y, int minX, int maxX) {
         for(int x = minX; x <= maxX; x++) world.anchorSlice(x, y);
-    }
-    
-    /**
-     * Loads a column of slices.
-     * 
-     * @param x The x-coordinate of the column, in slice-lengths.
-     */
-    protected void loadCol(int x) {
-        for(int y = minSliceY; y <= maxSliceY; y++)
-            world.anchorSlice(x, y);
-    }
-    
-    /**
-     * Loads a row of slices.
-     * 
-     * @param y The y-coordinate of the row, in slice-lengths.
-     */
-    protected void loadRow(int y) {
-        for(int x = minSliceX; x <= maxSliceX; x++)
-            world.anchorSlice(x, y);
     }
     
     /**
@@ -160,8 +148,7 @@ public class SliceMap {
      * slice-lengths, inclusive.
      */
     protected void unloadCol(int x, int minY, int maxY) {
-        for(int y = minY; y <= maxY; y++)
-            world.deanchorSlice(x, y);
+        for(int y = minY; y <= maxY; y++) world.deanchorSlice(x, y);
     }
     
     /**
@@ -174,8 +161,7 @@ public class SliceMap {
      * slice-lengths, inclusive.
      */
     protected void unloadRow(int y, int minX, int maxX) {
-        for(int x = minX; x <= maxX; x++)
-            world.deanchorSlice(x, y);
+        for(int x = minX; x <= maxX; x++) world.deanchorSlice(x, y);
     }
     
     /**
@@ -210,7 +196,7 @@ public class SliceMap {
         maxSliceY = centreY + LOADED_SLICE_RADIUS;
         
         for(int x = minSliceX; x <= maxSliceX; x++)
-            loadCol(x);
+            loadCol(x, minSliceY, maxSliceY);
     }
     
     /**

@@ -429,7 +429,7 @@ public class RegionStore {
         Point loc = locks.get(x, y);
         for(int u = x-1; u <= x+1; u++) {
             for(int v = y-1; v <= y+1; v++) {
-                if(u == x && v == y) continue;
+                if(u == x && v == y) continue; // don't do it if other == r
                 
                 Region other = regions.get(loc.set(u, v));
                 if(other != null) {
@@ -461,7 +461,7 @@ public class RegionStore {
         Point loc = locks.get(x, y);
         for(int u = x-1; u <= x+1; u++) {
             for(int v = y-1; v <= y+1; v++) {
-                if(u == x && v == y) continue;
+                if(u == x && v == y) continue; // don't do it if other == r
                 
                 Region other = regions.get(loc.set(u, v));
                 if(other != null) {
@@ -547,7 +547,7 @@ public class RegionStore {
             // Load and notify all regions adjacent to r
             for(int u = x-1; u <= x+1; u++) {
                 for(int v = y-1; v <= y+1; v++) {
-                    if(u != x && v != y)
+                    if(u != x || v != y)
                         loadRegion(u, v).state.addAnchoredNeighbour();
                 }
             }
@@ -577,8 +577,8 @@ public class RegionStore {
             // Notify all regions adjacent to r
             for(int u = x-1; u <= x+1; u++) {
                 for(int v = y-1; v <= y+1; v++) {
-                    if(u != x && v != y)
-                        getRegionTryCache(x, y).state.removeAnchoredNeighbour();
+                    if(u != x || v != y)
+                        getRegionTryCache(u, v).state.removeAnchoredNeighbour();
                 }
             }
         }

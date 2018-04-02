@@ -353,7 +353,6 @@ public class WorldRenderer implements Renderer {
         profiler.next("slideborders");
         if(renderSliceBorders) {
             shapes.begin(ShapeType.Line);
-            shapes.setColor(Color.YELLOW);
             tileRenderer.renderSliceBorders(shapes);
             shapes.end();
         }

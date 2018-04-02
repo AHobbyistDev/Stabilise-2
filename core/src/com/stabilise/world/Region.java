@@ -301,9 +301,9 @@ public class Region {
     public String toStringDebug() {
         StringBuilder sb = new StringBuilder();
         sb.append("Region[");
-        sb.append(loc.x());
+        sb.append(String.format("%3d", loc.x()));
         sb.append(',');
-        sb.append(loc.y());
+        sb.append(String.format("%3d", loc.y()));
         sb.append(": ");
         sb.append(state);
         sb.append("]");

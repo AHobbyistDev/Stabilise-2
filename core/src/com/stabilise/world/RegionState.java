@@ -379,7 +379,9 @@ public class RegionState {
     
     @Override
     public String toString() {
-        return stateToString() + "/" + saveStateToString();
+        return "[" + stateToString() + "/" + saveStateToString() + "; " + 
+                "anchors: " + anchors + ", adjAnchored: " + anchoredNeighbours +
+                ", adjPrepped: " + preparedNeighbours + "]";
     }
     
     private String stateToString() {
