@@ -1,11 +1,14 @@
 package com.stabilise.opengl.render;
 
+import static com.stabilise.world.Region.REGION_SIZE;
+import static com.stabilise.world.Region.REGION_SIZE_IN_TILES;
 import static com.stabilise.world.Slice.SLICE_SIZE;
 import static com.stabilise.world.Slice.SLICE_SIZE_MINUS_ONE;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 import com.stabilise.entity.Position;
 import com.stabilise.world.Slice;
@@ -16,6 +19,12 @@ import com.stabilise.world.tile.Tile;
  * world.
  */
 public class TileRenderer implements Renderer {
+    
+    private static final Color transparentRed = new Color(0xFF000040);
+    private static final Color transparentOrange= new Color(0xFF800040);
+    private static final Color transparentYellow = new Color(0xFFFF0040);
+    private static final Color transparentGreen = new Color(0x00FF0040);
+    private static final Color transparentBlue = new Color(0x00FFFF40);
     
     //--------------------==========--------------------
     //------------=====Member Variables=====------------
@@ -165,41 +174,63 @@ public class TileRenderer implements Renderer {
     }
     
     public void renderSliceBorders(ShapeRenderer shapes) {
-        /*
-        for(int c = wr.camObj.pos.getSliceX() - wr.slicesHorizontal;
-                c <= wr.camObj.pos.getSliceX() + wr.slicesHorizontal;
-                c++) {
-            for(int r = wr.camObj.pos.getSliceY() - wr.slicesVertical;
-                    r <= wr.camObj.pos.getSliceY() + wr.slicesVertical;
-                    r++) {
-                shapes.rect(c*SLICE_SIZE, r*SLICE_SIZE, SLICE_SIZE, SLICE_SIZE);
-            }
-        }
-        */
+        // Yellow slice borders
+        shapes.setColor(Color.YELLOW);
         
         int camSliceX = wr.camObj.pos.getSliceX();
         int camSliceY = wr.camObj.pos.getSliceY();
         Position camPos = wr.camObj.pos;
-        for(int c = camSliceX - wr.slicesHorizontal;
-                c <= camSliceX + wr.slicesHorizontal;
-                c++) {
-            for(int r = camSliceY - wr.slicesVertical;
-                    r <= camSliceY + wr.slicesVertical;
-                    r++) {
-                shapes.rect(camPos.diffX(c, 0f), camPos.diffY(r, 0f), SLICE_SIZE, SLICE_SIZE);
+        for(int x = camSliceX - wr.slicesHorizontal;
+                x <= camSliceX + wr.slicesHorizontal;
+                x++) {
+            for(int y = camSliceY - wr.slicesVertical;
+                    y <= camSliceY + wr.slicesVertical;
+                    y++) {
+                shapes.rect(camPos.diffX(x, 0f), camPos.diffY(y, 0f), SLICE_SIZE, SLICE_SIZE);
+            }
+        }
+        
+        // Red region borders
+        shapes.setColor(Color.RED);
+        
+        int camRegionX = wr.camObj.pos.getRegionX();
+        int camRegionY = wr.camObj.pos.getRegionY();
+        int regionsHorizontal = wr.slicesHorizontal / REGION_SIZE;
+        int regionsVertical = wr.slicesVertical / REGION_SIZE;
+        for(int x = camRegionX - regionsHorizontal;
+                x <= camRegionX + regionsHorizontal;
+                x++) {
+            for(int y = camRegionY - regionsVertical;
+                    y <= camRegionY + regionsVertical;
+                    y++) {
+                shapes.rect(camPos.diffX(x*REGION_SIZE, 0f), camPos.diffY(y*REGION_SIZE, 0f),
+                        REGION_SIZE_IN_TILES, REGION_SIZE_IN_TILES);
             }
         }
     }
     
-    /*
-    // TODO: temporary methods
-    private int camX() {
-        return Position.tileCoordFreeToTileCoordFixed(wr.camObj.pos.getGlobalX());
+    public void renderRegionTint(ShapeRenderer shapes) {
+        if(!(world instanceof HostWorld))
+            return;
+        HostWorld w = (HostWorld)world;
+        
+        Position camPos = wr.camObj.pos;
+        
+        w.regions.forEach(r -> {
+            if(r.state.isActive())
+                shapes.setColor(transparentBlue);
+            else if(r.state.isAnchored()) {
+                if(r.state.hasAnchoredNeighbours())
+                    shapes.setColor(transparentGreen);
+                else
+                    shapes.setColor(transparentOrange);
+            } else if(r.state.hasAnchoredNeighbours())
+                shapes.setColor(transparentYellow);
+            else
+                shapes.setColor(transparentRed);
+            shapes.rect(camPos.diffX(r.offsetX, 0f), camPos.diffY(r.offsetY, 0f),
+                    REGION_SIZE_IN_TILES, REGION_SIZE_IN_TILES);
+        });
     }
-    
-    private int camY() {
-        return Position.tileCoordFreeToTileCoordFixed(wr.camObj.pos.getGlobalY());
-    }
-    */
     
 }

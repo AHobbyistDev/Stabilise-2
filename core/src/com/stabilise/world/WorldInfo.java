@@ -31,14 +31,11 @@ public class WorldInfo implements Comparable<WorldInfo> {
     /** The date the world was last accessed at. */
     public long lastPlayedDate = 0L;
     
-    /** The version of the format in which the world has been saved.
-     * This is used to determine whether or not the game will need to convert the 
-     * world data from an older format a current one. */
-    public int worldFormatVersion = 0;
-    /** The version of the format in which the world slices have been saved.
-     * This will be used to determine whether or not the game will need to convert
-     * the world from an older format to a current one. */
-    public int sliceFormatVersion = 0;
+    /** Contains information about the format in which the world has been
+     * saved. This is an open-ended DataCompound object so that the WorldLoader
+     * can decide what to write and write to this. */
+    public DataCompound worldFormat = DataCompound.create();
+    
     
     
     /**
@@ -74,8 +71,8 @@ public class WorldInfo implements Comparable<WorldInfo> {
         creationDate = infoTag.getLong("creationDate");
         lastPlayedDate = infoTag.getLong("lastPlayed");
         
-        worldFormatVersion = infoTag.getInt("formatVersion");
-        sliceFormatVersion = infoTag.getInt("sliceFormatVersion");
+        // Overwriting our worldFormat object can't be helped here
+        worldFormat = infoTag.getCompound("format");
         
         loaded = true;
     }
@@ -97,8 +94,7 @@ public class WorldInfo implements Comparable<WorldInfo> {
         infoTag.put("creationDate", creationDate);
         infoTag.put("lastPlayed", lastPlayedDate);
         
-        infoTag.put("formatVersion", worldFormatVersion);
-        infoTag.put("sliceFormatVersion", sliceFormatVersion);
+        infoTag.put("format", worldFormat);
         
         IOUtil.writeSafe(getFile(), infoTag, Compression.GZIP);
     }
@@ -117,14 +113,14 @@ public class WorldInfo implements Comparable<WorldInfo> {
         return getWorldDir().child(World.FILE_INFO);
     }
     
-    /*
-     * Compares the WorldInfo object to another WorldInfo object, such that
-     * they may be ordered in an array based on the last time the worlds were
-     * accessed.
-     */
     @Override
-    public int compareTo(WorldInfo world) {
-        return Long.compare(world.lastPlayedDate, lastPlayedDate);
+    public int compareTo(WorldInfo other) {
+        // More recently-played worlds should appear higher
+        int comp = Long.compare(other.lastPlayedDate, lastPlayedDate);
+        // Failing that, order alphabetically
+        if(comp == 0)
+            comp = fileSystemName.compareTo(other.fileSystemName);
+        return comp;
     }
     
     //--------------------==========--------------------

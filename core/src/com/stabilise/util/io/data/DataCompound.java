@@ -49,8 +49,8 @@ public interface DataCompound extends Sendable, IContainerTag<DataCompound> {
     /**
      * Gets a compound which is a child of this one. If a compound by the
      * specified name already exists, it is returned, otherwise one is
-     * created. If another data type under the specified name is present,
-     * it will be overwritten.
+     * created and added to this compound. If another data type under the
+     * specified name is present, it will be overwritten.
      * 
      * <p>The returned compound will be of the same format as this one.
      */
@@ -58,9 +58,9 @@ public interface DataCompound extends Sendable, IContainerTag<DataCompound> {
     
     /**
      * Gets a list which is a child of this compound. If a list by the
-     * specified name already exists, it is returned, otherwise one is created.
-     * If another data type under the specified name is present, it will be
-     * overwritten.
+     * specified name already exists, it is returned, otherwise one is created
+     * and added to this compound. If another data type under the specified
+     * name is present, it will be overwritten.
      * 
      * <p>The returned list will be of the same format as this compound.
      */

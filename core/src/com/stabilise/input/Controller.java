@@ -58,6 +58,7 @@ public class Controller implements InputProcessor {
         ADVANCE_TICK    ("forceTick",    Keys.F2,      true),
         TOG_HITBOX_RENDER("togHbRender", Keys.H,       true),
         TOG_SLICE_BORDERS("sliceBorders",Keys.B,       true),
+        TOG_REGION_TINT ("regionTint",   Keys.N,       true),
         NEXT_TILE       ("nextTile",     Keys.PERIOD,  true),
         PREV_TILE       ("prevTile",     Keys.COMMA,   true),
         CLEAR_INVENTORY ("clearInv",     Keys.C,       true),

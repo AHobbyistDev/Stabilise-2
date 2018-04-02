@@ -59,7 +59,7 @@ public class CPortal extends CCore {
                     break;
                 }
             case WAITING_FOR_REGION:
-                if(w2.getRegionAt(0, 0).isPrepared()) {
+                if(w2.getRegionAt(0, 0).state.isActive()) {
                     Entity otherEnd = Entities.portal(((AbstractWorld)w).getDimensionName());
                     CPortal otherCore = (CPortal)otherEnd.core;
                     otherCore.direction = new Vector2(-direction.x, -direction.y);

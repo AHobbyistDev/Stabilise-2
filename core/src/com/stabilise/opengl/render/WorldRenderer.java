@@ -110,6 +110,7 @@ public class WorldRenderer implements Renderer {
     ShapeRenderer shapes;
     public boolean renderHitboxes = false;
     public boolean renderSliceBorders = false;
+    public boolean renderRegionTint = false;
     
     private final Vector2 vec = new Vector2();
     private final List<ParticleIndicator> indicators = new ArrayList<>();
@@ -352,9 +353,18 @@ public class WorldRenderer implements Renderer {
         profiler.next("slideborders");
         if(renderSliceBorders) {
             shapes.begin(ShapeType.Line);
-            shapes.setColor(Color.YELLOW);
             tileRenderer.renderSliceBorders(shapes);
             shapes.end();
+        }
+        
+        profiler.next("regiontint");
+        if(renderRegionTint) {
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            shapes.begin(ShapeType.Filled);
+            tileRenderer.renderRegionTint(shapes);
+            shapes.end();
+            Gdx.gl.glDisable(GL20.GL_BLEND);
         }
         
         profiler.next("hud"); // root.render.hud

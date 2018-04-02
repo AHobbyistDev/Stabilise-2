@@ -2,7 +2,8 @@ package com.stabilise.world;
 
 /**
  * A simple class which manages tracking the number of regions or slices of a
- * world which have been loaded and generated.
+ * world which have been loaded and generated. Used for producing a nice load
+ * bar while the world is loading.
  */
 public class WorldLoadTracker {
     

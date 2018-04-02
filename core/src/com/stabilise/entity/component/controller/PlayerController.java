@@ -194,17 +194,6 @@ public class PlayerController extends CController implements Controllable, Input
                 Position p = e.pos.copy().clampToTile().add(0,-1).realign();
                 game.world.getTileAt(p).handleInteract(game.world, p, e);
                 break;
-            case TEST_RANDOM:
-                //mob.x = 0;
-                //mob.y = 0;
-                //game.getWorld().camera.snapToFocus();
-                //Log.message(Texture.texturesToString());
-                Runtime r = Runtime.getRuntime();
-                Log.get().postDebug(r.freeMemory()/(1024*1024) + "/" +
-                        r.totalMemory()/(1024*1024) + "/" + r.maxMemory()/(1024*1024));
-                //System.out.println(game.profiler.getData().toString());
-                Log.get().postDebug(e.pos.getRegionX() + "," + e.pos.getRegionY());
-                break;
             case PREV_TILE:
                 scrolled(-1);
                 break;

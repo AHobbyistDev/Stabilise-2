@@ -3,7 +3,6 @@ package com.stabilise.world.multiverse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -37,9 +36,6 @@ import com.stabilise.world.dimension.Dimension;
  */
 public class HostMultiverse extends Multiverse<HostWorld> {
     
-    /** Dimensions should treat this as read-only. */
-    public final WorldInfo info;
-    
     /** Stores players using this world. Maps player hash -> PlayerData. */
     private final Map<String, PlayerData> players = new HashMap<>(2);
     
@@ -59,8 +55,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
      * @throws NullPointerException if {@code info} is {@code null}.
      */
     public HostMultiverse(WorldInfo info, Profiler profiler) {
-        super(profiler);
-        this.info = Objects.requireNonNull(info);
+        super(info, profiler);
     }
     
     @Override

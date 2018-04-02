@@ -1,11 +1,13 @@
 package com.stabilise.world.dimension;
 
+import com.stabilise.world.WorldInfo;
 import com.stabilise.world.gen.WorldGenerator.GeneratorRegistrant;
 import com.stabilise.world.gen.misc.ChestGen;
 import com.stabilise.world.gen.misc.OreGen;
 import com.stabilise.world.gen.terrain.CaveGen;
 import com.stabilise.world.gen.terrain.FlatlandTerrainGen;
 import com.stabilise.world.gen.terrain.OverworldTerrainGen;
+import com.stabilise.world.loader.WorldLoader;
 
 /**
  * The Overworld is the default world dimension.
@@ -24,6 +26,11 @@ public class DimOverworld extends Dimension {
         gr.add((w,s) -> new CaveGen(w,s));
         gr.add(new OreGen(2));
         gr.add(new ChestGen());
+    }
+    
+    @Override
+    public void addLoaders(WorldLoader wl, WorldInfo info) {
+        // no extra stuff to load
     }
     
 }

@@ -20,6 +20,7 @@ import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.gen.WorldGenerator.GeneratorRegistrant;
+import com.stabilise.world.loader.WorldLoader;
 import com.stabilise.world.multiverse.Multiverse;
 
 /**
@@ -74,19 +75,10 @@ public abstract class Dimension {
     }
     
     /**
-     * Creates the world generator to use for generating this dimension.
-     * 
-     * @param multiverse The multiverse.
-     * @param world This dimension's host world.
-     * 
-     * @return The world generator.
-     * @throws NullPointerException if either argument is {@code null}.
+     * Adds generators to the WorldGenerator for this dimension.
      */
-    public final WorldGenerator generatorFor(Multiverse<?> multiverse,
-            HostWorld world) {
-        WorldGenerator gen = new WorldGenerator(multiverse, world);
+    public final void addGenerators(WorldGenerator gen) {
         addGenerators(new GeneratorRegistrant(gen));
-        return gen;
     }
     
     /**
@@ -94,6 +86,19 @@ public abstract class Dimension {
      * should override this to add their desired generators.
      */
     protected abstract void addGenerators(GeneratorRegistrant gr);
+    
+    /**
+     * Adds additional loaders and savers to the WorldLoader for this
+     * dimension. Subclasses may choose to add their own if the dimension has
+     * extra funky things that need saving and loading.
+     * 
+     * @param wl The WorldLoader.
+     * @param info The world's info. This is passed so that this method has
+     * access to the world's save format version data, which may affect which
+     * loaders one might want to add.
+     */
+    public abstract void addLoaders(WorldLoader wl, WorldInfo info);
+    
     
     /**
      * Returns {@code true} if this dimension should have perpetually-loaded

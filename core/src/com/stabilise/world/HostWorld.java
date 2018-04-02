@@ -17,7 +17,7 @@ import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.loader.WorldLoader.DimensionLoader;
+import com.stabilise.world.loader.WorldLoader;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
 import com.stabilise.world.tile.Tile;
@@ -36,11 +36,12 @@ import com.stabilise.world.tile.tileentity.TileEntity;
  */
 public class HostWorld extends AbstractWorld {
     
-    /** This world's region cache. */
-    private final RegionStore regions;
+    /** This world's region store, which as the name suggests, stores and
+     * manages all the regions. */
+    public final RegionStore regions;
     
     /** The world loader. */
-    private final DimensionLoader loader;
+    private final WorldLoader loader;
     /** The world generator. */
     private final WorldGenerator generator;
     private final WorldLoadTracker loadTracker = new WorldLoadTracker();
@@ -67,14 +68,19 @@ public class HostWorld extends AbstractWorld {
         
         // We instantiate the loader, generator and cache, and then safely hand
         // them references to each other as required.
-        loader = multiverse.loader.loaderFor(this);
-        generator = dimension.generatorFor(multiverse, this);
+        
+        loader = new WorldLoader(this);
+        dimension.addLoaders(loader, multiverse.info);
+        
+        generator = new WorldGenerator(multiverse, this);
+        dimension.addGenerators(generator);
+        
         regions = new RegionStore(this);
         regions.setUnloadHandler(this::unloadRegion);
         
-        loader.prepare(generator);
-        generator.prepare(loader, regions);
-        regions.prepare(loader);
+        //loader.passReferences(generator);
+        generator.passReferences(regions);
+        regions.passReferences(loader, generator);
     }
     
     @UserThread("PoolThread")
@@ -192,7 +198,7 @@ public class HostWorld extends AbstractWorld {
             m.update();
         
         profiler.next("regions"); // root.update.game.world.regions
-        regions.updateRegions();
+        regions.update();
         
         // Uncache any regions which may have been cached during this tick.
         // TODO: Once a tick might be too often, since this can be expensive.
@@ -218,7 +224,7 @@ public class HostWorld extends AbstractWorld {
     @UserThread("MainThread")
     @ThreadUnsafeMethod
     public Region getRegionAt(int x, int y) {
-        Region r = regions.getRegionAt(x, y);
+        Region r = regions.getRegion(x, y);
         return r == null ? Region.DUMMY_REGION : r;
     }
     
@@ -251,23 +257,10 @@ public class HostWorld extends AbstractWorld {
     
     /**
      * Saves a region.
-     * 
-     * @param r The region to save.
      */
     public void saveRegion(Region r) {
-        loader.saveRegion(r, null);
+        loader.saveRegion(r, false, null);
     }
-    
-    /**
-     * Returns the region occupying the specified tile coord, or
-     * {@link Region#DUMMY_REGION} if it is not loaded.
-     */
-    /*
-    private Region getRegionFromTileCoords(int x, int y) {
-        return getRegionAt(regionCoordFromTileCoord(x),
-                regionCoordFromTileCoord(y));
-    }
-    */
     
     /**
      * Returns the region occupying the specified slice coord, or
@@ -287,7 +280,7 @@ public class HostWorld extends AbstractWorld {
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
-    public void loadSlice(int x, int y) {
+    public void anchorSlice(int x, int y) {
         regions.anchorRegion(
                 regionCoordFromSliceCoord(x),
                 regionCoordFromSliceCoord(y)
@@ -295,12 +288,12 @@ public class HostWorld extends AbstractWorld {
     }
     
     /**
-     * Unloads a slice.
+     * Removes an anchor from a slice.
      * 
      * @param x The x-coordinate of the slice, in slice lengths.
      * @param y The y-coordinate of the slice, in slice lengths.
      */
-    public void unloadSlice(int x, int y) {
+    public void deanchorSlice(int x, int y) {
         regions.deAnchorRegion(
                 regionCoordFromSliceCoord(x),
                 regionCoordFromSliceCoord(y)
