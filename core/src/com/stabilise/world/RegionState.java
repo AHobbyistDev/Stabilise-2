@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.concurrent.GuardedBy;
 
 import com.stabilise.util.Checks;
-import com.stabilise.util.Log;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
 
@@ -19,57 +18,26 @@ import com.stabilise.util.annotation.UserThread;
  * 
  * <p>This entire class could be made a part of the Region class, but for
  * clarity of mind I've thought it best to separate out into its own thing.
+ * 
+ * @see RegionStore
  */
 public class RegionState {
     
-    /* Alright, let's plan this out.
-     * 
-     * A region should be considered active if it is ANCHORED and PREPARED, and
-     * all 8 of its neighbours are PREPARED.
-     * 
-     * A region should be loaded when it is ANCHORED, or any of its neighbours
-     * are ANCHORED. Region generation should be performed as part of the
-     * loading process. A region is called PREPARED if it is LOADED and
-     * GENERATED.
-     * 
-     * When a region is NOT ANCHORED, and none of its neighbours are ANCHORED,
-     * it is eligible to be UNLOADED. A region is generally unloaded after a
-     * time delay as to provide a buffer time.
-     * 
-     * From an outside perspective, regions are never anchored directly. All
-     * anchoring takes place through HostWorld.loadSlice() and
-     * HostWorld.unloadSlice(). For now at least we don't care about the slices
-     * and instead stick the anchor on the region in which each requested slice
-     * lies. (QUESTION: In the future, might we care to distinguish which
-     * slices have anchors?)
-     * 
-     * A region is eligible to be SAVED if it is PREPARED.
-     * 
-     * When a region is UNLOADED, it is SAVED first.
-     * 
-     * 
-     * 
-     * 
-     * Unfortunate as it may be, implementation of the above functionality is
-     * spread throughout this class, RegionStore, WorldLoader, and
-     * WorldGenerator.
-     */
-    
-    /** The state of this region. See the documentation for {@link #State.NEW}
-     * and all other states. */
+    /** The main state (for want of a better name) of the region. See the
+     * documentation for {@link #State.NEW} and all other states. */
     private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
     /** Keeps track of whether the region is being saved. */
     @GuardedBy("this")
     private SaveState saveState = SaveState.NOT_SAVING;
-    /** Whether or not this region has been generated. Note that this is
+    /** Whether or not the region has been generated. Note that this is
      * distinct from {@link State#PREPARED}, since a region can be generated at
      * time of loading, but still in need of preparation to implant structures. */
     private boolean generated = false;
     
     
-    /** The number of slices anchored due to having been loaded by a client
-     * within the region. Used to determine whether the region should begin the
-     * 'unload countdown'.
+    /** The number of times the region has been 'anchored'. If a region is
+     * anchored, or any regions adjacent to it are anchored, it will remain
+     * loaded in primary storage.
      * 
      * <p>A region can only be anchored on the main thread, so we don't need to
      * be careful with synchronisation. */
@@ -81,10 +49,12 @@ public class RegionState {
      * thread, so we don't need to be careful with synchronisation. */
     private int anchoredNeighbours = 0;
     /** Number of adjacent regions which are 'prepared'. A region is considered
-     * active if it is anchored and all its neighbours are prepared. */
+     * active if it is anchored and prepared, and all its neighbours are
+     * prepared. */
     private AtomicInteger preparedNeighbours = new AtomicInteger();
     /** true if all this region's neighbours are prepared. A region is
-     * considered active if it is anchored and all its neighbours are prepared.
+     * considered active if it is anchored and prepared, and all its neighbours
+     * are prepared.
      * 
      * <p>This value is cached as to avoid reading from an AtomicInteger on a
      * per-tick basis. Since this is not volatile, the correct value is updated
@@ -105,10 +75,8 @@ public class RegionState {
     
     
     /**
-     * Anchors this region. An anchored region remains loaded, and additionally
+     * Anchors the region. An anchored region remains loaded, and additionally
      * loads its neighbours.
-     * 
-     * <p>Anchors will not be reset when a region is loaded or generated.
      * 
      * @return {@code true} if this region is newly-anchored.
      */
@@ -119,7 +87,7 @@ public class RegionState {
     }
     
     /**
-     * Removes an anchor from this region. This method is the inverse of {@link
+     * Removes an anchor from the region. This method is the inverse of {@link
      * #anchor()}, and invocations of these methods should be paired to ensure
      * an eventual equilibrium.
      * 
@@ -133,8 +101,7 @@ public class RegionState {
     }
     
     /**
-     * Returns {@code true} if this region is anchored/active, and may be
-     * updated.
+     * Returns {@code true} if this region is anchored at least once.
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
@@ -144,8 +111,12 @@ public class RegionState {
     
     /**
      * Returns {@code true} if the region is considered 'active' -- that is, if
-     * it is {@link #isAnchored() anchored} and all its neighbours (including
-     * itself) are {@link #isPrepared() prepared}.
+     * it is {@link #isAnchored() anchored}, and it, and all its neighbours,
+     * are {@link #isPrepared() prepared}.
+     * 
+     * <p>Implementation note: we don't actually check for whether this region
+     * is itself prepared, since by assumption a region in the RegionStore's
+     * primary storage should already be prepared.
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
@@ -154,7 +125,7 @@ public class RegionState {
     }
     
     /**
-     * Informs this region that is has an anchored neighbour. Invoked by
+     * Informs this region that is has an anchored neighbour. Called by
      * RegionStore.
      */
     @UserThread("MainThread")
@@ -165,7 +136,7 @@ public class RegionState {
     
     /**
      * Informs this region that one of its neighbours has been de-anchored.
-     * Invoked by RegionStore.
+     * Called by RegionStore.
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
@@ -175,14 +146,17 @@ public class RegionState {
     }
     
     /**
-     * Returns true if the region has anchored neighbours.
+     * Returns true if the region has at least one anchored neighbour (doesn't
+     * include itself).
      */
+    @UserThread("MainThread")
+    @ThreadUnsafeMethod
     public boolean hasAnchoredNeighbours() {
         return anchoredNeighbours > 0;
     }
     
     /**
-     * Informs this region that is has a prepared neighbour. This is called by
+     * Informs the region that is has a prepared neighbour. This is called by
      * RegionStore.
      */
     @UserThread("Any")
@@ -192,7 +166,7 @@ public class RegionState {
     }
     
     /**
-     * Informs this region that one of its neighbours has been removed from the
+     * Informs the region that one of its neighbours has been removed from the
      * world. This is called by RegionStore.
      */
     @UserThread("Any")
@@ -202,15 +176,18 @@ public class RegionState {
     }
     
     /**
-     * Returns {@code true} if this region has been prepared and may be safely
-     * used.
+     * Returns {@code true} if the region has been prepared -- that is, if it
+     * has been loaded and generated.
      */
     public boolean isPrepared() {
         return state.get().equals(State.PREPARED);
     }
     
     /**
-     * Checks for whether or not this region has been generated.
+     * Checks for whether or not this region has been generated. Note that this
+     * is distinct from {@link #isPrepared()} -- a region which has already
+     * been generated (as per here) might still need to have a run through the
+     * WorldGenerator to implant structures and whatnot.
      */
     public boolean isGenerated() {
         return generated;
@@ -227,60 +204,37 @@ public class RegionState {
     /**
      * Declares that the region has been loaded. This should be called by the
      * WorldLoader once loading of the region is completed.
+     * 
+     * @param generated true if the loaded region has already been generated.
+     * @param queuedStructures Whether or not the region has {@link
+     * Region#hasQueuedStructures()} that need adding. Ignored if {@code
+     * generated} is {@code false}. (Having to be passed this is a bit
+     * inelegant but I can't think of anything better.)
      */
-    public void setLoaded() {
-        if(!state.compareAndSet(State.LOADING, State.LOADED))
-            throw new RuntimeException("Couldn't transition from loading to loaded?");
+    public void setLoaded(boolean generated, boolean queuedStructures) {
+        if(generated) {
+            this.generated = true;
+            swapState(State.LOADING, queuedStructures ? State.LOADED : State.PREPARED);
+        } else
+            swapState(State.LOADING, State.LOADED);
     }
     
     /**
-     * Attempts to obtain the permit to generate this region. If this returns
-     * {@code true}, the caller may generate this region.
+     * Attempts to obtain the permit to generate the region. If this returns
+     * {@code true}, the caller may generate the region.
      */
     public boolean getGenerationPermit() {
         return state.compareAndSet(State.LOADED, State.GENERATING);
     }
     
     /**
-     * Marks the region as generated, and induces an appropriate state change.
-     * This is invoked in two scenarios:
-     * 
-     * <ul>
-     * <li>When the WorldLoader has finished loading this region and found it
-     *     to be generated.
-     * <li>When the WorldGenerator finishes generating this region.
-     * </ul>
-     * 
-     * @param queuedStructures Whether or not the region has {@link
-     * Region#hasQueuedStructures()} that need adding. (Having to be passed
-     * this is a bit inelegant but I can't think of anything better.)
+     * Marks the region as generated (moreso, <em>prepared</em>), and induces
+     * an appropriate state change. This is called by the WorldGenerator when
+     * it finishes generating the region.
      */
-    public void setGenerated(boolean queuedStructures) {
+    public void setGenerated() {
         generated = true;
-        
-        // This method is invoked in two scenarios:
-        // 
-        // 1: When this region is loaded by the WorldLoader, and it finds that
-        //    this region has already been generated. From here, there are two
-        //    options:
-        // 
-        //    a: There are queued structures. We remain in LOADED so that
-        //       getGenerationPermit() returns true so that the world generator
-        //       can generate those structures concurrently.
-        //    b: There are no queued structures. We change to PREPARED as this
-        //       region is now usable.
-        // 
-        // 2: The WorldGenerator just finished generating this region. We
-        //    change to PREPARED as this region is now usable.
-        
-        State s = state.get();
-        if(s == State.LOADING || s == State.LOADED) {
-            if(!queuedStructures)
-                state.set(State.PREPARED);
-        } else if(s == State.GENERATING)
-            state.set(State.PREPARED);
-        else
-            Log.get().postWarning("Invalid state " + s + " on setGenerated");
+        swapState(State.GENERATING, State.PREPARED);
     }
     
     /**
@@ -349,6 +303,8 @@ public class RegionState {
     
     /**
      * Counts down another tick until the region is scheduled to be unloaded.
+     * This should only be called if the region is not anchored and none of
+     * its neighbours are anchored.
      * 
      * @return true if the region should be unloaded
      */
@@ -377,11 +333,18 @@ public class RegionState {
         return false;
     }
     
+    private void swapState(State expect, State update) {
+        if(!state.compareAndSet(expect, update))
+            throw new RuntimeException("Could not update region state to " + update
+                    + "; expected " + " expect, (probably) was " + state.get());
+    }
+    
     @Override
     public String toString() {
         return "[" + stateToString() + "/" + saveStateToString() + "; " + 
                 "anchors: " + anchors + ", adjAnchored: " + anchoredNeighbours +
-                ", adjPrepped: " + preparedNeighbours + "]";
+                ", adjPrepped: " + preparedNeighbours + ", active: " + 
+                isActive() + "]";
     }
     
     private String stateToString() {
@@ -405,25 +368,24 @@ public class RegionState {
          * Transitions to {@link #LOADING} via {@link Region#getLoadPermit()}. */
         NEW,
         /** A region is currently being loaded by the world loader. Transitions
-         * to {@link #LOADED} via {@link RegionState#setLoaded()}. */
+         * to either {@link #LOADED} or {@link #PREPARED} via {@link
+         * RegionState#setLoaded(boolean, boolean)}. */
         LOADING,
         /** A region has finished loading, but has not been generated or begun
-         * generating. May transition to {@link #GENERATING} via {@link
-         * RegionState#getGenerationPermit()} or to {@link #PREPARED} via
-         * {@link RegionState#setGenerated()}. */
+         * generating. Transitions to {@link #GENERATING} via {@link
+         * RegionState#getGenerationPermit()}. */
         LOADED,
         /** A region is currently being generated by the world generator.
          * Transitions to {@link #PREPARED} via {@link Region#setGenerated()}. */
         GENERATING,
-        /** A region is prepared - that is, loaded and generated, and may be
-         * used. */
+        /** A region is prepared - that is, loaded and generated. */
         PREPARED
     }
     
     /**
      * Values for a region's "save state". These are separate from the main
-     * state in an effort to reduce complexity, as each save state can overlap
-     * with multiple different region states.
+     * state, as the save state is for the most part independent of, and can
+     * overlap with, multiple different states.
      * 
      * <p>All save state control is localised to {@link Region#getSavePermit()}
      * and {@link Region#finishSaving()}.

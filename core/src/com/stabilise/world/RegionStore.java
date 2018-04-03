@@ -11,7 +11,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.IntBinaryOperator;
-import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -29,46 +28,84 @@ import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.loader.WorldLoader;
 
 /**
- * Stores and manages regions. Every {@link HostWorld} owns a {@code
- * RegionStore}.
+ * Stores and manages regions. Delegates loading and generating where necessary
+ * to the {@link WorldLoader} and {@link WorldGenerator} respectively. Every
+ * {@link HostWorld} owns a {@code RegionStore}.
  * 
  * <p>A {@code RegionStore} provides two layers of region storage for a world -
- * primary and cache storage.
+ * <b>primary</b> and <b>cache</b> storage.
  * 
  * <h3>Primary Storage</h3>
  * 
- * <p>Primary storage holds all regions currently being used by the world.
- * Regions are loaded into primary storage using {@link
- * #loadRegion(int, int, boolean) loadRegion()}, and can be retrieved through
- * {@link #getRegion(int, int) getRegionAt()}. Every Region in primary
- * storage is {@link Region#update(HostWorld, RegionStore) updated} by {@link
- * #update()}, and is only removed from primary storage if {@code
- * update} returns {@code true}.
- * 
- * <p>Primary storage is not thread-safe and should only be interacted with on
+ * <p>Primary storage holds all the regions being used by the world. All the
+ * regions in primary storage have been loaded and generated, and are safe to
+ * interact with. Regions in primary storage should only be interacted with on
  * the main thread.
+ * 
+ * <p>A region lives in primary storage if it is either "anchored", or any of
+ * its neighbours (the 8 adjacent regions) are anchored. Regions with with no
+ * anchors nor anchored neighbours will be removed from primary storage
+ * (AKA unloaded) during an {@link #update() update tick} after a short delay.
+ * 
+ * <p>Regions are (somewhat indirectly) added to primary storage via {@link
+ * #anchorRegion(int, int)}. Regions are similarly indirectly removed from
+ * primary storage by {@link #deAnchorRegion(int, int)}. When a region (or one
+ * of its neighbours) is anchored for the first time, it is placed in the
+ * cache to be prepared, and then is moved to primary storage once it has
+ * finished loading and generating. When a region is unloaded, it is moved
+ * from primary storage to the cache, saved, and then removed from the cache.
  * 
  * <h3>Cache Storage</h3>
  * 
- * <p>Cache storage can overlap with primary storage, and it holds any Regions
- * which are loaded for anything other than gameplay.
+ * <p>Cache storage is a secondary storage which holds regions which are loaded
+ * for anything other than gameplay. The cache may overlap with primary
+ * storage; a region in primary may also live in the cache for some other
+ * reason. Regions are temporarily placed in the cache as a part of their
+ * natural lifecycle, but they may also be manually cached for other purposes.
  * 
- * <p>A Region may be obtained from the cache through {@link #cache(int, int)},
- * which is the cache analogue of {@code loadRegion()}. Since this class only
- * cares about the number of threads using a particular region, a thread may
- * invoke {@code cache()} as many times as it pleases. There is no method to
- * relinquish a particular region; a thread <i>must</i> invoke {@link
- * #uncacheAll()} to release each region it has cached.
+ * <p>A region being prepared for primary storage will initially live in the
+ * cache while it is being loaded and generated; once done, it will be moved to
+ * primary storage. A region is also temporarily moved into the cache while is
+ * being saved as part of the unload process.
+ * 
+ * <p>Regions may also be manually cached. To cache a region (or retrieve a
+ * cached region), one uses {@link #cache(int, int)}. This class does track how
+ * many times {@link #cache(int, int)} is invoked for a particular region, so
+ * different parts of the code may invoke it as many times as they so please.
+ * There is as such no associated {@code uncache()} method for a single region.
+ * Instead, this class tracks cached regions on a per-thread basis. Therefore,
+ * a thread <em>must</em> invoke {@link #uncacheAll()} when it is done with all
+ * the regions it has cached. Failing to do so will leave them perpetually in
+ * the cache.
  * 
  * <p>Cache storage is thread-safe, and interacts with primary storage in a
- * thread-safe way to ensure complete consistency.
+ * consistent thread-safe manner.
  * 
- * <h3>Other Details</h3>
+ * <h3>Save Policy</h3>
  * 
- * <p>This class's constructor requires a {@link Consumer} to act as an unload
- * handler. It is invoked in {@code updateRegions()} when a region is about to
- * be unloaded - immediately before it is {@link #saveRegion(Region) saved} and
- * removed from primary storage.
+ * As part of their natural lifecycle, regions are saved immediately after
+ * being generated, and also right before being unloaded. Both these saves
+ * occur while a region is <em>not</em> in primary storage, so there is minimal
+ * risk of it being concurrently modified while it is being saved.
+ * 
+ * <p>A region can also be manually saved (rather, currently, all regions in
+ * primary storage may be saved via {@link #saveAll()}) - however, the onus
+ * lies on the caller to ensure that concurrency issues won't arise (e.g., by
+ * saving only while the game is paused).
+ * 
+ * <h3>Region Lifecycle</h3>
+ * 
+ * TODO: Write in more detail about the lifecycle of a region
+ * 
+ * <pre>
+ * (On anchor): PUT IN CACHE -> LOAD -> GENERATE -> SAVE -> MOVE TO PRIMARY
+ * (On unload): MOVE TO CACHE -> SAVE -> REMOVE FROM CACHE
+ * (Cached region): PUT IN CACHE -> (LOAD IF NECESSARY) -> UNCACHE
+ * <pre>
+ * 
+ * I have, to the best of my ability, tried to account for all possibilities
+ * wherein a region is being loaded, generated, anchored, cached, etc. by
+ * multiple threads at once. 
  */
 public class RegionStore {
     
@@ -101,13 +138,14 @@ public class RegionStore {
     private final ConcurrentMap<Point, CachedRegion> cache =
             new ConcurrentHashMap<>();
     
-    /** Regions which have been cached by the current worker thread. */
+    /** Regions which have been cached by the current thread. */
     private final ThreadLocal<Map<Point, Region>> localCachedRegions =
             ThreadLocal.withInitial(HashMap::new);
     
     /** Locks for everything. The locks are Point objects for convenience in
      * {@link #moveToPrimary(Region)}. */
-    private final Striper2D<Point> locks = new Striper2D<>(Region::createMutableLoc);
+    private final Striper<Point> locks = 
+            new Striper<>(STRIPE_FACTOR, Region::createMutableLoc);
     
     /** Dummy key for {@link #regions} whose mutability may be abused for
      * convenience, but ONLY on the main thread. */
@@ -149,11 +187,12 @@ public class RegionStore {
     /**
      * Gets a region at the given coordinates, which are in region-lengths.
      * 
-     * @return The region, or {@code null} if no such region exists.
+     * @return The region, or {@code null} if no such region exists in primary
+     * storage.
      */
     @UserThread("MainThread")
     @ThreadUnsafeMethod
-    Region getRegion(int x, int y) {
+    public Region getRegion(int x, int y) {
         return regions.get(unguardedDummyLoc.set(x, y));
     }
     
@@ -163,7 +202,8 @@ public class RegionStore {
      * @param point The region's location, whose coordinates are in
      * region-lengths.
      * 
-     * @return The region, or {@code null} if no such region is loaded.
+     * @return The region, or {@code null} if no such region exists in primary
+     * storage.
      */
     @ThreadSafeMethod
     private Region getRegion(Point point) {
@@ -176,7 +216,7 @@ public class RegionStore {
      * 
      * <p>IMPORTANT NOTE: This method does not synchronise properly nor stick
      * a mark on the cached region to keep it cached, so the caller should be
-     * absolutely certain that nothing is going to blow up.
+     * absolutely certain that nothing is going to go wrong.
      * 
      * @return The region, or {@code null} if the region is in neither primary
      * storage nor the cache.
@@ -184,10 +224,12 @@ public class RegionStore {
     @UserThread("MainThread")
     @ThreadUnsafeMethod
     private Region getRegionTryCache(int x, int y) {
+        // Try primary
         Region r = regions.get(unguardedDummyLoc.set(x, y));
         if(r != null)
             return r;
         
+        // Try cache
         // No sync nor mark -- be careful!
         CachedRegion cr = cache.get(unguardedDummyLoc);
         return cr == null ? null : cr.region;
@@ -195,10 +237,10 @@ public class RegionStore {
     
     /**
      * Loads and generates a region, and adds it to primary storage when done.
-     * If the region already exists in this store, it is returned; otherwise,
-     * it will live in the cache until it is done being prepared. <b>Note:</b>
-     * the returned region might not be loaded nor generated, so be careful
-     * with what you do with it.
+     * If the region already lives in primary storage, it is returned;
+     * otherwise, it will sit in the cache until it is done being prepared.
+     * <b>Note:</b> the returned region might not be loaded nor generated, so
+     * be careful with what you do with it.
      * 
      * @return The region. Never null.
      */
@@ -214,8 +256,10 @@ public class RegionStore {
         // this method has a fair bit of overhead if it's not in primary
         // storage. Ah well.
         
+        boolean tryPrepare = false;
+        
         // Try the cache next. Synchronised to make the put-if-absent atomic.
-        synchronized(locks.get(x, y)) {
+        synchronized(getLock(x, y)) {
             // To avoid a race condition we'll want to try primary storage
             // again while synchronised on the lock just to be safe (see e.g.,
             // moveToPrimary()).
@@ -231,15 +275,18 @@ public class RegionStore {
             } else
                 r = c.region;
             
-            c.prepareForPrimary = true;
-            
-            // Since we'll be going into prepareRegion() regardless of whether
-            // the region was cached beforehand or not, grab a mark just to be
-            // safe.
-            c.mark();
+            // Not that it (theoretically) matters if we went ahead with it,
+            // but just to save on unnecessary effort, don't initiate a prepare
+            // it it looks like someone else has already done it.
+            if(!c.prepareForPrimary) {
+                c.prepareForPrimary = true;
+                tryPrepare = true;
+                c.mark();
+            }
         }
         
-        prepareRegion(r, true);
+        if(tryPrepare)
+            prepareRegion(r, true);
         
         return r;
     }
@@ -247,13 +294,16 @@ public class RegionStore {
     /**
      * Loads and optionally generates a region. Nothing is done if the region
      * is already loaded/generated, or if loading/generating is already taking
-     * place on another thread.
+     * place on another thread. This method cleans up a mark on the region in
+     * the cache, so make sure it's marked first before invoking this.
      */
     @UserThread("Any")
     private void prepareRegion(Region r, boolean generate) {
         // Even if we don't get the load permit, if the region has already been
         // loaded due to being cached for some other purpose, we try getting
-        // the gen permit.
+        // the gen permit. Note that this permits the possibility of us
+        // stealing the gen permit from a thread that just finished loading and
+        // was about to then gen the region; ah well, it works either way.
         
         if(r.state.getLoadPermit())
             loader.loadRegion(r, generate, this::finishLoad);
@@ -275,8 +325,15 @@ public class RegionStore {
         boolean generate;
         boolean save = false;
         
-        synchronized(locks.get(r.x(), r.y())) {
+        synchronized(getLock(r.x(), r.y())) {
             CachedRegion cr = cache.get(r.loc);
+            
+            // temporary debug
+            if(cr == null) {
+                log.postSevere(r + " not in the cache after load??");
+                log.postSevere(toStringDebug());
+            }
+            
             generate = cr.prepareForPrimary; // = "please also generate me"
             
             if(generate) {
@@ -329,7 +386,7 @@ public class RegionStore {
         
         boolean save = false;
         
-        synchronized(locks.get(r.x(), r.y())) {
+        synchronized(getLock(r.x(), r.y())) {
             CachedRegion cr = cache.get(r.loc);
             
             // Save if nothing else has the region cached for other purposes
@@ -360,13 +417,16 @@ public class RegionStore {
         if(!success && handleFailure())
             return;
         
-        synchronized(locks.get(r.x(), r.y())) {
+        synchronized(getLock(r.x(), r.y())) {
             CachedRegion cr = cache.get(r.loc);
             
             if(cr.unmark()) {
-                // If the save occurred right after a generate (in the load ->
-                // generate -> save -> add to primary chain), the next step is
-                // to move the region to primary storage.
+                // If the region is slated to be added to the world and it's
+                // been prepared (e.g., if we're at the save part of the LOAD
+                // -> GENERATE -> SAVE -> ADD TO PRIMARY chain (but not 
+                // necessarily; this could just be part of a CACHE -> DO 
+                // STUFF -> UNCACHE -> SAVE chain that ran in parallel)), then
+                // the next step is to move it to primary storage.
                 if(cr.prepareForPrimary && r.state.isPrepared())
                     moveToPrimary(r);
                 // Otherwise, the save occurred after the region was cached for
@@ -389,7 +449,7 @@ public class RegionStore {
     private void finishGeneric(Region r) {
         boolean save = false;
         
-        synchronized(locks.get(r.x(), r.y())) {
+        synchronized(getLock(r.x(), r.y())) {
             CachedRegion cr = cache.get(r.loc);
             
             if(cr.unmark()) { // remove the mark keeping us in here
@@ -423,28 +483,35 @@ public class RegionStore {
             Checks.badAssert("Tried to move " + r.toStringDebug() + " from "
                     + "cache to primary storage, but it was not prepared?");
         
-        // Notify neighbouring regions that this region is prepared and
-        // vice-versa.
-        int x = r.x(), y = r.y();
-        Point loc = locks.get(x, y);
-        for(int u = x-1; u <= x+1; u++) {
-            for(int v = y-1; v <= y+1; v++) {
-                if(u == x && v == y) continue; // don't do it if other == r
-                
-                Region other = regions.get(loc.set(u, v));
-                if(other != null) {
-                    r.state.addPreparedNeighbour();
-                    other.state.addPreparedNeighbour();
+        cache.remove(r.loc); // out of cache
+        
+        // Synchronise over this RegionStore to make the "put into primary then
+        // notify adjacent regions that were already in primary" atomic.
+        // It's unfortunate that we can't use a striped lock here, so this may
+        // cause some hitches.
+        synchronized(this) {
+            if(regions.put(r.loc, r) != null) { // into primary
+                log.postWarning("Adding " + r + " to primary storage, but it's already there?");
+                return;
+            }
+            
+            // Notify neighbouring regions that this region is prepared and
+            // vice-versa.
+            int x = r.x(), y = r.y();
+            Point loc = getLock(x, y); // safe to use since we're synced on it
+            
+            for(int u = x-1; u <= x+1; u++) {
+                for(int v = y-1; v <= y+1; v++) {
+                    if(u == x && v == y) continue; // don't do it if other == r
+                    
+                    Region other = regions.get(loc.set(u, v));
+                    if(other != null) {
+                        r.state.addPreparedNeighbour();
+                        other.state.addPreparedNeighbour();
+                    }
                 }
             }
         }
-        
-        // Put the region in primary after sharing preparedness to establish a
-        // happens-before.
-        
-        regions.putIfAbsent(r.loc, r); // into primary
-        //     ^ just .put() would work too, but putIfAbsent() probably avoids some work
-        cache.remove(r.loc); // out of cache
         
         numRegions.getAndIncrement();
     }
@@ -456,25 +523,29 @@ public class RegionStore {
      */
     @UserThread("MainThread")
     private void removeFromPrimary(Region r) {
-        // Notify neighbouring regions that this region is being removed
-        int x = r.x(), y = r.y();
-        Point loc = locks.get(x, y);
-        for(int u = x-1; u <= x+1; u++) {
-            for(int v = y-1; v <= y+1; v++) {
-                if(u == x && v == y) continue; // don't do it if other == r
-                
-                Region other = regions.get(loc.set(u, v));
-                if(other != null) {
-                    r.state.removePreparedNeighbour(); // could do all at once, but I cbf
-                    other.state.removePreparedNeighbour();
+        // Synchronise over this RegionStore to make the "remove from primary
+        // then notify adjacent regions in primary" atomic.
+        // It's unfortunate that we can't use a striped lock here, so this may
+        // cause some hitches.
+        synchronized(this) {
+            regions.remove(r.loc); // out of primary
+            
+            // Notify neighbouring regions that this region is being removed
+            int x = r.x(), y = r.y();
+            Point loc = getLock(x, y); // safe to use since we're synced on it
+            
+            for(int u = x-1; u <= x+1; u++) {
+                for(int v = y-1; v <= y+1; v++) {
+                    if(u == x && v == y) continue; // don't do it if other == r
+                    
+                    Region other = regions.get(loc.set(u, v));
+                    if(other != null) {
+                        r.state.removePreparedNeighbour(); // could do all at once, but I cbf
+                        other.state.removePreparedNeighbour();
+                    }
                 }
             }
         }
-        
-        // Remove the region after sharing preparedness to establish a
-        // happens-before.
-        
-        regions.remove(r.loc);
         
         numRegions.getAndDecrement();
     }
@@ -616,7 +687,7 @@ public class RegionStore {
         
         boolean needsLoad = false;
         
-        synchronized(locks.get(x, y)) {
+        synchronized(getLock(x, y)) {
             CachedRegion cr = cache.get(loc);
             
             // If the region isn't in the cache, we check primary storage
@@ -691,7 +762,7 @@ public class RegionStore {
         if(!hasPermit && !removeFromPrimary) // early check to avoid synchronising
             return;
         
-        synchronized(locks.get(r.x(), r.y())) {
+        synchronized(getLock(r.x(), r.y())) {
             if(removeFromPrimary)
                 removeFromPrimary(r); // unfortunate name collision, but eclipse doesn't mind
             if(!hasPermit)
@@ -718,20 +789,17 @@ public class RegionStore {
     }
     
     /**
-     * Returns true iff all regions in primary storage are {@link
-     * Region#isPrepared() prepared}.
+     * Returns true if all regions have been loaded (this means there are no
+     * regions in the cache).
      */
     boolean isLoaded() {
-        // TODO: pretty crude implementation
-        for(Region r : regions.values()) {
-            if(!r.state.isPrepared()) {
-                //log.postInfo("Not all regions loaded (" + r + ": "
-                //        + r.isLoaded() + ", " + r.isGenerated() + ")");
-                return false;
-            }
-        }
-        //log.postInfo("All regions loaded!");
-        return true;
+        // TODO: what if the only entries in the cache are regions being
+        // saved?
+        return cache.isEmpty();
+    }
+    
+    private Point getLock(int x, int y) {
+        return locks.get(STRIPE_HASHER.applyAsInt(x, y));
     }
     
     /**
@@ -855,25 +923,6 @@ public class RegionStore {
     @FunctionalInterface
     public interface RegionCallback {
         void accept(Region r, boolean success);
-    }
-    
-    /**
-     * Convenience class which extends {@link Striper} to provide {@code
-     * get(x, y)}.
-     */
-    private static class Striper2D<T> extends Striper<T> {
-        
-        public Striper2D(Supplier<T> supplier) {
-            super(STRIPE_FACTOR, supplier);
-        }
-        
-        /**
-         * Gets the object corresponding to the specified x and y coordinates.
-         */
-        public T get(int x, int y) {
-            return get(STRIPE_HASHER.applyAsInt(x, y));
-        }
-        
     }
     
 }

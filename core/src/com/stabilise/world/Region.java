@@ -22,14 +22,8 @@ import com.stabilise.world.gen.action.Action;
  * <p>Regions are to slices as slices are to tiles; they provide a means of
  * storage and management.
  * 
- * <h3>Implementation Details</h3>
- * 
- * <h4>Saving</h4>
- * <p>We take a very loose approach to saving regions.
- * 
- * <!--wow such detail-->
- * <!--seriously though this section was wiped when I changed things up and
- * now needs rewriting-->
+ * <p>For implementation details on how regions are managed (saved, loaded,
+ * generated, etc.) see {@link RegionStore}.
  */
 public class Region {
     

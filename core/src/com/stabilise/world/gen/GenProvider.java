@@ -14,6 +14,10 @@ import com.stabilise.world.gen.action.*;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
+/**
+ * WorldProvider implementation which is passed to generators as to give them
+ * a WorldProvider-y view on the world.
+ */
 class GenProvider implements WorldProvider {
     
     @SuppressWarnings("unused")

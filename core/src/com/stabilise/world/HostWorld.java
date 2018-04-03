@@ -26,13 +26,7 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
  * The world as viewed by its host (i.e. the client in singleplayer, or the
- * server (slash hosting client) in multiplayer).
- * 
- * <!--
- * TODO: Implementation details for everything. Details are very important when
- * it comes to documenting interactions between the world, the world loader,
- * and the world generator
- * -->
+ * server (/hosting client) in multiplayer).
  */
 public class HostWorld extends AbstractWorld {
     
@@ -40,9 +34,7 @@ public class HostWorld extends AbstractWorld {
      * manages all the regions. */
     public final RegionStore regions;
     
-    /** The world loader. */
     private final WorldLoader loader;
-    /** The world generator. */
     private final WorldGenerator generator;
     private final WorldLoadTracker loadTracker = new WorldLoadTracker();
     

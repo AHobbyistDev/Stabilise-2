@@ -18,8 +18,8 @@ import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
+import com.stabilise.world.gen.GeneratorRegistrant;
 import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.gen.WorldGenerator.GeneratorRegistrant;
 import com.stabilise.world.loader.WorldLoader;
 import com.stabilise.world.multiverse.Multiverse;
 

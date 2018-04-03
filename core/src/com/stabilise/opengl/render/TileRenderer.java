@@ -21,7 +21,7 @@ import com.stabilise.world.tile.Tile;
 public class TileRenderer implements Renderer {
     
     private static final Color transparentRed = new Color(0xFF000040);
-    private static final Color transparentOrange= new Color(0xFF800040);
+    //private static final Color transparentOrange= new Color(0xFF800040);
     private static final Color transparentYellow = new Color(0xFFFF0040);
     private static final Color transparentGreen = new Color(0x00FF0040);
     private static final Color transparentBlue = new Color(0x00FFFF40);
@@ -220,10 +220,7 @@ public class TileRenderer implements Renderer {
             if(r.state.isActive())
                 shapes.setColor(transparentBlue);
             else if(r.state.isAnchored()) {
-                if(r.state.hasAnchoredNeighbours())
-                    shapes.setColor(transparentGreen);
-                else
-                    shapes.setColor(transparentOrange);
+                shapes.setColor(transparentGreen);
             } else if(r.state.hasAnchoredNeighbours())
                 shapes.setColor(transparentYellow);
             else

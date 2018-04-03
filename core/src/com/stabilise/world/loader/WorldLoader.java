@@ -15,35 +15,19 @@ import com.stabilise.util.io.data.Format;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.RegionState;
+import com.stabilise.world.RegionStore;
 import com.stabilise.world.RegionStore.RegionCallback;
 import com.stabilise.world.WorldLoadTracker;
 
 
 /**
- * A {@code WorldLoader} instance manages the loading and saving of regions for
- * a world.
+ * A {@code WorldLoader} instance handles the loading and saving of regions for
+ * a world. All save and load requests are made through a world's {@link
+ * RegionStore}.
  * 
- * <p>Internally, a WorldLoader uses an ExecutorService to perform its I/O
- * tasks; each individual load or save request for a region is delegated to a
- * separate thread.
- * 
- * <p>TODO: Synchronisation policy on saved regions. Since it is incredibly
- * inefficient and wasteful to make a defensive copy of a region and its
- * contents when it is being saved, it can be expected that concurrency
- * problems will arise from the fact that said region and contents will be
- * modified while it is in the process of being saved. This can be rectified
- * either by:
- * 
- * <ul>
- * <li>never saving regions mid-game (though this lends itself to potential
- *     loss of data if, say, the JVM crashes and as such the game can't
- *     properly shut down), or
- * <li>defining a synchronisation policy wherein at minimum no exceptions or
- *     errors will be thrown, and cases of deadlock, livelock and starvation
- *     are impossible (though there may be inconsistent state data as the world
- *     changes while it is being saved - though at least that would be
- *     preferable to losing data)
- * </ul>
+ * <p>The actual code for loading a region is provided by {@link
+ * IRegionLoaders}, and these are provided upon construction by {@link
+ * WorldFormat}.
  */
 public class WorldLoader {
 	
@@ -120,16 +104,14 @@ public class WorldLoader {
     
     /**
      * Instructs this WorldLoader to asynchronously load a region. It is
-     * assumed the called has already acquired a {@link
-     * RegionState#getLoadPermit() permit} to load the region.
+     * assumed the caller has acquired a {@link RegionState#getLoadPermit()
+     * permit} to load the region.
      * 
      * @param r The region to load.
      * @param generate true if the the region should also be generated, if it
      * has not already been generated.
      * @param callback The function to call once loading/generation is
      * completed.
-     * 
-     * @throws NullPointerException if {@code region} is {@code null}.
      */
     @UserThread("Any")
     public void loadRegion(Region r, boolean generate, RegionCallback callback) {
@@ -157,9 +139,7 @@ public class WorldLoader {
                 
                 loaders.forEach(l -> l.load(r, c, generated));
                 
-                r.state.setLoaded();
-                if(generated)
-                	r.state.setGenerated(r.hasQueuedStructures());
+                r.state.setLoaded(generated, r.hasQueuedStructures());
             	
                 world.stats.load.completed.increment();
             } catch(Exception e) {
@@ -169,7 +149,7 @@ public class WorldLoader {
             }
     	} else {
     	    world.stats.load.completed.increment(); // we'll count this as completed
-    	    r.state.setLoaded();
+    	    r.state.setLoaded(false, false); // nothing to load == "loaded", but not generated
     	}
     	
     	tracker.endLoadOp();
@@ -177,10 +157,8 @@ public class WorldLoader {
     }
     
     /**
-     * Saves a region.
-     * 
-     * <p>The request will be ignored if the region does not grant its
-     * {@link Region#getSavePermit() save permit}.
+     * Saves a region. It is assumed that the caller has acquired a {@link
+     * RegionState#getSavePermit() permit} to save the region.
      * 
      * @param region The region to save.
      * @param useCurrentThread true to save on the current thread, false to
