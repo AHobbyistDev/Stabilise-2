@@ -101,7 +101,7 @@ import com.stabilise.world.loader.WorldLoader;
  * (On anchor): PUT IN CACHE -> LOAD -> GENERATE -> SAVE -> MOVE TO PRIMARY
  * (On unload): MOVE TO CACHE -> SAVE -> REMOVE FROM CACHE
  * (Cached region): PUT IN CACHE -> (LOAD IF NECESSARY) -> UNCACHE
- * <pre>
+ * </pre>
  * 
  * I have, to the best of my ability, tried to account for all possibilities
  * wherein a region is being loaded, generated, anchored, cached, etc. by
@@ -119,7 +119,8 @@ public class RegionStore {
             Maths.genHashFunction(STRIPE_FACTOR, false);
     
     
-    // References to the world, loader, and generator.
+    // Reference to the world
+    
     private final HostWorld world;
     private WorldLoader loader = null;
     private WorldGenerator generator = null;
@@ -306,7 +307,7 @@ public class RegionStore {
         // was about to then gen the region; ah well, it works either way.
         
         if(r.state.getLoadPermit())
-            loader.loadRegion(r, generate, this::finishLoad);
+            loader.loadRegion(r, this::finishLoad);
         else if(generate && r.state.getGenerationPermit())
             generator.generate(r, false, this::finishGenerate);
         else
@@ -327,12 +328,6 @@ public class RegionStore {
         
         synchronized(getLock(r.x(), r.y())) {
             CachedRegion cr = cache.get(r.loc);
-            
-            // temporary debug
-            if(cr == null) {
-                log.postSevere(r + " not in the cache after load??");
-                log.postSevere(toStringDebug());
-            }
             
             generate = cr.prepareForPrimary; // = "please also generate me"
             
@@ -885,9 +880,9 @@ public class RegionStore {
      * Container class for cached regions.
      * 
      * <p>All methods of this class should only be invoked while the monitor
-     * lock on one of the {@link RegionStore#cacheLocks} is held.
+     * lock on one of the {@link RegionStore#getLock(int,int) locks} is held.
      */
-    public class CachedRegion {
+    private static class CachedRegion {
         
         private final Region region;
         /** The number of times the region has been cached. */

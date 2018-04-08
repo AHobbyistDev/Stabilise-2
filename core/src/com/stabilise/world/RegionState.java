@@ -284,8 +284,8 @@ public class RegionState {
     /**
      * This is called when a save operation is completed.
      *
-     * @return true if another save was queued in the meantime and the region
-     * should be saved again.
+     * @return true if another save was requested in the meantime and the
+     * region should be saved again.
      */
     @UserThread("WorkerThread")
     public synchronized boolean finishSaving() {

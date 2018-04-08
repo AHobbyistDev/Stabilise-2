@@ -248,13 +248,6 @@ public class HostWorld extends AbstractWorld {
     }
     
     /**
-     * Saves a region.
-     */
-    public void saveRegion(Region r) {
-        loader.saveRegion(r, false, null);
-    }
-    
-    /**
      * Returns the region occupying the specified slice coord, or
      * {@link Region#DUMMY_REGION} if it is not loaded.
      */

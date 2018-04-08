@@ -30,6 +30,11 @@ import com.stabilise.world.WorldLoadTracker;
  * WorldFormat}.
  */
 public class WorldLoader {
+    
+    public static final Format REGION_FORMAT = Format.NBT;
+    public static final Compression REGION_COMPRESSION = Compression.GZIP;
+    
+    
 	
     /** A reference to the world that this WorldLoader handles the loading for. */
     private final HostWorld world;
@@ -108,19 +113,16 @@ public class WorldLoader {
      * permit} to load the region.
      * 
      * @param r The region to load.
-     * @param generate true if the the region should also be generated, if it
-     * has not already been generated.
-     * @param callback The function to call once loading/generation is
-     * completed.
+     * @param callback The function to call once loading is completed.
      */
     @UserThread("Any")
-    public void loadRegion(Region r, boolean generate, RegionCallback callback) {
+    public void loadRegion(Region r, RegionCallback callback) {
         world.stats.load.requests.increment();
         tracker.startLoadOp();
-        executor.execute(() -> doLoad(r, generate, callback));
+        executor.execute(() -> doLoad(r, callback));
     }
     
-    private void doLoad(Region r, boolean generate, RegionCallback callback) {
+    private void doLoad(Region r, RegionCallback callback) {
     	world.stats.load.started.increment();
         
         if(cancelLoadOperations) {
@@ -134,7 +136,7 @@ public class WorldLoader {
     	FileHandle file = r.getFile(world);
     	if(file.exists()) {
             try {
-            	DataCompound c = IOUtil.read(file, Format.NBT, Compression.GZIP);
+            	DataCompound c = IOUtil.read(file, REGION_FORMAT, REGION_COMPRESSION);
                 boolean generated = c.optBool("generated").orElse(false);
                 
                 loaders.forEach(l -> l.load(r, c, generated));
@@ -179,7 +181,7 @@ public class WorldLoader {
         boolean success;
     	
         do {
-            DataCompound c = Format.NBT.newCompound();
+            DataCompound c = REGION_FORMAT.newCompound();
             boolean generated = r.state.isGenerated();
             c.put("generated", generated);
             
@@ -188,13 +190,15 @@ public class WorldLoader {
                 // to trust them.
                 savers.forEach(s -> s.save(r, c, generated));
                 
-                IOUtil.writeSafe(r.getFile(world), c, Compression.GZIP);
+                IOUtil.writeSafe(r.getFile(world), c, REGION_COMPRESSION);
+                
                 success = true;
                 world.stats.save.completed.increment();
             } catch(Throwable t) {
+                success = false;
                 world.stats.save.failed.increment();
                 log.postSevere("Saving " + r + " failed!", t);
-                success = false;
+                
                 // Don't break from the do..while on a fail; if another save
                 // was requested, we might get lucky and it may work the second
                 // time.
