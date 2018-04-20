@@ -66,8 +66,6 @@ public abstract class Dimension {
      * Subclasses may override this to return a custom implementation of
      * HostWorld to implement dimension-specific logic.
      * 
-     * @param multiverse The multiverse.
-     * 
      * @throws NullPointerException if {@code multiverse} is {@code null}.
      */
     public HostWorld createHost(Multiverse<? extends AbstractWorld> multiverse) {

@@ -105,7 +105,7 @@ import com.stabilise.world.loader.WorldLoader;
 public class RegionStore {
     
     /** Wait time in seconds for {@link #waitUntilDone()}. */
-    private static final int WAIT_TIME = 5;
+    private static final int WAIT_TIME = 1;
     
     /** The number of locks to stripe {@link #cacheLocks} and {@link
      * #storeLocks} into. */
@@ -789,26 +789,31 @@ public class RegionStore {
      * cached regions have been uncached.
      */
     void waitUntilDone() {
+    	doneLock.lock();
         try {
-            doneLock.lock();
+            // TODO: only use cache size for now. Upgrade to checking primary too
+        	// when I get primary to be completely flushed when the world is
+        	// forcefully unloaded (e.g., when the game is closed.)
+            int prevNumRegions = cache.size();
             
-            if(cache.isEmpty())
-                return;
-            
-            // We only wait for a certain number of seconds, since we shouldn't
-            // risk deadlock if some bug causes some regions to not be managed
-            // properly. Instead we'll just complain about it to the log.
-            // TODO: Instead, we could perhaps take charge of unloading them
-            // ourselves?
-            if(!emptyCondition.await(WAIT_TIME, TimeUnit.SECONDS)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Regions too long to finish saving! "
-                        + "Here are our offenders:");
-                for(CachedRegion c : cache.values()) {
-                    sb.append("\n    > ");
-                    sb.append(c.region.toStringDebug());
-                }
-                log.postWarning(sb.toString());
+            while(prevNumRegions > 0) {
+            	if(!emptyCondition.await(WAIT_TIME, TimeUnit.SECONDS)) {
+            		int numRegions = cache.size();
+            		if(numRegions < prevNumRegions) {
+            			// Progress has been made, keep waiting.
+            			prevNumRegions = numRegions;
+            		} else {
+            			// No progress! Just chuck a log message and abort.
+            			StringBuilder sb = new StringBuilder();
+                        sb.append("Regions too long to finish saving! "
+                                + "Here are our offenders:");
+                        for(CachedRegion c : cache.values()) {
+                            sb.append("\n    > ");
+                            sb.append(c.region.toStringDebug());
+                        }
+                        log.postWarning(sb.toString());
+            		}
+            	}
             }
         } catch(InterruptedException e) {
             log.postWarning("Interrupted while waiting to finish.");
