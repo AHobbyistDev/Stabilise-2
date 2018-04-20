@@ -15,9 +15,8 @@ import com.stabilise.util.annotation.ForTestingPurposes;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.UnorderedArrayList;
+import com.stabilise.util.concurrent.SingleBlockingJob;
 import com.stabilise.world.dimension.Dimension;
-import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.loader.WorldLoader;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
 import com.stabilise.world.tile.Tile;
@@ -34,15 +33,14 @@ public class HostWorld extends AbstractWorld {
      * manages all the regions. */
     public final RegionStore regions;
     
-    private final WorldLoader loader;
-    private final WorldGenerator generator;
-    private final WorldLoadTracker loadTracker = new WorldLoadTracker();
     
     /** Holds all player slice maps. */
     private final List<SliceMap> sliceMaps = new UnorderedArrayList<>(4, 2);
     
     /** Whether or not the world has been {@link #prepare() prepared}. */
     private volatile boolean prepared = false;
+    
+    public final SingleBlockingJob preloadJob = new SingleBlockingJob(this::preload);
     
     public final WorldStatistics stats = new WorldStatistics();
     
@@ -61,40 +59,28 @@ public class HostWorld extends AbstractWorld {
         // We instantiate the loader, generator and cache, and then safely hand
         // them references to each other as required.
         
-        loader = new WorldLoader(this);
-        dimension.addLoaders(loader, multiverse.info);
-        
-        generator = new WorldGenerator(multiverse, this);
-        dimension.addGenerators(generator);
-        
         regions = new RegionStore(this);
-        regions.setUnloadHandler(this::unloadRegion);
-        
-        //loader.passReferences(generator);
-        generator.passReferences(regions);
-        regions.passReferences(loader, generator);
     }
     
-    @UserThread("PoolThread")
+    /**
+     * Prepares the world by performing any necessary preemptive loading
+     * operations, such as preparing the spawn regions, etc. Polling {@link
+     * #isLoaded()} allows one to check the status of this operation.
+     */
+    @UserThread("WorkerThread")
     public void preload() {
-        try {
+    	try {
             dimension.loadData();
         } catch(IOException e) {
             throw new RuntimeException("Could not load dimension info! (dim: " +
                     dimension.info.name + ") (" + e.getMessage() + ")" , e);
         }
-        
+    	
+    	dimension.addLoaders(regions.loader, multiverse.info);
+    	dimension.addGenerators(regions.generator);
+    	
         spawnSliceX = dimension.info.spawnSliceX;
         spawnSliceY = dimension.info.spawnSliceY;
-        
-        prepare();
-    }
-    
-    @ThreadUnsafeMethod
-    @Override
-    public void prepare() {
-        if(prepared)
-            throw new IllegalStateException("World has already been prepared!");
         
         // Load the spawn regions if this is the default dimension
         if(dimension.hasSpawnRegions()) {
@@ -110,8 +96,6 @@ public class HostWorld extends AbstractWorld {
                 }
             }
         }
-        
-        prepared = true;
     }
     
     /**
@@ -163,22 +147,15 @@ public class HostWorld extends AbstractWorld {
      */
     @Override
     public boolean isLoaded() {
-        return regions.isLoaded() && prepared;
-    }
-    
-    /**
-     * Returns this world's load tracker.
-     */
-    public WorldLoadTracker loadTracker() {
-        return loadTracker;
+        return regions.allRegionsLoaded() && prepared;
     }
     
     @Override
     public boolean update() {
-        if(!prepared)
+    	if(!preloadJob.isDone())
             return false;
         doUpdate();
-        return regions.numRegions() == 0;
+        return regions.isEmpty();
     }
     
     @Override
@@ -218,33 +195,6 @@ public class HostWorld extends AbstractWorld {
     public Region getRegionAt(int x, int y) {
         Region r = regions.getRegion(x, y);
         return r == null ? Region.DUMMY_REGION : r;
-    }
-    
-    /**
-     * Ports the state of all entities located in a region to that region, and
-     * then moves the region to the cache so that it may be saved.
-     * 
-     * <p>The region should be removed from the map of regions immediately
-     * after this method returns.
-     * 
-     * @param r The region.
-     */
-    private void unloadRegion(Region r) {
-        // TODO
-        
-        // Unload entities in the region...
-        int minX = r.x() * Region.REGION_SIZE_IN_TILES;
-        int maxX = minX + Region.REGION_SIZE_IN_TILES;
-        int minY = r.y() * Region.REGION_SIZE_IN_TILES;
-        int maxY = minY + Region.REGION_SIZE_IN_TILES;
-        
-        getEntities().forEach(e -> {
-            if(e.pos.getGlobalX() + e.aabb.maxX() >= minX
-                    && e.pos.getGlobalX() + e.aabb.minX() <= maxX
-                    && e.pos.getGlobalY() + e.aabb.maxY() >= minY
-                    && e.pos.getGlobalY() + e.aabb.minY() <= maxY)
-                e.destroy();
-        });
     }
     
     /**
@@ -474,9 +424,7 @@ public class HostWorld extends AbstractWorld {
      */
     @Override
     public void close() {
-        loader.shutdown();
         save(true);
-        generator.shutdown();
     }
     
     @Override
@@ -484,6 +432,10 @@ public class HostWorld extends AbstractWorld {
         regions.waitUntilDone();
         
         log.postDebug(stats.toString());
+    }
+    
+    public WorldLoadTracker loadTracker() {
+    	return regions.loadTracker;
     }
     
     @Override

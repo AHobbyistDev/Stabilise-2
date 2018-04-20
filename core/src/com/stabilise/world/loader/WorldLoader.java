@@ -17,7 +17,7 @@ import com.stabilise.world.Region;
 import com.stabilise.world.RegionState;
 import com.stabilise.world.RegionStore;
 import com.stabilise.world.RegionStore.RegionCallback;
-import com.stabilise.world.WorldLoadTracker;
+import com.stabilise.world.WorldStatistics;
 
 
 /**
@@ -34,7 +34,6 @@ public class WorldLoader {
     public static final Format REGION_FORMAT = Format.NBT;
     public static final Compression REGION_COMPRESSION = Compression.GZIP;
     
-    
 	
     /** A reference to the world that this WorldLoader handles the loading for. */
     private final HostWorld world;
@@ -44,11 +43,11 @@ public class WorldLoader {
     
     private volatile boolean cancelLoadOperations = false;
     
-    /** Tracker used for producing nice load bars while loading the world. */
-    private final WorldLoadTracker tracker;
-    
     private final List<IRegionLoader> loaders = new ArrayList<>();
     private final List<IRegionLoader> savers = new ArrayList<>();
+    
+    private final WorldStatistics.ProcessStats loadStats;
+    private final WorldStatistics.ProcessStats saveStats;
     
     private final Log log;
     
@@ -61,7 +60,9 @@ public class WorldLoader {
     public WorldLoader(HostWorld world) {
         this.world = world;
         this.executor = world.multiverse().getExecutor();
-        this.tracker = world.loadTracker();
+        
+        this.loadStats = world.stats.load;
+        this.saveStats = world.stats.save;
         
         this.log = Log.getAgent("WORLDLOADER: " + world.getDimensionName());
         
@@ -117,17 +118,24 @@ public class WorldLoader {
      */
     @UserThread("Any")
     public void loadRegion(Region r, RegionCallback callback) {
-        world.stats.load.requests.increment();
-        tracker.startLoadOp();
+        loadStats.requests.increment();
+        //tracker.startLoadOp();
         executor.execute(() -> doLoad(r, callback));
     }
     
     private void doLoad(Region r, RegionCallback callback) {
-    	world.stats.load.started.increment();
+    	// Conservatively make sure the world has been preloaded before we load
+    	// the region. If it hasn't been preloaded, we steal the work and do it
+    	// ourselves.
+    	// Preloading also registers all the loaders & savers, and generators
+    	// for the WorldGenerator, which we want!
+    	world.preloadJob.run();
+    	
+    	loadStats.started.increment();
         
         if(cancelLoadOperations) {
-            world.stats.load.aborted.increment();
-            tracker.endLoadOp();
+            loadStats.aborted.increment();
+            //tracker.endLoadOp();
             callback.accept(r, false);
             return;
         }
@@ -143,18 +151,18 @@ public class WorldLoader {
                 
                 r.state.setLoaded(generated, r.hasQueuedStructures());
             	
-                world.stats.load.completed.increment();
+                loadStats.completed.increment();
             } catch(Exception e) {
                 log.postSevere("Loading " + r + " failed!", e);
-                world.stats.load.failed.increment();
+                loadStats.failed.increment();
                 success = false;
             }
     	} else {
-    	    world.stats.load.completed.increment(); // we'll count this as completed
+    	    loadStats.completed.increment(); // we'll count this as completed
     	    r.state.setLoaded(false, false); // nothing to load == "loaded", but not generated
     	}
     	
-    	tracker.endLoadOp();
+    	//tracker.endLoadOp();
     	callback.accept(r, success);
     }
     
@@ -169,7 +177,7 @@ public class WorldLoader {
      */
     @UserThread("Any")
     public void saveRegion(Region region, boolean useCurrentThread, RegionCallback callback) {
-        world.stats.save.requests.increment();
+        saveStats.requests.increment();
         if(useCurrentThread)
             doSave(region, callback);
         else
@@ -177,7 +185,7 @@ public class WorldLoader {
     }
     
     private void doSave(Region r, RegionCallback callback) {
-    	world.stats.save.started.increment();
+    	saveStats.started.increment();
         boolean success;
     	
         do {
@@ -193,10 +201,10 @@ public class WorldLoader {
                 IOUtil.writeSafe(r.getFile(world), c, REGION_COMPRESSION);
                 
                 success = true;
-                world.stats.save.completed.increment();
+                saveStats.completed.increment();
             } catch(Throwable t) {
                 success = false;
-                world.stats.save.failed.increment();
+                saveStats.failed.increment();
                 log.postSevere("Saving " + r + " failed!", t);
                 
                 // Don't break from the do..while on a fail; if another save

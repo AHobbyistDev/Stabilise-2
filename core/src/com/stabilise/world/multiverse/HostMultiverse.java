@@ -91,7 +91,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         dimensions.put(name, world);
         
         final HostWorld w = world;
-        executor.execute(() -> w.preload());
+        executor.execute(w.preloadJob::run);
         
         return world;
     }
@@ -194,8 +194,6 @@ public class HostMultiverse extends Multiverse<HostWorld> {
      * Stores the world-local data of a player.
      * 
      * <p>TODO outdated docs
-     * <p>An instance of this class should be {@link PlayerData#dispose()
-     * disposed} of when it is no longer needed.
      */
     @NotThreadSafe
     public class PlayerData {

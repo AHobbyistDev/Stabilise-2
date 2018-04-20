@@ -16,10 +16,8 @@ import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.RegionState;
 import com.stabilise.world.RegionStore;
-import com.stabilise.world.WorldLoadTracker;
 import com.stabilise.world.RegionStore.RegionCallback;
 import com.stabilise.world.dimension.Dimension;
-import com.stabilise.world.multiverse.Multiverse;
 
 /**
  * A {@code WorldGenerator} instance handles the generation of regions for a
@@ -30,6 +28,10 @@ import com.stabilise.world.multiverse.Multiverse;
  * itself is performed by {@link IWorldGenerator}s which are registered by a
  * world's {@link Dimension}; see {@link
  * Dimension#addGenerators(WorldGenerator)}.
+ * 
+ * <p>Note that the generation of a region <em>always</em> comes after a load
+ * of that region (whether anything was loaded or not), and thus every part of
+ * the load process <i>happens-before</i> generation.
  */
 @ThreadSafe
 public final class WorldGenerator {
@@ -48,8 +50,6 @@ public final class WorldGenerator {
     /** These generators are what actually generate the terrain of each region. */
     private final List<IWorldGenerator> generators = new ArrayList<>(1);
     
-    /** Tracker used for producing nice load bars while loading the world. */
-    private final WorldLoadTracker tracker;
     
     final Log log;
     
@@ -57,17 +57,15 @@ public final class WorldGenerator {
     /**
      * Creates a new WorldGenerator.
      * 
-     * @param multiverse The multiverse.
      * @param world The world.
      * 
      * @throws NullPointerException if either argument is {@code null}.
      */
-    public WorldGenerator(Multiverse<?> multiverse, HostWorld world) {
+    public WorldGenerator(HostWorld world) {
         this.world = Objects.requireNonNull(world);
-        this.executor = multiverse.getExecutor();
-        this.tracker = world.loadTracker();
+        this.executor = world.multiverse().getExecutor();
         
-        seed = multiverse.getSeed();
+        seed = world.multiverse().getSeed();
         
         log = Log.getAgent("Generator_" + world.getDimensionName());
     }
@@ -103,7 +101,7 @@ public final class WorldGenerator {
     @UserThread("Any")
     public void generate(Region r, boolean useCurrentThread, RegionCallback callback) {
         world.stats.gen.requests.increment();
-        tracker.startLoadOp();
+        //tracker.startLoadOp();
         if(useCurrentThread)
             genRegion(r, callback);
         else
@@ -120,7 +118,7 @@ public final class WorldGenerator {
         
         if(isShutdown) {
             world.stats.gen.aborted.increment();
-            tracker.endLoadOp();
+            //tracker.endLoadOp();
             callback.accept(r, false);
             return;
         }
@@ -169,7 +167,7 @@ public final class WorldGenerator {
         // Clean up all regions cached during generation.
         regionStore.uncacheAll();
         
-        tracker.endLoadOp();
+        //tracker.endLoadOp();
         callback.accept(r, success);
     }
     

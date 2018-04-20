@@ -256,6 +256,12 @@ public class Checks {
         "ooo noo broden",
     };
     
+    private static final String[] unsupportedMessages = {
+    	"Unsupported operation!",
+    	"You shouldn't have done that",
+    	"Can you not read the docs?",
+    };
+    
     /**
      * Throws an AssertionError.
      */
@@ -274,7 +280,7 @@ public class Checks {
      * Throws an UnsupportedOperationException.
      */
     public static UnsupportedOperationException unsupported() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(ArrayUtil.random(unsupportedMessages));
     }
     
     /**

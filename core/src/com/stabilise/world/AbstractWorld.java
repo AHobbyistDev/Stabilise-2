@@ -136,15 +136,6 @@ public abstract class AbstractWorld implements World {
     }
     
     /**
-     * Prepares the world by performing any necessary preemptive loading
-     * operations, such as preparing the spawn regions, etc. Polling {@link
-     * #isLoaded()} allows one to check the status of this operation.
-     * 
-     * @throws IllegalStateException if the world has already been prepared.
-     */
-    protected abstract void prepare();
-    
-    /**
      * Polls the loaded status of the world.
      * 
      * @return {@code true} if the world is loaded; {@code false} otherwise.

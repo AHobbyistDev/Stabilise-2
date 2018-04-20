@@ -313,15 +313,6 @@ public class RegionState {
     }
     
     /**
-     * This is called when the region is removed from the world.
-     */
-    public void removedFromWorld() {
-        // Might need to be reimported if the region is added back before it is
-        // flushed from the cache
-        imported = false;
-    }
-    
-    /**
      * Checks to see if the region should have its contents imported into the
      * world.
      */
@@ -331,6 +322,15 @@ public class RegionState {
             return true;
         }
         return false;
+    }
+    
+    /**
+     * Sets the region as imported, so that {@link #tryImport()} can return
+     * true again. This is invoked when the region is unloaded and moved from
+     * primary storage to the cache for saving.
+     */
+    public void setUnimported() {
+        imported = false;
     }
     
     private void swapState(State expect, State update) {

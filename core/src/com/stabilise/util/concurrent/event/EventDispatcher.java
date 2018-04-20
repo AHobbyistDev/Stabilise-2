@@ -8,7 +8,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -41,7 +40,6 @@ public class EventDispatcher {
     
     protected final boolean retained;
     protected final Map<Event, ListenerBucket<?>> handlers;
-    protected final Supplier<ListenerBucket<?>> bucketSupplier;
     protected final Striper<Lock> locks;
     
     
@@ -65,10 +63,6 @@ public class EventDispatcher {
         handlers = concurrencyLevel == 0
                 ? new HashMap<>()
                 : new ConcurrentHashMap<>();
-        
-        bucketSupplier = retained
-                ? RetainedListenerBucket::new
-                : StandardListenerBucket::new;
         
         locks = concurrencyLevel == 0
                 ? new Striper<>(1, () -> FakeLock.INSTANCE)
@@ -118,7 +112,10 @@ public class EventDispatcher {
         Lock l = locks.get(e);
         l.lock();
         try {
-            if(handlers.computeIfAbsent(e, k -> bucketSupplier.get()).addListener(li))
+            if(handlers.computeIfAbsent(e, k -> {
+		            	if(retained) return new RetainedListenerBucket<>();
+		            	else         return new StandardListenerBucket<>();
+		            }).addListener(li))
                 return;
         } finally {
             l.unlock();
@@ -174,12 +171,13 @@ public class EventDispatcher {
         Lock l = locks.get(e);
         l.lock();
         try {
+        	b = (ListenerBucket<E>) handlers.get(e);
             if(retained) {
-                if((b = (ListenerBucket<E>) handlers.get(e)) == null)
-                    handlers.put(e, b = (ListenerBucket<E>) bucketSupplier.get());
+                if(b == null)
+                    handlers.put(e, b = new RetainedListenerBucket<E>());
                 ls = b.post(e);
             } else {
-                if((b = (ListenerBucket<E>) handlers.get(e)) != null) {
+                if(b != null) {
                     ls = b.post(e);
                     if(b.isEmpty())
                         handlers.remove(e);

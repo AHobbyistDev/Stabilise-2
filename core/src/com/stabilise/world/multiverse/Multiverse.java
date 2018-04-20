@@ -82,8 +82,8 @@ public abstract class Multiverse<W extends AbstractWorld> {
         final int coreThreads = Runtime.getRuntime().availableProcessors() - 1;
         executor = new ThreadPoolExecutor(
         		coreThreads,
-        		Integer.MAX_VALUE,
-        		30L, TimeUnit.SECONDS,
+        		Integer.MAX_VALUE, // doesn't matter since queue is unbounded
+        		30L, TimeUnit.SECONDS, // idle thread timeout
         		new LinkedBlockingQueue<>(),
         		new WorldThreadFactory()
         );

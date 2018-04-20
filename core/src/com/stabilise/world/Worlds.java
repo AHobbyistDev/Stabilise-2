@@ -118,6 +118,8 @@ public class Worlds {
         for(int i = 0; i < worldDirs.length; i++) {
             try {
                 WorldInfo info = new WorldInfo(worldDirs[i].name());
+                if(!info.getFile().exists())
+                	continue;
                 info.load(); // throws IOE
                 worlds.add(info);
             } catch(IOException e) {
@@ -360,8 +362,10 @@ public class Worlds {
                     if(buildHost) {
                         t.next(50, "Loading world data");
                         worldInfo.load();
+                        
                         t.next(50, "Starting up the world");
                         bMulti.set(new HostMultiverse(worldInfo, profiler));
+                        
                         t.next(50, "Creating the player");
                         bPlayer.set(bMulti.get().addPlayer(integratedPlayer, true));
                         bWorld.set(bPlayer.get().world);
@@ -374,14 +378,23 @@ public class Worlds {
                     public WorldBundle run(TaskHandle t) throws Exception {
                         t.setTotal(bStatus.get().numTotal());
                         HostWorld w = bWorld.get();
+                        
                         t.setStatus("Loading dimension " + w.getDimensionName());
                         do {
                             t.set(bStatus.get().numDone());
                             bStatus.get().waitUntilNext();
-                            w.forEachRegion(r -> { if(r.state.isPrepared()) r.importContents(w); });
                         } while(!bStatus.get().isDone());
-                        return new WorldBundle(bMulti.get(), w,
-                                bPlayer.get().playerEntity, bPlayer.get().playerData);
+                        
+                        // Regions have been loaded; now properly import them
+                        // while we have the luxury of this concurrent loading.
+                        w.forEachRegion(r -> r.importToWorld(w));
+                        
+                        return new WorldBundle(
+                        		bMulti.get(),
+                        		w,
+                                bPlayer.get().playerEntity,
+                                bPlayer.get().playerData
+                        );
                     }
                     
                 })

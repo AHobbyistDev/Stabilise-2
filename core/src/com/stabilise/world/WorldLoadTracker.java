@@ -19,16 +19,14 @@ public class WorldLoadTracker {
     }
     
     /**
-     * Indicates that a new loading operation has begun. For WorldLoader and
-     * WorldGenerator use only.
+     * Indicates that a new loading operation has begun.
      */
     public synchronized void startLoadOp() {
         total++;
     }
     
     /**
-     * Indicates that a loading operation has ended. For WorldLoader and
-     * WorldGenerator use only.
+     * Indicates that a loading operation has ended.
      */
     public synchronized void endLoadOp() {
         done++;

@@ -5,22 +5,17 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.IntBinaryOperator;
 
-import javax.annotation.Nullable;
-
 import com.stabilise.util.Checks;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.ThreadSafeMethod;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.util.box.Box;
-import com.stabilise.util.box.Boxes;
 import com.stabilise.util.concurrent.Striper;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
@@ -119,21 +114,18 @@ public class RegionStore {
             Maths.genHashFunction(STRIPE_FACTOR, false);
     
     
-    // Reference to the world
-    
+    /** Reference to the world. */
     private final HostWorld world;
-    private WorldLoader loader = null;
-    private WorldGenerator generator = null;
     
-    /** Consumer which is invoked right before a region is unloaded, to perform
-     * any unload logic as required by the world. */
-    private final Box<Consumer<Region>> unloadHandler = Boxes.emptyMut();
+    public final WorldLoader loader;
+    public final WorldGenerator generator;
+    
     
     /** Contains all loaded regions. Maps region.loc -> region. */
     private final ConcurrentMap<Point, Region> regions =
             new ConcurrentHashMap<>();
     /** Tracks the number of loaded regions. */
-    private final AtomicInteger numRegions = new AtomicInteger();
+    //private final AtomicInteger numRegions = new AtomicInteger();
     
     /** The map of cached regions. Maps region.loc -> region. */
     private final ConcurrentMap<Point, CachedRegion> cache =
@@ -152,9 +144,13 @@ public class RegionStore {
      * convenience, but ONLY on the main thread. */
     private final Point unguardedDummyLoc = Region.createMutableLoc();
     
+    // Tracker for determining when all the regions are loaded.
+    public final WorldLoadTracker loadTracker = new WorldLoadTracker();
+    
     // A Lock and its associated Condition to wait on in waitUntilDone().
     private final Lock doneLock = new ReentrantLock();
     private final Condition emptyCondition = doneLock.newCondition();
+    
     
     private final Log log;
     
@@ -165,26 +161,11 @@ public class RegionStore {
     RegionStore(HostWorld world) {
         this.world = world;
         
+        this.loader = new WorldLoader(world);
+        this.generator = new WorldGenerator(world);
+        
         log = Log.getAgent(world.getDimensionName() + "_RegionStore");
     }
-    
-    /**
-     * Sets this store's unload handler. The given consumer will be invoked
-     * when a region is unloaded - immediately before it is removed from
-     * primary storage.
-     */
-    void setUnloadHandler(@Nullable Consumer<Region> action) {
-        unloadHandler.set(action);
-    }
-    
-    /**
-     * Passes this RegionStore a reference to the world's loader and generator.
-     */
-    void passReferences(WorldLoader loader, WorldGenerator generator) {
-        this.loader = loader;
-        this.generator = generator;
-    }
-    
     /**
      * Gets a region at the given coordinates, which are in region-lengths.
      * 
@@ -276,9 +257,7 @@ public class RegionStore {
             } else
                 r = c.region;
             
-            // Not that it (theoretically) matters if we went ahead with it,
-            // but just to save on unnecessary effort, don't initiate a prepare
-            // it it looks like someone else has already done it.
+            // Unless someone else has already initiated a prepare, we do it
             if(!c.prepareForPrimary) {
                 c.prepareForPrimary = true;
                 tryPrepare = true;
@@ -286,8 +265,10 @@ public class RegionStore {
             }
         }
         
-        if(tryPrepare)
+        if(tryPrepare) {
+        	loadTracker.startLoadOp();
             prepareRegion(r, true);
+        }
         
         return r;
     }
@@ -508,7 +489,8 @@ public class RegionStore {
             }
         }
         
-        numRegions.getAndIncrement();
+        loadTracker.endLoadOp();
+        //numRegions.getAndIncrement();
     }
     
     /**
@@ -542,7 +524,7 @@ public class RegionStore {
             }
         }
         
-        numRegions.getAndDecrement();
+        //numRegions.getAndDecrement();
     }
     
     /**
@@ -564,21 +546,20 @@ public class RegionStore {
         regions.values().forEach(r -> {
             RegionState s = r.state;
             
-            if(s.tryImport())
-                r.importContents(world);
+            r.importToWorld(world);
             
             if(s.isActive()) {
                 r.update(world);
                 r.implantStructures(this); // implant structures
             } else if(!s.isAnchored() && !s.hasAnchoredNeighbours() && s.tickDown()) {
                 // Perform any operations needed for proper unloading first.
-                unloadHandler.ifPresent(a -> a.accept(r));
+                r.exportFromWorld(world);
                 
                 // We save the region and remove it from primary storage.
                 // It's probably poor style to have the region removed while
                 // we're iterating over them (normally this would give a
                 // ConcurrentModificationException), but since regions is a
-                // ConcurrentHashMap I'm not /too/ concerned.
+                // ConcurrentHashMap I'm not *too* concerned.
                 saveRegion(r, true);
             } else
                 r.implantStructures(this); // implant structures even if not active
@@ -783,26 +764,24 @@ public class RegionStore {
         regions.values().forEach(r -> saveRegion(r, false));
     }
     
-    /**
-     * Returns true if all regions have been loaded (this means there are no
-     * regions in the cache).
-     */
-    boolean isLoaded() {
-        // TODO: what if the only entries in the cache are regions being
-        // saved?
-        return cache.isEmpty();
-    }
-    
     private Point getLock(int x, int y) {
         return locks.get(STRIPE_HASHER.applyAsInt(x, y));
     }
     
     /**
-     * Returns the number of regions in primary storage.
+     * Returns true if all regions have been loaded (this means there are no
+     * regions in the cache).
      */
-    @UserThread("MainThread")
-    int numRegions() {
-        return numRegions.get();
+    boolean allRegionsLoaded() {
+        return cache.isEmpty();
+    }
+    
+    /**
+     * Returns true if there are no regions in primary storage nor the cache.
+     */
+    public boolean isEmpty() {
+    	// This isn't an atomic check, but it shouldn't matter, I don't think.
+    	return regions.isEmpty() && cache.isEmpty();
     }
     
     /**
@@ -851,6 +830,16 @@ public class RegionStore {
                 doneLock.unlock();
             }
         }
+    }
+    
+    /**
+     * Cancels all queued load and generation operations, but allows save
+     * operations to be queued and carried out. This is used to help make
+     * closing the world a slighly speedier process.
+     */
+    public void cancelLoads() {
+    	loader.shutdown();
+    	generator.shutdown();
     }
     
     /**
