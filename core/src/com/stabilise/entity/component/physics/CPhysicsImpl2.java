@@ -6,6 +6,7 @@ import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
+import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.Tile;
@@ -13,7 +14,8 @@ import com.stabilise.world.tile.Tile;
 /**
  * Extremely crappy physics implementation
  */
-public class PhysicsImpl extends CPhysics {
+@Incomplete
+public class CPhysicsImpl2 extends CPhysics {
     
     protected static final float AIR_FRICTION = 0.001f;
     
@@ -38,7 +40,7 @@ public class PhysicsImpl extends CPhysics {
         //    dx *= (1-friction);
         
         // We know that y at the next step is given by (where y' is dy at the
-    	// end of the last step, and y'' is gravitational accel).
+        // end of the last step, and y'' is gravitational accel).
         // y_next = y + dy = y + y't + (1/2)y''t^2
         // In other words, in this step the net effect is the following
         // (assuming we don't run into a wall or something):
@@ -107,7 +109,7 @@ public class PhysicsImpl extends CPhysics {
      * Gets the frictive force acting on the entity.
      */
     protected float getXFriction(World w, Entity e) {
-        Tile groundTile = w.getTileAt(tmp.set(e.pos, 0f, -0.01f).realign());
+        Tile groundTile = w.getTileAt(tmp.set(e.pos, 0f, -0.01f).align());
         return 1 - groundTile.getFriction();
     }
     
@@ -169,7 +171,7 @@ public class PhysicsImpl extends CPhysics {
         
         // TODO: < vs <= - watch out for this, it may cause problems in the future
         for(float v = proj.ly + e.aabb.minY(); v < max; v++) {
-        	tmp.set(proj.sx, proj.sy, proj.lx, v).realign();
+            tmp.set(proj.sx, proj.sy, proj.lx, v).align();
             if(w.getTileAt(tmp).isSolid() && rowValid(w, e, tmp)) {
                 //x = dxp ? Math.floor(xp) - boundingBox.p11.x : Math.ceil(xp) - boundingBox.p00.x;
                 // Alternatively... (doesn't really matter though)
@@ -208,8 +210,8 @@ public class PhysicsImpl extends CPhysics {
         
         // TODO: < vs <= - watch out for this, it may cause problems in the future
         for(float h = proj.lx + e.aabb.minX(); h < max; h++) {
-        	tmp.set(proj.sx, proj.sy, h, proj.ly).realign();
-        	try {
+            tmp.set(proj.sx, proj.sy, h, proj.ly).align();
+            try {
                 if(w.getTileAt(tmp).isSolid() && columnValid(w, e, tmp)) {
                     //y = dyp ? Math.floor(yp) - boundingBox.p11.y : Math.ceil(yp) - boundingBox.p00.y;
                     //onGround = dy < 0;
@@ -217,9 +219,9 @@ public class PhysicsImpl extends CPhysics {
                     collideVertical(w, e, tmp, dyp ? Direction.UP : Direction.DOWN);
                     return true;
                 }
-        	} catch(ArrayIndexOutOfBoundsException ex) {
-        	    Log.getAgent("ASDFGHJKL").postSevere("It hath strucketh", ex);
-        	}
+            } catch(ArrayIndexOutOfBoundsException ex) {
+                Log.getAgent("ASDFGHJKL").postSevere("It hath strucketh", ex);
+            }
         }
         return false;
     }
@@ -239,7 +241,7 @@ public class PhysicsImpl extends CPhysics {
         // the height of the entity's bounding box would require.
         int max = Maths.ceil(e.aabb.height());
         for(int i = 1; i <= max; i++) {
-            if(w.getTileAt(tmp3.set(pos).add(0f, dyp ? -i : i).realign()).isSolid())
+            if(w.getTileAt(tmp3.set(pos).add(0f, dyp ? -i : i).align()).isSolid())
                 return false;
         }
         return true;
@@ -260,7 +262,7 @@ public class PhysicsImpl extends CPhysics {
         // question that the width of the entity's bounding box would require.
         int max = Maths.ceil(e.aabb.width());
         for(int i = 1; i <= max; i++) {
-            if(w.getTileAt(tmp3.set(pos).add(dxp ? -i : i, 0f).realign()).isSolid())
+            if(w.getTileAt(tmp3.set(pos).add(dxp ? -i : i, 0f).align()).isSolid())
                 return false;
         }
         return true;
@@ -282,10 +284,10 @@ public class PhysicsImpl extends CPhysics {
         
         e.pos.sx = collisionPos.sx;
         if(direction == Direction.RIGHT) {
-        	e.pos.lx = Maths.floor(collisionPos.lx) - e.aabb.maxX();
+            e.pos.lx = Maths.floor(collisionPos.lx) - e.aabb.maxX();
             //e.x = Math.floor(xp) - e.aabb.maxX();
         } else {
-        	e.pos.lx = Maths.ceil(collisionPos.lx) - e.aabb.minX();
+            e.pos.lx = Maths.ceil(collisionPos.lx) - e.aabb.minX();
             //e.x = Math.ceil(xp) - e.aabb.minX();
         }
     }
@@ -306,18 +308,18 @@ public class PhysicsImpl extends CPhysics {
         
         e.pos.sy = collisionPos.sy;
         if(direction == Direction.UP) {
-        	e.pos.ly = Maths.floor(collisionPos.ly) - e.aabb.maxY();
+            e.pos.ly = Maths.floor(collisionPos.ly) - e.aabb.maxY();
             //e.y = Math.floor(yp) - e.aabb.maxY();
         } else {
-        	e.pos.ly = Maths.ceil(collisionPos.ly) - e.aabb.minY();
+            e.pos.ly = Maths.ceil(collisionPos.ly) - e.aabb.minY();
             //e.y = Math.ceil(yp) - e.aabb.minY();
             
             // TODO: Find a better way of doing this
-        	tmp4.set(e.pos).add(0f, -0.001f).clampToTile().realign();
-        	Tile t = w.getTileAt(tmp4);
-        	t.handleStep(w, tmp4, e);
-        	floorTile = t.getID();
-        	onGround = true;
+            tmp4.set(e.pos).add(0f, -0.001f).clampToTile().align();
+            Tile t = w.getTileAt(tmp4);
+            t.handleStep(w, tmp4, e);
+            floorTile = t.getID();
+            onGround = true;
             //int tx = Maths.floor(e.x);
             //int ty = Maths.floor(e.y - 0.001D);
             //Tile t = w.getTileAt(tx, ty);

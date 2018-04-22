@@ -38,6 +38,11 @@ public class CPortal extends CCore {
     
     public Vector2 direction = LEFT;
     
+    /** The position offset that an entity undergoes when moving through this
+     * portal. */
+    public Position offset;
+    
+    
     public CPortal(String dimension) {
         this.pairedDimension = dimension;
     }

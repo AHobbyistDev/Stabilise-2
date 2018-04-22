@@ -2,7 +2,6 @@ package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.component.controller.PlayerController;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.ETileCollision;
@@ -16,8 +15,10 @@ import com.stabilise.world.World;
 
 /**
  * Basic mob implementation.
+ * 
+ * <p>TODO: will need a pretty heavy rewrite at some point
  */
-public abstract class BaseMob extends CCore {
+public abstract class CBaseMob extends CCore {
     
     /** The default number of ticks a mob becomes invulnerable for after being
      * hit. */
@@ -469,15 +470,6 @@ public abstract class BaseMob extends CCore {
         this.state = state;
         this.stateLockDuration = stateLockDuration;
         stateTicks = 0;
-    }
-    
-    /**
-     * Checks for whether or not the mob is under the control of a player.
-     * 
-     * @return {@code true} if the mob is being controlled by a player.
-     */
-    public boolean isPlayerControlled() {
-        return e.controller instanceof PlayerController;
     }
     
     @Override

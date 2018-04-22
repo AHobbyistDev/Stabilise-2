@@ -32,6 +32,8 @@ public abstract class GameObject {
      * <p>This method performs as if by:
      * 
      * <pre>
+     * if(isDestroyed())
+     *      return true;
      * update(world);
      * return isDestroyed();</pre>
      * 
@@ -41,7 +43,7 @@ public abstract class GameObject {
      * should be removed from the world ASAP; {@code false} otherwise.
      */
     public boolean updateAndCheck(World world) {
-        if(isDestroyed())
+        if(isDestroyed()) // a quick preemptive check
             return true;
         update(world);
         return isDestroyed();

@@ -15,8 +15,8 @@ public class Entities {
     
     private Entities() {}
     
-    private static CPhysics       p() { return new PhysicsImpl();       }
-    private static CController   co() { return IdleController.INSTANCE; }
+    private static CPhysics       p() { return new CPhysicsImpl();       }
+    private static CController   co() { return CIdleController.INSTANCE; }
     
     private static Entity e(CPhysics p, CController co, CCore c) 
                                       { return new Entity(p, co, c);    }
@@ -41,16 +41,16 @@ public class Entities {
     }
     
     public static Entity enemy() {
-        return e(p(), new EnemyController(), new CGenericEnemy())
+        return e(p(), new CEnemyController(), new CGenericEnemy())
                 .addComponent(new CBasicArmour());
     }
     
     public static Entity person() {
-        return e(p(), new EnemyController(), new CPerson());
+        return e(p(), new CEnemyController(), new CPerson());
     }
     
     public static Entity portal(String dimension) {
-        return e(NoPhysics.INSTANCE, co(), new CPortal(dimension));
+        return e(CNoPhysics.INSTANCE, co(), new CPortal(dimension));
     }
     
 }

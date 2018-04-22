@@ -16,7 +16,7 @@ import com.stabilise.world.World;
  * <p>A mob which is on fire will take 2 damage a second and constantly produce
  * flame particles.
  */
-public class EffectFire extends ParticleEffect<ParticleFlame> {
+public class CEffectFire extends CParticleEffect<ParticleFlame> {
     
     private int damage;
     private int extra = 1;
@@ -27,7 +27,7 @@ public class EffectFire extends ParticleEffect<ParticleFlame> {
      * 
      * @param duration The duration of the effect, in ticks.
      */
-    public EffectFire(int duration, int damage) {
+    public CEffectFire(int duration, int damage) {
         super(duration);
         this.damage = damage;
     }
@@ -67,24 +67,14 @@ public class EffectFire extends ParticleEffect<ParticleFlame> {
     public boolean handle(World w, Entity e, EntityEvent ev) {
         return false;
     }
-
-    @Override
-    public int getWeight() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
     
     @Override
     public Action resolve(Component c) {
-        // If we get a new fire effect while active just add the durations.
-        if(c instanceof EffectFire) {
-            EffectFire e = (EffectFire)c;
-            duration += e.duration;
-            damage += e.damage;
-            extra++;
-            return Action.REJECT;
-        } else
-            return Action.KEEP_BOTH;
+        CEffectFire e = (CEffectFire)c; // c is guaranteed to be equal()
+        duration += e.duration;
+        damage += e.damage;
+        extra++;
+        return Action.REJECT;
     }
     
 }

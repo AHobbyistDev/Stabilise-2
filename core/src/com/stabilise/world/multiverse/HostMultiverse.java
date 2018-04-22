@@ -33,6 +33,8 @@ import com.stabilise.world.dimension.Dimension;
  *     two; the world is hosted to multiple clients, but there is also an
  *     integrated player who does not require a connection.
  * </ul>
+ * 
+ * <p>Since networking is NYI, however, Singleplayer is really the only case.
  */
 public class HostMultiverse extends Multiverse<HostWorld> {
     
@@ -178,11 +180,13 @@ public class HostMultiverse extends Multiverse<HostWorld> {
     protected void closeExtra() {
         for(PlayerData p : players.values()) {
             p.lastPos.set(p.playerMob.pos);
-            try {
-                p.save();
-            } catch(IOException e) {
-                throw new RuntimeException("Could not save " + p, e);
-            }
+            this.getExecutor().execute(() -> {
+                try {
+                    p.save();
+                } catch(IOException e) {
+                    log.postSevere("Could not save " + p, e);
+                }
+            });
         }
     }
     

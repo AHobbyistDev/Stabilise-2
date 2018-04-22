@@ -6,6 +6,9 @@ import com.stabilise.core.Application;
 import com.stabilise.core.Resources;
 
 
+/**
+ * Used by the launcher, and not the actual game.
+ */
 public class LauncherState implements State {
     
     private static final String javaPath
@@ -13,7 +16,7 @@ public class LauncherState implements State {
     private static final String updater = Resources.DIR_APP.child(Resources.UPDATER_JAR).path();
     private static final String game = Resources.DIR_APP.child(Resources.GAME_JAR).path();
     
-    enum State {
+    private enum State {
         starting, updating, running;
     }
     

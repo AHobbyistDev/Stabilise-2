@@ -24,7 +24,7 @@ public class TileVoidSpread extends Tile {
     private void spread(World w, Position pos, Position tmp) {
         int dx = w.rnd().nextInt(5) - 2; // -2 to 2
         int dy = w.rnd().nextInt(5) - 2; // -2 to 2
-        tmp.set(pos, dx, dy).realign();
+        tmp.set(pos, dx, dy).align();
         Tile t = w.getTileAt(tmp);
         if(t == Tiles.dirt || t == Tiles.grass)
             w.setTileAt(tmp, Tiles.voidDirt);

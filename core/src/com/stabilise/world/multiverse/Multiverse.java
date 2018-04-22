@@ -196,8 +196,6 @@ public abstract class Multiverse<W extends AbstractWorld> {
      * @throws RuntimeException if an I/O error occurred while saving.
      */
     public void close() {
-        //loader.shutdown();
-        
         for(AbstractWorld dim : dimensions.values())
             dim.close();
         

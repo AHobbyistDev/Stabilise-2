@@ -508,7 +508,7 @@ public class Worlds {
          */
         public Entity getPlayerEntity() {
             if(playerEntity == null)
-                throw new IllegalStateException("Not integrated player!");
+                throw new IllegalStateException("No integrated player!");
             return playerEntity;
         }
         

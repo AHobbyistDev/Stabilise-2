@@ -1,7 +1,7 @@
 package com.stabilise.entity.component.controller;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.component.core.BaseMob;
+import com.stabilise.entity.component.core.CBaseMob;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
@@ -10,7 +10,7 @@ import com.stabilise.world.World;
 /**
  * Extremely simplistic mob controller.
  */
-public class EnemyController extends CController {
+public class CEnemyController extends CController {
     
     /** Actions for the current, incredibly simplistic, AI. */
     private static enum EnumAction {
@@ -23,13 +23,13 @@ public class EnemyController extends CController {
     /** The enemy's current action. */
     private EnumAction action = EnumAction.IDLE;
     
-    private BaseMob mob;
+    private CBaseMob mob;
     
     private boolean scared = false;
     
     @Override
     public void init(Entity e) {
-        mob = (BaseMob)e.core;
+        mob = (CBaseMob)e.core;
     }
     
     @Override

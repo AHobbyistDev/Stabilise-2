@@ -92,8 +92,8 @@ public class TileRenderer implements Renderer {
         //worldRenderer.batch.disableBlending();
         slicesRendered = 0;
         Position camPos = wr.camObj.pos;
-        minCorner.set(camPos, -wr.tilesHorizontal, -wr.tilesVertical).realign().clampToTile();
-        maxCorner.set(camPos, wr.tilesHorizontal, wr.tilesVertical + 1).realign().clampToTile();
+        minCorner.set(camPos, -wr.tilesHorizontal, -wr.tilesVertical).align().clampToTile();
+        maxCorner.set(camPos, wr.tilesHorizontal, wr.tilesVertical + 1).align().clampToTile();
         int camSliceX = camPos.getSliceX();
         int camSliceY = camPos.getSliceY();
         for(int c = camSliceX - wr.slicesHorizontal;

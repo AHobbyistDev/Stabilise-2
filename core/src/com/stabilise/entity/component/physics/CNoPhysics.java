@@ -10,11 +10,11 @@ import com.stabilise.world.World;
  * An empty physics component implementation that does not attempt to simulate
  * any physics.
  */
-public class NoPhysics extends CPhysics {
+public class CNoPhysics extends CPhysics {
     
-    public static final NoPhysics INSTANCE = new NoPhysics();
+    public static final CNoPhysics INSTANCE = new CNoPhysics();
     
-    private NoPhysics() {}
+    private CNoPhysics() {}
     
     @Override public void init(Entity e) {}
     @Override public void update(World w, Entity e) {}

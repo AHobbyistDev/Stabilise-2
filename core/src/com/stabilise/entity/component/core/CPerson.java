@@ -5,8 +5,8 @@ import com.stabilise.core.Constants;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
-import com.stabilise.entity.component.effect.EffectFire;
-import com.stabilise.entity.component.effect.EffectFireTrail;
+import com.stabilise.entity.component.effect.CEffectFire;
+import com.stabilise.entity.component.effect.CEffectFireTrail;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
@@ -23,7 +23,7 @@ import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
 
 
-public class CPerson extends BaseMob {
+public class CPerson extends CBaseMob {
     
     //--------------------==========--------------------
     //-----=====Static Constants and Variables=====-----
@@ -384,7 +384,7 @@ public class CPerson extends BaseMob {
                         h1.force = 14f;
                         h1.fx = 0.5f;
                         h1.fy = 0.7f;
-                        h1.effects = tgt -> tgt.addComponent(new EffectFire(60*7, 3));
+                        h1.effects = tgt -> tgt.addComponent(new CEffectFire(60*7, 3));
                         w.addHitbox(h1, e.pos);
                         
                         Hitbox h2 = new Hitbox(e.id(), SPECIAL_DOWN_GROUND_HITBOX_2,
@@ -393,7 +393,7 @@ public class CPerson extends BaseMob {
                         h2.force = 14f;
                         h2.fx = -0.5f;
                         h2.fy = 0.7f;
-                        h2.effects = tgt -> tgt.addComponent(new EffectFire(60*7, 3));
+                        h2.effects = tgt -> tgt.addComponent(new CEffectFire(60*7, 3));
                         w.addHitbox(h2, e.pos);
                         
                         fireParticles.createBurst(300, e.pos, 0.1f, 5f, 0, (float)Math.PI);
@@ -416,7 +416,7 @@ public class CPerson extends BaseMob {
                 if(stateTicks == SPECIAL_DOWN_AIR_FRAME_2_BEGIN) {
                     fireballRain(w, e, SPECIAL_DOWN_AIR_COST_MANA, SPECIAL_DOWN_AIR_ORIGIN);
                     e.dy += 10f;
-                    e.addComponent(new EffectFireTrail(Constants.TICKS_PER_SECOND / 3));
+                    e.addComponent(new CEffectFireTrail(Constants.TICKS_PER_SECOND / 3));
                     /*
                     if(useMana(SPECIAL_DOWN_AIR_COST_MANA)) {
                         EntityBigFireball f = new EntityBigFireball(w, this);
@@ -458,7 +458,7 @@ public class CPerson extends BaseMob {
     protected void doNthJump(int n) {
         super.doNthJump(n);
         if(n > 1)
-            e.addComponent(new EffectFireTrail(Constants.TICKS_PER_SECOND / 2));
+            e.addComponent(new CEffectFireTrail(Constants.TICKS_PER_SECOND / 2));
     }
     
     private void fireball(World w, Entity e, int manaCost, Vec2 originPoint) {

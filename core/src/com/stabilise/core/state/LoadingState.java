@@ -47,9 +47,7 @@ public class LoadingState implements State {
     
     private ShapeRenderer shapes;
     
-    //////////////////temp stuff
     private ReturnTask<WorldBundle> future;
-    //////////////////end temp stuff
     
     
     /**

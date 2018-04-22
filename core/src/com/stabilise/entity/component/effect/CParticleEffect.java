@@ -10,11 +10,11 @@ import com.stabilise.world.World;
  * An Effect which produces particles on an entity. This is a convenience class
  * which helps abstract over any effect with an associated ParticleSource.
  */
-public abstract class ParticleEffect<T extends Particle> extends Effect {
+public abstract class CParticleEffect<T extends Particle> extends CEffect {
     
     protected ParticleSource<T> particleSrc;
     
-    public ParticleEffect(int duration) {
+    public CParticleEffect(int duration) {
         super(duration);
     }
     

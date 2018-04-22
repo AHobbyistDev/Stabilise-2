@@ -12,7 +12,7 @@ import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
-import com.stabilise.entity.component.core.BaseMob;
+import com.stabilise.entity.component.core.CBaseMob;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
@@ -29,10 +29,10 @@ import com.stabilise.world.tile.Tiles;
 /**
  * A PlayerController is a MobController which is managed by player input.
  */
-public class PlayerController extends CController implements Controllable, InputProcessor {
+public class CPlayerController extends CController implements Controllable, InputProcessor {
     
     private Entity e;
-    private BaseMob mob;
+    private CBaseMob mob;
     
     /** A reference to the PlayerController's controller. */
     public Controller controller;
@@ -57,7 +57,7 @@ public class PlayerController extends CController implements Controllable, Input
      * PlayerController.
      * @param The game which is currently active.
      */
-    public PlayerController(Controller controller, Game game) {
+    public CPlayerController(Controller controller, Game game) {
         this.controller = controller;
         this.game = game;
         
@@ -70,7 +70,7 @@ public class PlayerController extends CController implements Controllable, Input
     @Override
     public void init(Entity e) {
         this.e = e;
-        mob = (BaseMob)e.core;
+        mob = (CBaseMob)e.core;
     }
     
     @Override
@@ -107,7 +107,7 @@ public class PlayerController extends CController implements Controllable, Input
     /**
      * Performs a given action on all tiles within {@link #radius} of the
      * cursor as given by {@link WorldRenderer#mouseCoords()}. The position
-     * given to the consumer will always be {@link Position#realign() aligned}.
+     * given to the consumer will always be {@link Position#align() aligned}.
      */
     public void doInRadius(WorldRenderer renderer, Consumer<Position> func) {
         Position mc = renderer.mouseCoords();
@@ -119,27 +119,9 @@ public class PlayerController extends CController implements Controllable, Input
         for(int ty = -rad; ty <= rad; ty++) {
             for(int tx = -rad; tx <= rad; tx++) {
                 if(tx*tx + ty*ty < r2)
-                    func.accept(pos.set(mc, tx, ty).realign());
+                    func.accept(pos.set(mc, tx, ty).align());
             }
         }
-        
-        /*
-        float x = Maths.floor(wc.x);
-        float y = Maths.floor(wc.y);
-        int minX = (int)(x - radius);
-        int maxX = (int)Math.ceil(x + radius);
-        int minY = (int)(y - radius);
-        int maxY = (int)Math.ceil(y + radius);
-        
-        for(int tx = minX; tx <= maxX; tx++) {
-            for(int ty = minY; ty <= maxY; ty++) {
-                float xDiff = x - tx;
-                float yDiff = y - ty;
-                if(xDiff*xDiff + yDiff*yDiff < r2)
-                    func.accept(tx, ty);
-            }
-        }
-        */
     }
     
     @Override
@@ -191,7 +173,7 @@ public class PlayerController extends CController implements Controllable, Input
                 mob.restore();
                 break;
             case INTERACT:
-                Position p = e.pos.copy().clampToTile().add(0,-1).realign();
+                Position p = e.pos.copy().clampToTile().add(0,-1).align();
                 game.world.getTileAt(p).handleInteract(game.world, p, e);
                 break;
             case PREV_TILE:
@@ -208,8 +190,11 @@ public class PlayerController extends CController implements Controllable, Input
                 Log.get().postInfo(e.core.toString());
                 break;
             case PORTAL:
-                //game.world.addEntity(Entities.portal("overworld"), e.x + 3, e.y);
-                game.messages.send("Portal NYI for now");
+                String dim = "overworld";
+                Entity portal = Entities.portal(dim);
+                portal.pos.set(e.pos, e.facingRight ? 3f : -3f, 0f).align();
+                game.world.addEntity(portal);
+                //game.messages.send("Portal NYI for now");
                 break;
             default:
                 return false;

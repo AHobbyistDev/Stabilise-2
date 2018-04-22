@@ -785,6 +785,21 @@ public class RegionStore {
     }
     
     /**
+     * If the cache is empty, notifies any threads that may be waiting in
+     * {@link #waitUntilDone()}.
+     */
+    private void notifyWaiters() {
+        if(cache.isEmpty()) {
+            doneLock.lock();
+            try {
+                emptyCondition.signalAll();
+            } finally {
+                doneLock.unlock();
+            }
+        }
+    }
+    
+    /**
      * Blocks the current thread until all regions have finished saving and all
      * cached regions have been uncached.
      */
@@ -804,6 +819,7 @@ public class RegionStore {
             			prevNumRegions = numRegions;
             		} else {
             			// No progress! Just chuck a log message and abort.
+            		    // TODO: account for spurious wakeups
             			StringBuilder sb = new StringBuilder();
                         sb.append("Regions too long to finish saving! "
                                 + "Here are our offenders:");
@@ -819,21 +835,6 @@ public class RegionStore {
             log.postWarning("Interrupted while waiting to finish.");
         } finally {
             doneLock.unlock();
-        }
-    }
-    
-    /**
-     * If the cache is empty, notifies any threads that may be waiting in
-     * {@link #waitUntilDone()}.
-     */
-    private void notifyWaiters() {
-        if(cache.isEmpty()) {
-            doneLock.lock();
-            try {
-                emptyCondition.signalAll();
-            } finally {
-                doneLock.unlock();
-            }
         }
     }
     

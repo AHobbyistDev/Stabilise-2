@@ -15,7 +15,7 @@ import com.stabilise.util.shape.Polygon;
 import com.stabilise.world.World;
 
 
-public class CGenericEnemy extends BaseMob {
+public class CGenericEnemy extends CBaseMob {
     
     private static final AABB ENEMY_AABB = new AABB(-0.5f, 0, 1, 2);
     

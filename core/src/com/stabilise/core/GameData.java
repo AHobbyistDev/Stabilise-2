@@ -6,7 +6,7 @@ import org.reflections.Reflections;
 
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.component.controller.CController;
-import com.stabilise.entity.component.controller.IdleController;
+import com.stabilise.entity.component.controller.CIdleController;
 import com.stabilise.entity.component.core.CCore;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.util.annotation.Incomplete;
@@ -41,7 +41,7 @@ public class GameData {
         
         params.name = "EntityControllerComponentRegistry";
         controllers = factory(params, CController.class);
-        controllers.register(0, IdleController.class, () -> IdleController.INSTANCE);
+        controllers.register(0, CIdleController.class, () -> CIdleController.INSTANCE);
         
         params.name = "EntityCoreComponentRegistry";
         cores = factory(params, CCore.class);

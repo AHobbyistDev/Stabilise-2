@@ -23,4 +23,9 @@ public class CDamageAmplifier implements Component {
         return false;
     }
     
+    @Override
+    public Action resolve(Component c) {
+        return Action.KEEP_BOTH; // for the lols
+    }
+    
 }

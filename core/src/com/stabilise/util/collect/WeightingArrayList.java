@@ -18,6 +18,9 @@ import com.stabilise.util.collect.IDuplicateResolver.Action;
  * A WeightingArrayList is an ArrayList which sorts inserted elements by their
  * {@link IWeightProvider#getWeight() weight}, in order of lowest weight to
  * highest weight.
+ * 
+ * <p>See {@link #add(IWeightProvider)} for more details on how element
+ * insertion works.
  */
 public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E>>
         extends AbstractList<E>
@@ -45,8 +48,20 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
     }
     
     /**
-     * {@inheritDoc}
+     * Adds the given element to the list. The element is added after all
+     * elements with a lower weight, and before all elements with a higher
+     * weight, shifting if necessary. If other elements with the same weight
+     * are present, then {@code e} is added after all of them. If however one
+     * (or more) of the elements with the same weight is {@link
+     * Object#equals(Object) equal} to {@code e}, then {@link
+     * IDuplicateResolver#resolve(Object) elementAlreadyPresent.resolve(e)} is
+     * invoked and {@code e} is only added if the result of the invocation is
+     * either {@link IDuplicateResolver.Action#KEEP_BOTH KEEP_BOTH} or {@link
+     * IDuplicateResolver.Action#OVERWRITE OVERWRITE}.
      * 
+     * @return true if {@code e} was successfully added; false if an equal
+     * element already present {@link IDuplicateResolver.Action#REJECT
+     * rejected} the insertion of {@code e}.
      * @throws NullPointerException if {@code e} is {@code null}.
      */
     @Override
@@ -71,7 +86,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
                             data[i] = e;
                             return true;
                         } else if(a == Action.REJECT) return false;
-                        else continue;
+                        else continue; // Action.KEEP_BOTH
                     }
                 }
             }
@@ -83,6 +98,11 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
         }
     }
     
+    /**
+     * {@inheritDoc}
+     * 
+     * @see #add(IWeightProvider)
+     */
     @Override
     public void append(E e) {
         add(e);

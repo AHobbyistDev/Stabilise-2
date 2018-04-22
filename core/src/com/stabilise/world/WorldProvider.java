@@ -84,7 +84,7 @@ public interface WorldProvider {
      * Gets a tile at the given position. Fractional coordinates are rounded
      * down.
      * 
-     * <p>IMPORTANT NOTE: make sure the position is {@link Position#realign()
+     * <p>IMPORTANT NOTE: make sure the position is {@link Position#align()
      * aligned} before invoking this, or this will chuck an exception.
      * 
      * @param pos The position of the tile.
@@ -92,7 +92,7 @@ public interface WorldProvider {
      * @return The tile at the given coordinates, or the {@link Tiles#barrier
      * barrier} tile if no such tile is loaded.
      * @throws ArrrayIndexOutOfBoundsException if {@code pos} is not {@link
-     * Position#realign() aligned}.
+     * Position#align() aligned}.
      */
     default Tile getTileAt(Position pos) {
         return getSliceAt(pos).getTileAt(pos.getLocalTileX(), pos.getLocalTileY());
@@ -102,7 +102,7 @@ public interface WorldProvider {
      * Gets the ID of the tile at the given position. Fractional coordinates 
      * are rounded down.
      * 
-     * <p>IMPORTANT NOTE: make sure the position is {@link Position#realign()
+     * <p>IMPORTANT NOTE: make sure the position is {@link Position#align()
      * aligned} before invoking this, or this will chuck an exception.
      * 
      * @param pos The position of the tile.
@@ -110,7 +110,7 @@ public interface WorldProvider {
      * @return The ID of the tile at the given coordinates, or the ID of the
      * {@link Tiles#barrier barrier} tile if no such tile is loaded.
      * @throws ArrrayIndexOutOfBoundsException if {@code pos} is not {@link
-     * Position#realign() aligned}.
+     * Position#align() aligned}.
      */
     default int getTileIDAt(Position pos) {
         return getSliceAt(pos).getTileIDAt(pos.getLocalTileX(), pos.getLocalTileY());
@@ -203,14 +203,14 @@ public interface WorldProvider {
     /**
      * Sets a tile at the specified position.
      * 
-     * <p>IMPORTANT NOTE: make sure the position is {@link Position#realign()
+     * <p>IMPORTANT NOTE: make sure the position is {@link Position#align()
      * aligned} before invoking this, or this will chuck an exception.
      * 
      * @param pos The position. <!-- wow such documentation -->
      * @param tile The tile to set.
      * 
      * @throws ArrrayIndexOutOfBoundsException if {@code pos} is not {@link
-     * Position#realign() aligned}.
+     * Position#align() aligned}.
      */
     default void setTileAt(Position pos, Tile tile) {
         //getSliceAt(pos.getSliceX(), pos.getSliceY())
@@ -221,14 +221,14 @@ public interface WorldProvider {
     /**
      * Sets a tile at the specified position.
      * 
-     * <p>IMPORTANT NOTE: make sure the position is {@link Position#realign()
+     * <p>IMPORTANT NOTE: make sure the position is {@link Position#align()
      * aligned} before invoking this, or this will chuck an exception.
      * 
      * @param pos The position. <!-- wow such documentation -->
      * @param id The ID of the tile to set.
      * 
      * @throws ArrrayIndexOutOfBoundsException if {@code pos} is not {@link
-     * Position#realign() aligned}.
+     * Position#align() aligned}.
      */
     default void setTileAt(Position pos, int id) {
         getSliceAt(pos).setTileIDAt(pos.getLocalTileX(), pos.getLocalTileY(), id);
@@ -286,7 +286,7 @@ public interface WorldProvider {
     /**
      * Gets the tile entity at the given position.
      * 
-     * <p>IMPORTANT NOTE: make sure the position is {@link Position#realign()
+     * <p>IMPORTANT NOTE: make sure the position is {@link Position#align()
      * aligned} before invoking this, or this will chuck an exception.
      * 
      * @return The tile entity at the given position, or {@code null} if no

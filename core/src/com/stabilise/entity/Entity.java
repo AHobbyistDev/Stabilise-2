@@ -2,7 +2,7 @@ package com.stabilise.entity;
 
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.component.controller.CController;
-import com.stabilise.entity.component.controller.PlayerController;
+import com.stabilise.entity.component.controller.CPlayerController;
 import com.stabilise.entity.component.core.CCore;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.IDamageSource;
@@ -10,12 +10,17 @@ import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.collect.WeightingArrayList;
-import com.stabilise.util.io.data.DataCompound;
-import com.stabilise.util.io.data.nbt.NBTCompound;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
-
+/**
+ * Entities are the main actors in the game; essentially all objects that are
+ * not tiles are entities, including the player, other mobs, items, etc.
+ * 
+ * <p>Implementation-wise, an entity is essentially just a bag of {@link
+ * Component components}, an approach I have opted for over inheritance since
+ * it is far more flexible.
+ */
 public class Entity extends GameObject {
     
     private      long        id;
@@ -36,7 +41,8 @@ public class Entity extends GameObject {
     
     
     /**
-     * Creates a new Entity.
+     * Creates a new Entity. The given components are all {@link
+     * Component#init(Entity) initialised}.
      * 
      * @throws NullPointerException if any argument is null.
      */
@@ -71,7 +77,8 @@ public class Entity extends GameObject {
         physics.update(world, this);
         world.profiler().end();
         
-        this.pos.realign(); // TODO: temporary?
+        // After all is said and done, realign the entity's position
+        pos.align();
     }
     
     @Override
@@ -95,12 +102,14 @@ public class Entity extends GameObject {
     }
     
     /**
-     * Adds a component to this entity.
+     * Adds a component to this entity. Invokes {@link Component#init(Entity)}
+     * on the component.
      * 
      * @return This entity.
      * @throws NullPointerException if {@code c} is {@code null}.
      */
     public Entity addComponent(Component c) {
+        c.init(this);
         components.add(c);
         return this;
     }
@@ -147,10 +156,15 @@ public class Entity extends GameObject {
         return post(w, EDamaged.damaged(src));
     }
     
+    /**
+     * Returns true if this entity is controlled by the player, i.e., if its
+     * {@link #controller} is a {@link CPlayerController}.
+     */
     public boolean isPlayerControlled() {
-        return controller instanceof PlayerController;
+        return controller instanceof CPlayerController;
     }
     
+    /*
     public DataCompound toNBT() {
         return new NBTCompound(); // TODO
     }
@@ -158,5 +172,6 @@ public class Entity extends GameObject {
     public static Entity fromNBT(DataCompound tag) {
         return Entities.enemy(); // TODO
     }
+    */
     
 }

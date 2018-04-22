@@ -12,6 +12,11 @@ package com.stabilise.util.collect;
  */
 public interface IDuplicateResolver<T> {
     
+    /**
+     * @see #OVERWRITE
+     * @see #REJECT
+     * @see #KEEP_BOTH
+     */
     public static enum Action {
         /** Overwrite the old object with the new one. */
         OVERWRITE,
@@ -22,6 +27,19 @@ public interface IDuplicateResolver<T> {
     }
     
     
+    /**
+     * Resolves a detected duplicate. This is invoked on an element of a {@link
+     * WeightingArrayList} when a newly-inserted object is {@link
+     * Object#equals(Object) equal} to it. If this returns
+     * 
+     * <ul>
+     * <li>{@link Action#OVERWRITE}, then the new object replaces this one,
+     * <li>{@link Action#REJECT}, then the new object is rejected and not added
+     *     to the list; this one remains,
+     * <li>{@link Action#KEEP_BOTH}, then the new object is added to the list,
+     *     and this object remains.
+     * </ul>
+     */
     Action resolve(T other);
     
 }

@@ -81,7 +81,7 @@ public class Position implements Exportable {
     /**
      * Sets this Position to the same value as the given Position, but with
      * lx and ly incremented by dx and dy respectively. This method does not
-     * invoke {@link #realign()}, so lx and ly may fall outside of the slice
+     * invoke {@link #align()}, so lx and ly may fall outside of the slice
      * bounds.
      * 
      * @return this Position.
@@ -125,7 +125,7 @@ public class Position implements Exportable {
     
     /**
      * Adds dx and dy to lx and ly respectively. This method does not invoke
-     * {@link #realign()}, so lx and ly may fall outside of the slice bounds.
+     * {@link #align()}, so lx and ly may fall outside of the slice bounds.
 
      * @return this Position.
      */
@@ -214,24 +214,24 @@ public class Position implements Exportable {
     }
     
     /**
-     * Realigns this position. That is, if {@link #lx} or {@link #ly}
-     * have overflowed into another slice, this method clamps them back and
-     * adjusts {@link #sx} and {@link #sy} appropriately.
+     * Aligns this position. That is, if {@link #lx} or {@link #ly} have
+     * overflowed into another slice, this method clamps them back and adjusts
+     * {@link #sx} and {@link #sy} appropriately.
      * 
      * @return this Position.
      */
-    public Position realign() {
+    public Position align() {
         realignX();
         realignY();
         return this;
     }
     
     /**
-     * As with {@link #realign()}, but only aligns the x-coordinates. Use this
-     * if you know only {@link #lx} has been changed and want to save slightly
-     * on computation time.
+     * As with {@link #align()}, but only aligns the x-coordinates. Use this if
+     * you know only {@link #lx} has been changed and want to save slightly on
+     * computation time.
      * 
-     * @see #realign()
+     * @see #align()
      */
     public void realignX() {
         sx += sliceCoordFromTileCoord2(lx);
@@ -239,11 +239,11 @@ public class Position implements Exportable {
     }
     
     /**
-     * As with {@link #realign()}, but only aligns the y-coordinates. Use this
-     * if you know only {@link #ly} has been changed and want to save slightly
-     * on computation time.
+     * As with {@link #align()}, but only aligns the y-coordinates. Use this if
+     * you know only {@link #ly} has been changed and want to save slightly on
+     * computation time.
      * 
-     * @see #realign()
+     * @see #align()
      */
     public void realignY() {
         sy += sliceCoordFromTileCoord2(ly);
@@ -672,7 +672,7 @@ public class Position implements Exportable {
         // 
         // Strictly speaking, the error lies in Maths.remainder() and the fix
         // belongs in there, but it's too much work and I won't bother.
-        if(rem == 16.0f) // TODO: hardcoded 16 is bad
+        if(rem == Slice.SLICE_SIZEf)
             rem = Slice.SLICE_SIZE_MINUS_EPSf;
         return rem;
     }

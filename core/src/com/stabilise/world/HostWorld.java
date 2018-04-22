@@ -408,22 +408,20 @@ public class HostWorld extends AbstractWorld {
         
         regions.saveAll();
         
-        try {
-            dimension.saveData();
-        } catch(IOException e) {
-            throw new RuntimeException("Could not save dimension info!", e);
-        }
+        multiverse.getExecutor().execute(() -> {
+            try {
+                dimension.saveData();
+            } catch(IOException e) {
+                log.postSevere("Could not save dimension info", e);
+            }
+        });
         
         //savePlayers();
     }
     
-    /**
-     * {@inheritDoc}
-     * 
-     * @throws RuntimeException if an I/O error occurred while saving.
-     */
     @Override
     public void close() {
+        regions.cancelLoads();
         save(true);
     }
     

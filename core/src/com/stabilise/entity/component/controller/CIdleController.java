@@ -7,15 +7,15 @@ import com.stabilise.world.World;
 /**
  * Mobs with an IdleController have no defined behaviour; they do nothing.
  */
-public class IdleController extends CController {
+public class CIdleController extends CController {
     
     /** The global IdleController instance. Since an IdleController does
      * nothing, this may be shared between multiple mobs. */
-    public static final IdleController INSTANCE = new IdleController();
+    public static final CIdleController INSTANCE = new CIdleController();
     
     
     // Only privately instantiable
-    private IdleController() {
+    private CIdleController() {
         super();
     }
     

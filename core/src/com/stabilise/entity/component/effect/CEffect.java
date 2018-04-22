@@ -7,7 +7,7 @@ import com.stabilise.world.World;
 /**
  * An Effect is a lingering condition which can affect a mob.
  */
-public abstract class Effect implements Component {
+public abstract class CEffect implements Component {
     
     /** The duration of the effect, in ticks. */
     public int duration;
@@ -21,7 +21,7 @@ public abstract class Effect implements Component {
      * 
      * @param duration The duration of the effect, in ticks.
      */
-    protected Effect(int duration) {
+    protected CEffect(int duration) {
         if(duration < 1)
             throw new IllegalArgumentException("The duration of an effect must be a positive number!");
         
@@ -37,11 +37,6 @@ public abstract class Effect implements Component {
     public boolean shouldRemove() {
         return age >= duration;
     }
-    
-    // Get rid of the default implementation; we want to force effects to
-    // handle overlapping ones.
-    @Override
-    public abstract Action resolve(Component c);
     
     @Override
     public boolean equals(Object o) {

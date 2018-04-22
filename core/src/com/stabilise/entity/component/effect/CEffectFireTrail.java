@@ -11,9 +11,9 @@ import com.stabilise.world.World;
 /**
  * An effect that produces a brief trail of fire at the entity's base.
  */
-public class EffectFireTrail extends ParticleEffect<ParticleFlame> {
+public class CEffectFireTrail extends CParticleEffect<ParticleFlame> {
     
-    public EffectFireTrail(int duration) {
+    public CEffectFireTrail(int duration) {
         super(duration);
     }
     
@@ -33,12 +33,6 @@ public class EffectFireTrail extends ParticleEffect<ParticleFlame> {
         //particleSrc.createBurst(2, e.x, e.y, 0.2f, 1.0f, 0f, Maths.TAUf);
         Position dummyPos = particleSrc.dummyPos;
         particleSrc.createBurst(5, dummyPos.set(e.pos, -0.2f, -0.2f), 0.4f, 0.4f, 0.2f, 1.0f, 0f, Maths.TAUf);
-    }
-    
-    @Override
-    public int getWeight() {
-        // TODO Auto-generated method stub
-        return 0;
     }
     
     @Override
