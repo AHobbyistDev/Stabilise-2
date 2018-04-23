@@ -1,13 +1,13 @@
 package com.stabilise.entity.component.effect;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.component.AbstractComponent;
+import com.stabilise.entity.component.Component;
 import com.stabilise.world.World;
 
 /**
  * An Effect is a lingering condition which can affect a mob.
  */
-public abstract class CEffect extends AbstractComponent {
+public abstract class CEffect implements Component {
     
     /** The duration of the effect, in ticks. */
     public int duration;
@@ -36,6 +36,12 @@ public abstract class CEffect extends AbstractComponent {
     @Override
     public boolean shouldRemove() {
         return age >= duration;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        // Effects are considered equal if they're the same class.
+        return o != null && o.getClass().equals(getClass());
     }
     
 }

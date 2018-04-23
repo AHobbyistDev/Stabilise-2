@@ -42,17 +42,25 @@ public interface Component extends IWeightProvider, IDuplicateResolver<Component
     
     /**
      * Checks for whether or not this component should be removed.
+     * 
+     * <p>The default implementation returns {@code false}.
      */
-    boolean shouldRemove();
+    default boolean shouldRemove() {
+        return false;
+    }
     
     /**
      * Handles an entity-local event broadcast.
+     * 
+     * <p>The default implementation returns {@code false}.
      * 
      * @return {@code true} to consume the event and prevent it from being
      * passed on to more components; {@code false} to not treat the event as
      * consumed.
      */
-    boolean handle(World w, Entity e, EntityEvent ev);
+    default boolean handle(World w, Entity e, EntityEvent ev) {
+        return false;
+    }
     
     /**
      * Returns the "weight" of this component. The list of ad hoc components on
@@ -60,9 +68,13 @@ public interface Component extends IWeightProvider, IDuplicateResolver<Component
      * usually necessary to override this unless there's a particular need for
      * a component to come before/after some other components when iterating or
      * {@link #handle(World, Entity, EntityEvent) handling events}.
+     * 
+     * <p>The default implementation returns 0.
      */
     @Override
-    int getWeight();
+    default int getWeight() {
+        return 0;
+    }
     
     /**
      * This is invoked on a component in an entity's list of ad hoc components

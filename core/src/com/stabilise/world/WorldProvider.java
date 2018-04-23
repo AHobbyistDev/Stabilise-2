@@ -19,23 +19,23 @@ public interface WorldProvider {
      * <p>The entity is not added to the world immediately; rather, it is added
      * at the end of the current tick. This is intended as to prevent a {@code
      * ConcurrentModificationException} during iteration.
+     * 
+     * @param e The entity.
+     * @param p The position at which to place the entity.
      */
-    void addEntity(Entity e);
+    default void addEntity(Entity e, Position p) {
+        e.pos.set(p);
+        addEntity(e);
+    }
     
     /**
-     * Adds an entity to the world, but unlike {@link #addEntity(Entity)} this
-     * method doesn't assign an ID to it. Instead, the entity's {@link
-     * Entity#id() current ID} is used.
-     * 
-     * <p>This method should only be used when moving an entity between
-     * dimensions, where we want to preserve the entity's ID rather than
-     * overwrite it.
+     * Adds an entity to the world. The entity's ID is assigned automatically.
      * 
      * <p>The entity is not added to the world immediately; rather, it is added
      * at the end of the current tick. This is intended as to prevent a {@code
      * ConcurrentModificationException} during iteration.
      */
-    void addEntityDontSetID(Entity e);
+    void addEntity(Entity e);
     
     // ==========World component getters and setters==========
     

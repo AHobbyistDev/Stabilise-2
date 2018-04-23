@@ -35,8 +35,8 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
         if(playerInRange(w)) {
             // Ugly way of lazily initialising...
             if(fireGen == null) {
-                fireGen = w.particleSource(ParticleFlame.class);
-                smokeGen = w.particleSource(ParticleSmoke.class);
+                fireGen = w.getParticleManager().getSource(ParticleFlame.class);
+                smokeGen = w.getParticleManager().getSource(ParticleSmoke.class);
                 centrePos.set(pos).clampToTile().add(0.5f, 0.5f); // TODO: should be set sooner
             }
             

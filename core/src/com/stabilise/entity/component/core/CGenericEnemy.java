@@ -107,7 +107,7 @@ public class CGenericEnemy extends CBaseMob {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
-            srcFlame = w.particleSource(ParticleFlame.class);
+            srcFlame = w.getParticleManager().getSource(ParticleFlame.class);
         else if(ev.type() == EntityEvent.Type.KILLED) {
             dropItem(w, e, Items.APPLE.stackOf(1), 0.02f);
             dropItem(w, e, Items.SWORD.stackOf(1), 0.02f);

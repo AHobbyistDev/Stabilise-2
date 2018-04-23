@@ -1,6 +1,5 @@
 package com.stabilise.entity.component.physics;
 
-import com.stabilise.entity.component.AbstractComponent;
 import com.stabilise.entity.component.Component;
 
 
@@ -10,11 +9,8 @@ import com.stabilise.entity.component.Component;
  * @see CPhysicsImpl
  * @see CNoPhysics
  */
-public abstract class CPhysics extends AbstractComponent {
-    
-    
+public abstract class CPhysics implements Component {
     public abstract boolean onGround();
-    
     
     @Override
     public int getWeight() {
