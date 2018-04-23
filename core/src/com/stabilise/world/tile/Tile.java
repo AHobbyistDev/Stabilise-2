@@ -166,8 +166,7 @@ public class Tile {
     protected void createItemEntity(World w, Position pos, ItemStack stack) {
         if(stack != ItemStack.NO_STACK) {
             Entity e = Entities.item(w, createStack(1));
-            e.pos.set(pos, 0.5f, 0.1f);
-            w.addEntity(e);
+            w.addEntity(e, pos.copy().add(0.5f, 0.1f));
         }
     }
     

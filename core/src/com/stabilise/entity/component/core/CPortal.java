@@ -1,11 +1,13 @@
 package com.stabilise.entity.component.core;
 
 import com.badlogic.gdx.math.Vector2;
+import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
+import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 
@@ -31,38 +33,18 @@ public class CPortal extends CCore {
     private String pairedDimension;
     private State state = State.WAITING_FOR_DIMENSION;
     
-    /** The direction this portal is facing. Default: {@link #direction */
     public Vector2 direction = LEFT;
     
     
-    /** The position of the other portal in its own dimension. This shouldn't
-     * be modified after either portal is added to the world. */
+    /** The position of the other portal in its own dimension. */
     public final Position otherPortalPos = Position.create();
     /** The position offset that an entity undergoes when moving through this
-     * portal. This is computed when this portal is added to the world. This
-     * is public for convenience and shouldn't be modified full-stop. */
+     * portal. This is computed when this portal is added to the world. */
     public final Position offset = Position.create();
-    
-    
-    /** true if we are the original portal, false if we were created by the
-     * original portal. */
-    public boolean original = true;
     
     
     public CPortal(String dimension) {
         this.pairedDimension = dimension;
-    }
-    
-    private void onAddToWorld(World w, Entity e) {
-        if(original) {
-            // Align and clamp our position, just to be safe
-            e.pos.align().clampToTile();
-            otherPortalPos.align().clampToTile();
-            
-            w.multiverse().loadDimension(pairedDimension);
-        } else {
-            
-        }
     }
     
     @Override
@@ -71,26 +53,26 @@ public class CPortal extends CCore {
         switch(state) {
             case WAITING_FOR_DIMENSION:
                 if(w2.getRegionAt(0, 0).state.isActive()) {
-                    /*
                     Entity otherEnd = Entities.portal(((AbstractWorld)w).getDimensionName());
                     CPortal otherCore = (CPortal)otherEnd.core;
                     otherCore.direction = new Vector2(-direction.x, -direction.y);
                     otherCore.state = State.OPEN;
                     w2.addEntity(otherEnd, Position.create(0, 0, 8f, 8f));
                     
+                    //otherCore.pairedPortalID = e.id();
+                    //pairedPortalID = otherEnd.id();
+                    
                     state = State.OPEN;
-                    */
                 }
                 break;
             case OPEN:
-                // nothing to do, really
                 break;
             case CLOSED:
-                // do we remove ourselves?
+                break;
+            default:
                 break;
         }
         
-        /*
         w.getEntities().forEach(e2 -> {
             if(!(e2.core instanceof CPortal)) {
                 if(e2.core.getAABB().intersects(getAABB(), e.pos.diffX(e2.pos), e.pos.diffY(e2.pos))) {
@@ -98,7 +80,6 @@ public class CPortal extends CCore {
                 }
             }
         });
-        */
     }
     
     @Override
@@ -115,7 +96,11 @@ public class CPortal extends CCore {
     public boolean handle(World w, Entity e, EntityEvent ev) {
         switch(ev.type()) {
             case ADDED_TO_WORLD:
-            	onAddToWorld(w, e);
+            	// Align and clamp our position, just to be safe
+            	e.pos.align().clampToTile();
+            	otherPortalPos.align().clampToTile();
+            	
+                w.multiverse().loadDimension(pairedDimension);
                 break;
             default:
                 break;
@@ -125,13 +110,6 @@ public class CPortal extends CCore {
     
     public boolean isOpen() {
         return state == State.OPEN;
-    }
-    
-    /**
-     * Closes the portal.
-     */
-    public void close() {
-        // TODO
     }
     
 }

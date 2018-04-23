@@ -3,6 +3,7 @@ package com.stabilise.world;
 import static com.stabilise.entity.Position.*;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.badlogic.gdx.files.FileHandle;
@@ -13,6 +14,7 @@ import com.stabilise.entity.Position;
 import com.stabilise.util.annotation.ForTestingPurposes;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
+import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.util.concurrent.SingleBlockingJob;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.multiverse.Multiverse;
@@ -31,6 +33,9 @@ public class HostWorld extends AbstractWorld {
      * manages all the regions. */
     public final RegionStore regions;
     
+    
+    /** Holds all player slice maps. */
+    private final List<SliceMap> sliceMaps = new UnorderedArrayList<>(4, 2);
     
     public final SingleBlockingJob preloadJob = new SingleBlockingJob(this::prepare);
     
@@ -110,10 +115,9 @@ public class HostWorld extends AbstractWorld {
         }
         
         p.pos.set(data.lastPos);
-        p.setID(multiverse().getNextEntityID());
-        addEntityDirectly(p); // add directly so it gets the ADDED_TO_WORLD
-                              // event, which initialises its slice anchorer
+        addEntity(p);
         setPlayer(p);
+        sliceMaps.add(new SliceMap(this, p));
         return p;
     }
     
@@ -139,6 +143,10 @@ public class HostWorld extends AbstractWorld {
     @Override
     protected void doUpdate() {
         super.doUpdate();
+        
+        profiler.start("sliceMap"); // root.update.game.world.sliceMap
+        for(SliceMap m : sliceMaps)
+            m.update();
         
         profiler.next("regions"); // root.update.game.world.regions
         regions.update();
@@ -180,7 +188,15 @@ public class HostWorld extends AbstractWorld {
                 regionCoordFromSliceCoord(y));
     }
     
-    @Override
+    /**
+     * Marks a slice as loaded. This will attempt to load and generate the
+     * slice's parent region, if it is not already loaded.
+     * 
+     * @param x The x-coordinate of the slice, in slice lengths.
+     * @param y The y-coordinate of the slice, in slice lengths.
+     */
+    @UserThread("MainThread")
+    @ThreadUnsafeMethod
     public void anchorSlice(int x, int y) {
         regions.anchorRegion(
                 regionCoordFromSliceCoord(x),
@@ -188,7 +204,12 @@ public class HostWorld extends AbstractWorld {
         );
     }
     
-    @Override
+    /**
+     * Removes an anchor from a slice.
+     * 
+     * @param x The x-coordinate of the slice, in slice lengths.
+     * @param y The y-coordinate of the slice, in slice lengths.
+     */
     public void deanchorSlice(int x, int y) {
         regions.deAnchorRegion(
                 regionCoordFromSliceCoord(x),

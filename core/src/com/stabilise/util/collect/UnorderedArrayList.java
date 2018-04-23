@@ -37,26 +37,15 @@ public class UnorderedArrayList<E>
     protected int size = 0;
     /** The array resize scaling factor.
      * Invariant: >= 1.0 */
-    protected final float scaleFactor;
+    protected float scaleFactor;
     
     
     /**
      * Creates a new UnorderedArrayList with an initial capacity of 16 and a scaling
-     * factor of {@code 2}.
+     * factor of {@code 1.5}.
      */
     public UnorderedArrayList() {
-        this(16, 2f);
-    }
-    
-    /**
-     * Creates a new UnorderedArrayList with a scaling factor of {@code 2}.
-     * 
-     * @param capacity The initial internal array length.
-     * 
-     * @throws NegativeArraySizeException if {@code capacity} is negative.
-     */
-    public UnorderedArrayList(int capacity) {
-        this(capacity, 2f);
+        this(16, 1.5f);
     }
     
     /**

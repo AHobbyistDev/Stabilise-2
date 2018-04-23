@@ -429,11 +429,8 @@ public abstract class CBaseMob extends CCore {
     }
     
     protected void dropItem(World w, Entity e, ItemStack stack, float chance) {
-        if(w.rnd().nextFloat() < chance) {
-            Entity ei = Entities.item(w, stack);
-            ei.pos.set(e.pos);
-            w.addEntity(ei);
-        }
+        if(w.rnd().nextFloat() < chance)
+            w.addEntity(Entities.item(w, stack), e.pos);
     }
     
     /**
@@ -480,8 +477,8 @@ public abstract class CBaseMob extends CCore {
         if(ev.type() == EntityEvent.Type.TILE_COLLISION_V)
             onVerticalCollision(e, (ETileCollision)ev);
         else if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD) {
-            srcDmgIndicator = w.particleSource(ParticleIndicator.class);
-            srcSmoke = w.particleSource(ParticleSmoke.class);
+            srcDmgIndicator = w.getParticleManager().getSource(ParticleIndicator.class);
+            srcSmoke = w.getParticleManager().getSource(ParticleSmoke.class);
         } else if(ev.type() == EntityEvent.Type.DAMAGED) {
             return damage(w, e, ((EDamaged)ev).src);
         }

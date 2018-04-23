@@ -1,6 +1,5 @@
 package com.stabilise.entity;
 
-import com.stabilise.entity.component.CSliceAnchorer;
 import com.stabilise.entity.component.buffs.*;
 import com.stabilise.entity.component.controller.*;
 import com.stabilise.entity.component.core.*;
@@ -26,15 +25,11 @@ public class Entities {
     
     
     public static Entity player() {
-        return e(new CPlayerPerson())
-                .addComponent(new CInvulnerability())
-                .addComponent(new CSliceAnchorer());
+        return e(new CPlayerPerson()).addComponent(new CInvulnerability());
     }
     
     public static Entity player2() {
-        return e(new CPlayerAsGenericEnemy())
-                .addComponent(new CInvulnerability())
-                .addComponent(new CSliceAnchorer());
+        return e(new CPlayerAsGenericEnemy()).addComponent(new CInvulnerability());
     }
     
     public static Entity fireball(long ownerID, int damage) {
@@ -55,8 +50,7 @@ public class Entities {
     }
     
     public static Entity portal(String dimension) {
-        return e(CNoPhysics.INSTANCE, co(), new CPortal(dimension))
-                .addComponent(new CSliceAnchorer());
+        return e(CNoPhysics.INSTANCE, co(), new CPortal(dimension));
     }
     
 }

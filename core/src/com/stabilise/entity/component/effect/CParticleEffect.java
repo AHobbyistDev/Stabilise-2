@@ -23,7 +23,7 @@ public abstract class CParticleEffect<T extends Particle> extends CEffect {
         super.update(w, e);
         
         if(particleSrc == null)
-            particleSrc = w.particleSource(particleClass());
+            particleSrc = w.getParticleManager().getSource(particleClass());
     }
     
     /**

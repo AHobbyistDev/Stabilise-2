@@ -10,7 +10,7 @@ import com.stabilise.world.World;
  * component manipulates the phantom of this entity in the other dimension.
  */
 @Incomplete
-public class CNearbyPortal extends AbstractComponent {
+public class CNearbyPortal implements Component {
     
     /** The portal that we are nearby. */
     private Entity portal;
@@ -50,6 +50,11 @@ public class CNearbyPortal extends AbstractComponent {
     public Action resolve(Component c) {
         // There may be multiple neabry portals, so keep both
         return Action.KEEP_BOTH;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof CNearbyPortal;
     }
     
 }

@@ -1,7 +1,6 @@
 package com.stabilise.entity.component.buffs;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.component.AbstractComponent;
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.damage.DamageType;
 import com.stabilise.entity.event.EDamaged;
@@ -10,12 +9,17 @@ import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
 
 
-public class CBasicArmour extends AbstractComponent {
+public class CBasicArmour implements Component {
     
     private static final int DMG_BLOCK = 8;
     private static final int BLOCK_EXTRA = 2;
     
     private int durability = 25;
+    
+    @Override
+    public int getWeight() {
+        return 0;
+    }
     
     @Override
     public Action resolve(Component other) {
