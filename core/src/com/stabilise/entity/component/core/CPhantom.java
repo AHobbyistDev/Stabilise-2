@@ -21,19 +21,23 @@ public class CPhantom extends CCore {
     public Entity portal;
     
     
-    @Override
-    public void init(Entity e) {
-        
+    /**
+     * @param base the entity in the other dimension that we are the phantom of
+     * @param portal the portal that connects to the dimension the base is in
+     */
+    public CPhantom(Entity base, Entity portal) {
+    	this.base = base;
+    	this.portal = portal;
     }
     
     @Override
     public void update(World w, Entity e) {
-        
+        // Do nothing?
     }
     
     @Override
     public void render(WorldRenderer renderer, Entity e) {
-        
+        // Do nothing?
     }
     
     @Override

@@ -134,13 +134,6 @@ public class Entity extends GameObject {
             && !physics.handle(w, this, e);
     }
     
-    /**
-     * Invoked when this entity is added to the world.
-     */
-    public void onAdd(World w) {
-        post(w, EntityEvent.ADDED_TO_WORLD);
-    }
-    
     @Override
     public void destroy() {
         super.destroy();
@@ -150,7 +143,8 @@ public class Entity extends GameObject {
     /**
      * Attempts to damage this entity.
      * 
-     * @return true if the entity was damaged; false if not.
+     * @return true if the entity was damaged; false if not (e.g., due to
+     * invulnerability).
      */
     public boolean damage(World w, IDamageSource src) {
         return post(w, EDamaged.damaged(src));
@@ -163,15 +157,5 @@ public class Entity extends GameObject {
     public boolean isPlayerControlled() {
         return controller instanceof CPlayerController;
     }
-    
-    /*
-    public DataCompound toNBT() {
-        return new NBTCompound(); // TODO
-    }
-    
-    public static Entity fromNBT(DataCompound tag) {
-        return Entities.enemy(); // TODO
-    }
-    */
     
 }

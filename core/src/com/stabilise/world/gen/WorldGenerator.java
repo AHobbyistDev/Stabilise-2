@@ -45,7 +45,8 @@ public final class WorldGenerator {
     /** Whether or not the generator has been shut down. This is volatile. */
     private volatile boolean isShutdown = false;
     
-    private RegionStore regionStore;
+    /** A reference to the region store, to cache/uncache regions. */
+    private final RegionStore regionStore;
     
     /** These generators are what actually generate the terrain of each region. */
     private final List<IWorldGenerator> generators = new ArrayList<>(1);
@@ -55,26 +56,19 @@ public final class WorldGenerator {
     
     
     /**
-     * Creates a new WorldGenerator.
-     * 
-     * @param world The world.
+     * Creates a new WorldGenerator. Takes references to the world and the
+     * world's region store.
      * 
      * @throws NullPointerException if either argument is {@code null}.
      */
-    public WorldGenerator(HostWorld world) {
+    public WorldGenerator(HostWorld world, RegionStore regionStore) {
         this.world = Objects.requireNonNull(world);
         this.executor = world.multiverse().getExecutor();
+        this.regionStore = regionStore;
         
         seed = world.multiverse().getSeed();
         
         log = Log.getAgent("Generator_" + world.getDimensionName());
-    }
-    
-    /**
-     * Passes this WorldGenerator a reference to the region store.
-     */
-    public void passReferences(RegionStore regions) {
-        this.regionStore = regions;
     }
     
     /**
@@ -101,7 +95,6 @@ public final class WorldGenerator {
     @UserThread("Any")
     public void generate(Region r, boolean useCurrentThread, RegionCallback callback) {
         world.stats.gen.requests.increment();
-        //tracker.startLoadOp();
         if(useCurrentThread)
             genRegion(r, callback);
         else
@@ -118,7 +111,6 @@ public final class WorldGenerator {
         
         if(isShutdown) {
             world.stats.gen.aborted.increment();
-            //tracker.endLoadOp();
             callback.accept(r, false);
             return;
         }
@@ -167,7 +159,6 @@ public final class WorldGenerator {
         // Clean up all regions cached during generation.
         regionStore.uncacheAll();
         
-        //tracker.endLoadOp();
         callback.accept(r, success);
     }
     

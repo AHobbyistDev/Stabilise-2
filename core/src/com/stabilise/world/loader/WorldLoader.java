@@ -119,7 +119,6 @@ public class WorldLoader {
     @UserThread("Any")
     public void loadRegion(Region r, RegionCallback callback) {
         loadStats.requests.increment();
-        //tracker.startLoadOp();
         executor.execute(() -> doLoad(r, callback));
     }
     
@@ -135,7 +134,6 @@ public class WorldLoader {
         
         if(cancelLoadOperations) {
             loadStats.aborted.increment();
-            //tracker.endLoadOp();
             callback.accept(r, false);
             return;
         }
@@ -159,10 +157,9 @@ public class WorldLoader {
             }
     	} else {
     	    loadStats.completed.increment(); // we'll count this as completed
-    	    r.state.setLoaded(false, false); // nothing to load == "loaded", but not generated
+    	    r.state.setLoaded(false, false); // nothing to load = "loaded", but not generated
     	}
     	
-    	//tracker.endLoadOp();
     	callback.accept(r, success);
     }
     

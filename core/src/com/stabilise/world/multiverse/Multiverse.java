@@ -117,10 +117,8 @@ public abstract class Multiverse<W extends AbstractWorld> {
      * @param name The name of the dimension.
      * 
      * @return The dimension.
-     * @throws NullPointerException if {@code name} is {@code null}.
      * @throws IllegalArgumentException if {@code name} is not the name of a
      * valid dimension.
-     * @throws RuntimeException if the dimension could not be prepared.
      */
     public abstract W loadDimension(String name);
     

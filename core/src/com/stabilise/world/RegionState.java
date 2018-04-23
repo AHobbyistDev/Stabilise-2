@@ -207,9 +207,9 @@ public class RegionState {
      * 
      * @param generated true if the loaded region has already been generated.
      * @param queuedStructures Whether or not the region has {@link
-     * Region#hasQueuedStructures()} that need adding. Ignored if {@code
-     * generated} is {@code false}. (Having to be passed this is a bit
-     * inelegant but I can't think of anything better.)
+     * Region#hasQueuedStructures() has queued structures} that need adding.
+     * Ignored if {@code generated} is {@code false}. (Having to be passed this
+     * is a bit inelegant but I can't think of anything better.)
      */
     public void setLoaded(boolean generated, boolean queuedStructures) {
         if(generated) {

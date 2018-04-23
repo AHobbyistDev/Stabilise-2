@@ -23,24 +23,24 @@ public class CPortal extends CCore {
     
     private static enum State {
         WAITING_FOR_DIMENSION,
-        WAITING_FOR_REGION,
         OPEN,
         CLOSED
     }
     
-    private static final AABB AABB = new AABB(-0.25f, 0f, 0.5f, 2f);
-    private static final Position SEND_TO_POS = Position.create(0, 0, 8f, 8f);
+    /** 1 block wide, 3 blocks high. */
+    private static final AABB AABB = new AABB(-0.5f, 0f, 1.0f, 3f);
     
     private String pairedDimension;
-    @SuppressWarnings("unused")
-    private long pairedPortalID = -1;
     private State state = State.WAITING_FOR_DIMENSION;
     
     public Vector2 direction = LEFT;
     
+    
+    /** The position of the other portal in its own dimension. */
+    public final Position otherPortalPos = Position.create();
     /** The position offset that an entity undergoes when moving through this
-     * portal. */
-    public Position offset;
+     * portal. This is computed when this portal is added to the world. */
+    public final Position offset = Position.create();
     
     
     public CPortal(String dimension) {
@@ -48,22 +48,10 @@ public class CPortal extends CCore {
     }
     
     @Override
-    public void init(Entity e) {
-        
-    }
-    
-    @Override
     public void update(World w, Entity e) {
         HostWorld w2 = (HostWorld)w.multiverse().getDimension(pairedDimension);
         switch(state) {
             case WAITING_FOR_DIMENSION:
-                if(w2.isLoaded()) {
-                    state = State.WAITING_FOR_REGION;
-                    // Fall through
-                } else {
-                    break;
-                }
-            case WAITING_FOR_REGION:
                 if(w2.getRegionAt(0, 0).state.isActive()) {
                     Entity otherEnd = Entities.portal(((AbstractWorld)w).getDimensionName());
                     CPortal otherCore = (CPortal)otherEnd.core;
@@ -71,8 +59,8 @@ public class CPortal extends CCore {
                     otherCore.state = State.OPEN;
                     w2.addEntity(otherEnd, Position.create(0, 0, 8f, 8f));
                     
-                    otherCore.pairedPortalID = e.id();
-                    pairedPortalID = otherEnd.id();
+                    //otherCore.pairedPortalID = e.id();
+                    //pairedPortalID = otherEnd.id();
                     
                     state = State.OPEN;
                 }
@@ -88,7 +76,7 @@ public class CPortal extends CCore {
         w.getEntities().forEach(e2 -> {
             if(!(e2.core instanceof CPortal)) {
                 if(e2.core.getAABB().intersects(getAABB(), e.pos.diffX(e2.pos), e.pos.diffY(e2.pos))) {
-                    w.multiverse().sendToDimension(w2, pairedDimension, e2, SEND_TO_POS);
+                    w.multiverse().sendToDimension(w2, pairedDimension, e2, otherPortalPos);
                 }
             }
         });
@@ -108,6 +96,10 @@ public class CPortal extends CCore {
     public boolean handle(World w, Entity e, EntityEvent ev) {
         switch(ev.type()) {
             case ADDED_TO_WORLD:
+            	// Align and clamp our position, just to be safe
+            	e.pos.align().clampToTile();
+            	otherPortalPos.align().clampToTile();
+            	
                 w.multiverse().loadDimension(pairedDimension);
                 break;
             default:

@@ -19,7 +19,7 @@ import com.stabilise.util.Checks;
 /**
  * An alternative ArrayList implementation with some design adjustments and
  * additional features. As this list is unordered, we avoid memory copies on
- * element removal, which can drastically increase performance.
+ * element removal, which can help improve performance.
  * 
  * <p>This class permits list modification during iteration, and as such
  * iterators will not throw {@code ConcurrentModificationExceptions}.

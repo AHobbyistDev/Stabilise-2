@@ -11,6 +11,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.GameCamera;
 import com.stabilise.entity.GameObject;
 import com.stabilise.entity.Position;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.Particle;
 import com.stabilise.entity.particle.ParticleManager;
@@ -181,7 +182,7 @@ public abstract class AbstractWorld implements World {
             entitiesToAdd.consume(e -> {
                 e.setID(multiverse().getNextEntityID());
                 entities.put(e.id(), e);
-                e.onAdd(this);
+                e.post(this, EntityEvent.ADDED_TO_WORLD);
             });
         }
         

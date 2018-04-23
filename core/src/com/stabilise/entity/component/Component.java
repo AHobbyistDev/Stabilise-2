@@ -26,7 +26,9 @@ public interface Component extends IWeightProvider, IDuplicateResolver<Component
     /**
      * Initialises this component. Invoked when {@link
      * Entity#addComponent(Component) added to an entity}, immediately before
-     * being added to the entity's list of components.
+     * being added to the entity's list of components. If this is one of the
+     * entity's priviliged three components, this is invoked by the entity's
+     * constructor.
      */
     void init(Entity e);
     
@@ -62,7 +64,12 @@ public interface Component extends IWeightProvider, IDuplicateResolver<Component
     
     /**
      * Returns the "weight" of this component. The list of ad hoc components on
-     * an entity is ordered from lowest weight to highest weight.
+     * an entity is ordered from lowest weight to highest weight. It isn't
+     * usually necessary to override this unless there's a particular need for
+     * a component to come before/after some other components when iterating or
+     * {@link #handle(World, Entity, EntityEvent) handling events}.
+     * 
+     * <p>The default implementation returns 0.
      */
     @Override
     default int getWeight() {

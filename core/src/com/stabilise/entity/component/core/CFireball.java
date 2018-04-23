@@ -16,7 +16,7 @@ import com.stabilise.util.shape.Polygon;
 import com.stabilise.world.World;
 
 
-public class CFireball extends BaseProjectile {
+public class CFireball extends CBaseProjectile {
     
     /** The fireball hitbox template. */
     private static final AABB FIREBALL_BOUNDING_BOX = new AABB(-0.05f, -0.05f, 0.1f, 0.1f);

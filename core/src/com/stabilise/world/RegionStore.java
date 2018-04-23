@@ -11,6 +11,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.IntBinaryOperator;
 
+import javax.annotation.concurrent.GuardedBy;
+
 import com.stabilise.util.Checks;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.ThreadSafeMethod;
@@ -136,7 +138,7 @@ public class RegionStore {
             ThreadLocal.withInitial(HashMap::new);
     
     /** Locks for everything. The locks are Point objects for convenience in
-     * {@link #moveToPrimary(Region)}. */
+     * {@link #moveToPrimary(Region)} and {@link #removeFromPrimary(Region)}. */
     private final Striper<Point> locks = 
             new Striper<>(STRIPE_FACTOR, Region::createMutableLoc);
     
@@ -162,7 +164,7 @@ public class RegionStore {
         this.world = world;
         
         this.loader = new WorldLoader(world);
-        this.generator = new WorldGenerator(world);
+        this.generator = new WorldGenerator(world, this);
         
         log = Log.getAgent(world.getDimensionName() + "_RegionStore");
     }
@@ -235,7 +237,7 @@ public class RegionStore {
             return r;
         
         // Unfortunately due to checking the cache and trying prepareRegion()
-        // this method has a fair bit of overhead if it's not in primary
+        // this method has a fair bit of overhead if it's not yet in primary
         // storage. Ah well.
         
         boolean tryPrepare = false;
@@ -265,8 +267,9 @@ public class RegionStore {
             }
         }
         
+        // Initiate the prepare outside of the synchronized block
         if(tryPrepare) {
-        	loadTracker.startLoadOp();
+        	loadTracker.startLoadOp(); // op is ended in moveToPrimary()
             prepareRegion(r, true);
         }
         
@@ -292,7 +295,7 @@ public class RegionStore {
         else if(generate && r.state.getGenerationPermit())
             generator.generate(r, false, this::finishGenerate);
         else
-            finishGeneric(r); // get rid of our mark
+            finishGeneric(r); // Beaten to the punch! Get rid of our mark
     }
     
     /**
@@ -307,8 +310,14 @@ public class RegionStore {
         boolean generate;
         boolean save = false;
         
-        synchronized(getLock(r.x(), r.y())) {
+        synchronized(getLock(r)) {
             CachedRegion cr = cache.get(r.loc);
+            
+            // TODO: temporary until I can find and fix this bug
+            if(cr == null) {
+            	log.postSevere("CachedRegion for " + r + " is null in finishLoad()?");
+            	log.postSevere(toStringDebug());
+            }
             
             generate = cr.prepareForPrimary; // = "please also generate me"
             
@@ -323,7 +332,16 @@ public class RegionStore {
                         // anything else!
                         moveToPrimary(r);
                 }
-            } else
+                // There is a subtle downside to what we've done here. If the
+                // region has already been generated (so that we don't get the
+                // permit above), but another thread concurrently queued a
+                // structure (say, while generating another region), then we
+                // don't implant it nor save the region. Instead, we just move
+                // it to primary. If we're unlucky and the game abruptly closes
+                // before the region is saved from within primary, then we'll
+                // lose the queued structure. Ah well, I can't be bothered
+                // dealing with that problem now.
+            }
             // If the region doesn't need generating, then very well, remove
             // the mark for the load operation.
             // 
@@ -332,7 +350,11 @@ public class RegionStore {
             // true here (since the load operating was the last thing keeping
             // the region cached), which means disposal is now our
             // responsibility. So we will need to save before unloading.
-            if(!generate && cr.unmark()) { // remove the "load" mark
+            // 
+            // Note that since this is an "else if(...)" to the "if(generate)"
+            // above, a region which was merely loaded for primary will not be
+            // saved immediately after loading (which we what we want!).
+            else if(cr.unmark()) { // remove the "load" mark
                 if(r.state.getSavePermit()) {
                     cr.mark(); // add the "save" mark
                     save = true;
@@ -362,7 +384,7 @@ public class RegionStore {
         
         boolean save = false;
         
-        synchronized(getLock(r.x(), r.y())) {
+        synchronized(getLock(r)) {
             CachedRegion cr = cache.get(r.loc);
             
             // Save if nothing else has the region cached for other purposes
@@ -393,7 +415,7 @@ public class RegionStore {
         if(!success && handleFailure())
             return;
         
-        synchronized(getLock(r.x(), r.y())) {
+        synchronized(getLock(r)) {
             CachedRegion cr = cache.get(r.loc);
             
             if(cr.unmark()) {
@@ -425,7 +447,7 @@ public class RegionStore {
     private void finishGeneric(Region r) {
         boolean save = false;
         
-        synchronized(getLock(r.x(), r.y())) {
+        synchronized(getLock(r)) {
             CachedRegion cr = cache.get(r.loc);
             
             if(cr.unmark()) { // remove the mark keeping us in here
@@ -454,6 +476,7 @@ public class RegionStore {
      * the appropriate lock is held (see {@link #locks}).
      */
     @UserThread("WorkerThread")
+    @GuardedBy("getLock()")
     private void moveToPrimary(Region r) {
         if(!r.state.isPrepared())
             Checks.badAssert("Tried to move " + r.toStringDebug() + " from "
@@ -489,7 +512,7 @@ public class RegionStore {
             }
         }
         
-        loadTracker.endLoadOp();
+        loadTracker.endLoadOp(); // op is started in loadRegion()
         //numRegions.getAndIncrement();
     }
     
@@ -499,6 +522,7 @@ public class RegionStore {
      * #locks}).
      */
     @UserThread("MainThread")
+    @GuardedBy("getLock()")
     private void removeFromPrimary(Region r) {
         // Synchronise over this RegionStore to make the "remove from primary
         // then notify adjacent regions in primary" atomic.
@@ -738,7 +762,7 @@ public class RegionStore {
         if(!hasPermit && !removeFromPrimary) // early check to avoid synchronising
             return;
         
-        synchronized(getLock(r.x(), r.y())) {
+        synchronized(getLock(r)) {
             if(removeFromPrimary)
                 removeFromPrimary(r); // unfortunate name collision, but eclipse doesn't mind
             if(!hasPermit)
@@ -766,6 +790,10 @@ public class RegionStore {
     
     private Point getLock(int x, int y) {
         return locks.get(STRIPE_HASHER.applyAsInt(x, y));
+    }
+    
+    private Point getLock(Region r) {
+    	return getLock(r.x(), r.y());
     }
     
     /**
@@ -811,15 +839,17 @@ public class RegionStore {
         	// forcefully unloaded (e.g., when the game is closed.)
             int prevNumRegions = cache.size();
             
+            long waitTime = TimeUnit.SECONDS.toNanos(WAIT_TIME);
+            
             while(prevNumRegions > 0) {
-            	if(!emptyCondition.await(WAIT_TIME, TimeUnit.SECONDS)) {
+            	long nanosRemaining = emptyCondition.awaitNanos(waitTime);
+            	if(nanosRemaining <= 0) { // timeout elapsed
             		int numRegions = cache.size();
             		if(numRegions < prevNumRegions) {
             			// Progress has been made, keep waiting.
             			prevNumRegions = numRegions;
             		} else {
             			// No progress! Just chuck a log message and abort.
-            		    // TODO: account for spurious wakeups
             			StringBuilder sb = new StringBuilder();
                         sb.append("Regions too long to finish saving! "
                                 + "Here are our offenders:");
@@ -828,11 +858,18 @@ public class RegionStore {
                             sb.append(c.region.toStringDebug());
                         }
                         log.postWarning(sb.toString());
+                        return;
             		}
-            	}
+            	} else
+            		// If the await was broken before timeout, either we
+            		// underwent a spurious wakeup or we we notified that
+            		// the cache is empty. Either way, update
+            		// prevNumRegions; we'll see next time around the while
+            		// loop.
+            		prevNumRegions = cache.size();
             }
         } catch(InterruptedException e) {
-            log.postWarning("Interrupted while waiting to finish.");
+            log.postWarning("Interrupted while waiting to finish.", e);
         } finally {
             doneLock.unlock();
         }
@@ -894,15 +931,16 @@ public class RegionStore {
         }
         
         /**
-         * Marks the region as cached by the current thread.
+         * Marks the region. A region will not be removed from the cache while
+         * it is marked.
          */
         private void mark() {
             timesCached++;
         }
         
         /**
-         * Removes the current thread's marking, and returns {@code true} if
-         * the region is no longer considered marked and should be saved.
+         * Removes a marking, and returns {@code true} if the region no longer
+         * has any marks and should be saved/removed from the cache.
          */
         private boolean unmark() {
             return --timesCached == 0;
@@ -910,6 +948,10 @@ public class RegionStore {
         
     }
     
+    /**
+     * Signature of the callback function to be invoked by the WorldLoader/
+     * WorldGenerator when a region has finished loading/generating.
+     */
     @FunctionalInterface
     public interface RegionCallback {
         void accept(Region r, boolean success);

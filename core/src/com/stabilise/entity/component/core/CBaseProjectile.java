@@ -9,7 +9,7 @@ import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
 
 
-public abstract class BaseProjectile extends CCore {
+public abstract class CBaseProjectile extends CCore {
     
     protected long ownerID;
     /** The projectile's hitbox. */

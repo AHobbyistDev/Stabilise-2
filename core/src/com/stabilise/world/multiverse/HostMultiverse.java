@@ -39,11 +39,12 @@ import com.stabilise.world.dimension.Dimension;
 public class HostMultiverse extends Multiverse<HostWorld> {
     
     /** Stores players using this world. Maps player hash -> PlayerData. */
-    private final Map<String, PlayerData> players = new HashMap<>(2);
+    private final Map<String, PlayerData> players = new HashMap<>(1);
     
     /** The total number of entities which have existed during the lifetime of
      * all worlds. When a new entity is created this is incremented and set as
-     * its ID. */
+     * its ID. This is shared between dimensions since, of course, entities may
+     * move between dimensions and it would suck to encounter an ID collision. */
     private long entityCount = 0;
     
     
@@ -157,6 +158,8 @@ public class HostMultiverse extends Multiverse<HostWorld> {
      */
     @Override
     public void save() {
+    	// TODO: pass everything off to the executor
+    	
         try {
             info.save();
         } catch(IOException e) {

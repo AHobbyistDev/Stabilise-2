@@ -37,10 +37,7 @@ public class HostWorld extends AbstractWorld {
     /** Holds all player slice maps. */
     private final List<SliceMap> sliceMaps = new UnorderedArrayList<>(4, 2);
     
-    /** Whether or not the world has been {@link #prepare() prepared}. */
-    private volatile boolean prepared = false;
-    
-    public final SingleBlockingJob preloadJob = new SingleBlockingJob(this::preload);
+    public final SingleBlockingJob preloadJob = new SingleBlockingJob(this::prepare);
     
     public final WorldStatistics stats = new WorldStatistics();
     
@@ -56,9 +53,8 @@ public class HostWorld extends AbstractWorld {
     public HostWorld(Multiverse<?> multiverse, Dimension dimension) {
         super(multiverse, dimension);
         
-        // We instantiate the loader, generator and cache, and then safely hand
-        // them references to each other as required.
-        
+        // Instantiate from within the constructor so that it can grab the
+        // executor from the multiverse
         regions = new RegionStore(this);
     }
     
@@ -68,7 +64,7 @@ public class HostWorld extends AbstractWorld {
      * #isLoaded()} allows one to check the status of this operation.
      */
     @UserThread("WorkerThread")
-    public void preload() {
+    public void prepare() {
     	try {
             dimension.loadData();
         } catch(IOException e) {
@@ -126,20 +122,6 @@ public class HostWorld extends AbstractWorld {
     }
     
     /**
-     * Checks for whether or not the spawn area about a player has been
-     * loaded.
-     * 
-     * @param player The player.
-     * 
-     * @return {@code true} if the area is loaded; {@code false} otherwise.
-     */
-    /*
-    public boolean spawnAreaLoaded(EntityMob player) {
-        return true; // TODO
-    }
-    */
-    
-    /**
      * {@inheritDoc}
      * 
      * <p>In the HostWorld implementation, this returns {@code true} iff all
@@ -147,7 +129,7 @@ public class HostWorld extends AbstractWorld {
      */
     @Override
     public boolean isLoaded() {
-        return regions.allRegionsLoaded() && prepared;
+        return regions.allRegionsLoaded();
     }
     
     @Override
@@ -397,9 +379,8 @@ public class HostWorld extends AbstractWorld {
      * 
      * @param unload Whether or not every region should be unloaded as well as
      * saved.
-     * 
-     * @throws RuntimeException if an I/O error occurred while saving.
      */
+    @UserThread("MainThread")
     private void save(boolean unload) {
         log.postInfo("Saving dimension...");
         
