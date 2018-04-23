@@ -22,8 +22,8 @@ import com.stabilise.world.Slice;
  */
 public class Constants {
     
-    // non-instantiable
-    private Constants() {}
+    private Constants() {} // non-instantiable
+    
     
     // Primary Application Data -----------------------------------------------
     
@@ -80,12 +80,9 @@ public class Constants {
     public static final int REGION_SIZE = Region.REGION_SIZE;
     
     public static final int LOADED_TILE_RADIUS = 6 * SLICE_SIZE;
-    public static final int LOADED_TILE_BUFFER = 3 * SLICE_SIZE;
     /** The half-length of an edge of the square of loaded slices around the
      * player. */
     public static final int LOADED_SLICE_RADIUS = LOADED_TILE_RADIUS / Slice.SLICE_SIZE;
-    /** The buffer length of loaded slices. */
-    public static final int LOADED_SLICE_BUFFER = LOADED_TILE_BUFFER / Slice.SLICE_SIZE;
     /** The minimum number of slices which can be considered 'loaded' about a
      * player at any given time. */
     public static final int MIN_LOADED_SLICES =
@@ -95,8 +92,7 @@ public class Constants {
      * loaded about a player at any given time. */
     public static final int MAX_LOADED_SLICES =
             // Manually square this to make it a compile-time constant.
-            (1 + 2 * (LOADED_SLICE_RADIUS + LOADED_SLICE_BUFFER)) *
-            (1 + 2 * (LOADED_SLICE_RADIUS + LOADED_SLICE_BUFFER));
+            (1 + 2*(LOADED_SLICE_RADIUS)) * (1 + 2*(LOADED_SLICE_RADIUS));
     /** How many ticks after coming out of use that a region should unload. */
     public static final int REGION_UNLOAD_TICK_BUFFER = 10 * TICKS_PER_SECOND;
     

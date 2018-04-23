@@ -46,6 +46,12 @@ class GenProvider implements WorldProvider {
     }
     
     @Override
+    public void addEntityDontSetID(Entity e) {
+        throw new UnsupportedOperationException("idk how a generator would pull"
+                + " this off, so for now I'm just forbidding it");
+    }
+    
+    @Override
     public Slice getSliceAt(int x, int y) {
         if(x == lastX && y == lastY) return lastSlice;
         if(!checkXBound(x) || !checkYBound(y))
