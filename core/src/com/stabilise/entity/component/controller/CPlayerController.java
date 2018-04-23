@@ -13,6 +13,7 @@ import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.component.core.CBaseMob;
+import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
@@ -190,11 +191,19 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 Log.get().postInfo(e.core.toString());
                 break;
             case PORTAL:
-                String dim = "overworld";
+                //String dim = "overworld";
+                String dim = game.playerData.data.getDimensionName();
                 Entity portal = Entities.portal(dim);
                 portal.pos.set(e.pos, e.facingRight ? 3f : -3f, 0f).align();
+                CPortal pCore = (CPortal) portal.core;
+                
+                if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
+                	pCore.otherPortalPos.set(0, 0, 0f, 0f);
+                else
+                	// spawn the other portal at the same place
+                	pCore.otherPortalPos.set(portal.pos);
+                
                 game.world.addEntity(portal);
-                //game.messages.send("Portal NYI for now");
                 break;
             default:
                 return false;

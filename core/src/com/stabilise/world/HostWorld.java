@@ -10,6 +10,7 @@ import com.stabilise.core.state.SingleplayerState;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
+import com.stabilise.entity.component.CSliceAnchorer;
 import com.stabilise.util.annotation.ForTestingPurposes;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
@@ -110,10 +111,12 @@ public class HostWorld extends AbstractWorld {
         }
         
         p.pos.set(data.lastPos);
-        p.setID(multiverse().getNextEntityID());
-        addEntityDirectly(p); // add directly so it gets the ADDED_TO_WORLD
-                              // event, which initialises its slice anchorer
+        addEntity(p); // assigns ID
         setPlayer(p);
+        
+        // Anchor everything quickly
+        p.getComponent(CSliceAnchorer.class).anchorAll(this, p);
+        
         return p;
     }
     
@@ -176,8 +179,10 @@ public class HostWorld extends AbstractWorld {
      * {@link Region#DUMMY_REGION} if it is not loaded.
      */
     private Region getRegionFromSliceCoords(int x, int y) {
-        return getRegionAt(regionCoordFromSliceCoord(x),
-                regionCoordFromSliceCoord(y));
+        return getRegionAt(
+        		regionCoordFromSliceCoord(x),
+                regionCoordFromSliceCoord(y)
+        );
     }
     
     @Override
@@ -405,34 +410,5 @@ public class HostWorld extends AbstractWorld {
     public boolean equals(Object o) {
         return o == this;
     }
-    
-    //--------------------==========--------------------
-    //------------=====Static Functions=====------------
-    //--------------------==========--------------------
-    
-    /**
-     * Creates a new HostWorld as per
-     * {@link #HostWorld(WorldInfo) new HostWorld(info)}, where {@code info} is
-     * the WorldInfo object returned as if by
-     * {@link WorldInfo#loadInfo(String) WorldInfo.loadInfo(worldName)}. If you
-     * already have access to a world's WorldInfo object, it is preferable to
-     * construct the GameWorld directly.
-     * 
-     * @param worldName The name of the world on the file system.
-     * 
-     * @return The HostWorld instance, or {@code null} if the world info could
-     * not be loaded.
-     */
-    /*
-    public static HostWorld loadWorld(String worldName) {
-        WorldInfo info = WorldInfo.loadInfo(worldName);
-        
-        if(info != null)
-            return new HostWorld(info);
-        
-        Log.get().postSevere("Could not load info file of world \"" + worldName + "\" during world loading!");
-        return null;
-    }
-    */
     
 }

@@ -1,8 +1,10 @@
 package com.stabilise.entity.component.core;
 
 import com.badlogic.gdx.math.Vector2;
+import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
+import com.stabilise.entity.component.CSliceAnchorer;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
@@ -54,33 +56,55 @@ public class CPortal extends CCore {
     }
     
     private void onAddToWorld(World w, Entity e) {
+    	// Only do the setup if we're the original portal
         if(original) {
             // Align and clamp our position, just to be safe
             e.pos.align().clampToTile();
             otherPortalPos.align().clampToTile();
             
-            w.multiverse().loadDimension(pairedDimension);
-        } else {
+            offset.setDiff(otherPortalPos, e.pos).align();
             
+            // ope = "other portal entity", opc = "other portal core"
+            Entity ope = Entities.portal(w.getDimensionName());
+            CPortal opc = (CPortal) ope.core;
+            
+            ope.setID(e.id()); // match our IDs
+            ope.pos.set(otherPortalPos);
+            
+            opc.original = false;
+            opc.otherPortalPos.set(e.pos);
+            opc.offset.setDiff(e.pos, ope.pos).align();
+            opc.direction.set(direction).scl(-1); // faces opposite direction
+            opc.state = State.WAITING_FOR_DIMENSION;
+            
+            World w2 = w.multiverse().loadDimension(pairedDimension);
+            w2.addEntityDontSetID(ope);
+            ope.getComponent(CSliceAnchorer.class).anchorAll(w2, ope); // preanchor all slices
         }
     }
     
     @Override
     public void update(World w, Entity e) {
-        HostWorld w2 = (HostWorld)w.multiverse().getDimension(pairedDimension);
         switch(state) {
             case WAITING_FOR_DIMENSION:
-                if(w2.getRegionAt(0, 0).state.isActive()) {
-                    /*
-                    Entity otherEnd = Entities.portal(((AbstractWorld)w).getDimensionName());
-                    CPortal otherCore = (CPortal)otherEnd.core;
-                    otherCore.direction = new Vector2(-direction.x, -direction.y);
-                    otherCore.state = State.OPEN;
-                    w2.addEntity(otherEnd, Position.create(0, 0, 8f, 8f));
-                    
-                    state = State.OPEN;
-                    */
-                }
+            	// Do all the work only if we are the original portal
+            	if(!original)
+            		return;
+            	
+            	HostWorld w2 = w.multiverse().getDimension(pairedDimension).asHost();
+            	Entity ope = w2.getEntity(e.id());
+            	
+            	// Might be null for a single tick if the other portal entity
+            	// is still queued to be added to the other dimension.
+            	if(ope == null)
+            		return;
+            	
+            	if(ope.getComponent(CSliceAnchorer.class).allSlicesActive(w2)) {
+            		state = State.OPEN;
+            		
+            		CPortal opc = (CPortal) ope.core;
+            		opc.state = State.OPEN;
+            	}
                 break;
             case OPEN:
                 // nothing to do, really

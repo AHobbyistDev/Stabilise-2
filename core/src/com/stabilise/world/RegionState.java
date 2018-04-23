@@ -14,7 +14,8 @@ import com.stabilise.util.annotation.UserThread;
 
 /**
  * This class contains and deals with everything related to the load state of
- * a region. 
+ * a region. It is through this class that {@link RegionStore} manages a
+ * region.
  * 
  * <p>This entire class could be made a part of the Region class, but for
  * clarity of mind I've thought it best to separate out into its own thing.

@@ -98,7 +98,7 @@ public class Position implements Exportable {
     /**
      * Sets the x-component values of this Position to the same as those of the
      * given position, but with dx added to lx. This method does not invoke
-     * {@link #realignX()}, so lx may fall outside of the slice bounds.
+     * {@link #alignX()}, so lx may fall outside of the slice bounds.
      *  
      * @return this Position.
      * @throws NullPointerException if {@code p} is {@code null}.
@@ -112,7 +112,7 @@ public class Position implements Exportable {
     /**
      * Sets the y-component values of this Position to the same as those of the
      * given position, but with dy added to ly. This method does not invoke
-     * {@link #realignY()}, so ly may fall outside of the slice bounds.
+     * {@link #alignY()}, so ly may fall outside of the slice bounds.
      *  
      * @return this Position.
      * @throws NullPointerException if {@code p} is {@code null}.
@@ -120,6 +120,36 @@ public class Position implements Exportable {
     public Position setY(Position p, float dy) {
     	sy = p.sy;
     	ly = p.ly;
+    	return this;
+    }
+    
+    /**
+     * Sets this Position to the sum of the two given positions, (i.e. this =
+     * p1 + p2). Warning: this method does not invoke {@link #align()}.
+     * 
+     * @return this Position.
+     * @throws NullPointerException if either argument is {@code null}.
+     */
+    public Position setSum(Position p1, Position p2) {
+    	sx = p1.sx + p2.sx;
+    	sy = p1.sy + p2.sy;
+    	lx = p1.lx + p2.lx;
+    	ly = p1.ly + p2.ly;
+    	return this;
+    }
+    
+    /**
+     * Sets this Position to the difference of the two given positions, (i.e.
+     * this = p1 - p2). Warning: this method does not invoke {@link #align()}.
+     * 
+     * @return this Position.
+     * @throws NullPointerException if either argument is {@code null}.
+     */
+    public Position setDiff(Position p1, Position p2) {
+    	sx = p1.sx - p2.sx;
+    	sy = p1.sy - p2.sy;
+    	lx = p1.lx - p2.lx;
+    	ly = p1.ly - p2.ly;
     	return this;
     }
     
@@ -219,10 +249,13 @@ public class Position implements Exportable {
      * {@link #sx} and {@link #sy} appropriately.
      * 
      * @return this Position.
+     * 
+     * @see #alignX()
+     * @see #alignY()
      */
     public Position align() {
-        realignX();
-        realignY();
+        alignX();
+        alignY();
         return this;
     }
     
@@ -233,7 +266,7 @@ public class Position implements Exportable {
      * 
      * @see #align()
      */
-    public void realignX() {
+    public void alignX() {
         sx += sliceCoordFromTileCoord2(lx);
         lx = tileCoordRelativeToSliceFromTileCoordFree2(lx);
     }
@@ -245,7 +278,7 @@ public class Position implements Exportable {
      * 
      * @see #align()
      */
-    public void realignY() {
+    public void alignY() {
         sy += sliceCoordFromTileCoord2(ly);
         ly = tileCoordRelativeToSliceFromTileCoordFree2(ly);
     }

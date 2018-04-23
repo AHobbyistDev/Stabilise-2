@@ -78,7 +78,7 @@ public abstract class Multiverse<W extends AbstractWorld> {
         
         // Start up the executor
         
-        // availProcessors-1 because the main thread already exists.
+        // processors-1 because the main thread already exists.
         final int coreThreads = Runtime.getRuntime().availableProcessors() - 1;
         executor = new ThreadPoolExecutor(
         		coreThreads,

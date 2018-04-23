@@ -80,8 +80,9 @@ public class HostMultiverse extends Multiverse<HostWorld> {
             PlayerData dat = players.get(hash);
             if(dat == null)
                 throw new RuntimeException("No player present for this dimension!");
-            if(name != dat.data.getDimensionName())
-                throw new RuntimeException("Given dimension name != expected name");
+            if(!name.equals(dat.data.getDimensionName()))
+                throw new RuntimeException("Given dimension name (" + name + 
+                		") != expected name (" + dat.data.getDimensionName() + ")");
             dim = Dimension.getPlayerDimension(dat.data);
         } else {
             dim = Dimension.getDimension(info, name);

@@ -4,8 +4,11 @@ import static com.stabilise.core.Constants.LOADED_SLICE_RADIUS;
 
 import com.stabilise.core.Constants;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Checks;
+import com.stabilise.world.HostWorld;
+import com.stabilise.world.RegionState;
 import com.stabilise.world.World;
 
 
@@ -25,6 +28,9 @@ public class CSliceAnchorer extends AbstractComponent {
     private int centreX, centreY;
     /** Coordinates determining which slices are to be anchored. */
     protected int minSliceX, maxSliceX, minSliceY, maxSliceY;
+    
+    /** true if we've done an initial anchoring of slices. */
+    private boolean initialAnchor = false;
     
     
     /**
@@ -84,42 +90,42 @@ public class CSliceAnchorer extends AbstractComponent {
         int minX = Math.max(oldMinX, minSliceX);
         int maxX = Math.min(oldMaxX, maxSliceX);
         
-        for(int x = minSliceX; x < oldMinX; x++) loadCol(w, x, minSliceY, maxSliceY);
-        for(int x = maxSliceX; x > oldMaxX; x--) loadCol(w, x, minSliceY, maxSliceY);
-        for(int y = minSliceY; y < oldMinY; y++) loadRow(w, y, minX, maxX);
-        for(int y = maxSliceY; y > oldMaxY; y--) loadRow(w, y, minX, maxX);
+        for(int x = minSliceX; x < oldMinX; x++) anchorCol(w, x, minSliceY, maxSliceY);
+        for(int x = maxSliceX; x > oldMaxX; x--) anchorCol(w, x, minSliceY, maxSliceY);
+        for(int y = minSliceY; y < oldMinY; y++) anchorRow(w, y, minX, maxX);
+        for(int y = maxSliceY; y > oldMaxY; y--) anchorRow(w, y, minX, maxX);
         
-        for(int x = oldMinX; x < minSliceX; x++) unloadCol(w, x, oldMinY, oldMaxY);
-        for(int x = oldMaxX; x > maxSliceX; x--) unloadCol(w, x, oldMinY, oldMaxY);
-        for(int y = oldMinY; y < minSliceY; y++) unloadRow(w, y, minX, maxX);
-        for(int y = oldMaxY; y > maxSliceY; y--) unloadRow(w, y, minX, maxX);
+        for(int x = oldMinX; x < minSliceX; x++) deanchorCol(w, x, oldMinY, oldMaxY);
+        for(int x = oldMaxX; x > maxSliceX; x--) deanchorCol(w, x, oldMinY, oldMaxY);
+        for(int y = oldMinY; y < minSliceY; y++) deanchorRow(w, y, minX, maxX);
+        for(int y = oldMaxY; y > maxSliceY; y--) deanchorRow(w, y, minX, maxX);
     }
     
     /**
-     * Loads a column of slices. minY and maxY are inclusive.
+     * Anchors a column of slices. minY and maxY are inclusive.
      */
-    private void loadCol(World w, int x, int minY, int maxY) {
+    private void anchorCol(World w, int x, int minY, int maxY) {
         for(int y = minY; y <= maxY; y++) w.anchorSlice(x, y);
     }
     
     /**
-     * Loads a row of slices. minX and maxX are inclusive
+     * Anchors a row of slices. minX and maxX are inclusive
      */
-    private void loadRow(World w, int y, int minX, int maxX) {
+    private void anchorRow(World w, int y, int minX, int maxX) {
         for(int x = minX; x <= maxX; x++) w.anchorSlice(x, y);
     }
     
     /**
-     * Unloads a column of slices. minY and maxY are inclusive.
+     * Deanchors a column of slices. minY and maxY are inclusive.
      */
-    protected void unloadCol(World w, int x, int minY, int maxY) {
+    protected void deanchorCol(World w, int x, int minY, int maxY) {
         for(int y = minY; y <= maxY; y++) w.deanchorSlice(x, y);
     }
     
     /**
-     * Unloads a row of slices. minX and maxX are inclusive.
+     * Deanchors a row of slices. minX and maxX are inclusive.
      */
-    protected void unloadRow(World w, int y, int minX, int maxX) {
+    protected void deanchorRow(World w, int y, int minX, int maxX) {
         for(int x = minX; x <= maxX; x++) w.deanchorSlice(x, y);
     }
     
@@ -136,16 +142,30 @@ public class CSliceAnchorer extends AbstractComponent {
         // Chuck down our new anchors before removing the old ones. This
         // prevents the possibility of some slices being momentarily deanchored
         // and executing any unnecessary de-anchor logic.
-        loadAll(w, e);
+        anchorAll(w, e, false);
         
         for(int x = oldMinX; x <= oldMaxX; x++)
-            unloadCol(w, x, oldMinY, oldMaxY);
+            deanchorCol(w, x, oldMinY, oldMaxY);
     }
     
     /**
-     * Loads the slices which should be loaded about the entity.
+     * Performs an initial anchorage of all slices around the entity. Does
+     * nothing if this initial anchorage has already been done.
      */
-    private void loadAll(World w, Entity e) {
+    public void anchorAll(World w, Entity e) {
+    	anchorAll(w, e, true);
+    }
+    
+    /**
+     * Anchor the slices which should be loaded about the entity. Does nothing
+     * if this method has already been invoked once.
+     */
+    private void anchorAll(World w, Entity e, boolean check) {
+    	if(check && initialAnchor)
+    		return;
+    	
+    	initialAnchor = true;
+    	
         centreX = e.pos.getSliceX();
         centreY = e.pos.getSliceY();
         minSliceX = centreX - LOADED_SLICE_RADIUS;
@@ -154,21 +174,46 @@ public class CSliceAnchorer extends AbstractComponent {
         maxSliceY = centreY + LOADED_SLICE_RADIUS;
         
         for(int x = minSliceX; x <= maxSliceX; x++)
-            loadCol(w, x, minSliceY, maxSliceY);
+            anchorCol(w, x, minSliceY, maxSliceY);
     }
     
     /**
      * Deanchors all anchored slices.
      */
-    public void unloadAll(World w) {
+    public void deanchorAll(World w) {
         for(int x = minSliceX; x <= maxSliceX; x++)
-            unloadCol(w, x, minSliceY, maxSliceY);
+            deanchorCol(w, x, minSliceY, maxSliceY);
+    }
+    
+    /**
+     * Checks for whether all anchored slices are active.
+     * 
+     * @see RegionState#isActive()
+     */
+    public boolean allSlicesActive(World w) {
+    	// Just check regions
+    	HostWorld hw = w.asHost();
+    	int minRegionX = Position.regionCoordFromSliceCoord(minSliceX);
+    	int maxRegionX = Position.regionCoordFromSliceCoord(maxSliceX);
+    	int minRegionY = Position.regionCoordFromSliceCoord(minSliceY);
+    	int maxRegionY = Position.regionCoordFromSliceCoord(maxSliceY);
+    	
+    	for(int x = minRegionX; x <= maxRegionX; x++) {
+    		for(int y = minRegionY; y <= maxRegionY; y++) {
+    			if(!hw.getRegionAt(x, y).state.isActive())
+    				return false;
+    		}
+    	}
+    	
+    	return true;
     }
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        if(ev.type().equals(EntityEvent.ADDED_TO_WORLD))
-            loadAll(w, e);
+        if(ev.equals(EntityEvent.ADDED_TO_WORLD))
+            anchorAll(w, e, true);
+        else if(ev.equals(EntityEvent.REMOVED_FROM_WORLD))
+        	deanchorAll(w);
         return false;
     }
     

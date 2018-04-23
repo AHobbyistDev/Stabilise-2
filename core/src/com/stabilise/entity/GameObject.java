@@ -18,16 +18,19 @@ public abstract class GameObject {
     
     
     /**
-     * Updates this GameObject.
+     * Updates this GameObject. This is only ever called through {@link
+     * #updateAndCheck(World)}.
      * 
      * @param world The world in which this GameObject is present. Never null.
      */
-    public void update(World world) {
+    protected void update(World world) {
         // do nothing
     }
     
     /**
-     * Updates this GameObject, and then returns {@link #isDestroyed()}.
+     * Updates this GameObject, and then returns {@link #isDestroyed()}. If
+     * this method returns true, this GameObject will be removed from the world
+     * immediately afterwards.
      * 
      * <p>This method performs as if by:
      * 
@@ -43,10 +46,9 @@ public abstract class GameObject {
      * should be removed from the world ASAP; {@code false} otherwise.
      */
     public boolean updateAndCheck(World world) {
-        if(isDestroyed()) // a quick preemptive check
-            return true;
-        update(world);
-        return isDestroyed();
+        if(!destroyed) // a quick preemptive check
+            update(world);
+        return destroyed;
     }
     
     /**
@@ -77,7 +79,7 @@ public abstract class GameObject {
      * {@code true} is returned, this GameObject should be removed from the
      * world ASAP.
      */
-    public boolean isDestroyed() {
+    public final boolean isDestroyed() {
         return destroyed;
     }
     

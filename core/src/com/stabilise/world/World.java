@@ -299,6 +299,12 @@ public interface World extends WorldProvider {
     // ========== Utility Methods ==========
     
     /**
+     * Returns the name of this world's dimension.
+     */
+    String getDimensionName();
+    
+    
+    /**
      * @return {@code true} if this is a {@code HostWorld}; {@code false}
      * otherwise.
      */

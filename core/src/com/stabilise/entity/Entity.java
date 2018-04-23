@@ -1,5 +1,7 @@
 package com.stabilise.entity;
 
+import java.util.function.Predicate;
+
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.controller.CPlayerController;
@@ -59,7 +61,7 @@ public class Entity extends GameObject {
     }
     
     @Override
-    public void update(World world) {
+    protected void update(World world) {
         age++;
         
         world.profiler().start("components");
@@ -79,6 +81,15 @@ public class Entity extends GameObject {
         
         // After all is said and done, realign the entity's position
         pos.align();
+    }
+    
+    @Override
+    public boolean updateAndCheck(World world) {
+    	if(super.updateAndCheck(world)) {
+    		post(world, EntityEvent.REMOVED_FROM_WORLD);
+    		return true;
+    	}
+    	return false;
     }
     
     @Override
@@ -112,6 +123,34 @@ public class Entity extends GameObject {
         c.init(this);
         components.add(c);
         return this;
+    }
+    
+    /**
+     * Gets the first component on this entity which satisfies the given
+     * predicate.
+     * 
+     * @return the first such component, or {@code null} if no component
+     * matching the predicate exists.
+     */
+    public Component getComponent(Predicate<Component> pred) {
+    	for(int i = 0; i < components.size(); i++)
+    		if(pred.test(components.get(i)))
+    			return components.get(i);
+    	return null;
+    }
+    
+    /**
+     * Gets the first component on this entity which is an instance of the
+     * specified class.
+     * 
+     * @return the first such component, or {@code null} if no component of the
+     * given class exists.
+     */
+    public <T extends Component> T getComponent(Class<T> clazz) {
+    	for(int i = 0; i < components.size(); i++)
+    		if(clazz.isInstance(components.get(i)))
+    			return clazz.cast(components.get(i));
+    	return null;
     }
     
     /**
