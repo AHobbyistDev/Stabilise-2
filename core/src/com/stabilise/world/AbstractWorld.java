@@ -1,11 +1,14 @@
 package com.stabilise.world;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
+import com.badlogic.gdx.math.RandomXS128;
 import com.stabilise.core.Constants;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.GameCamera;
@@ -24,7 +27,6 @@ import com.stabilise.util.collect.LongList;
 import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.collect.SimpleList;
-import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -41,23 +43,17 @@ public abstract class AbstractWorld implements World {
     protected final Dimension dimension;
     
     /** All players in the world. Maps IDs -> player Entities. */
-    protected final Map<Long, Entity> players = new HashMap<>(4);
+    protected final Map<Long, Entity> players = new HashMap<>(1);
     private final FunctionalIterable<Entity> itrPlayers =
             FunctionalIterable.wrap(players.values(), players::size);
     /** The map of loaded entities in the world. Maps IDs -> Entities.
      * This is a LinkedHashMap as to allow for consistent iteration. */
-    protected final Map<Long, Entity> entities = new LinkedHashMap<>(1024);
+    protected final Map<Long, Entity> entities = new LinkedHashMap<>(256);
     private final FunctionalIterable<Entity> itrEntities =
             FunctionalIterable.wrap(entities.values(), entities::size);
-    /** The total number of entities which have existed during the lifetime of
-     * the world. When a new entity is created this is incremented and set as
-     * its ID. */
-    //@Deprecated
-    //public long entityCount = 0; // Moved to Multiverse
-    /** Entities queued to be added to the world at the end of the tick.
-     * <p>This is a ClearingQueue as entities may be added to a world from
-     * from another dimension, which can be hosted on another thread. */
-    private final ClearingQueue<Entity> entitiesToAdd = ClearingQueue.create();
+    
+    /** Entities queued to be added to the world at the end of the tick. */
+    private final List<Entity> entitiesToAdd = new ArrayList<>();
     /** Entities queued to be removed from the world at the end of the tick.
      * <p>Implementation detail: Though it would be cleaner to invoke {@code
      * destroy()} on entities and let them self-remove while being iterated
@@ -93,9 +89,11 @@ public abstract class AbstractWorld implements World {
     public long particleCount = 0;
     
     /** The x/y-coordinates of the slice in which players initially spawn, in
-     * slice-lengths. */
+     * slice-lengths.
+     * <p>TODO: temporary? */
     protected int spawnSliceX, spawnSliceY;
     
+    // TEMPORARY STUFF
     private float timeDelta = 1f;
     private float timeIncrement = timeDelta / Constants.TICKS_PER_SECOND;
     private final float gravity = -3 * 9.8f; // arbitrary, but 9.8 feels too sluggish
@@ -107,7 +105,7 @@ public abstract class AbstractWorld implements World {
     /** An easy-access utility RNG which should be used by any GameObject with
      * a reference to this world in preference to constructing a new one.
      * @see #rnd() */
-    public final Random rnd = new Random();
+    public final Random rnd = new RandomXS128();
     
     /** Use this to profile the world's operation. */
     protected final Profiler profiler;
@@ -179,11 +177,8 @@ public abstract class AbstractWorld implements World {
         profiler.start("add"); // root.update.game.world.entity.add
         
         if(!entitiesToAdd.isEmpty()) {
-            entitiesToAdd.consume(e -> {
-                e.setID(multiverse().getNextEntityID());
-                entities.put(e.id(), e);
-                e.post(this, EntityEvent.ADDED_TO_WORLD);
-            });
+            entitiesToAdd.forEach(this::addEntityDirectly);
+            entitiesToAdd.clear();
         }
         
         profiler.next("remove"); // root.update.game.world.entity.remove
@@ -222,9 +217,23 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
-    @UserThread("AnyDimensionThread")
     public void addEntity(Entity e) {
+        e.setID(multiverse().getNextEntityID());
         entitiesToAdd.add(e);
+    }
+    
+    @Override
+    public void addEntityDontSetID(Entity e) {
+        entitiesToAdd.add(e);
+    }
+    
+    /**
+     * Adds an entity directly to the map of entities in the world, skipping
+     * the queue.
+     */
+    protected void addEntityDirectly(Entity e) {
+        entities.put(e.id(), e);
+        e.post(this, EntityEvent.ADDED_TO_WORLD);
     }
     
     @Override
@@ -255,7 +264,7 @@ public abstract class AbstractWorld implements World {
     }
     
     private boolean reclaimParticle(Particle p) {
-        getParticleManager().getSource(p.getClass()).reclaim(p);
+        particleSource(p.getClass()).reclaim(p);
         return true;
     }
     

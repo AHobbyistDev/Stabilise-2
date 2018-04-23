@@ -156,8 +156,8 @@ public class CFireball extends CBaseProjectile {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD) {
-            particleSrc = w.getParticleManager().getSource(ParticleFlame.class);
-            explosionSrc = w.getParticleManager().getSource(ParticleExplosion.class);
+            particleSrc = w.particleSource(ParticleFlame.class);
+            explosionSrc = w.particleSource(ParticleExplosion.class);
         }
         return super.handle(w, e, ev);
     }
