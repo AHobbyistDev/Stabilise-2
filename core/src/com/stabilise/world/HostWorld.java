@@ -60,16 +60,16 @@ public class HostWorld extends AbstractWorld {
      */
     @UserThread("WorkerThread")
     public void prepare() {
-        try {
+    	try {
             dimension.loadData();
         } catch(IOException e) {
             throw new RuntimeException("Could not load dimension info! (dim: " +
                     dimension.info.name + ") (" + e.getMessage() + ")" , e);
         }
-        
-        dimension.addLoaders(regions.loader, multiverse.info);
-        dimension.addGenerators(regions.generator);
-        
+    	
+    	dimension.addLoaders(regions.loader, multiverse.info);
+    	dimension.addGenerators(regions.generator);
+    	
         spawnSliceX = dimension.info.spawnSliceX;
         spawnSliceY = dimension.info.spawnSliceY;
         
@@ -130,7 +130,7 @@ public class HostWorld extends AbstractWorld {
     
     @Override
     public boolean update() {
-        if(!preloadJob.isDone())
+    	if(!preloadJob.isDone())
             return false;
         doUpdate();
         return regions.isEmpty();
@@ -393,7 +393,7 @@ public class HostWorld extends AbstractWorld {
     }
     
     public WorldLoadTracker loadTracker() {
-        return regions.loadTracker;
+    	return regions.loadTracker;
     }
     
     @Override

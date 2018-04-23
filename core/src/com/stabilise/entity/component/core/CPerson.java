@@ -397,7 +397,7 @@ public class CPerson extends CBaseMob {
                         w.addHitbox(h2, e.pos);
                         
                         fireParticles.createBurst(300, e.pos, 0.1f, 5f, 0, (float)Math.PI);
-                        w.getParticleManager().getSource(ParticleExplosion.class).createAt(e.pos);
+                        w.particleSource(ParticleExplosion.class).createAt(e.pos);
                         w.getCamera().shake(0.1f, 30);
                     } else {
                         fireParticles.createBurst(100, e.pos, 0.1f, 5f, 0, (float)Math.PI);
@@ -772,7 +772,7 @@ public class CPerson extends CBaseMob {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
-            fireParticles = w.getParticleManager().getSource(ParticleFlame.class);
+            fireParticles = w.particleSource(ParticleFlame.class);
         return super.handle(w, e, ev);
     }
     
