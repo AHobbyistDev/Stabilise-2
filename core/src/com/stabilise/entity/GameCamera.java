@@ -19,11 +19,6 @@ public class GameCamera extends GameObject implements WorldCamera {
     /** Real position (i.e. ignoring shake). */
     private Position realPos = new Position();
     
-    /** The coordinates of the slice in which the camera is located, in
-     * slice-lengths. These are cached values recalculated every tick. Used by
-     * the world renderer to decide which slices to render. */
-    //public int sliceX, sliceY;
-    
     /** The strength with which the camera follows the focus. */
     private float followStrength = 0.25f;
     
@@ -42,8 +37,6 @@ public class GameCamera extends GameObject implements WorldCamera {
         if(focus != null) {
             realPos.lx += realPos.diffX(focus.pos) * followStrength;
             realPos.ly += (realPos.diffY(focus.pos) + focus.aabb.centreY()) * followStrength;
-            //rx += (focus.x - rx) * followStrength;
-            //ry += (focus.y + focus.aabb.centreY() - ry) * followStrength;
         }
         
         realPos.align();

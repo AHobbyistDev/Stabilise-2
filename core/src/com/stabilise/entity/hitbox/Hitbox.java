@@ -72,8 +72,9 @@ public class Hitbox extends GameObject {
      */
     @Override
     public void update(World world) {
-        if(isDestroyed())
-            return;
+    	// No need to check since this is done by updateAndCheck().
+        //if(isDestroyed())
+        //    return;
         
         moveToOwner(world);
         

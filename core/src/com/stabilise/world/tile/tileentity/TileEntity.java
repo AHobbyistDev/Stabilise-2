@@ -65,17 +65,12 @@ public abstract class TileEntity extends GameObject {
      */
     @Override
     public boolean updateAndCheck(World world) {
-        if(isDestroyed())
-            return true;
-        update(world);
-        if(isDestroyed()) {
-            // We reset the destroyed flag as to permit behaviour wherein a
-            // tile entity may add and remove itself from the update list
-            // repeatedly as it wills.
-            destroyed = false;
-            return true;
-        }
-        return false;
+    	boolean ret = super.updateAndCheck(world);
+    	// We reset the destroyed flag as to permit behaviour wherein a
+    	// tile entity may add and remove itself from the update list
+    	// repeatedly as it wills.
+    	destroyed = false;
+        return ret;
     }
     
     @Override

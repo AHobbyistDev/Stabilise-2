@@ -33,7 +33,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
     
     
     /**
-     * Creates a WeightingArrayList with the specified initial capacity.
+     * Creates a WeightingArrayList using the given initial internal array.
      * 
      * @param array The internal array to use. This must be explicitly supplied
      * due to the limitations of generics (curse you, type erasure!)

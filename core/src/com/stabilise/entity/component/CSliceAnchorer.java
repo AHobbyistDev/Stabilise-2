@@ -27,7 +27,7 @@ public class CSliceAnchorer extends AbstractComponent {
      * the coordinates of the slices to keep anchored. */
     private int centreX, centreY;
     /** Coordinates determining which slices are to be anchored. */
-    protected int minSliceX, maxSliceX, minSliceY, maxSliceY;
+    private int minSliceX, maxSliceX, minSliceY, maxSliceY;
     
     /** true if we've done an initial anchoring of slices. */
     private boolean initialAnchor = false;
@@ -118,14 +118,14 @@ public class CSliceAnchorer extends AbstractComponent {
     /**
      * Deanchors a column of slices. minY and maxY are inclusive.
      */
-    protected void deanchorCol(World w, int x, int minY, int maxY) {
+    private void deanchorCol(World w, int x, int minY, int maxY) {
         for(int y = minY; y <= maxY; y++) w.deanchorSlice(x, y);
     }
     
     /**
      * Deanchors a row of slices. minX and maxX are inclusive.
      */
-    protected void deanchorRow(World w, int y, int minX, int maxX) {
+    private void deanchorRow(World w, int y, int minX, int maxX) {
         for(int x = minX; x <= maxX; x++) w.deanchorSlice(x, y);
     }
     

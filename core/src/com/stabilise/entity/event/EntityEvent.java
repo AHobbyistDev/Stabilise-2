@@ -32,9 +32,9 @@ public class EntityEvent extends Event {
     }
     
     public static final EntityEvent
-            ADDED_TO_WORLD = new EntityEvent(Type.ADDED_TO_WORLD),
+            ADDED_TO_WORLD     = new EntityEvent(Type.ADDED_TO_WORLD),
             REMOVED_FROM_WORLD = new EntityEvent(Type.REMOVED_FROM_WORLD),
-            DESTROYED      = new EntityEvent(Type.DESTROYED);
+            DESTROYED          = new EntityEvent(Type.DESTROYED);
     
     private final Type type;
     

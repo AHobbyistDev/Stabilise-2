@@ -99,16 +99,6 @@ public abstract class Dimension {
     
     
     /**
-     * Returns {@code true} if this dimension should have perpetually-loaded
-     * spawn regions; {@code false} otherwise.
-     */
-    public boolean hasSpawnRegions() {
-        // TODO: For now, only the default dimension has spawn regions
-        //return info.name.equals(defaultDimensionName());
-        return true;
-    }
-    
-    /**
      * Loads this dimension's info, if it exists on the filesystem.
      * 
      * @throws IOException if an I/O error occurs.
