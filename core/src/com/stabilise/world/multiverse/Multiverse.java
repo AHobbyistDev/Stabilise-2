@@ -78,12 +78,12 @@ public abstract class Multiverse<W extends AbstractWorld> {
         
         // Start up the executor
         
-        // availProcessors-1 because the main thread already exists.
+        // processors-1 because the main thread already exists.
         final int coreThreads = Runtime.getRuntime().availableProcessors() - 1;
         executor = new ThreadPoolExecutor(
         		coreThreads,
-        		Integer.MAX_VALUE,
-        		30L, TimeUnit.SECONDS,
+        		Integer.MAX_VALUE, // doesn't matter since queue is unbounded
+        		30L, TimeUnit.SECONDS, // idle thread timeout
         		new LinkedBlockingQueue<>(),
         		new WorldThreadFactory()
         );
@@ -117,10 +117,8 @@ public abstract class Multiverse<W extends AbstractWorld> {
      * @param name The name of the dimension.
      * 
      * @return The dimension.
-     * @throws NullPointerException if {@code name} is {@code null}.
      * @throws IllegalArgumentException if {@code name} is not the name of a
      * valid dimension.
-     * @throws RuntimeException if the dimension could not be prepared.
      */
     public abstract W loadDimension(String name);
     
@@ -196,8 +194,6 @@ public abstract class Multiverse<W extends AbstractWorld> {
      * @throws RuntimeException if an I/O error occurred while saving.
      */
     public void close() {
-        //loader.shutdown();
-        
         for(AbstractWorld dim : dimensions.values())
             dim.close();
         

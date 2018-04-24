@@ -18,6 +18,9 @@ import com.stabilise.util.collect.registry.TypeFactory;
 import com.stabilise.util.io.data.ITag;
 
 
+/**
+ * Enumerates different types of NBT tags.
+ */
 public enum NBTType {
     
     BYTE      (1,  ByteBox.class),
@@ -31,7 +34,9 @@ public enum NBTType {
     LIST      (9,  NBTList.class, NBTList::new),
     COMPOUND  (10, NBTCompound.class, NBTCompound::new),
     INT_ARRAY (11, IntArrBox.class),
+    /** Note: isn't part of minecraft's NBT specification. */
     BOOLEAN   (12, BoolBox.class),
+    /** Note: isn't part of minecraft's NBT specification. */
     CHAR      (13, CharBox.class);
     
     

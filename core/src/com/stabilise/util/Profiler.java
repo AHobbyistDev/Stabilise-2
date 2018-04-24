@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 /**
  * A Profiler object is used to gauge the amount of processing time which is
  * being dedicated to various portions of a program.
@@ -37,6 +39,7 @@ import java.util.Objects;
  * 
  * <p>A Profiler is not thread-safe.
  */
+@NotThreadSafe
 public class Profiler {
     
     /** The root section. */

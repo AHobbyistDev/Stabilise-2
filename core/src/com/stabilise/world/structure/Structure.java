@@ -18,7 +18,7 @@ public class Structure {
      * Creates a new empty schematic.
      */
     public Structure() {
-        // le nothing
+        
     }
     
     /**

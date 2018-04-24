@@ -1,8 +1,10 @@
 package com.stabilise.entity;
 
+import java.util.function.Predicate;
+
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.component.controller.CController;
-import com.stabilise.entity.component.controller.PlayerController;
+import com.stabilise.entity.component.controller.CPlayerController;
 import com.stabilise.entity.component.core.CCore;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.IDamageSource;
@@ -10,12 +12,17 @@ import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.opengl.render.WorldRenderer;
 import com.stabilise.util.collect.WeightingArrayList;
-import com.stabilise.util.io.data.DataCompound;
-import com.stabilise.util.io.data.nbt.NBTCompound;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
-
+/**
+ * Entities are the main actors in the game; essentially all objects that are
+ * not tiles are entities, including the player, other mobs, items, etc.
+ * 
+ * <p>Implementation-wise, an entity is essentially just a bag of {@link
+ * Component components}, an approach I have opted for over inheritance since
+ * it is far more flexible.
+ */
 public class Entity extends GameObject {
     
     private      long        id;
@@ -36,7 +43,8 @@ public class Entity extends GameObject {
     
     
     /**
-     * Creates a new Entity.
+     * Creates a new Entity. The given components are all {@link
+     * Component#init(Entity) initialised}.
      * 
      * @throws NullPointerException if any argument is null.
      */
@@ -53,7 +61,7 @@ public class Entity extends GameObject {
     }
     
     @Override
-    public void update(World world) {
+    protected void update(World world) {
         age++;
         
         world.profiler().start("components");
@@ -71,7 +79,17 @@ public class Entity extends GameObject {
         physics.update(world, this);
         world.profiler().end();
         
-        this.pos.realign(); // TODO: temporary?
+        // After all is said and done, realign the entity's position
+        pos.align();
+    }
+    
+    @Override
+    public boolean updateAndCheck(World world) {
+    	if(super.updateAndCheck(world)) {
+    		post(world, EntityEvent.REMOVED_FROM_WORLD);
+    		return true;
+    	}
+    	return false;
     }
     
     @Override
@@ -95,14 +113,44 @@ public class Entity extends GameObject {
     }
     
     /**
-     * Adds a component to this entity.
+     * Adds a component to this entity. Invokes {@link Component#init(Entity)}
+     * on the component.
      * 
      * @return This entity.
      * @throws NullPointerException if {@code c} is {@code null}.
      */
     public Entity addComponent(Component c) {
+        c.init(this);
         components.add(c);
         return this;
+    }
+    
+    /**
+     * Gets the first component on this entity which satisfies the given
+     * predicate.
+     * 
+     * @return the first such component, or {@code null} if no component
+     * matching the predicate exists.
+     */
+    public Component getComponent(Predicate<Component> pred) {
+    	for(int i = 0; i < components.size(); i++)
+    		if(pred.test(components.get(i)))
+    			return components.get(i);
+    	return null;
+    }
+    
+    /**
+     * Gets the first component on this entity which is an instance of the
+     * specified class.
+     * 
+     * @return the first such component, or {@code null} if no component of the
+     * given class exists.
+     */
+    public <T extends Component> T getComponent(Class<T> clazz) {
+    	for(int i = 0; i < components.size(); i++)
+    		if(clazz.isInstance(components.get(i)))
+    			return clazz.cast(components.get(i));
+    	return null;
     }
     
     /**
@@ -125,13 +173,6 @@ public class Entity extends GameObject {
             && !physics.handle(w, this, e);
     }
     
-    /**
-     * Invoked when this entity is added to the world.
-     */
-    public void onAdd(World w) {
-        post(w, EntityEvent.ADDED_TO_WORLD);
-    }
-    
     @Override
     public void destroy() {
         super.destroy();
@@ -141,22 +182,19 @@ public class Entity extends GameObject {
     /**
      * Attempts to damage this entity.
      * 
-     * @return true if the entity was damaged; false if not.
+     * @return true if the entity was damaged; false if not (e.g., due to
+     * invulnerability).
      */
     public boolean damage(World w, IDamageSource src) {
         return post(w, EDamaged.damaged(src));
     }
     
+    /**
+     * Returns true if this entity is controlled by the player, i.e., if its
+     * {@link #controller} is a {@link CPlayerController}.
+     */
     public boolean isPlayerControlled() {
-        return controller instanceof PlayerController;
-    }
-    
-    public DataCompound toNBT() {
-        return new NBTCompound(); // TODO
-    }
-    
-    public static Entity fromNBT(DataCompound tag) {
-        return Entities.enemy(); // TODO
+        return controller instanceof CPlayerController;
     }
     
 }

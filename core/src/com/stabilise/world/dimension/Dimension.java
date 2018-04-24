@@ -18,8 +18,8 @@ import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
+import com.stabilise.world.gen.GeneratorRegistrant;
 import com.stabilise.world.gen.WorldGenerator;
-import com.stabilise.world.gen.WorldGenerator.GeneratorRegistrant;
 import com.stabilise.world.loader.WorldLoader;
 import com.stabilise.world.multiverse.Multiverse;
 
@@ -65,8 +65,6 @@ public abstract class Dimension {
      * Creates the HostWorld object upon which this dimension will be hosted.
      * Subclasses may override this to return a custom implementation of
      * HostWorld to implement dimension-specific logic.
-     * 
-     * @param multiverse The multiverse.
      * 
      * @throws NullPointerException if {@code multiverse} is {@code null}.
      */

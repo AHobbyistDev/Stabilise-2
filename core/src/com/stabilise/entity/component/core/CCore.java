@@ -1,6 +1,7 @@
 package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.AbstractComponent;
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.opengl.render.WorldRenderer;
@@ -14,8 +15,15 @@ import com.stabilise.world.World;
  * 
  * <p>Cores contain secondary entity data, functionality and render data.
  */
-public abstract class CCore implements Component {
+public abstract class CCore extends AbstractComponent {
     
+    @Override
+    public void init(Entity e) {
+        // A core is init()'d on entity construction, so there isn't anything
+    	// that we'd usually need to do; thus we provide a default empty
+    	// implementation.
+    }
+	
     /**
      * Renders the entity.
      */

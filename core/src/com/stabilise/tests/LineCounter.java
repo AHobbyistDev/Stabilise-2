@@ -94,8 +94,6 @@ public class LineCounter {
                 //"C:/Users/Administrator/Documents/Java/Stabilise II/core/src",
                 new String[] {
                         "com/stabilise/tests",
-                        "com/stabilise/screen/menu",
-                        "com/stabilise/character"
                 }
         );
     }

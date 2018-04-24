@@ -15,37 +15,25 @@ import com.stabilise.util.io.data.Format;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.RegionState;
+import com.stabilise.world.RegionStore;
 import com.stabilise.world.RegionStore.RegionCallback;
-import com.stabilise.world.WorldLoadTracker;
+import com.stabilise.world.WorldStatistics;
 
 
 /**
- * A {@code WorldLoader} instance manages the loading and saving of regions for
- * a world.
+ * A {@code WorldLoader} instance handles the loading and saving of regions for
+ * a world. All save and load requests are made through a world's {@link
+ * RegionStore}.
  * 
- * <p>Internally, a WorldLoader uses an ExecutorService to perform its I/O
- * tasks; each individual load or save request for a region is delegated to a
- * separate thread.
- * 
- * <p>TODO: Synchronisation policy on saved regions. Since it is incredibly
- * inefficient and wasteful to make a defensive copy of a region and its
- * contents when it is being saved, it can be expected that concurrency
- * problems will arise from the fact that said region and contents will be
- * modified while it is in the process of being saved. This can be rectified
- * either by:
- * 
- * <ul>
- * <li>never saving regions mid-game (though this lends itself to potential
- *     loss of data if, say, the JVM crashes and as such the game can't
- *     properly shut down), or
- * <li>defining a synchronisation policy wherein at minimum no exceptions or
- *     errors will be thrown, and cases of deadlock, livelock and starvation
- *     are impossible (though there may be inconsistent state data as the world
- *     changes while it is being saved - though at least that would be
- *     preferable to losing data)
- * </ul>
+ * <p>The actual code for loading a region is provided by {@link
+ * IRegionLoaders}, and these are provided upon construction by {@link
+ * WorldFormat}.
  */
 public class WorldLoader {
+    
+    public static final Format REGION_FORMAT = Format.NBT;
+    public static final Compression REGION_COMPRESSION = Compression.GZIP;
+    
 	
     /** A reference to the world that this WorldLoader handles the loading for. */
     private final HostWorld world;
@@ -55,11 +43,11 @@ public class WorldLoader {
     
     private volatile boolean cancelLoadOperations = false;
     
-    /** Tracker used for producing nice load bars while loading the world. */
-    private final WorldLoadTracker tracker;
-    
     private final List<IRegionLoader> loaders = new ArrayList<>();
     private final List<IRegionLoader> savers = new ArrayList<>();
+    
+    private final WorldStatistics.ProcessStats loadStats;
+    private final WorldStatistics.ProcessStats saveStats;
     
     private final Log log;
     
@@ -72,7 +60,9 @@ public class WorldLoader {
     public WorldLoader(HostWorld world) {
         this.world = world;
         this.executor = world.multiverse().getExecutor();
-        this.tracker = world.loadTracker();
+        
+        this.loadStats = world.stats.load;
+        this.saveStats = world.stats.save;
         
         this.log = Log.getAgent("WORLDLOADER: " + world.getDimensionName());
         
@@ -120,30 +110,30 @@ public class WorldLoader {
     
     /**
      * Instructs this WorldLoader to asynchronously load a region. It is
-     * assumed the called has already acquired a {@link
-     * RegionState#getLoadPermit() permit} to load the region.
+     * assumed the caller has acquired a {@link RegionState#getLoadPermit()
+     * permit} to load the region.
      * 
      * @param r The region to load.
-     * @param generate true if the the region should also be generated, if it
-     * has not already been generated.
-     * @param callback The function to call once loading/generation is
-     * completed.
-     * 
-     * @throws NullPointerException if {@code region} is {@code null}.
+     * @param callback The function to call once loading is completed.
      */
     @UserThread("Any")
-    public void loadRegion(Region r, boolean generate, RegionCallback callback) {
-        world.stats.load.requests.increment();
-        tracker.startLoadOp();
-        executor.execute(() -> doLoad(r, generate, callback));
+    public void loadRegion(Region r, RegionCallback callback) {
+        loadStats.requests.increment();
+        executor.execute(() -> doLoad(r, callback));
     }
     
-    private void doLoad(Region r, boolean generate, RegionCallback callback) {
-    	world.stats.load.started.increment();
+    private void doLoad(Region r, RegionCallback callback) {
+    	// Conservatively make sure the world has been preloaded before we load
+    	// the region. If it hasn't been preloaded, we steal the work and do it
+    	// ourselves.
+    	// Preloading also registers all the loaders & savers, and generators
+    	// for the WorldGenerator, which we want!
+    	world.preloadJob.run();
+    	
+    	loadStats.started.increment();
         
         if(cancelLoadOperations) {
-            world.stats.load.aborted.increment();
-            tracker.endLoadOp();
+            loadStats.aborted.increment();
             callback.accept(r, false);
             return;
         }
@@ -152,35 +142,30 @@ public class WorldLoader {
     	FileHandle file = r.getFile(world);
     	if(file.exists()) {
             try {
-            	DataCompound c = IOUtil.read(file, Format.NBT, Compression.GZIP);
+            	DataCompound c = IOUtil.read(file, REGION_FORMAT, REGION_COMPRESSION);
                 boolean generated = c.optBool("generated").orElse(false);
                 
                 loaders.forEach(l -> l.load(r, c, generated));
                 
-                r.state.setLoaded();
-                if(generated)
-                	r.state.setGenerated(r.hasQueuedStructures());
+                r.state.setLoaded(generated, r.hasQueuedStructures());
             	
-                world.stats.load.completed.increment();
+                loadStats.completed.increment();
             } catch(Exception e) {
                 log.postSevere("Loading " + r + " failed!", e);
-                world.stats.load.failed.increment();
+                loadStats.failed.increment();
                 success = false;
             }
     	} else {
-    	    world.stats.load.completed.increment(); // we'll count this as completed
-    	    r.state.setLoaded();
+    	    loadStats.completed.increment(); // we'll count this as completed
+    	    r.state.setLoaded(false, false); // nothing to load = "loaded", but not generated
     	}
     	
-    	tracker.endLoadOp();
     	callback.accept(r, success);
     }
     
     /**
-     * Saves a region.
-     * 
-     * <p>The request will be ignored if the region does not grant its
-     * {@link Region#getSavePermit() save permit}.
+     * Saves a region. It is assumed that the caller has acquired a {@link
+     * RegionState#getSavePermit() permit} to save the region.
      * 
      * @param region The region to save.
      * @param useCurrentThread true to save on the current thread, false to
@@ -189,7 +174,7 @@ public class WorldLoader {
      */
     @UserThread("Any")
     public void saveRegion(Region region, boolean useCurrentThread, RegionCallback callback) {
-        world.stats.save.requests.increment();
+        saveStats.requests.increment();
         if(useCurrentThread)
             doSave(region, callback);
         else
@@ -197,11 +182,11 @@ public class WorldLoader {
     }
     
     private void doSave(Region r, RegionCallback callback) {
-    	world.stats.save.started.increment();
+    	saveStats.started.increment();
         boolean success;
     	
         do {
-            DataCompound c = Format.NBT.newCompound();
+            DataCompound c = REGION_FORMAT.newCompound();
             boolean generated = r.state.isGenerated();
             c.put("generated", generated);
             
@@ -210,13 +195,15 @@ public class WorldLoader {
                 // to trust them.
                 savers.forEach(s -> s.save(r, c, generated));
                 
-                IOUtil.writeSafe(r.getFile(world), c, Compression.GZIP);
+                IOUtil.writeSafe(r.getFile(world), c, REGION_COMPRESSION);
+                
                 success = true;
-                world.stats.save.completed.increment();
+                saveStats.completed.increment();
             } catch(Throwable t) {
-                world.stats.save.failed.increment();
-                log.postSevere("Saving " + r + " failed!", t);
                 success = false;
+                saveStats.failed.increment();
+                log.postSevere("Saving " + r + " failed!", t);
+                
                 // Don't break from the do..while on a fail; if another save
                 // was requested, we might get lucky and it may work the second
                 // time.

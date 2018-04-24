@@ -114,7 +114,7 @@ abstract class AbstractTask implements Task {
      * <p>This implementation behaves as if by:
      * 
      * <pre>
-     * return getStatus() + "... " + percentCompleted() + "%";
+     * return status() + "... " + percentCompleted() + "%";
      * </pre>
      * 
      * which returns a string of the form:

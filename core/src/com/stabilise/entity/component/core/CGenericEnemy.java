@@ -15,7 +15,7 @@ import com.stabilise.util.shape.Polygon;
 import com.stabilise.world.World;
 
 
-public class CGenericEnemy extends BaseMob {
+public class CGenericEnemy extends CBaseMob {
     
     private static final AABB ENEMY_AABB = new AABB(-0.5f, 0, 1, 2);
     
@@ -107,7 +107,7 @@ public class CGenericEnemy extends BaseMob {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
-            srcFlame = w.getParticleManager().getSource(ParticleFlame.class);
+            srcFlame = w.particleSource(ParticleFlame.class);
         else if(ev.type() == EntityEvent.Type.KILLED) {
             dropItem(w, e, Items.APPLE.stackOf(1), 0.02f);
             dropItem(w, e, Items.SWORD.stackOf(1), 0.02f);

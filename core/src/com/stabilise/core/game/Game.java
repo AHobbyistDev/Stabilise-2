@@ -8,7 +8,7 @@ import com.stabilise.core.Constants;
 import com.stabilise.core.main.Stabilise;
 import com.stabilise.core.state.MainMenuState;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.component.controller.PlayerController;
+import com.stabilise.entity.component.controller.CPlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
@@ -45,7 +45,7 @@ public class Game implements Controllable, InputProcessor {
     /** The controller. */
     public Controller controller;
     /** The player controller. */
-    public PlayerController playerController;
+    public CPlayerController playerController;
     
     /** The current active menu. */
     //public Menu menu;
@@ -83,7 +83,7 @@ public class Game implements Controllable, InputProcessor {
         controller = new Controller(this);
         
         // TODO: Hardcoding this is poor design and should be changed in the future
-        playerController = new PlayerController(controller, this);
+        playerController = new CPlayerController(controller, this);
         player.controller = playerController;
         playerController.init(player);
         

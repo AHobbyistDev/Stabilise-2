@@ -1,7 +1,7 @@
 package com.stabilise.world.dimension;
 
 import com.stabilise.world.WorldInfo;
-import com.stabilise.world.gen.WorldGenerator.GeneratorRegistrant;
+import com.stabilise.world.gen.GeneratorRegistrant;
 import com.stabilise.world.gen.misc.ChestGen;
 import com.stabilise.world.gen.misc.OreGen;
 import com.stabilise.world.gen.terrain.CaveGen;

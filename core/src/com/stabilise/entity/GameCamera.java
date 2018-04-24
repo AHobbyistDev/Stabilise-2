@@ -46,7 +46,7 @@ public class GameCamera extends GameObject implements WorldCamera {
             //ry += (focus.y + focus.aabb.centreY() - ry) * followStrength;
         }
         
-        realPos.realign();
+        realPos.align();
         pos.set(realPos);
         
         shakes.iterate(s -> {
@@ -56,7 +56,7 @@ public class GameCamera extends GameObject implements WorldCamera {
             return --s.duration == 0;
         });
         
-        pos.realign();
+        pos.align();
         
         // Unimportant TODOs:
         // Focus on multiple entities
@@ -80,7 +80,7 @@ public class GameCamera extends GameObject implements WorldCamera {
         if(e != null) {
             realPos.set(e.pos);
             realPos.ly += e.aabb.centreY();
-            realPos.realign();
+            realPos.align();
         }
     }
     
@@ -103,7 +103,7 @@ public class GameCamera extends GameObject implements WorldCamera {
     public void snapToFocus() {
         realPos.set(focus.pos);
         realPos.ly += focus.aabb.centreY();
-        realPos.realign();
+        realPos.align();
     }
     
     @Override

@@ -7,6 +7,8 @@ import com.stabilise.entity.particle.Particle;
 import com.stabilise.entity.particle.ParticleManager;
 import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.util.Profiler;
+import com.stabilise.util.annotation.ThreadUnsafeMethod;
+import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -49,7 +51,8 @@ public interface World extends WorldProvider {
      * Removes an entity from the world.
      * 
      * <p>The entity is not removed from the world immediately; rather, it is
-     * removed at the end of the current tick.
+     * removed at the end of the current tick. This is intended as to prevent a
+     * {@code ConcurrentModificationException} during iteration.
      * 
      * <p>Note that it is normally preferable to invoke {@link Entity#destroy()
      * destroy()} on an entity to remove it from the world.
@@ -66,7 +69,8 @@ public interface World extends WorldProvider {
      * Removes an entity from the world.
      * 
      * <p>The entity is not removed from the world immediately; rather, it is
-     * removed at the end of the current tick.
+     * removed at the end of the current tick. This is intended as to prevent a
+     * {@code ConcurrentModificationException} during iteration.
      * 
      * <p>Note that it is normally preferable to invoke {@link Entity#destroy()
      * destroy()} on an entity to remove it from the world.
@@ -203,6 +207,29 @@ public interface World extends WorldProvider {
      */
     void blowUpTile(Position pos, float explosionPower);
     
+    /**
+     * Anchors a slice. For a {@link HostWorld}, this will attempt to load and
+     * generate the slice's parent region, if it is not already loaded.
+     * 
+     * @param x The x-coordinate of the slice, in slice lengths.
+     * @param y The y-coordinate of the slice, in slice lengths.
+     */
+    @UserThread("MainThread")
+    @ThreadUnsafeMethod
+    void anchorSlice(int x, int y);
+    
+    /**
+     * Removes an anchor from a slice. For a {@link HostWorld}, this will
+     * remove an anchor from the slice's parent region, leading it to be
+     * unloaded if it no longer has any anchors.
+     * 
+     * @param x The x-coordinate of the slice, in slice lengths.
+     * @param y The y-coordinate of the slice, in slice lengths.
+     */
+    @UserThread("MainThread")
+    @ThreadUnsafeMethod
+    void deanchorSlice(int x, int y);
+    
     // ========== Dimensional stuff ==========
     
     /**
@@ -272,6 +299,12 @@ public interface World extends WorldProvider {
     // ========== Utility Methods ==========
     
     /**
+     * Returns the name of this world's dimension.
+     */
+    String getDimensionName();
+    
+    
+    /**
      * @return {@code true} if this is a {@code HostWorld}; {@code false}
      * otherwise.
      */
@@ -285,6 +318,28 @@ public interface World extends WorldProvider {
      * client.
      */
     boolean isClient();
+    
+    /**
+     * Casts this World object to a HostWorld.
+     * 
+     * <p>I've decided to make this a method so that if I ever change things
+     * around it'll be easy to find places where I've assumed a World is a
+     * HostWorld.
+     */
+    default HostWorld asHost() {
+        return (HostWorld) this;
+    }
+    
+    /**
+     * Casts this World object to an AbstractWorld.
+     * 
+     * <p>I've decided to make this a method so that if I ever change things
+     * around it'll be easy to find places where I've assumed a World is an
+     * AbstractWorld.
+     */
+    default AbstractWorld asAbstract() {
+        return (AbstractWorld) this;
+    }
     
     /**
      * Returns {@code true} if this world has particles; that is, if this is a

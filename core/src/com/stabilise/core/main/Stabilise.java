@@ -49,8 +49,8 @@ public class Stabilise extends Application {
     @Override
     protected State getInitialState() {
         //return new com.stabilise.core.state.MenuTestState();
-        //return new com.stabilise.core.state.LoadingState();
-        return new com.stabilise.core.state.MainMenuState();
+        return new com.stabilise.core.state.LoadingState();
+        //return new com.stabilise.core.state.MainMenuState();
     }
     
     @Override

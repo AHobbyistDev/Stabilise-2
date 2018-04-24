@@ -22,14 +22,8 @@ import com.stabilise.world.gen.action.Action;
  * <p>Regions are to slices as slices are to tiles; they provide a means of
  * storage and management.
  * 
- * <h3>Implementation Details</h3>
- * 
- * <h4>Saving</h4>
- * <p>We take a very loose approach to saving regions.
- * 
- * <!--wow such detail-->
- * <!--seriously though this section was wiped when I changed things up and
- * now needs rewriting-->
+ * <p>For implementation details on how regions are managed (saved, loaded,
+ * generated, etc.) see {@link RegionStore}.
  */
 public class Region {
     
@@ -105,8 +99,8 @@ public class Region {
     /**
      * Creates a new region.
      * 
-     * @param x The region's x-coordinate, in region lengths.
-     * @param y The region's y-coordinate, in region lengths.
+     * @param x The region's x-coordinate, in region-lengths.
+     * @param y The region's y-coordinate, in region-lengths.
      */
     Region(int x, int y) {
         loc = createImmutableLoc(x, y);
@@ -222,9 +216,12 @@ public class Region {
     
     /**
      * Imports this region's contents (e.g. entities, tile entities, lighting)
-     * into the world.
+     * into the world, if this region hasn't been imported already.
      */
-    public void importContents(HostWorld world) {
+    public void importToWorld(HostWorld world) {
+    	if(!state.tryImport())
+    		return;
+    	
         forEachSlice(s -> {
             //s.buildLight();
             s.importEntities(world);
@@ -236,6 +233,28 @@ public class Region {
             }
             queuedActions = null;
         }
+    }
+    
+    /**
+     * Exports this region's contents (e.g., entities, tile entities) from the
+     * world, in preparation for this region being unloaded.
+     */
+    public void exportFromWorld(HostWorld world) {
+    	state.setUnimported();
+    	
+    	// Unload entities in the region...
+        int minX = x() * Region.REGION_SIZE_IN_TILES;
+        int maxX = minX + Region.REGION_SIZE_IN_TILES;
+        int minY = y() * Region.REGION_SIZE_IN_TILES;
+        int maxY = minY + Region.REGION_SIZE_IN_TILES;
+        
+        world.getEntities().forEach(e -> {
+            if(e.pos.getGlobalX() + e.aabb.maxX() >= minX
+                    && e.pos.getGlobalX() + e.aabb.minX() <= maxX
+                    && e.pos.getGlobalY() + e.aabb.maxY() >= minY
+                    && e.pos.getGlobalY() + e.aabb.minY() <= maxY)
+                e.destroy();
+        });
     }
     
     /**
@@ -253,7 +272,8 @@ public class Region {
     }
     
     /**
-     * Returns {@code true} if this region's coords match the specified coords.
+     * Returns {@code true} if this region's coords match the specified coords
+     * (which are assumed to be given in region-lengths).
      */
     public boolean isAt(int x, int y) {
         return loc.equals(x, y);

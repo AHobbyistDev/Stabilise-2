@@ -38,7 +38,7 @@ public class DesktopGame {
     	Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
     	config.setTitle(Stabilise.GAME_NAME + " - " + Stabilise.getGameSubtitle());
     	config.setWindowedMode(900, 600);
-    	config.useVsync(true);
+    	//config.useVsync(true);
     	config.setIdleFPS(5);
     	
     	config.setWindowIcon(FileType.Classpath, "icon128.png", "icon32.png", "icon16.png");

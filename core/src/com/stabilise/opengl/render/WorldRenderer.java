@@ -27,7 +27,7 @@ import com.stabilise.core.Application;
 import com.stabilise.core.Resources;
 import com.stabilise.core.game.Game;
 import com.stabilise.entity.*;
-import com.stabilise.entity.component.controller.PlayerController;
+import com.stabilise.entity.component.controller.CPlayerController;
 import com.stabilise.entity.component.core.*;
 import com.stabilise.entity.particle.*;
 import com.stabilise.item.Item;
@@ -65,7 +65,7 @@ public class WorldRenderer implements Renderer {
     /** The camera. */
     public final GameCamera camObj;
     public final Entity player;
-    public final PlayerController controller;
+    public final CPlayerController controller;
     
     //public final HUDRenderer hudRenderer;
     
@@ -129,7 +129,7 @@ public class WorldRenderer implements Renderer {
      * @param world The game world.
      * @param player The player entity.
      */
-    public WorldRenderer(Game game, AbstractWorld world, Entity player, PlayerController controller) {
+    public WorldRenderer(Game game, AbstractWorld world, Entity player, CPlayerController controller) {
         super();
         
         this.world = world;
@@ -264,11 +264,11 @@ public class WorldRenderer implements Renderer {
     
     /**
      * Gets the position of the cursor in the world. The returned Position will
-     * be {@link Position#realign() aligned}.
+     * be {@link Position#align() aligned}.
      */
     public Position mouseCoords() {
         Vector2 coords = viewport.unproject(vec.set(Gdx.input.getX(), Gdx.input.getY()));
-        return camObj.pos.copy().add(coords.x, coords.y).realign();
+        return camObj.pos.copy().add(coords.x, coords.y).align();
     }
     
     @Override

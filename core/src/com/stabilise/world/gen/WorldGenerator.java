@@ -16,68 +16,57 @@ import com.stabilise.world.HostWorld;
 import com.stabilise.world.Region;
 import com.stabilise.world.RegionState;
 import com.stabilise.world.RegionStore;
-import com.stabilise.world.WorldLoadTracker;
 import com.stabilise.world.RegionStore.RegionCallback;
-import com.stabilise.world.gen.InstancedWorldgen.InstancedWorldgenSupplier;
-import com.stabilise.world.loader.WorldLoader;
-import com.stabilise.world.multiverse.Multiverse;
+import com.stabilise.world.dimension.Dimension;
 
 /**
- * The {@code WorldGenerator} class provides the mechanism for generating the
- * terrain of a world.
+ * A {@code WorldGenerator} instance handles the generation of regions for a
+ * world. In broader terms, it's here that we generate the terrain of a world.
+ * All generation requests are made through a world's {@link RegionStore}.
  * 
- * <h3>Usage Guidelines</h3>
+ * <p>This class simply manages the generation of a region; the generation
+ * itself is performed by {@link IWorldGenerator}s which are registered by a
+ * world's {@link Dimension}; see {@link
+ * Dimension#addGenerators(WorldGenerator)}.
  * 
- * <p>Firstly, a {@code WorldGenerator} must be prepared via {@link
- * #passReferences(WorldLoader, RegionStore) prepare()} before it can be used.
- * 
- * <p>A {@code WorldGenerator} should be used exclusively by the {@code
- * WorldLoader}, as region generation happens immediately after loading.
- * 
- * <p>To generate a region, invoke {@link #generateOld(Region)}. When {@link
- * Region#isPrepared()} returns {@code true}, generation of the region is
- * complete, and it is safe to interact with it. {@link
- * #generateSynchronously(Region)} is offered as a convenience alternative
- * for all threads but the main thread.
- * 
- * <p>To shut down the generator, invoke {@link #shutdown()}.
+ * <p>Note that the generation of a region <em>always</em> comes after a load
+ * of that region (whether anything was loaded or not), and thus every part of
+ * the load process <i>happens-before</i> generation.
  */
 @ThreadSafe
 public final class WorldGenerator {
     
-    /** The world for which the generator is generating. */
     private final HostWorld world;
+    /** A copy of the world's seed. This is important since after all it
+     * determines what's generated. */
     private final long seed;
     
-    /** The executor which delegates threads. */
     private final Executor executor;
     /** Whether or not the generator has been shut down. This is volatile. */
     private volatile boolean isShutdown = false;
     
-    private RegionStore regionStore;
+    /** A reference to the region store, to cache/uncache regions. */
+    private final RegionStore regionStore;
     
+    /** These generators are what actually generate the terrain of each region. */
     private final List<IWorldGenerator> generators = new ArrayList<>(1);
     
-    /** Tracker used for producing nice load bars while loading the world. */
-    private final WorldLoadTracker tracker;
     
-    private final Log log;
+    final Log log;
     
     
     /**
-     * Creates a new WorldGenerator.
-     * 
-     * @param multiverse The multiverse.
-     * @param world The world.
+     * Creates a new WorldGenerator. Takes references to the world and the
+     * world's region store.
      * 
      * @throws NullPointerException if either argument is {@code null}.
      */
-    public WorldGenerator(Multiverse<?> multiverse, HostWorld world) {
+    public WorldGenerator(HostWorld world, RegionStore regionStore) {
         this.world = Objects.requireNonNull(world);
-        this.executor = multiverse.getExecutor();
-        this.tracker = world.loadTracker();
+        this.executor = world.multiverse().getExecutor();
+        this.regionStore = regionStore;
         
-        seed = multiverse.getSeed();
+        seed = world.multiverse().getSeed();
         
         log = Log.getAgent("Generator_" + world.getDimensionName());
     }
@@ -85,20 +74,10 @@ public final class WorldGenerator {
     /**
      * Registers a generator. Generators are run in the order they are
      * registered.
-     * 
-     * <p>This method is not thread-safe and should only be invoked when
-     * setting up the generator.
      */
     @ThreadUnsafeMethod
-    private void addGenerator(IWorldGenerator generator) {
+    void addGenerator(IWorldGenerator generator) {
         generators.add(generator);
-    }
-    
-    /**
-     * Passes this WorldGenerator a reference to the region store.
-     */
-    public void passReferences(RegionStore regions) {
-        this.regionStore = regions;
     }
     
     /**
@@ -116,7 +95,6 @@ public final class WorldGenerator {
     @UserThread("Any")
     public void generate(Region r, boolean useCurrentThread, RegionCallback callback) {
         world.stats.gen.requests.increment();
-        tracker.startLoadOp();
         if(useCurrentThread)
             genRegion(r, callback);
         else
@@ -133,7 +111,6 @@ public final class WorldGenerator {
         
         if(isShutdown) {
             world.stats.gen.aborted.increment();
-            tracker.endLoadOp();
             callback.accept(r, false);
             return;
         }
@@ -168,13 +145,13 @@ public final class WorldGenerator {
             success = true;
             world.stats.gen.completed.increment();
             
-            // Even if due to some other region being generated concurrently
-            // we have some more structures to implant, we don't bother to do
-            // it anymore here -- we'll just have to do it on the main thread
-            // during an update tick. Thus we hardcode a false here.
-            r.state.setGenerated(false);
+            r.state.setGenerated();
+            
+            // Finally note that even if due to some other region being
+            // generated concurrently we have some more structures to implant, 
+            // we don't bother to do it anymore here -- we'll just have to do
+            // it on the main thread during an update tick.
         } catch(Throwable t) {
-            // TODO: What do we do if worldgen fails? Do we retry?
             world.stats.gen.failed.increment();
             log.postSevere("Worldgen of " + r + " failed!", t);
         }
@@ -182,7 +159,6 @@ public final class WorldGenerator {
         // Clean up all regions cached during generation.
         regionStore.uncacheAll();
         
-        tracker.endLoadOp();
         callback.accept(r, success);
     }
     
@@ -192,46 +168,6 @@ public final class WorldGenerator {
     @UserThread("MainThread")
     public final void shutdown() {
         isShutdown = true;
-    }
-    
-    //--------------------==========--------------------
-    //-------------=====Nested Classes=====-------------
-    //--------------------==========--------------------
-    
-    /**
-     * This class delegates the registering of {@code IWorldGenerators} to the
-     * main {@code WorldGenerator}.
-     */
-    public static class GeneratorRegistrant {
-        
-        private final WorldGenerator gen;
-        
-        public GeneratorRegistrant(WorldGenerator gen) {
-            this.gen = gen;
-        }
-        
-        /**
-         * Registers a generator. Generators are run in the order they are
-         * registered.
-         */
-        @ThreadUnsafeMethod
-        public void add(IWorldGenerator generator) {
-            if(generator instanceof InstancedWorldgenSupplier)
-                gen.log.postWarning("Registering a constructed instance of \"" +
-                        generator.getClass().getSimpleName() + "\" even though"+
-                        "it is a subclass of InstancedWorldgen. Mistake?");
-            gen.addGenerator(generator);
-        }
-        
-        /**
-         * Registers a generator. Generators are run in the order they are
-         * registered.
-         */
-        @ThreadUnsafeMethod
-        public void add(InstancedWorldgenSupplier generator) {
-            gen.addGenerator((r,w,s) -> generator.get(w, s).generate(r));
-        }
-        
     }
     
 }

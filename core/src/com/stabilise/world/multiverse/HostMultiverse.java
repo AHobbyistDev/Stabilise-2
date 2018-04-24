@@ -33,15 +33,18 @@ import com.stabilise.world.dimension.Dimension;
  *     two; the world is hosted to multiple clients, but there is also an
  *     integrated player who does not require a connection.
  * </ul>
+ * 
+ * <p>Since networking is NYI, however, Singleplayer is really the only case.
  */
 public class HostMultiverse extends Multiverse<HostWorld> {
     
     /** Stores players using this world. Maps player hash -> PlayerData. */
-    private final Map<String, PlayerData> players = new HashMap<>(2);
+    private final Map<String, PlayerData> players = new HashMap<>(1);
     
     /** The total number of entities which have existed during the lifetime of
      * all worlds. When a new entity is created this is incremented and set as
-     * its ID. */
+     * its ID. This is shared between dimensions since, of course, entities may
+     * move between dimensions and it would suck to encounter an ID collision. */
     private long entityCount = 0;
     
     
@@ -77,8 +80,9 @@ public class HostMultiverse extends Multiverse<HostWorld> {
             PlayerData dat = players.get(hash);
             if(dat == null)
                 throw new RuntimeException("No player present for this dimension!");
-            if(name != dat.data.getDimensionName())
-                throw new RuntimeException("Given dimension name != expected name");
+            if(!name.equals(dat.data.getDimensionName()))
+                throw new RuntimeException("Given dimension name (" + name + 
+                		") != expected name (" + dat.data.getDimensionName() + ")");
             dim = Dimension.getPlayerDimension(dat.data);
         } else {
             dim = Dimension.getDimension(info, name);
@@ -91,7 +95,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         dimensions.put(name, world);
         
         final HostWorld w = world;
-        executor.execute(() -> w.preload());
+        executor.execute(w.preloadJob::run);
         
         return world;
     }
@@ -155,6 +159,8 @@ public class HostMultiverse extends Multiverse<HostWorld> {
      */
     @Override
     public void save() {
+    	// TODO: pass everything off to the executor
+    	
         try {
             info.save();
         } catch(IOException e) {
@@ -178,11 +184,13 @@ public class HostMultiverse extends Multiverse<HostWorld> {
     protected void closeExtra() {
         for(PlayerData p : players.values()) {
             p.lastPos.set(p.playerMob.pos);
-            try {
-                p.save();
-            } catch(IOException e) {
-                throw new RuntimeException("Could not save " + p, e);
-            }
+            this.getExecutor().execute(() -> {
+                try {
+                    p.save();
+                } catch(IOException e) {
+                    log.postSevere("Could not save " + p, e);
+                }
+            });
         }
     }
     
@@ -194,8 +202,6 @@ public class HostMultiverse extends Multiverse<HostWorld> {
      * Stores the world-local data of a player.
      * 
      * <p>TODO outdated docs
-     * <p>An instance of this class should be {@link PlayerData#dispose()
-     * disposed} of when it is no longer needed.
      */
     @NotThreadSafe
     public class PlayerData {

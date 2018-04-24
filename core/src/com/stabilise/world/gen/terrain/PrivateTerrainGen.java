@@ -64,7 +64,7 @@ public class PrivateTerrainGen extends InstancedWorldgen {
                             ? Tiles.voidRockDense
                             : Tiles.voidRock;
                     
-                    tmpPos.set(x, y).realign();
+                    tmpPos.set(x, y).align();
                     if(cave > caveAbove) {
                         //w.setTileAt(x, y, Tiles.air);
                     	w.setTileAt(tmpPos, Tiles.air);

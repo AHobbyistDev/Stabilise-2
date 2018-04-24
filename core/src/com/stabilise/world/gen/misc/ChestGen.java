@@ -31,9 +31,9 @@ public class ChestGen implements IWorldGenerator {
         r.forEachSlice(s -> {
             int x = s.x*SLICE_SIZE + rnd.nextInt(SLICE_SIZE);
             int y = s.y*SLICE_SIZE + rnd.nextInt(SLICE_SIZE - 1);
-            int id = w.getTileIDAt(tmp.set(x, y).realign());
+            int id = w.getTileIDAt(tmp.set(x, y).align());
             if((id == stone.getID() || id == grass.getID()) &&
-                        w.getTileIDAt(tmp2.set(x, y+1).realign()) == air.getID()) {
+                        w.getTileIDAt(tmp2.set(x, y+1).align()) == air.getID()) {
                 w.setTileAt(tmp, chest);
                 TileEntityChest te = (TileEntityChest)w.getTileEntityAt(tmp);
                 te.items.addItem(Items.APPLE, rnd.nextInt(7)+1);

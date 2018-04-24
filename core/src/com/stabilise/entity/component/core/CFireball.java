@@ -2,7 +2,7 @@ package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
-import com.stabilise.entity.component.effect.EffectFire;
+import com.stabilise.entity.component.effect.CEffectFire;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.hitbox.LinkedHitbox;
@@ -16,7 +16,7 @@ import com.stabilise.util.shape.Polygon;
 import com.stabilise.world.World;
 
 
-public class CFireball extends BaseProjectile {
+public class CFireball extends CBaseProjectile {
     
     /** The fireball hitbox template. */
     private static final AABB FIREBALL_BOUNDING_BOX = new AABB(-0.05f, -0.05f, 0.1f, 0.1f);
@@ -52,7 +52,7 @@ public class CFireball extends BaseProjectile {
         super.onAdd(w, e);
         
         hitbox.force = 3f;
-        hitbox.effects = tgt -> tgt.addComponent(new EffectFire(60*7, 2));
+        hitbox.effects = tgt -> tgt.addComponent(new CEffectFire(60*7, 2));
         hitbox.hits = 1000000; // TODO: temporary for fun
         hitbox.persistenceTimer = -1;
         
@@ -130,7 +130,7 @@ public class CFireball extends BaseProjectile {
         
         for(int y = min; y <= max; y++) {
         	for(int x = min; x <= max; x++) {
-        		if(tmp.isWithinRange(e.pos, range) && w.getTileAt(tmp.realign()).getHardness() <= 5f)
+        		if(tmp.isWithinRange(e.pos, range) && w.getTileAt(tmp.align()).getHardness() <= 5f)
         			w.breakTileAt(tmp);
         		tmp.add(1f, 0f);
         	}
@@ -144,7 +144,7 @@ public class CFireball extends BaseProjectile {
         h.persistenceTimer = 3;
         h.stickToOwner = false;
         h.hits = -1;
-        h.effects = tgt -> tgt.addComponent(new EffectFire(60*5, 1));
+        h.effects = tgt -> tgt.addComponent(new CEffectFire(60*5, 1));
         w.addHitbox(h, e.pos);
         
         explosionSrc.createAt(e.pos);
@@ -156,8 +156,8 @@ public class CFireball extends BaseProjectile {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD) {
-            particleSrc = w.getParticleManager().getSource(ParticleFlame.class);
-            explosionSrc = w.getParticleManager().getSource(ParticleExplosion.class);
+            particleSrc = w.particleSource(ParticleFlame.class);
+            explosionSrc = w.particleSource(ParticleExplosion.class);
         }
         return super.handle(w, e, ev);
     }

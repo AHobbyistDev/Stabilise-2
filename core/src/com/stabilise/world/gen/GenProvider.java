@@ -14,6 +14,10 @@ import com.stabilise.world.gen.action.*;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
+/**
+ * WorldProvider implementation which is passed to generators as to give them
+ * a WorldProvider-y view on the world.
+ */
 class GenProvider implements WorldProvider {
     
     @SuppressWarnings("unused")
@@ -39,6 +43,12 @@ class GenProvider implements WorldProvider {
         ActionAddEntity a = new ActionAddEntity();
         a.e = e;
         actions().add(a);
+    }
+    
+    @Override
+    public void addEntityDontSetID(Entity e) {
+        throw new UnsupportedOperationException("idk how a generator would pull"
+                + " this off, so for now I'm just forbidding it");
     }
     
     @Override

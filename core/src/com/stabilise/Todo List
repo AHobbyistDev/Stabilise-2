@@ -17,26 +17,3 @@ HIGH PRIORITY
 
 TODO EVENTUALLY
 - Structure generation
-
-
-
------- OLD TODO LIST ----------
-
-TOP PRIORITY
-- Menus
-- Get both singleplayer and multiplayer architecture working
-- WorldProvider architecture
-- Implement structure generation
-
-HIGH PRIORITY
-- Entity saving in worlds.
-
-TODO EVENTUALLY
-- Gameplay!!!
-- Character creation
-- Mob AIs
-- Modding & Mod API
-
-BACKGROUND OBJECTIVES
-- Maximise extensibility for modding
-

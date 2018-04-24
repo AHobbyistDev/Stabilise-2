@@ -224,6 +224,7 @@ public class IOUtil {
      */
     public static DataCompound read(FileHandle file, Format format,
     		Compression compression) throws IOException {
+        /*
         InputStream is1 = null;
         InputStream is2 = null;
         BufferedInputStream bis = null;
@@ -245,6 +246,16 @@ public class IOUtil {
             else if(is2 != null) is2.close();
             else if(is1 != null) is1.close();
         }
+        */
+        
+        try(DataInStream in = new DataInStream(new BufferedInputStream(
+                compression.wrap(file.read())))) {
+            DataCompound c = format.read(in);
+            c.setReadMode();
+            return c;
+        } catch(GdxRuntimeException e) {
+            throw new IOException(e);
+        }
     }
     
     /**
@@ -255,6 +266,7 @@ public class IOUtil {
      */
     public static DataCompound read(FileHandle file, DataCompound c,
     		Compression compression) throws IOException {
+        /*
         InputStream is1 = null;
         InputStream is2 = null;
         BufferedInputStream bis = null;
@@ -276,6 +288,16 @@ public class IOUtil {
             else if(is2 != null) is2.close();
             else if(is1 != null) is1.close();
         }
+        */
+        
+        try(DataInStream in = new DataInStream(new BufferedInputStream(
+                compression.wrap(file.read())))) {
+            c.format().read(in, c);
+            c.setReadMode();
+            return c;
+        } catch(GdxRuntimeException e) {
+            throw new IOException(e);
+        }
     }
     
     /**
@@ -286,6 +308,7 @@ public class IOUtil {
      */
     public static void write(FileHandle file, DataCompound data,
     		Compression compression) throws IOException {
+        /*
         OutputStream os1 = null;
         OutputStream os2 = null;
         BufferedOutputStream bos = null;
@@ -304,6 +327,14 @@ public class IOUtil {
             else if(bos != null) bos.close();
             else if(os2 != null) os2.close();
             else if(os1 != null) os1.close();
+        }
+        */
+        
+        try(DataOutStream out = new DataOutStream(new BufferedOutputStream(
+                compression.wrap(file.write(false))))) {
+            data.format().write(out, data);
+        } catch(GdxRuntimeException e) {
+            throw new IOException(e);
         }
     }
     
@@ -328,29 +359,14 @@ public class IOUtil {
      * @throws NullPointerException if any argument is null.
      */
     public static int countBytes(DataCompound data, Format format, Compression compression) {
-        ByteCountingStream bcs = new ByteCountingStream();
-        OutputStream os = null;
-        BufferedOutputStream bos = null;
-        DataOutStream dos = null;
-        
-        try {
-            os = compression.wrap(bcs);
-            bos = new BufferedOutputStream(os);
-            dos = new DataOutStream(bos);
-            format.write(dos, data.convert(format));
+        try(ByteCountingStream bcs = new ByteCountingStream();
+            DataOutStream out = new DataOutStream(new BufferedOutputStream(
+                    compression.wrap(bcs)))) {
+            format.write(out, data.convert(format));
+            return bcs.byteCount();
         } catch(Throwable t) {
             return 0;
-        } finally {
-            try {
-                if(dos != null) dos.close();
-                else if(bos != null) bos.close();
-                else if(os != null) os.close();
-            } catch(IOException e) {
-                throw new AssertionError();
-            } 
         }
-        
-        return bcs.byteCount();
     }
     
     /**
@@ -389,13 +405,10 @@ public class IOUtil {
         Deque<FileHandle> queue = new LinkedList<>();
         queue.push(dir);
         
-        OutputStream out = null;
-        ZipOutputStream zout = null;
+        //OutputStream out = null;
+        //ZipOutputStream zout = null;
         
-        try {
-            out = zipFile.write(false);
-            zout = new ZipOutputStream(out);
-            
+        try(ZipOutputStream zout = new ZipOutputStream(zipFile.write(false))) {
             while(!queue.isEmpty()) {
                 dir = queue.pop();
                 
@@ -427,9 +440,6 @@ public class IOUtil {
                     }
                 }
             }
-        } finally {
-            if(zout != null) zout.close();
-            else if(out != null) out.close();
         }
     }
     

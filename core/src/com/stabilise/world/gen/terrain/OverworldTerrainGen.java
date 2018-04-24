@@ -63,7 +63,7 @@ public class OverworldTerrainGen extends InstancedWorldgen {
                     w.setTileAt(tmpPos, air);
                 else if(noise <= 0) {
                     if(rnd.nextInt(10) == 0) {
-                        w.setTileAt(tmpPos.set(tx, ty).realign(), torch);
+                        w.setTileAt(tmpPos.set(tx, ty).align(), torch);
                     } else
                         set(tmpPos, air);
                 } else if(noise <= 1) {
