@@ -8,7 +8,7 @@ import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.ITag;
 
-public class ShortBox implements IBox {
+public class ShortBox implements ITag {
     
     private short value;
     
@@ -38,23 +38,23 @@ public class ShortBox implements IBox {
     }
     
     @Override
-    public void write(String name, DataCompound o) {
-        o.put(name, value);
-    }
-    
-    @Override
     public void read(String name, DataCompound o) {
         value = o.getShort(name);
     }
     
     @Override
-    public void write(DataList l) {
-        l.add(value);
+    public void write(String name, DataCompound o) {
+        o.put(name, value);
     }
     
     @Override
     public void read(DataList l) {
         value = l.getShort();
+    }
+    
+    @Override
+    public void write(DataList l) {
+        l.add(value);
     }
     
     @Override

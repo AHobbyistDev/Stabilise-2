@@ -75,6 +75,26 @@ public class ImmutableList implements DataList {
     }
     
     @Override
+    public void read(String name, DataCompound o) {
+        Checks.unsupported();
+    }
+    
+    @Override
+    public void write(String name, DataCompound o) {
+        list.write(name, o);
+    }
+    
+    @Override
+    public void read(DataList l) {
+        Checks.unsupported();
+    }
+    
+    @Override
+    public void write(DataList l) {
+        list.write(l);
+    }
+    
+    @Override
     public Format format() {
         return list.format();
     }

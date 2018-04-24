@@ -11,7 +11,7 @@ import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.ITag;
 
-public class ByteArrBox implements IBox {
+public class ByteArrBox implements ITag {
     
     private byte[] value;
     
@@ -47,23 +47,23 @@ public class ByteArrBox implements IBox {
     }
     
     @Override
-    public void write(String name, DataCompound o) {
-        o.put(name, value);
-    }
-    
-    @Override
     public void read(String name, DataCompound o) {
         value = o.getByteArr(name);
     }
     
     @Override
-    public void write(DataList l) {
-        l.add(value);
+    public void write(String name, DataCompound o) {
+        o.put(name, value);
     }
     
     @Override
     public void read(DataList l) {
         value = l.getByteArr();
+    }
+    
+    @Override
+    public void write(DataList l) {
+        l.add(value);
     }
     
     @Override

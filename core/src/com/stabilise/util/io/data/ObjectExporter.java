@@ -40,7 +40,7 @@ public class ObjectExporter {
      * @throws RuntimeException if the object could not be properly exported.
      */
     public static DataCompound exportObj(Object o, Format f) {
-        return doExport(o, f.newCompound(true));
+        return doExport(o, f.newCompound());
     }
     
     /**

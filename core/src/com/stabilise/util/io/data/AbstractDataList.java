@@ -4,7 +4,6 @@ import static com.stabilise.util.box.Boxes.box;
 
 import java.util.function.Consumer;
 
-import com.stabilise.util.Checks;
 import com.stabilise.util.box.BoolBox;
 import com.stabilise.util.box.ByteArrBox;
 import com.stabilise.util.box.ByteBox;
@@ -110,18 +109,25 @@ public abstract class AbstractDataList implements DataList, ITag {
     @Override public byte[]  getByteArr()       { return ((ByteArrBox) getNext()).get(); }
     @Override public int[]   getIntArr()        { return ((IntArrBox)  getNext()).get(); }
     
-    // From ValueExportable
+    
     @Override
-    public void io(String name, DataCompound o, boolean write) {
-        if(write) o.put(name, this);
-        else      o.optList(name).peek(l -> ((AbstractDataList)l).putAll(this));
+    public void read(String name, DataCompound o) {
+        o.optList(name).peek(l -> ((AbstractDataList)l).putAll(this));
     }
     
-    // From ValueExportable
     @Override
-    public void io(DataList l, boolean write) {
-        if(write) l.add(this);
-        else      ((AbstractDataList) l.createList()).putAll(this);
+    public void write(String name, DataCompound o) {
+        o.put(name, this);
+    }
+    
+    @Override
+    public void read(DataList l) {
+        ((AbstractDataList) l.createList()).putAll(this);
+    }
+    
+    @Override
+    public void write(DataList l) {
+        l.add(this);
     }
     
     @Override
@@ -132,25 +138,5 @@ public abstract class AbstractDataList implements DataList, ITag {
         putAll(l);
         return l;
     }
-    
-    
-    
-    
-    @Override
-    public ITag convertToSameType(ITag other) {
-        if(isSameType(other))
-            return other;
-        throw Checks.ISE("Can't convert " + other.getClass().getSimpleName() + " to list type.");
-    }
-    
-    @Override public boolean isBoolean() { return false; }
-    @Override public boolean isLong()    { return false; }
-    @Override public boolean isDouble()  { return false; }
-    @Override public boolean isString()  { return false; }
-    
-    @Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert lost to boolean"); }
-    @Override public long    getAsLong()    { throw Checks.ISE("Can't convert list to long");    }
-    @Override public double  getAsDouble()  { throw Checks.ISE("Can't convert list to double");  }
-    @Override public String  getAsString()  { throw Checks.ISE("Can't convert list to string");  }
     
 }

@@ -1,13 +1,13 @@
 package com.stabilise.util.io.data;
 
-import com.stabilise.util.io.Sendable;
+import com.stabilise.util.Checks;
 
 /**
  * A DataList is a list which may be written to and read from sequentially.
  * Each of the {@code add()} methods append to the end of this list, and
  * each of the {@code get()} methods reads the next element from the list.
  */
-public interface DataList extends Sendable, IContainerTag<DataList> {
+public interface DataList extends ITag, IContainerTag<DataList> {
     
     /**
      * Creates a DataCompound of the format determined the current thread's
@@ -103,5 +103,22 @@ public interface DataList extends Sendable, IContainerTag<DataList> {
     default ImmutableList immutable() {
         return ImmutableList.wrap(this);
     }
+    
+    @Override
+    default ITag convertToSameType(ITag other) {
+        if(isSameType(other))
+            return other;
+        throw Checks.ISE("Can't convert " + other.getClass().getSimpleName() + " to list type.");
+    }
+    
+    @Override default boolean isBoolean() { return false; }
+    @Override default boolean isLong()    { return false; }
+    @Override default boolean isDouble()  { return false; }
+    @Override default boolean isString()  { return false; }
+    
+    @Override default boolean getAsBoolean() { throw Checks.ISE("Can't convert list to boolean"); }
+    @Override default long    getAsLong()    { throw Checks.ISE("Can't convert list to long");    }
+    @Override default double  getAsDouble()  { throw Checks.ISE("Can't convert list to double");  }
+    @Override default String  getAsString()  { throw Checks.ISE("Can't convert list to string");  }
     
 }

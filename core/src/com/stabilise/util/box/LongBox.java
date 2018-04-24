@@ -8,7 +8,7 @@ import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.ITag;
 
-public class LongBox implements IBox {
+public class LongBox implements ITag {
     
     private long value;
     
@@ -38,13 +38,18 @@ public class LongBox implements IBox {
     }
     
     @Override
+    public void read(String name, DataCompound o) {
+        value = o.getLong(name);
+    }
+    
+    @Override
     public void write(String name, DataCompound o) {
         o.put(name, value);
     }
     
     @Override
-    public void read(String name, DataCompound o) {
-        value = o.getLong(name);
+    public void read(DataList l) {
+        value = l.getLong();
     }
     
     @Override
@@ -52,10 +57,7 @@ public class LongBox implements IBox {
         l.add(value);
     }
     
-    @Override
-    public void read(DataList l) {
-        value = l.getLong();
-    }
+
     
     @Override
     public String toString() {

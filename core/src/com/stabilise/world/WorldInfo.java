@@ -85,7 +85,7 @@ public class WorldInfo implements Comparable<WorldInfo> {
     public void save() throws IOException {
         lastPlayedDate = System.currentTimeMillis();
         
-        DataCompound infoTag = Format.NBT.newCompound(true);
+        DataCompound infoTag = Format.NBT.newCompound();
         
         infoTag.put("worldName", name);
         infoTag.put("seed", seed);

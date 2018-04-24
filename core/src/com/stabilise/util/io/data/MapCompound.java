@@ -193,13 +193,10 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
     
     @Override
     public DataCompound convert(Format format) {
-        if(format().sameTypeAs(format)) {
-            setReadMode();
+        if(format().sameTypeAs(format))
             return this;
-        }
-        AbstractCompound c = (AbstractCompound) format.newCompound(true);
+        AbstractCompound c = (AbstractCompound) format.newCompound();
         putAll(c);
-        c.setReadMode();
         return c;
     }
     
@@ -210,22 +207,24 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
     	data.clear();
     }
     
-    // From ValueExportable
     @Override
-    public void io(String name, DataCompound o, boolean write) {
-        if(write)
-            o.put(name, this);
-        else
-            o.optCompound(name).peek(c -> ((AbstractCompound)c).putAll(this));
+    public void write(String name, DataCompound o) {
+        o.put(name, this);
     }
     
-    // From ValueExportable
     @Override
-    public void io(DataList l, boolean write) {
-        if(write)
-            l.add(this);
-        else
-            ((AbstractCompound) l.getCompound()).putAll(this);
+    public void read(String name, DataCompound o) {
+        o.optCompound(name).peek(c -> ((AbstractCompound)c).putAll(this));
+    }
+    
+    @Override
+    public void write(DataList l) {
+        l.add(this);
+    }
+    
+    @Override
+    public void read(DataList l) {
+        ((AbstractCompound) l.getCompound()).putAll(this);
     }
     
     @Override

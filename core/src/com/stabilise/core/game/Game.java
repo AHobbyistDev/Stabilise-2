@@ -36,7 +36,7 @@ public class Game implements Controllable, InputProcessor {
     /** True if a single game tick should be run despite the game being paused. */
     private boolean advanceTick = false;
     
-    private final HostMultiverse provider;
+    private final HostMultiverse multiverse;
     /** The game's world instance. */
     public final HostWorld world;
     public final PlayerData playerData;
@@ -73,7 +73,7 @@ public class Game implements Controllable, InputProcessor {
      * @throws NullPointerException if {@code worldBundle} is {@code null}.
      */
     public Game(WorldBundle worldBundle) {
-        this.provider = worldBundle.getHostMultiverse();
+        this.multiverse = worldBundle.getHostMultiverse();
         this.world = worldBundle.getHostWorld();
         this.playerData = worldBundle.getPlayerData();
         this.player = worldBundle.getPlayerEntity();
@@ -103,17 +103,17 @@ public class Game implements Controllable, InputProcessor {
                 //    menu.update();
                 profiler.next("world"); // root.update.game.world
                 if(!paused)
-                    provider.update();
+                    multiverse.update();
                 else if(advanceTick) {
                     advanceTick = false;
-                    provider.update();
+                    multiverse.update();
                 }
                 profiler.end(); // root.update.game
             } catch(Exception e) {
                 log.postSevere("Game encountered error!", e);
                 profiler.disable();
                 Application a = Application.get();
-                Log.saveLog(true, "Game crashed by did not shut down.");
+                Log.saveLog(true, "Game crashed but did not shut down.");
                 //close();            // Simply calling close() makes the game freeze
                 a.setState(new MainMenuState());
                 return;
@@ -138,7 +138,7 @@ public class Game implements Controllable, InputProcessor {
         running = false;
         //if(menu != null)
         //    menu.unloadResources();
-        provider.close();
+        multiverse.close();
     }
     
     /**
@@ -185,7 +185,7 @@ public class Game implements Controllable, InputProcessor {
      */
     public void openPauseMenu() {
         //setMenu(new PauseMenu(this), true);
-        provider.save();
+        multiverse.save();
     }
     
     public void pause() {

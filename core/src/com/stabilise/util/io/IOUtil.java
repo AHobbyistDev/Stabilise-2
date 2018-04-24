@@ -251,7 +251,6 @@ public class IOUtil {
         try(DataInStream in = new DataInStream(new BufferedInputStream(
                 compression.wrap(file.read())))) {
             DataCompound c = format.read(in);
-            c.setReadMode();
             return c;
         } catch(GdxRuntimeException e) {
             throw new IOException(e);
@@ -293,7 +292,6 @@ public class IOUtil {
         try(DataInStream in = new DataInStream(new BufferedInputStream(
                 compression.wrap(file.read())))) {
             c.format().read(in, c);
-            c.setReadMode();
             return c;
         } catch(GdxRuntimeException e) {
             throw new IOException(e);

@@ -129,7 +129,7 @@ public abstract class Dimension {
      * @throws IOException if an I/O error occurs.
      */
     public final void saveData() throws IOException {
-        DataCompound tag = Format.NBT.newCompound(true);
+        DataCompound tag = Format.NBT.newCompound();
         saveExtraData(tag);
         info.save(tag);
     }
@@ -371,6 +371,7 @@ public abstract class Dimension {
         
         /**
          * Dimension info for some dimension
+         * 
          * @throws NullPointerException if either arg is null
          */
         private Info(WorldInfo worldInfo, String name) {
@@ -381,6 +382,7 @@ public abstract class Dimension {
         
         /**
          * Dimension info for a client view of some dimension
+         * 
          * @throws NullPointerException if name is null
          */
         private Info(String name) {
@@ -391,6 +393,7 @@ public abstract class Dimension {
         
         /**
          * Dimension info for a character's private dimension
+         * 
          * @throws NullPointerException if either arg is null
          */
         private Info(CharacterData character) {

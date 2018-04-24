@@ -117,7 +117,7 @@ public abstract class TileEntity extends GameObject {
     public final DataCompound toNBT() {
         DataCompound tag = DataCompound.create();
         tag.put("id", getID());
-        pos.io(tag, true);
+        pos.exportToCompound(tag);
         writeNBT(tag);
         return tag;
     }
@@ -161,7 +161,7 @@ public abstract class TileEntity extends GameObject {
         TileEntity t = createTileEntity(tag.getInt("id"));
         if(t == null)
             return null;
-        t.pos.io(tag, false);
+        t.pos.importFromCompound(tag);
         t.fromNBT(tag);
         return t;
     }

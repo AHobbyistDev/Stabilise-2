@@ -387,18 +387,19 @@ public class Position implements Exportable {
     }
     
     @Override
-    public void io(DataCompound o, boolean write) {
-        if(write) {
-            o.put("sx", sx);
-            o.put("sy", sy);
-            o.put("lx", lx);
-            o.put("ly", ly);
-        } else {
-            sx = o.getInt("sx");
-            sy = o.getInt("sy");
-            lx = o.getFloat("lx");
-            ly = o.getFloat("ly");
-        }
+    public void importFromCompound(DataCompound o) {
+        sx = o.getInt("sx");
+        sy = o.getInt("sy");
+        lx = o.getFloat("lx");
+        ly = o.getFloat("ly");
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound o) {
+        o.put("sx", sx);
+        o.put("sy", sy);
+        o.put("lx", lx);
+        o.put("ly", ly);
     }
     
     @Override

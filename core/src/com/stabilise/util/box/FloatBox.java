@@ -8,7 +8,7 @@ import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.ITag;
 
-public class FloatBox implements IBox {
+public class FloatBox implements ITag {
     
     private float value;
     
@@ -38,23 +38,23 @@ public class FloatBox implements IBox {
     }
     
     @Override
-    public void write(String name, DataCompound o) {
-        o.put(name, value);
-    }
-    
-    @Override
     public void read(String name, DataCompound o) {
         value = o.getFloat(name);
     }
     
     @Override
-    public void write(DataList l) {
-        l.add(value);
+    public void write(String name, DataCompound o) {
+        o.put(name, value);
     }
     
     @Override
     public void read(DataList l) {
         value = l.getFloat();
+    }
+    
+    @Override
+    public void write(DataList l) {
+        l.add(value);
     }
     
     @Override

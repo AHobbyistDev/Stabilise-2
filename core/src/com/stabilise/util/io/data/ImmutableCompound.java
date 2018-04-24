@@ -67,6 +67,32 @@ public class ImmutableCompound implements DataCompound {
         compound.writeData(out);
     }
     
+    /**
+     * Throws UnsupportedOperationException.
+     */
+    @Override
+    public void read(String name, DataCompound o) {
+        throw new UnsupportedOperationException("Cannot read to an immutable compound");
+    }
+    
+    @Override
+    public void write(String name, DataCompound o) {
+        compound.write(name, o);
+    }
+    
+    /**
+     * Throws UnsupportedOperationException.
+     */
+    @Override
+    public void read(DataList l) {
+        throw new UnsupportedOperationException("Cannot read to an immutable compound");
+    }
+    
+    @Override
+    public void write(DataList l) {
+        compound.write(l);
+    }
+    
     @Override
     public Format format() {
         return compound.format();
@@ -140,16 +166,6 @@ public class ImmutableCompound implements DataCompound {
     @Override public Option<String> optString(String name)  { return compound.optString(name);  }
     @Override public Option<byte[]> optByteArr(String name) { return compound.optByteArr(name); }
     @Override public Option<int[]> optIntArr(String name)   { return compound.optIntArr(name);  }
-    
-    @Override
-    public void setReadMode() {
-        compound.setReadMode();
-    }
-    
-    @Override
-    public void setWriteMode() {
-        Checks.unsupported();
-    }
     
     /**
      * {@inheritDoc}

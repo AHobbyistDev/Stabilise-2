@@ -32,7 +32,7 @@ public class IOtest {
     
     public static void main(String[] args) throws IOException {
         DataCompound c1 = ObjectExporter.exportObj(new A(), Format.NBT);
-        DataCompound c2 = ObjectExporter.exportObj(new A(), Format.BYTE_STREAM);
+        DataCompound c2 = ObjectExporter.exportObj(new A(), Format.JSON);
         A a = new A();
         a.a = 0;
         a.b = null;
@@ -41,18 +41,18 @@ public class IOtest {
         ObjectExporter.importObj(a, c1);
         
         System.out.println(c1);
-        System.out.println(c1.convert(Format.BYTE_STREAM));
+        System.out.println(c1.convert(Format.JSON));
         System.out.println(c2);
         System.out.println(ObjectExporter.exportObj(a, Format.NBT));
         System.out.println(IOUtil.countBytes(c1, Format.NBT, Compression.UNCOMPRESSED));
         System.out.println(IOUtil.countBytes(c1, Format.NBT, Compression.GZIP));
         System.out.println(IOUtil.countBytes(c1, Format.NBT, Compression.ZLIB));
-        System.out.println(IOUtil.countBytes(c1, Format.BYTE_STREAM, Compression.UNCOMPRESSED));
-        System.out.println(IOUtil.countBytes(c1, Format.BYTE_STREAM, Compression.GZIP));
-        System.out.println(IOUtil.countBytes(c1, Format.BYTE_STREAM, Compression.ZLIB));
-        System.out.println(IOUtil.countBytes(c2, Format.BYTE_STREAM, Compression.UNCOMPRESSED));
-        System.out.println(IOUtil.countBytes(c2, Format.BYTE_STREAM, Compression.GZIP));
-        System.out.println(IOUtil.countBytes(c2, Format.BYTE_STREAM, Compression.ZLIB));
+        //System.out.println(IOUtil.countBytes(c1, Format.BYTE_STREAM, Compression.UNCOMPRESSED));
+        //System.out.println(IOUtil.countBytes(c1, Format.BYTE_STREAM, Compression.GZIP));
+        //System.out.println(IOUtil.countBytes(c1, Format.BYTE_STREAM, Compression.ZLIB));
+        //System.out.println(IOUtil.countBytes(c2, Format.BYTE_STREAM, Compression.UNCOMPRESSED));
+        //System.out.println(IOUtil.countBytes(c2, Format.BYTE_STREAM, Compression.GZIP));
+        //System.out.println(IOUtil.countBytes(c2, Format.BYTE_STREAM, Compression.ZLIB));
     }
     
 }

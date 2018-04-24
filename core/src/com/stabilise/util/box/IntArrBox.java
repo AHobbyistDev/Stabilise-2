@@ -11,7 +11,7 @@ import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.ITag;
 
-public class IntArrBox implements IBox {
+public class IntArrBox implements ITag {
     
     private int[] value;
     
@@ -50,23 +50,23 @@ public class IntArrBox implements IBox {
     }
     
     @Override
-    public void write(String name, DataCompound o) {
-        o.put(name, value);
-    }
-    
-    @Override
     public void read(String name, DataCompound o) {
         value = o.getIntArr(name);
     }
     
     @Override
-    public void write(DataList l) {
-        l.add(value);
+    public void write(String name, DataCompound o) {
+        o.put(name, value);
     }
     
     @Override
     public void read(DataList l) {
         value = l.getIntArr();
+    }
+    
+    @Override
+    public void write(DataList l) {
+        l.add(value);
     }
     
     @Override

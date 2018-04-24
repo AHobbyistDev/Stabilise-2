@@ -2,7 +2,7 @@ package com.stabilise.util.io.data;
 
 import javaslang.control.Option;
 
-import com.stabilise.util.io.Sendable;
+import com.stabilise.util.Checks;
 
 /**
  * A DataCompound is the basic unifying building block for this package. A
@@ -23,7 +23,7 @@ import com.stabilise.util.io.Sendable;
  *     methods, but return an {@code Option} instead of a default value.
  * </ul>
  */
-public interface DataCompound extends Sendable, IContainerTag<DataCompound> {
+public interface DataCompound extends ITag, IContainerTag<DataCompound> {
     
     /**
      * Creates a DataCompound of the format determined the current thread's
@@ -141,34 +141,6 @@ public interface DataCompound extends Sendable, IContainerTag<DataCompound> {
     Option<int[]>        optIntArr  (String name);
     
     /**
-     * Sets this compound into read mode. In read mode, users can always get
-     * data from this compound, and the {@code io} methods will automatically
-     * read from the given exportables.
-     * 
-     * <p>In general, it is not necessary to have a compound in read mode to
-     * read data (the only current exception is {@link Format#BYTE_STREAM}),
-     * but it's better to play it safe.
-     * 
-     * @see #io(String, Exportable)
-     * @see #io(String, ValueExportable)
-     */
-    void setReadMode();
-    
-    /**
-     * Sets this compound into write mode. In write mode, can always write data
-     * from this compound, and the {@code io} methods will automatically write
-     * to the given exportables.
-     * 
-     * <p>In general, it is not necessary to have a compound in write mode to
-     * add to it (the only current exception is {@link Format#BYTE_STREAM}),
-     * but it's better to play it safe.
-     * 
-     * @see #io(String, Exportable)
-     * @see #io(String, ValueExportable)
-     */
-    void setWriteMode();
-    
-    /**
      * Clones this DataCompound.
      */
     default DataCompound copy() {
@@ -199,6 +171,23 @@ public interface DataCompound extends Sendable, IContainerTag<DataCompound> {
     	if(this instanceof MapCompound)
     		return (MapCompound)this;
     	throw new RuntimeException("This DataCompound is not a map compound!");
+    }
+    
+    @Override default boolean isBoolean() { return false; }
+    @Override default boolean isLong()    { return false; }
+    @Override default boolean isDouble()  { return false; }
+    @Override default boolean isString()  { return false; }
+    
+    @Override default boolean getAsBoolean() { throw Checks.ISE("Can't convert compound to boolean"); }
+    @Override default long    getAsLong()    { throw Checks.ISE("Can't convert compound to long");    }
+    @Override default double  getAsDouble()  { throw Checks.ISE("Can't convert compound to double");  }
+    @Override default String  getAsString()  { throw Checks.ISE("Can't convert compound to string");  }
+    
+    @Override
+    default ITag convertToSameType(ITag other) {
+        if(isSameType(other))
+            return other;
+        throw Checks.ISE("Can't convert " + other.getClass().getSimpleName() + " to compound type.");
     }
     
 }

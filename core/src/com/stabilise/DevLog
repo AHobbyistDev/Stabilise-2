@@ -276,5 +276,8 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Added Position class and refactored game to use it instead of double/int pairs.
 18/04/02
 	- Refactored the RegionStore, WorldLoader, and WorldGenerator.
+18/04/24
+	- Basic portal implementation which merely loads the paired dimension
+	- Moved SliceMap to the entity component CSliceAnchorer
 
 
