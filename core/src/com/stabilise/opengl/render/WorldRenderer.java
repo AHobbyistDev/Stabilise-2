@@ -313,14 +313,12 @@ public class WorldRenderer implements Renderer {
         profiler.next("tiles"); // root.render.tiles
         tileRenderer.render();
         
-        batch.setColor(DEFAULT_COL);
+        batch.setColor(DEFAULT_COL); // reset the tint colour
         
         profiler.next("entities"); // root.render.entities
         profiler.start("nonplayer"); // root.render.entities.nonplayer
         
         // Temporary way of ensuring the player is rendered on top
-        
-        
         for(Entity e : world.getEntities()) {
             if(e.isPlayerControlled())
                 players.add(e);
@@ -329,11 +327,12 @@ public class WorldRenderer implements Renderer {
             else
                 e.render(this);
         }
-        batch.flush();
+        //batch.flush();
         
         profiler.next("portals");
         for(Entity p : portals) {
             tileRenderer.renderPortalView(p);
+            batch.setColor(DEFAULT_COL); // reset the tint colour
             p.render(this);
         }
         portals.clear();

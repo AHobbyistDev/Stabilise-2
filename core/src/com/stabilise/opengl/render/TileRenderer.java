@@ -44,8 +44,8 @@ public class TileRenderer implements Renderer {
     private float[] lightLevels;
     
     
-    private Position minCorner = Position.create();
-    private Position maxCorner = Position.create();
+    private final Position minCorner = Position.create();
+    private final Position maxCorner = Position.create();
     
     
     /**
@@ -96,15 +96,10 @@ public class TileRenderer implements Renderer {
         Position camPos = wr.camObj.pos;
         minCorner.set(camPos, -wr.tilesHorizontal, -wr.tilesVertical).align().clampToTile();
         maxCorner.set(camPos, wr.tilesHorizontal, wr.tilesVertical + 1).align().clampToTile();
-        int camSliceX = camPos.getSliceX();
-        int camSliceY = camPos.getSliceY();
-        for(int c = camSliceX - wr.slicesHorizontal;
-                c <= camSliceX + wr.slicesHorizontal;
-                c++) {
-            for(int r = camSliceY - wr.slicesVertical;
-                    r <= camSliceY + wr.slicesVertical;
-                    r++) {
-                renderSlice(world.getSliceAt(c, r), wr.camObj.pos, (x,y) -> true);
+        
+        for(int x = minCorner.getSliceX(); x <= maxCorner.getSliceX(); x++) {
+            for(int y = minCorner.getSliceY(); y <= maxCorner.getSliceY(); y++) {
+                renderSlice(world.getSliceAt(x, y), wr.camObj.pos, (dx,dy) -> true);
                 slicesRendered++;
             }
         }
@@ -116,14 +111,11 @@ public class TileRenderer implements Renderer {
      * Renders a slice.
      */
     private void renderSlice(Slice slice, Position camPos, TilePredicate pred) {
-        //Slice slice = world.getSliceAt(x, y);
         if(slice.isDummy())
             return;
         
         int x = slice.x;
         int y = slice.y; 
-        
-        //Position camPos = wr.camObj.pos;
         
         // Relative to the camera, where the origin of this slice is
         float sliceOriginX = camPos.diffX(x, 0f);
@@ -169,12 +161,11 @@ public class TileRenderer implements Renderer {
             }
             cy += 1f;
         }
-        
-        //if(x == 0 && y == -9)
-        //    System.out.println("ayy lmao");
     }
     
     public void renderSliceBorders(ShapeRenderer shapes) {
+        // TODO: inefficient n^2 algo, use the 2n one instead
+        
         // Yellow slice borders
         shapes.setColor(Color.YELLOW);
         
@@ -252,7 +243,7 @@ public class TileRenderer implements Renderer {
         
         // Do proper positional calculations using the camera's pos in the
         // other dimension
-        float camDiffX = camPos.diffX(ope.pos);
+        float camDiffX = camPos.diffX(ope.pos); // is centred on a tile
         float camDiffY = camPos.diffY(ope.pos);
         
         float minGradDy, maxGradDy;
@@ -270,31 +261,23 @@ public class TileRenderer implements Renderer {
                 .align().clampToTile();
         maxCorner.set(camPos, drawToRight ? wr.tilesHorizontal : camDiffX, wr.tilesVertical + 1)
                 .align().clampToTile();
-        //int camSliceX = camPos.getSliceX();
-        //int camSliceY = camPos.getSliceY();
         
-        for(int c = minCorner.getSliceX();
-                c <= maxCorner.getSliceX();
-                c++) {
-            for(int r = minCorner.getSliceY();
-                    r <= maxCorner.getSliceY();
-                    r++) {
-                renderSlice(w.getSliceAt(c, r), wr.camObj.pos, (x,y) -> {
+        for(int x = minCorner.getSliceX(); x <= maxCorner.getSliceX(); x++) {
+            for(int y = minCorner.getSliceY(); y <= maxCorner.getSliceY(); y++) {
+                renderSlice(w.getSliceAt(x, y), wr.camObj.pos, (dx,dy) -> {
+                    dy += 0.5f; // centre on the tile
+                    dx += 0.5f; // centre on the tile
                     // We want
-                    // y/x > minGradDy / camDiffX, and
-                    // y/x < maxGradDy / camDiffX.
+                    // dy/dx > minGradDy/camDiffX, and
+                    // dy/dx < maxGradDy/camDiffX.
                     // To avoid accidental division by zero, rearrange to
-                    // y*camDiffX > x*minGradDy and
-                    // y*camDiffX < x*maxGradDy
-                    return y*camDiffX > x*minGradDy && y*camDiffX < x*maxGradDy;
+                    // dy*camDiffX > dx*minGradDy and
+                    // dy*camDiffX < dx*maxGradDy
+                    return dy*camDiffX > dx*minGradDy && dy*camDiffX < dx*maxGradDy;
                 });
                 slicesRendered++;
             }
         }
-        
-        //Slice s = pc.pairedWorld(world).getSliceAt(pe.pos);
-        
-        //renderSlice(s, camPos);
     }
     
     @FunctionalInterface
