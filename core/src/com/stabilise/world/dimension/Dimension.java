@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
-import com.stabilise.core.Settings;
 import com.stabilise.util.collect.registry.DuplicatePolicy;
 import com.stabilise.util.collect.registry.Registry;
 import com.stabilise.util.collect.registry.RegistryParams;
@@ -284,8 +283,10 @@ public abstract class Dimension {
      * registered.
      */
     public static void registerDimensions() {
-        registerDimension(Settings.getOverworldDefault(), "overworld", DimOverworld.class);
-        registerDimension(!Settings.getOverworldDefault(), "private(Temp)", DimPrivate.class);
+        registerDimension(true, "overworld", DimOverworld.class);
+        //registerDimension(!Settings.getOverworldDefault(), "private(Temp)", DimPrivate.class);
+        registerDimension(false, "flatland", DimFlatland.class);
+        
         registerPrivateDimension("privateDim", DimPrivate.class);
         
         DIMENSIONS.lock();

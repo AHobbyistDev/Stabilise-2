@@ -193,6 +193,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
             case PORTAL:
                 //String dim = "overworld";
                 String dim = game.playerData.data.getDimensionName();
+                //String dim = "flatland";
                 Entity portal = Entities.portal(dim);
                 portal.pos.set(e.pos, e.facingRight ? 3f : -3f, 0f).align();
                 portal.facingRight = !e.facingRight;

@@ -17,7 +17,7 @@ public class GameCamera extends GameObject implements WorldCamera {
     private Entity focus;
     
     /** Real position (i.e. ignoring shake). */
-    private Position realPos = new Position();
+    public final Position realPos = new Position();
     
     /** The strength with which the camera follows the focus. */
     private float followStrength = 0.25f;

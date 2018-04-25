@@ -43,6 +43,7 @@ public class FlatlandTerrainGen extends InstancedWorldgen {
                     s.setTileAt(x, y, Tiles.ice);
                 else
                     s.setTileAt(x, y, Tiles.glowstone);
+                s.setWallAt(x, y, Tiles.stone);
             }
         }
     }

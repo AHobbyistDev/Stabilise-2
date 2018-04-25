@@ -2,12 +2,12 @@ package com.stabilise.opengl.render;
 
 import static com.stabilise.world.Region.REGION_SIZE;
 import static com.stabilise.world.Region.REGION_SIZE_IN_TILES;
-import static com.stabilise.world.Slice.SLICE_SIZE;
 import static com.stabilise.world.Slice.SLICE_SIZE_MINUS_ONE;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 import com.stabilise.entity.Entity;
@@ -23,7 +23,6 @@ import com.stabilise.world.tile.Tile;
 public class TileRenderer implements Renderer {
     
     private static final Color transparentRed = new Color(0xFF000040);
-    //private static final Color transparentOrange= new Color(0xFF800040);
     private static final Color transparentYellow = new Color(0xFFFF0040);
     private static final Color transparentGreen = new Color(0x00FF0040);
     private static final Color transparentBlue = new Color(0x00FFFF40);
@@ -46,6 +45,7 @@ public class TileRenderer implements Renderer {
     
     private final Position minCorner = Position.create();
     private final Position maxCorner = Position.create();
+    private final Position camPosOtherDim = Position.create();
     
     
     /**
@@ -65,13 +65,11 @@ public class TileRenderer implements Renderer {
             lightLevels[i] = new Color(i*16/255f, i*16/255f, i*16/255f, 1f).toFloatBits();
         }
         
-        tiles = new TextureRegion[32]; // TODO: temp length
+        tiles = new TextureRegion[32];
         Tile.TILES.forEachEntry(t -> {
             if(t._2 != 0) // skip air
                 tiles[t._2] = wr.skin.getRegion("tile/" + t._1.split(":")[1]);
         });
-        
-        //System.out.println(tiles);
     }
     
     @Override
@@ -104,7 +102,6 @@ public class TileRenderer implements Renderer {
             }
         }
         //worldRenderer.batch.enableBlending();
-        //System.out.println(slicesRendered + " slices rendered");
     }
     
     /**
@@ -164,40 +161,23 @@ public class TileRenderer implements Renderer {
     }
     
     public void renderSliceBorders(ShapeRenderer shapes) {
-        // TODO: inefficient n^2 algo, use the 2n one instead
-        
-        // Yellow slice borders
-        shapes.setColor(Color.YELLOW);
-        
-        int camSliceX = wr.camObj.pos.getSliceX();
-        int camSliceY = wr.camObj.pos.getSliceY();
         Position camPos = wr.camObj.pos;
-        for(int x = camSliceX - wr.slicesHorizontal;
-                x <= camSliceX + wr.slicesHorizontal;
-                x++) {
-            for(int y = camSliceY - wr.slicesVertical;
-                    y <= camSliceY + wr.slicesVertical;
-                    y++) {
-                shapes.rect(camPos.diffX(x, 0f), camPos.diffY(y, 0f), SLICE_SIZE, SLICE_SIZE);
-            }
+        
+        int minX = camPos.getSliceX() - wr.slicesHorizontal;
+        int maxX = camPos.getSliceX() + wr.slicesHorizontal + 1;
+        int minY = camPos.getSliceY() - wr.slicesVertical;
+        int maxY = camPos.getSliceY() + wr.slicesVertical + 1;
+        
+        // Draw horizontal lines
+        for(int y = minY; y <= maxY; y++) {
+            shapes.setColor(Maths.remainder2(y, REGION_SIZE) == 0 ? Color.RED : Color.YELLOW);
+            shapes.line(camPos.diffX(minX, 0f), camPos.diffY(y, 0f), camPos.diffX(maxX, 0f), camPos.diffY(y, 0f));
         }
         
-        // Red region borders
-        shapes.setColor(Color.RED);
-        
-        int camRegionX = wr.camObj.pos.getRegionX();
-        int camRegionY = wr.camObj.pos.getRegionY();
-        int regionsHorizontal = wr.slicesHorizontal / REGION_SIZE;
-        int regionsVertical = wr.slicesVertical / REGION_SIZE;
-        for(int x = camRegionX - regionsHorizontal;
-                x <= camRegionX + regionsHorizontal;
-                x++) {
-            for(int y = camRegionY - regionsVertical;
-                    y <= camRegionY + regionsVertical;
-                    y++) {
-                shapes.rect(camPos.diffX(x*REGION_SIZE, 0f), camPos.diffY(y*REGION_SIZE, 0f),
-                        REGION_SIZE_IN_TILES, REGION_SIZE_IN_TILES);
-            }
+        // Draw vertical lines
+        for(int x = minX; x <= maxX; x++) {
+            shapes.setColor(Maths.remainder2(x, REGION_SIZE) == 0 ? Color.RED : Color.YELLOW);
+            shapes.line(camPos.diffX(x, 0f), camPos.diffY(minY, 0f), camPos.diffX(x, 0f), camPos.diffY(maxY, 0f));
         }
     }
     
@@ -231,40 +211,37 @@ public class TileRenderer implements Renderer {
         // if false, other dimension will display to the left of portal
         boolean drawToRight = !pe.facingRight;
         
-        float portalDiffX = wr.camObj.pos.diffX(pe.pos);
-        if((drawToRight && portalDiffX < 0) || (!drawToRight && portalDiffX > 0))
+        Position camPos = wr.camObj.pos;
+        
+        float diffX = camPos.diffX(pe.pos);
+        float diffY = camPos.diffY(pe.pos);
+        
+        if((drawToRight && diffX < 0) || (!drawToRight && diffX > 0))
             return;
-        
-        World w = pc.pairedWorld(world);
-        Entity ope = pc.pairedPortal(w);
-        
-        // The camera's position if it were in the other dimension.
-        Position camPos = Position.create().setSum(wr.camObj.pos, pc.offset).align();
-        
-        // Do proper positional calculations using the camera's pos in the
-        // other dimension
-        float camDiffX = camPos.diffX(ope.pos); // is centred on a tile
-        float camDiffY = camPos.diffY(ope.pos);
         
         float minGradDy, maxGradDy;
         
         if(pe.facingRight) {
-            minGradDy = camDiffY + pe.aabb.maxY();
-            maxGradDy = camDiffY + pe.aabb.minY();
+            minGradDy = diffY + pe.aabb.maxY();
+            maxGradDy = diffY + pe.aabb.minY();
         } else {
-            minGradDy = camDiffY + pe.aabb.minY();
-            maxGradDy = camDiffY + pe.aabb.maxY();
+            minGradDy = diffY + pe.aabb.minY();
+            maxGradDy = diffY + pe.aabb.maxY();
         }
         
+        // The camera's position if it were in the other dimension.
+        camPosOtherDim.setSum(camPos, pc.offset).align();
         
-        minCorner.set(camPos, drawToRight ? camDiffX : -wr.tilesHorizontal, -wr.tilesVertical)
+        minCorner.set(camPosOtherDim, drawToRight ? diffX : -wr.tilesHorizontal, -wr.tilesVertical)
                 .align().clampToTile();
-        maxCorner.set(camPos, drawToRight ? wr.tilesHorizontal : camDiffX, wr.tilesVertical + 1)
+        maxCorner.set(camPosOtherDim, drawToRight ? wr.tilesHorizontal : diffX, wr.tilesVertical + 1)
                 .align().clampToTile();
+        
+        World w = pc.pairedWorld(world);
         
         for(int x = minCorner.getSliceX(); x <= maxCorner.getSliceX(); x++) {
             for(int y = minCorner.getSliceY(); y <= maxCorner.getSliceY(); y++) {
-                renderSlice(w.getSliceAt(x, y), wr.camObj.pos, (dx,dy) -> {
+                renderSlice(w.getSliceAt(x, y), camPosOtherDim, (dx,dy) -> {
                     dy += 0.5f; // centre on the tile
                     dx += 0.5f; // centre on the tile
                     // We want
@@ -273,7 +250,7 @@ public class TileRenderer implements Renderer {
                     // To avoid accidental division by zero, rearrange to
                     // dy*camDiffX > dx*minGradDy and
                     // dy*camDiffX < dx*maxGradDy
-                    return dy*camDiffX > dx*minGradDy && dy*camDiffX < dx*maxGradDy;
+                    return dy*diffX > dx*minGradDy && dy*diffX < dx*maxGradDy;
                 });
                 slicesRendered++;
             }
