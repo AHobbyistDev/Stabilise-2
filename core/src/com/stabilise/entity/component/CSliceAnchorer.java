@@ -32,6 +32,10 @@ public class CSliceAnchorer extends AbstractComponent {
     /** true if we've done an initial anchoring of slices. */
     private boolean initialAnchor = false;
     
+    /** true if this anchorer has been disabled, which means it should be
+     * removed from the attached entity's components list */
+    private boolean disabled = false;
+    
     
     /**
      * Creates a slice anchorer component with radius {@link
@@ -58,6 +62,9 @@ public class CSliceAnchorer extends AbstractComponent {
     
     @Override
     public void update(World w, Entity e) {
+        if(disabled)
+            return;
+        
         int sliceX = e.pos.getSliceX();
         int sliceY = e.pos.getSliceY();
         
@@ -161,7 +168,7 @@ public class CSliceAnchorer extends AbstractComponent {
      * if this method has already been invoked once.
      */
     private void anchorAll(World w, Entity e, boolean check) {
-    	if(check && initialAnchor)
+    	if((check && initialAnchor) || disabled)
     		return;
     	
     	initialAnchor = true;
@@ -178,9 +185,14 @@ public class CSliceAnchorer extends AbstractComponent {
     }
     
     /**
-     * Deanchors all anchored slices.
+     * Deanchors all anchored slices. This permanently disables this component,
+     * and it will be removed from its attached entity soon.
      */
     public void deanchorAll(World w) {
+        if(disabled)
+            return;
+        disabled = true;
+        
         for(int x = minSliceX; x <= maxSliceX; x++)
             deanchorCol(w, x, minSliceY, maxSliceY);
     }
@@ -206,6 +218,11 @@ public class CSliceAnchorer extends AbstractComponent {
     	}
     	
     	return true;
+    }
+    
+    @Override
+    public boolean shouldRemove() {
+        return disabled;
     }
     
     @Override

@@ -116,8 +116,15 @@ public class WorldRenderer implements Renderer {
     private final List<ParticleIndicator> indicators = new ArrayList<>();
     
     // List for automatic resource disposal
-    private List<Disposable> disposables = new ArrayList<>();
+    private final List<Disposable> disposables = new ArrayList<>();
     
+    // Each tick we pick out the players and portals and do special render
+    // logic with them. Keep these lists as member variables to avoid creating
+    // new ones each frame.
+    private final List<Entity> players = new ArrayList<>();
+    private final List<Entity> portals = new ArrayList<>();
+    
+    @SuppressWarnings("unused")
     private final Log log = Log.getAgent("WorldRenderer");
     private final Profiler profiler = Application.get().profiler;
     
@@ -312,21 +319,30 @@ public class WorldRenderer implements Renderer {
         profiler.start("nonplayer"); // root.render.entities.nonplayer
         
         // Temporary way of ensuring the player is rendered on top
-        Entity playerEntity = null;
+        
         
         for(Entity e : world.getEntities()) {
             if(e.isPlayerControlled())
-                playerEntity = e;
+                players.add(e);
+            else if(e.core instanceof CPortal)
+                portals.add(e);
             else
                 e.render(this);
         }
         batch.flush();
         
+        profiler.next("portals");
+        for(Entity p : portals) {
+            tileRenderer.renderPortalView(p);
+            p.render(this);
+        }
+        portals.clear();
+        
         profiler.next("player");
-        if(playerEntity != null)
-            playerEntity.render(this); // render the player on top
-        else
-            log.postWarning("No player entity to render!");
+        for(Entity p : players) // render the player on top
+            p.render(this);
+        players.clear();
+        
         profiler.end();
         
         profiler.next("particles"); // root.render.particles

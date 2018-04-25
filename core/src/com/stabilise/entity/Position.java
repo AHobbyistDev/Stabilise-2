@@ -166,6 +166,21 @@ public class Position implements Exportable {
     }
     
     /**
+     * Reflects this Position (i.e., negates everything). This method does not
+     * invoke {@link #align()}, so lx and ly will almost certainly fall outside
+     * slice bounds.
+     * 
+     * @return this Position.
+     */
+    public Position reflect() {
+        sx = -sx;
+        sy = -sy;
+        lx = -lx;
+        ly = -ly;
+        return this;
+    }
+    
+    /**
      * Gets the x-coordinate of the region this Position is in.
      */
     public int getRegionX() {
@@ -281,6 +296,21 @@ public class Position implements Exportable {
     public void alignY() {
         sy += sliceCoordFromTileCoord2(ly);
         ly = tileCoordRelativeToSliceFromTileCoordFree2(ly);
+    }
+    
+    /**
+     * Turns this into a "global position", by setting {@link #sx} and {@link
+     * #sy} to zero and changing {@code #lx} and {@link #ly} in accordance.
+     * This method is essentially the opposite of {@link #align()}.
+     * 
+     * @return this Position.
+     */
+    public Position globalify() {
+        lx += tileCoordFromSliceCoord(sx);
+        ly += tileCoordFromSliceCoord(sy);
+        sx = 0;
+        sy = 0;
+        return this;
     }
     
     /**

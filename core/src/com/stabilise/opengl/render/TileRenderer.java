@@ -10,7 +10,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
+import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
+import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.world.Slice;
 import com.stabilise.world.tile.Tile;
 
@@ -102,7 +104,7 @@ public class TileRenderer implements Renderer {
             for(int r = camSliceY - wr.slicesVertical;
                     r <= camSliceY + wr.slicesVertical;
                     r++) {
-                renderSlice(c, r);
+                renderSlice(world.getSliceAt(c, r), wr.camObj.pos, (x,y) -> true);
                 slicesRendered++;
             }
         }
@@ -112,17 +114,16 @@ public class TileRenderer implements Renderer {
     
     /**
      * Renders a slice.
-     * 
-     * @param x The x-coordinate of the slice, in slice-lengths.
-     * @param y The y-coordinate of the slice, in slice-lengths.
      */
-    private void renderSlice(int x, int y) {
-        Slice slice = world.getSliceAt(x, y);
-        
+    private void renderSlice(Slice slice, Position camPos, TilePredicate pred) {
+        //Slice slice = world.getSliceAt(x, y);
         if(slice.isDummy())
             return;
         
-        Position camPos = wr.camObj.pos;
+        int x = slice.x;
+        int y = slice.y; 
+        
+        //Position camPos = wr.camObj.pos;
         
         // Relative to the camera, where the origin of this slice is
         float sliceOriginX = camPos.diffX(x, 0f);
@@ -144,7 +145,7 @@ public class TileRenderer implements Renderer {
             cx = sliceOriginX + xMin;
             for(int tx = xMin; tx <= xMax; tx++) {
                 int id = slice.getWallIDAt(tx, ty);
-                if(id != 0) { // i.e. not air
+                if(id != 0 && pred.test(cx, cy)) { // i.e. not air
                     // Temporary wall lighting; 2 + light/2
                     wr.batch.setColor(lightLevels[1 + slice.getLightAt(tx, ty)/4]);
                     wr.batch.draw(tiles[id], cx, cy, 1f, 1f);
@@ -160,7 +161,7 @@ public class TileRenderer implements Renderer {
             cx = sliceOriginX + xMin;
             for(int tx = xMin; tx <= xMax; tx++) {
                 int id = slice.getTileIDAt(tx, ty);
-                if(id != 0) { // i.e. not air
+                if(id != 0 && pred.test(cx, cy)) { // i.e. not air
                     wr.batch.setColor(lightLevels[slice.getLightAt(tx, ty)]);
                     wr.batch.draw(tiles[id], cx, cy, 1f, 1f);
                 }
@@ -210,9 +211,9 @@ public class TileRenderer implements Renderer {
     }
     
     public void renderRegionTint(ShapeRenderer shapes) {
-        if(!(world instanceof HostWorld))
+        if(!world.isHost())
             return;
-        HostWorld w = (HostWorld)world;
+        HostWorld w = world.asHost();
         
         Position camPos = wr.camObj.pos;
         
@@ -228,6 +229,84 @@ public class TileRenderer implements Renderer {
             shapes.rect(camPos.diffX(r.offsetX, 0f), camPos.diffY(r.offsetY, 0f),
                     REGION_SIZE_IN_TILES, REGION_SIZE_IN_TILES);
         });
+    }
+    
+    public void renderPortalView(Entity pe) {
+        CPortal pc = (CPortal) pe.core;
+        if(!pc.isOpen())
+            return;
+        
+        // If true, other dimension will display to the right of portal;
+        // if false, other dimension will display to the left of portal
+        boolean drawToRight = !pe.facingRight;
+        
+        float portalDiffX = wr.camObj.pos.diffX(pe.pos);
+        if((drawToRight && portalDiffX < 0) || (!drawToRight && portalDiffX > 0))
+            return;
+        
+        World w = pc.pairedWorld(world);
+        Entity ope = pc.pairedPortal(w);
+        
+        // The camera's position if it were in the other dimension.
+        Position camPos = Position.create().setSum(wr.camObj.pos, pc.offset).align();
+        
+        // Do proper positional calculations using the camera's pos in the
+        // other dimension
+        float camDiffX = camPos.diffX(ope.pos);
+        float camDiffY = camPos.diffY(ope.pos);
+        
+        float minGradDy, maxGradDy;
+        
+        if(pe.facingRight) {
+            minGradDy = camDiffY + pe.aabb.maxY();
+            maxGradDy = camDiffY + pe.aabb.minY();
+        } else {
+            minGradDy = camDiffY + pe.aabb.minY();
+            maxGradDy = camDiffY + pe.aabb.maxY();
+        }
+        
+        
+        minCorner.set(camPos, drawToRight ? camDiffX : -wr.tilesHorizontal, -wr.tilesVertical)
+                .align().clampToTile();
+        maxCorner.set(camPos, drawToRight ? wr.tilesHorizontal : camDiffX, wr.tilesVertical + 1)
+                .align().clampToTile();
+        //int camSliceX = camPos.getSliceX();
+        //int camSliceY = camPos.getSliceY();
+        
+        for(int c = minCorner.getSliceX();
+                c <= maxCorner.getSliceX();
+                c++) {
+            for(int r = minCorner.getSliceY();
+                    r <= maxCorner.getSliceY();
+                    r++) {
+                renderSlice(w.getSliceAt(c, r), wr.camObj.pos, (x,y) -> {
+                    // We want
+                    // y/x > minGradDy / camDiffX, and
+                    // y/x < maxGradDy / camDiffX.
+                    // To avoid accidental division by zero, rearrange to
+                    // y*camDiffX > x*minGradDy and
+                    // y*camDiffX < x*maxGradDy
+                    return y*camDiffX > x*minGradDy && y*camDiffX < x*maxGradDy;
+                });
+                slicesRendered++;
+            }
+        }
+        
+        //Slice s = pc.pairedWorld(world).getSliceAt(pe.pos);
+        
+        //renderSlice(s, camPos);
+    }
+    
+    @FunctionalInterface
+    private static interface TilePredicate {
+        /**
+         * Returns true if the tile at the given coordinates relative to the
+         * camera should be rendered.
+         * 
+         * @param x The x-coordinate of the tile, relative to the camera
+         * @param y The y-coordinate of the tile, relative to the camera
+         */
+        boolean test(float x, float y);
     }
     
 }

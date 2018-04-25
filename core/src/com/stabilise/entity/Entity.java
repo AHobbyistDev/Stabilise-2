@@ -1,7 +1,5 @@
 package com.stabilise.entity;
 
-import java.util.function.Predicate;
-
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.controller.CPlayerController;
@@ -132,16 +130,20 @@ public class Entity extends GameObject {
      * @return the first such component, or {@code null} if no component
      * matching the predicate exists.
      */
+    /*
     public Component getComponent(Predicate<Component> pred) {
     	for(int i = 0; i < components.size(); i++)
     		if(pred.test(components.get(i)))
     			return components.get(i);
     	return null;
     }
+    */
     
     /**
      * Gets the first component on this entity which is an instance of the
-     * specified class.
+     * specified class. Since this method uses a linear search it is obviously
+     * not very efficient when an entity has many components, so try not to
+     * overuse this.
      * 
      * @return the first such component, or {@code null} if no component of the
      * given class exists.

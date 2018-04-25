@@ -94,7 +94,7 @@ public class Constants {
             // Manually square this to make it a compile-time constant.
             (1 + 2*(LOADED_SLICE_RADIUS)) * (1 + 2*(LOADED_SLICE_RADIUS));
     /** How many ticks after coming out of use that a region should unload. */
-    public static final int REGION_UNLOAD_TICK_BUFFER = 10 * TICKS_PER_SECOND;
+    public static final int REGION_UNLOAD_TICK_BUFFER = 5 * TICKS_PER_SECOND;
     
     /** How large a character's inventory is. */
     public static final int INVENTORY_CAPACITY = 36;

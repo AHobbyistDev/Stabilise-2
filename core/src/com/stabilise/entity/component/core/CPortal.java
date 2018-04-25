@@ -1,6 +1,5 @@
 package com.stabilise.entity.component.core;
 
-import com.badlogic.gdx.math.Vector2;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
@@ -18,9 +17,6 @@ import com.stabilise.world.World;
  */
 public class CPortal extends CCore {
     
-    public static final Vector2 LEFT = new Vector2(-1, 0);
-    public static final Vector2 RIGHT = new Vector2(1, 0);
-    
     private static enum State {
         WAITING_FOR_DIMENSION,
         OPEN,
@@ -33,10 +29,6 @@ public class CPortal extends CCore {
     private String pairedDimension;
     private State state = State.WAITING_FOR_DIMENSION;
     
-    /** The direction this portal is facing. Default: {@link #direction */
-    public Vector2 direction = LEFT;
-    
-    
     /** The position of the other portal in its own dimension. This shouldn't
      * be modified after either portal is added to the world. */
     public final Position otherPortalPos = Position.create();
@@ -48,7 +40,10 @@ public class CPortal extends CCore {
     
     /** true if we are the original portal, false if we were created by the
      * original portal. */
-    public boolean original = true;
+    private boolean original = true;
+    
+    /** Cache the ID for convenience here. */
+    private long id;
     
     
     public CPortal(String dimension) {
@@ -56,31 +51,61 @@ public class CPortal extends CCore {
     }
     
     private void onAddToWorld(World w, Entity e) {
+        id = e.id(); // cache the ID
+        
     	// Only do the setup if we're the original portal
         if(original) {
-            // Align and clamp our position, just to be safe
-            e.pos.align().clampToTile();
-            otherPortalPos.align().clampToTile();
+            // First clamp to the middle of a tile (since we have width 0.5 on
+            // each side, this will centre the portal on a tile), then align.
+            e.pos.clampToTile().add(0.5f, 0).align();
+            otherPortalPos.clampToTile().add(0.5f, 0).align();
             
-            offset.setDiff(otherPortalPos, e.pos).align();
+            // Subtract the direction vector since we enter from one edge of the
+            // first portal and exit from the opposite edge of the other.
+            offset.setDiff(otherPortalPos, e.pos).add(e.facingRight?1:-1, 0).align();
             
             // ope = "other portal entity", opc = "other portal core"
             Entity ope = Entities.portal(w.getDimensionName());
             CPortal opc = (CPortal) ope.core;
             
-            ope.setID(e.id()); // match our IDs
+            ope.setID(id); // match our IDs
             ope.pos.set(otherPortalPos);
+            ope.facingRight = !e.facingRight;
             
             opc.original = false;
             opc.otherPortalPos.set(e.pos);
-            opc.offset.setDiff(e.pos, ope.pos).align();
-            opc.direction.set(direction).scl(-1); // faces opposite direction
+            opc.offset.set(offset).reflect().align();
             opc.state = State.WAITING_FOR_DIMENSION;
             
             World w2 = w.multiverse().loadDimension(pairedDimension);
             w2.addEntityDontSetID(ope);
             ope.getComponent(CSliceAnchorer.class).anchorAll(w2, ope); // preanchor all slices
         }
+    }
+    
+    /**
+     * Closes the portal, if it is not already closed.
+     */
+    public void close(World w, Entity e) {
+        if(state == State.CLOSED)
+            return;
+        state = State.CLOSED;
+        
+        World w2 = pairedWorld(w);
+        Entity ope = w2.getEntity(id);
+        CPortal opc = (CPortal) ope.core;
+        
+        opc.state = State.CLOSED;
+        
+        // Deanchor both ends, being careful which world to deanchor in
+        e.getComponent(CSliceAnchorer.class).deanchorAll(w);
+        ope.getComponent(CSliceAnchorer.class).deanchorAll(w2);
+        
+        // Destroy the portal that isn't the original, because why not
+        if(original)
+            ope.destroy();
+        else
+            e.destroy();
     }
     
     @Override
@@ -91,8 +116,8 @@ public class CPortal extends CCore {
             	if(!original)
             		return;
             	
-            	HostWorld w2 = w.multiverse().getDimension(pairedDimension).asHost();
-            	Entity ope = w2.getEntity(e.id());
+            	HostWorld w2 = pairedWorld(w).asHost();
+            	Entity ope = w2.getEntity(id);
             	
             	// Might be null for a single tick if the other portal entity
             	// is still queued to be added to the other dimension.
@@ -113,16 +138,6 @@ public class CPortal extends CCore {
                 // do we remove ourselves?
                 break;
         }
-        
-        /*
-        w.getEntities().forEach(e2 -> {
-            if(!(e2.core instanceof CPortal)) {
-                if(e2.core.getAABB().intersects(getAABB(), e.pos.diffX(e2.pos), e.pos.diffY(e2.pos))) {
-                    w.multiverse().sendToDimension(w2, pairedDimension, e2, otherPortalPos);
-                }
-            }
-        });
-        */
     }
     
     @Override
@@ -137,25 +152,36 @@ public class CPortal extends CCore {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        switch(ev.type()) {
-            case ADDED_TO_WORLD:
-            	onAddToWorld(w, e);
-                break;
-            default:
-                break;
-        }
+        if(ev.equals(EntityEvent.ADDED_TO_WORLD))
+            onAddToWorld(w, e);
+        else if(ev.equals(EntityEvent.REMOVED_FROM_WORLD))
+            close(w, e);
         return false;
     }
     
+    /**
+     * Returns true if this portal is open.
+     */
     public boolean isOpen() {
         return state == State.OPEN;
     }
     
     /**
-     * Closes the portal.
+     * Returns the world this portal is paired to.
+     * 
+     * @param w The world this portal is in (needed for accessing the
+     * multiverse).
      */
-    public void close() {
-        // TODO
+    public World pairedWorld(World w) {
+        return w.multiverse().getDimension(pairedDimension);
+    }
+    
+    /**
+     * Gets the portal in the given paired dimension which is paired to this
+     * portal.
+     */
+    public Entity pairedPortal(World otherDimWorld) {
+        return otherDimWorld.getEntity(id);
     }
     
 }

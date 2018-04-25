@@ -195,6 +195,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 String dim = game.playerData.data.getDimensionName();
                 Entity portal = Entities.portal(dim);
                 portal.pos.set(e.pos, e.facingRight ? 3f : -3f, 0f).align();
+                portal.facingRight = !e.facingRight;
                 CPortal pCore = (CPortal) portal.core;
                 
                 if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
