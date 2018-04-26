@@ -13,7 +13,7 @@ import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSource;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Vec2;

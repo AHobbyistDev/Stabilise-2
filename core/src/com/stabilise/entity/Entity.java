@@ -8,7 +8,7 @@ import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.EntityEvent;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.collect.WeightingArrayList;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
@@ -118,8 +118,8 @@ public class Entity extends GameObject {
      * @throws NullPointerException if {@code c} is {@code null}.
      */
     public Entity addComponent(Component c) {
-        c.init(this);
-        components.add(c);
+        if(components.add(c))
+        	c.init(this);
         return this;
     }
     

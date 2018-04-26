@@ -1,4 +1,4 @@
-package com.stabilise.opengl;
+package com.stabilise.render.opengl;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Matrix4;

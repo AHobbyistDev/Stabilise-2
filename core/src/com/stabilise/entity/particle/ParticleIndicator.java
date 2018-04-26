@@ -1,7 +1,7 @@
 package com.stabilise.entity.particle;
 
 import com.badlogic.gdx.graphics.Color;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.world.World;
 
 /**

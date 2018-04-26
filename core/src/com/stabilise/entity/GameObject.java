@@ -1,6 +1,6 @@
 package com.stabilise.entity;
 
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.world.World;
 
 /**

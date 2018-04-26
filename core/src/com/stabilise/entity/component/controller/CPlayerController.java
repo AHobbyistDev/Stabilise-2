@@ -19,7 +19,7 @@ import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
 import com.stabilise.item.IContainer;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
 import com.stabilise.util.maths.Maths;

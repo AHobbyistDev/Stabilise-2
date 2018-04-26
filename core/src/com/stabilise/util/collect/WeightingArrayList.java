@@ -26,7 +26,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
         extends AbstractList<E>
         implements SimpleList<E>, RandomAccess {
     
-    private static final int TREE_THRESHOLD = Integer.MAX_VALUE; // TODO: temporary value
+    private static final int BINARY_SEARCH_THRESHOLD = Integer.MAX_VALUE; // TODO: temporary value
     
     private E[] data;
     private int size = 0;
@@ -68,7 +68,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
     public boolean add(E e) {
         Objects.requireNonNull(e);
         int w = e.getWeight(), w2;
-        if(size >= TREE_THRESHOLD) {
+        if(size >= BINARY_SEARCH_THRESHOLD) {
             return false; // TODO
         } else {
             for(int i = 0; i < size; i++) {

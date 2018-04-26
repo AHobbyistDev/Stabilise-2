@@ -1,4 +1,4 @@
-package com.stabilise.opengl.render.model;
+package com.stabilise.render.model;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;

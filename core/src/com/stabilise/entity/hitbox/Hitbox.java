@@ -7,7 +7,7 @@ import com.stabilise.entity.GameObject;
 import com.stabilise.entity.damage.DamageType;
 import com.stabilise.entity.damage.GeneralSource;
 import com.stabilise.entity.damage.IDamageSource;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
 

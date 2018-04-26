@@ -8,7 +8,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.item.IContainer;
 import com.stabilise.item.ItemStack;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
@@ -62,8 +62,10 @@ public class CItem extends CCore {
     
     @Override
     public void update(World w, Entity e) {
-        if(e.age == DESPAWN_TICKS)
+        if(e.age == DESPAWN_TICKS) {
             e.destroy();
+            return;
+        }
         
         if(e.age == 60 || e.age == 120 || e.age == 600) {
             for(Entity o : w.getEntities()) {

@@ -41,7 +41,7 @@ public class ArrayUtil {
     
     /**
      * Performs a deep copy of the given 2D array (because arr.clone() does
-     * not work as one would expect >.<).
+     * not work as one would expect).
      * 
      * @throws NullPointerException if {@code arr} is {@code null}.
      */

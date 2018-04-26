@@ -5,7 +5,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.component.CSliceAnchorer;
 import com.stabilise.entity.event.EntityEvent;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;

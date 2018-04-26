@@ -1,6 +1,6 @@
 package com.stabilise.entity;
 
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Checks;
 import com.stabilise.util.collect.SimpleList;
 import com.stabilise.util.collect.UnorderedArrayList;

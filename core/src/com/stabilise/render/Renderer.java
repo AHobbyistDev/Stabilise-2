@@ -1,4 +1,4 @@
-package com.stabilise.opengl.render;
+package com.stabilise.render;
 
 /**
  * A renderer is a mechanism which performs certain rendering operations.

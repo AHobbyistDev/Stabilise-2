@@ -4,7 +4,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.AbstractComponent;
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.damage.IDamageSource;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 

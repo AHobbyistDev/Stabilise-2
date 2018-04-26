@@ -1,4 +1,4 @@
-package com.stabilise.opengl.render;
+package com.stabilise.render;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

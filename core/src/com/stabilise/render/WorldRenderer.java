@@ -1,4 +1,4 @@
-package com.stabilise.opengl.render;
+package com.stabilise.render;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ import com.stabilise.entity.component.core.*;
 import com.stabilise.entity.particle.*;
 import com.stabilise.item.Item;
 import com.stabilise.item.Items;
-import com.stabilise.opengl.render.model.ModelPlayer;
+import com.stabilise.render.model.ModelPlayer;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.maths.Maths;

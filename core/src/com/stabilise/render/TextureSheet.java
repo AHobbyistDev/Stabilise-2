@@ -1,4 +1,4 @@
-package com.stabilise.opengl;
+package com.stabilise.render;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;

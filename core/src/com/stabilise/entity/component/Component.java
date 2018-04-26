@@ -25,10 +25,11 @@ public interface Component extends IWeightProvider, IDuplicateResolver<Component
     
     /**
      * Initialises this component. Invoked when {@link
-     * Entity#addComponent(Component) added to an entity}, immediately before
-     * being added to the entity's list of components. If this is one of the
-     * entity's priviliged three components, this is invoked by the entity's
-     * constructor.
+     * Entity#addComponent(Component) added to an entity}, immediately
+     * <em>after</em> being added to the entity's list of components (that is,
+     * only if this component was successfully added, and was not rejected).
+     * If this is one of the entity's priviliged three components, this is
+     * invoked by the entity's constructor.
      */
     void init(Entity e);
     

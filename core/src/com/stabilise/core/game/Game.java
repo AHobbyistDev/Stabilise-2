@@ -12,7 +12,7 @@ import com.stabilise.entity.component.controller.CPlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.HostWorld;

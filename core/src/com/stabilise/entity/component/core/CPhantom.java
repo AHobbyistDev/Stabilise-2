@@ -1,7 +1,7 @@
 package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 

@@ -1,4 +1,4 @@
-package com.stabilise.opengl.render;
+package com.stabilise.render;
 
 import static com.stabilise.world.Region.REGION_SIZE;
 import static com.stabilise.world.Region.REGION_SIZE_IN_TILES;
@@ -42,7 +42,9 @@ public class TileRenderer implements Renderer {
     TextureRegion[] tiles;
     private float[] lightLevels;
     
-    
+    // minCorner and maxCorner provide screen border cutoffs so that
+    // renderSlice() can save some work by only rendering tiles on the
+    // screen.
     private final Position minCorner = Position.create();
     private final Position maxCorner = Position.create();
     private final Position camPosOtherDim = Position.create();
@@ -98,7 +100,6 @@ public class TileRenderer implements Renderer {
         for(int x = minCorner.getSliceX(); x <= maxCorner.getSliceX(); x++) {
             for(int y = minCorner.getSliceY(); y <= maxCorner.getSliceY(); y++) {
                 renderSlice(world.getSliceAt(x, y), wr.camObj.pos, (dx,dy) -> true);
-                slicesRendered++;
             }
         }
         //worldRenderer.batch.enableBlending();
@@ -158,6 +159,8 @@ public class TileRenderer implements Renderer {
             }
             cy += 1f;
         }
+        
+        slicesRendered++;
     }
     
     public void renderSliceBorders(ShapeRenderer shapes) {
@@ -213,29 +216,33 @@ public class TileRenderer implements Renderer {
         
         Position camPos = wr.camObj.pos;
         
-        float diffX = camPos.diffX(pe.pos);
+        // Need tileDiffX separately or else some unlucky very precise addition
+        // will end up rendering tiles in front of the portal, and flickering
+        // sometimes.
+        float tileDiffX = camPos.diffX(pe.pos);
+        float diffX = tileDiffX + (drawToRight ? pe.aabb.minX() : pe.aabb.maxX());
         float diffY = camPos.diffY(pe.pos);
         
-        if((drawToRight && diffX < 0) || (!drawToRight && diffX > 0))
+        if((drawToRight && diffX <= 0) || (!drawToRight && diffX >= 0))
             return;
         
         float minGradDy, maxGradDy;
         
-        if(pe.facingRight) {
-            minGradDy = diffY + pe.aabb.maxY();
-            maxGradDy = diffY + pe.aabb.minY();
-        } else {
-            minGradDy = diffY + pe.aabb.minY();
+        if(drawToRight) {
+        	minGradDy = diffY + pe.aabb.minY();
             maxGradDy = diffY + pe.aabb.maxY();
+        } else {
+        	minGradDy = diffY + pe.aabb.maxY();
+            maxGradDy = diffY + pe.aabb.minY();
         }
         
         // The camera's position if it were in the other dimension.
         camPosOtherDim.setSum(camPos, pc.offset).align();
         
-        minCorner.set(camPosOtherDim, drawToRight ? diffX : -wr.tilesHorizontal, -wr.tilesVertical)
-                .align().clampToTile();
-        maxCorner.set(camPosOtherDim, drawToRight ? wr.tilesHorizontal : diffX, wr.tilesVertical + 1)
-                .align().clampToTile();
+        minCorner.set(camPosOtherDim, drawToRight ? tileDiffX : -wr.tilesHorizontal, -wr.tilesVertical)
+        		.clampToTile().align();
+        maxCorner.set(camPosOtherDim, drawToRight ? wr.tilesHorizontal : tileDiffX, wr.tilesVertical + 1)
+        		.clampToTile().align();
         
         World w = pc.pairedWorld(world);
         
@@ -247,12 +254,9 @@ public class TileRenderer implements Renderer {
                     // We want
                     // dy/dx > minGradDy/camDiffX, and
                     // dy/dx < maxGradDy/camDiffX.
-                    // To avoid accidental division by zero, rearrange to
-                    // dy*camDiffX > dx*minGradDy and
-                    // dy*camDiffX < dx*maxGradDy
+                    // Rearranging to avoid division by zero, we get...
                     return dy*diffX > dx*minGradDy && dy*diffX < dx*maxGradDy;
                 });
-                slicesRendered++;
             }
         }
     }

@@ -2,7 +2,7 @@ package com.stabilise.world.tile.tileentity;
 
 import com.stabilise.entity.GameObject;
 import com.stabilise.entity.Position;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.collect.registry.TypeFactory;
 import com.stabilise.util.io.data.DataCompound;

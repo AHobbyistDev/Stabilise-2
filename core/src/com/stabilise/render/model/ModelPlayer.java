@@ -1,4 +1,4 @@
-package com.stabilise.opengl.render.model;
+package com.stabilise.render.model;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -8,7 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.stabilise.core.Resources;
 import com.stabilise.entity.component.core.CBaseMob;
 import com.stabilise.entity.component.core.CPerson;
-import com.stabilise.opengl.TextureSheet;
+import com.stabilise.render.TextureSheet;
 import com.stabilise.util.maths.Point;
 
 /**
