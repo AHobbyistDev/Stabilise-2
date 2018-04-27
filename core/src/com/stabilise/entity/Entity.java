@@ -4,12 +4,15 @@ import com.stabilise.entity.component.Component;
 import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.controller.CPlayerController;
 import com.stabilise.entity.component.core.CCore;
+import com.stabilise.entity.component.core.CPhantom;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.collect.WeightingArrayList;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.Exportable;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
@@ -21,20 +24,20 @@ import com.stabilise.world.World;
  * Component components}, an approach I have opted for over inheritance since
  * it is far more flexible.
  */
-public class Entity extends GameObject {
+public class Entity extends GameObject implements Exportable {
     
-    private      long        id;
-    public       long        age;
+    private long       id;
+    public  long       age;
     
     // Core physical properties
-    public       float       dx, dy;
-    public       AABB        aabb;
-    public       boolean     facingRight;
+    public float       dx, dy;
+    public AABB        aabb;
+    public boolean     facingRight;
     
     // Components
-    public final CPhysics    physics;
-    public       CController controller;
-    public final CCore       core;
+    public CPhysics    physics;
+    public CController controller;
+    public CCore       core;
     
     public final WeightingArrayList<Component> components =
             new WeightingArrayList<>(new Component[2]);
@@ -198,5 +201,25 @@ public class Entity extends GameObject {
     public boolean isPlayerControlled() {
         return controller instanceof CPlayerController;
     }
+    
+    /**
+     * Returns true if this entity is a phantom (a "clone" of an entity in a
+     * different dimension).
+     * 
+     * @see CPhantom
+     */
+    public boolean isPhantom() {
+    	return core instanceof CPhantom;
+    }
+    
+	@Override
+	public void importFromCompound(DataCompound o) {
+		// TODO Auto-generated method stub
+	}
+	
+	@Override
+	public void exportToCompound(DataCompound o) {
+		// TODO Auto-generated method stub
+	}
     
 }

@@ -74,11 +74,6 @@ public abstract class TileEntity extends GameObject {
     }
     
     @Override
-    public void update(World world) {
-        // nothing in the default implementation
-    }
-    
-    @Override
     public void render(WorldRenderer renderer) {
         // nothing in the default implementation
     }

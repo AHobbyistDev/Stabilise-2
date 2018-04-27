@@ -12,6 +12,9 @@ import com.stabilise.world.World;
  * hitboxes where appropriate, etc.) and forwards them to the original entity.
  * When the entity crosses the portal boundary it has its components hotswapped
  * out with those of the phantom; the original then becomes the phantom.
+ * 
+ * @see CPortal
+ * @see CNearbyPortal
  */
 public class CPhantom extends CCore {
     

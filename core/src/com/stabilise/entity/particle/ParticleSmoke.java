@@ -31,7 +31,7 @@ public class ParticleSmoke extends ParticlePhysical {
     }
     
     @Override
-    public void update(World world) {
+    protected void update(World world) {
         dx *= DX_MULT;
         dy -= (dy - 0.4f) * 0.08f;
         

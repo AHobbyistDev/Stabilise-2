@@ -71,7 +71,7 @@ public class Hitbox extends GameObject {
      * applicable and resolving the collision appropriately.
      */
     @Override
-    public void update(World world) {
+    protected void update(World world) {
     	// No need to check since this is done by updateAndCheck().
         //if(isDestroyed())
         //    return;

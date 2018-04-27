@@ -23,7 +23,8 @@ public class ParticleFlame extends ParticlePhysical {
     public float opacity;
     
     
-    public void update(World world) {
+    @Override
+    protected void update(World world) {
         super.update(world);
         
         dy += -0.02f / 32f; //world.gravity / 32f;

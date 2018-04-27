@@ -31,13 +31,15 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     
     
     @Override
-    public void update(World w) {
+    protected void update(World w) {
         if(playerInRange(w)) {
             // Ugly way of lazily initialising...
             if(fireGen == null) {
                 fireGen = w.particleSource(ParticleFlame.class);
                 smokeGen = w.particleSource(ParticleSmoke.class);
-                centrePos.set(pos).clampToTile().add(0.5f, 0.5f); // TODO: should be set sooner
+                
+                // TODO: should be set sooner
+                centrePos.set(pos).clampToTile().add(0.5f, 0.5f);
             }
             
             if(--ticksUntilNextSpawn == 0) {

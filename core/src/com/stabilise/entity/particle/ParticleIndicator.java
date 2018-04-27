@@ -35,7 +35,7 @@ public class ParticleIndicator extends Particle {
     
     
     @Override
-    public void update(World world) {
+    protected void update(World world) {
         super.update(world);
         
         pos.ly += dy;

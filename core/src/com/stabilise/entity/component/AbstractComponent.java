@@ -47,7 +47,8 @@ public abstract class AbstractComponent implements Component {
     
     /**
      * This implementation returns {@code true} if the given object is of the
-     * same class as this one.
+     * same class as this one. This is a reasonable default for component
+     * equality.
      */
     @Override
     public boolean equals(Object o) {

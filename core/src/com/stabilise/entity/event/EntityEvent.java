@@ -6,10 +6,20 @@ import com.stabilise.util.concurrent.event.Event;
 import com.stabilise.world.World;
 
 
+/**
+ * An EntityEvent is a special type of event that is posted to an {@link
+ * Entity} to notify its components of, allow them to modify, and perform
+ * reactions in response to, actions effected upon it. Unlike the parent {@link
+ * Event} class, entity events are not posted to an EventDispatcher, but are
+ * rather bubbled through an entity's list of components.
+ * 
+ * @see Entity#post(World, EntityEvent)
+ * @see Component#handle(World, Entity, EntityEvent)
+ */
 public class EntityEvent extends Event {
     
     /**
-     * An identifying type for an event; enums can be switched for efficient
+     * An identifying type for an event; enums can be 'switched' for efficient
      * handler code.
      */
     public static enum Type {
@@ -29,6 +39,9 @@ public class EntityEvent extends Event {
         TILE_COLLISION_V,
         DAMAGED,
         KILLED,
+        /** When the entity changes dimensions, and has its components swapped
+         * out with its phantom. */
+        DIMENSION_CHANGE,
     }
     
     public static final EntityEvent
