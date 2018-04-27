@@ -83,7 +83,6 @@ public class CPlayerController extends CController implements Controllable, Inpu
         else if(controller.isControlPressed(Control.RIGHT))
             mob.move(Direction.RIGHT);
         
-        //if(Constants.DEV_VERSION) {
         if(controller.isControlPressed(Control.FLYRIGHT))
             e.dx += 1f;
         if(controller.isControlPressed(Control.FLYLEFT))
@@ -92,7 +91,6 @@ public class CPlayerController extends CController implements Controllable, Inpu
             e.dy += 1f;
         if(controller.isControlPressed(Control.FLYDOWN))
             e.dy -= 1f;
-        //}
         
         if(worldRenderer == null) {
             // TODO: Temporary way of grabbing the renderer

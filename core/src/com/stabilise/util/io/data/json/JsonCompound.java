@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.SerializationException;
 import com.badlogic.gdx.utils.JsonValue.ValueType;
+import com.stabilise.util.Checks;
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.box.*;
 import com.stabilise.util.io.DataInStream;
@@ -55,6 +56,7 @@ public class JsonCompound extends MapCompound {
                 v = new JsonValue(((BoolBox)tag).get());
             } else if(tag instanceof ByteArrBox) {
                 //v = new JsonValue(((ByteArrBox)tag).get());
+                throw Checks.unsupported("byte array is no bueno for now");
             } else if(tag instanceof ByteBox) {
                 v = new JsonValue(((ByteBox)tag).get());
             } else if(tag instanceof CharBox) {
@@ -65,6 +67,7 @@ public class JsonCompound extends MapCompound {
                 v = new JsonValue(((FloatBox)tag).get());
             } else if(tag instanceof IntArrBox) {
                 //v = new JsonValue(((IntArrBox)tag).get());
+                throw Checks.unsupported("int array is no bueno for now");
             } else if(tag instanceof IntBox) {
                 v = new JsonValue(((IntBox)tag).get());
             } else if(tag instanceof LongBox) {

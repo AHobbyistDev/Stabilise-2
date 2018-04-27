@@ -153,7 +153,7 @@ public class HUDRenderer implements Renderer {
         outer:
         for(String s : profilerStack) {
             for(Profiler.SectionData data : profilerLevel.getConstituents()) {
-                if(data.name == s) {
+                if(data.name.equals(s)) {
                     profilerLevel = data;
                     continue outer;
                 }

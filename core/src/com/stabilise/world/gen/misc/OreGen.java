@@ -56,17 +56,12 @@ public class OreGen implements IWorldGenerator {
         Interpolation interp = Interpolation.QUADRATIC.inOut;
         int max = SLICE_SIZE/2;
         
-        double[] factors = new double[SLICE_SIZE*SLICE_SIZE];
-        int i = 0;
-        
         for(int y = 0; y < SLICE_SIZE; y++) {
             for(int x = 0; x < SLICE_SIZE; x++) {
-                
                 // x and y factors range from 0-8; min at edges, max at centre
                 float xFact = interp.transform((max - (x <= max ? max-x-1 : x-max))/(float)max);
                 float yFact = interp.transform((max - (y <= max ? max-y-1 : y-max))/(float)max);
                 double fact = Math.sqrt(xFact*yFact);
-                factors[i++] = fact;
                 int stoneID = Tiles.stone.getID();
                 if(noise.noise(baseX + x, baseY + y) * fact > 0.5 
                         && s.getTileIDAt(x, y) == stoneID) {

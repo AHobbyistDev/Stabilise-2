@@ -433,6 +433,12 @@ public class Position implements Exportable {
     }
     
     @Override
+    public int hashCode() {
+        // a bit crap of a hashcode but meh
+        return sx ^ sy ^ Float.hashCode(lx) ^ Float.hashCode(ly);
+    }
+    
+    @Override
     public boolean equals(Object o) {
         if(o == this) return true;
         if(!(o instanceof Position)) return false;

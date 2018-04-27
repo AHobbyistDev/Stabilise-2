@@ -212,14 +212,14 @@ public class Entity extends GameObject implements Exportable {
     	return core instanceof CPhantom;
     }
     
-	@Override
-	public void importFromCompound(DataCompound o) {
-		// TODO Auto-generated method stub
-	}
-	
-	@Override
-	public void exportToCompound(DataCompound o) {
-		// TODO Auto-generated method stub
-	}
+    @Override
+    public void importFromCompound(DataCompound o) {
+        
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound o) {
+        
+    }
     
 }

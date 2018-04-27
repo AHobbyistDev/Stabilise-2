@@ -156,6 +156,7 @@ public abstract class CachedFileSource extends FileSource {
             // whether or not we've read all of the file without expanding
             // fileBytes and attempting to read another chunk.
             fileBytes = new byte[src.available() + 1];
+            this.src = src;
         }
         
         @Override

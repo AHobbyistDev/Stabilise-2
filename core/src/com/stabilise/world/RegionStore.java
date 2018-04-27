@@ -15,7 +15,6 @@ import javax.annotation.concurrent.GuardedBy;
 
 import com.stabilise.util.Checks;
 import com.stabilise.util.Log;
-import com.stabilise.util.annotation.ThreadSafeMethod;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.concurrent.Striper;
@@ -179,20 +178,6 @@ public class RegionStore {
     @ThreadUnsafeMethod
     public Region getRegion(int x, int y) {
         return regions.get(unguardedDummyLoc.set(x, y));
-    }
-    
-    /**
-     * Gets the region at the specified location.
-     * 
-     * @param point The region's location, whose coordinates are in
-     * region-lengths.
-     * 
-     * @return The region, or {@code null} if no such region exists in primary
-     * storage.
-     */
-    @ThreadSafeMethod
-    private Region getRegion(Point point) {
-        return regions.get(point);
     }
     
     /**

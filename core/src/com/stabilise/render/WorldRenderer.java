@@ -64,7 +64,6 @@ public class WorldRenderer implements Renderer {
     public final AbstractWorld world;
     /** The camera. */
     public final GameCamera camObj;
-    public final Entity player;
     public final CPlayerController controller;
     
     //public final HUDRenderer hudRenderer;
@@ -141,7 +140,6 @@ public class WorldRenderer implements Renderer {
         
         this.world = world;
         
-        this.player = player;
         camObj = world.camera;
         this.controller = controller;
         

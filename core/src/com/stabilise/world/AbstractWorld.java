@@ -61,8 +61,6 @@ public abstract class AbstractWorld implements World {
      * {@code destroy()} is invoked, this would also invalidate its position in
      * the dimension it is being moved to. */
     private final LongList entitiesToRemove = new LongList();
-    /** The number of hostile mobs in the world. */
-    protected int hostileMobCount = 0;
     
     /** Stores tile entities for iteration and updating. A loaded tile entity
      * need not exist in this list if it does not require updates. */
