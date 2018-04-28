@@ -1,23 +1,21 @@
 package com.stabilise.item;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
-import com.stabilise.util.io.DataInStream;
-import com.stabilise.util.io.DataOutStream;
-import com.stabilise.util.io.Sendable;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
-import com.stabilise.util.io.data.nbt.NBTList;
+import com.stabilise.util.io.data.Exportable;
 
 /**
  * A container is something which contains items - e.g. player inventory,
  * chest.
  */
-public abstract class Container implements IContainer, Iterable<ItemStack>, Sendable {
+public abstract class Container implements IContainer,
+                                           Iterable<ItemStack>,
+                                           Exportable {
     
     /**
      * Checks for whether or not this container is a bounded container.
@@ -363,45 +361,26 @@ public abstract class Container implements IContainer, Iterable<ItemStack>, Send
         return sb.toString();
     }
     
-    /**
-     * Gets the container in the form of an NBT list tag.
-     * 
-     * @return The container in the form of an NBT list tag.
-     */
-    public DataList toNBT() {
-        DataList tag = DataList.create();
-        for(int i = 0; i < size(); i++) {
-            if(!isSlotEmpty(i)) {
-                DataCompound c = getStack(i).toNBT();
-                c.put("slot", (byte)i);
-                tag.add(c);
-            }
-        }
-        return tag;
-    }
-    
-    /**
-     * Loads the container from an NBT list tag.
-     * 
-     * @param tag The NBT list tag.
-     */
-    public void fromNBT(DataList tag) {
-        while(tag.hasNext()) {
-            DataCompound stackTag = tag.getCompound();
-            byte slot = stackTag.getByte("slot");
-            setSlot(slot, ItemStack.fromNBT(stackTag));
+    @Override
+    public void importFromCompound(DataCompound c) {
+        DataList l = c.getList("items");
+        while(l.hasNext()) {
+            DataCompound stack = l.getCompound();
+            byte slot = stack.getByte("slot");
+            setSlot(slot, ItemStack.createFromCompound(stack));
         }
     }
     
     @Override
-    public void readData(DataInStream in) throws IOException {
-        DataList l = new NBTList();
-        l.readData(in);
-        fromNBT(l);
-    }
-    
-    public void writeData(DataOutStream out) throws IOException {
-        toNBT().writeData(out);
+    public void exportToCompound(DataCompound c) {
+        DataList l = c.createList("items");
+        for(int i = 0; i < size(); i++) {
+            if(!isSlotEmpty(i)) {
+                DataCompound stack = l.createCompound();
+                getStack(i).exportToCompound(stack);
+                stack.put("slot", (byte)i);
+            }
+        }
     }
     
     /**

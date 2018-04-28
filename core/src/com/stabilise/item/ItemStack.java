@@ -1,6 +1,7 @@
 package com.stabilise.item;
 
 import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.Exportable;
 
 /**
  * This class represents a stack of identical items.
@@ -8,7 +9,7 @@ import com.stabilise.util.io.data.DataCompound;
  * <p>To instantiate an {@code ItemStack}, refer to {@link Item#stackOf()} or
  * {@link Item#stackOf(int)}.
  */
-public class ItemStack {
+public class ItemStack implements Exportable {
     
     //--------------------==========--------------------
     //-----=====Static Constants and Variables=====-----
@@ -30,6 +31,16 @@ public class ItemStack {
     /** The number of items in the stack. */
     private int quantity;
     
+    
+    /**
+     * Creates a new ItemStack.
+     * 
+     * <p>This constructor should be used exclusively by {@link
+     * #createFromCompound(DataCompound)}.
+     */
+    ItemStack(Item item) {
+        this.item = item;
+    }
     
     /**
      * Creates a new ItemStack. No checking is performed on the arguments.
@@ -198,17 +209,19 @@ public class ItemStack {
         }
     }
     
-    /**
-     * Writes this ItemStack to an NBT compound tag and returns the tag. The
-     * returned NBT data can be used to reconstruct this ItemStack via {@link
-     * #fromNBT(NBTTagCompound)}.
-     */
-    public DataCompound toNBT() {
-        DataCompound tag = item.toNBT();
-        tag.put("count", quantity);
+    @Override
+    public void importFromCompound(DataCompound o) {
+        quantity = o.getInt("count");
+        data = o.getInt("data");
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound o) {
+        item.exportToCompound(o);
+        
+        o.put("count", quantity);
         if(data != 0) // Don't write if it's 0 to save space.
-            tag.put("data", data);
-        return tag;
+            o.put("data", data);
     }
     
     @Override
@@ -233,21 +246,19 @@ public class ItemStack {
     //--------------------==========--------------------
     
     /**
-     * Reads an ItemStack from an NBT compound tag.
+     * Reads an ItemStack from a DataCompound.
      * 
-     * @param tag The tag.
-     * 
-     * @return The stack, or {@link #NO_STACK} if the tag represents an invalid
-     * item stack.
-     * @throws NullPointerException if {@code tag} is {@code null}.
+     * @return The stack, or {@link #NO_STACK} if the compound represents an
+     * invalid item stack.
+     * @throws NullPointerException if {@code o} is {@code null}.
      */
-    public static ItemStack fromNBT(DataCompound tag) {
-        Item item = Item.fromNBT(tag);
+    public static ItemStack createFromCompound(DataCompound o) {
+        Item item = Item.fromCompound(o);
         if(item == Item.NO_ITEM)
             return NO_STACK;
-        int quantity = tag.getInt("count");
-        int data = tag.getInt("data");
-        return item.stackOf(quantity, data);
+        ItemStack stack = new ItemStack(item);
+        stack.importFromCompound(o);
+        return stack;
     }
     
     //--------------------==========--------------------

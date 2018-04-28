@@ -11,6 +11,7 @@ import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.item.ItemStack;
 import com.stabilise.util.Direction;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
 /**
@@ -486,6 +487,54 @@ public abstract class CBaseMob extends CCore {
             return damage(w, e, ((EDamaged)ev).src);
         }
         return false;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        state = State.values()[c.getInt("state")];
+        stateTicks = c.getInt("stateTicks");
+        stateLockDuration = c.getInt("stateLockDuration");
+        
+        maxHealth = c.getInt("maxHealth");
+        health = c.getInt("health");
+        dead = c.getBool("dead");
+        invulnerable = c.getBool("invul");
+        invulnerabilityTicks = c.getInt("invulTicks");
+        
+        moving = c.getBool("moving");
+        jumpVelocity = c.getFloat("jumpVelocity");
+        acceleration = c.getFloat("acceleration");
+        airAcceleration = c.getFloat("airAcceleration");
+        swimAcceleration = c.getFloat("swimAcceleration");
+        maxDx = c.getFloat("maxDx");
+        
+        jumpCrouchDuration = c.getInt("jumpCrouchDuration");
+        maxJumpCount = c.getInt("maxJumpCount");
+        jumpCount = c.getInt("jumpCount");
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        c.put("state", state.ordinal());
+        c.put("stateTicks", stateTicks);
+        c.put("stateLockDuration", stateLockDuration);
+        
+        c.put("maxHealth", maxHealth);
+        c.put("health", health);
+        c.put("dead", dead);
+        c.put("invul", invulnerable);
+        c.put("invulTicks", invulnerabilityTicks);
+        
+        c.put("moving", moving);
+        c.put("jumpVelocity", jumpVelocity);
+        c.put("acceleration", acceleration);
+        c.put("airAcceleration", airAcceleration);
+        c.put("swimAcceleration", swimAcceleration);
+        c.put("maxDx", maxDx);
+        
+        c.put("jumpCrouchDuration", jumpCrouchDuration);
+        c.put("maxJumpCount", maxJumpCount);
+        c.put("jumpCount", jumpCount);
     }
     
 }

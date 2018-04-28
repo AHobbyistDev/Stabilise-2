@@ -5,6 +5,7 @@ import com.stabilise.entity.component.core.CBaseMob;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
 /**
@@ -93,6 +94,20 @@ public class CEnemyController extends CController {
             refreshAction(w, e);
         }
         return false;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        actionTimeout = c.getInt("actionTimeout");
+        action = EnumAction.values()[c.getInt("action")];
+        scared = c.getBool("scared");
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        c.put("actionTimeout", actionTimeout);
+        c.put("action", action.ordinal());
+        c.put("scared", scared);
     }
     
 }

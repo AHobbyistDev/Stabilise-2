@@ -115,13 +115,17 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     }
     
     @Override
-    protected void writeNBT(DataCompound tag) {
-        tag.put("ticksUntilNextSpawn", ticksUntilNextSpawn);
+    public void importFromCompound(DataCompound c) {
+        super.importFromCompound(c);
+        
+        ticksUntilNextSpawn = c.getInt("ticksUntilNextSpawn");
     }
     
     @Override
-    public void fromNBT(DataCompound tag) {
-        ticksUntilNextSpawn = tag.getInt("ticksUntilNextSpawn");
+    public void exportToCompound(DataCompound c) {
+        super.exportToCompound(c);
+        
+        c.put("ticksUntilNextSpawn", ticksUntilNextSpawn);
     }
     
 }

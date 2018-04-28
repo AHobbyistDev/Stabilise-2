@@ -7,6 +7,7 @@ import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.collect.IDuplicateResolver;
 import com.stabilise.util.collect.IWeightProvider;
+import com.stabilise.util.io.data.Exportable;
 import com.stabilise.world.World;
 
 
@@ -21,7 +22,9 @@ import com.stabilise.world.World;
  * {@link CController controller} component, and a {@link CPhysics physics}
  * component.
  */
-public interface Component extends IWeightProvider, IDuplicateResolver<Component> {
+public interface Component extends IWeightProvider,
+                                    IDuplicateResolver<Component>,
+                                    Exportable {
     
     /**
      * Initialises this component. Invoked when {@link

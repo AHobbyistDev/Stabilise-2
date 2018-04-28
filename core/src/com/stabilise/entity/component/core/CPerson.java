@@ -15,6 +15,7 @@ import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.AABB;
@@ -774,6 +775,34 @@ public class CPerson extends CBaseMob {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
             fireParticles = w.particleSource(ParticleFlame.class);
         return super.handle(w, e, ev);
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        super.importFromCompound(c);
+        
+        maxStamina = c.getInt("maxStamina");
+        stamina = c.getInt("stamina");
+        maxMana = c.getInt("maxMana");
+        mana = c.getInt("mana");
+        
+        ticksSinceHealthLoss = c.getInt("ticksSinceHpLoss");
+        ticksSinceStaminaLoss = c.getInt("ticksSinceSpLoss");
+        ticksSinceManaLoss = c.getInt("ticksSinceMpLoss");
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        super.exportToCompound(c);
+        
+        c.put("maxStamina", maxStamina);
+        c.put("stamina", stamina);
+        c.put("maxMana", maxMana);
+        c.put("mana", mana);
+        
+        c.put("ticksSinceHpLoss", ticksSinceHealthLoss);
+        c.put("ticksSinceSpLoss", ticksSinceStaminaLoss);
+        c.put("ticksSinceMpLoss", ticksSinceManaLoss);
     }
     
 }

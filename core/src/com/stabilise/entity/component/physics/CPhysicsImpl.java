@@ -4,8 +4,10 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
+import com.stabilise.util.Checks;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.Tile;
@@ -332,6 +334,16 @@ public class CPhysicsImpl extends CPhysics {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         return false;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        Checks.TODO(); // TODO
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        Checks.TODO(); // TODO
     }
     
 }

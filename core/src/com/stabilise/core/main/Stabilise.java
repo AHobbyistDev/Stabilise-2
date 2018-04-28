@@ -6,6 +6,7 @@ import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
 import com.stabilise.core.state.State;
+import com.stabilise.entity.component.Components;
 import com.stabilise.input.Controller;
 import com.stabilise.item.Item;
 import com.stabilise.util.ArrayUtil;
@@ -105,6 +106,7 @@ public class Stabilise extends Application {
                 Tile.registerTiles();
                 Item.registerItems();
                 Dimension.registerDimensions();
+                Components.registerComponentTypes();
                 TileEntity.poke();
                 
                 Controller.poke();

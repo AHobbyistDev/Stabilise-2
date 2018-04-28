@@ -2,6 +2,7 @@ package com.stabilise.entity.component.controller;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.event.EntityEvent;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
 /**
@@ -32,6 +33,16 @@ public class CIdleController extends CController {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         return false;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        // nothing to do
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        // nothing to do
     }
     
 }

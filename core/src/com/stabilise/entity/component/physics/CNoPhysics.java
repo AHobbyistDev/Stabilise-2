@@ -3,6 +3,7 @@ package com.stabilise.entity.component.physics;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.event.EntityEvent;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
 
@@ -22,5 +23,15 @@ public class CNoPhysics extends CPhysics {
     @Override public int getWeight() { return 0; }
     @Override public Action resolve(Component other) { return Action.REJECT; }
     @Override public boolean onGround() { return false; }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        // nothing to do
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        // nothing to do
+    }
     
 }

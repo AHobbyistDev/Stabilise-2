@@ -7,6 +7,7 @@ import com.stabilise.entity.component.Component;
 import com.stabilise.entity.damage.GeneralSource;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.particle.ParticleFlame;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
 
@@ -75,6 +76,22 @@ public class CEffectFire extends CParticleEffect<ParticleFlame> {
         damage += e.damage;
         extra++;
         return Action.REJECT;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        duration = c.getInt("duration");
+        age = c.getInt("age");
+        damage = c.getInt("damage");
+        extra = c.getInt("extra");
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        c.put("duration", duration);
+        c.put("age", age);
+        c.put("damage", damage);
+        c.put("extra", extra);
     }
     
 }

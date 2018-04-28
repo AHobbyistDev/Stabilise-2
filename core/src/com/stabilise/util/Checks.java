@@ -304,4 +304,18 @@ public class Checks {
         throw new IllegalStateException(msg);
     }
     
+    /**
+     * Throws a TODOException.
+     */
+    public static TODOException TODO() {
+        throw new TODOException();
+    }
+    
+    /**
+     * Throws a TODOException with the specified message.
+     */
+    public static TODOException TODO(String msg) {
+        throw new TODOException(msg);
+    }
+    
 }

@@ -22,7 +22,7 @@ public interface Exportable {
      * 
      * @param o The compound to write to. Not null.
      */
-    void importFromCompound(DataCompound o);
+    void importFromCompound(DataCompound c);
     
     /**
      * Exports this object to the given DataCompound. This method is
@@ -30,6 +30,6 @@ public interface Exportable {
      * 
      * @param o The compound to read from. Not null.
      */
-    void exportToCompound(DataCompound o);
+    void exportToCompound(DataCompound c);
     
 }

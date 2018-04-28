@@ -6,6 +6,8 @@ import com.stabilise.entity.Position;
 import com.stabilise.entity.component.CSliceAnchorer;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.render.WorldRenderer;
+import com.stabilise.util.Checks;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
@@ -45,6 +47,8 @@ public class CPortal extends CCore {
     /** Cache the ID for convenience here. */
     private long id;
     
+    
+    public CPortal() {}
     
     public CPortal(String dimension) {
         this.pairedDimension = dimension;
@@ -182,6 +186,16 @@ public class CPortal extends CCore {
      */
     public Entity pairedPortal(World otherDimWorld) {
         return otherDimWorld.getEntity(id);
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        Checks.TODO(); // TODO
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        Checks.TODO(); // TODO
     }
     
 }

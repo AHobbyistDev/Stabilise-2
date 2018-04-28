@@ -7,6 +7,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Checks;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.RegionState;
 import com.stabilise.world.World;
@@ -22,7 +23,7 @@ public class CSliceAnchorer extends AbstractComponent {
     
     
     /** "Radius" of the square of slices to keep anchored. */
-    private final int radius;
+    private int radius;
     /** The entity's most recent slice coordinates, which serve the centre of
      * the coordinates of the slices to keep anchored. */
     private int centreX, centreY;
@@ -244,6 +245,18 @@ public class CSliceAnchorer extends AbstractComponent {
     @Override
     public Action resolve(Component c) {
         throw new IllegalStateException("Two slices anchorers on the same entity?");
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        radius = c.getInt("radius");
+        disabled = c.getBool("disabled");
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        c.put("radius", radius);
+        c.put("disabled", disabled);
     }
     
 }

@@ -18,21 +18,18 @@ import com.stabilise.item.BoundedContainer;
 import com.stabilise.item.Container;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.Incomplete;
-import com.stabilise.util.io.DataInStream;
-import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.IOUtil;
-import com.stabilise.util.io.Sendable;
 import com.stabilise.util.io.data.Compression;
 import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.Exportable;
 import com.stabilise.util.io.data.Format;
-import com.stabilise.util.io.data.nbt.NBTCompound;
 import com.stabilise.world.dimension.Dimension;
 
 /**
  * Data about a character.
  */
 @Incomplete
-public class CharacterData implements Sendable {
+public class CharacterData implements Exportable {
     
     //--------------------==========--------------------
     //-----=====Static Constants and Variables=====-----
@@ -147,20 +144,7 @@ public class CharacterData implements Sendable {
         if(loaded)
             return;
         
-        DataCompound tag = IOUtil.read(getFile(), Format.NBT, Compression.GZIP);
-        
-        hash = tag.getString("hash");
-        
-        name = tag.getString("name");
-        
-        level = tag.getInt("level");
-        xp = tag.getInt("xp");
-        
-        maxHealth = tag.getInt("maxHealth");
-        maxStamina = tag.getInt("maxStamina");
-        maxMana = tag.getInt("maxMana");
-        
-        inventory.fromNBT(tag.getList("inventory"));
+        importFromCompound(IOUtil.read(getFile(), Format.NBT, Compression.GZIP));
         
         loaded = true;
     }
@@ -174,42 +158,36 @@ public class CharacterData implements Sendable {
     public void save() throws IOException {
         lastPlayed = new Date().getTime();
         
-        DataCompound tag = new NBTCompound();
+        DataCompound data = Format.NBT.newCompound();
+        exportToCompound(data);
         
-        tag.put("hash", hash);
-        
-        tag.put("name", name);
-        
-        tag.put("level", level);
-        tag.put("xp", xp);
-        
-        tag.put("maxHealth", maxHealth);
-        tag.put("maxStamina", maxStamina);
-        tag.put("maxMana", maxMana);
-        
-        tag.put("inventory", inventory.toNBT());
-        
-        IOUtil.writeSafe(getFile(), tag, Compression.GZIP);
+        IOUtil.writeSafe(getFile(), data, Compression.GZIP);
     }
     
     @Override
-    public void readData(DataInStream in) throws IOException {
-        hash = in.readString();
-        name = in.readString();
-        maxHealth = in.readInt();
-        maxStamina = in.readInt();
-        maxMana = in.readInt();
-        inventory.readData(in);
+    public void importFromCompound(DataCompound o) {
+        hash = o.getString("hash");
+        name = o.getString("name");
+        level = o.getInt("level");
+        xp = o.getInt("xp");
+        maxHealth = o.getInt("maxHealth");
+        maxStamina = o.getInt("maxStamina");
+        maxMana = o.getInt("maxMana");
+        
+        inventory.importFromCompound(o.getCompound("inventory"));
     }
     
     @Override
-    public void writeData(DataOutStream out) throws IOException {
-        out.writeString(hash);
-        out.writeString(name);
-        out.writeInt(maxHealth);
-        out.writeInt(maxStamina);
-        out.writeInt(maxMana);
-        inventory.writeData(out);
+    public void exportToCompound(DataCompound o) {
+        o.put("hash", hash);
+        o.put("name", name);
+        o.put("level", level);
+        o.put("xp", xp);
+        o.put("maxHealth", maxHealth);
+        o.put("maxStamina", maxStamina);
+        o.put("maxMana", maxMana);
+        
+        inventory.exportToCompound(o.createCompound("inventory"));
     }
     
     /**

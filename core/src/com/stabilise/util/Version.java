@@ -67,8 +67,8 @@ public class Version implements Comparable<Version>, Printable, Cloneable {
         this.patch = Checks.testMin(patch, 0);
         // We convert empty strings to null to prevent unpleasant loopbacks
         // from preRelease() and metadata().
-        this.preRe = Option.of(preRe.equals("") ? null : preRe).peek(s -> check(s, "pre-release"));
-        this.meta  = Option.of(meta.equals("")  ? null : meta ).peek(s -> check(s, "metadata"));
+        this.preRe = Option.of("".equals(preRe) ? null : preRe).peek(s -> check(s, "pre-release"));
+        this.meta  = Option.of("".equals(meta)  ? null : meta ).peek(s -> check(s, "metadata"));
     }
     
     /**

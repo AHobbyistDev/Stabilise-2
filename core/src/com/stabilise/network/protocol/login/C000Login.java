@@ -7,6 +7,7 @@ import com.stabilise.character.CharacterData;
 import com.stabilise.network.Packet;
 import com.stabilise.network.TCPConnection;
 import com.stabilise.network.protocol.PacketHandler;
+import com.stabilise.util.Checks;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 
@@ -26,12 +27,14 @@ public class C000Login extends Packet {
     @Override
     public void readData(DataInStream in) throws IOException {
         player = new CharacterData();
-        player.readData(in);
+        //player.readData(in);
+        Checks.TODO();
     }
     
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        player.writeData(out);
+        //player.writeData(out);
+        Checks.TODO();
     }
     
     @Override

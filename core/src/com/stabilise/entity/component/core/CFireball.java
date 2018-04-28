@@ -10,6 +10,8 @@ import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.render.WorldRenderer;
+import com.stabilise.util.Checks;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Polygon;
@@ -32,6 +34,9 @@ public class CFireball extends CBaseProjectile {
     private ParticleSource<ParticleFlame> particleSrc;
     private ParticleSource<ParticleExplosion> explosionSrc;
     private int damage;
+    
+    
+    public CFireball() {}
     
     public CFireball(long ownerID) {
         this(ownerID, DEFAULT_FIREBALL_DAMAGE);
@@ -160,6 +165,18 @@ public class CFireball extends CBaseProjectile {
             explosionSrc = w.particleSource(ParticleExplosion.class);
         }
         return super.handle(w, e, ev);
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        // TODO
+        Checks.TODO();
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        // TODO
+        Checks.TODO();
     }
     
 }

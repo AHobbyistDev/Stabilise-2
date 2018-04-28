@@ -2,6 +2,8 @@ package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.render.WorldRenderer;
+import com.stabilise.util.Checks;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
@@ -23,6 +25,8 @@ public class CPhantom extends CCore {
     /** The portal that connects us to the dimension that our base is from. */
     public Entity portal;
     
+    
+    public CPhantom() {}
     
     /**
      * @param base the entity in the other dimension that we are the phantom of
@@ -46,6 +50,16 @@ public class CPhantom extends CCore {
     @Override
     public AABB getAABB() {
         return base.core.getAABB();
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        Checks.TODO(); // TODO
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        Checks.TODO(); // TODO
     }
     
 }

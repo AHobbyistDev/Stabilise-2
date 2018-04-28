@@ -2,7 +2,9 @@ package com.stabilise.entity.component;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.core.CPortal;
+import com.stabilise.util.Checks;
 import com.stabilise.util.annotation.Incomplete;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
 /**
@@ -48,6 +50,16 @@ public class CNearbyPortal extends AbstractComponent {
     public Action resolve(Component c) {
         // There may be multiple nearby portals, so keep both
         return Action.KEEP_BOTH;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        Checks.TODO(); // TODO
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        Checks.TODO(); // TODO
     }
     
 }

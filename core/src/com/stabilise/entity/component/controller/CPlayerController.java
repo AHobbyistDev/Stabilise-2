@@ -22,6 +22,7 @@ import com.stabilise.item.IContainer;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.Tile;
@@ -48,7 +49,6 @@ public class CPlayerController extends CController implements Controllable, Inpu
     private final int maxTileID;
     /** Radius of the tile brush. */
     public float radius = 0.5f;
-    
     
     
     /**
@@ -277,6 +277,16 @@ public class CPlayerController extends CController implements Controllable, Inpu
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         return false;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        // nothing to do
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        // nothing to do
     }
     
 }
