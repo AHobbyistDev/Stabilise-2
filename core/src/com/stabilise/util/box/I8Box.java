@@ -8,38 +8,47 @@ import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.ITag;
 
-public class ShortBox implements ITag {
+
+/**
+ * Boxes a single byte value.
+ */
+public class I8Box implements ITag {
     
-    private short value;
+    /** Returns 0 */
+    public static byte defaultValue() { return 0; }
+    
+    
+    
+    private byte value;
     
     
     /**
-     * Creates a new ShortBox holding the value 0.
+     * Creates a new ByteBox holding the value 0.
      */
-    public ShortBox() {
-        this((short) 0);
+    public I8Box() {
+        this.value = defaultValue();
     }
     
-    public ShortBox(short value) {
+    public I8Box(byte value) {
         this.value = value;
     }
     
-    public short get()           { return value; }
-    public void set(short value) { this.value = value; }
+    public byte get()           { return value;       }
+    public void set(byte value) { this.value = value; }
     
     @Override
     public void readData(DataInStream in) throws IOException {
-        value = in.readShort();
+        value = in.readByte();
     }
     
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        out.writeShort(value);
+        out.writeByte(value);
     }
     
     @Override
     public void read(String name, DataCompound o) {
-        value = o.getShort(name);
+        value = o.getI8(name);
     }
     
     @Override
@@ -49,7 +58,7 @@ public class ShortBox implements ITag {
     
     @Override
     public void read(DataList l) {
-        value = l.getShort();
+        value = l.getI8();
     }
     
     @Override
@@ -69,7 +78,7 @@ public class ShortBox implements ITag {
     public ITag convertToSameType(ITag other) {
         if(isSameType(other))
             return other;
-        return new ShortBox((short)other.getAsLong());
+        return new I8Box((byte)other.getAsLong());
     }
     
     @Override public boolean isBoolean() { return true; }
@@ -77,9 +86,9 @@ public class ShortBox implements ITag {
     @Override public boolean isDouble()  { return true; }
     @Override public boolean isString()  { return true; }
     
-    @Override public boolean getAsBoolean() { return value != 0;            }
-    @Override public long    getAsLong()    { return (long) value;          }
-    @Override public double  getAsDouble()  { return (double) value;        }
-    @Override public String  getAsString()  { return Short.toString(value); }
+    @Override public boolean getAsBoolean() { return value != 0;           }
+    @Override public long    getAsLong()    { return (long) value;         }
+    @Override public double  getAsDouble()  { return (double) value;       }
+    @Override public String  getAsString()  { return Byte.toString(value); }
     
 }

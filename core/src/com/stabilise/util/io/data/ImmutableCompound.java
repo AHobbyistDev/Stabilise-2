@@ -125,29 +125,33 @@ public class ImmutableCompound implements DataCompound {
     @Override public void put(String name, DataList data)     { Checks.unsupported(); }
     @Override public void put(String name, boolean data)      { Checks.unsupported(); }
     @Override public void put(String name, byte data)         { Checks.unsupported(); }
-    @Override public void put(String name, char data)         { Checks.unsupported(); }
-    @Override public void put(String name, double data)       { Checks.unsupported(); }
-    @Override public void put(String name, float data)        { Checks.unsupported(); }
+    @Override public void put(String name, short data)        { Checks.unsupported(); }
     @Override public void put(String name, int data)          { Checks.unsupported(); }
     @Override public void put(String name, long data)         { Checks.unsupported(); }
-    @Override public void put(String name, short data)        { Checks.unsupported(); }
-    @Override public void put(String name, String data)       { Checks.unsupported(); }
+    @Override public void put(String name, float data)        { Checks.unsupported(); }
+    @Override public void put(String name, double data)       { Checks.unsupported(); }
     @Override public void put(String name, byte[] data)       { Checks.unsupported(); }
     @Override public void put(String name, int[] data)        { Checks.unsupported(); }
+    @Override public void put(String name, long[] data)       { Checks.unsupported(); }
+    @Override public void put(String name, float[] data)      { Checks.unsupported(); }
+    @Override public void put(String name, double[] data)     { Checks.unsupported(); }
+    @Override public void put(String name, String data)       { Checks.unsupported(); }
     
     @Override public DataCompound getCompound(String name) { return wrap(compound.getCompound(name)); }
-    @Override public DataList getList(String name) { return ImmutableList.wrap(compound.getList(name)); }
-    @Override public boolean getBool(String name)   { return compound.getBool(name);    }
-    @Override public byte getByte(String name)      { return compound.getByte(name);    }
-    @Override public char getChar(String name)      { return compound.getChar(name);    }
-    @Override public double getDouble(String name)  { return compound.getDouble(name);  }
-    @Override public float getFloat(String name)    { return compound.getFloat(name);   }
-    @Override public int getInt(String name)        { return compound.getInt(name);     }
-    @Override public long getLong(String name)      { return compound.getLong(name);    }
-    @Override public short getShort(String name)    { return compound.getShort(name);   }
-    @Override public String getString(String name)  { return compound.getString(name);  }
-    @Override public byte[] getByteArr(String name) { return compound.getByteArr(name); }
-    @Override public int[] getIntArr(String name)   { return compound.getIntArr(name);  }
+    @Override public DataList getList(String name)  { return ImmutableList.wrap(compound.getList(name)); }
+    @Override public boolean  getBool(String name)   { return compound.getBool(name);   }
+    @Override public byte     getI8(String name)     { return compound.getI8(name);     }
+    @Override public short    getI16(String name)    { return compound.getI16(name);    }
+    @Override public int      getI32(String name)    { return compound.getI32(name);    }
+    @Override public long     getI64(String name)    { return compound.getI64(name);    }
+    @Override public float    getF32(String name)    { return compound.getF32(name);    }
+    @Override public double   getF64(String name)    { return compound.getF64(name);    }
+    @Override public byte[]   getI8Arr(String name)  { return compound.getI8Arr(name);  }
+    @Override public int[]    getI32Arr(String name) { return compound.getI32Arr(name); }
+    @Override public long[]   getI64Arr(String name) { return compound.getI64Arr(name); }
+    @Override public float[]  getF32Arr(String name) { return compound.getF32Arr(name); }
+    @Override public double[] getF64Arr(String name) { return compound.getF64Arr(name); }
+    @Override public String   getString(String name) { return compound.getString(name); }
     
     @Override public Option<DataCompound> optCompound(String name) {
         return compound.optCompound(name).map(ImmutableCompound::wrap);
@@ -155,17 +159,19 @@ public class ImmutableCompound implements DataCompound {
     @Override public Option<DataList> optList(String name)  {
         return compound.optList(name).map(ImmutableList::wrap);
     }
-    @Override public Option<Boolean> optBool(String name)   { return compound.optBool(name);    }
-    @Override public Option<Byte> optByte(String name)      { return compound.optByte(name);    }
-    @Override public Option<Character> optChar(String name) { return compound.optChar(name);    }
-    @Override public Option<Double> optDouble(String name)  { return compound.optDouble(name);  }
-    @Override public Option<Float> optFloat(String name)    { return compound.optFloat(name);   }
-    @Override public Option<Integer> optInt(String name)    { return compound.optInt(name);     }
-    @Override public Option<Long> optLong(String name)      { return compound.optLong(name);    }
-    @Override public Option<Short> optShort(String name)    { return compound.optShort(name);   }
-    @Override public Option<String> optString(String name)  { return compound.optString(name);  }
-    @Override public Option<byte[]> optByteArr(String name) { return compound.optByteArr(name); }
-    @Override public Option<int[]> optIntArr(String name)   { return compound.optIntArr(name);  }
+    @Override public Option<Boolean>  optBool(String name)   { return compound.optBool(name);   }
+    @Override public Option<Byte>     optI8(String name)     { return compound.optI8(name);     }
+    @Override public Option<Short>    optI16(String name)    { return compound.optI16(name);    }
+    @Override public Option<Integer>  optI32(String name)    { return compound.optI32(name);    }
+    @Override public Option<Long>     optI64(String name)    { return compound.optI64(name);    }
+    @Override public Option<Float>    optF32(String name)    { return compound.optF32(name);    }
+    @Override public Option<Double>   optF64(String name)    { return compound.optF64(name);    }
+    @Override public Option<byte[]>   optI8Arr(String name)  { return compound.optI8Arr(name);  }
+    @Override public Option<int[]>    optI32Arr(String name) { return compound.optI32Arr(name); }
+    @Override public Option<long[]>   optI64Arr(String name) { return compound.optI64Arr(name); }
+    @Override public Option<float[]>  optF32Arr(String name) { return compound.optF32Arr(name); }
+    @Override public Option<double[]> optF64Arr(String name) { return compound.optF64Arr(name); }
+    @Override public Option<String>   optString(String name) { return compound.optString(name); }
     
     /**
      * {@inheritDoc}

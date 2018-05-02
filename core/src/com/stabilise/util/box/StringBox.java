@@ -13,11 +13,16 @@ import com.stabilise.util.io.data.ITag;
 
 public class StringBox extends MutBox<String> implements ITag {
     
+    /** Returns an empty string */
+    public static String defaultValue() { return ""; }
+    
+    
+    
     /**
      * Creates a new StringBox holding an empty string.
      */
     public StringBox() {
-        super("");
+        super(defaultValue());
     }
     
     /**

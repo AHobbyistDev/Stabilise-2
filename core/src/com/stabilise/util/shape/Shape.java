@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
+import com.stabilise.util.io.data.Exportable;
 import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.TransMat;
 
@@ -12,8 +13,11 @@ import com.stabilise.util.maths.TransMat;
  * A shape is a 2D object usually consisting of a number of vertices, which may
  * be used to represent such things as collision areas.
  * 
- * <p>Classes in the {@code Shape} hierarchy are immutable, but may be {@link
- * #transform(VertexFunction) transformed} to generate a new shape.
+ * <p>Classes in the {@code Shape} hierarchy are (effectively) immutable (as
+ * in, please don't mutate them or bad things will happen, especially if the
+ * {@link #genCollisionData() collision data has already been generated}), but
+ * may be {@link #transform(VertexFunction) transformed} to generate a new
+ * shape.
  * 
  * <p>These classes use the <a
  * href=http://en.wikipedia.org/wiki/Hyperplane_separation_theorem> Separating
@@ -24,7 +28,7 @@ import com.stabilise.util.maths.TransMat;
  * make sure you invoke {@link #genCollisionData()} before sharing it to ensure
  * correct behaviour.
  */
-public abstract class Shape {
+public abstract class Shape implements Exportable {
     
     /**
      * Transforms this shape by applying the given transformation function to

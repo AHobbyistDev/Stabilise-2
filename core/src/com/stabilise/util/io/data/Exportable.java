@@ -10,7 +10,9 @@ import com.stabilise.util.io.Sendable;
  * of the {@link Sendable} interface. Some background: this entire package more
  * or less exists because past me figured that having every little thing be
  * Sendable is an easy way to accidentally let a bug slip in, and so here we
- * are.
+ * are. (In the current iteration we still suffer from essentially the same
+ * problem but are now additionally burdened with the interim step of writing
+ * to a DataCompound before saving, so was anything really gained?)
  * 
  * @see Sendable
  */
@@ -20,7 +22,7 @@ public interface Exportable {
      * Imports this object from the given DataCompound. This method is
      * complementary to {@link #exportToCompound(DataCompound)}.
      * 
-     * @param o The compound to write to. Not null.
+     * @param c The compound to write to. Not null.
      */
     void importFromCompound(DataCompound c);
     
@@ -28,7 +30,7 @@ public interface Exportable {
      * Exports this object to the given DataCompound. This method is
      * complementary to {@link #importFromCompound(DataCompound)}.
      * 
-     * @param o The compound to read from. Not null.
+     * @param c The compound to read from. Not null.
      */
     void exportToCompound(DataCompound c);
     

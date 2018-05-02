@@ -168,11 +168,11 @@ public class CharacterData implements Exportable {
     public void importFromCompound(DataCompound o) {
         hash = o.getString("hash");
         name = o.getString("name");
-        level = o.getInt("level");
-        xp = o.getInt("xp");
-        maxHealth = o.getInt("maxHealth");
-        maxStamina = o.getInt("maxStamina");
-        maxMana = o.getInt("maxMana");
+        level = o.getI32("level");
+        xp = o.getI32("xp");
+        maxHealth = o.getI32("maxHealth");
+        maxStamina = o.getI32("maxStamina");
+        maxMana = o.getI32("maxMana");
         
         inventory.importFromCompound(o.getCompound("inventory"));
     }

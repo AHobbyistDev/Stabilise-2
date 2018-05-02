@@ -781,14 +781,14 @@ public class CPerson extends CBaseMob {
     public void importFromCompound(DataCompound c) {
         super.importFromCompound(c);
         
-        maxStamina = c.getInt("maxStamina");
-        stamina = c.getInt("stamina");
-        maxMana = c.getInt("maxMana");
-        mana = c.getInt("mana");
+        maxStamina = c.getI32("maxStamina");
+        stamina = c.getI32("stamina");
+        maxMana = c.getI32("maxMana");
+        mana = c.getI32("mana");
         
-        ticksSinceHealthLoss = c.getInt("ticksSinceHpLoss");
-        ticksSinceStaminaLoss = c.getInt("ticksSinceSpLoss");
-        ticksSinceManaLoss = c.getInt("ticksSinceMpLoss");
+        ticksSinceHealthLoss = c.getI32("ticksSinceHpLoss");
+        ticksSinceStaminaLoss = c.getI32("ticksSinceSpLoss");
+        ticksSinceManaLoss = c.getI32("ticksSinceMpLoss");
     }
     
     @Override

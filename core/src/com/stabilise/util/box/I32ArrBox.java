@@ -11,22 +11,31 @@ import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.ITag;
 
-public class IntArrBox implements ITag {
+
+/**
+ * Boxes an array of ints.
+ */
+public class I32ArrBox implements ITag {
+    
+    /** Returns a zero-length array */
+    public static int[] defaultValue() { return new int[0]; }
+    
+    
     
     private int[] value;
     
     
     /**
-     * Creates a new IntArrayBox holding a zero-length int array.
+     * Creates a new I32ArrBox holding a zero-length int array.
      */
-    public IntArrBox() {
-        this.value = new int[0];
+    public I32ArrBox() {
+        this.value = defaultValue();
     }
     
     /**
      * @throws NullPointerException if {@code value} is {@code null}.
      */
-    public IntArrBox(int[] value) {
+    public I32ArrBox(int[] value) {
         this.value = Objects.requireNonNull(value);
     }
     
@@ -51,7 +60,7 @@ public class IntArrBox implements ITag {
     
     @Override
     public void read(String name, DataCompound o) {
-        value = o.getIntArr(name);
+        value = o.getI32Arr(name);
     }
     
     @Override
@@ -61,7 +70,7 @@ public class IntArrBox implements ITag {
     
     @Override
     public void read(DataList l) {
-        value = l.getIntArr();
+        value = l.getI32Arr();
     }
     
     @Override

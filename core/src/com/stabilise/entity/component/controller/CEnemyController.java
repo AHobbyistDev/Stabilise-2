@@ -98,8 +98,8 @@ public class CEnemyController extends CController {
     
     @Override
     public void importFromCompound(DataCompound c) {
-        actionTimeout = c.getInt("actionTimeout");
-        action = EnumAction.values()[c.getInt("action")];
+        actionTimeout = c.getI32("actionTimeout");
+        action = EnumAction.values()[c.getI32("action")];
         scared = c.getBool("scared");
     }
     

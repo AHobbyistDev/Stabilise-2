@@ -71,7 +71,7 @@ public class Settings {
             Log.get().postWarning("Could not load settings config: " + e.getMessage());
         }
         
-        int particles = config.values.getInt("particles");
+        int particles = config.values.getI32("particles");
         if(particles < PARTICLES_ALL || particles > PARTICLES_NONE) {
             config.reset("particles");
             changes = true;
@@ -111,7 +111,7 @@ public class Settings {
      * @return The particles setting.
      */
     public static int getSettingParticles() {
-        return config.values.getInt("particles");
+        return config.values.getI32("particles");
     }
     
     /**

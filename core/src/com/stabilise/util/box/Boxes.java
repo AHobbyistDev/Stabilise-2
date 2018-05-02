@@ -53,40 +53,48 @@ public class Boxes {
         return BoolBox.valueOf(data);
     }
     
-    public static ByteArrBox box(byte[] data) {
-        return new ByteArrBox(data);
+    public static I8Box box(byte data) {
+        return new I8Box(data);
     }
     
-    public static ByteBox box(byte data) {
-        return new ByteBox(data);
+    public static I16Box box(short data) {
+        return new I16Box(data);
     }
     
-    public static CharBox box(char data) {
-        return new CharBox(data);
+    public static I32Box box(int data) {
+        return new I32Box(data);
     }
     
-    public static DoubleBox box(double data) {
-        return new DoubleBox(data);
+    public static I64Box box(long data) {
+        return new I64Box(data);
     }
     
-    public static FloatBox box(float data) {
-        return new FloatBox(data);
+    public static F32Box box(float data) {
+        return new F32Box(data);
     }
     
-    public static IntArrBox box(int[] data) {
-        return new IntArrBox(data);
+    public static F64Box box(double data) {
+        return new F64Box(data);
     }
     
-    public static IntBox box(int data) {
-        return new IntBox(data);
+    public static I8ArrBox box(byte[] data) {
+        return new I8ArrBox(data);
     }
     
-    public static LongBox box(long data) {
-        return new LongBox(data);
+    public static I32ArrBox box(int[] data) {
+        return new I32ArrBox(data);
     }
     
-    public static ShortBox box(short data) {
-        return new ShortBox(data);
+    public static I64ArrBox box(long[] data) {
+        return new I64ArrBox(data);
+    }
+    
+    public static F32ArrBox box(float[] data) {
+        return new F32ArrBox(data);
+    }
+    
+    public static F64ArrBox box(double[] data) {
+        return new F64ArrBox(data);
     }
     
     public static StringBox box(String data) {

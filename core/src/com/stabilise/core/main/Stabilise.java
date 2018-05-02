@@ -70,19 +70,21 @@ public class Stabilise extends Application {
         return ArrayUtil.random(
                 Constants.VERSION.toString(),
                 "Coming soon to a computer near you!",
-                "Look, a distraction!",
                 "II esilibatS",
                 "20% less bugs!",
                 "20% more bugs!",
-                "Stable release builds? Hah!",
-                "[Insert witty title here]",
+                "[Insert witty subtitle here]",
                 "May contain traces of nuts",
                 "Not suitable for children under the age of 84",
                 "Take twice daily for fast, effective results!",
+                "Recommended by 9/10 doctors",
                 "Batteries not included!",
                 "Now with excavators!",
-                "(I lied about the excavators)",
-                "No refunds!"
+                "No refunds!",
+                "Not even in early access yet",
+                "In perpetual development",
+                "Has no content!",
+                "Barely functional"
         );
     }
     

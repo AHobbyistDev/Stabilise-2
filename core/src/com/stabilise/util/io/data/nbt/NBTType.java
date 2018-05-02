@@ -2,17 +2,7 @@ package com.stabilise.util.io.data.nbt;
 
 import java.util.function.Supplier;
 
-import com.stabilise.util.box.BoolBox;
-import com.stabilise.util.box.ByteArrBox;
-import com.stabilise.util.box.ByteBox;
-import com.stabilise.util.box.CharBox;
-import com.stabilise.util.box.DoubleBox;
-import com.stabilise.util.box.FloatBox;
-import com.stabilise.util.box.IntArrBox;
-import com.stabilise.util.box.IntBox;
-import com.stabilise.util.box.LongBox;
-import com.stabilise.util.box.ShortBox;
-import com.stabilise.util.box.StringBox;
+import com.stabilise.util.box.*;
 import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.collect.registry.TypeFactory;
 import com.stabilise.util.io.data.ITag;
@@ -23,21 +13,25 @@ import com.stabilise.util.io.data.ITag;
  */
 public enum NBTType {
     
-    BYTE      (1,  ByteBox.class),
-    SHORT     (2,  ShortBox.class),
-    INT       (3,  IntBox.class),
-    LONG      (4,  LongBox.class),
-    FLOAT     (5,  FloatBox.class),
-    DOUBLE    (6,  DoubleBox.class),
-    BYTE_ARRAY(7,  ByteArrBox.class),
-    STRING    (8,  StringBox.class),
-    LIST      (9,  NBTList.class, NBTList::new),
-    COMPOUND  (10, NBTCompound.class, NBTCompound::new),
-    INT_ARRAY (11, IntArrBox.class),
-    /** Note: isn't part of minecraft's NBT specification. */
-    BOOLEAN   (12, BoolBox.class),
-    /** Note: isn't part of minecraft's NBT specification. */
-    CHAR      (13, CharBox.class);
+    BYTE        (1,  I8Box.class),
+    SHORT       (2,  I16Box.class),
+    INT         (3,  I32Box.class),
+    LONG        (4,  I64Box.class),
+    FLOAT       (5,  F32Box.class),
+    DOUBLE      (6,  F64Box.class),
+    BYTE_ARRAY  (7,  I8ArrBox.class),
+    STRING      (8,  StringBox.class),
+    LIST        (9,  NBTList.class, NBTList::new),
+    COMPOUND    (10, NBTCompound.class, NBTCompound::new),
+    INT_ARRAY   (11, I32ArrBox.class),
+    LONG_ARRAY  (12, I64ArrBox.class),
+    /** Note: everything here onwards isn't part of the original NBT
+     * specification, so I'm leaving a gap in IDs in case minecraft expands. */
+    FLOAT_ARRAY (20, F32ArrBox.class),
+    DOUBLE_ARRAY(21, F64ArrBox.class),
+    BOOLEAN     (22, BoolBox.class);
+    
+    // In actual NBT specification, 12 is long array
     
     
     public final byte id;

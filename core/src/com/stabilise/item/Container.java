@@ -366,7 +366,7 @@ public abstract class Container implements IContainer,
         DataList l = c.getList("items");
         while(l.hasNext()) {
             DataCompound stack = l.getCompound();
-            byte slot = stack.getByte("slot");
+            byte slot = stack.getI8("slot");
             setSlot(slot, ItemStack.createFromCompound(stack));
         }
     }

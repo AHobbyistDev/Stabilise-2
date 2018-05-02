@@ -226,7 +226,7 @@ public class Item implements Exportable {
      * @throws NullPointerException if {@code o} is {@code null}.
      */
     public static Item fromCompound(DataCompound o) {
-        return getItem(o.getInt("id"));
+        return getItem(o.getI32("id"));
     }
     
     /**

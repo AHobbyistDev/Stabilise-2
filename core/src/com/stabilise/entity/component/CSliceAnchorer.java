@@ -249,7 +249,7 @@ public class CSliceAnchorer extends AbstractComponent {
     
     @Override
     public void importFromCompound(DataCompound c) {
-        radius = c.getInt("radius");
+        radius = c.getI32("radius");
         disabled = c.getBool("disabled");
     }
     

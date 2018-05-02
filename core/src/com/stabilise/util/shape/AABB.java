@@ -1,6 +1,7 @@
 package com.stabilise.util.shape;
 
 import com.stabilise.util.Checks;
+import com.stabilise.util.io.data.DataCompound;
 
 /**
  * An Axis-Aligned Bounding Box, or AABB for short, is a rectangle whose edges
@@ -141,6 +142,17 @@ public class AABB extends Shape {
     @Override
     protected int getKey() {
         return Collider.K_AABB;
+    }
+    
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        System.arraycopy(c.getF32Arr("verts"), 0, verts, 0, 4);
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        c.put("verts", verts.clone());
     }
     
     //--------------------==========--------------------

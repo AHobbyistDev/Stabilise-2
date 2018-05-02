@@ -41,6 +41,8 @@ public class DesktopGame {
     	//config.useVsync(true);
     	config.setIdleFPS(5);
     	
+    	// Can't set max fps here; use the AppDriver in Stabilie instead.
+    	
     	config.setWindowIcon(FileType.Classpath, "icon128.png", "icon32.png", "icon16.png");
     	new Lwjgl3Application(new Stabilise(args).getListener(), config);
     }

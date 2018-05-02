@@ -52,7 +52,7 @@ public class CBasicArmour extends AbstractComponent {
     
     @Override
     public void importFromCompound(DataCompound c) {
-        durability = c.getInt("durability");
+        durability = c.getI32("durability");
     }
     
     @Override

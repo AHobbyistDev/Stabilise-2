@@ -416,10 +416,10 @@ public abstract class Dimension {
                 throw new IOException("Dimension name does not match stored name \""
                         + tag.getString("dimName") + "\"");
             
-            age = tag.getLong("age");
+            age = tag.getI64("age");
             
-            spawnSliceX = tag.getInt("spawnX");
-            spawnSliceY = tag.getInt("spawnY");
+            spawnSliceX = tag.getI32("spawnX");
+            spawnSliceY = tag.getI32("spawnY");
             
             return tag;
         }

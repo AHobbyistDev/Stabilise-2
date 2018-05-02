@@ -80,10 +80,10 @@ public class CEffectFire extends CParticleEffect<ParticleFlame> {
     
     @Override
     public void importFromCompound(DataCompound c) {
-        duration = c.getInt("duration");
-        age = c.getInt("age");
-        damage = c.getInt("damage");
-        extra = c.getInt("extra");
+        duration = c.getI32("duration");
+        age = c.getI32("age");
+        damage = c.getI32("damage");
+        extra = c.getI32("extra");
     }
     
     @Override

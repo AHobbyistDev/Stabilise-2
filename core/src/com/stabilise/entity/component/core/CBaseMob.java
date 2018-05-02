@@ -491,26 +491,26 @@ public abstract class CBaseMob extends CCore {
     
     @Override
     public void importFromCompound(DataCompound c) {
-        state = State.values()[c.getInt("state")];
-        stateTicks = c.getInt("stateTicks");
-        stateLockDuration = c.getInt("stateLockDuration");
+        state = State.values()[c.getI32("state")];
+        stateTicks = c.getI32("stateTicks");
+        stateLockDuration = c.getI32("stateLockDuration");
         
-        maxHealth = c.getInt("maxHealth");
-        health = c.getInt("health");
+        maxHealth = c.getI32("maxHealth");
+        health = c.getI32("health");
         dead = c.getBool("dead");
         invulnerable = c.getBool("invul");
-        invulnerabilityTicks = c.getInt("invulTicks");
+        invulnerabilityTicks = c.getI32("invulTicks");
         
         moving = c.getBool("moving");
-        jumpVelocity = c.getFloat("jumpVelocity");
-        acceleration = c.getFloat("acceleration");
-        airAcceleration = c.getFloat("airAcceleration");
-        swimAcceleration = c.getFloat("swimAcceleration");
-        maxDx = c.getFloat("maxDx");
+        jumpVelocity = c.getF32("jumpVelocity");
+        acceleration = c.getF32("acceleration");
+        airAcceleration = c.getF32("airAcceleration");
+        swimAcceleration = c.getF32("swimAcceleration");
+        maxDx = c.getF32("maxDx");
         
-        jumpCrouchDuration = c.getInt("jumpCrouchDuration");
-        maxJumpCount = c.getInt("maxJumpCount");
-        jumpCount = c.getInt("jumpCount");
+        jumpCrouchDuration = c.getI32("jumpCrouchDuration");
+        maxJumpCount = c.getI32("maxJumpCount");
+        jumpCount = c.getI32("jumpCount");
     }
     
     @Override

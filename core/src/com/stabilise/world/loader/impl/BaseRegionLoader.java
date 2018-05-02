@@ -20,9 +20,9 @@ public class BaseRegionLoader implements IRegionLoader {
             for(int x = 0; x < REGION_SIZE; x++) {
                 DataCompound sliceTag = c.getCompound("slice" + x + "_" + y);
                 Slice s = new Slice(r.offsetX + x, r.offsetY + y,
-                        sliceTag.getIntArr("tiles"),
-                        sliceTag.getIntArr("walls"),
-                        sliceTag.getByteArr("light"));
+                        sliceTag.getI32Arr("tiles"),
+                        sliceTag.getI32Arr("walls"),
+                        sliceTag.getI8Arr("light"));
                 
                 DataList tileEntities = sliceTag.createList("tileEntities");
                 if(tileEntities.size() > 0)

@@ -11,44 +11,56 @@ import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.ITag;
 
-public class ByteArrBox implements ITag {
+
+/**
+ * Boxes an array of floats.
+ */
+public class F32ArrBox implements ITag {
     
-    private byte[] value;
+    /** Returns a zero-length array */
+    public static float[] defaultValue() { return new float[0]; }
+    
+    
+    
+    private float[] value;
     
     
     /**
-     * Creates a new ByteArrayBox holding a zero-length byte array.
+     * Creates a new F32ArrBox holding a zero-length float array.
      */
-    public ByteArrBox() {
-        this.value = new byte[0];
+    public F32ArrBox() {
+        this.value = defaultValue();
     }
     
     /**
      * @throws NullPointerException if {@code value} is {@code null}.
      */
-    public ByteArrBox(byte[] value) {
+    public F32ArrBox(float[] value) {
         this.value = Objects.requireNonNull(value);
     }
     
-    public byte[] get()           { return value; }
+    public float[] get()           { return value; }
     /** @throws NullPointerException if {@code value} is {@code null}. */
-    public void set(byte[] value) { this.value = Objects.requireNonNull(value);  }
+    public void set(float[] value) { this.value = Objects.requireNonNull(value); }
     
     @Override
     public void readData(DataInStream in) throws IOException {
-        value = new byte[in.readInt()];
-        in.readFully(value);
+        int len = in.readInt();
+        value = new float[len];
+        for(int i = 0; i < len; i++)
+            value[i] = in.readFloat();
     }
     
     @Override
     public void writeData(DataOutStream out) throws IOException {
         out.writeInt(value.length);
-        out.write(value);
+        for(float i : value)
+            out.writeFloat(i);
     }
     
     @Override
     public void read(String name, DataCompound o) {
-        value = o.getByteArr(name);
+        value = o.getF32Arr(name);
     }
     
     @Override
@@ -58,7 +70,7 @@ public class ByteArrBox implements ITag {
     
     @Override
     public void read(DataList l) {
-        value = l.getByteArr();
+        value = l.getF32Arr();
     }
     
     @Override
@@ -68,7 +80,7 @@ public class ByteArrBox implements ITag {
     
     @Override
     public String toString() {
-        return "[" + value.length + (value.length == 1 ? " byte]" : " bytes]");
+        return "[" + value.length + (value.length == 1 ? " float]" : " floats]");
     }
     
     
@@ -86,9 +98,9 @@ public class ByteArrBox implements ITag {
     @Override public boolean isDouble()  { return false; }
     @Override public boolean isString()  { return true;  }
     
-    @Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert byte array to boolean... for now"); }
-    @Override public long    getAsLong()    { throw Checks.ISE("Can't convert byte array to long... for now");    }
-    @Override public double  getAsDouble()  { throw Checks.ISE("Can't convert byte array to double... for now");  }
-    @Override public String  getAsString()  { return Arrays.toString(value);                                      }
+    @Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert float array to boolean... yet"); }
+    @Override public long    getAsLong()    { throw Checks.ISE("Can't convert float array to long... yet");    }
+    @Override public double  getAsDouble()  { throw Checks.ISE("Can't convert float array to double... yet");  }
+    @Override public String  getAsString()  { return Arrays.toString(value);                                   }
     
 }

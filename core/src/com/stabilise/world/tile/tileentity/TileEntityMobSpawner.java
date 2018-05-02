@@ -118,7 +118,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     public void importFromCompound(DataCompound c) {
         super.importFromCompound(c);
         
-        ticksUntilNextSpawn = c.getInt("ticksUntilNextSpawn");
+        ticksUntilNextSpawn = c.getI32("ticksUntilNextSpawn");
     }
     
     @Override

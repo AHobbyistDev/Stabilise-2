@@ -6,6 +6,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.Checks;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 
 /**
@@ -144,6 +145,16 @@ public class Polygon extends Shape {
         }
         sb.append("\n]");
         return sb.toString();
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        verts = c.getF32Arr("verts").clone();
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        c.put("verts", verts.clone());
     }
     
     //--------------------==========--------------------

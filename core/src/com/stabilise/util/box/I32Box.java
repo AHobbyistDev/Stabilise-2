@@ -8,38 +8,47 @@ import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.ITag;
 
-public class FloatBox implements ITag {
+
+/**
+ * Boxes a single int value.
+ */
+public class I32Box implements ITag {
     
-    private float value;
+    /** Returns 0 */
+    public static int defaultValue() { return 0; }
+    
+    
+    
+    private int value;
     
     
     /**
-     * Creates a new FloatBox holding the value 0f.
+     * Creates a new I32Box holding the value 0.
      */
-    public FloatBox() {
-        this(0f);
+    public I32Box() {
+        this.value = defaultValue();
     }
     
-    public FloatBox(float value) {
+    public I32Box(int value) {
         this.value = value;
     }
     
-    public float get()           { return value; }
-    public void set(float value) { this.value = value; }
+    public int get()           { return value; }
+    public void set(int value) { this.value = value; }
     
     @Override
     public void readData(DataInStream in) throws IOException {
-        value = in.readFloat();
+        value = in.readInt();
     }
     
     @Override
     public void writeData(DataOutStream out) throws IOException {
-        out.writeFloat(value);
+        out.writeInt(value);
     }
     
     @Override
     public void read(String name, DataCompound o) {
-        value = o.getFloat(name);
+        value = o.getI32(name);
     }
     
     @Override
@@ -49,7 +58,7 @@ public class FloatBox implements ITag {
     
     @Override
     public void read(DataList l) {
-        value = l.getFloat();
+        value = l.getI32();
     }
     
     @Override
@@ -68,14 +77,14 @@ public class FloatBox implements ITag {
     
     @Override
     public boolean isCompatibleType(ITag other) {
-        return other.isFloat();
+        return other.isInt();
     }
     
     @Override
     public ITag convertToSameType(ITag other) {
         if(isSameType(other))
             return other;
-        return new FloatBox(other.getAsFloat());
+        return new I32Box(other.getAsInt());
     }
     
     @Override public boolean isBoolean() { return true; }
@@ -83,10 +92,10 @@ public class FloatBox implements ITag {
     @Override public boolean isDouble()  { return true; }
     @Override public boolean isString()  { return true; }
     
-    @Override public boolean getAsBoolean() { return value != 0;            }
-    @Override public long    getAsLong()    { return (long) value;          }
-    @Override public float   getAsFloat()   { return value;                 }
-    @Override public double  getAsDouble()  { return (double) value;        }
-    @Override public String  getAsString()  { return Float.toString(value); }
+    @Override public boolean getAsBoolean() { return value != 0;              }
+    @Override public int     getAsInt()     { return value;                   }
+    @Override public long    getAsLong()    { return (long) value;            }
+    @Override public double  getAsDouble()  { return (double) value;          }
+    @Override public String  getAsString()  { return Integer.toString(value); }
     
 }

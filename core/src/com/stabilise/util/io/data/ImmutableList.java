@@ -4,17 +4,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 import com.stabilise.util.Checks;
-import com.stabilise.util.box.BoolBox;
-import com.stabilise.util.box.ByteArrBox;
-import com.stabilise.util.box.ByteBox;
-import com.stabilise.util.box.CharBox;
-import com.stabilise.util.box.DoubleBox;
-import com.stabilise.util.box.FloatBox;
-import com.stabilise.util.box.IntArrBox;
-import com.stabilise.util.box.IntBox;
-import com.stabilise.util.box.LongBox;
-import com.stabilise.util.box.ShortBox;
-import com.stabilise.util.box.StringBox;
+import com.stabilise.util.box.*;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 
@@ -131,43 +121,49 @@ public class ImmutableList implements DataList {
     @Override public void add(DataList data)     { Checks.unsupported(); }
     @Override public void add(boolean data)      { Checks.unsupported(); }
     @Override public void add(byte data)         { Checks.unsupported(); }
-    @Override public void add(char data)         { Checks.unsupported(); }
-    @Override public void add(double data)       { Checks.unsupported(); }
-    @Override public void add(float data)        { Checks.unsupported(); }
+    @Override public void add(short data)        { Checks.unsupported(); }
     @Override public void add(int data)          { Checks.unsupported(); }
     @Override public void add(long data)         { Checks.unsupported(); }
-    @Override public void add(short data)        { Checks.unsupported(); }
-    @Override public void add(String data)       { Checks.unsupported(); }
+    @Override public void add(float data)        { Checks.unsupported(); }
+    @Override public void add(double data)       { Checks.unsupported(); }
     @Override public void add(byte[] data)       { Checks.unsupported(); }
     @Override public void add(int[] data)        { Checks.unsupported(); }
+    @Override public void add(long[] data)       { Checks.unsupported(); }
+    @Override public void add(float[] data)      { Checks.unsupported(); }
+    @Override public void add(double[] data)     { Checks.unsupported(); }
+    @Override public void add(String data)       { Checks.unsupported(); }
     
     @Override public ITag    getTag(int i)           { throw Checks.unsupported("Just no");  }
     @Override public DataCompound getCompound(int i) { return ImmutableCompound.wrap((DataCompound)getTag(i)); }
-    @Override public DataList getList(int i)         { return wrap((DataList)getTag(i));      }
-    @Override public boolean getBool(int i)          { return ((BoolBox)    getTag(i)).get(); }
-    @Override public byte    getByte(int i)          { return ((ByteBox)    getTag(i)).get(); }
-    @Override public char    getChar(int i)          { return ((CharBox)    getTag(i)).get(); }
-    @Override public double  getDouble(int i)        { return ((DoubleBox)  getTag(i)).get(); }
-    @Override public float   getFloat(int i)         { return ((FloatBox)   getTag(i)).get(); }
-    @Override public int     getInt(int i)           { return ((IntBox)     getTag(i)).get(); }
-    @Override public long    getLong(int i)          { return ((LongBox)    getTag(i)).get(); }
-    @Override public short   getShort(int i)         { return ((ShortBox)   getTag(i)).get(); }
-    @Override public String  getString(int i)        { return ((StringBox)  getTag(i)).get(); }
-    @Override public byte[]  getByteArr(int i)       { return ((ByteArrBox) getTag(i)).get(); }
-    @Override public int[]   getIntArr(int i)        { return ((IntArrBox)  getTag(i)).get(); }
+    @Override public DataList getList(int i)         { return wrap((DataList)getTag(i));     }
+    @Override public boolean  getBool(int i)         { return ((BoolBox)   getTag(i)).get(); }
+    @Override public byte     getI8(int i)           { return ((I8Box)     getTag(i)).get(); }
+    @Override public short    getI16(int i)          { return ((I16Box)    getTag(i)).get(); }
+    @Override public int      getI32(int i)          { return ((I32Box)    getTag(i)).get(); }
+    @Override public long     getI64(int i)          { return ((I64Box)    getTag(i)).get(); }
+    @Override public float    getF32(int i)          { return ((F32Box)    getTag(i)).get(); }
+    @Override public double   getF64(int i)          { return ((F64Box)    getTag(i)).get(); }
+    @Override public byte[]   getI8Arr(int i)        { return ((I8ArrBox)  getTag(i)).get(); }
+    @Override public int[]    getI32Arr(int i)       { return ((I32ArrBox) getTag(i)).get(); }
+    @Override public long[]   getI64Arr(int i)       { return ((I64ArrBox) getTag(i)).get(); }
+    @Override public float[]  getF32Arr(int i)       { return ((F32ArrBox) getTag(i)).get(); }
+    @Override public double[] getF64Arr(int i)       { return ((F64ArrBox) getTag(i)).get(); }
+    @Override public String   getString(int i)       { return ((StringBox) getTag(i)).get(); }
     
     @Override public DataCompound getCompound() { throw Checks.unsupported("Mutable state!"); }
     @Override public DataList getList()         { throw Checks.unsupported("Mutable state!"); }
-    @Override public boolean getBool()          { throw Checks.unsupported("Mutable state!"); }
-    @Override public byte    getByte()          { throw Checks.unsupported("Mutable state!"); }
-    @Override public char    getChar()          { throw Checks.unsupported("Mutable state!"); }
-    @Override public double  getDouble()        { throw Checks.unsupported("Mutable state!"); }
-    @Override public float   getFloat()         { throw Checks.unsupported("Mutable state!"); }
-    @Override public int     getInt()           { throw Checks.unsupported("Mutable state!"); }
-    @Override public long    getLong()          { throw Checks.unsupported("Mutable state!"); }
-    @Override public short   getShort()         { throw Checks.unsupported("Mutable state!"); }
-    @Override public String  getString()        { throw Checks.unsupported("Mutable state!"); }
-    @Override public byte[]  getByteArr()       { throw Checks.unsupported("Mutable state!"); }
-    @Override public int[]   getIntArr()        { throw Checks.unsupported("Mutable state!"); }
+    @Override public boolean  getBool()         { throw Checks.unsupported("Mutable state!"); }
+    @Override public byte     getI8()           { throw Checks.unsupported("Mutable state!"); }
+    @Override public short    getI16()          { throw Checks.unsupported("Mutable state!"); }
+    @Override public int      getI32()          { throw Checks.unsupported("Mutable state!"); }
+    @Override public long     getI64()          { throw Checks.unsupported("Mutable state!"); }
+    @Override public float    getF32()          { throw Checks.unsupported("Mutable state!"); }
+    @Override public double   getF64()          { throw Checks.unsupported("Mutable state!"); }
+    @Override public byte[]   getI8Arr()        { throw Checks.unsupported("Mutable state!"); }
+    @Override public int[]    getI32Arr()       { throw Checks.unsupported("Mutable state!"); }
+    @Override public long[]   getI64Arr()       { throw Checks.unsupported("Mutable state!"); }
+    @Override public float[]  getF32Arr()       { throw Checks.unsupported("Mutable state!"); }
+    @Override public double[] getF64Arr()       { throw Checks.unsupported("Mutable state!"); }
+    @Override public String   getString()       { throw Checks.unsupported("Mutable state!"); }
     
 }

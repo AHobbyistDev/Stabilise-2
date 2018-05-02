@@ -82,17 +82,42 @@ public interface DataCompound extends ITag, IContainerTag<DataCompound> {
      */
     void put(String name, DataList     data);
     
-    void put(String name, boolean data);
-    void put(String name, byte    data);
-    void put(String name, char    data);
-    void put(String name, double  data);
-    void put(String name, float   data);
-    void put(String name, int     data);
-    void put(String name, long    data);
-    void put(String name, short   data);
-    void put(String name, String  data);
-    void put(String name, byte[]  data);
-    void put(String name, int[]   data);
+    void put(String name, boolean  data);
+    void put(String name, byte     data);
+    void put(String name, double   data);
+    void put(String name, float    data);
+    void put(String name, int      data);
+    void put(String name, long     data);
+    void put(String name, short    data);
+    void put(String name, String   data);
+    void put(String name, byte[]   data);
+    void put(String name, int[]    data);
+    void put(String name, long[]   data);
+    void put(String name, float[]  data);
+    void put(String name, double[] data);
+    
+    /**
+     * Convenient shorthand for {@code o.exportToCompound(this)}.
+     * 
+     * @see #getInto(Exportable)
+     */
+    default void put(Exportable o) {
+        o.exportToCompound(this);
+    }
+    
+    /**
+     * Convenient shorthand for
+     * <pre>
+     * DataCompound c = this.createCompound(name);
+     * o.exportToCompound(c);
+     * </pre>
+     * 
+     * @see #getInto(String, Exportable)
+     */
+    default void put(String name, Exportable o) {
+        DataCompound c = this.createCompound(name);
+        o.exportToCompound(c);
+    }
     
     // <----- GET METHODS ----->
     // Gets data from this compound. If data with the specified name is not
@@ -110,35 +135,62 @@ public interface DataCompound extends ITag, IContainerTag<DataCompound> {
      */
     DataList getList(String name);
     
-    boolean getBool   (String name);
-    byte    getByte   (String name);
-    char    getChar   (String name);
-    double  getDouble (String name);
-    float   getFloat  (String name);
-    int     getInt    (String name);
-    long    getLong   (String name);
-    short   getShort  (String name);
-    String  getString (String name);
-    byte[]  getByteArr(String name);
-    int[]   getIntArr (String name);
+    boolean  getBool  (String name);
+    byte     getI8    (String name);
+    short    getI16   (String name);
+    int      getI32   (String name);
+    long     getI64   (String name);
+    float    getF32   (String name);
+    double   getF64   (String name);
+    byte[]   getI8Arr (String name);
+    int[]    getI32Arr(String name);
+    long[]   getI64Arr(String name);
+    float[]  getF32Arr(String name);
+    double[] getF64Arr(String name);
+    String   getString(String name);
+    
+    /**
+     * Convenient shorthand for {@code o.importFromCompound(this)}.
+     * 
+     * @see #put(Exportable)
+     */
+    default void getInto(Exportable o) {
+        o.importFromCompound(this);
+    }
+    
+    /**
+     * Convenient shorthand for
+     * <pre>
+     * DataCompound c = this.getCompound(name);
+     * o.importFromCompound(c);
+     * </pre>
+     * 
+     * @see #put(String, Exportable)
+     */
+    default void getInto(String name, Exportable o) {
+        DataCompound c = this.getCompound(name);
+        o.importFromCompound(c);
+    }
     
     // <----- OPTION GETTERS ----->
     // Gets data from this compound. If data with the specified name is
     // present, a Some<T> is returned.
     
-    Option<DataCompound> optCompound(String name);
-    Option<DataList>     optList    (String name);
-    Option<Boolean>      optBool    (String name);
-    Option<Byte>         optByte    (String name);
-    Option<Character>    optChar    (String name);
-    Option<Double>       optDouble  (String name);
-    Option<Float>        optFloat   (String name);
-    Option<Integer>      optInt     (String name);
-    Option<Long>         optLong    (String name);
-    Option<Short>        optShort   (String name);
-    Option<String>       optString  (String name);
-    Option<byte[]>       optByteArr (String name);
-    Option<int[]>        optIntArr  (String name);
+    Option<DataCompound> optCompound (String name);
+    Option<DataList>     optList     (String name);
+    Option<Boolean>      optBool     (String name);
+    Option<Byte>         optI8       (String name);
+    Option<Short>        optI16      (String name);
+    Option<Integer>      optI32      (String name);
+    Option<Long>         optI64      (String name);
+    Option<Float>        optF32      (String name);
+    Option<Double>       optF64      (String name);
+    Option<byte[]>       optI8Arr    (String name);
+    Option<int[]>        optI32Arr   (String name);
+    Option<long[]>       optI64Arr   (String name);
+    Option<float[]>      optF32Arr   (String name);
+    Option<double[]>     optF64Arr   (String name);
+    Option<String>       optString   (String name);
     
     /**
      * Clones this DataCompound.

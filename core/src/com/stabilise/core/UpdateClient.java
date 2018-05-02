@@ -151,7 +151,7 @@ public class UpdateClient extends Client implements IClientUpdate {
         
         for(String path : p.files) {
             // Try versiondata first, otherwise calculate as we go
-            Option<byte[]> ch = versionData.optByteArr(path);
+            Option<byte[]> ch = versionData.optI8Arr(path);
             if(ch.isDefined()) {
                 c.add(path, ch.get());
             } else {

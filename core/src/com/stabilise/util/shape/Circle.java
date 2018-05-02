@@ -1,6 +1,8 @@
 package com.stabilise.util.shape;
 
+import com.stabilise.util.Checks;
 import com.stabilise.util.annotation.Incomplete;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Matrix2;
 
 /**
@@ -161,6 +163,21 @@ class Circle extends Shape {
     protected int getKey() {
         // TODO Auto-generated method stub
         return 0;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound dc) {
+        c[0] = dc.getF32("cx");
+        c[1] = dc.getF32("cy");
+        //radius = dc.getFloat("r"); // is immutable sadly, watdo?
+        Checks.TODO(); // todo
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound dc) {
+        dc.put("cx", c[0]);
+        dc.put("cy", c[1]);
+        dc.put("r", radius);
     }
     
 }

@@ -139,7 +139,7 @@ public abstract class TileEntity extends GameObject implements Exportable {
      * @throws RuntimeException if tile entity creation failed.
      */
     public static TileEntity createFromCompound(DataCompound c) {
-        TileEntity t = createTileEntity(c.getInt("id"));
+        TileEntity t = createTileEntity(c.getI32("id"));
         if(t == null)
             return null;
         t.importFromCompound(c);

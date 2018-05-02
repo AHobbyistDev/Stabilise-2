@@ -15,6 +15,11 @@ public class BoolBox implements ITag {
     public static final BoolBox FALSE = new BoolBox(false);
     
     
+    /** Returns false. */
+    public static boolean defaultValue() { return false; }
+    
+    
+    
     /**
      * Returns a BoolBox encapsulating the specified value. This method may be
      * preferable to constructing a new BoolBox as it reuses {@link TRUE} and
@@ -35,7 +40,7 @@ public class BoolBox implements ITag {
      * Creates a new BooleanBox holding the value false.
      */
     public BoolBox() {
-        this(false);
+        this(defaultValue());
     }
     
     public BoolBox(boolean value) {

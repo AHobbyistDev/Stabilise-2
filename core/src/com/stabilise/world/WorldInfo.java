@@ -65,11 +65,11 @@ public class WorldInfo implements Comparable<WorldInfo> {
         DataCompound infoTag = IOUtil.read(getFile(), Format.NBT, Compression.GZIP);
         
         name = infoTag.getString("worldName");
-        seed = infoTag.getLong("seed");
-        age = infoTag.getLong("age");
+        seed = infoTag.getI64("seed");
+        age = infoTag.getI64("age");
         
-        creationDate = infoTag.getLong("creationDate");
-        lastPlayedDate = infoTag.getLong("lastPlayed");
+        creationDate = infoTag.getI64("creationDate");
+        lastPlayedDate = infoTag.getI64("lastPlayed");
         
         // Overwriting our worldFormat object can't be helped here
         worldFormat = infoTag.getCompound("format");

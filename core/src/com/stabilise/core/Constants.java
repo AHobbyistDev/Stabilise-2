@@ -141,7 +141,7 @@ public class Constants {
                 String[] fieldNames = { "major", "minor", "patch" };
                 int[] fields = { version.major(), version.minor(), version.patch() };
                 
-                tag.put("builds", tag.getInt("builds") + 1);
+                tag.put("builds", tag.getI32("builds") + 1);
                 int buildCompilations = buildTags(tag, fieldNames, fields, 0);
                 
                 IOUtil.writeSafe(file, tag, UNCOMPRESSED);
@@ -163,11 +163,11 @@ public class Constants {
      */
     private static int buildTags(DataCompound parent, String[] names, int[] fields, int i) {
         DataCompound tag = parent.createCompound(names[i] + ": " + fields[i]);
-        tag.put("builds", tag.getInt("builds") + 1);
+        tag.put("builds", tag.getI32("builds") + 1);
         if(++i < fields.length) // we are not build
             return buildTags(tag, names, fields, i); // recursively get children
         else // we are build
-            return tag.getInt("builds");
+            return tag.getI32("builds");
     }
     
 }

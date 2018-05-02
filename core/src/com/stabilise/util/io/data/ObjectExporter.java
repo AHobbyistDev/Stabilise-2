@@ -129,15 +129,15 @@ public class ObjectExporter {
                     String n = f.getName();
                     f.setAccessible(true);
                     // See comments for doExport()
-                    if(c.equals(int.class)) f.setInt(o, tag.getInt(n));
-                    else if(c.equals(long.class)) f.setLong(o, tag.getLong(n));
-                    else if(c.equals(float.class)) f.setFloat(o, tag.getFloat(n));
-                    else if(c.equals(double.class)) f.setDouble(o, tag.getDouble(n));
+                    if(c.equals(int.class)) f.setInt(o, tag.getI32(n));
+                    else if(c.equals(long.class)) f.setLong(o, tag.getI64(n));
+                    else if(c.equals(float.class)) f.setFloat(o, tag.getF32(n));
+                    else if(c.equals(double.class)) f.setDouble(o, tag.getF64(n));
                     else if(c.equals(String.class)) f.set(o, tag.getString(n));
                     else if(c.isArray()) {
                         Class<?> t = c.getComponentType();
-                        if(t.equals(int.class)) f.set(o, tag.getIntArr(n));
-                        else if(t.equals(byte.class)) f.set(o, tag.getByteArr(n));
+                        if(t.equals(int.class)) f.set(o, tag.getI32Arr(n));
+                        else if(t.equals(byte.class)) f.set(o, tag.getI8Arr(n));
                         else { //if(t.getAnnotation(Exportable.class) != null) {
                             Object[] arr = (Object[])f.get(o);
                             if(arr != null) {
@@ -146,9 +146,9 @@ public class ObjectExporter {
                                     doImport(arr[i], list.getCompound());
                             }
                         }
-                    } else if(c.equals(byte.class)) f.setByte(o, tag.getByte(n));
+                    } else if(c.equals(byte.class)) f.setByte(o, tag.getI8(n));
                     else if(c.equals(boolean.class)) f.setBoolean(o, tag.getBool(n));
-                    else if(c.equals(short.class)) f.setShort(o, tag.getShort(n));
+                    else if(c.equals(short.class)) f.setShort(o, tag.getI16(n));
                     else { //if(c.getAnnotation(Exportable.class) != null) {
                         //LOG_IMP.postWarning("Invalid field type " + c.getSimpleName() +
                         //        " of field \"" + n + "\"");

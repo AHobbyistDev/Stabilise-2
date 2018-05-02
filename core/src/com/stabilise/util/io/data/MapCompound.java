@@ -10,17 +10,7 @@ import java.util.function.BiConsumer;
 
 import javaslang.control.Option;
 
-import com.stabilise.util.box.BoolBox;
-import com.stabilise.util.box.ByteArrBox;
-import com.stabilise.util.box.ByteBox;
-import com.stabilise.util.box.CharBox;
-import com.stabilise.util.box.DoubleBox;
-import com.stabilise.util.box.FloatBox;
-import com.stabilise.util.box.IntArrBox;
-import com.stabilise.util.box.IntBox;
-import com.stabilise.util.box.LongBox;
-import com.stabilise.util.box.ShortBox;
-import com.stabilise.util.box.StringBox;
+import com.stabilise.util.box.*;
 
 /**
  * Implementation for a DataCompound backed by a hash map. External code should
@@ -50,9 +40,15 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
     }
     
     @SuppressWarnings("unchecked")
-    protected <T> Option<T> get(String name, Class<T> c) {
-        Object o = data.get(name);
-        return c.isInstance(o) ? Option.some((T)o) : Option.none();
+    protected <T extends ITag> Option<T> get(String name, Class<T> c) {
+        ITag t = data.get(name);
+        return c.isInstance(t) ? Option.some((T)t) : Option.none();
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected <T extends ITag> T getRaw(String name, Class<T> c) {
+        ITag t = data.get(name);
+        return c.isInstance(t) ? (T)t : null;
     }
     
     /**
@@ -98,17 +94,19 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
     
     @Override public void put(String name, DataCompound data) { putData(name, (ITag)data.convert(format())); }
     @Override public void put(String name, DataList data) { putData(name, (ITag)data.convert(format())); }
-    @Override public void put(String name, boolean data) { putData(name, box(data)); }
-    @Override public void put(String name, byte data) { putData(name, box(data)); }
-    @Override public void put(String name, char data) { putData(name, box(data)); }
-    @Override public void put(String name, double data) { putData(name, box(data)); }
-    @Override public void put(String name, float data) { putData(name, box(data)); }
-    @Override public void put(String name, int data) { putData(name, box(data)); }
-    @Override public void put(String name, long data) { putData(name, box(data)); }
-    @Override public void put(String name, short data) { putData(name, box(data)); }
-    @Override public void put(String name, String data) { putData(name, box(data)); }
-    @Override public void put(String name, byte[] data) { putData(name, box(data)); }
-    @Override public void put(String name, int[] data) { putData(name, box(data)); }
+    @Override public void put(String name, boolean data)  { putData(name, box(data)); }
+    @Override public void put(String name, byte data)     { putData(name, box(data)); }
+    @Override public void put(String name, short data)    { putData(name, box(data)); }
+    @Override public void put(String name, int data)      { putData(name, box(data)); }
+    @Override public void put(String name, long data)     { putData(name, box(data)); }
+    @Override public void put(String name, float data)    { putData(name, box(data)); }
+    @Override public void put(String name, double data)   { putData(name, box(data)); }
+    @Override public void put(String name, byte[] data)   { putData(name, box(data)); }
+    @Override public void put(String name, int[] data)    { putData(name, box(data)); }
+    @Override public void put(String name, long[] data)   { putData(name, box(data)); }
+    @Override public void put(String name, float[] data)  { putData(name, box(data)); }
+    @Override public void put(String name, double[] data) { putData(name, box(data)); }
+    @Override public void put(String name, String data)   { putData(name, box(data)); }
     
     @Override
     public DataCompound getCompound(String name) {
@@ -124,72 +122,97 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
     
     @Override
     public boolean getBool(String name) {
-        return get(name, BoolBox.class).orElse(BoolBox.FALSE).get();
+        ITag b = data.get(name);
+        return b instanceof BoolBox ? ((BoolBox)b).get() : BoolBox.defaultValue();
     }
     
     @Override
-    public byte getByte(String name) {
-        return get(name, ByteBox.class).orElseGet(() -> box((byte)0)).get();
+    public byte getI8(String name) {
+        ITag b = data.get(name);
+        return b instanceof I8Box ? ((I8Box)b).get() : I8Box.defaultValue();
     }
     
     @Override
-    public char getChar(String name) {
-        return get(name, CharBox.class).orElseGet(() -> box((char)0)).get();
+    public short getI16(String name) {
+        ITag b = data.get(name);
+        return b instanceof I16Box ? ((I16Box)b).get() : I16Box.defaultValue();
     }
     
     @Override
-    public double getDouble(String name) {
-        return get(name, DoubleBox.class).orElseGet(() -> box(0.0)).get();
+    public int getI32(String name) {
+        ITag b = data.get(name);
+        return b instanceof I32Box ? ((I32Box)b).get() : I32Box.defaultValue();
     }
     
     @Override
-    public float getFloat(String name) {
-        return get(name, FloatBox.class).orElseGet(() -> box(0f)).get();
+    public long getI64(String name) {
+        ITag b = data.get(name);
+        return b instanceof I64Box ? ((I64Box)b).get() : I64Box.defaultValue();
     }
     
     @Override
-    public int getInt(String name) {
-        return get(name, IntBox.class).orElseGet(() -> box(0)).get();
+    public float getF32(String name) {
+        ITag b = data.get(name);
+        return b instanceof F32Box ? ((F32Box)b).get() : F32Box.defaultValue();
     }
     
     @Override
-    public long getLong(String name) {
-        return get(name, LongBox.class).orElseGet(() -> box(0L)).get();
+    public double getF64(String name) {
+        ITag b = data.get(name);
+        return b instanceof F64Box ? ((F64Box)b).get() : F64Box.defaultValue();
     }
     
     @Override
-    public short getShort(String name) {
-        return get(name, ShortBox.class).orElseGet(() -> box((short)0)).get();
+    public byte[] getI8Arr(String name) {
+        ITag b = data.get(name);
+        return b instanceof I8ArrBox ? ((I8ArrBox)b).get() : I8ArrBox.defaultValue();
+    }
+    
+    @Override
+    public int[] getI32Arr(String name) {
+        ITag b = data.get(name);
+        return b instanceof I32ArrBox ? ((I32ArrBox)b).get() : I32ArrBox.defaultValue();
+    }
+    
+    @Override
+    public long[] getI64Arr(String name) {
+        ITag b = data.get(name);
+        return b instanceof I64ArrBox ? ((I64ArrBox)b).get() : I64ArrBox.defaultValue();
+    }
+    
+    @Override
+    public float[] getF32Arr(String name) {
+        ITag b = data.get(name);
+        return b instanceof F32ArrBox ? ((F32ArrBox)b).get() : F32ArrBox.defaultValue();
+    }
+    
+    @Override
+    public double[] getF64Arr(String name) {
+        ITag b = data.get(name);
+        return b instanceof F64ArrBox ? ((F64ArrBox)b).get() : F64ArrBox.defaultValue();
     }
     
     @Override
     public String getString(String name) {
-        return get(name, StringBox.class).orElseGet(() -> box("")).get();
-    }
-    
-    @Override
-    public byte[] getByteArr(String name) {
-        return get(name, ByteArrBox.class).orElseGet(() -> box(new byte[0])).get();
-    }
-    
-    @Override
-    public int[] getIntArr(String name) {
-        return get(name, IntArrBox.class).orElseGet(() -> box(new int[0])).get();
+        ITag b = data.get(name);
+        return b instanceof StringBox ? ((StringBox)b).get() : StringBox.defaultValue();
     }
     
     public Option<DataCompound> optCompound(String name) { return get(name, DataCompound.class); }
     public Option<DataList>     optList    (String name) { return get(name, DataList.class); }
     public Option<Boolean>      optBool    (String name) { return get(name, BoolBox.class).map(b -> b.get()); }
-    public Option<Byte>         optByte    (String name) { return get(name, ByteBox.class).map(b -> b.get()); }
-    public Option<Character>    optChar    (String name) { return get(name, CharBox.class).map(b -> b.get()); }
-    public Option<Double>       optDouble  (String name) { return get(name, DoubleBox.class).map(b -> b.get()); }
-    public Option<Float>        optFloat   (String name) { return get(name, FloatBox.class).map(b -> b.get()); }
-    public Option<Integer>      optInt     (String name) { return get(name, IntBox.class).map(b -> b.get()); }
-    public Option<Long>         optLong    (String name) { return get(name, LongBox.class).map(b -> b.get()); }
-    public Option<Short>        optShort   (String name) { return get(name, ShortBox.class).map(b -> b.get()); }
+    public Option<Byte>         optI8      (String name) { return get(name, I8Box.class).map(b -> b.get()); }
+    public Option<Short>        optI16     (String name) { return get(name, I16Box.class).map(b -> b.get()); }
+    public Option<Integer>      optI32     (String name) { return get(name, I32Box.class).map(b -> b.get()); }
+    public Option<Long>         optI64     (String name) { return get(name, I64Box.class).map(b -> b.get()); }
+    public Option<Float>        optF32     (String name) { return get(name, F32Box.class).map(b -> b.get()); }
+    public Option<Double>       optF64     (String name) { return get(name, F64Box.class).map(b -> b.get()); }
+    public Option<byte[]>       optI8Arr   (String name) { return get(name, I8ArrBox.class).map(b -> b.get()); }
+    public Option<int[]>        optI32Arr  (String name) { return get(name, I32ArrBox.class).map(b -> b.get()); }
+    public Option<long[]>       optI64Arr  (String name) { return get(name, I64ArrBox.class).map(b -> b.get()); }
+    public Option<float[]>      optF32Arr  (String name) { return get(name, F32ArrBox.class).map(b -> b.get()); }
+    public Option<double[]>     optF64Arr  (String name) { return get(name, F64ArrBox.class).map(b -> b.get()); }
     public Option<String>       optString  (String name) { return get(name, StringBox.class).map(b -> b.get()); }
-    public Option<byte[]>       optByteArr (String name) { return get(name, ByteArrBox.class).map(b -> b.get()); }
-    public Option<int[]>        optIntArr  (String name) { return get(name, IntArrBox.class).map(b -> b.get()); }
     
     @Override
     public DataCompound convert(Format format) {

@@ -12,6 +12,7 @@ import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.collect.WeightingArrayList;
 import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.Exportable;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
@@ -212,14 +213,70 @@ public class Entity extends GameObject implements Exportable {
     	return core instanceof CPhantom;
     }
     
+    /**
+     * {@inheritDoc}
+     * 
+     * <p>Do not use this directly; use {@link
+     * Entity#fromCompound(DataCompound)} instead.
+     */
     @Override
-    public void importFromCompound(DataCompound o) {
+    public void importFromCompound(DataCompound dc) {
+        id = dc.getI64("id");
+        age = dc.getI64("age");
         
+        dc.getInto(pos);
+        dx = dc.getF32("dx");
+        dy = dc.getF32("dy");
+        facingRight = dc.getBool("facingRight");
+        
+        DataCompound comp = dc.getCompound("components");
+        DataList adhoc = comp.getList("ad hoc");
+        while(adhoc.hasNext()) {
+            Component c = Component.fromCompound(adhoc.getCompound());
+            if(c == null)
+                throw new RuntimeException("invalid component oh no");
+            //if(components.add(c))
+            c.init(this);
+        }
     }
     
     @Override
-    public void exportToCompound(DataCompound o) {
+    public void exportToCompound(DataCompound dc) {
+        dc.put("id", id);
+        dc.put("age", age);
         
+        dc.put(pos);
+        dc.put("dx", dx);
+        dc.put("dy", dy);
+        dc.put("facingRight", facingRight);
+        
+        DataCompound comp = dc.createCompound("components");
+        Component.toCompound(comp.createCompound("core"), core);
+        Component.toCompound(comp.createCompound("controller"), controller);
+        Component.toCompound(comp.createCompound("physics"), physics);
+        DataList adhoc = comp.createList("ad hoc");
+        
+        components.forEach(c -> Component.toCompound(adhoc.createCompound(), c));
     }
+    
+    
+    /**
+     * Reads an entity from the given DataCompound.
+     * 
+     * @return the entity, or {@code null} if any of the core/controller/
+     * physics components are null.
+     */
+    public static Entity fromCompound(DataCompound c) {
+        DataCompound comp = c.getCompound("components");
+        Component core = Component.fromCompound(comp.getCompound("core"));
+        Component controller = Component.fromCompound(comp.getCompound("controller"));
+        Component physics = Component.fromCompound(comp.getCompound("physics"));
+        if(core == null || controller == null || physics == null)
+            return null;
+        Entity e = new Entity((CPhysics)physics, (CController)controller, (CCore)core);
+        e.importFromCompound(c);
+        return e;
+    }
+    
     
 }

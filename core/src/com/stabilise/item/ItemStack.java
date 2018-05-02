@@ -211,8 +211,8 @@ public class ItemStack implements Exportable {
     
     @Override
     public void importFromCompound(DataCompound o) {
-        quantity = o.getInt("count");
-        data = o.getInt("data");
+        quantity = o.getI32("count");
+        data = o.getI32("data");
     }
     
     @Override

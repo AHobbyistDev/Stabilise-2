@@ -21,7 +21,7 @@ public abstract class Action implements Exportable {
     
     
     public static Action read(DataCompound c) {
-        Action a = registry.create(c.getByte("id"));
+        Action a = registry.create(c.getI8("id"));
         a.importFromCompound(c);
         return a;
     }
