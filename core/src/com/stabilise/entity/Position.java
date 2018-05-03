@@ -279,11 +279,14 @@ public class Position implements Exportable {
      * you know only {@link #lx} has been changed and want to save slightly on
      * computation time.
      * 
+     * @return this Position.
+     * 
      * @see #align()
      */
-    public void alignX() {
+    public Position alignX() {
         sx += sliceCoordFromTileCoord2(lx);
         lx = tileCoordRelativeToSliceFromTileCoordFree2(lx);
+        return this;
     }
     
     /**
@@ -291,11 +294,14 @@ public class Position implements Exportable {
      * you know only {@link #ly} has been changed and want to save slightly on
      * computation time.
      * 
+     * @return this Position.
+     * 
      * @see #align()
      */
-    public void alignY() {
+    public Position alignY() {
         sy += sliceCoordFromTileCoord2(ly);
         ly = tileCoordRelativeToSliceFromTileCoordFree2(ly);
+        return this;
     }
     
     /**
@@ -378,6 +384,22 @@ public class Position implements Exportable {
         float dx = diffX(other);
         float dy = diffY(other);
         return dx*dx + dy*dy;
+    }
+    
+    /**
+     * Returns the square of the distance from the origin to this position.
+     */
+    public double distFromOriginSq() {
+        double x = getGlobalX();
+        double y = getGlobalY();
+        return x*x + y*y;
+    }
+    
+    /**
+     * Returns the distance from the origin to this position.
+     */
+    public double distFromOrigin() {
+        return Math.sqrt(distFromOriginSq());
     }
     
     /**

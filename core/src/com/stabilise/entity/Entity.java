@@ -235,6 +235,9 @@ public class Entity extends GameObject implements Exportable {
             Component c = Component.fromCompound(adhoc.getCompound());
             if(c == null)
                 throw new RuntimeException("invalid component oh no");
+            
+            // By assumption of the entity being saved in a valid state, this
+            // should return true, so no need to check
             //if(components.add(c))
             c.init(this);
         }
@@ -242,6 +245,12 @@ public class Entity extends GameObject implements Exportable {
     
     @Override
     public void exportToCompound(DataCompound dc) {
+        // Export components first, to match import order over in fromCompound()
+        DataCompound comp = dc.createCompound("components");
+        Component.toCompound(comp.createCompound("core"), core);
+        Component.toCompound(comp.createCompound("controller"), controller);
+        Component.toCompound(comp.createCompound("physics"), physics);
+        
         dc.put("id", id);
         dc.put("age", age);
         
@@ -250,12 +259,7 @@ public class Entity extends GameObject implements Exportable {
         dc.put("dy", dy);
         dc.put("facingRight", facingRight);
         
-        DataCompound comp = dc.createCompound("components");
-        Component.toCompound(comp.createCompound("core"), core);
-        Component.toCompound(comp.createCompound("controller"), controller);
-        Component.toCompound(comp.createCompound("physics"), physics);
         DataList adhoc = comp.createList("ad hoc");
-        
         components.forEach(c -> Component.toCompound(adhoc.createCompound(), c));
     }
     
@@ -267,14 +271,17 @@ public class Entity extends GameObject implements Exportable {
      * physics components are null.
      */
     public static Entity fromCompound(DataCompound c) {
+        // Need to read main components first because the constructor demands it
         DataCompound comp = c.getCompound("components");
         Component core = Component.fromCompound(comp.getCompound("core"));
         Component controller = Component.fromCompound(comp.getCompound("controller"));
         Component physics = Component.fromCompound(comp.getCompound("physics"));
         if(core == null || controller == null || physics == null)
             return null;
+        
         Entity e = new Entity((CPhysics)physics, (CController)controller, (CCore)core);
         e.importFromCompound(c);
+        
         return e;
     }
     

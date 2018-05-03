@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -49,7 +50,7 @@ public final class WorldGenerator {
     private final RegionStore regionStore;
     
     /** These generators are what actually generate the terrain of each region. */
-    private final List<IWorldGenerator> generators = new ArrayList<>(1);
+    private final List<Supplier<IWorldGenerator>> generators = new ArrayList<>(1);
     
     
     final Log log;
@@ -76,7 +77,19 @@ public final class WorldGenerator {
      * registered.
      */
     @ThreadUnsafeMethod
-    void addGenerator(IWorldGenerator generator) {
+    public void addGenerator(IWorldGenerator generator) {
+        addGenerator(() -> generator);
+    }
+    
+    /**
+     * Registers a generator. Generators are run in the order they are
+     * registered. Use this in preference to {@link
+     * #addGenerator(IWorldGenerator)} if the desired generator is not
+     * thread-safe, and it is better to simply construct one for each new
+     * region generated.
+     */
+    @ThreadUnsafeMethod
+    public void addGenerator(Supplier<IWorldGenerator> generator) {
         generators.add(generator);
     }
     
@@ -129,7 +142,7 @@ public final class WorldGenerator {
                 
                 GenProvider prov = new GenProvider(world, r);
                 // Generate the region, as per the generators
-                generators.forEach(g -> g.generate(r, prov, seed));
+                generators.forEach(g -> g.get().generate(r, prov, seed));
             }
             
             // After normal generation processes have been completed, add any

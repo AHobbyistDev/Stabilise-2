@@ -1,6 +1,5 @@
 package com.stabilise.util.collect;
 
-
 /**
  * An IDuplicateResolver is an interface built into the {@link
  * WeightingArrayList} collection; if two {@link Object#equals(Object) equal}

@@ -1,7 +1,7 @@
 package com.stabilise.world.dimension;
 
 import com.stabilise.world.WorldInfo;
-import com.stabilise.world.gen.GeneratorRegistrant;
+import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.gen.misc.ChestGen;
 import com.stabilise.world.gen.misc.OreGen;
 import com.stabilise.world.gen.terrain.CaveGen;
@@ -18,12 +18,11 @@ public class DimOverworld extends Dimension {
     }
     
     @Override
-    protected void addGenerators(GeneratorRegistrant gr) {
-        gr.add((w,s) -> new OverworldTerrainGen(w,s));
-        //gr.add((w,s) -> new FlatlandTerrainGen(w,s));
-        gr.add((w,s) -> new CaveGen(w,s));
-        gr.add(new OreGen(2));
-        gr.add(new ChestGen());
+    public void addGenerators(WorldGenerator g) {
+        g.addGenerator(OverworldTerrainGen::new);
+        g.addGenerator(new CaveGen());
+        g.addGenerator(new OreGen(2));
+        g.addGenerator(new ChestGen());
     }
     
     @Override

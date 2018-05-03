@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.badlogic.gdx.math.RandomXS128;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.world.HostWorld;
@@ -27,7 +28,7 @@ class GenProvider implements WorldProvider {
     private int lastX, lastY;
     private Slice lastSlice;
     
-    private final Random rnd = new Random();
+    private final Random rnd = new RandomXS128();
     
     
     GenProvider(HostWorld w, Region r) {

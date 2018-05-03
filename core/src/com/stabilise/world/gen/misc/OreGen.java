@@ -4,6 +4,7 @@ import static com.stabilise.world.Slice.SLICE_SIZE;
 
 import java.util.Random;
 
+import com.badlogic.gdx.math.RandomXS128;
 import com.stabilise.util.Checks;
 import com.stabilise.util.maths.INoise;
 import com.stabilise.util.maths.Interpolation;
@@ -35,10 +36,11 @@ public class OreGen implements IWorldGenerator {
     public void generate(Region r, WorldProvider w, long seed) {
         long mix1 = 0xdb64064dff219635L;
         long mix2 = 0xf1d4c49b0ac04506L;
-        Random rnd = new Random(seed^mix1);
-        OctaveNoise noise = OctaveNoise.simplex(2, seed^mix2)
+        Random rnd = new RandomXS128(seed^mix1);
+        OctaveNoise noise = OctaveNoise.simplex(seed^mix2)
                 .addOctave(32, 4)
-                .addOctave(8,  1);
+                .addOctave(8,  1)
+                .normalise();
         r.forEachSlice(s -> { if(w.chance(n)) addOreVein(s,rnd,noise); });
     }
     
