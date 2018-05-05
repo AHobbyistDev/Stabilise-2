@@ -31,7 +31,7 @@ public class ChestGen implements IWorldGenerator {
         r.forEachSlice(s -> {
             int x = rnd.nextInt(SLICE_SIZE);
             int y = rnd.nextInt(SLICE_SIZE - 1);
-            tmp.set(s.x, s.y, x, y).align();
+            tmp.set(s.x, s.y, x, y); // no need to align
             int id = w.getTileIDAt(tmp);
             if((id == stone.getID() || id == grass.getID()) &&
                         w.getTileIDAt(tmp2.set(tmp2, 0, 1).alignY()) == air.getID()) {

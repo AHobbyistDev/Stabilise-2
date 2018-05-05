@@ -9,6 +9,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.entity.Position;
 import com.stabilise.util.annotation.ThreadSafeMethod;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
+import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.concurrent.ClearingQueue;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Point;
@@ -217,8 +218,11 @@ public class Region {
     /**
      * Imports this region's contents (e.g. entities, tile entities, lighting)
      * into the world, if this region hasn't been imported already.
+     * 
+     * <p>This is invoked during an update tick.
      */
-    public void importToWorld(HostWorld world) {
+    @UserThread("Main Thread")
+    public void importToWorld(HostWorld world, RegionStore regions) {
     	if(!state.tryImport())
     		return;
     	
@@ -228,11 +232,30 @@ public class Region {
             s.importTileEntities(world);
         });
         if(queuedActions != null) {
-            for(Action a : queuedActions) {
+            for(Action a : queuedActions)
                 a.apply(world, this);
-            }
             queuedActions = null;
         }
+        
+        // Stitch this region to all adjacent loaded regions
+        int x = x(), y = y();
+        for(int u = x-1; u <= x+1; u++) {
+            for(int v = y-1; v <= y+1; v++) {
+                if(u == x && v == y) continue; // don't do it if other == r
+                
+                Region other = regions.getRegion(u, v);
+                if(other != null)
+                    stitch(other);
+            }
+        }
+    }
+    
+    /**
+     * "Stitches" this region to an adjacent prepared region, i.e., shares
+     * lighting, etc.
+     */
+    private void stitch(Region r) {
+        
     }
     
     /**

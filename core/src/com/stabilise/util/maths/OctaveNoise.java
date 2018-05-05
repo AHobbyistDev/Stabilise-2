@@ -61,7 +61,7 @@ public class OctaveNoise implements INoise {
      * Invoking this will normalise the noise to [0,1] by rescaling each octave
      * by <tt>1/totalWeight</tt>.
      * 
-     * @return this, for chaing operations.
+     * @return this {@code OctaveNoise}, for chaining operations.
      */
     public OctaveNoise normalise() {
         float totalWeight = 0f;

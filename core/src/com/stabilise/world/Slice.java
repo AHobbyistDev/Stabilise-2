@@ -314,13 +314,17 @@ public class Slice {
     public void buildLight() {
         for(int y = 0; y < SLICE_SIZE; y++) {
             for(int x = 0; x < SLICE_SIZE; x++) {
-                setLightAt(x, y, getTileAt(x, y).getLight());
+                byte l1 = getTileAt(x, y).getLight();
+                byte l2 = getWallAt(x, y).getLight();
+                setLightAt(x, y, l1 > l2 ? l1 : l2);
             }
         }
         
         for(int y = 0; y < SLICE_SIZE; y++) {
             for(int x = 0; x < SLICE_SIZE; x++) {
-                spreadLightTo(x, y, getTileAt(x, y).getLight(), true);
+                byte l1 = getTileAt(x, y).getLight();
+                byte l2 = getWallAt(x, y).getLight();
+                spreadLightTo(x, y, l1 > l2 ? l1 : l2, true);
             }
         }
     }

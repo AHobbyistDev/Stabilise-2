@@ -113,7 +113,8 @@ public class RegionState {
     /**
      * Returns {@code true} if the region is considered 'active' -- that is, if
      * it is {@link #isAnchored() anchored}, and it, and all its neighbours,
-     * are {@link #isPrepared() prepared}.
+     * are {@link #isPrepared() prepared}. A region is {@link
+     * Region#update(HostWorld) updated} only if it is active.
      * 
      * <p>Implementation note: we don't actually check for whether this region
      * is itself prepared, since by assumption a region in the RegionStore's

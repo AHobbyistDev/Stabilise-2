@@ -459,7 +459,8 @@ public class RegionStore {
     }
     
     /**
-     * Moves a region from the cache to primary storage. This is invoked while
+     * Moves a region from the cache to primary storage. This is invoked after
+     * a region has been appropriately loaded/generated. This is invoked while
      * the appropriate lock is held (see {@link #locks}).
      */
     @UserThread("WorkerThread")
@@ -557,7 +558,7 @@ public class RegionStore {
         regions.values().forEach(r -> {
             RegionState s = r.state;
             
-            r.importToWorld(world);
+            r.importToWorld(world, this);
             
             if(s.isActive()) {
                 r.update(world);

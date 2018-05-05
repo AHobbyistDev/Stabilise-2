@@ -29,10 +29,6 @@ public interface World extends WorldProvider {
     /** The file extension for player data files. */
     public static final String EXT_PLAYERS = ".player";
     
-    /** The maximum number of hostile mobs which may spawn.
-     * <p>TODO: Arbitrary, and probably temporary. */
-    public static final int HOSTILE_MOB_CAP = 100;
-    
     
     /**
      * Gets the Multiverse to which this World belongs.
@@ -61,9 +57,9 @@ public interface World extends WorldProvider {
      * 
      * @throws NullPointerException if {@code e} is {@code null}.
      */
-    default void removeEntity(Entity e) {
-        removeEntity(e.id());
-    }
+    //default void removeEntity(Entity e) {
+    //    removeEntity(e.id());
+    //}
     
     /**
      * Removes an entity from the world.
@@ -77,7 +73,7 @@ public interface World extends WorldProvider {
      * 
      * @param id The ID of the entity.
      */
-    void removeEntity(long id);
+    //void removeEntity(long id);
     
     /**
      * Adds a hitbox to the world. The hitbox's ID is assigned automatically.
@@ -229,19 +225,6 @@ public interface World extends WorldProvider {
     @UserThread("MainThread")
     @ThreadUnsafeMethod
     void deanchorSlice(int x, int y);
-    
-    // ========== Dimensional stuff ==========
-    
-    /**
-     * Sends an entity to the specified dimension.
-     * 
-     * @param dimension The name of the dimension to which to send the entity.
-     * @param e The entity.
-     * @param pos The position at which to place the entity.
-     * 
-     * @throws NullPointerException if either argument is {@code null}.
-     */
-    void sendToDimension(String dimension, Entity e, Position pos);
     
     // ========== Time delta stuff ==========
     
