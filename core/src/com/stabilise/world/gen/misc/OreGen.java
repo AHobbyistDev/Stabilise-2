@@ -2,9 +2,6 @@ package com.stabilise.world.gen.misc;
 
 import static com.stabilise.world.Slice.SLICE_SIZE;
 
-import java.util.Random;
-
-import com.badlogic.gdx.math.RandomXS128;
 import com.stabilise.util.Checks;
 import com.stabilise.util.maths.INoise;
 import com.stabilise.util.maths.Interpolation;
@@ -34,27 +31,25 @@ public class OreGen implements IWorldGenerator {
     
     @Override
     public void generate(Region r, WorldProvider w, long seed) {
-        long mix1 = 0xdb64064dff219635L;
-        long mix2 = 0xf1d4c49b0ac04506L;
-        Random rnd = new RandomXS128(seed^mix1);
-        OctaveNoise noise = OctaveNoise.simplex(seed^mix2)
+        long mix = 0xf1d4c49b0ac04506L;
+        OctaveNoise noise = OctaveNoise.simplex(seed^mix)
                 .addOctave(32, 4)
                 .addOctave(8,  1)
                 .normalise();
-        r.forEachSlice(s -> { if(w.chance(n)) addOreVein(s,rnd,noise); });
+        r.forEachSlice(s -> { if(w.chance(n)) addOreVein(s,w,noise); });
     }
     
-    private void addOreVein(Slice s, Random rnd, INoise noise) {
+    private void addOreVein(Slice s, WorldProvider w, INoise noise) {
         int ore = new int[] {
                 Tiles.oreCopper.getID(),
                 Tiles.oreIron.getID(),
                 Tiles.oreSilver.getID(),
                 Tiles.oreGold.getID(),
                 Tiles.oreDiamond.getID()
-        }[rnd.nextInt(5)];
+        }[w.rnd().nextInt(5)];
         
-        int baseX = rnd.nextInt(Integer.MAX_VALUE - SLICE_SIZE);
-        int baseY = rnd.nextInt(Integer.MAX_VALUE - SLICE_SIZE);
+        int baseX = w.rnd().nextInt(Integer.MAX_VALUE - SLICE_SIZE);
+        int baseY = w.rnd().nextInt(Integer.MAX_VALUE - SLICE_SIZE);
         Interpolation interp = Interpolation.QUADRATIC.inOut;
         int max = SLICE_SIZE/2;
         

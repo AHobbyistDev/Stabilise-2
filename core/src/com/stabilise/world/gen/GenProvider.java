@@ -28,15 +28,21 @@ class GenProvider implements WorldProvider {
     private int lastX, lastY;
     private Slice lastSlice;
     
-    private final Random rnd = new RandomXS128();
+    private final Random rnd;
     
     
-    GenProvider(HostWorld w, Region r) {
+    GenProvider(HostWorld w, Region r, long seed) {
         this.w = w;
         this.r = r;
         
         lastX = lastY = 0;
         lastSlice = r.getSliceAt(0, 0);
+        
+        long mix = 0x59c5180355b14d9bL;
+        long n = 13*r.x() + 57*r.y();
+        n = (n<<13) ^ n;
+        n = n * (n*n*15731 + 789221) + 1376312589;
+        rnd = new RandomXS128(seed ^ n ^ mix);
     }
     
     @Override

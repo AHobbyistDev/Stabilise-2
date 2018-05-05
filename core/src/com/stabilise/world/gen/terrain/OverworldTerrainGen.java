@@ -9,8 +9,6 @@ import static com.stabilise.world.tile.Tiles.grass;
 import static com.stabilise.world.tile.Tiles.stone;
 import static com.stabilise.world.tile.Tiles.torch;
 
-import java.util.Random;
-
 import javax.annotation.concurrent.NotThreadSafe;
 
 import com.stabilise.entity.Position;
@@ -46,11 +44,6 @@ public class OverworldTerrainGen implements IWorldGenerator {
         int tileOffX = r.x() * REGION_SIZE_IN_TILES;
         int tileOffY = r.y() * REGION_SIZE_IN_TILES;
         
-        int n = r.x() + r.y() * 57;
-        n = (n<<13) ^ n;
-        n = n * (n * n * 15731 + 789221) + 1376312589;
-        Random rnd = new Random(seed ^ n);
-        
         float[] noiseVec = new float[REGION_SIZE_IN_TILES];
         for(int x = 0; x < REGION_SIZE_IN_TILES; x++) {
             noiseVec[x] = landNoise.noise(x+tileOffX) - tileOffY;
@@ -65,7 +58,7 @@ public class OverworldTerrainGen implements IWorldGenerator {
                 if(noise <= -1)
                     w.setTileAt(pos, air);
                 else if(noise <= 0) {
-                    if(rnd.nextInt(10) == 0) {
+                    if(w.rnd().nextInt(10) == 0) {
                         w.setTileAt(pos, torch);
                     } else
                         set(air);

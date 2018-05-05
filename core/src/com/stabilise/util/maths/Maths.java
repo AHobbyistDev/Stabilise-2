@@ -498,7 +498,7 @@ public class Maths {
         return x2*x2 + y2*y2 <= range*range;
     }
     
-    // This really shouldn't need documenting
+    /** What do you think this does? */
     public static int min(int a, int b, int c) {
         return Math.min(Math.min(a, b), c);
     }

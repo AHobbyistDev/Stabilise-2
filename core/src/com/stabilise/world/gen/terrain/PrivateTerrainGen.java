@@ -2,11 +2,8 @@ package com.stabilise.world.gen.terrain;
 
 import static com.stabilise.world.Region.REGION_SIZE_IN_TILES;
 
-import java.util.Random;
-
 import javax.annotation.concurrent.NotThreadSafe;
 
-import com.badlogic.gdx.math.RandomXS128;
 import com.stabilise.entity.Position;
 import com.stabilise.util.maths.Interpolation;
 import com.stabilise.util.maths.OctaveNoise;
@@ -33,32 +30,28 @@ public class PrivateTerrainGen implements IWorldGenerator {
     
     @Override
     public void generate(Region r, WorldProvider w, long seed) {
-        long mix1 = 0x8daa1080e4bef1cdL;
-        long mix2 = 0xdef21d21bb94dfc3L;
-        
-        OctaveNoise caveNoise = OctaveNoise.simplex(seed^mix1)
+        long mix = 0x8daa1080e4bef1cdL;
+        OctaveNoise caveNoise = OctaveNoise.simplex(seed^mix)
                 .addOctave(16,  2)
                 .normalise();
-        Random rnd = new RandomXS128(seed^mix2);
         
         Position pos = Position.create();
-        
         
         for(int y = 0; y < REGION_SIZE_IN_TILES; y++) {
             for(int x = 0; x < REGION_SIZE_IN_TILES; x++) {
                 pos.set(r.offsetX, r.offsetY, x, y).align();
+                float d = (float) pos.distFromOrigin();
                 
-                if(Math.abs(x) > caveExtent || Math.abs(y) > caveExtent) {
+                if(d > caveExtent) {
                     w.setTileAt(pos, Tiles.voidRockDense);
                     w.setWallAt(pos, Tiles.voidRockDense);
                 } else {
-                    float d = (float) pos.distFromOrigin();
-                    float cave = caveNoise.noise(x, y) + attenuation(d);
+                    float cave = caveNoise.noise(pos.getGlobalX(), pos.getGlobalY()) + attenuation(d);
                     
                     float denseRockProb = d > blockTypeSwitchStart
                             ? (d - blockTypeSwitchStart)/(blockTypeSwitchEnd - blockTypeSwitchStart)
                             : 0f;
-                    Tile rockType = (d > blockTypeSwitchEnd) || (rnd.nextFloat() <= denseRockProb)
+                    Tile rockType = (d > blockTypeSwitchEnd) || (w.rnd().nextFloat() <= denseRockProb)
                             ? Tiles.voidRockDense
                             : Tiles.voidRock;
                     

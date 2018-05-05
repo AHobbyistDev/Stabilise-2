@@ -140,7 +140,7 @@ public final class WorldGenerator {
                 // Set up the region's slices
                 r.initSlices();
                 
-                GenProvider prov = new GenProvider(world, r);
+                GenProvider prov = new GenProvider(world, r, seed);
                 // Generate the region, as per the generators
                 generators.forEach(g -> g.get().generate(r, prov, seed));
             }

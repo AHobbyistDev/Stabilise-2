@@ -22,10 +22,10 @@ import com.stabilise.util.maths.Maths;
  * vary from system to system, so if one method of doing something is faster on
  * one system, it may in fact be slower on others.
  */
-public class RandomTests {
+public class MiscTests {
     
     // Non-instantiable
-    private RandomTests() {}
+    private MiscTests() {}
     
     /**
      * Compares fastFloor, fastCeil and fastRound in {@link Maths} to their
