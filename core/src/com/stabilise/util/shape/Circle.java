@@ -97,6 +97,16 @@ class Circle extends Shape {
     }
     
     @Override
+    public AABB boundingAABB() {
+        return new AABB(new float[] { c[0]-radius, c[1]-radius, c[0]+radius, c[1]+radius });
+    }
+    
+    @Override
+    public Polygon sweep(float dx, float dy) {
+        throw Checks.unsupported();
+    }
+    
+    @Override
     protected float[] getVertices() {
         return c;
     }
@@ -134,12 +144,14 @@ class Circle extends Shape {
         return dr*dr >= dx*dx + dy*dy;
     }
     
+    /*
     @Override
     public boolean containsPoint(float x, float y) {
         float dx = x() - x;
         float dy = y() - y;
         return dx*dx + dy*dy <= radius*radius;
     }
+    */
     
     protected void getProjection(float[] dest, int offset, float x, float y) {
         // A circle, being a uniform shape, is of constant width for all axes

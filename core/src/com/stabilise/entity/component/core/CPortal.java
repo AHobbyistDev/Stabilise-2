@@ -44,7 +44,7 @@ public class CPortal extends CCore {
      * original portal. */
     private boolean original = true;
     
-    /** Cache the ID for convenience here. */
+    /** Cache this portal's entity ID for convenience here. */
     private long id;
     
     

@@ -363,7 +363,7 @@ public class WorldRenderer implements Renderer {
             shapes.end();
         }
         
-        profiler.next("slideborders");
+        profiler.next("sliceborders");
         if(renderSliceBorders) {
             shapes.begin(ShapeType.Line);
             tileRenderer.renderSliceBorders(shapes);
@@ -545,8 +545,6 @@ public class WorldRenderer implements Renderer {
     
     /**
      * Renders an explosion particle.
-     * 
-     * @param p The explosion particle.
      */
     public void renderExplosion(ParticleExplosion p) {
         batch.setColor(p.colour);

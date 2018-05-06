@@ -198,16 +198,16 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
         return b instanceof StringBox ? ((StringBox)b).get() : StringBox.defaultValue();
     }
     
-    public Option<DataCompound> optCompound(String name) { return get(name, DataCompound.class); }
-    public Option<DataList>     optList    (String name) { return get(name, DataList.class); }
-    public Option<Boolean>      optBool    (String name) { return get(name, BoolBox.class).map(b -> b.get()); }
-    public Option<Byte>         optI8      (String name) { return get(name, I8Box.class).map(b -> b.get()); }
-    public Option<Short>        optI16     (String name) { return get(name, I16Box.class).map(b -> b.get()); }
-    public Option<Integer>      optI32     (String name) { return get(name, I32Box.class).map(b -> b.get()); }
-    public Option<Long>         optI64     (String name) { return get(name, I64Box.class).map(b -> b.get()); }
-    public Option<Float>        optF32     (String name) { return get(name, F32Box.class).map(b -> b.get()); }
-    public Option<Double>       optF64     (String name) { return get(name, F64Box.class).map(b -> b.get()); }
-    public Option<byte[]>       optI8Arr   (String name) { return get(name, I8ArrBox.class).map(b -> b.get()); }
+    public Option<DataCompound> optCompound(String name) { return get(name, DataCompound.class);                }
+    public Option<DataList>     optList    (String name) { return get(name, DataList.class);                    }
+    public Option<Boolean>      optBool    (String name) { return get(name, BoolBox.class).map(b -> b.get());   }
+    public Option<Byte>         optI8      (String name) { return get(name, I8Box.class).map(b -> b.get());     }
+    public Option<Short>        optI16     (String name) { return get(name, I16Box.class).map(b -> b.get());    }
+    public Option<Integer>      optI32     (String name) { return get(name, I32Box.class).map(b -> b.get());    }
+    public Option<Long>         optI64     (String name) { return get(name, I64Box.class).map(b -> b.get());    }
+    public Option<Float>        optF32     (String name) { return get(name, F32Box.class).map(b -> b.get());    }
+    public Option<Double>       optF64     (String name) { return get(name, F64Box.class).map(b -> b.get());    }
+    public Option<byte[]>       optI8Arr   (String name) { return get(name, I8ArrBox.class).map(b -> b.get());  }
     public Option<int[]>        optI32Arr  (String name) { return get(name, I32ArrBox.class).map(b -> b.get()); }
     public Option<long[]>       optI64Arr  (String name) { return get(name, I64ArrBox.class).map(b -> b.get()); }
     public Option<float[]>      optF32Arr  (String name) { return get(name, F32ArrBox.class).map(b -> b.get()); }

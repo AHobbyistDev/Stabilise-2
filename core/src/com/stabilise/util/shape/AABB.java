@@ -75,6 +75,19 @@ public class AABB extends Shape {
         });
     }
     
+    /**
+     * Returns this AABB.
+     */
+    @Override
+    public AABB boundingAABB() {
+        return this;
+    }
+    
+    @Override
+    public Polygon sweep(float dx, float dy) {
+        throw Checks.TODO(); // TODO
+    }
+    
     @Override
     protected float[] getVertices() {
         return new float[] {

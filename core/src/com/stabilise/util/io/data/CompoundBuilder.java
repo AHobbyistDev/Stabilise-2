@@ -37,17 +37,19 @@ public class CompoundBuilder {
 	
     public CompoundBuilder put(String name, DataCompound data) { c.put(name,data); return this; }
     public CompoundBuilder put(String name, DataList     data) { c.put(name,data); return this; }
-    public CompoundBuilder put(String name, boolean data) { c.put(name,data); return this; }
-    public CompoundBuilder put(String name, byte    data) { c.put(name,data); return this; }
-    public CompoundBuilder put(String name, char    data) { c.put(name,data); return this; }
-    public CompoundBuilder put(String name, double  data) { c.put(name,data); return this; }
-    public CompoundBuilder put(String name, float   data) { c.put(name,data); return this; }
-    public CompoundBuilder put(String name, int     data) { c.put(name,data); return this; }
-    public CompoundBuilder put(String name, long    data) { c.put(name,data); return this; }
-    public CompoundBuilder put(String name, short   data) { c.put(name,data); return this; }
-    public CompoundBuilder put(String name, String  data) { c.put(name,data); return this; }
-    public CompoundBuilder put(String name, byte[]  data) { c.put(name,data); return this; }
-    public CompoundBuilder put(String name, int[]   data) { c.put(name,data); return this; }
+    public CompoundBuilder put(String name, boolean  data) { c.put(name,data); return this; }
+    public CompoundBuilder put(String name, byte     data) { c.put(name,data); return this; }
+    public CompoundBuilder put(String name, short    data) { c.put(name,data); return this; }
+    public CompoundBuilder put(String name, int      data) { c.put(name,data); return this; }
+    public CompoundBuilder put(String name, long     data) { c.put(name,data); return this; }
+    public CompoundBuilder put(String name, float    data) { c.put(name,data); return this; }
+    public CompoundBuilder put(String name, double   data) { c.put(name,data); return this; }
+    public CompoundBuilder put(String name, byte[]   data) { c.put(name,data); return this; }
+    public CompoundBuilder put(String name, int[]    data) { c.put(name,data); return this; }
+    public CompoundBuilder put(String name, long[]   data) { c.put(name,data); return this; }
+    public CompoundBuilder put(String name, float[]  data) { c.put(name,data); return this; }
+    public CompoundBuilder put(String name, double[] data) { c.put(name,data); return this; }
+    public CompoundBuilder put(String name, String   data) { c.put(name,data); return this; }
     
     /**
      * Returns the underlying DataCompound object.

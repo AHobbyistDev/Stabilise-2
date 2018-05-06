@@ -74,6 +74,26 @@ public class Polygon extends Shape {
     }
     
     @Override
+    public AABB boundingAABB() {
+        float minX = verts[0];
+        float maxX = minX;
+        float minY = verts[1];
+        float maxY = minY;
+        for(int i = 2; i < verts.length; i += 2) {
+            minX = Maths.min(minX, verts[i  ]);
+            maxX = Maths.max(maxX, verts[i  ]);
+            minY = Maths.min(minY, verts[i+1]);
+            maxY = Maths.max(maxY, verts[i+1]);
+        }
+        return new AABB(new float[] { minX, minY, maxX, maxY });
+    }
+    
+    @Override
+    public Polygon sweep(float dx, float dy) {
+        throw Checks.TODO(); // TODO
+    }
+    
+    @Override
     public float[] getVertices() {
         return verts;
     }

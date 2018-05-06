@@ -151,6 +151,17 @@ public abstract class Shape implements Exportable {
     }
     
     /**
+     * Returns an AABB which bounds this shape.
+     */
+    public abstract AABB boundingAABB();
+    
+    /**
+     * "Sweeps" this shape in the direction given by (dx,dy) and returns the
+     * resulting shape.
+     */
+    public abstract Shape sweep(float dx, float dy);
+    
+    /**
      * Calculates whether or not this shape intersects with another.
      * 
      * @return {@code true} if this shape intersects with {@code s}; {@code
@@ -209,7 +220,11 @@ public abstract class Shape implements Exportable {
      * @return {@code true} if this shape contains the point; {@code false}
      * otherwise.
      */
-    public boolean containsPoint(float x, float y) { return false; }
+    /*
+    public boolean containsPoint(float x, float y) {
+        return false;
+    }
+    */
     
     /**
      * Gets this shape's vertices.
