@@ -273,7 +273,7 @@ public class WorldRenderer implements Renderer {
      */
     public Position mouseCoords() {
         Vector2 coords = viewport.unproject(vec.set(Gdx.input.getX(), Gdx.input.getY()));
-        return camObj.pos.copy().add(coords.x, coords.y).align();
+        return camObj.pos.clone().add(coords.x, coords.y).align();
     }
     
     @Override

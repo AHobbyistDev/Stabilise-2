@@ -321,14 +321,16 @@ public class HostWorld extends AbstractWorld {
             
             TileEntity t2 = s.getTileEntityAt(tx, ty);
             if(t2 != null) {
-                t2.handleRemove(this, pos);
-                removeTileEntity(t2);
+                t2.handleRemove(this);
+                removeTileEntityFromUpdateList(t2);
             }
             
             s.setTileEntityAt(tx, ty, t);
             
-            if(t != null)
-                addTileEntity(t);
+            if(t != null) {
+                t.handleAdd(this);
+                addTileEntityToUpdateList(t);
+            }
         }
     }
     

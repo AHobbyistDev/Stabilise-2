@@ -28,13 +28,15 @@ public abstract class Particle extends GameObject {
     }
     
     private static void register(int id, Class<? extends Particle> clazz, Supplier<Particle> constructor) {
-        REGISTRY.register(id, clazz, constructor);
-        // Can't use registerUnsafe anymore since particles have a Position
-        // object which needs to be initialised.
+        // Note: can't use registerUnsafe since particles, being descendants of
+        // GameObject, have a Position object which needs to be initialised.
         //REGISTRY.registerUnsafe(id, clazz);
+        
+        REGISTRY.register(id, clazz, constructor);
     }
     
-    /** The age of the particle, in ticks. */
+    /** The age of the particle, in ticks. Not a long since a particle isn't
+     * expected to live too long. */
     public int age;
     
     

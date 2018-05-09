@@ -172,7 +172,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 mob.restore();
                 break;
             case INTERACT:
-                Position p = e.pos.copy().clampToTile().add(0,-1).align();
+                Position p = e.pos.clone().clampToTile().add(0,-1).align();
                 game.world.getTileAt(p).handleInteract(game.world, p, e);
                 break;
             case PREV_TILE:

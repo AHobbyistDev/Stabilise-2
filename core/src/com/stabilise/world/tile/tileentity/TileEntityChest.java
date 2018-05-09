@@ -2,7 +2,6 @@ package com.stabilise.world.tile.tileentity;
 
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.Position;
 import com.stabilise.item.BoundedContainer;
 import com.stabilise.item.Container;
 import com.stabilise.item.ItemStack;
@@ -30,12 +29,12 @@ public class TileEntityChest extends TileEntity {
     
     
     @Override
-    public void handleAdd(World world, Position pos) {
+    public void handleAdd(World world) {
         // nothing to see here, move along
     }
     
     @Override
-    public void handleRemove(World world, Position pos) {
+    public void handleRemove(World world) {
         for(ItemStack s : items) {
             Entity e = Entities.item(world, s);
             e.pos.set(pos, 0.5f, 0.5f);

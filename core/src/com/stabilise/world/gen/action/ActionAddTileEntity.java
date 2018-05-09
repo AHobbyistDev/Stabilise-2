@@ -11,7 +11,7 @@ public class ActionAddTileEntity extends Action {
     
     @Override
     public void apply(World w, Region r) {
-        w.addTileEntity(t);
+        w.addTileEntityToUpdateList(t);
     }
     
     @Override

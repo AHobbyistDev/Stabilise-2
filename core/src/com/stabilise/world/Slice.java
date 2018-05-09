@@ -305,10 +305,14 @@ public class Slice {
     void importTileEntities(AbstractWorld world) {
         if(tileEntities == null)
             return;
-        for(int r = 0; r < SLICE_SIZE; r++)
-            for(int c = 0; c < SLICE_SIZE; c++)
-                if(tileEntities[r][c] != null)
-                    world.addTileEntity(tileEntities[r][c]);
+        for(int r = 0; r < SLICE_SIZE; r++) {
+            for(int c = 0; c < SLICE_SIZE; c++) {
+                if(tileEntities[r][c] != null) {
+                    tileEntities[r][c].handleAdd(world);
+                    world.addTileEntityToUpdateList(tileEntities[r][c]);
+                }
+            }
+        }
     }
     
     public void buildLight() {

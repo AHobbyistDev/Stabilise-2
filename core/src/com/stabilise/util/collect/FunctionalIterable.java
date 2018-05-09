@@ -45,7 +45,7 @@ public interface FunctionalIterable<E> extends Iterable<E> {
      * @throws NullPointerException if {@code pred} is {@code null}.
      */
     default void iterate(Predicate<? super E> pred) {
-        Objects.requireNonNull(pred); // fail-fast
+        //Objects.requireNonNull(pred); // fail-fast
         for(Iterator<E> i = iterator(); i.hasNext();) {
             if(pred.test(i.next()))
                 i.remove();
@@ -73,11 +73,63 @@ public interface FunctionalIterable<E> extends Iterable<E> {
      * @throws NullPointerException if {@code pred} is {@code null}.
      */
     default boolean iterateUntil(Predicate<? super E> pred) {
-        Objects.requireNonNull(pred); // fail-fast
+        //Objects.requireNonNull(pred); // fail-fast
         for(E e : this) {
             if(pred.test(e))
                 return false;
         }
+        return true;
+    }
+    
+    /**
+     * Iterates over the elements, and returns {@code true} if the given
+     * predicate is satisfied for any element.
+     * 
+     * <p>The default implementation behaves as if by:
+     * 
+     * <pre>
+     * for(E e : this) {
+     *     if(pred.test(e))
+     *         return true;
+     * }
+     * return false;</pre>
+     * 
+     * <p>Implementors are encouraged to override this if a faster
+     * implementation is possible.
+     * 
+     * @throws NullPointerException if {@code pred} is {@code null}.
+     */
+    default boolean any(Predicate<? super E> pred) {
+        //Objects.requireNonNull(pred); // fail-fast
+        for(E e : this)
+            if(pred.test(e))
+                return true;
+        return false;
+    }
+    
+    /**
+     * Iterates over the elements, and returns {@code true} if the given
+     * predicate is satisfied for all elements.
+     * 
+     * <p>The default implementation behaves as if by:
+     * 
+     * <pre>
+     * for(E e : this) {
+     *     if(!pred.test(e))
+     *         return false;
+     * }
+     * return true;</pre>
+     * 
+     * <p>Implementors are encouraged to override this if a faster
+     * implementation is possible.
+     * 
+     * @throws NullPointerException if {@code pred} is {@code null}.
+     */
+    default boolean all(Predicate<? super E> pred) {
+        //Objects.requireNonNull(pred); // fail-fast
+        for(E e : this)
+            if(!pred.test(e))
+                return false;
         return true;
     }
     

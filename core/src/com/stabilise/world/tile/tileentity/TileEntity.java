@@ -8,6 +8,7 @@ import com.stabilise.util.collect.registry.TypeFactory;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.Exportable;
 import com.stabilise.world.World;
+import com.stabilise.world.WorldProvider;
 
 /**
  * A tile entity contains additional data associated with a tile, and in
@@ -80,20 +81,18 @@ public abstract class TileEntity extends GameObject implements Exportable {
     }
     
     /**
-     * Handles being added to the world.
+     * Invoked when this tile entity is added to the world.
      * 
-     * @param world The world.
-     * @param pos The position of the tile entity.
+     * @see WorldProvider#setTileEntity(TileEntity)
      */
-    public abstract void handleAdd(World world, Position pos);
+    public abstract void handleAdd(World world);
     
     /**
-     * Handles being removed from the world.
+     * Invoked when this tile entity is removed from the world.
      * 
-     * @param world The world.
-     * @param pos The position of the tile entity.
+     * @see WorldProvider#removeTileEntityAt(Position)
      */
-    public abstract void handleRemove(World world, Position pos);
+    public abstract void handleRemove(World world);
     
     /**
      * @return The ID of this tile entity's type.

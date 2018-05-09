@@ -161,7 +161,7 @@ public interface World extends WorldProvider {
      * The supplied tile entity will only be added if {@link
      * TileEntity#requiresUpdates()} returns {@code true}. To remove a tile
      * entity from the update list, either {@link TileEntity#destroy() destroy}
-     * it, or invoke {@link #removeTileEntity(TileEntity)}.
+     * it, or invoke {@link #removeTileEntityFromUpdateList(TileEntity)}.
      * 
      * <p>Note that if the supplied tile entity is already on the update list,
      * it will be added again, and hence updated multiple times per tick!
@@ -170,7 +170,7 @@ public interface World extends WorldProvider {
      * 
      * @throws NullPointerException if {@code t} is {@code null}.
      */
-    void addTileEntity(TileEntity t);
+    void addTileEntityToUpdateList(TileEntity t); // very verbose, unfortunately
     
     /**
      * Removes a tile entity from the "update list" of tile entities. It will
@@ -187,7 +187,7 @@ public interface World extends WorldProvider {
      * 
      * @throws NullPointerException if {@code t} is {@code null}.
      */
-    default void removeTileEntity(TileEntity t) {
+    default void removeTileEntityFromUpdateList(TileEntity t) { // very verbose, unfortunately
         // Since it is expensive to find and remove an object from a list,
         // simply set its destroyed flag and have it remove itself upon the 
         // next iteration.

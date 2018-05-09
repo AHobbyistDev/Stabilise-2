@@ -242,7 +242,7 @@ public class ParticleSource<T extends Particle> {
      */
     public void createBurstOnTile(int numParticles, Position pos,
             float minV, float maxV, float minAngle, float maxAngle) {
-        createBurst(numParticles, pos.copy().add(rnd.nextFloat(), rnd.nextFloat()),
+        createBurst(numParticles, pos.clone().add(rnd.nextFloat(), rnd.nextFloat()),
                 minV, maxV, minAngle, maxAngle);
     }
     

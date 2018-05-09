@@ -52,7 +52,7 @@ public abstract class GameObject {
     }
     
     /**
-     * @param renderer The renderer with which to render the GameObject. Never
+     * @param renderer The renderer with which to render this GameObject. Never
      * null.
      */
     public void render(WorldRenderer renderer) {

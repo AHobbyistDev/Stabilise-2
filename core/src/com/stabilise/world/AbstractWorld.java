@@ -255,7 +255,7 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
-    public void addTileEntity(TileEntity t) {
+    public void addTileEntityToUpdateList(TileEntity t) {
         if(t.requiresUpdates())
             tileEntities.append(t);
     }

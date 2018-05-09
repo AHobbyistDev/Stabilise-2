@@ -76,6 +76,7 @@ public class HUDRenderer implements Renderer {
                     "Entities:  " + wr.world.getEntities().size() + "/" + wr.world.multiverse().getTotalEntityCount() + "\n" +
                     "Hitboxes:  " + wr.world.getHitboxes().size() + "/" + wr.world.hitboxCount + "\n" +
                     "Particles: " + wr.world.getParticles().size() + "/" + wr.world.particleCount + "\n" +
+                    "Tile Entities: " + wr.world.getTileEntities().size() + "\n" +
                     "\n" +
                     "Slices rendered: " + wr.tileRenderer.slicesRendered + "\n" +
                     "\n\n\n" +

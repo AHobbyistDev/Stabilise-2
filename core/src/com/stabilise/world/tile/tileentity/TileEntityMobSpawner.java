@@ -24,7 +24,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     private static final int MAX_SPAWNS = 2;
     
     private int ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS;
-    private Position centrePos = Position.create();
+    private final Position centrePos = Position.create();
     
     private ParticleSource<?> fireGen;
     private ParticleSource<?> smokeGen;
@@ -37,9 +37,6 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
             if(fireGen == null) {
                 fireGen = w.particleSource(ParticleFlame.class);
                 smokeGen = w.particleSource(ParticleSmoke.class);
-                
-                // TODO: should be set sooner
-                centrePos.set(pos).clampToTile().add(0.5f, 0.5f);
             }
             
             if(--ticksUntilNextSpawn == 0) {
@@ -61,11 +58,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      * @return {@code true} if a player is in range; {@code false} otherwise.
      */
     private boolean playerInRange(World world) {
-        for(Entity p : world.getPlayers()) {
-            if(centrePos.diffSq(p.pos) <= ACTIVATION_RANGE_SQUARED)
-                return true;
-        }
-        return false;
+        return world.getPlayers().any(p -> centrePos.diffSq(p.pos) <= ACTIVATION_RANGE_SQUARED);
     }
     
     /**
@@ -76,7 +69,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      */
     private boolean trySpawn(World world) {
         Entity e = Entities.enemy();
-        e.pos.set(pos).clampToTile().add(0f, 1f);
+        e.pos.set(centrePos).add(0f, 0.5f);
         world.addEntity(e);
         
         for(int i = 0; i < 10; i++) {
@@ -105,12 +98,12 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     }
     
     @Override
-    public void handleAdd(World world, Position pos) {
-        // nothing to see here, move along
+    public void handleAdd(World world) {
+        centrePos.set(pos).clampToTile().add(0.5f, 0.5f);
     }
     
     @Override
-    public void handleRemove(World world, Position pos) {
+    public void handleRemove(World world) {
         // nothing to see here, move along
     }
     

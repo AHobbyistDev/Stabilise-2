@@ -20,7 +20,7 @@ import com.stabilise.world.Slice;
  * represent an entity's position as two doubles (x,y), and so this class
  * provides a way of converting between the two representations.
  */
-public class Position implements Exportable {
+public class Position implements Exportable, Cloneable {
     
     // Keep the field names nice and short since they'll probably be used all
     // throughout the codebase, and it gets tedious writing e.g., sliceX and
@@ -434,7 +434,8 @@ public class Position implements Exportable {
     /**
      * Clones this Position object.
      */
-    public Position copy() {
+    @Override
+    public Position clone() {
         return new Position().set(this);
     }
     

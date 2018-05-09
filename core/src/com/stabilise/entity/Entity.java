@@ -30,19 +30,32 @@ public class Entity extends GameObject implements Exportable {
     private long       id;
     public  long       age;
     
-    // Core physical properties
-    public float       dx, dy;
-    public AABB        aabb;
-    public boolean     facingRight;
+    // Core physical properties. pos is inherited from GameObject but left here
+    // commented as documentation.
     
-    // Components
+    // public final Position pos = Position.create();
+    public float       dx, dy;
+    public boolean     facingRight;
+    public AABB        aabb;
+    
+    // The three privileged components
+    public CCore       core;
     public CPhysics    physics;
     public CController controller;
-    public CCore       core;
     
+    // ad hoc components
     public final WeightingArrayList<Component> components =
             new WeightingArrayList<>(new Component[2]);
     
+    
+    /**
+     * Creates a new Entity, but does not initialise any components. This
+     * should only really be used if you're constructing an entity from a
+     * DataCompound via {@link #importFromCompound(DataCompound)}.
+     */
+    public Entity() {
+        // nothing to do here
+    }
     
     /**
      * Creates a new Entity. The given components are all {@link
@@ -55,11 +68,15 @@ public class Entity extends GameObject implements Exportable {
         controller = co;
         core       = c;
         
+        initComponents();
+    }
+    
+    private void initComponents() {
         aabb = core.getAABB();
         
+        core.init(this);
         physics.init(this);
         controller.init(this);
-        core.init(this);
     }
     
     @Override
@@ -126,22 +143,6 @@ public class Entity extends GameObject implements Exportable {
         	c.init(this);
         return this;
     }
-    
-    /**
-     * Gets the first component on this entity which satisfies the given
-     * predicate.
-     * 
-     * @return the first such component, or {@code null} if no component
-     * matching the predicate exists.
-     */
-    /*
-    public Component getComponent(Predicate<Component> pred) {
-    	for(int i = 0; i < components.size(); i++)
-    		if(pred.test(components.get(i)))
-    			return components.get(i);
-    	return null;
-    }
-    */
     
     /**
      * Gets the first component on this entity which is an instance of the
@@ -216,7 +217,7 @@ public class Entity extends GameObject implements Exportable {
     /**
      * {@inheritDoc}
      * 
-     * <p>Do not use this directly; use {@link
+     * <p>It is advised not to use this directly; use {@link
      * Entity#fromCompound(DataCompound)} instead.
      */
     @Override
@@ -230,6 +231,13 @@ public class Entity extends GameObject implements Exportable {
         facingRight = dc.getBool("facingRight");
         
         DataCompound comp = dc.getCompound("components");
+        
+        core = (CCore) Component.fromCompound(comp.getCompound("core"));
+        controller = (CController) Component.fromCompound(comp.getCompound("controller"));
+        physics = (CPhysics) Component.fromCompound(comp.getCompound("physics"));
+        
+        initComponents();
+        
         DataList adhoc = comp.getList("ad hoc");
         while(adhoc.hasNext()) {
             Component c = Component.fromCompound(adhoc.getCompound());
@@ -237,20 +245,14 @@ public class Entity extends GameObject implements Exportable {
                 throw new RuntimeException("invalid component oh no");
             
             // By assumption of the entity being saved in a valid state, this
-            // should return true, so no need to check
-            //if(components.add(c))
+            // should return true, so no need to check if(components.add(c))
+            components.add(c);
             c.init(this);
         }
     }
     
     @Override
     public void exportToCompound(DataCompound dc) {
-        // Export components first, to match import order over in fromCompound()
-        DataCompound comp = dc.createCompound("components");
-        Component.toCompound(comp.createCompound("core"), core);
-        Component.toCompound(comp.createCompound("controller"), controller);
-        Component.toCompound(comp.createCompound("physics"), physics);
-        
         dc.put("id", id);
         dc.put("age", age);
         
@@ -259,29 +261,33 @@ public class Entity extends GameObject implements Exportable {
         dc.put("dy", dy);
         dc.put("facingRight", facingRight);
         
+        DataCompound comp = dc.createCompound("components");
+        Component.toCompound(comp.createCompound("core"), core);
+        Component.toCompound(comp.createCompound("controller"), controller);
+        Component.toCompound(comp.createCompound("physics"), physics);
+        
         DataList adhoc = comp.createList("ad hoc");
         components.forEach(c -> Component.toCompound(adhoc.createCompound(), c));
     }
     
     
+    
+    
+    
     /**
-     * Reads an entity from the given DataCompound.
+     * Reads an entity from the given DataCompound. Equivalent to
      * 
-     * @return the entity, or {@code null} if any of the core/controller/
-     * physics components are null.
+     * <pre>
+     * Entity e = new Entity();
+     * e.importFromCompound(c);
+     * return e;
+     * </pre>
+     * 
+     * @return the entity
      */
     public static Entity fromCompound(DataCompound c) {
-        // Need to read main components first because the constructor demands it
-        DataCompound comp = c.getCompound("components");
-        Component core = Component.fromCompound(comp.getCompound("core"));
-        Component controller = Component.fromCompound(comp.getCompound("controller"));
-        Component physics = Component.fromCompound(comp.getCompound("physics"));
-        if(core == null || controller == null || physics == null)
-            return null;
-        
-        Entity e = new Entity((CPhysics)physics, (CController)controller, (CCore)core);
+        Entity e = new Entity();
         e.importFromCompound(c);
-        
         return e;
     }
     
