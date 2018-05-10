@@ -20,17 +20,11 @@ import com.stabilise.world.Slice;
  * represent an entity's position as two doubles (x,y), and so this class
  * provides a way of converting between the two representations.
  */
-public class Position implements Exportable, Cloneable {
-    
-    // Keep the field names nice and short since they'll probably be used all
-    // throughout the codebase, and it gets tedious writing e.g., sliceX and
-    // localY everywhere.
+public abstract class Position implements Exportable, Cloneable {
     
     /** Slice coordinates, in slice-lengths. */
     public int sx, sy;
-    /** Local coordinates, in tile-lengths, relative to the slice specified by
-     * {@link #sx} and {@link #sy}. */
-    public float lx, ly;
+    
     
     
     /**
@@ -41,28 +35,142 @@ public class Position implements Exportable, Cloneable {
     }
     
     /**
-     * Sets the coordinates of this Position, and then returns this Position
-     * object.
+     * Gets the x-coordinate of the region this Position is in.
      */
-    public Position set(int sliceX, int sliceY, float localX, float localY) {
-        this.sx = sliceX;
-        this.sy = sliceY;
-        this.lx = localX;
-        this.ly = localY;
-        return this;
+    public int rx() {
+        return regionCoordFromSliceCoord(sx);
     }
+    
+    /**
+     * Gets the x-coordinate of the region this Position is in.
+     */
+    public int ry() {
+        return regionCoordFromSliceCoord(sy);
+    }
+    
+    /**
+     * Gets the x-coordinate of the slice this Position is in.
+     * 
+     * @see #sx
+     */
+    public int sx() {
+        return sx;
+    }
+    
+    /**
+     * Gets the y-coordinate of the slice this Position is in.
+     * 
+     * @see #sy
+     */
+    public int sy() {
+        return sy;
+    }
+    
+    /**
+     * Gets the x-coordinate of this Position, relative to the slice it is in.
+     * Note that if this Position has not been {@link #align() aligned}, then
+     * the returned value may not lie in the valid range of such local
+     * coordinates.
+     */
+    public abstract float lx();
+    
+    /**
+     * Gets the y-coordinate of this Position, relative to the slice it is in.
+     * Note that if this Position has not been {@link #align() aligned}, then
+     * the returned value may not lie in the valid range of such local
+     * coordinates.
+     */
+    public abstract float ly();
+    
+    /**
+     * Gets the clamped/tile-coordinate equivalent of {@link #lx()}.
+     */
+    public abstract int ltx();
+    
+    /**
+     * Gets the clamped/local tile coordinate equivalent of {@link #ly}.
+     */
+    public abstract int lty();
+    
+    /**
+     * Returns the x-coordinate of this Position, in tile-lengths, which is
+     * equivalent (up to finite precision) to the position specified jointly by
+     * {@link #sx} and {@link #tileX}.
+     * 
+     * @see #tileCoordFromLocalCoords(int, float)
+     */
+    public double gx() {
+        return tileCoordFromLocalCoords(sx, lx());
+    }
+    
+    /**
+     * Returns the y-coordinate of this Position, in tile-lengths, which is
+     * equivalent (up to finite precision) to the position specified jointly by
+     * {@link #sy} and {@link #tileY}.
+     * 
+     * @see #tileCoordFromLocalCoords(int, float)
+     */
+    public double gy() {
+        return tileCoordFromLocalCoords(sy, ly());
+    }
+    
+    /**
+     * Sets {@link #sx}
+     */
+    public void setSx(int sx) {
+        this.sx = sx;
+    }
+    
+    /**
+     * Sets {@link #sy}
+     */
+    public void setSy(int sy) {
+        this.sy = sy;
+    }
+    
+    /**
+     * Sets the local x-coordinate. If this is a fixed position, the fractional
+     * information is lost. Note: this method does <em>not</em> align the
+     * result!
+     */
+    public abstract void setLx(float lx);
+    
+    /**
+     * Sets the local y-coordinate. If this is a fixed position, the fractional
+     * information is lost. Note: this method does <em>not</em> align the
+     * result!
+     */
+    public abstract void setLy(float ly);
+    
+    /**
+     * Sets the local x-coordinate to an integer value. Note: this method does
+     * <em>not</em> align the result!
+     */
+    public abstract void setLx(int lx);
+    
+    /**
+     * Sets the local y-coordinate to an integer value. Note: this method does
+     * <em>not</em> align the result!
+     */
+    public abstract void setLy(int ly);
     
     /**
      * Sets the coordinates of this Position, and then returns this Position
      * object.
      */
-    public Position set(double x, double y) {
-        this.sx = sliceCoordFromTileCoord(x);
-        this.sy = sliceCoordFromTileCoord(y);
-        this.lx = (float)tileCoordRelativeToSliceFromTileCoordFree(x);
-        this.ly = (float)tileCoordRelativeToSliceFromTileCoordFree(y);
-        return this;
-    }
+    public abstract Position set(int sliceX, int sliceY, float localX, float localY);
+    
+    /**
+     * Sets the coordinates of this Position, and then returns this Position
+     * object.
+     */
+    public abstract Position set(int sliceX, int sliceY, int localX, int localY);
+    
+    /**
+     * Sets the coordinates of this Position, and then returns this Position
+     * object.
+     */
+    public abstract Position set(double x, double y);
     
     /**
      * Sets this Position to the same value as the given Position, and then
@@ -70,13 +178,7 @@ public class Position implements Exportable, Cloneable {
      * 
      * @throws NullPointerException if {@code p} is {@code null}.
      */
-    public Position set(Position p) {
-        sx = p.sx;
-        sy = p.sy;
-        lx = p.lx;
-        ly = p.ly;
-        return this;
-    }
+    public abstract Position set(Position p);
     
     /**
      * Sets this Position to the same value as the given Position, but with
@@ -87,13 +189,7 @@ public class Position implements Exportable, Cloneable {
      * @return this Position.
      * @throws NullPointerException if {@code p} is {@code null}.
      */
-    public Position set(Position p, float dx, float dy) {
-        sx = p.sx;
-        sy = p.sy;
-        lx = p.lx + dx;
-        ly = p.ly + dy;
-        return this;
-    }
+    public abstract Position set(Position p, float dx, float dy);
     
     /**
      * Sets the x-component values of this Position to the same as those of the
@@ -103,11 +199,7 @@ public class Position implements Exportable, Cloneable {
      * @return this Position.
      * @throws NullPointerException if {@code p} is {@code null}.
      */
-    public Position setX(Position p, float dx) {
-    	sx = p.sx;
-    	lx = p.lx;
-    	return this;
-    }
+    public abstract Position setX(Position p, float dx);
     
     /**
      * Sets the y-component values of this Position to the same as those of the
@@ -117,11 +209,7 @@ public class Position implements Exportable, Cloneable {
      * @return this Position.
      * @throws NullPointerException if {@code p} is {@code null}.
      */
-    public Position setY(Position p, float dy) {
-    	sy = p.sy;
-    	ly = p.ly;
-    	return this;
-    }
+    public abstract Position setY(Position p, float dy);
     
     /**
      * Sets this Position to the sum of the two given positions, (i.e. this =
@@ -130,13 +218,7 @@ public class Position implements Exportable, Cloneable {
      * @return this Position.
      * @throws NullPointerException if either argument is {@code null}.
      */
-    public Position setSum(Position p1, Position p2) {
-    	sx = p1.sx + p2.sx;
-    	sy = p1.sy + p2.sy;
-    	lx = p1.lx + p2.lx;
-    	ly = p1.ly + p2.ly;
-    	return this;
-    }
+    public abstract Position setSum(Position p1, Position p2);
     
     /**
      * Sets this Position to the difference of the two given positions, (i.e.
@@ -145,25 +227,64 @@ public class Position implements Exportable, Cloneable {
      * @return this Position.
      * @throws NullPointerException if either argument is {@code null}.
      */
-    public Position setDiff(Position p1, Position p2) {
-    	sx = p1.sx - p2.sx;
-    	sy = p1.sy - p2.sy;
-    	lx = p1.lx - p2.lx;
-    	ly = p1.ly - p2.ly;
-    	return this;
-    }
+    public abstract Position setDiff(Position p1, Position p2);
     
     /**
      * Adds dx and dy to lx and ly respectively. This method does not invoke
      * {@link #align()}, so lx and ly may fall outside of the slice bounds.
-
+     * 
      * @return this Position.
      */
     public Position add(float dx, float dy) {
-        lx += dx;
-        ly += dy;
+        addX(dx);
+        addY(dy);
         return this;
     }
+    
+    /**
+     * Adds dx to lx. This method does not invoke {@link #alignX()}, so lx may
+     * fall outside of the slice bounds.
+     * 
+     * @return this Position.
+     */
+    public abstract Position addX(float dx);
+    
+    /**
+     * Adds dy to ly. This method does not invoke {@link #alignY()}, so ly may
+     * fall outside of the slice bounds.
+     * 
+     * @return this Position.
+     */
+    public abstract Position addY(float dy);
+    
+    /**
+     * Adds dx and dy to lx and ly respectively. This method does not invoke
+     * {@link #align()}, so lx and ly may fall outside of the slice bounds.
+     * 
+     * @return this Position.
+     */
+    public Position add(int dx, int dy) {
+        addX(dx);
+        addY(dy);
+        return this;
+    }
+    
+    /**
+     * Adds dx to lx. This method does not invoke {@link #alignX()}, so lx may
+     * fall outside of the slice bounds.
+     * 
+     * @return this Position.
+     */
+    public abstract Position addX(int dx);
+    
+    /**
+     * Adds dy to ly. This method does not invoke {@link #alignY()}, so ly may
+     * fall outside of the slice bounds.
+     * 
+     * @return this Position.
+     */
+    public abstract Position addY(int dy);
+    
     
     /**
      * Reflects this Position (i.e., negates everything). This method does not
@@ -172,91 +293,7 @@ public class Position implements Exportable, Cloneable {
      * 
      * @return this Position.
      */
-    public Position reflect() {
-        sx = -sx;
-        sy = -sy;
-        lx = -lx;
-        ly = -ly;
-        return this;
-    }
-    
-    /**
-     * Gets the x-coordinate of the region this Position is in.
-     */
-    public int getRegionX() {
-        return regionCoordFromSliceCoord(sx);
-    }
-    
-    /**
-     * Gets the x-coordinate of the region this Position is in.
-     */
-    public int getRegionY() {
-        return regionCoordFromSliceCoord(sy);
-    }
-    
-    /**
-     * @see #sx
-     */
-    public int getSliceX() {
-        return sx;
-    }
-    
-    /**
-     * @see #sy
-     */
-    public int getSliceY() {
-        return sy;
-    }
-    
-    /**
-     * @see #lx
-     */
-    public float getLocalX() {
-        return lx;
-    }
-    
-    /**
-     * @see #ly
-     */
-    public float getLocalY() {
-        return ly;
-    }
-    
-    /**
-     * Gets the local tile coordinate from {@link #lx}.
-     */
-    public int getLocalTileX() {
-        return Position.tileCoordFreeToTileCoordFixed2(lx);
-    }
-    
-    /**
-     * Gets the local tile coordinate from {@link #ly}.
-     */
-    public int getLocalTileY() {
-        return Position.tileCoordFreeToTileCoordFixed2(ly);
-    }
-    
-    /**
-     * Returns the x-coordinate of this Position, in tile-lengths, which is
-     * equivalent (up to finite precision) to the position specified jointly by
-     * {@link #sx} and {@link #tileX}.
-     * 
-     * @see #tileCoordFromLocalCoords(int, float)
-     */
-    public double getGlobalX() {
-        return tileCoordFromLocalCoords(sx, lx);
-    }
-    
-    /**
-     * Returns the y-coordinate of this Position, in tile-lengths, which is
-     * equivalent (up to finite precision) to the position specified jointly by
-     * {@link #sy} and {@link #tileY}.
-     * 
-     * @see #tileCoordFromLocalCoords(int, float)
-     */
-    public double getGlobalY() {
-        return tileCoordFromLocalCoords(sy, ly);
-    }
+    public abstract Position reflect();
     
     /**
      * Aligns this position. That is, if {@link #lx} or {@link #ly} have
@@ -283,11 +320,7 @@ public class Position implements Exportable, Cloneable {
      * 
      * @see #align()
      */
-    public Position alignX() {
-        sx += sliceCoordFromTileCoord2(lx);
-        lx = tileCoordRelativeToSliceFromTileCoordFree2(lx);
-        return this;
-    }
+    public abstract Position alignX();
     
     /**
      * As with {@link #align()}, but only aligns the y-coordinates. Use this if
@@ -298,11 +331,7 @@ public class Position implements Exportable, Cloneable {
      * 
      * @see #align()
      */
-    public Position alignY() {
-        sy += sliceCoordFromTileCoord2(ly);
-        ly = tileCoordRelativeToSliceFromTileCoordFree2(ly);
-        return this;
-    }
+    public abstract Position alignY();
     
     /**
      * Turns this into a "global position", by setting {@link #sx} and {@link
@@ -311,25 +340,7 @@ public class Position implements Exportable, Cloneable {
      * 
      * @return this Position.
      */
-    public Position globalify() {
-        lx += tileCoordFromSliceCoord(sx);
-        ly += tileCoordFromSliceCoord(sy);
-        sx = 0;
-        sy = 0;
-        return this;
-    }
-    
-    /**
-     * Clamps this position to that of an exact tile by removing any fractional
-     * part.
-     * 
-     * @return this Position.
-     */
-    public Position clampToTile() {
-        lx = tileCoordFreeToTileCoordFixed2(lx);
-        ly = tileCoordFreeToTileCoordFixed2(ly);
-        return this;
-    }
+    public abstract Position globalify();
     
     /**
      * Returns the relative distance along the x-axis between the given
@@ -339,7 +350,7 @@ public class Position implements Exportable, Cloneable {
      * @throws NullPointerException if {@code other} is {@code null}.
      */
     public float diffX(Position other) {
-        return (other.sx - sx) * Slice.SLICE_SIZE + other.lx - lx;
+        return (other.sx - sx) * Slice.SLICE_SIZE + other.lx() - lx();
     }
     
     /**
@@ -349,7 +360,7 @@ public class Position implements Exportable, Cloneable {
      * @return other.x - x, in tile-lengths.
      */
     public float diffX(int otherSliceX, float otherTileX) {
-        return (otherSliceX - sx) * Slice.SLICE_SIZE + otherTileX - lx;
+        return (otherSliceX - sx) * Slice.SLICE_SIZE + otherTileX - lx();
     }
     
     /**
@@ -360,7 +371,7 @@ public class Position implements Exportable, Cloneable {
      * @throws NullPointerException if {@code other} is {@code null}.
      */
     public float diffY(Position other) {
-        return (other.sy - sy) * Slice.SLICE_SIZE + other.ly - ly;
+        return (other.sy - sy) * Slice.SLICE_SIZE + other.ly() - ly();
     }
     
     /**
@@ -370,7 +381,7 @@ public class Position implements Exportable, Cloneable {
      * @return other.y - y, in tile-lengths.
      */
     public float diffY(int otherSliceY, float otherTileY) {
-        return (otherSliceY - sy) * Slice.SLICE_SIZE + otherTileY - ly;
+        return (otherSliceY - sy) * Slice.SLICE_SIZE + otherTileY - ly();
     }
     
     /**
@@ -390,8 +401,8 @@ public class Position implements Exportable, Cloneable {
      * Returns the square of the distance from the origin to this position.
      */
     public double distFromOriginSq() {
-        double x = getGlobalX();
-        double y = getGlobalY();
+        double x = gx();
+        double y = gy();
         return x*x + y*y;
     }
     
@@ -432,34 +443,57 @@ public class Position implements Exportable, Cloneable {
     }
     
     /**
+     * Clamps this position to that of an exact tile by removing any fractional
+     * part.
+     * 
+     * @return this Position.
+     * 
+     * @see #fixed()
+     */
+    public abstract Position clampToTile();
+    
+    /**
+     * Converts this Position to a PositionFree. If this Position is already
+     * free, then itself is returned.
+     */
+    public PositionFree free() {
+        return new PositionFree().set(this);
+    }
+    
+    /**
+     * Converts this Position to a PositionFixed. If this Position is already
+     * fixed, then itself is returned.
+     * 
+     * @see #clampToTile()
+     */
+    public PositionFixed fixed() {
+        return new PositionFixed().set(this);
+    }
+    
+    /**
      * Clones this Position object.
      */
     @Override
-    public Position clone() {
-        return new Position().set(this);
-    }
+    public abstract Position clone();
     
     @Override
     public void importFromCompound(DataCompound c) {
         sx = c.getI32("sx");
         sy = c.getI32("sy");
-        lx = c.getF32("lx");
-        ly = c.getF32("ly");
+        
+        // Subclasses must override
     }
     
     @Override
     public void exportToCompound(DataCompound c) {
         c.put("sx", sx);
         c.put("sy", sy);
-        c.put("lx", lx);
-        c.put("ly", ly);
+        
+        // Subclasses must override
     }
     
     @Override
-    public int hashCode() {
-        // a bit crap of a hashcode but meh
-        return sx ^ sy ^ Float.hashCode(lx) ^ Float.hashCode(ly);
-    }
+    public abstract int hashCode();
     
     @Override
     public boolean equals(Object o) {
@@ -472,9 +506,7 @@ public class Position implements Exportable, Cloneable {
      * Returns true if the given position is equal to this one; false
      * otherwise.
      */
-    public boolean equalsPos(Position p) {
-        return sx == p.sx && sy == p.sy && lx == p.lx && ly == p.ly;
-    }
+    public abstract boolean equalsPos(Position p);
     
     /**
      * {@inheritDoc}
@@ -482,9 +514,7 @@ public class Position implements Exportable, Cloneable {
      * @return "Pos[(sx,sy); (lx,ly)]"
      */
     @Override
-    public String toString() {
-        return "Pos[(" + sx + "," + sy + "); (" + lx + "," + ly + ")]";
-    }
+    public abstract String toString();
     
     /**
      * Returns a string representation of this Position in terms of the global
@@ -493,35 +523,63 @@ public class Position implements Exportable, Cloneable {
      * @return "(x,y)"
      */
     public String toGlobalString() {
-        return "(" + getGlobalX() + "," + getGlobalY() + ")";
+        return "(" + gx() + "," + gy() + ")";
     }
+    
+    
+    
+    
     
     //--------------------==========--------------------
     //------------=====Static Functions=====------------
     //--------------------==========--------------------
     
     /**
-     * Creates a new Position at (0,0).
+     * Creates a new free position at (0,0).
      */
-    public static Position create() {
-        return new Position();
+    public static PositionFree create() {
+        return new PositionFree();
     }
     
     /**
-     * Creates a new Position from the given slice coordinates and local
+     * Creates a new free position from the given slice coordinates and local
      * coordinates.
      */
-    public static Position create(int sliceX, int sliceY, float localX, float localY) {
-        return new Position().set(sliceX, sliceY, localX, localY);
+    public static PositionFree create(int sliceX, int sliceY, float localX, float localY) {
+        return new PositionFree().set(sliceX, sliceY, localX, localY);
     }
     
     /**
      * Creates a position from the given global coordinates. x and y are
      * decomposed into slice and local coordinates.
      */
-    public static Position create(double x, double y) {
-        return new Position().set(x, y);
+    public static PositionFree create(double x, double y) {
+        return new PositionFree().set(x, y);
     }
+    
+    /**
+     * Creates a new fixed position at (0,0).
+     */
+    public static PositionFixed createFixed() {
+        return new PositionFixed();
+    }
+    
+    /**
+     * Creates a new fixed position from the given slice coordinates and local
+     * coordinates.
+     */
+    public static PositionFixed create(int sliceX, int sliceY, int localX, int localY) {
+        return new PositionFixed().set(sliceX, sliceY, localX, localY);
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     /**
      * Gets the coordinate of the region at the given tile coordinate.
@@ -823,8 +881,8 @@ public class Position implements Exportable, Cloneable {
      * 
      * @return The coordinate, in tile-lengths.
      */
-    public static double tileCoordFixedToTileCoordFree(int c) {
-        return (double)c;
+    public static float tileCoordFixedToTileCoordFree(int c) {
+        return (float)c;
     }
     
     /**

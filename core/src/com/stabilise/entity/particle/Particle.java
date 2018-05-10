@@ -41,7 +41,7 @@ public abstract class Particle extends GameObject {
     
     
     // Package-private constructor
-    Particle() {}
+    Particle() { super(true); }
     
     @Override
     protected void update(World world) {

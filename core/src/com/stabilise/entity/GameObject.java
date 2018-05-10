@@ -12,10 +12,20 @@ public abstract class GameObject {
     /** If {@code true}, this GameObject should be removed from the world ASAP. */
     protected boolean destroyed = false;
     
-    /** The position of this GameObject. Initialises to (0,0). */
-    public final Position pos = Position.create();
+    /** The position of this GameObject. Initialised to (0,0). */
+    public final Position pos;
     
     
+    
+    /**
+     * Constructor.
+     * 
+     * @param free true to use a {@link PositionFree}; false to use a {@link
+     * PositionFixed}.
+     */
+    protected GameObject(boolean free) {
+        pos = free ? Position.create() : Position.createFixed();
+    }
     
     /**
      * Updates this GameObject. This is only ever called through {@link

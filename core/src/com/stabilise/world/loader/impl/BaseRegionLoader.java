@@ -30,7 +30,7 @@ public class BaseRegionLoader implements IRegionLoader {
                 for(int i = 0; i < tileEntities.size(); i++) {
                     DataCompound tc = tileEntities.getCompound();
                     TileEntity te = TileEntity.createFromCompound(tc);
-                    s.tileEntities[te.pos.getLocalTileY()][te.pos.getLocalTileX()] = te; 
+                    s.tileEntities[te.pos.lty()][te.pos.ltx()] = te; 
                 }
                 
                 r.slices[y][x] = s;

@@ -57,7 +57,7 @@ public class Hitbox extends GameObject {
      * @param damage The damage the hitbox deals.
      */
     public Hitbox(long ownerID, Shape boundingBox, int damage) {
-        super();
+        super(true);
         this.ownerID = ownerID;
         this.boundingBox = boundingBox;
         this.damage = damage;

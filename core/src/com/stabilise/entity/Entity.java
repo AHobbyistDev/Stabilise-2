@@ -54,7 +54,7 @@ public class Entity extends GameObject implements Exportable {
      * DataCompound via {@link #importFromCompound(DataCompound)}.
      */
     public Entity() {
-        // nothing to do here
+        super(true);
     }
     
     /**
@@ -64,6 +64,8 @@ public class Entity extends GameObject implements Exportable {
      * @throws NullPointerException if any argument is null.
      */
     public Entity(CPhysics p, CController co, CCore c) {
+        super(true);
+        
         physics    = p;
         controller = co;
         core       = c;

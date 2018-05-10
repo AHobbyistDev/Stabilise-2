@@ -263,7 +263,7 @@ public class Game implements Controllable, InputProcessor {
                 //        r.totalMemory()/(1024*1024) + "/" + r.maxMemory()/(1024*1024));
                 //System.out.println(game.profiler.getData().toString());
                 Log.get().postDebug(world.regions.toStringDebug());
-                Log.get().postDebug("Player region: (" + player.pos.getRegionX() + "," + player.pos.getRegionY() + ")");
+                Log.get().postDebug("Player region: (" + player.pos.rx() + "," + player.pos.ry() + ")");
                 break;
             default:
                 return playerController.handleControlPress(control);

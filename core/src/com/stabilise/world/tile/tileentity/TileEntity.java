@@ -41,7 +41,7 @@ public abstract class TileEntity extends GameObject implements Exportable {
      * this one (that is to say, no arguments) for factory construction.
      */
     protected TileEntity() {
-        // nothing to see here, move along
+        super(false);
     }
     
     

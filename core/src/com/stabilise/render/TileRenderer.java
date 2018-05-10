@@ -97,8 +97,8 @@ public class TileRenderer implements Renderer {
         minCorner.set(camPos, -wr.tilesHorizontal, -wr.tilesVertical).align().clampToTile();
         maxCorner.set(camPos, wr.tilesHorizontal, wr.tilesVertical + 1).align().clampToTile();
         
-        for(int x = minCorner.getSliceX(); x <= maxCorner.getSliceX(); x++) {
-            for(int y = minCorner.getSliceY(); y <= maxCorner.getSliceY(); y++) {
+        for(int x = minCorner.sx(); x <= maxCorner.sx(); x++) {
+            for(int y = minCorner.sy(); y <= maxCorner.sy(); y++) {
                 renderSlice(world.getSliceAt(x, y), wr.camObj.pos, (dx,dy) -> true);
             }
         }
@@ -121,10 +121,10 @@ public class TileRenderer implements Renderer {
         
         // Casting the corners' localX/Y to int is fine since we already
         // clamped minCorner and maxCorner in render().
-        int xMin = x == minCorner.getSliceX() ? (int)minCorner.getLocalX() : 0;
-        int yMin = y == minCorner.getSliceY() ? (int)minCorner.getLocalY() : 0;
-        int xMax = x == maxCorner.getSliceX() ? (int)maxCorner.getLocalX() : SLICE_SIZE_MINUS_ONE;
-        int yMax = y == maxCorner.getSliceY() ? (int)maxCorner.getLocalY() : SLICE_SIZE_MINUS_ONE;
+        int xMin = x == minCorner.sx() ? (int)minCorner.lx() : 0;
+        int yMin = y == minCorner.sy() ? (int)minCorner.ly() : 0;
+        int xMax = x == maxCorner.sx() ? (int)maxCorner.lx() : SLICE_SIZE_MINUS_ONE;
+        int yMax = y == maxCorner.sy() ? (int)maxCorner.ly() : SLICE_SIZE_MINUS_ONE;
         
         // Camera x/y at which to place the tile.
         float cx, cy;
@@ -166,10 +166,10 @@ public class TileRenderer implements Renderer {
     public void renderSliceBorders(ShapeRenderer shapes) {
         Position camPos = wr.camObj.pos;
         
-        int minX = camPos.getSliceX() - wr.slicesHorizontal;
-        int maxX = camPos.getSliceX() + wr.slicesHorizontal + 1;
-        int minY = camPos.getSliceY() - wr.slicesVertical;
-        int maxY = camPos.getSliceY() + wr.slicesVertical + 1;
+        int minX = camPos.sx() - wr.slicesHorizontal;
+        int maxX = camPos.sx() + wr.slicesHorizontal + 1;
+        int minY = camPos.sy() - wr.slicesVertical;
+        int maxY = camPos.sy() + wr.slicesVertical + 1;
         
         // Draw horizontal lines
         for(int y = minY; y <= maxY; y++) {
@@ -246,8 +246,8 @@ public class TileRenderer implements Renderer {
         
         World w = pc.pairedWorld(world);
         
-        for(int x = minCorner.getSliceX(); x <= maxCorner.getSliceX(); x++) {
-            for(int y = minCorner.getSliceY(); y <= maxCorner.getSliceY(); y++) {
+        for(int x = minCorner.sx(); x <= maxCorner.sx(); x++) {
+            for(int y = minCorner.sy(); y <= maxCorner.sy(); y++) {
                 renderSlice(w.getSliceAt(x, y), camPosOtherDim, (dx,dy) -> {
                     dy += 0.5f; // centre on the tile
                     dx += 0.5f; // centre on the tile

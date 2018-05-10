@@ -16,7 +16,7 @@ public class Entities {
     
     private Entities() {}
     
-    private static CPhysics       p() { return new CPhysicsImpl();       }
+    private static CPhysics       p() { return new CPhysicsImpl2();       }
     private static CController   co() { return CIdleController.INSTANCE; }
     
     private static Entity e(CPhysics p, CController co, CCore c) 

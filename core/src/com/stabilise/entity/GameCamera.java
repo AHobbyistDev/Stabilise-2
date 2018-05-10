@@ -17,7 +17,7 @@ public class GameCamera extends GameObject implements WorldCamera {
     private Entity focus;
     
     /** Real position (i.e. ignoring shake). */
-    public final Position realPos = new Position();
+    public final PositionFree realPos = Position.create();
     
     /** The strength with which the camera follows the focus. */
     private float followStrength = 0.25f;
@@ -29,6 +29,7 @@ public class GameCamera extends GameObject implements WorldCamera {
      * Creates a new GameCamera.
      */
     public GameCamera() {
+        super(true);
         setFocus(null);
     }
     
@@ -44,8 +45,8 @@ public class GameCamera extends GameObject implements WorldCamera {
         
         shakes.iterate(s -> {
             float mod = (float) s.duration / s.maxDuration;
-            pos.lx += s.strength * (2 * w.rnd().nextFloat() - 1) * mod;
-            pos.ly += s.strength * (2 * w.rnd().nextFloat() - 1) * mod;
+            pos.addX(s.strength * (2 * w.rnd().nextFloat() - 1) * mod);
+            pos.addY(s.strength * (2 * w.rnd().nextFloat() - 1) * mod);
             return --s.duration == 0;
         });
         

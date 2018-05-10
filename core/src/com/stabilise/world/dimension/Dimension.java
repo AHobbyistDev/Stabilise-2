@@ -275,7 +275,7 @@ public abstract class Dimension {
      */
     public static void registerDimensions() {
         registerDimension(true, "overworld", DimOverworld.class);
-        //registerDimension(!Settings.getOverworldDefault(), "private(Temp)", DimPrivate.class);
+        registerDimension(false, "private(Temp)", DimPrivate.class);
         registerDimension(false, "flatland", DimFlatland.class);
         
         registerPrivateDimension("privateDim", DimPrivate.class);

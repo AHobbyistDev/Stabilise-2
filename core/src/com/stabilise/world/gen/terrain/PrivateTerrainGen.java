@@ -46,7 +46,7 @@ public class PrivateTerrainGen implements IWorldGenerator {
                     w.setTileAt(pos, Tiles.voidRockDense);
                     w.setWallAt(pos, Tiles.voidRockDense);
                 } else {
-                    float cave = caveNoise.noise(pos.getGlobalX(), pos.getGlobalY()) + attenuation(d);
+                    float cave = caveNoise.noise(pos.gx(), pos.gy()) + attenuation(d);
                     
                     float denseRockProb = d > blockTypeSwitchStart
                             ? (d - blockTypeSwitchStart)/(blockTypeSwitchEnd - blockTypeSwitchStart)

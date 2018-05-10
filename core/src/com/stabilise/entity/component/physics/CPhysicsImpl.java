@@ -157,21 +157,21 @@ public class CPhysicsImpl extends CPhysics {
         
         float leadingEdge = dxp ? e.aabb.maxX() : e.aabb.minX();
         
-        proj.lx += leadingEdge;
+        proj.addX(leadingEdge);
         
         // If the vertical wall is the same wall as the one the entity is
         // currently occupying, don't bother checking
-        if(dxp ? Math.ceil(proj.lx) == Math.ceil(e.pos.lx + leadingEdge) : Math.floor(proj.lx) == Math.floor(e.pos.lx + leadingEdge))
+        if(dxp ? Math.ceil(proj.lx()) == Math.ceil(e.pos.lx() + leadingEdge) : Math.floor(proj.lx()) == Math.floor(e.pos.lx() + leadingEdge))
             return false;
         
         // Check the vertical wall of tiles to the left/right of the entity
         
         //double max = dyp ? Math.ceil(yp + boundingBox.p11.y) : Math.ceil(yp + boundingBox.p11.y);
-        float max = Maths.ceil(proj.ly + e.aabb.maxY());
+        float max = Maths.ceil(proj.ly() + e.aabb.maxY());
         
         // TODO: < vs <= - watch out for this, it may cause problems in the future
-        for(float v = proj.ly + e.aabb.minY(); v < max; v++) {
-        	tmp.set(proj.sx, proj.sy, proj.lx, v).align();
+        for(float v = proj.ly() + e.aabb.minY(); v < max; v++) {
+        	tmp.set(proj.sx, proj.sy, proj.lx(), v).align();
             if(w.getTileAt(tmp).isSolid() && rowValid(w, e, tmp)) {
                 //x = dxp ? Math.floor(xp) - boundingBox.p11.x : Math.ceil(xp) - boundingBox.p00.x;
                 // Alternatively... (doesn't really matter though)
@@ -196,21 +196,21 @@ public class CPhysicsImpl extends CPhysics {
         
         float leadingEdge = dyp ? e.aabb.maxY() : e.aabb.minY();
         
-        proj.ly += leadingEdge;
+        proj.addY(leadingEdge);
         
         // If the horizontal wall is the same as the one the entity is
         // currently occupying, don't bother checking.
-        if(dyp ? Math.ceil(proj.ly) == Math.ceil(e.pos.ly + leadingEdge) : Math.floor(proj.ly) == Math.floor(e.pos.ly + leadingEdge))
+        if(dyp ? Math.ceil(proj.ly()) == Math.ceil(e.pos.ly() + leadingEdge) : Math.floor(proj.ly()) == Math.floor(e.pos.ly() + leadingEdge))
             return false;
         
         // Check the horizontal wall of tiles at the top/bottom of the entity
         
         //double max = dxp ? Math.ceil(xp + boundingBox.p11.x) : Math.ceil(xp + boundingBox.p11.x);
-        float max = Maths.ceil(proj.lx + e.aabb.maxX());
+        float max = Maths.ceil(proj.lx() + e.aabb.maxX());
         
         // TODO: < vs <= - watch out for this, it may cause problems in the future
-        for(float h = proj.lx + e.aabb.minX(); h < max; h++) {
-        	tmp.set(proj.sx, proj.sy, h, proj.ly).align();
+        for(float h = proj.lx() + e.aabb.minX(); h < max; h++) {
+        	tmp.set(proj.sx, proj.sy, h, proj.ly()).align();
         	try {
                 if(w.getTileAt(tmp).isSolid() && columnValid(w, e, tmp)) {
                     //y = dyp ? Math.floor(yp) - boundingBox.p11.y : Math.ceil(yp) - boundingBox.p00.y;
@@ -284,10 +284,10 @@ public class CPhysicsImpl extends CPhysics {
         
         e.pos.sx = collisionPos.sx;
         if(direction == Direction.RIGHT) {
-        	e.pos.lx = Maths.floor(collisionPos.lx) - e.aabb.maxX();
+        	e.pos.setLx(Maths.floor(collisionPos.lx()) - e.aabb.maxX());
             //e.x = Math.floor(xp) - e.aabb.maxX();
         } else {
-        	e.pos.lx = Maths.ceil(collisionPos.lx) - e.aabb.minX();
+        	e.pos.setLx(Maths.ceil(collisionPos.lx()) - e.aabb.minX());
             //e.x = Math.ceil(xp) - e.aabb.minX();
         }
     }
@@ -308,10 +308,10 @@ public class CPhysicsImpl extends CPhysics {
         
         e.pos.sy = collisionPos.sy;
         if(direction == Direction.UP) {
-        	e.pos.ly = Maths.floor(collisionPos.ly) - e.aabb.maxY();
+        	e.pos.setLy(Maths.floor(collisionPos.ly()) - e.aabb.maxY());
             //e.y = Math.floor(yp) - e.aabb.maxY();
         } else {
-        	e.pos.ly = Maths.ceil(collisionPos.ly) - e.aabb.minY();
+        	e.pos.setLy(Maths.ceil(collisionPos.ly()) - e.aabb.minY());
             //e.y = Math.ceil(yp) - e.aabb.minY();
             
             // TODO: Find a better way of doing this

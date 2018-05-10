@@ -272,10 +272,10 @@ public class Region {
         int maxY = minY + Region.REGION_SIZE_IN_TILES;
         
         world.getEntities().forEach(e -> {
-            if(e.pos.getGlobalX() + e.aabb.maxX() >= minX
-                    && e.pos.getGlobalX() + e.aabb.minX() <= maxX
-                    && e.pos.getGlobalY() + e.aabb.maxY() >= minY
-                    && e.pos.getGlobalY() + e.aabb.minY() <= maxY)
+            if(e.pos.gx() + e.aabb.maxX() >= minX
+                    && e.pos.gx() + e.aabb.minX() <= maxX
+                    && e.pos.gy() + e.aabb.maxY() >= minY
+                    && e.pos.gy() + e.aabb.minY() <= maxY)
                 e.destroy();
         });
     }

@@ -66,8 +66,8 @@ public class CSliceAnchorer extends AbstractComponent {
         if(disabled)
             return;
         
-        int sliceX = e.pos.getSliceX();
-        int sliceY = e.pos.getSliceY();
+        int sliceX = e.pos.sx();
+        int sliceY = e.pos.sy();
         
         // If the entity hasn't moved slices, nothing needs to be changed
         if(centreX == sliceX && centreY == sliceY)
@@ -174,8 +174,8 @@ public class CSliceAnchorer extends AbstractComponent {
     	
     	initialAnchor = true;
     	
-        centreX = e.pos.getSliceX();
-        centreY = e.pos.getSliceY();
+        centreX = e.pos.sx();
+        centreY = e.pos.sy();
         minSliceX = centreX - LOADED_SLICE_RADIUS;
         maxSliceX = centreX + LOADED_SLICE_RADIUS;
         minSliceY = centreY - LOADED_SLICE_RADIUS;

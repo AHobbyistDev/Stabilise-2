@@ -98,7 +98,7 @@ class GenProvider implements WorldProvider {
     @Override
     public void setTileAt(Position pos, int id) {
         getTileAt(pos).handleRemove(this, pos);
-        getSliceAt(pos).setTileIDAt(pos.getLocalTileX(), pos.getLocalTileY(), id);
+        getSliceAt(pos).setTileIDAt(pos.ltx(), pos.lty(), id);
         Tile.getTile(id).handlePlace(this, pos);
     }
     
@@ -120,8 +120,8 @@ class GenProvider implements WorldProvider {
         Slice s = getSliceAt(pos);
         
         if(!s.isDummy()) {
-            int tx = pos.getLocalTileX();
-            int ty = pos.getLocalTileY();
+            int tx = pos.ltx();
+            int ty = pos.lty();
             
             TileEntity t2 = s.getTileEntityAt(tx, ty);
             if(t2 != null) {

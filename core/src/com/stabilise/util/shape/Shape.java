@@ -367,7 +367,7 @@ public abstract class Shape implements Exportable {
         // This is what we're really doing:
         // v1.sub(v2).rotate90Degrees();
         // However, if we simplify that algebraically, we get:
-        dest[offset]   = y2 - y1;
+        dest[offset  ] = y2 - y1;
         dest[offset+1] = x1 - x2;
     }
     
@@ -401,12 +401,12 @@ public abstract class Shape implements Exportable {
          * pretty cheap already.
          */
         
-        float min = x*verts[0] + y*verts[1]; // dot product <=> projection
+        float min = x*verts[0] + y*verts[1]; // dot product = projection
         float max = min;
         float p;
         
         for(int i = 2; i < verts.length; i += 2) {
-            p = x*verts[i] + y*verts[i+1]; // dot product <=> projection
+            p = x*verts[i] + y*verts[i+1]; // dot product = projection
             if(p < min)
                 min = p;
             else if(p > max)
@@ -425,12 +425,12 @@ public abstract class Shape implements Exportable {
      */
     protected static boolean projectionsOverlap(float[] verts, float x, float y,
             float projMin, float projMax) {
-        float min = x*verts[0] + y*verts[1]; // dot product <=> projection
+        float min = x*verts[0] + y*verts[1]; // dot product = projection
         float max = min;
         float p;
         
         for(int i = 2; i < verts.length; i += 2) {
-            p = x*verts[i] + y*verts[i+1]; // dot product <=> projection
+            p = x*verts[i] + y*verts[i+1]; // dot product = projection
             if(p < min)
                 min = p;
             else if(p > max)
@@ -440,6 +440,16 @@ public abstract class Shape implements Exportable {
         return min <= projMax && max >= projMin;
     }
     
+    /**
+     * Tests for whether the projections of a polygon and an AABB overlap on
+     * one of the polygon's axes.
+     * 
+     * @param verts vertices of the AABB
+     * @param x projection axis
+     * @param y projection axis
+     * @param projMin min projection of the poly on the projection axis
+     * @param projMax max projection of the poly on the projection axis
+     */
     protected static boolean projectionsOverlapAABB(float[] verts, float x, float y,
             float projMin, float projMax) {
         float p1 = x*verts[AABB.XMIN] + y*verts[AABB.YMIN];
@@ -487,7 +497,7 @@ public abstract class Shape implements Exportable {
          * @param y The y component of the output vertex.
          */
         default void set(float[] dest, int offset, float x, float y) {
-            dest[offset]   = x;
+            dest[offset  ] = x;
             dest[offset+1] = y;
         }
         

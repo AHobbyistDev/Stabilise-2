@@ -17,7 +17,7 @@ import com.stabilise.util.maths.SimplexNoise;
 public class NoiseTest {
     
     // true = simplex, false = perlin
-    private static final boolean SIMPLEX = false;
+    private static final boolean SIMPLEX = true;
     
     private long seed = 7238674329493L;
     

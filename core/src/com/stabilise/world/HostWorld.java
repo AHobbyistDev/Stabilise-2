@@ -233,8 +233,8 @@ public class HostWorld extends AbstractWorld {
         Slice s = getSliceAt(pos);
         
         if(!s.isDummy()) {
-            int tx = pos.getLocalTileX();
-            int ty = pos.getLocalTileY();
+            int tx = pos.ltx();
+            int ty = pos.lty();
             
             // TODO: remove this when I make sure one can't set a tile over another
             if(id != s.getTileIDAt(tx, ty)) {
@@ -283,8 +283,8 @@ public class HostWorld extends AbstractWorld {
         Slice s = getSliceAt(pos);
         
         if(!s.isDummy()) {
-            int tx = pos.getLocalTileX();
-            int ty = pos.getLocalTileY();
+            int tx = pos.ltx();
+            int ty = pos.lty();
             
             Tile old = s.getTileAt(tx, ty);
             
@@ -316,8 +316,8 @@ public class HostWorld extends AbstractWorld {
         Slice s = getSliceAt(pos);
         
         if(!s.isDummy()) {
-            int tx = pos.getLocalTileX();
-            int ty = pos.getLocalTileY();
+            int tx = pos.ltx();
+            int ty = pos.lty();
             
             TileEntity t2 = s.getTileEntityAt(tx, ty);
             if(t2 != null) {
@@ -339,8 +339,8 @@ public class HostWorld extends AbstractWorld {
         Slice s = getSliceAt(pos);
         
         if(!s.isDummy()) {
-            int tx = pos.getLocalTileX();
-            int ty = pos.getLocalTileY();
+            int tx = pos.ltx();
+            int ty = pos.lty();
             
             if(s.getTileAt(tx, ty).getHardness() < explosionPower) {
                 s.getTileAt(tx, ty).handleBreak(this, pos);
