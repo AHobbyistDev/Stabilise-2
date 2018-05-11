@@ -5,13 +5,12 @@ import com.stabilise.util.Checks;
 import com.stabilise.util.collect.SimpleList;
 import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.world.World;
-import com.stabilise.world.WorldCamera;
 
 /**
  * The GameCamera controls the player's perspective, and hence which parts of
  * the world are visible to them.
  */
-public class GameCamera extends GameObject implements WorldCamera {
+public class GameCamera extends GameObject {
     
     /** The entity upon which to focus the camera. */
     private Entity focus;
@@ -67,7 +66,10 @@ public class GameCamera extends GameObject implements WorldCamera {
         focus = null; // help the gc
     }
     
-    @Override
+    /**
+     * Sets the entity upon which to focus the camera. If {@code e} is null,
+     * the camera will freeze.
+     */
     public void setFocus(Entity e) {
         focus = e;
         
@@ -100,7 +102,9 @@ public class GameCamera extends GameObject implements WorldCamera {
         realPos.align();
     }
     
-    @Override
+    /**
+     * Adds a shake effect to the camera.
+     */
     public void shake(float strength, int duration) {
         shakes.append(new Shake(strength, duration));
     }

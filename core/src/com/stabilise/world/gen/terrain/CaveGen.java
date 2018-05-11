@@ -29,7 +29,7 @@ public class CaveGen implements IWorldGenerator {
                 .addOctave(512,  1)
                 .normalise();
         
-        Position pos = Position.create();
+        Position pos = Position.createFixed();
         
         int tileOffX = r.x() * REGION_SIZE_IN_TILES;
         int tileOffY = r.y() * REGION_SIZE_IN_TILES;

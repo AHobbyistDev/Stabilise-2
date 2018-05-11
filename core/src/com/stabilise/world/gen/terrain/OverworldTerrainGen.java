@@ -24,7 +24,7 @@ import com.stabilise.world.tile.Tile;
 @NotThreadSafe
 public class OverworldTerrainGen implements IWorldGenerator {
     
-    private final Position pos = Position.create();
+    private final Position pos = Position.createFixed();
     private WorldProvider w;
     
     @Override

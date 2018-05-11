@@ -122,11 +122,10 @@ public class RegionStore {
     public final WorldGenerator generator;
     
     
-    /** Contains all loaded regions. Maps region.loc -> region. */
+    /** Primary storage. Contains all prepared regions. Maps region.loc ->
+     * region. */
     private final ConcurrentMap<Point, Region> regions =
             new ConcurrentHashMap<>();
-    /** Tracks the number of loaded regions. */
-    //private final AtomicInteger numRegions = new AtomicInteger();
     
     /** The map of cached regions. Maps region.loc -> region. */
     private final ConcurrentMap<Point, CachedRegion> cache =
@@ -501,7 +500,6 @@ public class RegionStore {
         }
         
         loadTracker.endLoadOp(); // op is started in loadRegion()
-        //numRegions.getAndIncrement();
     }
     
     /**
@@ -535,8 +533,6 @@ public class RegionStore {
                 }
             }
         }
-        
-        //numRegions.getAndDecrement();
     }
     
     /**

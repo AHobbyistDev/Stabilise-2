@@ -113,9 +113,8 @@ public interface WorldProvider {
      * Position#align() aligned}.
      */
     default void setTileAt(Position pos, Tile tile) {
-        //getSliceAt(pos.getSliceX(), pos.getSliceY())
-        //        .setTileAt(pos.getLocalTileX(), pos.getLocalTileY(), tile);
-        setTileAt(pos, tile.getID());
+        //setTileAt(pos, tile.getID());
+        getSliceAt(pos).setTileAt(pos.ltx(), pos.lty(), tile);
     }
     
     /**
@@ -138,17 +137,11 @@ public interface WorldProvider {
     }
     
     default void setWallAt(Position pos, Tile wall) {
-        getSliceAt(pos).setWallAt(
-                pos.ltx(), pos.lty(),
-                wall
-        );
+        getSliceAt(pos).setWallAt(pos.ltx(), pos.lty(), wall);
     }
     
     default void setWallAt(Position pos, int id) {
-        getSliceAt(pos).setWallIDAt(
-                pos.ltx(), pos.lty(),
-                id
-        );
+        getSliceAt(pos).setWallIDAt(pos.ltx(), pos.lty(), id);
     }
     
     default byte getLightAt(Position pos) {
@@ -156,10 +149,7 @@ public interface WorldProvider {
     }
     
     default void setLightAt(Position pos, byte light) {
-        getSliceAt(pos).setLightAt(
-                pos.ltx(), pos.lty(),
-                light
-        );
+        getSliceAt(pos).setLightAt(pos.ltx(), pos.lty(), light);
     }
     
     /**
@@ -172,8 +162,7 @@ public interface WorldProvider {
      * such tile entity is present or loaded.
      */
     default TileEntity getTileEntityAt(Position pos) {
-        return getSliceAt(pos)
-                .getTileEntityAt(pos.ltx(), pos.lty());
+        return getSliceAt(pos).getTileEntityAt(pos.ltx(), pos.lty());
     }
     
     /**

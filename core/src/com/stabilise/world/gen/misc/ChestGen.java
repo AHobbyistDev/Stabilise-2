@@ -21,18 +21,18 @@ public class ChestGen implements IWorldGenerator {
     
     @Override
     public void generate(Region r, WorldProvider w, long seed) {
-        Position tmp = Position.create();
-        Position tmp2 = Position.create();
+        Position tmp1 = Position.createFixed();
+        Position tmp2 = Position.createFixed();
         
         r.forEachSlice(s -> {
             int x = w.rnd().nextInt(SLICE_SIZE);
             int y = w.rnd().nextInt(SLICE_SIZE - 1);
-            tmp.set(s.x, s.y, x, y); // no need to align
-            int id = w.getTileIDAt(tmp);
+            tmp1.set(s.x, s.y, x, y); // no need to align
+            int id = w.getTileIDAt(tmp1);
             if((id == stone.getID() || id == grass.getID()) &&
-                        w.getTileIDAt(tmp2.set(tmp, 0, 1).alignY()) == air.getID()) {
-                w.setTileAt(tmp, chest);
-                TileEntityChest te = (TileEntityChest)w.getTileEntityAt(tmp);
+                        w.getTileIDAt(tmp2.set(tmp1, 0, 1).alignY()) == air.getID()) {
+                w.setTileAt(tmp1, chest);
+                TileEntityChest te = (TileEntityChest)w.getTileEntityAt(tmp1);
                 te.items.addItem(Items.APPLE, w.rnd().nextInt(7)+1);
                 te.items.addItem(Items.SWORD, w.rnd().nextInt(7)+1);
                 te.items.addItem(Items.ARROW, w.rnd().nextInt(7)+1);

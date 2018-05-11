@@ -30,10 +30,9 @@ public class Entity extends GameObject implements Exportable {
     private long       id;
     public  long       age;
     
-    // Core physical properties. pos is inherited from GameObject but left here
-    // commented as documentation.
+    // Core physical properties
     
-    // public final Position pos = Position.create();
+  //public final Position pos;     // inherited from GameObject
     public float       dx, dy;
     public boolean     facingRight;
     public AABB        aabb;

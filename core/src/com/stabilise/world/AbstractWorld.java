@@ -293,7 +293,7 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
-    public WorldCamera getCamera() {
+    public GameCamera getCamera() {
         return camera;
     }
     

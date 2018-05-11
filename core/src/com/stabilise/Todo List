@@ -1,20 +1,14 @@
 TOP PRIORITY
-- Menus
 - Get multidimensional worlds working
     - Step 1: Refactor region loading architecture
-        * Must allow for loading a region of another dimension, and being notified
-          when that region is fully loaded and active.
          DONE
-    - Step 2: Basic portal
-        * Simply transports entities to a different dimension.
-        * Must handle moving entities between dimensions properly and robustly
-        * If possible do this while planning ahead to full portal impl
-         SKIPPING STRAIGHT TO FULL PORTAL
-    - Step 3: Full proper portal
-        * We shall see
+    - Step 2: Portal
+         IN PROGRESS
 - Character model
+    ON HOLD
 
 HIGH PRIORITY
+- Menus
 - Entity saving in worlds
 - Proper world loading/unloading akin to what RegionStore does for regions
 - Improve entity physics

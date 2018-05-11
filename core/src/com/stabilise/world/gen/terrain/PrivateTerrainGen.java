@@ -35,7 +35,7 @@ public class PrivateTerrainGen implements IWorldGenerator {
                 .addOctave(16,  2)
                 .normalise();
         
-        Position pos = Position.create();
+        Position pos = Position.createFixed();
         
         for(int y = 0; y < REGION_SIZE_IN_TILES; y++) {
             for(int x = 0; x < REGION_SIZE_IN_TILES; x++) {
