@@ -171,8 +171,8 @@ public class Entity extends GameObject implements Exportable {
      * Component#handle(World, Entity, EntityEvent) handle} method returns
      * true, propagation of the event is halted and this method returns false.
      * 
-     * @return true if no component consumed the event; false if it was fully
-     * handled.
+     * @return true if if the events was fully handled, i.e. no component
+     * consumed the event; false if the event was halted by some component.
      */
     public boolean post(World w, EntityEvent e) {
         return components.iterateUntil(c -> c.handle(w, this, e))

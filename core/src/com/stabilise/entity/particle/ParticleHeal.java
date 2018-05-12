@@ -4,22 +4,15 @@ import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.maths.Interpolation;
 import com.stabilise.world.World;
 
-/**
- * A smoke particle which appears when a Mob dies.
- */
-public class ParticleSmoke extends ParticlePhysical {
+
+public class ParticleHeal extends ParticlePhysical {
     
-    //--------------------==========--------------------
-    //-----=====Static Constants and Variables=====-----
-    //--------------------==========--------------------
-    
-    /** The number of ticks after which a smoke particle despawns. */
-    public static final int DESPAWN_TICKS = 120;
-    
+    public ParticleHeal() {
+        
+    }
     
     private int despawn;
     public float opacity;
-    
     
     @Override
     public void reset() {
@@ -46,7 +39,7 @@ public class ParticleSmoke extends ParticlePhysical {
     
     @Override
     public void render(WorldRenderer renderer) {
-        renderer.renderSmoke(this);
+        renderer.renderHeal(this);
     }
     
 }

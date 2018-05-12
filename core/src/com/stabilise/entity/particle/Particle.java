@@ -25,6 +25,7 @@ public abstract class Particle extends GameObject {
         register(1, ParticleSmoke.class, ParticleSmoke::new);
         register(2, ParticleIndicator.class, ParticleIndicator::new);
         register(3, ParticleExplosion.class, ParticleExplosion::new);
+        register(4, ParticleHeal.class, ParticleHeal::new);
     }
     
     private static void register(int id, Class<? extends Particle> clazz, Supplier<Particle> constructor) {

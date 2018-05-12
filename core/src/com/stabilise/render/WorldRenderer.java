@@ -51,8 +51,9 @@ public class WorldRenderer implements Renderer {
     //-----=====Static Constants and Variables=====-----
     //--------------------==========--------------------
     
-    private static final float DEFAULT_COL = new Color(1f, 1f, 1f, 1f).toFloatBits();
-    
+    private static final Color DEFAULT_COL = new Color(1f, 1f, 1f, 1f);
+    private static final float DEFAULT_COL_BITS = DEFAULT_COL.toFloatBits();
+    private static final Color ENEMY_TINT = new Color(0.7f, 0.15f, 0.65f, 1f);
     
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
@@ -98,6 +99,7 @@ public class WorldRenderer implements Renderer {
     TextureRegion texExplosion;
     TextureRegion texFlame;
     TextureRegion texSmoke;
+    TextureRegion texHeal;
     TextureRegion[] texItems;
     
     ModelPlayer personModel;
@@ -110,6 +112,8 @@ public class WorldRenderer implements Renderer {
     public boolean renderHitboxes = false;
     public boolean renderSliceBorders = false;
     public boolean renderRegionTint = false;
+    
+    private final Color colTmp = new Color();
     
     private final Vector2 vec = new Vector2();
     private final List<ParticleIndicator> indicators = new ArrayList<>();
@@ -201,6 +205,7 @@ public class WorldRenderer implements Renderer {
         texExplosion = skin.getRegion("particle/explosion");
         texFlame = skin.getRegion("particle/flame");
         texSmoke = skin.getRegion("particle/smoke");
+        texHeal = skin.getRegion("particle/heal");
         
         texItems = new TextureRegion[8]; // TODO: temp length
         Item.ITEMS.forEachEntry(i -> {
@@ -311,7 +316,7 @@ public class WorldRenderer implements Renderer {
         profiler.next("tiles"); // root.render.tiles
         tileRenderer.render();
         
-        batch.setColor(DEFAULT_COL); // reset the tint colour
+        batch.setColor(DEFAULT_COL_BITS); // reset the tint colour
         
         profiler.next("entities"); // root.render.entities
         profiler.start("nonplayer"); // root.render.entities.nonplayer
@@ -330,7 +335,7 @@ public class WorldRenderer implements Renderer {
         profiler.next("portals");
         for(Entity p : portals) {
             tileRenderer.renderPortalView(p);
-            batch.setColor(DEFAULT_COL); // reset the tint colour
+            batch.setColor(DEFAULT_COL_BITS); // reset the tint colour
             p.render(this);
         }
         portals.clear();
@@ -456,7 +461,7 @@ public class WorldRenderer implements Renderer {
                 0f // rotation
         );
         
-        batch.setColor(DEFAULT_COL);
+        batch.setColor(DEFAULT_COL_BITS);
     }
     
     /**
@@ -512,18 +517,22 @@ public class WorldRenderer implements Renderer {
      * Renders a person entity.
      */
     public void renderPerson(Entity e, CPerson s) {
+        colTmp.set(e.isPlayerControlled() ? DEFAULT_COL : ENEMY_TINT);
+        
         if(s.hasTint) {
             if(s.dead)
-                batch.setColor(s.tintStrength, 0f, 0f, 1f);
+                colTmp.lerp(1f, 0f, 0f, 1f, s.tintStrength);
             else
-                batch.setColor(s.tintStrength, s.tintStrength, s.tintStrength, 1);
+                colTmp.lerp(1f, 1f, 1f, 1f, s.tintStrength);
         }
+        
+        batch.setColor(colTmp);
         
         personModel.setFlipped(!e.facingRight);
         personModel.setState(s.getState(), s.stateTicks);
         personModel.render(batch, camObj.pos.diffX(e.pos), camObj.pos.diffY(e.pos));
         
-        batch.setColor(DEFAULT_COL);
+        batch.setColor(DEFAULT_COL_BITS);
     }
     
     public void renderPortal(Entity e, CPortal c) {
@@ -589,7 +598,7 @@ public class WorldRenderer implements Renderer {
                 p.radius, // scaleY
                 0f // rotation
         );
-        batch.setColor(DEFAULT_COL);
+        batch.setColor(DEFAULT_COL_BITS);
     }
     
     /**
@@ -609,7 +618,7 @@ public class WorldRenderer implements Renderer {
                 1f, // scaleY
                 0f // rotation
         );
-        batch.setColor(DEFAULT_COL);
+        batch.setColor(DEFAULT_COL_BITS);
     }
     
     /**
@@ -629,7 +638,27 @@ public class WorldRenderer implements Renderer {
                 1f, // scaleY
                 0f // rotation
         );
-        batch.setColor(DEFAULT_COL);
+        batch.setColor(DEFAULT_COL_BITS);
+    }
+    
+    /**
+     * Renders a heal particle.
+     */
+    public void renderHeal(ParticleHeal p) {
+        batch.setColor(1f, 1f, 1f, p.opacity);
+        batch.draw(
+                texHeal, // region
+                camObj.pos.diffX(p.pos) - 0.25f, // x
+                camObj.pos.diffY(p.pos) - 0.25f, // y
+                0.25f, // originX
+                0.25f, // originY
+                0.25f, // width
+                0.25f, // height
+                1f, // scaleX
+                1f, // scaleY
+                0f // rotation
+        );
+        batch.setColor(DEFAULT_COL_BITS);
     }
     
     private void renderCursorItem() {
@@ -663,7 +692,7 @@ public class WorldRenderer implements Renderer {
                     1f // height
             );
         */
-        batch.setColor(DEFAULT_COL);
+        batch.setColor(DEFAULT_COL_BITS);
     }
     
     // Shape rendering --------------------------------------------------------

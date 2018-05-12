@@ -13,6 +13,7 @@ import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
+import com.stabilise.entity.particle.ParticleHeal;
 import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
@@ -227,9 +228,17 @@ public class CPerson extends CBaseMob {
         ticksSinceManaLoss++;
         
         // Regen health/mana/stamina
-        if(ticksSinceHealthLoss >= 60) {
-            if(ticksSinceHealthLoss >= 300 || ticksSinceHealthLoss % 2 == 0)
-                increaseHealth(1);
+        if(ticksSinceHealthLoss >= 80) {
+            if(ticksSinceHealthLoss >= 360 || ticksSinceHealthLoss % 3 == 0) {
+                if(increaseHealth(1)) {
+                    w.particleSource(ParticleHeal.class).createBurst(
+                            1, 0.2f, 2.0f,
+                            Maths.PIf / 6.0f,
+                            Maths.PIf * 5.0f / 6.0f,
+                            e
+                    );
+                }
+            }
         }
         
         if(ticksSinceStaminaLoss >= 60) {
@@ -727,16 +736,19 @@ public class CPerson extends CBaseMob {
      * Increases the person's health.
      * 
      * @param amount The amount by which to increase the person's health.
+     * 
+     * @return true if the health was increased
      */
-    private void increaseHealth(int amount) {
+    private boolean increaseHealth(int amount) {
         if(health == maxHealth)
-            return;
+            return false;
         
         health += amount;
         if(health > maxHealth)
             health = maxHealth;
         
         healthChanged = true;
+        return true;
     }
     
     /**

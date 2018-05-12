@@ -240,9 +240,10 @@ public abstract class CBaseMob extends CCore {
                 hasTint = false;
         }
         
-        //super.update(world);
-        
         wasOnGround = e.physics.onGround();
+        
+        if(Math.abs(e.dx) < 0.001)
+            e.dx = 0f;
         
         if(wasOnGround) {
             if(moving) {
@@ -251,7 +252,7 @@ public abstract class CBaseMob extends CCore {
                 else
                     setState(State.SLIDE_BACK, true);
             } else {
-                if(e.dx == 0)
+                if(e.dx == 0f)
                     setState(State.IDLE, true);
                 else
                     if((e.facingRight && e.dx > 0) || (!e.facingRight && e.dx < 0))
@@ -266,11 +267,7 @@ public abstract class CBaseMob extends CCore {
                 setState(State.FALL, true);
         }
         
-        // Temporary rectification of dx to prevent a mob from remaining in a slide state
-        // TODO: Better solution would be ideal
-        if((e.dx > 0 && e.dx < 0.001f)
-                || (e.dx < 0 && e.dx > -0.001f))
-            e.dx = (0);
+        moving = false;
     }
     
     /*
@@ -401,10 +398,10 @@ public abstract class CBaseMob extends CCore {
         
         if(health <= 0) {
             health = 0;
-            tintStrength = 0.8f;
+            tintStrength = 0.6f;
             kill(w, e, src);
         } else {
-            tintStrength = 1.0f;
+            tintStrength = 0.75f;
             invulnerable = true;
             invulnerabilityTicks = INVULNERABILITY_TICKS;
         }
@@ -417,9 +414,11 @@ public abstract class CBaseMob extends CCore {
      */
     @Override
     public void kill(World w, Entity e, IDamageSource src) {
-        dead = true;
-        setState(State.DEAD, false, DEATH_TICKS);
-        e.post(w, EDamaged.killed(src));
+        if(e.post(w, EDamaged.killed(src))) {
+            dead = true;
+            setState(State.DEAD, false, DEATH_TICKS);
+        } else
+            health = 1; // some component doesn't want us dead!
     }
     
     /**
