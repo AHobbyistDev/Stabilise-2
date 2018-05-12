@@ -24,10 +24,10 @@ public class CPhysicsImpl2 extends CPhysics {
     public boolean onGround;
     public int floorTile;
     private final Position projPos = Position.create(); // for update()
-    private final Position tmp1 = Position.create(); // for horizontalCollisions and verticalCollisions
+    private final Position tmp1 = Position.createFixed(); // for horizontalCollisions and verticalCollisions
     private final Position tmp2 = Position.create(); // for update() to give to horizontalCollisions and verticalCollisions
-    private final Position tmp3 = Position.create(); // for rowValid and columnValid
-    private final Position tmp4 = Position.create(); // for collideVertical
+    private final Position tmp3 = Position.createFixed(); // for rowValid and columnValid
+    private final Position tmp4 = Position.createFixed(); // for collideVertical
     
     
     @Override
@@ -71,7 +71,7 @@ public class CPhysicsImpl2 extends CPhysics {
             horizontalCollisions(w, e, projPos.set(e.pos, dxi, dyi));
         }
         
-        e.pos.add(dxi, dyi);
+        e.pos.add(dxi, dyi).align();
         
         e.dy += w.getGravityIncrement(); // apply after updating y
         
@@ -83,7 +83,7 @@ public class CPhysicsImpl2 extends CPhysics {
      * Gets the frictive force acting on the entity.
      */
     protected float getXFriction(World w, Entity e) {
-        Tile groundTile = w.getTileAt(tmp1.set(e.pos, 0f, -0.01f).align());
+        Tile groundTile = w.getTileAt(tmp1.set(e.pos).addY(-1).alignY());
         return 1 - groundTile.getFriction();
     }
     
@@ -233,21 +233,20 @@ public class CPhysicsImpl2 extends CPhysics {
      * entity has collided with is located.
      */
     private void collideHorizontal(World w, Entity e, Position collisionPos, Direction direction) {
-        //e.post(w, ETileCollision.collision(dxi));
-        e.post(w, ETileCollision.collisionH(dxi));
+        //e.post(w, ETileCollision.collision(e.dx));
+        e.post(w, ETileCollision.collisionH(e.dx));
         
         e.dx = dxi = 0;
         
         e.pos.sx = collisionPos.sx;
-        if(direction == Direction.RIGHT) {
+        if(direction == Direction.RIGHT)
         	e.pos.setLx(Maths.floor(collisionPos.lx()) - e.aabb.maxX());
-        } else {
-        	e.pos.setLx(Maths.ceil(collisionPos.lx()) - e.aabb.minX());
-        }
+        else
+        	e.pos.setLx(Maths.ceil(collisionPos.lx()) + 1 - e.aabb.minX());
     }
     
     /**
-     * Causes the entity to horizontally collide with a tile.
+     * Causes the entity to vertically collide with a tile.
      * 
      * @param collisionPos The position at which the collision is to be made.
      * Only the y-coord matters here.
@@ -255,8 +254,8 @@ public class CPhysicsImpl2 extends CPhysics {
      * entity has collided with is located.
      */
     private void collideVertical(World w, Entity e, Position collisionPos, Direction direction) {
-        //e.post(w, ETileCollision.collision(dyi));
-        e.post(w, ETileCollision.collisionV(dyi));
+        //e.post(w, ETileCollision.collision(e.dy));
+        e.post(w, ETileCollision.collisionV(e.dy));
         
         e.dy = dyi = 0;
         
@@ -264,20 +263,13 @@ public class CPhysicsImpl2 extends CPhysics {
         if(direction == Direction.UP) {
         	e.pos.setLy(Maths.floor(collisionPos.ly()) - e.aabb.maxY());
         } else {
-        	e.pos.setLy(Maths.ceil(collisionPos.ly()) - e.aabb.minY());
+        	e.pos.setLy(Maths.ceil(collisionPos.ly()) + 1 - e.aabb.minY());
             
-            // TODO: Find a better way of doing this
-        	tmp4.set(e.pos).add(0f, -0.001f).clampToTile().align();
+        	tmp4.set(e.pos).addY(-1).alignY();
         	Tile t = w.getTileAt(tmp4);
         	t.handleStep(w, tmp4, e);
         	floorTile = t.getID();
         	onGround = true;
-            //int tx = Maths.floor(e.x);
-            //int ty = Maths.floor(e.y - 0.001D);
-            //Tile t = w.getTileAt(tx, ty);
-            //t.handleStep(w, tx, ty, e);
-            //floorTile = t.getID();
-            //onGround = true;
         }
     }
     

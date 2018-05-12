@@ -62,12 +62,12 @@ public class Entity extends GameObject implements Exportable {
      * 
      * @throws NullPointerException if any argument is null.
      */
-    public Entity(CPhysics p, CController co, CCore c) {
+    public Entity(CCore c, CPhysics p, CController co) {
         super(true);
         
+        core       = c;
         physics    = p;
         controller = co;
-        core       = c;
         
         initComponents();
     }

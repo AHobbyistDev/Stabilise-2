@@ -512,9 +512,18 @@ public class WorldRenderer implements Renderer {
      * Renders a person entity.
      */
     public void renderPerson(Entity e, CPerson s) {
+        if(s.hasTint) {
+            if(s.dead)
+                batch.setColor(s.tintStrength, 0f, 0f, 1f);
+            else
+                batch.setColor(s.tintStrength, s.tintStrength, s.tintStrength, 1);
+        }
+        
         personModel.setFlipped(!e.facingRight);
         personModel.setState(s.getState(), s.stateTicks);
         personModel.render(batch, camObj.pos.diffX(e.pos), camObj.pos.diffY(e.pos));
+        
+        batch.setColor(DEFAULT_COL);
     }
     
     public void renderPortal(Entity e, CPortal c) {

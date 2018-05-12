@@ -7,6 +7,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.component.effect.CEffectFire;
 import com.stabilise.entity.component.effect.CEffectFireTrail;
+import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
@@ -198,10 +199,10 @@ public class CPerson extends CBaseMob {
     public void init(Entity e) {
         super.init(e);
         
-        maxHealth = 500;
-        health = 500;
-        maxStamina = 500;
-        stamina = 500;
+        maxHealth = 100;
+        health = 100;
+        maxStamina = 100;
+        stamina = 100;
         maxMana = 500000;
         mana = 500000;
         
@@ -775,6 +776,15 @@ public class CPerson extends CBaseMob {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
             fireParticles = w.particleSource(ParticleFlame.class);
         return super.handle(w, e, ev);
+    }
+    
+    @Override
+    public boolean damage(World w, Entity e, IDamageSource src) {
+        if(super.damage(w, e, src)) {
+            ticksSinceHealthLoss = 0;
+            return true;
+        }
+        return false;
     }
     
     @Override

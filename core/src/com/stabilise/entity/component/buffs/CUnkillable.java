@@ -1,28 +1,24 @@
-package com.stabilise.entity.component.effect;
+package com.stabilise.entity.component.buffs;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.AbstractComponent;
 import com.stabilise.entity.component.Component;
-import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
 
-public class CDamageAmplifier extends AbstractComponent {
+public class CUnkillable extends AbstractComponent {
     
-    public static final CDamageAmplifier AMPLIFIER = new CDamageAmplifier();
-    
-    
-    public int amp;
-    
-    /** Amplifies damage 10x */
-    public CDamageAmplifier() {
-        this(10);
+    @Override
+    public int getWeight() {
+        // Above all the 0s so that we can just outright reject death
+        return -1;
     }
     
-    public CDamageAmplifier(int amp) {
-        this.amp = amp;
+    @Override
+    public Action resolve(Component other) {
+        return Action.REJECT;
     }
     
     @Override public void init(Entity e) {}
@@ -30,16 +26,12 @@ public class CDamageAmplifier extends AbstractComponent {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        if(ev.type() == EntityEvent.Type.DAMAGED) {
-            EDamaged dmg = (EDamaged)ev;
-            dmg.src.setDamage(dmg.src.damage() * amp);
+        switch(ev.type()) {
+            case KILLED:
+                return true;
+            default:
+                return false;
         }
-        return false;
-    }
-    
-    @Override
-    public Action resolve(Component c) {
-        return Action.KEEP_BOTH; // for the lols
     }
     
     @Override

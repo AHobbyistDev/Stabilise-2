@@ -27,6 +27,7 @@ public class CEnemyController extends CController {
     private CBaseMob mob;
     
     private boolean scared = false;
+    private boolean aggro = false;
     
     @Override
     public void init(Entity e) {
@@ -36,7 +37,7 @@ public class CEnemyController extends CController {
     @Override
     public void update(World w, Entity e) {
         if(true/*!e.dead*/) {
-            if(--actionTimeout == 0) {
+            if(--actionTimeout <= 0) {
                 refreshAction(w, e);
             }
             
@@ -69,6 +70,17 @@ public class CEnemyController extends CController {
             }
         } else {
             if(rnd < 0.45) { // idle
+                if(aggro && rnd < 0.35) { // attack!
+                    Entity p = w.getPlayers().iterator().next();
+                    if(p == null) {
+                        Log.get().postWarning("[EnemyController] Player list is empty???");
+                        return;
+                    }
+                    
+                    if(p.pos.diffSq(e.pos) < 4*4)
+                        mob.attack(w, e.facingRight ? Direction.RIGHT : Direction.LEFT);
+                }
+                
                 action = EnumAction.IDLE;
                 actionTimeout = 180 + (int)(w.rnd().nextFloat() * 180);
             } else if(rnd < 0.55) { // idle but change direction we're facing
@@ -91,6 +103,7 @@ public class CEnemyController extends CController {
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.DAMAGED) {
             scared = true;
+            aggro = true;
             refreshAction(w, e);
         }
         return false;
