@@ -90,8 +90,8 @@ public class LineCounter {
     
     public static void main(String[] args) throws IOException {
         new LineCounter(
-                //"C:/Users/Adam/Documents/GitHub/Stabilise-2/core/src",
-                "/home/Are_You_Dreaming/Documents/Java (Eclipse workspace)/Stabilise 2/core",
+                "C:/Users/Adam/Documents/GitHub/Stabilise-2/core/src/com/stabilise/",
+                //"/home/Are_You_Dreaming/Documents/Java (Eclipse workspace)/Stabilise 2/core/src",
                 new String[] {
                         "com/stabilise/tests",
                 }

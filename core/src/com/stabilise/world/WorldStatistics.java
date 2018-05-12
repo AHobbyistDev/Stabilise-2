@@ -16,11 +16,6 @@ public class WorldStatistics {
     public final ProcessStats load = new ProcessStats("LoadStats");
     public final ProcessStats save = new ProcessStats("SaveStats");
     
-    // Server
-    
-    
-    
-    // Client
     
     
     @Override

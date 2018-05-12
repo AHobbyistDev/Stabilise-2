@@ -20,7 +20,7 @@ public class CEnemyController extends CController {
     
     /** The number of ticks for which the enemy is to continue its current
      * action.*/
-    private int actionTimeout = 1;
+    private int actionTimeout = 30;
     /** The enemy's current action. */
     private EnumAction action = EnumAction.IDLE;
     
@@ -86,9 +86,16 @@ public class CEnemyController extends CController {
                 e.facingRight = (!e.facingRight);
                 actionTimeout = 120 + (int)(w.rnd().nextFloat() * 180);
             } else if(rnd < 0.70) { // do a random jump
-                action = EnumAction.IDLE;
                 mob.jump();
-                actionTimeout = 180 + (int)(w.rnd().nextFloat() * 180);
+                if(rnd < 0.65) { // move 2/3rds of the time
+                    action = EnumAction.MOVE;
+                    if(rnd < 0.60) // flip direction half the time
+                        e.facingRight = (!e.facingRight);
+                    actionTimeout = 30 + (int)(w.rnd().nextFloat() * 30);
+                } else {
+                    action = EnumAction.IDLE;
+                    actionTimeout = 180 + (int)(w.rnd().nextFloat() * 180);
+                }
             } else { // move in the direction we're facing
                 if(rnd < 0.85) e.facingRight = (!e.facingRight);
                 action = EnumAction.MOVE;
@@ -105,7 +112,8 @@ public class CEnemyController extends CController {
                 scared = true;
             aggro = true;
             aggressorID = evd.src.sourceID();
-            refreshAction(w, e);
+            if(w.chance(5))
+                refreshAction(w, e);
         }
         return false;
     }

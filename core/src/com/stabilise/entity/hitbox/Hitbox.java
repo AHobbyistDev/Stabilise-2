@@ -8,6 +8,7 @@ import com.stabilise.entity.damage.DamageType;
 import com.stabilise.entity.damage.GeneralSource;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.render.WorldRenderer;
+import com.stabilise.util.Log;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
 
@@ -98,7 +99,10 @@ public class Hitbox extends GameObject {
     protected void moveToOwner(World w) {
         if(stickToOwner) {
             Entity e = w.getEntity(ownerID);
-            pos.set(e.pos);
+            if(e != null)
+                pos.set(e.pos);
+            else
+                Log.get().postWarning("Hitbox's owner is null!");
         }
     }
     

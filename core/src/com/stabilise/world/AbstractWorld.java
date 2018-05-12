@@ -205,6 +205,7 @@ public abstract class AbstractWorld implements World {
     @Override
     public void addEntity(Entity e) {
         e.setID(multiverse().getNextEntityID());
+        e.pos.align(); // play it safe
         entitiesToAdd.add(e);
     }
     

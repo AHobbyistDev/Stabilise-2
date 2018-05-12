@@ -279,5 +279,10 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 24/04/18
 	- Basic portal implementation which merely loads the paired dimension
 	- Moved SliceMap to the entity component CSliceAnchorer
+12/05/18
+	- Replaced enemy rectangles with stickfigures, and they now retaliate!
+
+
+
 
 

@@ -35,9 +35,6 @@ public class CPhysicsImpl2 extends CPhysics {
     
     @Override
     public void update(World w, Entity e) {
-        //if(dx != 0)
-        //    dx *= (1-friction);
-        
         dxi = e.dx * w.getTimeIncrement();
         dyi = e.dy * w.getTimeIncrement() + w.getGravity2ndOrder();
         

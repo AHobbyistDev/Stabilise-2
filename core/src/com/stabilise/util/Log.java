@@ -24,7 +24,7 @@ import com.stabilise.util.io.IOUtil;
  * <p>This class and its instances are thread-safe, and hence may be used by
  * multiple threads.
  * 
- * <!-- TODO: Make a better Log class :P-->
+ * <!-- TODO: Make a better Log class-->
  */
 public class Log {
     

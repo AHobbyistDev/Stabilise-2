@@ -4,7 +4,7 @@ import java.util.Random;
 
 
 /**
- * Generates random longs for me to use as random seed mixers.
+ * Generates random longs for me to use as seed mixers.
  */
 public class GenRandomLong {
     
