@@ -36,6 +36,10 @@ public final class AppDriver implements Runnable {
     /** Threshold value, in nanoseconds, of {@link #unprocessed} before we
      * reset its value and skip ticks. */
     private long delaySkip = 5000000000L; // 5 seconds
+    /** Force a render if catching up on update ticks takes longer than this.
+     * This helps avoid perceived unresponsiveness if the update ticks take
+     * far too much time. */
+    private long forceRender = 500000000L; // 0.5 seconds
     
     /** The time when last it was checked as per {@code System.nanoTime()}. */
     private long lastTime = 0L;
@@ -164,7 +168,7 @@ public final class AppDriver implements Runnable {
         // Make sure nothing has gone wrong with timing.
         if(unprocessed > delaySkip) {
             log.postWarning("Can't keep up! Running "
-                    + ((now - lastTime) / 1000000L) + " milliseconds behind; skipping "
+                    + (unprocessed / 1000000L) + " milliseconds behind; skipping "
                     + (unprocessed / nsPerTick) + " ticks!"
             );
             unprocessed = nsPerTick; // let at least one tick happen
@@ -177,10 +181,14 @@ public final class AppDriver implements Runnable {
         profiler.next("update"); // end wait, start update
         
         // Perform any scheduled update ticks
+        long updateBegin = System.nanoTime();
         while(unprocessed >= nsPerTick) {
             numUpdates++;
             unprocessed -= nsPerTick;
             updater.run();
+            
+            if(System.nanoTime() - updateBegin >= forceRender)
+                break;
         }
         
         profiler.verify("root.update");
@@ -204,7 +212,7 @@ public final class AppDriver implements Runnable {
         if(System.currentTimeMillis() - lastFPSRefresh >= 1000) {
             lastFps = fps;
             fps = 0;
-            lastFPSRefresh += 1000;
+            lastFPSRefresh = System.currentTimeMillis();
         }
         
         profiler.verify("root.render");
