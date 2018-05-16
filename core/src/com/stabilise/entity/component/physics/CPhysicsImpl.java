@@ -5,7 +5,6 @@ import com.stabilise.entity.Position;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Checks;
-import com.stabilise.util.Direction;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
@@ -16,17 +15,13 @@ import com.stabilise.world.tile.Tile;
  */
 public class CPhysicsImpl extends CPhysics {
     
-    protected static final float AIR_FRICTION = 0.001f;
-    
-    
-    //public float dxi, dyi; // dx, dy integrals
-    public boolean dxp, dyp; // dx/dy positive
+    public boolean dxp, dyp; // "dx/dy positive?"
     public boolean onGround;
     public int floorTile;
-    private final Position newPos = Position.create(); // for update()
+    private final Position newPos = Position.create();
     
-    private final Position tmp1 = Position.createFixed(); // for horizontalCollisions and verticalCollisions
-    private final Position tmp2 = Position.createFixed(); // for rowValid and columnValid
+    private final Position tmp1 = Position.createFixed(); // for horizontal/verticalCollisions
+    private final Position tmp2 = Position.createFixed(); // for row/columnValid
     
     
     @Override
@@ -58,7 +53,7 @@ public class CPhysicsImpl extends CPhysics {
                     xCollided = horizontalCollisions(w, e);
             }
         } else {
-            newPos.set(e.pos, dxi, dyi).align();
+            newPos.set(e.pos, dxi, dyi);//.align();
             
             if(dyi != 0.0f)
                 verticalCollisions(w, e);
@@ -75,7 +70,7 @@ public class CPhysicsImpl extends CPhysics {
     }
     
     /**
-     * Gets the frictive force acting on the entity.
+     * Gets the horizontal friction factor
      */
     protected float getXFriction(World w, Entity e) {
         Tile groundTile = w.getTileAt(tmp1.set(e.pos).addY(-1).alignY());
@@ -83,38 +78,14 @@ public class CPhysicsImpl extends CPhysics {
     }
     
     /**
-     * Gets the vertical frictive force acting on the entity.
-     * 
-     * @return The frictive force.
+     * Gets the vertical friction factor.
      */
     protected float getYFriction(World w, Entity e) {
         return 1f;
     }
     
     /**
-     * Gets the air friction.
-     * 
-     * @return The air friction acting on the entity.
-     */
-    protected final float getAirFriction() {
-        // TODO: Possibly a temporary method
-        return AIR_FRICTION;
-    }
-    
-    /**
-     * Gets the friction of the tile the entity is standing on.
-     */
-    protected float getTileFriction() {
-        if(onGround)
-            return Tile.getTile(floorTile).getFriction();
-        else
-            return 0;
-    }
-    
-    /**
-     * Tests for all horizontal collisions.
-     * 
-     * @param proj Projected position.
+     * Tests for horizontal collisions.
      * 
      * @return {@code true} if a collision is detected.
      */
@@ -123,12 +94,9 @@ public class CPhysicsImpl extends CPhysics {
         
         // If the vertical wall is the same wall as the one the entity is
         // currently occupying, don't bother checking
-        if(dxp ? Maths.ceil(newPos.lx()+leadingEdge) == Maths.ceil(e.pos.lx()+leadingEdge)
-               : Maths.floor(newPos.lx()+leadingEdge) == Maths.floor(e.pos.lx()+leadingEdge))
-            return false;
-        // ^
-        // IT IS IN THIS ABOVE CONDITIONAL SUCCEEDING THAT THE COLLISION BUG
-        // OCCURS. CURRENTLY UNDER INVESTIGATION
+        //if(dxp ? Maths.ceil(newPos.lx()+leadingEdge) == Maths.ceil(e.pos.lx()+leadingEdge)
+        //       : Maths.floor(newPos.lx()+leadingEdge) == Maths.floor(e.pos.lx()+leadingEdge))
+        //    return false;
         
         // Check the vertical wall of tiles to the left/right of the entity
         int min = Maths.floor(newPos.ly() + e.aabb.minY());
@@ -137,7 +105,7 @@ public class CPhysicsImpl extends CPhysics {
         tmp1.set(newPos.sx, newPos.sy, newPos.lx()+leadingEdge, min).align();
         for(int y = min; y <= max; y++) {
             if(w.getTileAt(tmp1).isSolid() && rowValid(w, e, tmp1)) {
-                collideHorizontal(w, e, tmp1, dxp ? Direction.RIGHT : Direction.LEFT);
+                collideHorizontal(w, e, tmp1);
                 return true;
             }
             tmp1.addY(1).alignY();
@@ -146,7 +114,7 @@ public class CPhysicsImpl extends CPhysics {
     }
     
     /**
-     * Tests for all vertical collisions.
+     * Tests for vertical collisions.
      * 
      * @return {@code true} if a collision is detected.
      */
@@ -155,9 +123,9 @@ public class CPhysicsImpl extends CPhysics {
         
         // If the horizontal wall is the same as the one the entity is
         // currently occupying, don't bother checking.
-        if(dyp ? Maths.ceil(newPos.ly()+leadingEdge) == Maths.ceil(e.pos.ly()+leadingEdge)
-               : Maths.floor(newPos.ly()+leadingEdge) == Maths.floor(e.pos.ly()+leadingEdge))
-            return false;
+        //if(dyp ? Maths.ceil(newPos.ly()+leadingEdge) == Maths.ceil(e.pos.ly()+leadingEdge)
+        //       : Maths.floor(newPos.ly()+leadingEdge) == Maths.floor(e.pos.ly()+leadingEdge))
+        //    return false;
         
         // Check the horizontal wall of tiles at the top/bottom of the entity
         int min = Maths.floor(newPos.lx() + e.aabb.minX());
@@ -166,7 +134,7 @@ public class CPhysicsImpl extends CPhysics {
         tmp1.set(newPos.sx, newPos.sy, min, newPos.ly()+leadingEdge).align();
         for(int x = min; x < max; x++) {
             if(w.getTileAt(tmp1).isSolid() && columnValid(w, e, tmp1)) {
-                collideVertical(w, e, tmp1, dyp ? Direction.UP : Direction.DOWN);
+                collideVertical(w, e, tmp1);
                 return true;
             }
             tmp1.addX(1).alignX();
@@ -221,41 +189,36 @@ public class CPhysicsImpl extends CPhysics {
      * 
      * @param collisionPos The position at which the collision is to be made.
      * Only the x-coord matters here.
-     * @param direction The direction relative to the entity that the tile the
-     * entity has collided with is located.
      */
-    private void collideHorizontal(World w, Entity e, Position collisionPos, Direction direction) {
+    private void collideHorizontal(World w, Entity e, Position collisionPos) {
         //e.post(w, ETileCollision.collision(e.dx));
         e.post(w, ETileCollision.collisionH(e.dx));
         
         e.dx = 0;
         
         newPos.sx = collisionPos.sx;
-        if(direction == Direction.RIGHT)
-        	newPos.setLx(Maths.floor(collisionPos.lx()) - e.aabb.maxX());
+        if(dxp)
+        	newPos.setLx(collisionPos.lx() - e.aabb.maxX());
         else
-        	newPos.setLx(Maths.ceil(collisionPos.lx()) + 1 - e.aabb.minX());
+        	newPos.setLx(collisionPos.lx() - e.aabb.minX() + 1);
     }
     
     /**
      * Causes the entity to vertically collide with a tile.
      * 
-     * @param collisionPos The position of the tile we collided with. Only the
-     * y-coord matters here.
-     * @param direction The direction relative to the entity that the tile the
-     * entity has collided with is located.
+     * @param collisionPos The position at which the collision is to be made.
      */
-    private void collideVertical(World w, Entity e, Position collisionPos, Direction direction) {
+    private void collideVertical(World w, Entity e, Position collisionPos) {
         //e.post(w, ETileCollision.collision(e.dy));
         e.post(w, ETileCollision.collisionV(e.dy));
         
         e.dy = 0;
         
         newPos.sy = collisionPos.sy;
-        if(direction == Direction.UP) {
-        	newPos.setLy(collisionPos.lty() - e.aabb.maxY());
-        } else {
-        	newPos.setLy(collisionPos.lty() + 1 - e.aabb.minY());
+        if(dyp)
+        	newPos.setLy(collisionPos.ly() - e.aabb.maxY());
+        else {
+        	newPos.setLy(collisionPos.ly() - e.aabb.minY() + 1);
             
         	//tmp3.set(newPos).addY(-1).alignY();
         	Tile t = w.getTileAt(collisionPos);

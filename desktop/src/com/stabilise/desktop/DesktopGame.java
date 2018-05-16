@@ -38,7 +38,7 @@ public class DesktopGame {
     	Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
     	config.setTitle(Stabilise.GAME_NAME + " - " + Stabilise.getGameSubtitle());
     	config.setWindowedMode(900, 600);
-    	//config.useVsync(true);
+    	config.useVsync(false);
     	config.setIdleFPS(5);
     	
     	// Can't set max fps here; use the AppDriver in Stabilie instead.

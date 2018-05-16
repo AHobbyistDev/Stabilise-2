@@ -66,6 +66,11 @@ public class CSliceAnchorer extends AbstractComponent {
         if(disabled)
             return;
         
+        // Conservatively invoke this in case this component was added to the
+        // entity after it had already been added to the world. Does nothing
+        // if everything is already anchored.
+        anchorAll(w, e);
+        
         int sliceX = e.pos.sx();
         int sliceY = e.pos.sy();
         

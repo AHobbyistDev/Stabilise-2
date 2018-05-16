@@ -222,7 +222,7 @@ public abstract class Application {
             return;
         
         try {
-            driver.tick();
+            driver.tickAndSleep();
         } catch(Throwable t) {
             crash(t);
         }

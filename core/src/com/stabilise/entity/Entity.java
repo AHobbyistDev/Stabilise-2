@@ -33,6 +33,7 @@ public class Entity extends GameObject implements Exportable {
     // Core physical properties
     
   //public final Position pos;     // inherited from GameObject
+    /** This entity's velocity, in tiles/sec (NOT tiles/tick). */
     public float       dx, dy;
     public boolean     facingRight;
     public AABB        aabb;
