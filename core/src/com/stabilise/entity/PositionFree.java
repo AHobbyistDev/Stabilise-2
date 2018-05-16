@@ -105,14 +105,14 @@ public class PositionFree extends Position {
     @Override
     public PositionFree setX(Position p, float dx) {
         sx = p.sx;
-        lx = p.lx();
+        lx = p.lx() + dx;
         return this;
     }
     
     @Override
     public PositionFree setY(Position p, float dy) {
         sy = p.sy;
-        ly = p.ly();
+        ly = p.ly() + dy;
         return this;
     }
     

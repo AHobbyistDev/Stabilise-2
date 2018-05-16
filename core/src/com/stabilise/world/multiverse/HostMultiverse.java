@@ -93,8 +93,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         world = dim.createHost(this);
         dimensions.put(name, world);
         
-        final HostWorld w = world;
-        executor.execute(w.preloadJob::run);
+        executor.execute(world.preloadJob::run);
         
         return world;
     }

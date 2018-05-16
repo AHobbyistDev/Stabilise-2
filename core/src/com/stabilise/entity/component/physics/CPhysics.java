@@ -7,7 +7,7 @@ import com.stabilise.entity.component.Component;
 /**
  * Abstract physics component class.
  * 
- * @see CPhysicsImpl
+ * @see CPhysicsImplOld
  * @see CNoPhysics
  */
 public abstract class CPhysics extends AbstractComponent {

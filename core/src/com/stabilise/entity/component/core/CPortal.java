@@ -9,7 +9,6 @@ import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Checks;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.shape.AABB;
-import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 
 
@@ -46,6 +45,8 @@ public class CPortal extends CCore {
     
     /** Cache this portal's entity ID for convenience here. */
     private long id;
+    /** The ID of the paired portal. */
+    private long pairID;
     
     
     public CPortal() {}
@@ -72,18 +73,20 @@ public class CPortal extends CCore {
             Entity ope = Entities.portal(w.getDimensionName());
             CPortal opc = (CPortal) ope.core;
             
-            ope.setID(id); // match our IDs
             ope.pos.set(otherPortalPos);
             ope.facingRight = !e.facingRight;
             
             opc.original = false;
+            opc.pairID = id;
             opc.otherPortalPos.set(e.pos);
             opc.offset.set(offset).reflect().align();
             opc.state = State.WAITING_FOR_DIMENSION;
             
             World w2 = w.multiverse().loadDimension(pairedDimension);
-            w2.addEntityDontSetID(ope);
+            w2.addEntity(ope);
             ope.getComponent(CSliceAnchorer.class).anchorAll(w2, ope); // preanchor all slices
+            
+            pairID = ope.id();
         }
     }
     
@@ -96,7 +99,7 @@ public class CPortal extends CCore {
         state = State.CLOSED;
         
         World w2 = pairedWorld(w);
-        Entity ope = w2.getEntity(id);
+        Entity ope = w2.getEntity(pairID);
         CPortal opc = (CPortal) ope.core;
         
         opc.state = State.CLOSED;
@@ -120,8 +123,8 @@ public class CPortal extends CCore {
             	if(!original)
             		return;
             	
-            	HostWorld w2 = pairedWorld(w).asHost();
-            	Entity ope = w2.getEntity(id);
+            	World w2 = pairedWorld(w);
+            	Entity ope = pairedPortal(w2);
             	
             	// Might be null for a single tick if the other portal entity
             	// is still queued to be added to the other dimension.
@@ -185,7 +188,7 @@ public class CPortal extends CCore {
      * portal.
      */
     public Entity pairedPortal(World otherDimWorld) {
-        return otherDimWorld.getEntity(id);
+        return otherDimWorld.getEntity(pairID);
     }
     
     @Override

@@ -39,7 +39,7 @@ public class Components {
         
         // Physics components (ids: 16-20)
         register(16, CNoPhysics.class, () -> CNoPhysics.INSTANCE);
-        register(17, CPhysicsImpl.class, CPhysicsImpl::new);
+        register(17, CPhysicsImplOld.class, CPhysicsImplOld::new);
         
         // Core components (ids: 21-50)
         register(21, CPortal.class, CPortal::new);

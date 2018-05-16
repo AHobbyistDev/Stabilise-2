@@ -157,6 +157,7 @@ public class CPerson extends CBaseMob {
     
     
     private static final AABB AABB = new AABB(-0.4f, 0f, 0.8f, 1.8f);
+    //private static final AABB AABB = new AABB(-0.375f, 0f, 0.75f, 1.8f);
     
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------

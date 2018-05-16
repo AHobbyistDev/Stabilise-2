@@ -13,6 +13,7 @@ import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
 import com.stabilise.render.WorldRenderer;
+import com.stabilise.util.Debug;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.HostWorld;
@@ -262,8 +263,9 @@ public class Game implements Controllable, InputProcessor {
                 //Log.get().postDebug(r.freeMemory()/(1024*1024) + "/" +
                 //        r.totalMemory()/(1024*1024) + "/" + r.maxMemory()/(1024*1024));
                 //System.out.println(game.profiler.getData().toString());
-                Log.get().postDebug(world.regions.toStringDebug());
-                Log.get().postDebug("Player region: (" + player.pos.rx() + "," + player.pos.ry() + ")");
+                //Log.get().postDebug(world.regions.toStringDebug());
+                //Log.get().postDebug("Player region: (" + player.pos.rx() + "," + player.pos.ry() + ")");
+                Debug.DEBUG = !Debug.DEBUG;
                 break;
             default:
                 return playerController.handleControlPress(control);
