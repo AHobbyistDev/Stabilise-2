@@ -4,7 +4,11 @@ import com.stabilise.util.io.data.DataCompound;
 
 
 /**
- * TODO
+ * A {@link Position} whose local coordinates are stored as ints. This class is
+ * then most appropriate to use for representing the position of a tile or
+ * anything else constrained to the world grid.
+ * 
+ * @see PositionFree
  */
 public class PositionFixed extends Position {
     

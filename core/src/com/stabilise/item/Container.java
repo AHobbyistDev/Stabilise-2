@@ -373,10 +373,10 @@ public abstract class Container implements IContainer,
     
     @Override
     public void exportToCompound(DataCompound c) {
-        DataList l = c.createList("items");
+        DataList l = c.childList("items");
         for(int i = 0; i < size(); i++) {
             if(!isSlotEmpty(i)) {
-                DataCompound stack = l.createCompound();
+                DataCompound stack = l.childCompound();
                 getStack(i).exportToCompound(stack);
                 stack.put("slot", (byte)i);
             }

@@ -17,9 +17,12 @@ public class Entities {
     
     private Entities() {}
     
+    /** Creates and returns a new physics component. */
     private static CPhysics       p() { return new CPhysicsImpl();       }
+    /** Returns the {@link CIdleController#INSTANCE idle controller}. */
     private static CController   co() { return CIdleController.INSTANCE; }
     
+    /** Constructs an entity with the given core, physics, and controllr components. */
     private static Entity e(CCore c, CPhysics p, CController co) 
                                       { return new Entity(c, p, co);    }
     public  static Entity e(CCore c)  { return e(c, p(), co());         }
@@ -61,6 +64,10 @@ public class Entities {
     public static Entity portal(String dimension) {
         return e(new CPortal(dimension), CNoPhysics.INSTANCE, co())
                 .addComponent(new CSliceAnchorer());
+    }
+    
+    public static Entity phantom(Entity base, Entity portal) {
+        return e(new CPhantom(base, portal), CNoPhysics.INSTANCE, co());
     }
     
 }

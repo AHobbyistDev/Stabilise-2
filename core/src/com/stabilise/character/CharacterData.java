@@ -187,7 +187,7 @@ public class CharacterData implements Exportable {
         o.put("maxStamina", maxStamina);
         o.put("maxMana", maxMana);
         
-        inventory.exportToCompound(o.createCompound("inventory"));
+        inventory.exportToCompound(o.childCompound("inventory"));
     }
     
     /**

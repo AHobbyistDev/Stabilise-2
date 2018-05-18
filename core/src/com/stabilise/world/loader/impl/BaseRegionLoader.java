@@ -24,7 +24,7 @@ public class BaseRegionLoader implements IRegionLoader {
                         sliceTag.getI32Arr("walls"),
                         sliceTag.getI8Arr("light"));
                 
-                DataList tileEntities = sliceTag.createList("tileEntities");
+                DataList tileEntities = sliceTag.childList("tileEntities");
                 if(tileEntities.size() > 0)
                     s.initTileEntities();
                 for(int i = 0; i < tileEntities.size(); i++) {
@@ -45,20 +45,20 @@ public class BaseRegionLoader implements IRegionLoader {
 		
 		for(int y = 0; y < REGION_SIZE; y++) {
             for(int x = 0; x < REGION_SIZE; x++) {
-                DataCompound sliceTag = c.createCompound("slice" + x + "_" + y);
+                DataCompound sliceTag = c.childCompound("slice" + x + "_" + y);
                 Slice s = r.slices[y][x];
                 sliceTag.put("tiles", Slice.to1DArray(s.tiles));
                 sliceTag.put("walls", Slice.to1DArray(s.walls));
                 sliceTag.put("light", Slice.to1DArray(s.light));
                 
                 if(s.tileEntities != null) {
-                    DataList tileEntities = sliceTag.createList("tileEntities");
+                    DataList tileEntities = sliceTag.childList("tileEntities");
                     
                     TileEntity t;
                     for(int tileX = 0; tileX < Slice.SLICE_SIZE; tileX++) {
                         for(int tileY = 0; tileY < Slice.SLICE_SIZE; tileY++) {
                             if((t = s.tileEntities[tileY][tileX]) != null) {
-                                t.exportToCompound(tileEntities.createCompound());
+                                t.exportToCompound(tileEntities.childCompound());
                             }
                         }
                     }

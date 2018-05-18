@@ -216,12 +216,6 @@ public class Entity extends GameObject implements Exportable {
     	return core instanceof CPhantom;
     }
     
-    /**
-     * {@inheritDoc}
-     * 
-     * <p>It is advised not to use this directly; use {@link
-     * Entity#fromCompound(DataCompound)} instead.
-     */
     @Override
     public void importFromCompound(DataCompound dc) {
         id = dc.getI64("id");
@@ -263,13 +257,13 @@ public class Entity extends GameObject implements Exportable {
         dc.put("dy", dy);
         dc.put("facingRight", facingRight);
         
-        DataCompound comp = dc.createCompound("components");
-        Component.toCompound(comp.createCompound("core"), core);
-        Component.toCompound(comp.createCompound("controller"), controller);
-        Component.toCompound(comp.createCompound("physics"), physics);
+        DataCompound comp = dc.childCompound("components");
+        Component.toCompound(comp.childCompound("core"), core);
+        Component.toCompound(comp.childCompound("controller"), controller);
+        Component.toCompound(comp.childCompound("physics"), physics);
         
-        DataList adhoc = comp.createList("ad hoc");
-        components.forEach(c -> Component.toCompound(adhoc.createCompound(), c));
+        DataList adhoc = comp.childList("ad hoc");
+        components.forEach(c -> Component.toCompound(adhoc.childCompound(), c));
     }
     
     

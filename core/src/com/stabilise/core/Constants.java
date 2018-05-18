@@ -162,7 +162,7 @@ public class Constants {
      * @return The number of builds of the current version.
      */
     private static int buildTags(DataCompound parent, String[] names, int[] fields, int i) {
-        DataCompound tag = parent.createCompound(names[i] + ": " + fields[i]);
+        DataCompound tag = parent.childCompound(names[i] + ": " + fields[i]);
         tag.put("builds", tag.getI32("builds") + 1);
         if(++i < fields.length) // we are not build
             return buildTags(tag, names, fields, i); // recursively get children

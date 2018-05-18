@@ -260,7 +260,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         public void save() throws IOException {
             DataCompound tag = Format.NBT.newCompound();
             tag.put("dimension", dimension);
-            lastPos.exportToCompound(tag.createCompound("lastPos"));
+            lastPos.exportToCompound(tag.childCompound("lastPos"));
             IOUtil.writeSafe(file, tag, Compression.GZIP);
         }
         

@@ -8,17 +8,22 @@ import com.stabilise.world.Slice;
 
 
 /**
- * Holds the position of an entity (or more generally, a FreeGameObject) in the
- * world.
+ * Holds the position of an object in the world.
  * 
- * <p>An entity's position is stored as two ints and two floats (sliceX,
- * sliceY, localX, localY) representing the slice an entity is in, and the
- * entity's coordinates relative to that slice. This avoids a loss of
- * floating-point precision when an entity moves far away from the origin.
+ * <p>An object's position is stored as four values: two ints (sliceX, sliceY),
+ * and either two ints or two floats (localX, localY); see {@link
+ * PositionFixed} and {@link PositionFree} respectively.
+ * 
+ * <p>This strategy for storing positions avoids a loss of floating-point
+ * precision when an entity moves far away from the origin, as opposed to, say,
+ * two doubles for (x,y).
  * 
  * <p>However, for either convenience or legacy reasons one may wish to
  * represent an entity's position as two doubles (x,y), and so this class
  * provides a way of converting between the two representations.
+ * 
+ * @see PositionFixed
+ * @see PositionFree
  */
 public abstract class Position implements Exportable, Cloneable {
     

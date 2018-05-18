@@ -1,5 +1,8 @@
 package com.stabilise.entity.component.core;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
@@ -10,13 +13,28 @@ import com.stabilise.util.Checks;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
+import com.stabilise.world.multiverse.Multiverse;
 
 
 /**
- * Extremely crappy pre-placeholder portal implementation. Absolutely nothing
- * like the (hopefully) intended final product.
+ * Very crappy work-in-progress portal implementation.
+ * 
+ * <p>A portal is a, well, portal, which if all things go well will provide a
+ * seamless transition between two dimensions, or locations in a dimension.
+ * 
+ * <p>
+ * 
+ * @see CPhantom
+ * @see CNearbyPortal
  */
 public class CPortal extends CCore {
+    
+    /** If an entity comes within this squared distance of a portal, a phantom
+     * will be created of it. */
+    private static final float NEARBY_DIST_SQ = 8*8;
+    /** If an entity with a phantom is no longer within this squared distance
+     * of a portal, the phantom will be removed. */
+    private static final float NEARBY_MAX_DIST_SQ = 16*16;
     
     private static enum State {
         WAITING_FOR_DIMENSION,
@@ -27,7 +45,13 @@ public class CPortal extends CCore {
     /** 1 block wide, 3 blocks high. */
     private static final AABB AABB = new AABB(-0.5f, 0f, 1.0f, 3f);
     
+    /** Name of the paired dimension, for getting via {@link
+     * Multiverse#getDimension(String)}. This is {@code null} if this portal
+     * is dimension-local. */
     private String pairedDimension;
+    /** true if the paired portal is in the same dimension as this one. */
+    private boolean intradimensional;
+    
     private State state = State.WAITING_FOR_DIMENSION;
     
     /** The position of the other portal in its own dimension. This shouldn't
@@ -49,10 +73,16 @@ public class CPortal extends CCore {
     private long pairID;
     
     
+    
+    private final Set<Long> nearbyEntityIDs = new HashSet<>();
+    
+    
+    
     public CPortal() {}
     
     public CPortal(String dimension) {
         this.pairedDimension = dimension;
+        intradimensional = dimension == null;
     }
     
     private void onAddToWorld(World w, Entity e) {

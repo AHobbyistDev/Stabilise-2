@@ -7,13 +7,13 @@ package com.stabilise.util;
 // TODO deprecate this sometime
 public enum Direction {
     
-    UP((byte)(Bit.VERTICAL_BIT | Bit.UP_BIT)),            // 0101
-    DOWN(Bit.VERTICAL_BIT),                                // 0001
-    RIGHT((byte)(Bit.HORIZONTAL_BIT | Bit.RIGHT_BIT)),    // 1010
-    LEFT(Bit.HORIZONTAL_BIT),                            // 0010
-    UP_LEFT(UP, LEFT),                                    // 0111
+    UP((byte)(Bit.VERTICAL_BIT | Bit.UP_BIT)),          // 0101
+    DOWN(Bit.VERTICAL_BIT),                             // 0001
+    RIGHT((byte)(Bit.HORIZONTAL_BIT | Bit.RIGHT_BIT)),  // 1010
+    LEFT(Bit.HORIZONTAL_BIT),                           // 0010
+    UP_LEFT(UP, LEFT),                                  // 0111
     UP_RIGHT(UP, RIGHT),                                // 1111
-    DOWN_LEFT(DOWN, LEFT),                                // 0011
+    DOWN_LEFT(DOWN, LEFT),                              // 0011
     DOWN_RIGHT(DOWN, RIGHT);                            // 1011
     
     /** The direction's identifying value.

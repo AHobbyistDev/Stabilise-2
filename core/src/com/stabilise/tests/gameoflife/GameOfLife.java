@@ -41,7 +41,7 @@ public class GameOfLife {
         }
         
         DataCompound saveData = DataCompound.create();
-        DataList resList = saveData.createList("results");
+        DataList resList = saveData.childList("results");
         for(Result r : results) {
             resList.add(ArrayUtil.to1D(r.reducedBoard));
         }

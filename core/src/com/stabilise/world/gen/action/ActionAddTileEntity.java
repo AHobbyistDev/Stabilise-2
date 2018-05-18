@@ -21,7 +21,7 @@ public class ActionAddTileEntity extends Action {
     
     @Override
     public void exportToCompound(DataCompound c) {
-        t.exportToCompound(c.createCompound("t"));
+        t.exportToCompound(c.childCompound("t"));
     }
     
 }

@@ -33,9 +33,9 @@ public class StructureLoader implements IRegionLoader {
     @Override
     public void save(Region r, DataCompound c, boolean generated) {
         if(r.hasQueuedStructures()) {
-            DataList structures = c.createList("queuedStructures");
+            DataList structures = c.childList("queuedStructures");
             for(QueuedStructure s : r.getStructures()) {
-                DataCompound structure = structures.createCompound();
+                DataCompound structure = structures.childCompound();
                 structure.put("schematicName", s.structureName);
                 structure.put("sliceX", s.sliceX);
                 structure.put("sliceY", s.sliceY);

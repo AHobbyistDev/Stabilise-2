@@ -27,16 +27,36 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
         return data.containsKey(name);
     }
     
+    @Override public boolean containsCompound(String name) { return data.get(name) instanceof DataCompound; }
+    @Override public boolean containsList    (String name) { return data.get(name) instanceof DataList;     }
+    @Override public boolean containsBool    (String name) { return data.get(name) instanceof BoolBox;      }
+    @Override public boolean containsI8      (String name) { return data.get(name) instanceof I8Box;        }
+    @Override public boolean containsI16     (String name) { return data.get(name) instanceof I16Box;       }
+    @Override public boolean containsI32     (String name) { return data.get(name) instanceof I32Box;       }
+    @Override public boolean containsI64     (String name) { return data.get(name) instanceof I64Box;       }
+    @Override public boolean containsF32     (String name) { return data.get(name) instanceof F32Box;       }
+    @Override public boolean containsF64     (String name) { return data.get(name) instanceof F64Box;       }
+    @Override public boolean containsI8Arr   (String name) { return data.get(name) instanceof I8ArrBox;     }
+    @Override public boolean containsI32Arr  (String name) { return data.get(name) instanceof I32ArrBox;    }
+    @Override public boolean containsI64Arr  (String name) { return data.get(name) instanceof I64ArrBox;    }
+    @Override public boolean containsF32Arr  (String name) { return data.get(name) instanceof F32ArrBox;    }
+    @Override public boolean containsF64Arr  (String name) { return data.get(name) instanceof F64ArrBox;    }
+    @Override public boolean containsString  (String name) { return data.get(name) instanceof StringBox;    }
+    
     @Override
-    public DataCompound createCompound(String name) {
-        return get(name, DataCompound.class)
-                .orElseGet(() -> putData(name, format().newAbstractCompound()));
+    public DataCompound childCompound(String name) {
+        ITag c = data.get(name);
+        return c instanceof DataCompound ? (DataCompound)c : putData(name, format().newCompound());
+        //return get(name, DataCompound.class)
+        //        .orElseGet(() -> putData(name, format().newAbstractCompound()));
     }
     
     @Override
-    public DataList createList(String name) {
-        return get(name, DataList.class)
-                .orElseGet(() -> putData(name, format().newAbstractList()));
+    public DataList childList(String name) {
+        ITag c = data.get(name);
+        return c instanceof DataList ? (DataList)c : putData(name, format().newList());
+        //return get(name, DataList.class)
+        //        .orElseGet(() -> putData(name, format().newAbstractList()));
     }
     
     @SuppressWarnings("unchecked")
@@ -45,11 +65,11 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
         return c.isInstance(t) ? Option.some((T)t) : Option.none();
     }
     
-    @SuppressWarnings("unchecked")
-    protected <T extends ITag> T getRaw(String name, Class<T> c) {
-        ITag t = data.get(name);
-        return c.isInstance(t) ? (T)t : null;
-    }
+    //@SuppressWarnings("unchecked")
+    //protected <T extends ITag> T getRaw(String name, Class<T> c) {
+    //    ITag t = data.get(name);
+    //    return c.isInstance(t) ? (T)t : null;
+    //}
     
     /**
      * Gets the raw data value mapped to the given name. Obviously it is better
@@ -68,8 +88,8 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
     /**
      * {@inheritDoc}
      * 
-     * <p>For an AbstractMapCompound, <i>every</i> insertion into this compound
-     * goes through this method.
+     * <p>For a MapCompound, <i>every</i> insertion into this compound goes
+     * through this method.
      */
     @Override
     public <T extends ITag> T putData(String name, T t) {

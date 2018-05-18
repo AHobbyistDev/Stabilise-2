@@ -73,30 +73,6 @@ public class HostWorld extends AbstractWorld {
     	
         spawnSliceX = dimension.info.spawnSliceX;
         spawnSliceY = dimension.info.spawnSliceY;
-        
-        // No spawn reasons; there's actually no good reason I can think of at
-        // the moment for why we might want spawn reasons.
-        // 
-        // Also, we were getting concurrency issues since we were invoking
-        // anchorRegion(), which is optimised for being called only on the main
-        // thread -- and in here we are in a worker thread.
-        
-        // Load the spawn regions if this is the default dimension
-        /*
-        if(dimension.hasSpawnRegions()) {
-            // Ensure the 'spawn regions' are generated, and anchor them such that
-            // they're always loaded
-            // The spawn regions extend for -256 <= x,y <= 256 (this is arbitrary)
-            for(int x = -1; x < 1; x++) {
-                for(int y = -1; y < 1; y++) {
-                    // This will induce a permanent anchorage imbalance which
-                    // should never be rectified; the region will remain
-                    // perpetually loaded
-                    regions.anchorRegion(x, y);
-                }
-            }
-        }
-        */
     }
     
     /**

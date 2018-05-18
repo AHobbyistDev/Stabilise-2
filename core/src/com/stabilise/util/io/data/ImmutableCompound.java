@@ -18,8 +18,8 @@ import com.stabilise.util.io.DataOutStream;
  * 
  * <ul>
  * <li>{@link #readData(DataInStream)}
- * <li>{@link #createCompound(String)}
- * <li>{@link #createList(String)}
+ * <li>{@link #childCompound(String)}
+ * <li>{@link #childList(String)}
  * <li>{@link #setWriteMode()}
  * </ul>
  * 
@@ -111,13 +111,29 @@ public class ImmutableCompound implements DataCompound {
         return compound.contains(name);
     }
     
+    @Override public boolean containsCompound(String name) { return compound.containsCompound(name); }
+    @Override public boolean containsList    (String name) { return compound.containsList(name);     }
+    @Override public boolean containsBool    (String name) { return compound.containsBool(name);     }
+    @Override public boolean containsI8      (String name) { return compound.containsI8(name);       }
+    @Override public boolean containsI16     (String name) { return compound.containsI16(name);      }
+    @Override public boolean containsI32     (String name) { return compound.containsI32(name);      }
+    @Override public boolean containsI64     (String name) { return compound.containsI64(name);      }
+    @Override public boolean containsF32     (String name) { return compound.containsF32(name);      }
+    @Override public boolean containsF64     (String name) { return compound.containsF64(name);      }
+    @Override public boolean containsI8Arr   (String name) { return compound.containsI8Arr(name);    }
+    @Override public boolean containsI32Arr  (String name) { return compound.containsI32Arr(name);   }
+    @Override public boolean containsI64Arr  (String name) { return compound.containsI64Arr(name);   }
+    @Override public boolean containsF32Arr  (String name) { return compound.containsF32Arr(name);   }
+    @Override public boolean containsF64Arr  (String name) { return compound.containsF64Arr(name);   }
+    @Override public boolean containsString  (String name) { return compound.containsString(name);   }
+    
     @Override
-    public DataCompound createCompound(String name) {
+    public DataCompound childCompound(String name) {
         throw Checks.unsupported();
     }
     
     @Override
-    public DataList createList(String name) {
+    public DataList childList(String name) {
         throw Checks.unsupported();
     }
     

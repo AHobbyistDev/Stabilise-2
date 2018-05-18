@@ -113,8 +113,6 @@ public class Stabilise extends Application {
                 
                 Controller.poke();
                 
-                //new GameData().register();
-                
                 bootstrapped = true;
                 
                 Log.get().postDebug("Bootstrap completed.");

@@ -60,8 +60,7 @@ class ParticlePool<T extends Particle> {
     }
     
     /**
-     * Gets a particle from this pool, instantiating a new one if
-     * necessary.
+     * Gets a particle from this pool, instantiating a new one if necessary.
      */
     T get() {
         activeParticles++;

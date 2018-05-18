@@ -37,14 +37,14 @@ public interface DataList extends ITag, IContainerTag<DataList> {
      * 
      * @return The created compound.
      */
-    DataCompound createCompound();
+    DataCompound childCompound();
     
     /**
      * Creates a new list and adds it to this list.
      * 
      * @return The created list.
      */
-    DataList createList();
+    DataList childList();
     
     /** If {@code data} is of a different format to this list, it will be
      * converted first. */

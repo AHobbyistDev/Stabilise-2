@@ -36,7 +36,7 @@ public final class AppDriver implements Runnable {
     private long forceRender = 500_000_000L; // 0.5 seconds
     
     /** The time when last it was checked as per {@code System.nanoTime()}. */
-    private long lastTime = 0L;
+    private long lastTickStart = 0L;
     /** The number of 'unprocessed' nanoseconds. An update tick is executed
      * when this is greater than or equal to nsPerTick. */
     private long unprocessed = 0L;
@@ -56,6 +56,10 @@ public final class AppDriver implements Runnable {
     private long lastFPSRefresh = System.currentTimeMillis();
     /** Nanoseconds per frame. */
     private long nsPerFrame;
+    /** System.nanoTime() value when we ended the most recent render. */
+    private long lastFrameEnd = 0L;
+    /** The value most recently returned by {@link #tick()} (but in nanos). */
+    private long lastSleep = 0L;
     
     /** {@code true} if this driver is running. You can set this to {@code
      * false} to stop this from running if it is being run as per {@link
@@ -133,7 +137,7 @@ public final class AppDriver implements Runnable {
     @Override
     public final void run() {
         running = true;
-        lastTime = System.nanoTime();
+        lastTickStart = System.nanoTime();
         
         while(running) {
             tickAndSleep();
@@ -154,7 +158,6 @@ public final class AppDriver implements Runnable {
      */
     public final void tickAndSleep() {
         long sleepTime = tick();
-        //System.out.println("Gonna sleep for " + sleepTime + "ms (msPerFrame is " + nsPerFrame/1000000 + ")");
         try {
             Thread.sleep(sleepTime);
         } catch(InterruptedException e) {
@@ -185,19 +188,22 @@ public final class AppDriver implements Runnable {
         ticking = true;
         
         long now = System.nanoTime();
-        if(lastTime == 0L) // should be the case when this is first invoked
-            lastTime = now;
-        unprocessed += now - lastTime;
+        if(lastTickStart == 0L) { // should be the case when this is first invoked
+            lastTickStart = now;
+            unprocessed = nsPerTick;
+        }
+        unprocessed += now - lastTickStart;
+        lastTickStart = now;
         
         // Make sure nothing has gone wrong with timing.
-        if(unprocessed > delaySkip) {
+        if(unprocessed >= delaySkip) {
             log.postWarning("Can't keep up! Running "
                     + (unprocessed / 1_000_000L) + " milliseconds behind; skipping "
-                    + (unprocessed / nsPerTick) + " ticks!"
+                    + (unprocessed / nsPerTick) + " ticks."
             );
             unprocessed = nsPerTick; // let at least one tick happen
         } else if(unprocessed < 0L) {
-            log.postWarning("Time ran backwards!");
+            log.postWarning("Time ran backwards?!");
             unprocessed = 0L;
         }
         
@@ -205,13 +211,12 @@ public final class AppDriver implements Runnable {
         profiler.next("update"); // end wait, start update
         
         // Perform any scheduled update ticks
-        long updateBegin = System.nanoTime();
         while(unprocessed >= nsPerTick) {
             numUpdates++;
             unprocessed -= nsPerTick;
             updater.run();
             
-            if(System.nanoTime() - updateBegin >= forceRender)
+            if(System.nanoTime() - now >= forceRender)
                 break;
         }
         
@@ -244,12 +249,32 @@ public final class AppDriver implements Runnable {
         
         ticking = false;
         
-        long usedNanos = System.nanoTime() - lastTime;
-        lastTime = now;
-        if(usedNanos < nsPerFrame)
-            return (nsPerFrame - usedNanos) / 1_000_000L; // convert to millis
-        else
-            return 0L;
+        
+        // We can't just sleep nsPerTick - (System.nanoTime()-lastTickStart),
+        // since we should account for time spent by whatever enclosing code
+        // is is that invokes this function. So try to account for it by
+        // subtracting off the difference between actual sleep time
+        // (lastTickStart - lastFrameEnd) and the expected sleep time
+        // (lastSleep). (This assumes the overhead of the enclosing code is the
+        // same every tick). Then we get
+        // 
+        //   nsPerTick - (System.nanoTime()-lastTickStart) - ( (lastTickStart-
+        //      lastFrameEnd) - lastSleep )
+        // = nsPerTick - System.nanoTime() + lastFrameEnd + lastSleep.
+        long newLastFrameEnd = System.nanoTime();
+        lastSleep = nsPerFrame - newLastFrameEnd + lastFrameEnd + lastSleep;
+        lastFrameEnd = newLastFrameEnd;
+        if(lastSleep < 0)
+            lastSleep = 0;
+        return lastSleep / 1_000_000L; // convert to millis
+        
+        
+        //long usedNanos = System.nanoTime() - lastTickStart;
+        //lastTickStart = now;
+        //if(usedNanos < nsPerFrame)
+        //    return (nsPerFrame - usedNanos) / 1_000_000L; // convert to millis
+        //else
+        //    return 0L;
     }
     
     /**

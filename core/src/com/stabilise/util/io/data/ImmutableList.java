@@ -108,12 +108,12 @@ public class ImmutableList implements DataList {
     }
     
     @Override
-    public DataCompound createCompound() {
+    public DataCompound childCompound() {
         throw Checks.unsupported();
     }
     
     @Override
-    public DataList createList() {
+    public DataList childList() {
         throw Checks.unsupported();
     }
     

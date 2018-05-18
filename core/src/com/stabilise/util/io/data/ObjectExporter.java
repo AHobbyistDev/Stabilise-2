@@ -93,10 +93,10 @@ public class ObjectExporter {
                         else { //if(t.getAnnotation(Exportable.class) != null) {
                             Object[] arr = (Object[])f.get(o);
                             if(arr != null) {
-                                DataList list = tag.createList(n);
+                                DataList list = tag.childList(n);
                                 for(Object obj : arr)
                                     if(obj != null)
-                                        doExport(obj, list.createCompound());
+                                        doExport(obj, list.childCompound());
                             }
                         }
                     } else if(c.equals(byte.class)) tag.put(n, f.getByte(o));
@@ -107,7 +107,7 @@ public class ObjectExporter {
                         //        " of field \"" + n + "\"");
                         Object obj = f.get(o);
                         if(obj != null)
-                            doExport(obj, tag.createCompound(n));
+                            doExport(obj, tag.childCompound(n));
                     }
 
                 } else {
@@ -141,7 +141,7 @@ public class ObjectExporter {
                         else { //if(t.getAnnotation(Exportable.class) != null) {
                             Object[] arr = (Object[])f.get(o);
                             if(arr != null) {
-                                DataList list = tag.createList(n);
+                                DataList list = tag.childList(n);
                                 for(int i = 0; i < Math.min(arr.length, list.size()); i++)
                                     doImport(arr[i], list.getCompound());
                             }
@@ -154,7 +154,7 @@ public class ObjectExporter {
                         //        " of field \"" + n + "\"");
                         Object obj = f.get(o);
                         if(obj != null)
-                            doImport(obj, tag.createCompound(n));
+                            doImport(obj, tag.childCompound(n));
                     }
                 } else {
                     //System.out.println("Not importing field \"" + f.getName() + "\"");

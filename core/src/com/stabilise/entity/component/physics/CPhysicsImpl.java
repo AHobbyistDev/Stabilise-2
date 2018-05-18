@@ -2,7 +2,6 @@ package com.stabilise.entity.component.physics;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
-import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Checks;
 import com.stabilise.util.io.data.DataCompound;
@@ -14,6 +13,8 @@ import com.stabilise.world.tile.Tile;
  * Extremely crappy physics implementation
  */
 public class CPhysicsImpl extends CPhysics {
+    
+    private static final float eps = 0.00001f;
     
     public boolean dxp, dyp; // "dx/dy positive?"
     public boolean onGround;
@@ -46,14 +47,15 @@ public class CPhysicsImpl extends CPhysics {
             boolean yCollided = false;
             
             for(int i = 0; i < divisor; i++) {
-                newPos.add(xInc, yInc).align();
+                newPos.add(xInc, yInc); // no need to align
                 if(!yCollided && dyi != 0.0f)
                     yCollided = verticalCollisions(w, e);
                 if(!xCollided && dxi != 0.0f)
                     xCollided = horizontalCollisions(w, e);
             }
         } else {
-            newPos.set(e.pos, dxi, dyi);//.align();
+            // No need to align
+            newPos.set(e.pos, dxi, dyi);
             
             if(dyi != 0.0f)
                 verticalCollisions(w, e);
@@ -61,6 +63,8 @@ public class CPhysicsImpl extends CPhysics {
                 horizontalCollisions(w, e);
         }
         
+        // Even if unaligned, entity.update() will do it for us
+        // nvm, need it aligned for getXFriction
         e.pos.set(newPos).align();
         
         e.dy += w.getGravityIncrement(); // apply after updating y
@@ -94,9 +98,9 @@ public class CPhysicsImpl extends CPhysics {
         
         // If the vertical wall is the same wall as the one the entity is
         // currently occupying, don't bother checking
-        //if(dxp ? Maths.ceil(newPos.lx()+leadingEdge) == Maths.ceil(e.pos.lx()+leadingEdge)
-        //       : Maths.floor(newPos.lx()+leadingEdge) == Maths.floor(e.pos.lx()+leadingEdge))
-        //    return false;
+        if(dxp ? Maths.ceil(newPos.lx()+leadingEdge) == Maths.ceil(e.pos.lx()+leadingEdge-eps)
+               : Maths.floor(newPos.lx()+leadingEdge) == Maths.floor(e.pos.lx()+leadingEdge+eps))
+            return false;
         
         // Check the vertical wall of tiles to the left/right of the entity
         int min = Maths.floor(newPos.ly() + e.aabb.minY());
@@ -123,9 +127,9 @@ public class CPhysicsImpl extends CPhysics {
         
         // If the horizontal wall is the same as the one the entity is
         // currently occupying, don't bother checking.
-        //if(dyp ? Maths.ceil(newPos.ly()+leadingEdge) == Maths.ceil(e.pos.ly()+leadingEdge)
-        //       : Maths.floor(newPos.ly()+leadingEdge) == Maths.floor(e.pos.ly()+leadingEdge))
-        //    return false;
+        if(dyp ? Maths.ceil(newPos.ly()+leadingEdge) == Maths.ceil(e.pos.ly()+leadingEdge-eps)
+               : Maths.floor(newPos.ly()+leadingEdge) == Maths.floor(e.pos.ly()+leadingEdge+eps))
+            return false;
         
         // Check the horizontal wall of tiles at the top/bottom of the entity
         int min = Maths.floor(newPos.lx() + e.aabb.minX());
@@ -191,8 +195,8 @@ public class CPhysicsImpl extends CPhysics {
      * Only the x-coord matters here.
      */
     private void collideHorizontal(World w, Entity e, Position collisionPos) {
-        //e.post(w, ETileCollision.collision(e.dx));
-        e.post(w, ETileCollision.collisionH(e.dx));
+        // Not currently used by anything so I'm not going to bother
+        //e.post(w, ETileCollision.collisionH(e.dx));
         
         e.dx = 0;
         
@@ -209,8 +213,8 @@ public class CPhysicsImpl extends CPhysics {
      * @param collisionPos The position at which the collision is to be made.
      */
     private void collideVertical(World w, Entity e, Position collisionPos) {
-        //e.post(w, ETileCollision.collision(e.dy));
-        e.post(w, ETileCollision.collisionV(e.dy));
+        // Not currently used by anything so I'm not going to bother
+        //e.post(w, ETileCollision.collisionV(e.dy));
         
         e.dy = 0;
         

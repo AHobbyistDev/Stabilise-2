@@ -42,14 +42,14 @@ public abstract class AbstractDataList implements DataList, ITag {
     }
     
     @Override
-    public DataCompound createCompound() {
+    public DataCompound childCompound() {
         DataCompound c = format().newCompound();
         addData((ITag) c);
         return c;
     }
     
     @Override
-    public DataList createList() {
+    public DataList childList() {
         DataList l = format().newList();
         addData((ITag) l);
         return l;
@@ -118,7 +118,7 @@ public abstract class AbstractDataList implements DataList, ITag {
     
     @Override
     public void read(DataList l) {
-        ((AbstractDataList) l.createList()).putAll(this);
+        ((AbstractDataList) l.childList()).putAll(this);
     }
     
     @Override

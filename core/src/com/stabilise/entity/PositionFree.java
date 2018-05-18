@@ -3,7 +3,11 @@ package com.stabilise.entity;
 import com.stabilise.util.io.data.DataCompound;
 
 /**
- * TODO
+ * A {@link Position} whose local coordinates are stored as floats. This class
+ * is then most appropriate to use for representing the position of an entity
+ * or anything unconstrained by the world grid.
+ * 
+ * @see PositionFixed
  */
 public class PositionFree extends Position {
     

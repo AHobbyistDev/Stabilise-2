@@ -22,6 +22,10 @@ import com.stabilise.world.World;
  * equipped with three privileged components: a {@link CCore core} component, a
  * {@link CController controller} component, and a {@link CPhysics physics}
  * component.
+ * 
+ * <p>Every implementor of this interface needs to have a parameterless
+ * constructor so that it may be instantiated dynamically e.g. when an entity
+ * is loaded from a save file.
  */
 public interface Component extends IWeightProvider,
                                     IDuplicateResolver<Component>,
