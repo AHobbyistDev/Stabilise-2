@@ -2,6 +2,7 @@ package com.stabilise.entity.component.physics;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
+import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Checks;
 import com.stabilise.util.io.data.DataCompound;
@@ -47,7 +48,12 @@ public class CPhysicsImpl extends CPhysics {
             boolean yCollided = false;
             
             for(int i = 0; i < divisor; i++) {
-                newPos.add(xInc, yInc); // no need to align
+                // no need to align
+                if(!xCollided)
+                    newPos.addX(xInc);
+                if(!yCollided)
+                    newPos.addY(yInc);
+                
                 if(!yCollided && dyi != 0.0f)
                     yCollided = verticalCollisions(w, e);
                 if(!xCollided && dxi != 0.0f)
@@ -103,8 +109,8 @@ public class CPhysicsImpl extends CPhysics {
             return false;
         
         // Check the vertical wall of tiles to the left/right of the entity
-        int min = Maths.floor(newPos.ly() + e.aabb.minY());
-        int max = Maths.floor(newPos.ly() + e.aabb.maxY());
+        int min = Maths.floor(Maths.min(e.pos.ly(), newPos.ly()) + e.aabb.minY());
+        int max = Maths.floor(Maths.max(e.pos.ly(), newPos.ly()) + e.aabb.maxY());
         
         tmp1.set(newPos.sx, newPos.sy, newPos.lx()+leadingEdge, min).align();
         for(int y = min; y <= max; y++) {
@@ -132,8 +138,8 @@ public class CPhysicsImpl extends CPhysics {
             return false;
         
         // Check the horizontal wall of tiles at the top/bottom of the entity
-        int min = Maths.floor(newPos.lx() + e.aabb.minX());
-        int max = Maths.ceil(newPos.lx() + e.aabb.maxX());
+        int min = Maths.floor(Maths.min(e.pos.lx(), newPos.lx()) + e.aabb.minX());
+        int max = Maths.ceil(Maths.max(e.pos.lx(), newPos.lx()) + e.aabb.maxX());
         
         tmp1.set(newPos.sx, newPos.sy, min, newPos.ly()+leadingEdge).align();
         for(int x = min; x < max; x++) {
@@ -195,8 +201,7 @@ public class CPhysicsImpl extends CPhysics {
      * Only the x-coord matters here.
      */
     private void collideHorizontal(World w, Entity e, Position collisionPos) {
-        // Not currently used by anything so I'm not going to bother
-        //e.post(w, ETileCollision.collisionH(e.dx));
+        e.post(w, ETileCollision.collisionH(e.dx));
         
         e.dx = 0;
         
@@ -213,8 +218,7 @@ public class CPhysicsImpl extends CPhysics {
      * @param collisionPos The position at which the collision is to be made.
      */
     private void collideVertical(World w, Entity e, Position collisionPos) {
-        // Not currently used by anything so I'm not going to bother
-        //e.post(w, ETileCollision.collisionV(e.dy));
+        e.post(w, ETileCollision.collisionV(e.dy));
         
         e.dy = 0;
         
@@ -224,7 +228,6 @@ public class CPhysicsImpl extends CPhysics {
         else {
         	newPos.setLy(collisionPos.ly() - e.aabb.minY() + 1);
             
-        	//tmp3.set(newPos).addY(-1).alignY();
         	Tile t = w.getTileAt(collisionPos);
         	t.handleStep(w, collisionPos, e);
         	floorTile = t.getID();

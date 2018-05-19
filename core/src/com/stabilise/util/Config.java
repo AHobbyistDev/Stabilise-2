@@ -106,7 +106,7 @@ public class Config {
     public boolean sanitise() {
         BoolBox changes = new BoolBox(false);
         defaultsAsMap.forEachTag((name,defTag) -> {
-            ITag valueTag = valuesAsMap.getData("name");
+            ITag valueTag = valuesAsMap.getData(name);
             // If tag isn't present or is of the completely wrong type, set to
             // the default.
             if(valueTag == null || !defTag.isCompatibleType(valueTag)) {
