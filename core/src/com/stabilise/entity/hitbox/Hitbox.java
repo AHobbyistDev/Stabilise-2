@@ -7,7 +7,8 @@ import com.stabilise.entity.GameObject;
 import com.stabilise.entity.damage.DamageType;
 import com.stabilise.entity.damage.GeneralSource;
 import com.stabilise.entity.damage.IDamageSource;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
+import com.stabilise.util.Log;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
 
@@ -57,7 +58,7 @@ public class Hitbox extends GameObject {
      * @param damage The damage the hitbox deals.
      */
     public Hitbox(long ownerID, Shape boundingBox, int damage) {
-        super();
+        super(true);
         this.ownerID = ownerID;
         this.boundingBox = boundingBox;
         this.damage = damage;
@@ -71,9 +72,10 @@ public class Hitbox extends GameObject {
      * applicable and resolving the collision appropriately.
      */
     @Override
-    public void update(World world) {
-        if(isDestroyed())
-            return;
+    protected void update(World world) {
+    	// No need to check since this is done by updateAndCheck().
+        //if(isDestroyed())
+        //    return;
         
         moveToOwner(world);
         
@@ -97,7 +99,10 @@ public class Hitbox extends GameObject {
     protected void moveToOwner(World w) {
         if(stickToOwner) {
             Entity e = w.getEntity(ownerID);
-            pos.set(e.pos);
+            if(e != null)
+                pos.set(e.pos);
+            else
+                Log.get().postWarning("Hitbox's owner is null!");
         }
     }
     

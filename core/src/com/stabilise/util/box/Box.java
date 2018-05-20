@@ -48,7 +48,7 @@ public interface Box<T> {
     /**
      * Equivalent to {@code computeIfAbsent(defaultVal).ifPresent(action)}.
      */
-    default void with(Supplier<? extends T> defaultVal, Consumer<? super T> action) {
+    default void with(Consumer<? super T> action, Supplier<? extends T> defaultVal) {
         T t = get();
         if(t == null) set(t = defaultVal.get());
         action.accept(t);

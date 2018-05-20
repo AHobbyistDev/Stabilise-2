@@ -1,8 +1,8 @@
 package com.stabilise.util.io.data.bytestream;
 
+/*
 import java.io.IOException;
 import java.io.InputStream;
-
 
 class ByteInStream extends InputStream {
     
@@ -21,3 +21,4 @@ class ByteInStream extends InputStream {
     }
     
 }
+*/

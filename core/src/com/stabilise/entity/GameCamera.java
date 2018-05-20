@@ -1,28 +1,22 @@
 package com.stabilise.entity;
 
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Checks;
 import com.stabilise.util.collect.SimpleList;
 import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.world.World;
-import com.stabilise.world.WorldCamera;
 
 /**
  * The GameCamera controls the player's perspective, and hence which parts of
  * the world are visible to them.
  */
-public class GameCamera extends GameObject implements WorldCamera {
+public class GameCamera extends GameObject {
     
     /** The entity upon which to focus the camera. */
     private Entity focus;
     
     /** Real position (i.e. ignoring shake). */
-    private Position realPos = new Position();
-    
-    /** The coordinates of the slice in which the camera is located, in
-     * slice-lengths. These are cached values recalculated every tick. Used by
-     * the world renderer to decide which slices to render. */
-    //public int sliceX, sliceY;
+    public final PositionFree realPos = Position.create();
     
     /** The strength with which the camera follows the focus. */
     private float followStrength = 0.25f;
@@ -34,6 +28,7 @@ public class GameCamera extends GameObject implements WorldCamera {
      * Creates a new GameCamera.
      */
     public GameCamera() {
+        super(true);
         setFocus(null);
     }
     
@@ -42,8 +37,6 @@ public class GameCamera extends GameObject implements WorldCamera {
         if(focus != null) {
             realPos.lx += realPos.diffX(focus.pos) * followStrength;
             realPos.ly += (realPos.diffY(focus.pos) + focus.aabb.centreY()) * followStrength;
-            //rx += (focus.x - rx) * followStrength;
-            //ry += (focus.y + focus.aabb.centreY() - ry) * followStrength;
         }
         
         realPos.align();
@@ -51,8 +44,8 @@ public class GameCamera extends GameObject implements WorldCamera {
         
         shakes.iterate(s -> {
             float mod = (float) s.duration / s.maxDuration;
-            pos.lx += s.strength * (2 * w.rnd().nextFloat() - 1) * mod;
-            pos.ly += s.strength * (2 * w.rnd().nextFloat() - 1) * mod;
+            pos.addX(s.strength * (2 * w.rnd().nextFloat() - 1) * mod);
+            pos.addY(s.strength * (2 * w.rnd().nextFloat() - 1) * mod);
             return --s.duration == 0;
         });
         
@@ -73,7 +66,10 @@ public class GameCamera extends GameObject implements WorldCamera {
         focus = null; // help the gc
     }
     
-    @Override
+    /**
+     * Sets the entity upon which to focus the camera. If {@code e} is null,
+     * the camera will freeze.
+     */
     public void setFocus(Entity e) {
         focus = e;
         
@@ -106,7 +102,9 @@ public class GameCamera extends GameObject implements WorldCamera {
         realPos.align();
     }
     
-    @Override
+    /**
+     * Adds a shake effect to the camera.
+     */
     public void shake(float strength, int duration) {
         shakes.append(new Shake(strength, duration));
     }

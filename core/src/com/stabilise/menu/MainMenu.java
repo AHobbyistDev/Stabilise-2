@@ -21,7 +21,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.stabilise.core.Application;
 import com.stabilise.core.main.Stabilise;
 import com.stabilise.core.state.LoadingState;
-import com.stabilise.opengl.GLUtil;
+import com.stabilise.render.opengl.GLUtil;
 
 // TODO: actually learn how to make proper menus with gdx
 

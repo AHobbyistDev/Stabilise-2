@@ -1,6 +1,6 @@
 package com.stabilise.entity.particle;
 
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.world.World;
 
 /**
@@ -23,7 +23,8 @@ public class ParticleFlame extends ParticlePhysical {
     public float opacity;
     
     
-    public void update(World world) {
+    @Override
+    protected void update(World world) {
         super.update(world);
         
         dy += -0.02f / 32f; //world.gravity / 32f;

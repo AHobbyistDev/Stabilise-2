@@ -132,6 +132,12 @@ public abstract class Point {
             this.hash = genHash();
         }
         
+        ImmutablePoint(int x, int y, int hash) {
+            this.x = x;
+            this.y = y;
+            this.hash = hash;
+        }
+        
         @Override
         public Point set(int x, int y) {
             throw new UnsupportedOperationException("This point is immutable");

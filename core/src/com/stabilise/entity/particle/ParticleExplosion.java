@@ -1,7 +1,7 @@
 package com.stabilise.entity.particle;
 
 import com.badlogic.gdx.graphics.Color;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.maths.Interpolation;
 import com.stabilise.world.World;
 
@@ -52,7 +52,7 @@ public class ParticleExplosion extends Particle {
     }
     
     @Override
-    public void update(World world) {
+    protected void update(World world) {
         super.update(world);
         
         float ratio = (float)age/DESPAWN_TICKS;

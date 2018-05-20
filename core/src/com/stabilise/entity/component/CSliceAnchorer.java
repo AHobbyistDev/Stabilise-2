@@ -7,6 +7,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Checks;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.RegionState;
 import com.stabilise.world.World;
@@ -22,15 +23,19 @@ public class CSliceAnchorer extends AbstractComponent {
     
     
     /** "Radius" of the square of slices to keep anchored. */
-    private final int radius;
+    private int radius;
     /** The entity's most recent slice coordinates, which serve the centre of
      * the coordinates of the slices to keep anchored. */
     private int centreX, centreY;
     /** Coordinates determining which slices are to be anchored. */
-    protected int minSliceX, maxSliceX, minSliceY, maxSliceY;
+    private int minSliceX, maxSliceX, minSliceY, maxSliceY;
     
     /** true if we've done an initial anchoring of slices. */
     private boolean initialAnchor = false;
+    
+    /** true if this anchorer has been disabled, which means it should be
+     * removed from the attached entity's components list */
+    private boolean disabled = false;
     
     
     /**
@@ -58,8 +63,16 @@ public class CSliceAnchorer extends AbstractComponent {
     
     @Override
     public void update(World w, Entity e) {
-        int sliceX = e.pos.getSliceX();
-        int sliceY = e.pos.getSliceY();
+        if(disabled)
+            return;
+        
+        // Conservatively invoke this in case this component was added to the
+        // entity after it had already been added to the world. Does nothing
+        // if everything is already anchored.
+        anchorAll(w, e);
+        
+        int sliceX = e.pos.sx();
+        int sliceY = e.pos.sy();
         
         // If the entity hasn't moved slices, nothing needs to be changed
         if(centreX == sliceX && centreY == sliceY)
@@ -118,14 +131,14 @@ public class CSliceAnchorer extends AbstractComponent {
     /**
      * Deanchors a column of slices. minY and maxY are inclusive.
      */
-    protected void deanchorCol(World w, int x, int minY, int maxY) {
+    private void deanchorCol(World w, int x, int minY, int maxY) {
         for(int y = minY; y <= maxY; y++) w.deanchorSlice(x, y);
     }
     
     /**
      * Deanchors a row of slices. minX and maxX are inclusive.
      */
-    protected void deanchorRow(World w, int y, int minX, int maxX) {
+    private void deanchorRow(World w, int y, int minX, int maxX) {
         for(int x = minX; x <= maxX; x++) w.deanchorSlice(x, y);
     }
     
@@ -161,13 +174,13 @@ public class CSliceAnchorer extends AbstractComponent {
      * if this method has already been invoked once.
      */
     private void anchorAll(World w, Entity e, boolean check) {
-    	if(check && initialAnchor)
+    	if((check && initialAnchor) || disabled)
     		return;
     	
     	initialAnchor = true;
     	
-        centreX = e.pos.getSliceX();
-        centreY = e.pos.getSliceY();
+        centreX = e.pos.sx();
+        centreY = e.pos.sy();
         minSliceX = centreX - LOADED_SLICE_RADIUS;
         maxSliceX = centreX + LOADED_SLICE_RADIUS;
         minSliceY = centreY - LOADED_SLICE_RADIUS;
@@ -178,9 +191,14 @@ public class CSliceAnchorer extends AbstractComponent {
     }
     
     /**
-     * Deanchors all anchored slices.
+     * Deanchors all anchored slices. This permanently disables this component,
+     * and it will be removed from its attached entity soon.
      */
     public void deanchorAll(World w) {
+        if(disabled)
+            return;
+        disabled = true;
+        
         for(int x = minSliceX; x <= maxSliceX; x++)
             deanchorCol(w, x, minSliceY, maxSliceY);
     }
@@ -209,6 +227,11 @@ public class CSliceAnchorer extends AbstractComponent {
     }
     
     @Override
+    public boolean shouldRemove() {
+        return disabled;
+    }
+    
+    @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.equals(EntityEvent.ADDED_TO_WORLD))
             anchorAll(w, e, true);
@@ -227,6 +250,18 @@ public class CSliceAnchorer extends AbstractComponent {
     @Override
     public Action resolve(Component c) {
         throw new IllegalStateException("Two slices anchorers on the same entity?");
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        radius = c.getI32("radius");
+        disabled = c.getBool("disabled");
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        c.put("radius", radius);
+        c.put("disabled", disabled);
     }
     
 }

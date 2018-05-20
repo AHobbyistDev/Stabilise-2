@@ -2,11 +2,13 @@ package com.stabilise.world.tile.tileentity;
 
 import com.stabilise.entity.GameObject;
 import com.stabilise.entity.Position;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.collect.registry.TypeFactory;
 import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.Exportable;
 import com.stabilise.world.World;
+import com.stabilise.world.WorldProvider;
 
 /**
  * A tile entity contains additional data associated with a tile, and in
@@ -15,7 +17,7 @@ import com.stabilise.world.World;
  * <p>Tile entities may not be added to the world by another tile entity, and
  * and a queue for tile entities is hence not required.
  */
-public abstract class TileEntity extends GameObject {
+public abstract class TileEntity extends GameObject implements Exportable {
     
     /** The tile entity registry. */
     private static final TypeFactory<TileEntity> TILE_ENTITIES =
@@ -39,7 +41,7 @@ public abstract class TileEntity extends GameObject {
      * this one (that is to say, no arguments) for factory construction.
      */
     protected TileEntity() {
-        // nothing to see here, move along
+        super(false);
     }
     
     
@@ -65,22 +67,12 @@ public abstract class TileEntity extends GameObject {
      */
     @Override
     public boolean updateAndCheck(World world) {
-        if(isDestroyed())
-            return true;
-        update(world);
-        if(isDestroyed()) {
-            // We reset the destroyed flag as to permit behaviour wherein a
-            // tile entity may add and remove itself from the update list
-            // repeatedly as it wills.
-            destroyed = false;
-            return true;
-        }
-        return false;
-    }
-    
-    @Override
-    public void update(World world) {
-        // nothing in the default implementation
+    	boolean ret = super.updateAndCheck(world);
+    	// We reset the destroyed flag as to permit behaviour wherein a
+    	// tile entity may add and remove itself from the update list
+    	// repeatedly as it wills.
+    	destroyed = false;
+        return ret;
     }
     
     @Override
@@ -89,20 +81,18 @@ public abstract class TileEntity extends GameObject {
     }
     
     /**
-     * Handles being added to the world.
+     * Invoked when this tile entity is added to the world.
      * 
-     * @param world The world.
-     * @param pos The position of the tile entity.
+     * @see WorldProvider#setTileEntity(TileEntity)
      */
-    public abstract void handleAdd(World world, Position pos);
+    public abstract void handleAdd(World world);
     
     /**
-     * Handles being removed from the world.
+     * Invoked when this tile entity is removed from the world.
      * 
-     * @param world The world.
-     * @param pos The position of the tile entity.
+     * @see WorldProvider#removeTileEntityAt(Position)
      */
-    public abstract void handleRemove(World world, Position pos);
+    public abstract void handleRemove(World world);
     
     /**
      * @return The ID of this tile entity's type.
@@ -111,31 +101,16 @@ public abstract class TileEntity extends GameObject {
         return TILE_ENTITIES.getID(getClass());
     }
     
-    /**
-     * Writes the tile entity to an NBT tag. The returned tag compound contains
-     * an integer tag "id" containing the value returned by {@link #getID()}
-     * (the value for the {@code id} parameter of
-     * {@link #createTileEntity(int, int, int)} required to produce a tile
-     * entity of the same class), the "x" and "y" integer tags, and other tags
-     * which are dependent on subclass implementations.
-     */
-    public final DataCompound toNBT() {
-        DataCompound tag = DataCompound.create();
-        tag.put("id", getID());
-        pos.io(tag, true);
-        writeNBT(tag);
-        return tag;
+    @Override
+    public void importFromCompound(DataCompound c) {
+        pos.importFromCompound(c);
     }
     
-    /**
-     * Writes this tile entity's data to the specified compound NBT tag.
-     */
-    protected abstract void writeNBT(DataCompound tag);
-    
-    /**
-     * Reads the tile entity from the specified compound NBT tag.
-     */
-    public abstract void fromNBT(DataCompound tag);
+    @Override
+    public void exportToCompound(DataCompound c) {
+        c.put("id", getID());
+        pos.exportToCompound(c);
+    }
     
     //--------------------==========--------------------
     //------------=====Static Functions=====------------
@@ -152,22 +127,21 @@ public abstract class TileEntity extends GameObject {
     }
     
     /**
-     * Creates a tile entity object from its NBT representation. The given tag
-     * compound should at least contain "id", "x" and "y" integer tags.
+     * Creates a tile entity object from its DataCompound representation. The
+     * given compound should at least contain the "id" and position tags..
      * 
-     * @param tag The compound tag from which to read the tile entity.
+     * @param c The compound from which to read the tile entity.
      * 
      * @return The tile entity, or {@code null} if it could not be constructed
      * for whatever reason.
      * @throws NullPointerException if {@code tag} is {@code null}.
      * @throws RuntimeException if tile entity creation failed.
      */
-    public static TileEntity createTileEntityFromNBT(DataCompound tag) {
-        TileEntity t = createTileEntity(tag.getInt("id"));
+    public static TileEntity createFromCompound(DataCompound c) {
+        TileEntity t = createTileEntity(c.getI32("id"));
         if(t == null)
             return null;
-        t.pos.io(tag, false);
-        t.fromNBT(tag);
+        t.importFromCompound(c);
         return t;
     }
     

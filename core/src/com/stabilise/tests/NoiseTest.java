@@ -17,7 +17,7 @@ import com.stabilise.util.maths.SimplexNoise;
 public class NoiseTest {
     
     // true = simplex, false = perlin
-    private static final boolean SIMPLEX = false;
+    private static final boolean SIMPLEX = true;
     
     private long seed = 7238674329493L;
     
@@ -33,12 +33,13 @@ public class NoiseTest {
                 s -> new SimplexNoise(s) :
                 s -> new PerlinNoise(s);
         
-        noise = new OctaveNoise(5, seed, func)
+        noise = new OctaveNoise(seed, func)
                 .addOctave(32, 32)
                 .addOctave(16, 16)
                 .addOctave(8,  8 )
                 .addOctave(4,  4 )
-                .addOctave(2,  2 );
+                .addOctave(2,  2 )
+                .normalise();
         
         final int width = 480;
         final int height = 480;

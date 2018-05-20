@@ -1,6 +1,6 @@
 package com.stabilise.entity;
 
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.world.World;
 
 /**
@@ -12,10 +12,20 @@ public abstract class GameObject {
     /** If {@code true}, this GameObject should be removed from the world ASAP. */
     protected boolean destroyed = false;
     
-    /** The position of this GameObject. Initialises to (0,0). */
-    public final Position pos = Position.create();
+    /** The position of this GameObject. Initialised to (0,0). */
+    public final Position pos;
     
     
+    
+    /**
+     * Constructor.
+     * 
+     * @param free true to use a {@link PositionFree}; false to use a {@link
+     * PositionFixed}.
+     */
+    protected GameObject(boolean free) {
+        pos = free ? Position.create() : Position.createFixed();
+    }
     
     /**
      * Updates this GameObject. This is only ever called through {@link
@@ -46,13 +56,13 @@ public abstract class GameObject {
      * should be removed from the world ASAP; {@code false} otherwise.
      */
     public boolean updateAndCheck(World world) {
-        if(!destroyed) // a quick preemptive check
+        if(!destroyed) // don't update if already destroyed!
             update(world);
         return destroyed;
     }
     
     /**
-     * @param renderer The renderer with which to render the GameObject. Never
+     * @param renderer The renderer with which to render this GameObject. Never
      * null.
      */
     public void render(WorldRenderer renderer) {

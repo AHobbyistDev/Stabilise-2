@@ -1,6 +1,7 @@
 package com.stabilise.world;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.GameCamera;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.Particle;
@@ -28,10 +29,6 @@ public interface World extends WorldProvider {
     public static final String DIR_PLAYERS = "players/";
     /** The file extension for player data files. */
     public static final String EXT_PLAYERS = ".player";
-    
-    /** The maximum number of hostile mobs which may spawn.
-     * <p>TODO: Arbitrary, and probably temporary. */
-    public static final int HOSTILE_MOB_CAP = 100;
     
     
     /**
@@ -61,9 +58,9 @@ public interface World extends WorldProvider {
      * 
      * @throws NullPointerException if {@code e} is {@code null}.
      */
-    default void removeEntity(Entity e) {
-        removeEntity(e.id());
-    }
+    //default void removeEntity(Entity e) {
+    //    removeEntity(e.id());
+    //}
     
     /**
      * Removes an entity from the world.
@@ -77,7 +74,7 @@ public interface World extends WorldProvider {
      * 
      * @param id The ID of the entity.
      */
-    void removeEntity(long id);
+    //void removeEntity(long id);
     
     /**
      * Adds a hitbox to the world. The hitbox's ID is assigned automatically.
@@ -148,7 +145,7 @@ public interface World extends WorldProvider {
     /**
      * Gets this world's camera.
      */
-    WorldCamera getCamera();
+    GameCamera getCamera();
     
     // ==========World component getters and setters==========
     
@@ -165,7 +162,7 @@ public interface World extends WorldProvider {
      * The supplied tile entity will only be added if {@link
      * TileEntity#requiresUpdates()} returns {@code true}. To remove a tile
      * entity from the update list, either {@link TileEntity#destroy() destroy}
-     * it, or invoke {@link #removeTileEntity(TileEntity)}.
+     * it, or invoke {@link #removeTileEntityFromUpdateList(TileEntity)}.
      * 
      * <p>Note that if the supplied tile entity is already on the update list,
      * it will be added again, and hence updated multiple times per tick!
@@ -174,7 +171,7 @@ public interface World extends WorldProvider {
      * 
      * @throws NullPointerException if {@code t} is {@code null}.
      */
-    void addTileEntity(TileEntity t);
+    void addTileEntityToUpdateList(TileEntity t); // very verbose, unfortunately
     
     /**
      * Removes a tile entity from the "update list" of tile entities. It will
@@ -191,7 +188,7 @@ public interface World extends WorldProvider {
      * 
      * @throws NullPointerException if {@code t} is {@code null}.
      */
-    default void removeTileEntity(TileEntity t) {
+    default void removeTileEntityFromUpdateList(TileEntity t) { // very verbose, unfortunately
         // Since it is expensive to find and remove an object from a list,
         // simply set its destroyed flag and have it remove itself upon the 
         // next iteration.
@@ -229,19 +226,6 @@ public interface World extends WorldProvider {
     @UserThread("MainThread")
     @ThreadUnsafeMethod
     void deanchorSlice(int x, int y);
-    
-    // ========== Dimensional stuff ==========
-    
-    /**
-     * Sends an entity to the specified dimension.
-     * 
-     * @param dimension The name of the dimension to which to send the entity.
-     * @param e The entity.
-     * @param pos The position at which to place the entity.
-     * 
-     * @throws NullPointerException if either argument is {@code null}.
-     */
-    void sendToDimension(String dimension, Entity e, Position pos);
     
     // ========== Time delta stuff ==========
     

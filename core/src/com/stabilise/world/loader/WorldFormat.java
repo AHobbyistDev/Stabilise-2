@@ -30,7 +30,7 @@ public class WorldFormat {
         // format if in the future I change the save format and want a smooth
         // compatible transition from an older to a newer version.
         
-        if(format.getInt("version") != 1)
+        if(format.getI32("version") != 1)
             Log.get().postInfo("World format version not 1? (not that it matters for now)");
         
         loader.addLoaderAndSaver(new BaseRegionLoader());

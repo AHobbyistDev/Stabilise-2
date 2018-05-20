@@ -6,6 +6,7 @@ import com.stabilise.entity.component.Component;
 import com.stabilise.entity.damage.DamageType;
 import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.EntityEvent;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
 
@@ -47,6 +48,16 @@ public class CBasicArmour extends AbstractComponent {
             //if(dmg == 0) return true;
         }
         return false;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        durability = c.getI32("durability");
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        c.put("durability", durability);
     }
     
 }

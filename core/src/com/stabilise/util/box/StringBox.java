@@ -11,13 +11,18 @@ import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.ITag;
 
-public class StringBox extends MutBox<String> implements IBox {
+public class StringBox extends MutBox<String> implements ITag {
+    
+    /** Returns an empty string */
+    public static String defaultValue() { return ""; }
+    
+    
     
     /**
      * Creates a new StringBox holding an empty string.
      */
     public StringBox() {
-        super("");
+        super(defaultValue());
     }
     
     /**
@@ -46,23 +51,23 @@ public class StringBox extends MutBox<String> implements IBox {
     }
     
     @Override
-    public void write(String name, DataCompound o) {
-        o.put(name, value);
-    }
-    
-    @Override
     public void read(String name, DataCompound o){
         value = o.getString(name);
     }
     
     @Override
-    public void write(DataList l) {
-        l.add(value);
+    public void write(String name, DataCompound o) {
+        o.put(name, value);
     }
     
     @Override
     public void read(DataList l) {
         value = l.getString();
+    }
+    
+    @Override
+    public void write(DataList l) {
+        l.add(value);
     }
     
     @Override

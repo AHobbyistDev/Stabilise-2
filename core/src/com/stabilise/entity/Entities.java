@@ -1,9 +1,10 @@
 package com.stabilise.entity;
 
-import com.stabilise.entity.component.CSliceAnchorer;
+import com.stabilise.entity.component.*;
 import com.stabilise.entity.component.buffs.*;
 import com.stabilise.entity.component.controller.*;
 import com.stabilise.entity.component.core.*;
+import com.stabilise.entity.component.effect.*;
 import com.stabilise.entity.component.physics.*;
 import com.stabilise.item.ItemStack;
 import com.stabilise.world.World;
@@ -16,18 +17,22 @@ public class Entities {
     
     private Entities() {}
     
+    /** Creates and returns a new physics component. */
     private static CPhysics       p() { return new CPhysicsImpl();       }
+    /** Returns the {@link CIdleController#INSTANCE idle controller}. */
     private static CController   co() { return CIdleController.INSTANCE; }
     
-    private static Entity e(CPhysics p, CController co, CCore c) 
-                                      { return new Entity(p, co, c);    }
-    public  static Entity e(CCore c)  { return e(p(), co(), c);         }
+    /** Constructs an entity with the given core, physics, and controllr components. */
+    private static Entity e(CCore c, CPhysics p, CController co) 
+                                      { return new Entity(c, p, co);    }
+    public  static Entity e(CCore c)  { return e(c, p(), co());         }
     
     
     
     public static Entity player() {
         return e(new CPlayerPerson())
-                .addComponent(new CInvulnerability())
+                //.addComponent(new CInvulnerability())
+                .addComponent(new CUnkillable())
                 .addComponent(new CSliceAnchorer());
     }
     
@@ -46,17 +51,23 @@ public class Entities {
     }
     
     public static Entity enemy() {
-        return e(p(), new CEnemyController(), new CGenericEnemy())
-                .addComponent(new CBasicArmour());
+        //return e(p(), new CEnemyController(), new CGenericEnemy())
+        //        .addComponent(new CBasicArmour());
+        return e(new CPlayerPerson(), p(), new CEnemyController())
+                .addComponent(new CDamageAmplifier(2));
     }
     
     public static Entity person() {
-        return e(p(), new CEnemyController(), new CPerson());
+        return e(new CPerson(), p(), new CEnemyController());
     }
     
     public static Entity portal(String dimension) {
-        return e(CNoPhysics.INSTANCE, co(), new CPortal(dimension))
+        return e(new CPortal(dimension), CNoPhysics.INSTANCE, co())
                 .addComponent(new CSliceAnchorer());
+    }
+    
+    public static Entity phantom(Entity base, Entity portal) {
+        return e(new CPhantom(base, portal), CNoPhysics.INSTANCE, co());
     }
     
 }

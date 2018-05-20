@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import com.stabilise.util.TaskTimer;
-import com.stabilise.util.box.IntBox;
+import com.stabilise.util.box.I32Box;
 import com.stabilise.util.collect.FragList;
 import com.stabilise.util.collect.UnorderedArrayList;
 
@@ -55,7 +55,7 @@ public abstract class FragListTest {
         int id = 0;
         int generation = 0;
         final int killMask = 0b0101010101;
-        final IntBox hash = new IntBox(hashGen(generation));
+        final I32Box hash = new I32Box(hashGen(generation));
         Predicate<Entity> pred = e -> ((e.hash ^ hash.get()) & killMask) == killMask;
         final TaskTimer t = timer();
         t.start();

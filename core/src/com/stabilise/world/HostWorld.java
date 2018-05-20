@@ -73,21 +73,6 @@ public class HostWorld extends AbstractWorld {
     	
         spawnSliceX = dimension.info.spawnSliceX;
         spawnSliceY = dimension.info.spawnSliceY;
-        
-        // Load the spawn regions if this is the default dimension
-        if(dimension.hasSpawnRegions()) {
-            // Ensure the 'spawn regions' are generated, and anchor them such that
-            // they're always loaded
-            // The spawn regions extend for -256 <= x,y <= 256 (this is arbitrary)
-            for(int x = -1; x < 1; x++) {
-                for(int y = -1; y < 1; y++) {
-                    // This will induce a permanent anchorage imbalance which
-                    // should never be rectified; the region will remain
-                    // perpetually loaded
-                    regions.anchorRegion(x, y);
-                }
-            }
-        }
     }
     
     /**
@@ -143,7 +128,7 @@ public class HostWorld extends AbstractWorld {
     protected void doUpdate() {
         super.doUpdate();
         
-        profiler.next("regions"); // root.update.game.world.regions
+        profiler.start("regions"); // root.update.game.world.regions
         regions.update();
         
         // Uncache any regions which may have been cached during this tick.
@@ -224,8 +209,8 @@ public class HostWorld extends AbstractWorld {
         Slice s = getSliceAt(pos);
         
         if(!s.isDummy()) {
-            int tx = pos.getLocalTileX();
-            int ty = pos.getLocalTileY();
+            int tx = pos.ltx();
+            int ty = pos.lty();
             
             // TODO: remove this when I make sure one can't set a tile over another
             if(id != s.getTileIDAt(tx, ty)) {
@@ -274,8 +259,8 @@ public class HostWorld extends AbstractWorld {
         Slice s = getSliceAt(pos);
         
         if(!s.isDummy()) {
-            int tx = pos.getLocalTileX();
-            int ty = pos.getLocalTileY();
+            int tx = pos.ltx();
+            int ty = pos.lty();
             
             Tile old = s.getTileAt(tx, ty);
             
@@ -307,19 +292,21 @@ public class HostWorld extends AbstractWorld {
         Slice s = getSliceAt(pos);
         
         if(!s.isDummy()) {
-            int tx = pos.getLocalTileX();
-            int ty = pos.getLocalTileY();
+            int tx = pos.ltx();
+            int ty = pos.lty();
             
             TileEntity t2 = s.getTileEntityAt(tx, ty);
             if(t2 != null) {
-                t2.handleRemove(this, pos);
-                removeTileEntity(t2);
+                t2.handleRemove(this);
+                removeTileEntityFromUpdateList(t2);
             }
             
             s.setTileEntityAt(tx, ty, t);
             
-            if(t != null)
-                addTileEntity(t);
+            if(t != null) {
+                t.handleAdd(this);
+                addTileEntityToUpdateList(t);
+            }
         }
     }
     
@@ -328,8 +315,8 @@ public class HostWorld extends AbstractWorld {
         Slice s = getSliceAt(pos);
         
         if(!s.isDummy()) {
-            int tx = pos.getLocalTileX();
-            int ty = pos.getLocalTileY();
+            int tx = pos.ltx();
+            int ty = pos.lty();
             
             if(s.getTileAt(tx, ty).getHardness() < explosionPower) {
                 s.getTileAt(tx, ty).handleBreak(this, pos);

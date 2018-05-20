@@ -52,7 +52,7 @@ public class Event {
         if(o == this) return true;
         // Events with identical names but different classes will be unequal,
         // which is what we want.
-        if(getClass() != o.getClass()) return false;
+        if(o == null || getClass() != o.getClass()) return false;
         Event e = (Event)o;
         return name.equals(e.name);
     }

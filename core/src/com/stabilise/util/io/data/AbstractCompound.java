@@ -10,9 +10,6 @@ import com.stabilise.util.Checks;
  */
 public abstract class AbstractCompound implements ITag, DataCompound {
     
-    protected boolean writeMode; // only really used for ByteCompound anyway
-    
-    
     /**
      * Adds a tag to this compound, and returns the tag. If a tag with the
      * specified name already exists, it will be overwritten. Throws NPE if
@@ -30,32 +27,6 @@ public abstract class AbstractCompound implements ITag, DataCompound {
     public abstract void putAll(AbstractCompound c);
     
     @Override
-    public void setReadMode() {
-        writeMode = false;
-    }
-    
-    @Override
-    public void setWriteMode() {
-        writeMode = true;
-    }
-    
-    /**
-     * Throws IllegalStateException if not in read mode.
-     */
-    protected void checkCanRead() {
-        if(writeMode)
-            throw new IllegalStateException("Not in reader mode!");
-    }
-    
-    /**
-     * Throws IllegalStateException if not in write mode.
-     */
-    protected void checkCanWrite() {
-        if(!writeMode)
-            throw new IllegalStateException("Not in writer mode!");
-    }
-    
-    @Override
     public DataCompound copy(Format format) {
         AbstractCompound clone = format.newAbstractCompound();
         putAll(clone);
@@ -70,15 +41,5 @@ public abstract class AbstractCompound implements ITag, DataCompound {
             return other;
         throw Checks.ISE("Can't convert " + other.getClass().getSimpleName() + " to compound type.");
     }
-    
-    @Override public boolean isBoolean() { return false; }
-    @Override public boolean isLong()    { return false; }
-    @Override public boolean isDouble()  { return false; }
-    @Override public boolean isString()  { return false; }
-    
-    @Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert compound to boolean"); }
-    @Override public long    getAsLong()    { throw Checks.ISE("Can't convert compound to long");    }
-    @Override public double  getAsDouble()  { throw Checks.ISE("Can't convert compound to double");  }
-    @Override public String  getAsString()  { throw Checks.ISE("Can't convert compound to string");  }
     
 }

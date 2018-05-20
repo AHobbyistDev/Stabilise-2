@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.SerializationException;
 import com.badlogic.gdx.utils.JsonValue.ValueType;
+import com.stabilise.util.Checks;
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.box.*;
 import com.stabilise.util.io.DataInStream;
@@ -53,24 +54,24 @@ public class JsonCompound extends MapCompound {
                 v = ((JsonList)tag).toJson();
             } else if(tag instanceof BoolBox) {
                 v = new JsonValue(((BoolBox)tag).get());
-            } else if(tag instanceof ByteArrBox) {
+            } else if(tag instanceof I8ArrBox) {
                 //v = new JsonValue(((ByteArrBox)tag).get());
-            } else if(tag instanceof ByteBox) {
-                v = new JsonValue(((ByteBox)tag).get());
-            } else if(tag instanceof CharBox) {
-                v = new JsonValue(((CharBox)tag).get());
-            } else if(tag instanceof DoubleBox) {
-                v = new JsonValue(((DoubleBox)tag).get());
-            } else if(tag instanceof FloatBox) {
-                v = new JsonValue(((FloatBox)tag).get());
-            } else if(tag instanceof IntArrBox) {
+                throw Checks.unsupported("byte array is no bueno for now");
+            } else if(tag instanceof I8Box) {
+                v = new JsonValue(((I8Box)tag).get());
+            } else if(tag instanceof F64Box) {
+                v = new JsonValue(((F64Box)tag).get());
+            } else if(tag instanceof F32Box) {
+                v = new JsonValue(((F32Box)tag).get());
+            } else if(tag instanceof I32ArrBox) {
                 //v = new JsonValue(((IntArrBox)tag).get());
-            } else if(tag instanceof IntBox) {
-                v = new JsonValue(((IntBox)tag).get());
-            } else if(tag instanceof LongBox) {
-                v = new JsonValue(((LongBox)tag).get());
-            } else if(tag instanceof ShortBox) {
-                v = new JsonValue(((ShortBox)tag).get());
+                throw Checks.unsupported("int array is no bueno for now");
+            } else if(tag instanceof I32Box) {
+                v = new JsonValue(((I32Box)tag).get());
+            } else if(tag instanceof I64Box) {
+                v = new JsonValue(((I64Box)tag).get());
+            } else if(tag instanceof I16Box) {
+                v = new JsonValue(((I16Box)tag).get());
             } else if(tag instanceof StringBox) {
                 v = new JsonValue(((StringBox)tag).get());
             } else {

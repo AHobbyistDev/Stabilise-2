@@ -3,8 +3,6 @@ package com.stabilise.util;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import javax.annotation.concurrent.Immutable;
-
 import javaslang.Tuple5;
 import javaslang.control.Option;
 import javaslang.control.Try;
@@ -13,8 +11,7 @@ import javaslang.control.Try;
  * A version class compliant with the <a href=semver.org>Semantic Versioning
  * 2.0.0</a> standard.
  */
-@Immutable
-public class Version implements Comparable<Version>, Printable {
+public class Version implements Comparable<Version>, Printable, Cloneable {
     
     private final int major;
     private final int minor;
@@ -70,8 +67,8 @@ public class Version implements Comparable<Version>, Printable {
         this.patch = Checks.testMin(patch, 0);
         // We convert empty strings to null to prevent unpleasant loopbacks
         // from preRelease() and metadata().
-        this.preRe = Option.of(preRe == "" ? null : preRe).peek(s -> check(s, "pre-release"));
-        this.meta  = Option.of(meta  == "" ? null : meta ).peek(s -> check(s, "metadata"));
+        this.preRe = Option.of("".equals(preRe) ? null : preRe).peek(s -> check(s, "pre-release"));
+        this.meta  = Option.of("".equals(meta)  ? null : meta ).peek(s -> check(s, "metadata"));
     }
     
     /**

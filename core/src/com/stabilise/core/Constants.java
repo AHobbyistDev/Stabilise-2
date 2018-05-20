@@ -94,7 +94,7 @@ public class Constants {
             // Manually square this to make it a compile-time constant.
             (1 + 2*(LOADED_SLICE_RADIUS)) * (1 + 2*(LOADED_SLICE_RADIUS));
     /** How many ticks after coming out of use that a region should unload. */
-    public static final int REGION_UNLOAD_TICK_BUFFER = 10 * TICKS_PER_SECOND;
+    public static final int REGION_UNLOAD_TICK_BUFFER = 5 * TICKS_PER_SECOND;
     
     /** How large a character's inventory is. */
     public static final int INVENTORY_CAPACITY = 36;
@@ -141,7 +141,7 @@ public class Constants {
                 String[] fieldNames = { "major", "minor", "patch" };
                 int[] fields = { version.major(), version.minor(), version.patch() };
                 
-                tag.put("builds", tag.getInt("builds") + 1);
+                tag.put("builds", tag.getI32("builds") + 1);
                 int buildCompilations = buildTags(tag, fieldNames, fields, 0);
                 
                 IOUtil.writeSafe(file, tag, UNCOMPRESSED);
@@ -162,12 +162,12 @@ public class Constants {
      * @return The number of builds of the current version.
      */
     private static int buildTags(DataCompound parent, String[] names, int[] fields, int i) {
-        DataCompound tag = parent.createCompound(names[i] + ": " + fields[i]);
-        tag.put("builds", tag.getInt("builds") + 1);
+        DataCompound tag = parent.childCompound(names[i] + ": " + fields[i]);
+        tag.put("builds", tag.getI32("builds") + 1);
         if(++i < fields.length) // we are not build
             return buildTags(tag, names, fields, i); // recursively get children
         else // we are build
-            return tag.getInt("builds");
+            return tag.getI32("builds");
     }
     
 }

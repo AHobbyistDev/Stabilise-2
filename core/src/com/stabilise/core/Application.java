@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -18,7 +19,6 @@ import com.stabilise.util.AppDriver;
 import com.stabilise.util.ArrayUtil;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
-import com.stabilise.util.concurrent.BoundedThreadPoolExecutor;
 
 /**
  * An {@code Application} is designed to form the basis of any program which
@@ -159,12 +159,16 @@ public abstract class Application {
      * set a custom executor implementation.
      */
     protected ExecutorService createExecutor() {
-        return new BoundedThreadPoolExecutor(
-                0, Runtime.getRuntime().availableProcessors(),
+        // -1 because main thread already exists
+        int processors = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
+        ThreadPoolExecutor exec = new ThreadPoolExecutor(
+                processors, processors,
                 30L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
                 new ThreadFactoryBuilder().setNameFormat("AppThread%d").build()
         );
+        exec.allowCoreThreadTimeOut(true);
+        return exec;
     }
     
     /**
@@ -218,7 +222,7 @@ public abstract class Application {
             return;
         
         try {
-            driver.tick();
+            driver.tickAndSleep();
         } catch(Throwable t) {
             crash(t);
         }

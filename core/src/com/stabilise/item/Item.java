@@ -4,6 +4,7 @@ import com.stabilise.core.Constants;
 import com.stabilise.util.collect.registry.RegistryNamespaced;
 import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.Exportable;
 import com.stabilise.world.tile.Tile;
 
 // This entire package is subject to rewriting when the day comes that I
@@ -12,7 +13,7 @@ import com.stabilise.world.tile.Tile;
 /**
  * Items are essentially ownable game objects.
  */
-public class Item {
+public class Item implements Exportable {
     
     //--------------------==========--------------------
     //-----=====Static Constants and Variables=====-----
@@ -159,14 +160,18 @@ public class Item {
     }
     
     /**
-     * Writes this Item to an NBT compound tag. The returned compound tag
-     * possesses an integer tag "id" corresponding to the item's ID, and can be
-     * used to reobtain this Item via {@link #fromNBT(NBTTagCompound)}.
+     * Throws an UnsupportedOperationException. See {@link
+     * #fromCompound(DataCompound)} instead.
      */
-    public DataCompound toNBT() {
-        DataCompound tag = DataCompound.create();
-        tag.put("id", id);
-        return tag;
+    @Override
+    public void importFromCompound(DataCompound o) {
+        throw new UnsupportedOperationException("Item objects are immutable, "
+                + "use the static function fromCompound() instead.");
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound o) {
+        o.put("id", id);
     }
     
     @Override
@@ -213,17 +218,15 @@ public class Item {
     }
     
     /**
-     * Reads an Item from an NBT compound tag. Such a tag should possess an
+     * Reads an Item from a DataCompound. Such a compound should possess an
      * integer tag "id" corresponding to the item's ID.
-     * 
-     * @param tag The tag.
      * 
      * @return The item, or {@link #NO_ITEM} if the tag represents an invalid
      * item.
-     * @throws NullPointerException if {@code tag} is {@code null}.
+     * @throws NullPointerException if {@code o} is {@code null}.
      */
-    public static Item fromNBT(DataCompound tag) {
-        return getItem(tag.getInt("id"));
+    public static Item fromCompound(DataCompound o) {
+        return getItem(o.getI32("id"));
     }
     
     /**

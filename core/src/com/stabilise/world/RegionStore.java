@@ -15,7 +15,6 @@ import javax.annotation.concurrent.GuardedBy;
 
 import com.stabilise.util.Checks;
 import com.stabilise.util.Log;
-import com.stabilise.util.annotation.ThreadSafeMethod;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.concurrent.Striper;
@@ -123,11 +122,10 @@ public class RegionStore {
     public final WorldGenerator generator;
     
     
-    /** Contains all loaded regions. Maps region.loc -> region. */
+    /** Primary storage. Contains all prepared regions. Maps region.loc ->
+     * region. */
     private final ConcurrentMap<Point, Region> regions =
             new ConcurrentHashMap<>();
-    /** Tracks the number of loaded regions. */
-    //private final AtomicInteger numRegions = new AtomicInteger();
     
     /** The map of cached regions. Maps region.loc -> region. */
     private final ConcurrentMap<Point, CachedRegion> cache =
@@ -168,6 +166,7 @@ public class RegionStore {
         
         log = Log.getAgent(world.getDimensionName() + "_RegionStore");
     }
+    
     /**
      * Gets a region at the given coordinates, which are in region-lengths.
      * 
@@ -178,20 +177,6 @@ public class RegionStore {
     @ThreadUnsafeMethod
     public Region getRegion(int x, int y) {
         return regions.get(unguardedDummyLoc.set(x, y));
-    }
-    
-    /**
-     * Gets the region at the specified location.
-     * 
-     * @param point The region's location, whose coordinates are in
-     * region-lengths.
-     * 
-     * @return The region, or {@code null} if no such region exists in primary
-     * storage.
-     */
-    @ThreadSafeMethod
-    private Region getRegion(Point point) {
-        return regions.get(point);
     }
     
     /**
@@ -251,19 +236,19 @@ public class RegionStore {
             if(r != null)
                 return r;
             
-            CachedRegion c = cache.get(unguardedDummyLoc);
-            if(c == null) {
+            CachedRegion cr = cache.get(unguardedDummyLoc);
+            if(cr == null) {
                 r = new Region(x, y);
-                c = new CachedRegion(r);
-                cache.put(r.loc, c);
+                cr = new CachedRegion(r);
+                cache.put(r.loc, cr);
             } else
-                r = c.region;
+                r = cr.region;
             
             // Unless someone else has already initiated a prepare, we do it
-            if(!c.prepareForPrimary) {
-                c.prepareForPrimary = true;
+            if(!cr.prepareForPrimary) {
+                cr.prepareForPrimary = true;
                 tryPrepare = true;
-                c.mark();
+                cr.mark();
             }
         }
         
@@ -295,7 +280,7 @@ public class RegionStore {
         else if(generate && r.state.getGenerationPermit())
             generator.generate(r, false, this::finishGenerate);
         else
-            finishGeneric(r); // Beaten to the punch! Get rid of our mark
+            finishGeneric(r, false); // Beaten to the punch! Get rid of our mark
     }
     
     /**
@@ -312,12 +297,6 @@ public class RegionStore {
         
         synchronized(getLock(r)) {
             CachedRegion cr = cache.get(r.loc);
-            
-            // TODO: temporary until I can find and fix this bug
-            if(cr == null) {
-            	log.postSevere("CachedRegion for " + r + " is null in finishLoad()?");
-            	log.postSevere(toStringDebug());
-            }
             
             generate = cr.prepareForPrimary; // = "please also generate me"
             
@@ -425,7 +404,13 @@ public class RegionStore {
                 // necessarily; this could just be part of a CACHE -> DO 
                 // STUFF -> UNCACHE -> SAVE chain that ran in parallel)), then
                 // the next step is to move it to primary storage.
-                if(cr.prepareForPrimary && r.state.isPrepared())
+            	// 
+            	// Note: Checking isPrepared() shouldn't strictly be necessary
+            	// since, because of the synchronized block in loadRegion(),
+            	// prepareForPrimary should only be set -- with the last mark
+            	// having just been removed -- when and only when the region is
+            	// prepared.
+                if(cr.prepareForPrimary) // && r.state.isPrepared())
                     moveToPrimary(r);
                 // Otherwise, the save occurred after the region was cached for
                 // some other purpose, we simply remove it from the cache.
@@ -442,9 +427,12 @@ public class RegionStore {
      * by {@link #prepareRegion(Region, boolean)} if it is unable to secure a
      * loading or generation permit. Performs all the necessary uncaching
      * cleanup.
+     * 
+     * @param saveIfAble true to save the region if it is not in primary and
+     * calling this would remove it from the cache.
      */
     @UserThread("Any")
-    private void finishGeneric(Region r) {
+    private void finishGeneric(Region r, boolean saveIfAble) {
         boolean save = false;
         
         synchronized(getLock(r)) {
@@ -456,12 +444,10 @@ public class RegionStore {
                 // it.
                 if(regions.containsKey(r.loc))
                     cache.remove(r.loc);
-                else if(r.state.getSavePermit()) {
+                else if(saveIfAble && r.state.getSavePermit()) {
                     cr.mark(); // add the "save" mark
                     save = true;
-                } else
-                    Checks.badAssert("Couldn't get save permit even though " +
-                            "nothing else had marked the region in the cache?");
+                }
             }
         }
         
@@ -472,7 +458,8 @@ public class RegionStore {
     }
     
     /**
-     * Moves a region from the cache to primary storage. This is invoked while
+     * Moves a region from the cache to primary storage. This is invoked after
+     * a region has been appropriately loaded/generated. This is invoked while
      * the appropriate lock is held (see {@link #locks}).
      */
     @UserThread("WorkerThread")
@@ -513,7 +500,6 @@ public class RegionStore {
         }
         
         loadTracker.endLoadOp(); // op is started in loadRegion()
-        //numRegions.getAndIncrement();
     }
     
     /**
@@ -547,8 +533,6 @@ public class RegionStore {
                 }
             }
         }
-        
-        //numRegions.getAndDecrement();
     }
     
     /**
@@ -570,7 +554,7 @@ public class RegionStore {
         regions.values().forEach(r -> {
             RegionState s = r.state;
             
-            r.importToWorld(world);
+            r.importToWorld(world, this);
             
             if(s.isActive()) {
                 r.update(world);
@@ -735,7 +719,7 @@ public class RegionStore {
     @UserThread("Any")
     public void uncacheAll() {
         Map<Point, Region> localRegions = localCachedRegions.get();
-        localRegions.values().forEach(this::finishGeneric);
+        localRegions.values().forEach(r -> finishGeneric(r, true));
         localRegions.clear();
     }
     

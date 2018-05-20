@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
-import com.stabilise.core.Settings;
 import com.stabilise.util.collect.registry.DuplicatePolicy;
 import com.stabilise.util.collect.registry.Registry;
 import com.stabilise.util.collect.registry.RegistryParams;
@@ -18,7 +17,6 @@ import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
-import com.stabilise.world.gen.GeneratorRegistrant;
 import com.stabilise.world.gen.WorldGenerator;
 import com.stabilise.world.loader.WorldLoader;
 import com.stabilise.world.multiverse.Multiverse;
@@ -75,15 +73,7 @@ public abstract class Dimension {
     /**
      * Adds generators to the WorldGenerator for this dimension.
      */
-    public final void addGenerators(WorldGenerator gen) {
-        addGenerators(new GeneratorRegistrant(gen));
-    }
-    
-    /**
-     * Adds generators to the WorldGenerator for this dimension. Subclasses
-     * should override this to add their desired generators.
-     */
-    protected abstract void addGenerators(GeneratorRegistrant gr);
+    public abstract void addGenerators(WorldGenerator gen);
     
     /**
      * Adds additional loaders and savers to the WorldLoader for this
@@ -97,16 +87,6 @@ public abstract class Dimension {
      */
     public abstract void addLoaders(WorldLoader wl, WorldInfo info);
     
-    
-    /**
-     * Returns {@code true} if this dimension should have perpetually-loaded
-     * spawn regions; {@code false} otherwise.
-     */
-    public boolean hasSpawnRegions() {
-        // TODO: For now, only the default dimension has spawn regions
-        //return info.name.equals(defaultDimensionName());
-        return true;
-    }
     
     /**
      * Loads this dimension's info, if it exists on the filesystem.
@@ -139,7 +119,7 @@ public abstract class Dimension {
      * @throws IOException if an I/O error occurs.
      */
     public final void saveData() throws IOException {
-        DataCompound tag = Format.NBT.newCompound(true);
+        DataCompound tag = Format.NBT.newCompound();
         saveExtraData(tag);
         info.save(tag);
     }
@@ -294,8 +274,10 @@ public abstract class Dimension {
      * registered.
      */
     public static void registerDimensions() {
-        registerDimension(Settings.getOverworldDefault(), "overworld", DimOverworld.class);
-        registerDimension(!Settings.getOverworldDefault(), "private(Temp)", DimPrivate.class);
+        registerDimension(true, "overworld", DimOverworld.class);
+        registerDimension(false, "private(Temp)", DimPrivate.class);
+        registerDimension(false, "flatland", DimFlatland.class);
+        
         registerPrivateDimension("privateDim", DimPrivate.class);
         
         DIMENSIONS.lock();
@@ -381,6 +363,7 @@ public abstract class Dimension {
         
         /**
          * Dimension info for some dimension
+         * 
          * @throws NullPointerException if either arg is null
          */
         private Info(WorldInfo worldInfo, String name) {
@@ -391,6 +374,7 @@ public abstract class Dimension {
         
         /**
          * Dimension info for a client view of some dimension
+         * 
          * @throws NullPointerException if name is null
          */
         private Info(String name) {
@@ -401,6 +385,7 @@ public abstract class Dimension {
         
         /**
          * Dimension info for a character's private dimension
+         * 
          * @throws NullPointerException if either arg is null
          */
         private Info(CharacterData character) {
@@ -422,10 +407,10 @@ public abstract class Dimension {
                 throw new IOException("Dimension name does not match stored name \""
                         + tag.getString("dimName") + "\"");
             
-            age = tag.getLong("age");
+            age = tag.getI64("age");
             
-            spawnSliceX = tag.getInt("spawnX");
-            spawnSliceY = tag.getInt("spawnY");
+            spawnSliceX = tag.getI32("spawnX");
+            spawnSliceY = tag.getI32("spawnY");
             
             return tag;
         }

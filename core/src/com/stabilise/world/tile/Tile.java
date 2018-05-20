@@ -287,9 +287,9 @@ public class Tile {
         register(STONE, 21, "glass");
         register(AIR,   22, "torch").light(13);
         register(STONE, 23, "glowstone").light(15);
-        register(SPREAD,24, "voidRock").light(10);
-        register(SPREAD,25, "voidRockDense").light(10).hardness(50f);
-        register(SPREAD,26, "voidDirt").hardness(2f).light(10);
+        register(STONE, 24, "voidRock").light(10);
+        register(STONE, 25, "voidRockDense").light(10).hardness(50f);
+        register(STONE, 26, "voidDirt").hardness(2f).light(10);
         
         builder.end();
         builder = null;

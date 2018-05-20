@@ -1,7 +1,7 @@
 package com.stabilise.entity.particle;
 
 import com.badlogic.gdx.graphics.Color;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.world.World;
 
 /**
@@ -35,11 +35,10 @@ public class ParticleIndicator extends Particle {
     
     
     @Override
-    public void update(World world) {
+    protected void update(World world) {
         super.update(world);
         
-        pos.ly += dy;
-        pos.alignY();
+        pos.addY(dy); // no real need to align
         dy *= 0.95f;
         
         if(age > FADE_OUT_MARK) {

@@ -84,9 +84,8 @@ public class HostMultiverse extends Multiverse<HostWorld> {
                 throw new RuntimeException("Given dimension name (" + name + 
                 		") != expected name (" + dat.data.getDimensionName() + ")");
             dim = Dimension.getPlayerDimension(dat.data);
-        } else {
+        } else
             dim = Dimension.getDimension(info, name);
-        }
         
         if(dim == null)
             throw new IllegalArgumentException("Invalid dim: \"" + name + "\"");
@@ -94,8 +93,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         world = dim.createHost(this);
         dimensions.put(name, world);
         
-        final HostWorld w = world;
-        executor.execute(w.preloadJob::run);
+        executor.execute(world.preloadJob::run);
         
         return world;
     }
@@ -244,7 +242,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
                 try {
                     DataCompound tag = IOUtil.read(file, Format.NBT, Compression.GZIP);
                     dimension = tag.getString("dimension");
-                    lastPos.io(tag.getCompound("lastPos"), false);
+                    lastPos.importFromCompound(tag.getCompound("lastPos"));
                     newToWorld = false;
                 } catch(IOException e) {
                     log.postSevere("Could not load data for " + data + "!");
@@ -260,9 +258,9 @@ public class HostMultiverse extends Multiverse<HostWorld> {
          * Saves the player data.
          */
         public void save() throws IOException {
-            DataCompound tag = Format.NBT.newCompound(true);
+            DataCompound tag = Format.NBT.newCompound();
             tag.put("dimension", dimension);
-            lastPos.io(tag.createCompound("lastPos"), true);
+            lastPos.exportToCompound(tag.childCompound("lastPos"));
             IOUtil.writeSafe(file, tag, Compression.GZIP);
         }
         

@@ -11,6 +11,7 @@ import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.entity.particle.ParticleSource;
 import com.stabilise.item.ItemStack;
 import com.stabilise.util.Direction;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
 /**
@@ -239,9 +240,10 @@ public abstract class CBaseMob extends CCore {
                 hasTint = false;
         }
         
-        //super.update(world);
-        
         wasOnGround = e.physics.onGround();
+        
+        if(Math.abs(e.dx) < 0.001)
+            e.dx = 0f;
         
         if(wasOnGround) {
             if(moving) {
@@ -250,7 +252,7 @@ public abstract class CBaseMob extends CCore {
                 else
                     setState(State.SLIDE_BACK, true);
             } else {
-                if(e.dx == 0)
+                if(e.dx == 0f)
                     setState(State.IDLE, true);
                 else
                     if((e.facingRight && e.dx > 0) || (!e.facingRight && e.dx < 0))
@@ -265,11 +267,7 @@ public abstract class CBaseMob extends CCore {
                 setState(State.FALL, true);
         }
         
-        // Temporary rectification of dx to prevent a mob from remaining in a slide state
-        // TODO: Better solution would be ideal
-        if((e.dx > 0 && e.dx < 0.001f)
-                || (e.dx < 0 && e.dx > -0.001f))
-            e.dx = (0);
+        moving = false;
     }
     
     /*
@@ -400,10 +398,10 @@ public abstract class CBaseMob extends CCore {
         
         if(health <= 0) {
             health = 0;
-            tintStrength = 0.8f;
+            tintStrength = 0.6f;
             kill(w, e, src);
         } else {
-            tintStrength = 1.0f;
+            tintStrength = 0.75f;
             invulnerable = true;
             invulnerabilityTicks = INVULNERABILITY_TICKS;
         }
@@ -416,9 +414,11 @@ public abstract class CBaseMob extends CCore {
      */
     @Override
     public void kill(World w, Entity e, IDamageSource src) {
-        dead = true;
-        setState(State.DEAD, false, DEATH_TICKS);
-        e.post(w, EDamaged.killed(src));
+        if(e.post(w, EDamaged.killed(src))) {
+            dead = true;
+            setState(State.DEAD, false, DEATH_TICKS);
+        } else
+            health = 1; // some component doesn't want us dead!
     }
     
     /**
@@ -486,6 +486,54 @@ public abstract class CBaseMob extends CCore {
             return damage(w, e, ((EDamaged)ev).src);
         }
         return false;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        state = State.values()[c.getI32("state")];
+        stateTicks = c.getI32("stateTicks");
+        stateLockDuration = c.getI32("stateLockDuration");
+        
+        maxHealth = c.getI32("maxHealth");
+        health = c.getI32("health");
+        dead = c.getBool("dead");
+        invulnerable = c.getBool("invul");
+        invulnerabilityTicks = c.getI32("invulTicks");
+        
+        moving = c.getBool("moving");
+        jumpVelocity = c.getF32("jumpVelocity");
+        acceleration = c.getF32("acceleration");
+        airAcceleration = c.getF32("airAcceleration");
+        swimAcceleration = c.getF32("swimAcceleration");
+        maxDx = c.getF32("maxDx");
+        
+        jumpCrouchDuration = c.getI32("jumpCrouchDuration");
+        maxJumpCount = c.getI32("maxJumpCount");
+        jumpCount = c.getI32("jumpCount");
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        c.put("state", state.ordinal());
+        c.put("stateTicks", stateTicks);
+        c.put("stateLockDuration", stateLockDuration);
+        
+        c.put("maxHealth", maxHealth);
+        c.put("health", health);
+        c.put("dead", dead);
+        c.put("invul", invulnerable);
+        c.put("invulTicks", invulnerabilityTicks);
+        
+        c.put("moving", moving);
+        c.put("jumpVelocity", jumpVelocity);
+        c.put("acceleration", acceleration);
+        c.put("airAcceleration", airAcceleration);
+        c.put("swimAcceleration", swimAcceleration);
+        c.put("maxDx", maxDx);
+        
+        c.put("jumpCrouchDuration", jumpCrouchDuration);
+        c.put("maxJumpCount", maxJumpCount);
+        c.put("jumpCount", jumpCount);
     }
     
 }

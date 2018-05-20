@@ -1,7 +1,9 @@
 package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
+import com.stabilise.util.Checks;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
@@ -12,6 +14,9 @@ import com.stabilise.world.World;
  * hitboxes where appropriate, etc.) and forwards them to the original entity.
  * When the entity crosses the portal boundary it has its components hotswapped
  * out with those of the phantom; the original then becomes the phantom.
+ * 
+ * @see CPortal
+ * @see CNearbyPortal
  */
 public class CPhantom extends CCore {
     
@@ -20,6 +25,8 @@ public class CPhantom extends CCore {
     /** The portal that connects us to the dimension that our base is from. */
     public Entity portal;
     
+    
+    public CPhantom() {}
     
     /**
      * @param base the entity in the other dimension that we are the phantom of
@@ -43,6 +50,16 @@ public class CPhantom extends CCore {
     @Override
     public AABB getAABB() {
         return base.core.getAABB();
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        Checks.TODO(); // TODO
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        Checks.TODO(); // TODO
     }
     
 }

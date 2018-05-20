@@ -25,6 +25,7 @@ public class ServerTCPConnection extends TCPConnection {
     /** The player's entity's ID. */
     public int id;
     /** The ID of the client. */
+    @SuppressWarnings("unused")
     private int hash;
     
     /** The tick number to which the client is currently sending packets for. */
@@ -37,19 +38,6 @@ public class ServerTCPConnection extends TCPConnection {
      */
     public ServerTCPConnection(Socket socket, Protocol initialProtocol) throws IOException {
         super(socket, true, initialProtocol);
-    }
-    
-    //--------------------==========--------------------
-    //---------=====Getter/Setter Wrappers=====---------
-    //--------------------==========--------------------
-    
-    /**
-     * Gets the client's hash.
-     * 
-     * @return The client's hash.
-     */
-    public int getHash() {
-        return hash;
     }
     
 }

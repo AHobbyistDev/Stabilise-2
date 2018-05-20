@@ -60,14 +60,6 @@ import com.badlogic.gdx.math.MathUtils;
  * <p>Also note that though none of the methods of this class will throw an
  * exception if {@code x} is outside the range {@code 0 <= x <= 1},
  * the behaviour of the interpolative functions for such values is undefined.
- * 
- * <p>Instances of this class are immutable and hence may be shared between
- * objects and threads.
- * 
- * <p>Some code, namely related to the less conventional functions, is borrowed
- * from
- * <a href=http://hosted.zeh.com.br/tweener/docs/en-us/misc/transitions.html>
- * here</a> and <a href=http://www.robertpenner.com/easing/>here</a>.
  */
 public interface Interpolation {
     

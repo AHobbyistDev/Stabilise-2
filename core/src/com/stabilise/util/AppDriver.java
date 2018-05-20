@@ -26,25 +26,40 @@ public final class AppDriver implements Runnable {
     /** Update ticks per second. */
     public final int tps;
     private final long nsPerTick; // nanos per tick
-    /** Maximum number of frames per second. 0 indicates no max, -1 indicates
-     * no frames should be rendered. */
-    private int maxFps;
-    private int fps = 0;
-    private int lastFps = 0;
-    private long lastFPSRefresh = System.currentTimeMillis();
-    private long nsPerFrame; // nanos per frame
+    
     /** Threshold value, in nanoseconds, of {@link #unprocessed} before we
      * reset its value and skip ticks. */
-    private long delaySkip = 5000000000L; // 5 seconds
+    private long delaySkip = 5_000_000_000L; // 5 seconds
+    /** Force a render if catching up on update ticks takes longer than this.
+     * This helps avoid perceived unresponsiveness if the update ticks take
+     * far too much time. */
+    private long forceRender = 500_000_000L; // 0.5 seconds
     
     /** The time when last it was checked as per {@code System.nanoTime()}. */
-    private long lastTime = 0L;
+    private long lastTickStart = 0L;
     /** The number of 'unprocessed' nanoseconds. An update tick is executed
      * when this is greater than or equal to nsPerTick. */
     private long unprocessed = 0L;
     /** The number of updates and renders which have been executed in the 
      * lifetime of this driver. */
     private long numUpdates = 0L, numRenders = 0L;
+    
+    /** Maximum number of frames per second. 0 indicates no max, -1 indicates
+     * no frames should be rendered. */
+    private int maxFps;
+    /** Current ongoing fps count. Reset every second. */
+    private int fps = 0;
+    /** Most recent completed fps count. Updated every second from {@link #fps}. */
+    private int lastFps = 0;
+    /** The most recent value of System.currentTimeMillis() at which lastFps
+     * was updated. */
+    private long lastFPSRefresh = System.currentTimeMillis();
+    /** Nanoseconds per frame. */
+    private long nsPerFrame;
+    /** System.nanoTime() value when we ended the most recent render. */
+    private long lastFrameEnd = 0L;
+    /** The value most recently returned by {@link #tick()} (but in nanos). */
+    private long lastSleep = 0L;
     
     /** {@code true} if this driver is running. You can set this to {@code
      * false} to stop this from running if it is being run as per {@link
@@ -81,7 +96,7 @@ public final class AppDriver implements Runnable {
      */
     public AppDriver(int tps, Runnable updater, Runnable renderer) {
         this.tps = Checks.testMin(tps, 1);
-        nsPerTick = 1000000000 / tps;
+        nsPerTick = 1_000_000_000 / tps;
         setMaxFPS(tps);
         this.log = log == null ? Log.get() : log;
         ticksPerFlush = tps;
@@ -122,16 +137,32 @@ public final class AppDriver implements Runnable {
     @Override
     public final void run() {
         running = true;
-        lastTime = System.nanoTime();
+        lastTickStart = System.nanoTime();
         
         while(running) {
-            long sleepTime = tick();
-            try {
-                Thread.sleep(sleepTime);
-            } catch(InterruptedException e) {
-                log.postWarning("Interrupted while sleeping until next tick!");
-                Thread.currentThread().interrupt();
-            }
+            tickAndSleep();
+        }
+    }
+    
+    /**
+     * Attempts to execute a render pass and as many ticks as applicable, and
+     * then causes the current thread to sleep for an appropriate amount of
+     * time such that the the framerate does not exceed {@link #getMaxFPS()
+     * the max fps}.
+     * 
+     * <p>If the current thread was interrupted while sleeping, then the
+     * interrupt flag will be set when this method returns.
+     * 
+     * @throws IllegalStateException if this is invoked while a tick is in
+     * progress, or if client code has been improperly using the profiler.
+     */
+    public final void tickAndSleep() {
+        long sleepTime = tick();
+        try {
+            Thread.sleep(sleepTime);
+        } catch(InterruptedException e) {
+            log.postWarning("Interrupted while sleeping until next tick!");
+            Thread.currentThread().interrupt();
         }
     }
     
@@ -157,19 +188,22 @@ public final class AppDriver implements Runnable {
         ticking = true;
         
         long now = System.nanoTime();
-        if(lastTime == 0L) // should be the case when this is first invoked
-            lastTime = now;
-        unprocessed += now - lastTime;
+        if(lastTickStart == 0L) { // should be the case when this is first invoked
+            lastTickStart = now;
+            unprocessed = nsPerTick;
+        }
+        unprocessed += now - lastTickStart;
+        lastTickStart = now;
         
         // Make sure nothing has gone wrong with timing.
-        if(unprocessed > delaySkip) {
+        if(unprocessed >= delaySkip) {
             log.postWarning("Can't keep up! Running "
-                    + ((now - lastTime) / 1000000L) + " milliseconds behind; skipping "
-                    + (unprocessed / nsPerTick) + " ticks!"
+                    + (unprocessed / 1_000_000L) + " milliseconds behind; skipping "
+                    + (unprocessed / nsPerTick) + " ticks."
             );
             unprocessed = nsPerTick; // let at least one tick happen
         } else if(unprocessed < 0L) {
-            log.postWarning("Time ran backwards!");
+            log.postWarning("Time ran backwards?!");
             unprocessed = 0L;
         }
         
@@ -181,6 +215,9 @@ public final class AppDriver implements Runnable {
             numUpdates++;
             unprocessed -= nsPerTick;
             updater.run();
+            
+            if(System.nanoTime() - now >= forceRender)
+                break;
         }
         
         profiler.verify("root.update");
@@ -204,7 +241,7 @@ public final class AppDriver implements Runnable {
         if(System.currentTimeMillis() - lastFPSRefresh >= 1000) {
             lastFps = fps;
             fps = 0;
-            lastFPSRefresh += 1000;
+            lastFPSRefresh = System.currentTimeMillis();
         }
         
         profiler.verify("root.render");
@@ -212,12 +249,32 @@ public final class AppDriver implements Runnable {
         
         ticking = false;
         
-        long usedNanos = System.nanoTime() - lastTime;
-        lastTime = now;
-        if(usedNanos < nsPerFrame)
-            return (nsPerFrame - usedNanos) / 1000000L; // convert to millis
-        else
-            return 0L;
+        
+        // We can't just sleep nsPerTick - (System.nanoTime()-lastTickStart),
+        // since we should account for time spent by whatever enclosing code
+        // is is that invokes this function. So try to account for it by
+        // subtracting off the difference between actual sleep time
+        // (lastTickStart - lastFrameEnd) and the expected sleep time
+        // (lastSleep). (This assumes the overhead of the enclosing code is the
+        // same every tick). Then we get
+        // 
+        //   nsPerTick - (System.nanoTime()-lastTickStart) - ( (lastTickStart-
+        //      lastFrameEnd) - lastSleep )
+        // = nsPerTick - System.nanoTime() + lastFrameEnd + lastSleep.
+        long newLastFrameEnd = System.nanoTime();
+        lastSleep = nsPerFrame - newLastFrameEnd + lastFrameEnd + lastSleep;
+        lastFrameEnd = newLastFrameEnd;
+        if(lastSleep < 0)
+            lastSleep = 0;
+        return lastSleep / 1_000_000L; // convert to millis
+        
+        
+        //long usedNanos = System.nanoTime() - lastTickStart;
+        //lastTickStart = now;
+        //if(usedNanos < nsPerFrame)
+        //    return (nsPerFrame - usedNanos) / 1_000_000L; // convert to millis
+        //else
+        //    return 0L;
     }
     
     /**
@@ -270,7 +327,7 @@ public final class AppDriver implements Runnable {
      */
     public AppDriver setMaxFPS(int fps) {
         this.maxFps = Checks.testMin(fps, -1);
-        nsPerFrame = fps == 0 ? 0 : 1000000000 / fps;
+        nsPerFrame = fps <= 0 ? 0 : 1_000_000_000L / fps;
         return this;
     }
     

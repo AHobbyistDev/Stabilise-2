@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import com.stabilise.util.Checks;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
-import com.stabilise.util.io.data.bytestream.ByteCompound;
 import com.stabilise.util.io.data.json.JsonCompound;
 import com.stabilise.util.io.data.nbt.NBTCompound;
 import com.stabilise.util.io.data.nbt.NBTList;
@@ -56,7 +55,7 @@ public enum Format {
      * and compounds of other formats do not translate perfectly into this
      * format for technical reasons (see: NBTList).
      */
-    BYTE_STREAM(ByteCompound::new, () -> { throw new UnsupportedOperationException(); }),
+    //BYTE_STREAM(ByteCompound::new, () -> { throw new UnsupportedOperationException(); }),
     
     /**
      * The JSON format that everyone knows and loves.
@@ -75,25 +74,10 @@ public enum Format {
     }
     
     /**
-     * Creates a new compound of this format. The returned compound is not
-     * guaranteed to be in either read or write mode.
+     * Creates a new compound of this format.
      */
     public DataCompound newCompound() {
         return compoundSup.get();
-    }
-    
-    /**
-     * Creates a new compound in read/write mode.
-     * 
-     * @param writeMode true for write mode, false for read mode.
-     */
-    public DataCompound newCompound(boolean writeMode) {
-        DataCompound c = newCompound();
-        if(writeMode)
-            c.setWriteMode();
-        else
-            c.setReadMode();
-        return c;
     }
     
     /**

@@ -24,20 +24,19 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     private static final int MAX_SPAWNS = 2;
     
     private int ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS;
-    private Position centrePos = Position.create();
+    private final Position centrePos = Position.create();
     
     private ParticleSource<?> fireGen;
     private ParticleSource<?> smokeGen;
     
     
     @Override
-    public void update(World w) {
+    protected void update(World w) {
         if(playerInRange(w)) {
             // Ugly way of lazily initialising...
             if(fireGen == null) {
                 fireGen = w.particleSource(ParticleFlame.class);
                 smokeGen = w.particleSource(ParticleSmoke.class);
-                centrePos.set(pos).clampToTile().add(0.5f, 0.5f); // TODO: should be set sooner
             }
             
             if(--ticksUntilNextSpawn == 0) {
@@ -59,11 +58,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      * @return {@code true} if a player is in range; {@code false} otherwise.
      */
     private boolean playerInRange(World world) {
-        for(Entity p : world.getPlayers()) {
-            if(centrePos.diffSq(p.pos) <= ACTIVATION_RANGE_SQUARED)
-                return true;
-        }
-        return false;
+        return world.getPlayers().any(p -> centrePos.diffSq(p.pos) <= ACTIVATION_RANGE_SQUARED);
     }
     
     /**
@@ -74,7 +69,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      */
     private boolean trySpawn(World world) {
         Entity e = Entities.enemy();
-        e.pos.set(pos).clampToTile().add(0f, 1f);
+        e.pos.set(centrePos).add(0f, 0.5f);
         world.addEntity(e);
         
         for(int i = 0; i < 10; i++) {
@@ -103,23 +98,27 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     }
     
     @Override
-    public void handleAdd(World world, Position pos) {
+    public void handleAdd(World world) {
+        centrePos.set(pos).clampToTile().add(0.5f, 0.5f);
+    }
+    
+    @Override
+    public void handleRemove(World world) {
         // nothing to see here, move along
     }
     
     @Override
-    public void handleRemove(World world, Position pos) {
-        // nothing to see here, move along
+    public void importFromCompound(DataCompound c) {
+        super.importFromCompound(c);
+        
+        ticksUntilNextSpawn = c.getI32("ticksUntilNextSpawn");
     }
     
     @Override
-    protected void writeNBT(DataCompound tag) {
-        tag.put("ticksUntilNextSpawn", ticksUntilNextSpawn);
-    }
-    
-    @Override
-    public void fromNBT(DataCompound tag) {
-        ticksUntilNextSpawn = tag.getInt("ticksUntilNextSpawn");
+    public void exportToCompound(DataCompound c) {
+        super.exportToCompound(c);
+        
+        c.put("ticksUntilNextSpawn", ticksUntilNextSpawn);
     }
     
 }

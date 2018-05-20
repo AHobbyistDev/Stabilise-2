@@ -194,7 +194,7 @@ public class FragList<E> implements SimpleList<E>, RandomAccess {
     
     @Override
     public void iterate(Predicate<? super E> action) {
-        Objects.requireNonNull(action); // fail-fast
+        //Objects.requireNonNull(action); // fail-fast
         
         for(int i = 0; i <= lastElement; i++) {
             if(data[i] != null && action.test(data[i]))
@@ -206,11 +206,29 @@ public class FragList<E> implements SimpleList<E>, RandomAccess {
     
     @Override
     public boolean iterateUntil(Predicate<? super E> pred) {
-        Objects.requireNonNull(pred); // fail-fast
+        //Objects.requireNonNull(pred); // fail-fast
+        
         for(int i = 0; i < size; i++) {
-            if(pred.test(data[i])) {
+            if(pred.test(data[i]))
                 return false;
-            }
+        }
+        return true;
+    }
+    
+    @Override
+    public boolean any(Predicate<? super E> pred) {
+        for(int i = 0; i < size; i++) {
+            if(pred.test(data[i]))
+                return true;
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean all(Predicate<? super E> pred) {
+        for(int i = 0; i < size; i++) {
+            if(!pred.test(data[i]))
+                return false;
         }
         return true;
     }

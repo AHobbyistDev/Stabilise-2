@@ -20,17 +20,17 @@ public class BaseRegionLoader implements IRegionLoader {
             for(int x = 0; x < REGION_SIZE; x++) {
                 DataCompound sliceTag = c.getCompound("slice" + x + "_" + y);
                 Slice s = new Slice(r.offsetX + x, r.offsetY + y,
-                        sliceTag.getIntArr("tiles"),
-                        sliceTag.getIntArr("walls"),
-                        sliceTag.getByteArr("light"));
+                        sliceTag.getI32Arr("tiles"),
+                        sliceTag.getI32Arr("walls"),
+                        sliceTag.getI8Arr("light"));
                 
-                DataList tileEntities = sliceTag.createList("tileEntities");
+                DataList tileEntities = sliceTag.childList("tileEntities");
                 if(tileEntities.size() > 0)
                     s.initTileEntities();
                 for(int i = 0; i < tileEntities.size(); i++) {
                     DataCompound tc = tileEntities.getCompound();
-                    TileEntity te = TileEntity.createTileEntityFromNBT(tc);
-                    s.tileEntities[te.pos.getLocalTileY()][te.pos.getLocalTileX()] = te; 
+                    TileEntity te = TileEntity.createFromCompound(tc);
+                    s.tileEntities[te.pos.lty()][te.pos.ltx()] = te; 
                 }
                 
                 r.slices[y][x] = s;
@@ -45,20 +45,20 @@ public class BaseRegionLoader implements IRegionLoader {
 		
 		for(int y = 0; y < REGION_SIZE; y++) {
             for(int x = 0; x < REGION_SIZE; x++) {
-                DataCompound sliceTag = c.createCompound("slice" + x + "_" + y);
+                DataCompound sliceTag = c.childCompound("slice" + x + "_" + y);
                 Slice s = r.slices[y][x];
                 sliceTag.put("tiles", Slice.to1DArray(s.tiles));
                 sliceTag.put("walls", Slice.to1DArray(s.walls));
                 sliceTag.put("light", Slice.to1DArray(s.light));
                 
                 if(s.tileEntities != null) {
-                    DataList tileEntities = sliceTag.createList("tileEntities");
+                    DataList tileEntities = sliceTag.childList("tileEntities");
                     
                     TileEntity t;
                     for(int tileX = 0; tileX < Slice.SLICE_SIZE; tileX++) {
                         for(int tileY = 0; tileY < Slice.SLICE_SIZE; tileY++) {
                             if((t = s.tileEntities[tileY][tileX]) != null) {
-                                tileEntities.add(t.toNBT());
+                                t.exportToCompound(tileEntities.childCompound());
                             }
                         }
                     }

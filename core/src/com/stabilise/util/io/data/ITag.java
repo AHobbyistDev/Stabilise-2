@@ -3,10 +3,39 @@ package com.stabilise.util.io.data;
 import com.stabilise.util.io.Sendable;
 
 /**
- * Unifying interface for {@link Sendable} and {@code ValueExportable}, which
- * together constitute a Tag.
+ * Generic interface for a Tag, which is anything that can live within a
+ * {@link DataCompound}.
  */
-public interface ITag extends Sendable, ValueExportable {
+public interface ITag extends Sendable {
+    
+    /**
+     * Reads this tag to the given DataCompound.
+     * 
+     * @param name The name assigned to this tag. This tag should read from
+     * the data with this name.
+     * @param o The DataCompound to read from.
+     */
+    void read(String name, DataCompound o);
+    
+    /**
+     * Writes this tag to the given DataCompound.
+     * 
+     * @param name The name assigned to this tag. This tag should write its
+     * data under this name.
+     * @param o The DataCompound to write this tag to.
+     */
+    void write(String name, DataCompound o);
+    
+    /**
+     * Reads this tag from the given DataList.
+     * @param l
+     */
+    void read(DataList l);
+    
+    /**
+     * Writes this tag to the given DataList.
+     */
+    void write(DataList l);
     
 	/**
 	 * Returns {@code true} if the given tag holds the same type of data as
@@ -28,7 +57,7 @@ public interface ITag extends Sendable, ValueExportable {
     /**
      * Converts the given tag to a tag of this type.
      * 
-     * @throws {@code IllegalStateException} if the other tag is {@link
+     * @throws IllegalStateException if the other tag is {@link
      * #isCompatibleType(ITag) not compatible}.
      */
     ITag convertToSameType(ITag other);

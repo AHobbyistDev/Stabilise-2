@@ -29,8 +29,8 @@ public class ActionLoader implements IRegionLoader {
     public void save(Region r, DataCompound c, boolean generated) {
         List<Action> queuedActions = r.queuedActions;
         if(queuedActions != null) {
-            DataList actions = c.createList("queuedActions");
-            queuedActions.forEach(a -> actions.add(a.toNBT()));
+            DataList actions = c.childList("queuedActions");
+            queuedActions.forEach(a -> a.exportToCompound(actions.childCompound()));
         }
     }
     

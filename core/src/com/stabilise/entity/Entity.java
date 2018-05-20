@@ -1,17 +1,19 @@
 package com.stabilise.entity;
 
-import java.util.function.Predicate;
-
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.controller.CPlayerController;
 import com.stabilise.entity.component.core.CCore;
+import com.stabilise.entity.component.core.CPhantom;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.EntityEvent;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.collect.WeightingArrayList;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.DataList;
+import com.stabilise.util.io.data.Exportable;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 
@@ -23,24 +25,37 @@ import com.stabilise.world.World;
  * Component components}, an approach I have opted for over inheritance since
  * it is far more flexible.
  */
-public class Entity extends GameObject {
+public class Entity extends GameObject implements Exportable {
     
-    private      long        id;
-    public       long        age;
+    private long       id;
+    public  long       age;
     
     // Core physical properties
-    public       float       dx, dy;
-    public       AABB        aabb;
-    public       boolean     facingRight;
     
-    // Components
-    public final CPhysics    physics;
-    public       CController controller;
-    public final CCore       core;
+  //public final Position pos;     // inherited from GameObject
+    /** This entity's velocity, in tiles/sec (NOT tiles/tick). */
+    public float       dx, dy;
+    public boolean     facingRight;
+    public AABB        aabb;
     
+    // The three privileged components
+    public CCore       core;
+    public CPhysics    physics;
+    public CController controller;
+    
+    // ad hoc components
     public final WeightingArrayList<Component> components =
             new WeightingArrayList<>(new Component[2]);
     
+    
+    /**
+     * Creates a new Entity, but does not initialise any components. This
+     * should only really be used if you're constructing an entity from a
+     * DataCompound via {@link #importFromCompound(DataCompound)}.
+     */
+    public Entity() {
+        super(true);
+    }
     
     /**
      * Creates a new Entity. The given components are all {@link
@@ -48,16 +63,22 @@ public class Entity extends GameObject {
      * 
      * @throws NullPointerException if any argument is null.
      */
-    public Entity(CPhysics p, CController co, CCore c) {
+    public Entity(CCore c, CPhysics p, CController co) {
+        super(true);
+        
+        core       = c;
         physics    = p;
         controller = co;
-        core       = c;
         
+        initComponents();
+    }
+    
+    private void initComponents() {
         aabb = core.getAABB();
         
+        core.init(this);
         physics.init(this);
         controller.init(this);
-        core.init(this);
     }
     
     @Override
@@ -120,28 +141,16 @@ public class Entity extends GameObject {
      * @throws NullPointerException if {@code c} is {@code null}.
      */
     public Entity addComponent(Component c) {
-        c.init(this);
-        components.add(c);
+        if(components.add(c))
+        	c.init(this);
         return this;
     }
     
     /**
-     * Gets the first component on this entity which satisfies the given
-     * predicate.
-     * 
-     * @return the first such component, or {@code null} if no component
-     * matching the predicate exists.
-     */
-    public Component getComponent(Predicate<Component> pred) {
-    	for(int i = 0; i < components.size(); i++)
-    		if(pred.test(components.get(i)))
-    			return components.get(i);
-    	return null;
-    }
-    
-    /**
      * Gets the first component on this entity which is an instance of the
-     * specified class.
+     * specified class. Since this method uses a linear search it is obviously
+     * not very efficient when an entity has many components, so try not to
+     * overuse this.
      * 
      * @return the first such component, or {@code null} if no component of the
      * given class exists.
@@ -163,8 +172,8 @@ public class Entity extends GameObject {
      * Component#handle(World, Entity, EntityEvent) handle} method returns
      * true, propagation of the event is halted and this method returns false.
      * 
-     * @return true if no component consumed the event; false if it was fully
-     * handled.
+     * @return true if if the events was fully handled, i.e. no component
+     * consumed the event; false if the event was halted by some component.
      */
     public boolean post(World w, EntityEvent e) {
         return components.iterateUntil(c -> c.handle(w, this, e))
@@ -196,5 +205,87 @@ public class Entity extends GameObject {
     public boolean isPlayerControlled() {
         return controller instanceof CPlayerController;
     }
+    
+    /**
+     * Returns true if this entity is a phantom (a "clone" of an entity in a
+     * different dimension).
+     * 
+     * @see CPhantom
+     */
+    public boolean isPhantom() {
+    	return core instanceof CPhantom;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound dc) {
+        id = dc.getI64("id");
+        age = dc.getI64("age");
+        
+        dc.getInto(pos);
+        dx = dc.getF32("dx");
+        dy = dc.getF32("dy");
+        facingRight = dc.getBool("facingRight");
+        
+        DataCompound comp = dc.getCompound("components");
+        
+        core = (CCore) Component.fromCompound(comp.getCompound("core"));
+        controller = (CController) Component.fromCompound(comp.getCompound("controller"));
+        physics = (CPhysics) Component.fromCompound(comp.getCompound("physics"));
+        
+        initComponents();
+        
+        DataList adhoc = comp.getList("ad hoc");
+        while(adhoc.hasNext()) {
+            Component c = Component.fromCompound(adhoc.getCompound());
+            if(c == null)
+                throw new RuntimeException("invalid component oh no");
+            
+            // By assumption of the entity being saved in a valid state, this
+            // should return true, so no need to check if(components.add(c))
+            components.add(c);
+            c.init(this);
+        }
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound dc) {
+        dc.put("id", id);
+        dc.put("age", age);
+        
+        dc.put(pos);
+        dc.put("dx", dx);
+        dc.put("dy", dy);
+        dc.put("facingRight", facingRight);
+        
+        DataCompound comp = dc.childCompound("components");
+        Component.toCompound(comp.childCompound("core"), core);
+        Component.toCompound(comp.childCompound("controller"), controller);
+        Component.toCompound(comp.childCompound("physics"), physics);
+        
+        DataList adhoc = comp.childList("ad hoc");
+        components.forEach(c -> Component.toCompound(adhoc.childCompound(), c));
+    }
+    
+    
+    
+    
+    
+    /**
+     * Reads an entity from the given DataCompound. Equivalent to
+     * 
+     * <pre>
+     * Entity e = new Entity();
+     * e.importFromCompound(c);
+     * return e;
+     * </pre>
+     * 
+     * @return the entity
+     */
+    public static Entity fromCompound(DataCompound c) {
+        Entity e = new Entity();
+        e.importFromCompound(c);
+        return e;
+    }
+    
     
 }

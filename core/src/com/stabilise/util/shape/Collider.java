@@ -4,6 +4,7 @@ import java.util.function.BiPredicate;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.stabilise.util.Checks;
 import com.stabilise.util.maths.Maths;
 
 // To be honest I'm not entirely certain a vtable is the way to go here, but
@@ -58,11 +59,6 @@ public class Collider {
     /*
      * Optimisations which can be made:
      * 
-     * - A translated shape shares axes with its parent.
-     *     - Foreseen complexity: parent shape may not yet have axes generated.
-     * - [IMPLEMENTED IN VARIANTS OF INTERSECTS...()] A translated shape can
-     *   derive its self-projections from its parent by simple O(n) addition
-     *   (O(1) per projection).
      * - Vertex arrays can be reused.
      * - Cache optimisation [do not do until more experienced]
      * - We could create a big vertex array which is shared between shapes, but
@@ -292,5 +288,76 @@ public class Collider {
         // All tests passed = shapes appear to intersect.
         return true;
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // --------------------------------------------------------------
+    //                      UNDER CONSTRUCTION
+    // --------------------------------------------------------------
+    
+    /**
+     * A CollisionResult contains the result of a collision between shapes
+     * wherein you also want to know how one of the shapes should be displaced
+     * to avoid overlapping.
+     */
+    public static class CollisionResult {
+        /** true if the shapes collide; false if not. If not, all other fields
+         * may be ignored. */
+        public boolean collided;
+        /** The amount by which to displace the "moving"/"non-fixed" shape on
+         * the x-axis to avoid overlapping. */
+        public float dispX;
+        /** The amount by which to displace the "moving"/"non-fixed" shape on
+         * the y-axis to avoid overlapping. */
+        public float dispY;
+        
+        /** Blank constructor. */
+        public CollisionResult() {}
+        
+        /** Constructor which initialises the fields. */
+        public CollisionResult(boolean collided, float dispX, float dispY) {
+            this.collided = collided;
+            this.dispX = dispX;
+            this.dispY = dispY;
+        }
+    }
+    
+    
+    
+    // Let's start with AABBs first since they should be easy to reason
+    // around, and then generalise to polygons and stuff
+    
+    /**
+     * Tests for collision between two AABBs, where the first one is treated as
+     * moving in a straight line from (dx,dy) to (dx+sx, dy+sy). A collision
+     * will occur if the shapes collide anywhere along this straight-line
+     * motion of b1.
+     * 
+     * @param b1 the first AABB
+     * @param b2 the second AABB
+     * @param dx initial x displacement of b1
+     * @param dy initial y displacement of b2
+     * @param sx step x displacement relative to the initial displacement
+     * @param sy step y displacement relative to the initial displacement
+     */
+    public static CollisionResult collideAABB(AABB b1, AABB b2, float dx, float dy,
+            float sx, float sy) {
+        
+        
+        throw Checks.TODO();
+    }
+    
     
 }

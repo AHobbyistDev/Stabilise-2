@@ -26,14 +26,14 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
         extends AbstractList<E>
         implements SimpleList<E>, RandomAccess {
     
-    private static final int TREE_THRESHOLD = Integer.MAX_VALUE; // TODO: temporary value
+    private static final int BINARY_SEARCH_THRESHOLD = Integer.MAX_VALUE; // TODO: temporary value
     
     private E[] data;
     private int size = 0;
     
     
     /**
-     * Creates a WeightingArrayList with the specified initial capacity.
+     * Creates a WeightingArrayList using the given initial internal array.
      * 
      * @param array The internal array to use. This must be explicitly supplied
      * due to the limitations of generics (curse you, type erasure!)
@@ -68,7 +68,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
     public boolean add(E e) {
         Objects.requireNonNull(e);
         int w = e.getWeight(), w2;
-        if(size >= TREE_THRESHOLD) {
+        if(size >= BINARY_SEARCH_THRESHOLD) {
             return false; // TODO
         } else {
             for(int i = 0; i < size; i++) {
@@ -176,11 +176,25 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
     
     @Override
     public boolean iterateUntil(Predicate<? super E> pred) {
-        for(int i = 0; i < size; i++) {
-            if(pred.test(data[i])) {
+        for(int i = 0; i < size; i++)
+            if(pred.test(data[i]))
                 return false;
-            }
-        }
+        return true;
+    }
+    
+    @Override
+    public boolean any(Predicate<? super E> pred) {
+        for(int i = 0; i < size; i++)
+            if(pred.test(data[i]))
+                return true;
+        return false;
+    }
+    
+    @Override
+    public boolean all(Predicate<? super E> pred) {
+        for(int i = 0; i < size; i++)
+            if(!pred.test(data[i]))
+                return false;
         return true;
     }
     

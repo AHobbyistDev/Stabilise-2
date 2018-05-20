@@ -41,7 +41,7 @@ public class GameOfLife {
         }
         
         DataCompound saveData = DataCompound.create();
-        DataList resList = saveData.createList("results");
+        DataList resList = saveData.childList("results");
         for(Result r : results) {
             resList.add(ArrayUtil.to1D(r.reducedBoard));
         }
@@ -55,7 +55,7 @@ public class GameOfLife {
         DataCompound saveData = IOUtil.read(destFile, Format.NBT, Compression.UNCOMPRESSED);
         DataList resList = saveData.getList("results");
         for(int i = 0; i < resList.size(); i++) {
-            results.add(new Result(ArrayUtil.to2D(resList.getIntArr(), Simulation.size, Simulation.size)));
+            results.add(new Result(ArrayUtil.to2D(resList.getI32Arr(), Simulation.size, Simulation.size)));
         }
         
         for(Result r : results)

@@ -473,7 +473,7 @@ public class Profiler {
      * Ordinary sections always contain an unspecified section, plus any
      * child sections added during program lifetime.
      */
-    public abstract class SectionData implements Comparable<SectionData> {
+    public static abstract class SectionData implements Comparable<SectionData> {
         
         /** The name of the section represented by this data. */
         public final String name;
@@ -570,7 +570,7 @@ public class Profiler {
      * The section data of a 'normal' section. Most sections are normal
      * sections.
      */
-    private class SectionDataNormal extends SectionData {
+    private static class SectionDataNormal extends SectionData {
         
         /** The constituents. */
         private final SectionData[] constituents;
@@ -598,7 +598,7 @@ public class Profiler {
     /**
      * The section data of an 'unspecified' section.
      */
-    private class SectionDataUnspecified extends SectionData {
+    private static class SectionDataUnspecified extends SectionData {
         
         private SectionDataUnspecified(String parentName,
                 long duration, float localPercent, float totalPercent) {

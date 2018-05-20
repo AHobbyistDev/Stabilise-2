@@ -10,10 +10,6 @@ public class ETileCollision extends EntityEvent {
         this.dv = dv;
     }
     
-    //public static ETileCollision collision(float dv) {
-    //    return new ETileCollision(Type.TILE_COLLISION, dv);
-    //}
-    
     public static ETileCollision collisionH(float dv) {
         return new ETileCollision(Type.TILE_COLLISION_H, dv);
     }

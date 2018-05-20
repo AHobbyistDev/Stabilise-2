@@ -1,7 +1,6 @@
 package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.Position;
 import com.stabilise.entity.component.effect.CEffectFire;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
@@ -9,7 +8,9 @@ import com.stabilise.entity.hitbox.LinkedHitbox;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSource;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
+import com.stabilise.util.Checks;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Polygon;
@@ -32,6 +33,9 @@ public class CFireball extends CBaseProjectile {
     private ParticleSource<ParticleFlame> particleSrc;
     private ParticleSource<ParticleExplosion> explosionSrc;
     private int damage;
+    
+    
+    public CFireball() {}
     
     public CFireball(long ownerID) {
         this(ownerID, DEFAULT_FIREBALL_DAMAGE);
@@ -109,24 +113,12 @@ public class CFireball extends CBaseProjectile {
     protected void onImpact(World w, Entity e) {
         e.destroy();
         
-        ///*
+        /*
         // Destroy a bunch of nearby blocks
         final float range = 5.75f;
         int min = Maths.floor(-range);
         int max = Maths.floor(range);
-        //int xMin = Maths.floor(e.pos.getGlobalX() - range);
-        //int xMax = Maths.floor(e.pos.getGlobalX() + range);
-        //int yMin = Maths.floor(e.pos.getGlobalY() - range);
-        //int yMax = Maths.floor(e.pos.getGlobalY() + range);
-        Position tmp = Position.create().set(e.pos, -range, -range);
-        
-        //for(int y = yMin; y <= yMax; y++) {
-        //    for(int x = xMin; x <= xMax; x++) {
-        //        if(Maths.pointsInRange(e.pos.getGlobalX(), e.pos.getGlobalY(), x, y, range)
-        //                && w.getTileAt(x, y).getHardness() <= 5f)
-        //            w.breakTileAt(x, y);
-        //    }
-        //}
+        Position tmp = Position.createFixed().set(e.pos, -range, -range);
         
         for(int y = min; y <= max; y++) {
         	for(int x = min; x <= max; x++) {
@@ -136,7 +128,6 @@ public class CFireball extends CBaseProjectile {
         	}
         	tmp.add(max - min + 1, 1f);
         }
-        
         //*/
         
         Hitbox h = new Hitbox(ownerID, SPLASH_HITBOX, 2*damage);
@@ -160,6 +151,18 @@ public class CFireball extends CBaseProjectile {
             explosionSrc = w.particleSource(ParticleExplosion.class);
         }
         return super.handle(w, e, ev);
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        // TODO
+        Checks.TODO();
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        // TODO
+        Checks.TODO();
     }
     
 }

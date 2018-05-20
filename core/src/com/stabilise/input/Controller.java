@@ -290,12 +290,12 @@ public class Controller implements InputProcessor {
             Control c = controls[i];
             if(!c.valid)
                 continue;
-            int key = CONFIG.values.getInt(c.fieldName);
+            int key = CONFIG.values.getI32(c.fieldName);
             // If key has already been bound to another control, reset this
             // control to the default value.
             if(CONTROL_MAP.containsKey(key)) {
                 CONFIG.reset(c.fieldName);
-                key = CONFIG.values.getInt(c.fieldName);
+                key = CONFIG.values.getI32(c.fieldName);
                 changes = true;
                 // If however the default value is also taken by something,
                 // then we give up on trying to make things work and reset
@@ -327,7 +327,7 @@ public class Controller implements InputProcessor {
         CONTROL_MAP.clear();
         ArrayUtil.forEach(Control.values(), c -> {
             if(c.valid)
-                CONTROL_MAP.put(CONFIG.values.getInt(c.fieldName), c);
+                CONTROL_MAP.put(CONFIG.values.getI32(c.fieldName), c);
         });
         
     }

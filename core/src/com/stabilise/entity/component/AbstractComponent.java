@@ -2,6 +2,7 @@ package com.stabilise.entity.component;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.event.EntityEvent;
+import com.stabilise.util.Checks;
 import com.stabilise.world.World;
 
 
@@ -45,9 +46,15 @@ public abstract class AbstractComponent implements Component {
     // about how to resolve duplicates.
     
     
+    @Override
+    public int hashCode() {
+        throw Checks.badAssert("Hash code not designed");
+    }
+    
     /**
      * This implementation returns {@code true} if the given object is of the
-     * same class as this one.
+     * same class as this one. This is a reasonable default for component
+     * equality.
      */
     @Override
     public boolean equals(Object o) {

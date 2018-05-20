@@ -19,7 +19,7 @@ import com.stabilise.character.CharacterData;
 import com.stabilise.core.Application;
 import com.stabilise.core.Resources;
 import com.stabilise.core.main.Stabilise;
-import com.stabilise.opengl.GLUtil;
+import com.stabilise.render.opengl.GLUtil;
 import com.stabilise.util.concurrent.task.ReturnTask;
 import com.stabilise.util.concurrent.task.TaskView;
 import com.stabilise.world.Worlds;

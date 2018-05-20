@@ -38,8 +38,10 @@ public class DesktopGame {
     	Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
     	config.setTitle(Stabilise.GAME_NAME + " - " + Stabilise.getGameSubtitle());
     	config.setWindowedMode(900, 600);
-    	//config.useVsync(true);
+    	config.useVsync(false);
     	config.setIdleFPS(5);
+    	
+    	// Can't set max fps here; use the AppDriver in Stabilie instead.
     	
     	config.setWindowIcon(FileType.Classpath, "icon128.png", "icon32.png", "icon16.png");
     	new Lwjgl3Application(new Stabilise(args).getListener(), config);

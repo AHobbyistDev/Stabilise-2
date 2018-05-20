@@ -19,9 +19,10 @@ import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
 import com.stabilise.item.IContainer;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
 import com.stabilise.world.tile.Tile;
@@ -48,7 +49,6 @@ public class CPlayerController extends CController implements Controllable, Inpu
     private final int maxTileID;
     /** Radius of the tile brush. */
     public float radius = 0.5f;
-    
     
     
     /**
@@ -83,7 +83,6 @@ public class CPlayerController extends CController implements Controllable, Inpu
         else if(controller.isControlPressed(Control.RIGHT))
             mob.move(Direction.RIGHT);
         
-        //if(Constants.DEV_VERSION) {
         if(controller.isControlPressed(Control.FLYRIGHT))
             e.dx += 1f;
         if(controller.isControlPressed(Control.FLYLEFT))
@@ -92,7 +91,6 @@ public class CPlayerController extends CController implements Controllable, Inpu
             e.dy += 1f;
         if(controller.isControlPressed(Control.FLYDOWN))
             e.dy -= 1f;
-        //}
         
         if(worldRenderer == null) {
             // TODO: Temporary way of grabbing the renderer
@@ -174,7 +172,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 mob.restore();
                 break;
             case INTERACT:
-                Position p = e.pos.copy().clampToTile().add(0,-1).align();
+                Position p = e.pos.clone().clampToTile().add(0,-1).align();
                 game.world.getTileAt(p).handleInteract(game.world, p, e);
                 break;
             case PREV_TILE:
@@ -193,8 +191,10 @@ public class CPlayerController extends CController implements Controllable, Inpu
             case PORTAL:
                 //String dim = "overworld";
                 String dim = game.playerData.data.getDimensionName();
+                //String dim = "flatland";
                 Entity portal = Entities.portal(dim);
                 portal.pos.set(e.pos, e.facingRight ? 3f : -3f, 0f).align();
+                portal.facingRight = !e.facingRight;
                 CPortal pCore = (CPortal) portal.core;
                 
                 if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
@@ -277,6 +277,16 @@ public class CPlayerController extends CController implements Controllable, Inpu
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         return false;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        // nothing to do
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        // nothing to do
     }
     
 }

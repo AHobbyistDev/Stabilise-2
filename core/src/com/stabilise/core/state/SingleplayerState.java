@@ -6,7 +6,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.stabilise.core.Application;
 import com.stabilise.core.Resources;
 import com.stabilise.core.game.Game;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.Worlds.WorldBundle;
 

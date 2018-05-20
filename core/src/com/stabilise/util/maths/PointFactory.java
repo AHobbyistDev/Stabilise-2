@@ -46,7 +46,7 @@ public class PointFactory {
      * Creates a new immutable Point with the specified components.
      */
     public Point newImmutablePoint(int x, int y) {
-        return new OwnedImmutablePoint(x, y);
+        return new ImmutablePoint(x, y, hasher.applyAsInt(x, y));
     }
     
     /**
@@ -64,11 +64,6 @@ public class PointFactory {
     }
     
     // Nested classes ---------------------------------------------------------
-    
-    private class OwnedImmutablePoint extends ImmutablePoint {
-        private OwnedImmutablePoint(int x, int y) { super(x,y); }
-        @Override protected int genHash() { return hasher.applyAsInt(x, y); }
-    }
     
     private class OwnedMutablePoint extends MutablePoint {
         private OwnedMutablePoint(int x, int y) { super(x,y); }

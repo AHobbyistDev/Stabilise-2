@@ -1,5 +1,6 @@
 package com.stabilise.util.io.data.bytestream;
 
+/*
 import java.io.IOException;
 
 import javaslang.control.Option;
@@ -425,3 +426,4 @@ public class ByteCompound extends AbstractCompound {
     }
     
 }
+*/

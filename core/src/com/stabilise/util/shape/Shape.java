@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
+import com.stabilise.util.io.data.Exportable;
 import com.stabilise.util.maths.Matrix2;
 import com.stabilise.util.maths.TransMat;
 
@@ -12,8 +13,11 @@ import com.stabilise.util.maths.TransMat;
  * A shape is a 2D object usually consisting of a number of vertices, which may
  * be used to represent such things as collision areas.
  * 
- * <p>Classes in the {@code Shape} hierarchy are immutable, but may be {@link
- * #transform(VertexFunction) transformed} to generate a new shape.
+ * <p>Classes in the {@code Shape} hierarchy are (effectively) immutable (as
+ * in, please don't mutate them or bad things will happen, especially if the
+ * {@link #genCollisionData() collision data has already been generated}), but
+ * may be {@link #transform(VertexFunction) transformed} to generate a new
+ * shape.
  * 
  * <p>These classes use the <a
  * href=http://en.wikipedia.org/wiki/Hyperplane_separation_theorem> Separating
@@ -24,7 +28,7 @@ import com.stabilise.util.maths.TransMat;
  * make sure you invoke {@link #genCollisionData()} before sharing it to ensure
  * correct behaviour.
  */
-public abstract class Shape {
+public abstract class Shape implements Exportable {
     
     /**
      * Transforms this shape by applying the given transformation function to
@@ -147,6 +151,17 @@ public abstract class Shape {
     }
     
     /**
+     * Returns an AABB which bounds this shape.
+     */
+    public abstract AABB boundingAABB();
+    
+    /**
+     * "Sweeps" this shape in the direction given by (dx,dy) and returns the
+     * resulting shape.
+     */
+    public abstract Shape sweep(float dx, float dy);
+    
+    /**
      * Calculates whether or not this shape intersects with another.
      * 
      * @return {@code true} if this shape intersects with {@code s}; {@code
@@ -205,7 +220,11 @@ public abstract class Shape {
      * @return {@code true} if this shape contains the point; {@code false}
      * otherwise.
      */
-    public boolean containsPoint(float x, float y) { return false; }
+    /*
+    public boolean containsPoint(float x, float y) {
+        return false;
+    }
+    */
     
     /**
      * Gets this shape's vertices.
@@ -348,7 +367,7 @@ public abstract class Shape {
         // This is what we're really doing:
         // v1.sub(v2).rotate90Degrees();
         // However, if we simplify that algebraically, we get:
-        dest[offset]   = y2 - y1;
+        dest[offset  ] = y2 - y1;
         dest[offset+1] = x1 - x2;
     }
     
@@ -382,12 +401,12 @@ public abstract class Shape {
          * pretty cheap already.
          */
         
-        float min = x*verts[0] + y*verts[1]; // dot product <=> projection
+        float min = x*verts[0] + y*verts[1]; // dot product = projection
         float max = min;
         float p;
         
         for(int i = 2; i < verts.length; i += 2) {
-            p = x*verts[i] + y*verts[i+1]; // dot product <=> projection
+            p = x*verts[i] + y*verts[i+1]; // dot product = projection
             if(p < min)
                 min = p;
             else if(p > max)
@@ -406,12 +425,12 @@ public abstract class Shape {
      */
     protected static boolean projectionsOverlap(float[] verts, float x, float y,
             float projMin, float projMax) {
-        float min = x*verts[0] + y*verts[1]; // dot product <=> projection
+        float min = x*verts[0] + y*verts[1]; // dot product = projection
         float max = min;
         float p;
         
         for(int i = 2; i < verts.length; i += 2) {
-            p = x*verts[i] + y*verts[i+1]; // dot product <=> projection
+            p = x*verts[i] + y*verts[i+1]; // dot product = projection
             if(p < min)
                 min = p;
             else if(p > max)
@@ -421,6 +440,16 @@ public abstract class Shape {
         return min <= projMax && max >= projMin;
     }
     
+    /**
+     * Tests for whether the projections of a polygon and an AABB overlap on
+     * one of the polygon's axes.
+     * 
+     * @param verts vertices of the AABB
+     * @param x projection axis
+     * @param y projection axis
+     * @param projMin min projection of the poly on the projection axis
+     * @param projMax max projection of the poly on the projection axis
+     */
     protected static boolean projectionsOverlapAABB(float[] verts, float x, float y,
             float projMin, float projMax) {
         float p1 = x*verts[AABB.XMIN] + y*verts[AABB.YMIN];
@@ -468,7 +497,7 @@ public abstract class Shape {
          * @param y The y component of the output vertex.
          */
         default void set(float[] dest, int offset, float x, float y) {
-            dest[offset]   = x;
+            dest[offset  ] = x;
             dest[offset+1] = y;
         }
         

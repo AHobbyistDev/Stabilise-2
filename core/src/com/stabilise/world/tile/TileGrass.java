@@ -19,7 +19,7 @@ public class TileGrass extends Tile {
     
     @Override
     public void update(World world, Position pos) {
-        Position tmp = pos.copy().add(0f, 1f).align();
+        Position tmp = pos.clone().add(0f, 1f).align();
         if(world.getTileAt(tmp).isSolid()) {
             world.setTileAt(pos, Tiles.dirt);
             return;

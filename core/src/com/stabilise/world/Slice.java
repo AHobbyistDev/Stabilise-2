@@ -305,22 +305,30 @@ public class Slice {
     void importTileEntities(AbstractWorld world) {
         if(tileEntities == null)
             return;
-        for(int r = 0; r < SLICE_SIZE; r++)
-            for(int c = 0; c < SLICE_SIZE; c++)
-                if(tileEntities[r][c] != null)
-                    world.addTileEntity(tileEntities[r][c]);
+        for(int r = 0; r < SLICE_SIZE; r++) {
+            for(int c = 0; c < SLICE_SIZE; c++) {
+                if(tileEntities[r][c] != null) {
+                    tileEntities[r][c].handleAdd(world);
+                    world.addTileEntityToUpdateList(tileEntities[r][c]);
+                }
+            }
+        }
     }
     
     public void buildLight() {
         for(int y = 0; y < SLICE_SIZE; y++) {
             for(int x = 0; x < SLICE_SIZE; x++) {
-                setLightAt(x, y, getTileAt(x, y).getLight());
+                byte l1 = getTileAt(x, y).getLight();
+                byte l2 = getWallAt(x, y).getLight();
+                setLightAt(x, y, l1 > l2 ? l1 : l2);
             }
         }
         
         for(int y = 0; y < SLICE_SIZE; y++) {
             for(int x = 0; x < SLICE_SIZE; x++) {
-                spreadLightTo(x, y, getTileAt(x, y).getLight(), true);
+                byte l1 = getTileAt(x, y).getLight();
+                byte l2 = getWallAt(x, y).getLight();
+                spreadLightTo(x, y, l1 > l2 ? l1 : l2, true);
             }
         }
     }

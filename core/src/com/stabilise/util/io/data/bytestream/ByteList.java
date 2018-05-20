@@ -1,5 +1,6 @@
 package com.stabilise.util.io.data.bytestream;
 
+/*
 import java.io.IOException;
 import java.util.function.Consumer;
 
@@ -12,6 +13,8 @@ import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
 import com.stabilise.util.io.data.Format;
 import com.stabilise.util.io.data.ITag;
+
+
 
 @Incomplete
 public class ByteList extends AbstractDataList {
@@ -152,3 +155,4 @@ public class ByteList extends AbstractDataList {
     }
 
 }
+*/

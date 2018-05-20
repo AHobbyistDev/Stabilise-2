@@ -6,6 +6,7 @@ import com.stabilise.core.Application;
 import com.stabilise.core.Constants;
 import com.stabilise.core.Settings;
 import com.stabilise.core.state.State;
+import com.stabilise.entity.component.Components;
 import com.stabilise.input.Controller;
 import com.stabilise.item.Item;
 import com.stabilise.util.ArrayUtil;
@@ -69,19 +70,21 @@ public class Stabilise extends Application {
         return ArrayUtil.random(
                 Constants.VERSION.toString(),
                 "Coming soon to a computer near you!",
-                "Look, a distraction!",
                 "II esilibatS",
                 "20% less bugs!",
                 "20% more bugs!",
-                "Stable release builds? Hah!",
-                "[Insert witty title here]",
+                "[Insert witty subtitle here]",
                 "May contain traces of nuts",
                 "Not suitable for children under the age of 84",
                 "Take twice daily for fast, effective results!",
+                "Recommended by 9/10 doctors",
                 "Batteries not included!",
                 "Now with excavators!",
-                "(I lied about the excavators)",
-                "No refunds!"
+                "No refunds!",
+                "Not even in early access yet",
+                "In perpetual development",
+                "Has no content!",
+                "Barely functional"
         );
     }
     
@@ -105,11 +108,10 @@ public class Stabilise extends Application {
                 Tile.registerTiles();
                 Item.registerItems();
                 Dimension.registerDimensions();
+                Components.registerComponentTypes();
                 TileEntity.poke();
                 
                 Controller.poke();
-                
-                //new GameData().register();
                 
                 bootstrapped = true;
                 

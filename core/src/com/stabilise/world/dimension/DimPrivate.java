@@ -1,7 +1,8 @@
 package com.stabilise.world.dimension;
 
 import com.stabilise.world.WorldInfo;
-import com.stabilise.world.gen.GeneratorRegistrant;
+import com.stabilise.world.gen.WorldGenerator;
+import com.stabilise.world.gen.terrain.GrassPlacer;
 import com.stabilise.world.gen.terrain.PrivateTerrainGen;
 import com.stabilise.world.loader.WorldLoader;
 
@@ -15,8 +16,9 @@ public class DimPrivate extends Dimension {
     }
     
     @Override
-    protected void addGenerators(GeneratorRegistrant gr) {
-        gr.add((w,s) -> new PrivateTerrainGen(w,s));
+    public void addGenerators(WorldGenerator g) {
+        g.addGenerator(new PrivateTerrainGen());
+        g.addGenerator(new GrassPlacer());
     }
     
     @Override

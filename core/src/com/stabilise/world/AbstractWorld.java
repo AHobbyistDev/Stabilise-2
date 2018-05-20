@@ -23,10 +23,9 @@ import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.ForTestingPurposes;
 import com.stabilise.util.annotation.UserThread;
 import com.stabilise.util.collect.FragList;
-import com.stabilise.util.collect.LongList;
-import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.util.collect.FunctionalIterable;
 import com.stabilise.util.collect.SimpleList;
+import com.stabilise.util.collect.UnorderedArrayList;
 import com.stabilise.world.dimension.Dimension;
 import com.stabilise.world.multiverse.Multiverse;
 import com.stabilise.world.tile.tileentity.TileEntity;
@@ -54,15 +53,6 @@ public abstract class AbstractWorld implements World {
     
     /** Entities queued to be added to the world at the end of the tick. */
     private final List<Entity> entitiesToAdd = new ArrayList<>();
-    /** Entities queued to be removed from the world at the end of the tick.
-     * <p>Implementation detail: Though it would be cleaner to invoke {@code
-     * destroy()} on entities and let them self-remove while being iterated
-     * over, this does not work when moving an entity to another dimension: if
-     * {@code destroy()} is invoked, this would also invalidate its position in
-     * the dimension it is being moved to. */
-    private final LongList entitiesToRemove = new LongList();
-    /** The number of hostile mobs in the world. */
-    protected int hostileMobCount = 0;
     
     /** Stores tile entities for iteration and updating. A loaded tile entity
      * need not exist in this list if it does not require updates. */
@@ -181,10 +171,6 @@ public abstract class AbstractWorld implements World {
             entitiesToAdd.clear();
         }
         
-        profiler.next("remove"); // root.update.game.world.entity.remove
-        
-        entitiesToRemove.clear(id -> entities.remove(id));
-        
         profiler.end(); // root.update.game.world.entity
         profiler.end(); // root.update.game.world
     }
@@ -219,6 +205,7 @@ public abstract class AbstractWorld implements World {
     @Override
     public void addEntity(Entity e) {
         e.setID(multiverse().getNextEntityID());
+        e.pos.align(); // play it safe
         entitiesToAdd.add(e);
     }
     
@@ -241,10 +228,10 @@ public abstract class AbstractWorld implements World {
         return entities.get(id);
     }
     
-    @Override
-    public void removeEntity(long id) {
-        entitiesToRemove.add(id);
-    }
+    //@Override
+    //public void removeEntity(long id) {
+    //    entitiesToRemove.add(id);
+    //}
     
     @Override
     public void addHitbox(Hitbox h) {
@@ -269,14 +256,9 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
-    public void addTileEntity(TileEntity t) {
+    public void addTileEntityToUpdateList(TileEntity t) {
         if(t.requiresUpdates())
             tileEntities.append(t);
-    }
-    
-    @Override
-    public void sendToDimension(String dimension, Entity e, Position pos) {
-        multiverse.sendToDimension(this, dimension, e, pos);
     }
     
     // ==========Collection getters==========
@@ -312,7 +294,7 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
-    public WorldCamera getCamera() {
+    public GameCamera getCamera() {
         return camera;
     }
     

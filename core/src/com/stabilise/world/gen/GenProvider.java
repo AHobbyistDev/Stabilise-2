@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.badlogic.gdx.math.RandomXS128;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.world.HostWorld;
@@ -27,15 +28,21 @@ class GenProvider implements WorldProvider {
     private int lastX, lastY;
     private Slice lastSlice;
     
-    private final Random rnd = new Random();
+    private final Random rnd;
     
     
-    GenProvider(HostWorld w, Region r) {
+    GenProvider(HostWorld w, Region r, long seed) {
         this.w = w;
         this.r = r;
         
         lastX = lastY = 0;
         lastSlice = r.getSliceAt(0, 0);
+        
+        long mix = 0x59c5180355b14d9bL;
+        long n = 13*r.x() + 57*r.y();
+        n = (n<<13) ^ n;
+        n = n * (n*n*15731 + 789221) + 1376312589;
+        rnd = new RandomXS128(seed ^ n ^ mix);
     }
     
     @Override
@@ -91,7 +98,7 @@ class GenProvider implements WorldProvider {
     @Override
     public void setTileAt(Position pos, int id) {
         getTileAt(pos).handleRemove(this, pos);
-        getSliceAt(pos).setTileIDAt(pos.getLocalTileX(), pos.getLocalTileY(), id);
+        getSliceAt(pos).setTileIDAt(pos.ltx(), pos.lty(), id);
         Tile.getTile(id).handlePlace(this, pos);
     }
     
@@ -113,8 +120,8 @@ class GenProvider implements WorldProvider {
         Slice s = getSliceAt(pos);
         
         if(!s.isDummy()) {
-            int tx = pos.getLocalTileX();
-            int ty = pos.getLocalTileY();
+            int tx = pos.ltx();
+            int ty = pos.lty();
             
             TileEntity t2 = s.getTileEntityAt(tx, ty);
             if(t2 != null) {

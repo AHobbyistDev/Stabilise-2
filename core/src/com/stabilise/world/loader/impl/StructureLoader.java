@@ -19,12 +19,12 @@ public class StructureLoader implements IRegionLoader {
                 DataCompound structure = structures.getCompound();
                 QueuedStructure s = new Region.QueuedStructure();
                 s.structureName = structure.getString("structureName");
-                s.sliceX = structure.getInt("sliceX");
-                s.sliceY = structure.getInt("sliceY");
-                s.tileX = structure.getInt("tileX");
-                s.tileY = structure.getInt("tileY");
-                s.offsetX = structure.getInt("offsetX");
-                s.offsetY = structure.getInt("offsetY");
+                s.sliceX = structure.getI32("sliceX");
+                s.sliceY = structure.getI32("sliceY");
+                s.tileX = structure.getI32("tileX");
+                s.tileY = structure.getI32("tileY");
+                s.offsetX = structure.getI32("offsetX");
+                s.offsetY = structure.getI32("offsetY");
                 r.addStructure(s);
             }
         });
@@ -33,9 +33,9 @@ public class StructureLoader implements IRegionLoader {
     @Override
     public void save(Region r, DataCompound c, boolean generated) {
         if(r.hasQueuedStructures()) {
-            DataList structures = c.createList("queuedStructures");
+            DataList structures = c.childList("queuedStructures");
             for(QueuedStructure s : r.getStructures()) {
-                DataCompound structure = structures.createCompound();
+                DataCompound structure = structures.childCompound();
                 structure.put("schematicName", s.structureName);
                 structure.put("sliceX", s.sliceX);
                 structure.put("sliceY", s.sliceY);

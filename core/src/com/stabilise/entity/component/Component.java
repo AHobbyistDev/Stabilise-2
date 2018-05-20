@@ -7,6 +7,8 @@ import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.collect.IDuplicateResolver;
 import com.stabilise.util.collect.IWeightProvider;
+import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.io.data.Exportable;
 import com.stabilise.world.World;
 
 
@@ -20,15 +22,22 @@ import com.stabilise.world.World;
  * equipped with three privileged components: a {@link CCore core} component, a
  * {@link CController controller} component, and a {@link CPhysics physics}
  * component.
+ * 
+ * <p>Every implementor of this interface needs to have a parameterless
+ * constructor so that it may be instantiated dynamically e.g. when an entity
+ * is loaded from a save file.
  */
-public interface Component extends IWeightProvider, IDuplicateResolver<Component> {
+public interface Component extends IWeightProvider,
+                                    IDuplicateResolver<Component>,
+                                    Exportable {
     
     /**
      * Initialises this component. Invoked when {@link
-     * Entity#addComponent(Component) added to an entity}, immediately before
-     * being added to the entity's list of components. If this is one of the
-     * entity's priviliged three components, this is invoked by the entity's
-     * constructor.
+     * Entity#addComponent(Component) added to an entity}, immediately
+     * <em>after</em> being added to the entity's list of components (that is,
+     * only if this component was successfully added, and was not rejected).
+     * If this is one of the entity's priviliged three components, this is
+     * invoked by the entity's constructor.
      */
     void init(Entity e);
     
@@ -80,5 +89,59 @@ public interface Component extends IWeightProvider, IDuplicateResolver<Component
      */
     @Override
     Action resolve(Component c);
+    
+    
+    /**
+     * {@inheritDoc}
+     * 
+     * <p>In general it is not a good idea to use this directly -- use {@link
+     * Component#fromCompound(DataCompound)} instead.
+     */
+    @Override
+    void importFromCompound(DataCompound c);
+    
+    /**
+     * {@inheritDoc}
+     * 
+     * <p>In general it is not a good idea to use this directly since this
+     * method does not export this component's id -- use {@link
+     * Component#toCompound(DataCompound, Component)} instead.
+     */
+    void exportToCompound(DataCompound c);
+    
+    
+    
+    /**
+     * Reads a Component from the given DataCompound. The given DataCompound
+     * should contain an integer tag "id".
+     * 
+     * @return the Component read from the compound, or {@code null} if the id
+     * contained in the compoud was invalid.
+     * 
+     * @see #toCompound(DataCompound, Component)
+     */
+    public static Component fromCompound(DataCompound dc) {
+        int id = dc.getI32("id");
+        Component c = Components.COMPONENT_TYPES.create(id);
+        if(c == null)
+            return null;
+        c.importFromCompound(dc);
+        return c;
+    }
+    
+    /**
+     * Exports a Component to a DataCompound.
+     * 
+     * @param dc the compound to export to
+     * @param c the component to export
+     * 
+     * @throws NullPointerException if either argument is null
+     * @see #fromCompound(DataCompound)
+     */
+    public static void toCompound(DataCompound dc, Component c) {
+        int id = Components.COMPONENT_TYPES.getID(c.getClass());
+        dc.put("id", id);
+        dc.put(c);
+    }
     
 }

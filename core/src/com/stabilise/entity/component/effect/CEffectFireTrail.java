@@ -4,6 +4,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.particle.ParticleFlame;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
 
@@ -38,6 +39,16 @@ public class CEffectFireTrail extends CParticleEffect<ParticleFlame> {
     @Override
     public Action resolve(Component c) {
         return Action.KEEP_BOTH;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        // nothing for now
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        // nothing for now
     }
     
 }

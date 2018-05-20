@@ -7,14 +7,17 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.component.effect.CEffectFire;
 import com.stabilise.entity.component.effect.CEffectFireTrail;
+import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
+import com.stabilise.entity.particle.ParticleHeal;
 import com.stabilise.entity.particle.ParticleSource;
-import com.stabilise.opengl.render.WorldRenderer;
+import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.AABB;
@@ -154,6 +157,8 @@ public class CPerson extends CBaseMob {
     
     
     private static final AABB AABB = new AABB(-0.4f, 0f, 0.8f, 1.8f);
+    //private static final AABB AABB = new AABB(-0.375f, 0f, 0.75f, 1.8f);
+    //private static final AABB AABB = new AABB(-0.05f, -0.05f, 0.1f, 0.1f);
     
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
@@ -197,10 +202,10 @@ public class CPerson extends CBaseMob {
     public void init(Entity e) {
         super.init(e);
         
-        maxHealth = 500;
-        health = 500;
-        maxStamina = 500;
-        stamina = 500;
+        maxHealth = 100;
+        health = 100;
+        maxStamina = 100;
+        stamina = 100;
         maxMana = 500000;
         mana = 500000;
         
@@ -225,9 +230,17 @@ public class CPerson extends CBaseMob {
         ticksSinceManaLoss++;
         
         // Regen health/mana/stamina
-        if(ticksSinceHealthLoss >= 60) {
-            if(ticksSinceHealthLoss >= 300 || ticksSinceHealthLoss % 2 == 0)
-                increaseHealth(1);
+        if(ticksSinceHealthLoss >= 80) {
+            if(ticksSinceHealthLoss >= 360 || ticksSinceHealthLoss % 3 == 0) {
+                if(increaseHealth(1)) {
+                    w.particleSource(ParticleHeal.class).createBurst(
+                            1, 0.2f, 2.0f,
+                            Maths.PIf / 6.0f,
+                            Maths.PIf * 5.0f / 6.0f,
+                            e
+                    );
+                }
+            }
         }
         
         if(ticksSinceStaminaLoss >= 60) {
@@ -725,16 +738,19 @@ public class CPerson extends CBaseMob {
      * Increases the person's health.
      * 
      * @param amount The amount by which to increase the person's health.
+     * 
+     * @return true if the health was increased
      */
-    private void increaseHealth(int amount) {
+    private boolean increaseHealth(int amount) {
         if(health == maxHealth)
-            return;
+            return false;
         
         health += amount;
         if(health > maxHealth)
             health = maxHealth;
         
         healthChanged = true;
+        return true;
     }
     
     /**
@@ -774,6 +790,43 @@ public class CPerson extends CBaseMob {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
             fireParticles = w.particleSource(ParticleFlame.class);
         return super.handle(w, e, ev);
+    }
+    
+    @Override
+    public boolean damage(World w, Entity e, IDamageSource src) {
+        if(super.damage(w, e, src)) {
+            ticksSinceHealthLoss = 0;
+            return true;
+        }
+        return false;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        super.importFromCompound(c);
+        
+        maxStamina = c.getI32("maxStamina");
+        stamina = c.getI32("stamina");
+        maxMana = c.getI32("maxMana");
+        mana = c.getI32("mana");
+        
+        ticksSinceHealthLoss = c.getI32("ticksSinceHpLoss");
+        ticksSinceStaminaLoss = c.getI32("ticksSinceSpLoss");
+        ticksSinceManaLoss = c.getI32("ticksSinceMpLoss");
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        super.exportToCompound(c);
+        
+        c.put("maxStamina", maxStamina);
+        c.put("stamina", stamina);
+        c.put("maxMana", maxMana);
+        c.put("mana", mana);
+        
+        c.put("ticksSinceHpLoss", ticksSinceHealthLoss);
+        c.put("ticksSinceSpLoss", ticksSinceStaminaLoss);
+        c.put("ticksSinceMpLoss", ticksSinceManaLoss);
     }
     
 }

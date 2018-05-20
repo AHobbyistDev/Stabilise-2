@@ -349,7 +349,6 @@ public class Worlds {
             Box<HostMultiverse> bMulti    = Boxes.emptyMut();
             Box<PlayerBundle> bPlayer     = Boxes.emptyMut();
             Box<HostWorld> bWorld         = Boxes.emptyMut();
-            Box<WorldLoadTracker> bStatus = Boxes.emptyMut();
             
             return Task.builder(Tasks.newThreadExecutor())
                 .name("Loading world")
@@ -369,25 +368,26 @@ public class Worlds {
                         t.next(50, "Creating the player");
                         bPlayer.set(bMulti.get().addPlayer(integratedPlayer, true));
                         bWorld.set(bPlayer.get().world);
-                        bStatus.set(bWorld.get().loadTracker());
                     } else {
                         throw new RuntimeException("Client is NYI");
                     }
                 }).andThenReturn(1000, new TaskCallable<WorldBundle>() {
                     @Override
                     public WorldBundle run(TaskHandle t) throws Exception {
-                        t.setTotal(bStatus.get().numTotal());
                         HostWorld w = bWorld.get();
+                        WorldLoadTracker status = w.loadTracker();
+                        
+                        t.setTotal(status.numTotal());
                         
                         t.setStatus("Loading dimension " + w.getDimensionName());
                         do {
-                            t.set(bStatus.get().numDone());
-                            bStatus.get().waitUntilNext();
-                        } while(!bStatus.get().isDone());
+                            t.set(status.numDone());
+                            status.waitUntilNext();
+                        } while(!status.isDone());
                         
                         // Regions have been loaded; now properly import them
                         // while we have the luxury of this concurrent loading.
-                        w.forEachRegion(r -> r.importToWorld(w));
+                        w.forEachRegion(r -> r.importToWorld(w, w.regions));
                         
                         return new WorldBundle(
                         		bMulti.get(),
