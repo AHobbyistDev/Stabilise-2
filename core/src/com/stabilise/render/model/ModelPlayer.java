@@ -27,10 +27,10 @@ public class ModelPlayer extends Model {
     private static final int NUM_COLS = 8, NUM_ROWS = 8;
     
     /** The dimensions of the model, in tile-lengths. */
-    public static final Point DIMENSIONS = Point.mutable(1, 2);
+    public static final Point DIMENSIONS = Point.immutable(1, 2);
     
     /** The template dimensions for each sprite. */
-    private static final Point TEMPLATE_DIMENSIONS = Point.mutable(256,256);
+    private static final Point TEMPLATE_DIMENSIONS = Point.immutable(256,256);
     
     /** The number of pixels per tile, using the template dimensions. */
     private static final int PIXELS_PER_TILE = 55;
@@ -48,50 +48,50 @@ public class ModelPlayer extends Model {
     );        
     
     private static final Point
-        SPRITE_IDLE = Point.mutable(0, 0),
-        SPRITE_RUN_1 = Point.mutable(1, 0),
-        SPRITE_RUN_2 = Point.mutable(2, 0),
-        SPRITE_RUN_3 = Point.mutable(3, 0),
-        SPRITE_RUN_4 = Point.mutable(4, 0),
-        SPRITE_CROUCH = Point.mutable(5, 0),
-        SPRITE_JUMP = Point.mutable(6, 0),
-        SPRITE_FALL = Point.mutable(7, 0),
+        SPRITE_IDLE = Point.immutable(0, 0),
+        SPRITE_RUN_1 = Point.immutable(1, 0),
+        SPRITE_RUN_2 = Point.immutable(2, 0),
+        SPRITE_RUN_3 = Point.immutable(3, 0),
+        SPRITE_RUN_4 = Point.immutable(4, 0),
+        SPRITE_CROUCH = Point.immutable(5, 0),
+        SPRITE_JUMP = Point.immutable(6, 0),
+        SPRITE_FALL = Point.immutable(7, 0),
     /*
-        SPRITE_BLOCK = Point.mutable(0, 1),
-        SPRITE_AIRDODGE = Point.mutable(1, 1),
-        SPRITE_HITSTUN = Point.mutable(2, 1),
-        SPRITE_AIRHITSTUN = Point.mutable(3, 1),
-        SPRITE_SIDESTEP = Point.mutable(4, 1),
+        SPRITE_BLOCK = Point.immutable(0, 1),
+        SPRITE_AIRDODGE = Point.immutable(1, 1),
+        SPRITE_HITSTUN = Point.immutable(2, 1),
+        SPRITE_AIRHITSTUN = Point.immutable(3, 1),
+        SPRITE_SIDESTEP = Point.immutable(4, 1),
     */
-        SPRITE_SLIDE_FORWARD = Point.mutable(5, 1),
-        SPRITE_SLIDE_BACKWARD = Point.mutable(6, 1),
-        SPRITE_ATTACK_GROUND_SIDE_1 = Point.mutable(7, 1),
-        SPRITE_ATTACK_GROUND_SIDE_2 = Point.mutable(0, 2),
-        SPRITE_ATTACK_GROUND_SIDE_3 = Point.mutable(1, 2),
-        SPRITE_ATTACK_GROUND_UP_1 = Point.mutable(2, 2),
-        SPRITE_ATTACK_GROUND_UP_2 = Point.mutable(3, 2),
-        SPRITE_ATTACK_GROUND_DOWN_1 = Point.mutable(4, 2),
-        SPRITE_SPECIAL_GROUND_SIDE_1 = Point.mutable(5, 2),
-        SPRITE_SPECIAL_GROUND_SIDE_2 = Point.mutable(6, 2),
-        SPRITE_SPECIAL_GROUND_UP_1 = Point.mutable(7, 2),
-        SPRITE_SPECIAL_GROUND_UP_2 = Point.mutable(0, 3),
-        SPRITE_SPECIAL_GROUND_DOWN_1 = Point.mutable(1, 3),
-        SPRITE_SPECIAL_GROUND_DOWN_2 = Point.mutable(2, 3),
-        SPRITE_ATTACK_AIR_SIDE_1 = Point.mutable(3, 3),
-        SPRITE_ATTACK_AIR_SIDE_2 = Point.mutable(4, 3),
-        SPRITE_ATTACK_AIR_SIDE_3 = Point.mutable(5, 3),
-        SPRITE_ATTACK_AIR_UP_1 = Point.mutable(6, 3),
-        SPRITE_ATTACK_AIR_UP_2 = Point.mutable(7, 3),
-        SPRITE_ATTACK_AIR_UP_3 = Point.mutable(0, 4),
-        SPRITE_ATTACK_AIR_DOWN_1 = Point.mutable(1, 4),
-        SPRITE_ATTACK_AIR_DOWN_2 = Point.mutable(2, 4),
-        SPRITE_ATTACK_AIR_DOWN_3 = Point.mutable(3, 4),
-        SPRITE_SPECIAL_AIR_SIDE_1 = Point.mutable(4, 4),
-        SPRITE_SPECIAL_AIR_SIDE_2 = Point.mutable(5, 4),
-        SPRITE_SPECIAL_AIR_UP_1 = Point.mutable(6, 4),
-        SPRITE_SPECIAL_AIR_UP_2 = Point.mutable(7, 4),
-        SPRITE_SPECIAL_AIR_DOWN_1 = Point.mutable(0, 5),
-        SPRITE_SPECIAL_AIR_DOWN_2 = Point.mutable(1, 5);
+        SPRITE_SLIDE_FORWARD = Point.immutable(5, 1),
+        SPRITE_SLIDE_BACKWARD = Point.immutable(6, 1),
+        SPRITE_ATTACK_GROUND_SIDE_1 = Point.immutable(7, 1),
+        SPRITE_ATTACK_GROUND_SIDE_2 = Point.immutable(0, 2),
+        SPRITE_ATTACK_GROUND_SIDE_3 = Point.immutable(1, 2),
+        SPRITE_ATTACK_GROUND_UP_1 = Point.immutable(2, 2),
+        SPRITE_ATTACK_GROUND_UP_2 = Point.immutable(3, 2),
+        SPRITE_ATTACK_GROUND_DOWN_1 = Point.immutable(4, 2),
+        SPRITE_SPECIAL_GROUND_SIDE_1 = Point.immutable(5, 2),
+        SPRITE_SPECIAL_GROUND_SIDE_2 = Point.immutable(6, 2),
+        SPRITE_SPECIAL_GROUND_UP_1 = Point.immutable(7, 2),
+        SPRITE_SPECIAL_GROUND_UP_2 = Point.immutable(0, 3),
+        SPRITE_SPECIAL_GROUND_DOWN_1 = Point.immutable(1, 3),
+        SPRITE_SPECIAL_GROUND_DOWN_2 = Point.immutable(2, 3),
+        SPRITE_ATTACK_AIR_SIDE_1 = Point.immutable(3, 3),
+        SPRITE_ATTACK_AIR_SIDE_2 = Point.immutable(4, 3),
+        SPRITE_ATTACK_AIR_SIDE_3 = Point.immutable(5, 3),
+        SPRITE_ATTACK_AIR_UP_1 = Point.immutable(6, 3),
+        SPRITE_ATTACK_AIR_UP_2 = Point.immutable(7, 3),
+        SPRITE_ATTACK_AIR_UP_3 = Point.immutable(0, 4),
+        SPRITE_ATTACK_AIR_DOWN_1 = Point.immutable(1, 4),
+        SPRITE_ATTACK_AIR_DOWN_2 = Point.immutable(2, 4),
+        SPRITE_ATTACK_AIR_DOWN_3 = Point.immutable(3, 4),
+        SPRITE_SPECIAL_AIR_SIDE_1 = Point.immutable(4, 4),
+        SPRITE_SPECIAL_AIR_SIDE_2 = Point.immutable(5, 4),
+        SPRITE_SPECIAL_AIR_UP_1 = Point.immutable(6, 4),
+        SPRITE_SPECIAL_AIR_UP_2 = Point.immutable(7, 4),
+        SPRITE_SPECIAL_AIR_DOWN_1 = Point.immutable(0, 5),
+        SPRITE_SPECIAL_AIR_DOWN_2 = Point.immutable(1, 5);
     
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------

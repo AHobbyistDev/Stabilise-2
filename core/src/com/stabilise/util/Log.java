@@ -40,7 +40,7 @@ public class Log {
     private static final RingBuffer<String> entries =
             new RingBuffer<>(LOG_CAPACITY);
     
-    /** A cache of the untagged logging agent to save on processor time. */
+    /** A cache of the untagged logging agent. */
     private static final Log defaultAgent = new Log("");
     
     /** The date. TODO: Would it be better to create Date objects on the fly? */
