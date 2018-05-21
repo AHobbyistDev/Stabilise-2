@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.stabilise.util.Config;
 import com.stabilise.util.Log;
+import com.stabilise.util.concurrent.event.EventDispatcher;
 import com.stabilise.util.io.data.CompoundBuilder;
 
 /**
@@ -13,10 +14,6 @@ import com.stabilise.util.io.data.CompoundBuilder;
  * {@link #initialise()} is invoked.
  */
 public class Settings {
-    
-    //--------------------==========--------------------
-    //-----=====Static Constants and Variables=====-----
-    //--------------------==========--------------------
     
     /** The value for the particles setting to indicate all particles. */
     public static final int PARTICLES_ALL = 0;
@@ -36,6 +33,11 @@ public class Settings {
                 .get(),
             Resources.DIR_CONFIG.child("settings.txt")
     );
+    
+    /** Dispatcher used to allow listeners to detect when a setting is changed.
+     * Events posted to this dispatcher will have the setting being changed as
+     * their name. */
+    public static final EventDispatcher NOTIFIER = EventDispatcher.concurrentNormal();
     
 
     // non-instantiable

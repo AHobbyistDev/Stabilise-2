@@ -19,3 +19,4 @@ HIGH PRIORITY
 TODO EVENTUALLY
 - Structure generation
 - Prepping spawn
+- Either abuse weak references or get the world's particle manager to deregister its event listener.

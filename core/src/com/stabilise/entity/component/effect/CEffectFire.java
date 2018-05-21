@@ -1,10 +1,7 @@
 package com.stabilise.entity.component.effect;
 
-import com.stabilise.core.Constants;
-import com.stabilise.core.Settings;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.Component;
-import com.stabilise.entity.damage.GeneralSource;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.util.io.data.DataCompound;
@@ -45,13 +42,7 @@ public class CEffectFire extends CParticleEffect<ParticleFlame> {
     public void update(World w, Entity e) {
         super.update(w, e);
         
-        if(Settings.settingParticlesAll())
-            createFireParticle(w, e);
-        else if(Settings.settingParticlesReduced() && age % 3 == 0)
-            createFireParticle(w, e);
-        
-        if(age % Constants.TICKS_PER_SECOND == 0)
-            e.damage(w, GeneralSource.fire(damage + w.rnd().nextInt(extra)));
+        createFireParticle(w, e);
     }
     
     /**
@@ -60,7 +51,7 @@ public class CEffectFire extends CParticleEffect<ParticleFlame> {
      * @param target The target of the effect.
      */
     private void createFireParticle(World world, Entity target) {
-        particleSrc.createBurst(1, 0.2f, 2.0f, Maths.PIf / 6.0f,
+        emitter.createBurst(1, 0.2f, 2.0f, Maths.PIf / 6.0f,
                 Maths.PIf * 5.0f / 6.0f, target);
     }
     

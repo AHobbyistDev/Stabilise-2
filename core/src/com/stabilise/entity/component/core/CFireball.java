@@ -7,7 +7,7 @@ import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.hitbox.LinkedHitbox;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
-import com.stabilise.entity.particle.ParticleSource;
+import com.stabilise.entity.particle.manager.ParticleEmitter;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Checks;
 import com.stabilise.util.io.data.DataCompound;
@@ -30,8 +30,8 @@ public class CFireball extends CBaseProjectile {
     /** The number of ticks after which a fireball despawns. */
     private static final int DESPAWN_TICKS = 300;
     
-    private ParticleSource<ParticleFlame> particleSrc;
-    private ParticleSource<ParticleExplosion> explosionSrc;
+    private ParticleEmitter<ParticleFlame> particleSrc;
+    private ParticleEmitter<ParticleExplosion> explosionSrc;
     private int damage;
     
     
@@ -106,7 +106,7 @@ public class CFireball extends CBaseProjectile {
      * Creates fire particles about the fireball's location of impact.
      */
     private void addImpactParticles(World w, Entity e, int particles) {
-        particleSrc.createBurst(particles, e.pos, 0.01f, 4.0f, 0f, (float)Maths.TAU);
+        particleSrc.createBurst(particles, e.pos, 0.01f, 4.0f, 0f, Maths.TAUf);
     }
     
     @Override
@@ -147,8 +147,8 @@ public class CFireball extends CBaseProjectile {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD) {
-            particleSrc = w.particleSource(ParticleFlame.class);
-            explosionSrc = w.particleSource(ParticleExplosion.class);
+            particleSrc = w.particleEmitter(ParticleFlame.class);
+            explosionSrc = w.particleEmitter(ParticleExplosion.class);
         }
         return super.handle(w, e, ev);
     }

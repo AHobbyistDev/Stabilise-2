@@ -14,7 +14,7 @@ import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleHeal;
-import com.stabilise.entity.particle.ParticleSource;
+import com.stabilise.entity.particle.manager.ParticleEmitter;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.io.data.DataCompound;
@@ -191,7 +191,7 @@ public class CPerson extends CBaseMob {
      * frames. */
     private int damageDealt = 0;
     
-    private ParticleSource<?> fireParticles;
+    private ParticleEmitter<?> fireParticles;
     
     @Override
     public AABB getAABB() {
@@ -233,7 +233,7 @@ public class CPerson extends CBaseMob {
         if(ticksSinceHealthLoss >= 80) {
             if(ticksSinceHealthLoss >= 360 || ticksSinceHealthLoss % 3 == 0) {
                 if(increaseHealth(1)) {
-                    w.particleSource(ParticleHeal.class).createBurst(
+                    w.particleEmitter(ParticleHeal.class).createBurst(
                             1, 0.2f, 2.0f,
                             Maths.PIf / 6.0f,
                             Maths.PIf * 5.0f / 6.0f,
@@ -410,7 +410,7 @@ public class CPerson extends CBaseMob {
                         w.addHitbox(h2, e.pos);
                         
                         fireParticles.createBurst(300, e.pos, 0.1f, 5f, 0, (float)Math.PI);
-                        w.particleSource(ParticleExplosion.class).createAt(e.pos);
+                        w.particleEmitter(ParticleExplosion.class).createAt(e.pos);
                         w.getCamera().shake(0.1f, 30);
                     } else {
                         fireParticles.createBurst(100, e.pos, 0.1f, 5f, 0, (float)Math.PI);
@@ -788,7 +788,7 @@ public class CPerson extends CBaseMob {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
-            fireParticles = w.particleSource(ParticleFlame.class);
+            fireParticles = w.particleEmitter(ParticleFlame.class);
         return super.handle(w, e, ev);
     }
     

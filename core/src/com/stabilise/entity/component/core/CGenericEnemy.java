@@ -5,7 +5,7 @@ import com.stabilise.entity.Position;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.ParticleFlame;
-import com.stabilise.entity.particle.ParticleSource;
+import com.stabilise.entity.particle.manager.ParticleEmitter;
 import com.stabilise.item.Items;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
@@ -19,7 +19,7 @@ public class CGenericEnemy extends CBaseMob {
     
     private static final AABB ENEMY_AABB = new AABB(-0.5f, 0, 1, 2);
     
-    private ParticleSource<?> srcFlame;
+    private ParticleEmitter<?> srcFlame;
     
     @Override
     public void init(Entity e) {
@@ -107,7 +107,7 @@ public class CGenericEnemy extends CBaseMob {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
-            srcFlame = w.particleSource(ParticleFlame.class);
+            srcFlame = w.particleEmitter(ParticleFlame.class);
         else if(ev.type() == EntityEvent.Type.KILLED) {
             dropItem(w, e, Items.APPLE.stackOf(1), 0.02f);
             dropItem(w, e, Items.SWORD.stackOf(1), 0.02f);
