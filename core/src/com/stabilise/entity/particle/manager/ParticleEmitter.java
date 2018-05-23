@@ -123,7 +123,6 @@ public class ParticleEmitter<T extends Particle> {
      */
     public T createAlways() {
         T p = pool.get();
-        //p.reset();
         world.addParticle(p);
         return p;
     }
@@ -135,7 +134,6 @@ public class ParticleEmitter<T extends Particle> {
      */
     public T createAlwaysAt(Position pos) {
         T p = pool.get();
-        //p.reset();
         p.pos.set(pos);
         world.addParticle(p);
         return p;
@@ -151,15 +149,13 @@ public class ParticleEmitter<T extends Particle> {
     
     private void createAlways(Position pos, float dx, float dy) {
         if(pool.physical) {
-            ParticlePhysical p = (ParticlePhysical)createAlways();
-            //p.reset();
+            ParticlePhysical p = (ParticlePhysical)pool.get();
             p.pos.set(pos);
             p.dx = dx;
             p.dy = dy;
             world.addParticle(p);
         } else {
-            Particle p = createAlways();
-            //p.reset();
+            Particle p = pool.get();
             p.pos.set(pos, dx, dy);
             world.addParticle(p);
         }

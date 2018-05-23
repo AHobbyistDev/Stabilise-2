@@ -19,7 +19,7 @@ import com.stabilise.world.World;
 class ParticlePool<T extends Particle> {
     
     /** Functions as the initial and the minimum capacity. */
-    private static final int CAPACITY_INITIAL = 1 << 4;
+    private static final int CAPACITY_INITIAL = 1 << 8;
     /** Maximum pool capacity. */
     private static final int CAPACITY_MAX = 1 << 13; // 9 expansions
     /** Number of active particles must be this many times the size of

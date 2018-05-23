@@ -1,7 +1,9 @@
 package com.stabilise.entity.component.effect;
 
+import com.stabilise.core.Constants;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.Component;
+import com.stabilise.entity.damage.GeneralSource;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.util.io.data.DataCompound;
@@ -43,6 +45,9 @@ public class CEffectFire extends CParticleEffect<ParticleFlame> {
         super.update(w, e);
         
         createFireParticle(w, e);
+        
+        if(age % Constants.TICKS_PER_SECOND == 0)
+            e.damage(w, GeneralSource.fire(damage + w.rnd().nextInt(extra)));
     }
     
     /**
