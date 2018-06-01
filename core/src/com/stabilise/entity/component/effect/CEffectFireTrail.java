@@ -30,8 +30,6 @@ public class CEffectFireTrail extends CParticleEffect<ParticleFlame> {
     public void update(World w, Entity e) {
         super.update(w, e);
         
-        //particleSrc.createAt(e.x, e.y); // one particle per tick for now
-        //particleSrc.createBurst(2, e.x, e.y, 0.2f, 1.0f, 0f, Maths.TAUf);
         Position dummyPos = emitter.dummyPos;
         emitter.createBurst(5, dummyPos.set(e.pos, -0.2f, -0.2f), 0.4f, 0.4f, 0.2f, 1.0f, 0f, Maths.TAUf);
     }

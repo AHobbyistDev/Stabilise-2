@@ -269,8 +269,18 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
+    public FunctionalIterable<Entity> getNearbyEntities(Position pos) {
+        return getEntities(); // TODO
+    }
+    
+    @Override
     public FunctionalIterable<Hitbox> getHitboxes() {
         return hitboxes;
+    }
+    
+    @Override
+    public FunctionalIterable<Hitbox> getNearbyHitboxes(Position pos) {
+        return getHitboxes(); // TODO
     }
     
     @Override

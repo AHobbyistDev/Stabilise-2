@@ -58,7 +58,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      * @return {@code true} if a player is in range; {@code false} otherwise.
      */
     private boolean playerInRange(World world) {
-        return world.getPlayers().any(p -> centrePos.diffSq(p.pos) <= ACTIVATION_RANGE_SQUARED);
+        return world.getPlayers().any(p -> centrePos.distSq(p.pos) <= ACTIVATION_RANGE_SQUARED);
     }
     
     /**

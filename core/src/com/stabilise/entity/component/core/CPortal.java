@@ -6,6 +6,7 @@ import java.util.Set;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
+import com.stabilise.entity.component.CNearbyPortal;
 import com.stabilise.entity.component.CSliceAnchorer;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.render.WorldRenderer;
@@ -49,8 +50,9 @@ public class CPortal extends CCore {
      * Multiverse#getDimension(String)}. This is {@code null} if this portal
      * is dimension-local. */
     private String pairedDimension;
-    /** true if the paired portal is in the same dimension as this one. */
-    private boolean intradimensional;
+    /** true if this is a portal to another dimension; false if this is the
+     * same dimension. */
+    private boolean interdimensional;
     
     private State state = State.WAITING_FOR_DIMENSION;
     
@@ -80,9 +82,14 @@ public class CPortal extends CCore {
     
     public CPortal() {}
     
+    
+    /**
+     * @param dimension The dimension to connect to. null to make this an
+     * intradimensional (same dimension) portal.
+     */
     public CPortal(String dimension) {
         this.pairedDimension = dimension;
-        intradimensional = dimension == null;
+        interdimensional = dimension != null;
     }
     
     private void onAddToWorld(World w, Entity e) {
@@ -149,32 +156,57 @@ public class CPortal extends CCore {
     public void update(World w, Entity e) {
         switch(state) {
             case WAITING_FOR_DIMENSION:
-            	// Do all the work only if we are the original portal
-            	if(!original)
-            		return;
-            	
-            	World w2 = pairedWorld(w);
-            	Entity ope = pairedPortal(w2);
-            	
-            	// Might be null for a single tick if the other portal entity
-            	// is still queued to be added to the other dimension.
-            	if(ope == null)
-            		return;
-            	
-            	if(ope.getComponent(CSliceAnchorer.class).allSlicesActive(w2)) {
-            		state = State.OPEN;
-            		
-            		CPortal opc = (CPortal) ope.core;
-            		opc.state = State.OPEN;
-            	}
+            	updateWaiting(w, e);
                 break;
             case OPEN:
-                // nothing to do, really
+                updateOpen(w, e);
                 break;
             case CLOSED:
-                // do we remove ourselves?
+                updateClosed(w, e);
                 break;
         }
+    }
+    
+    private void updateWaiting(World w, Entity e) {
+        // Do all the work only if we are the original portal
+        if(!original)
+            return;
+        
+        World w2 = pairedWorld(w);
+        Entity ope = pairedPortal(w2);
+        
+        // Might be null for a single tick if the other portal entity
+        // is still queued to be added to the other dimension.
+        if(ope == null)
+            return;
+        
+        if(ope.getComponent(CSliceAnchorer.class).allSlicesActive(w2)) {
+            state = State.OPEN;
+            
+            CPortal opc = (CPortal) ope.core;
+            opc.state = State.OPEN;
+        }
+    }
+    
+    private void updateOpen(World w, Entity e) {
+        w.getNearbyEntities(e.pos).forEach(en -> {
+            // Ignore phantoms for now
+            if(en.isPhantom())
+                return;
+            
+            float dist = e.pos.distSq(en.pos);
+            if(dist < NEARBY_DIST_SQ) {
+                if(nearbyEntityIDs.add(en.id())) {
+                    // We have a new phantom to create!
+                    Entity ph = Entities.phantom(en, e);
+                    en.addComponent(new CNearbyPortal(e, ph));
+                }
+            }
+        });
+    }
+    
+    private void updateClosed(World w, Entity e) {
+        // TODO
     }
     
     @Override
@@ -219,6 +251,13 @@ public class CPortal extends CCore {
      */
     public Entity pairedPortal(World otherDimWorld) {
         return otherDimWorld.getEntity(pairID);
+    }
+    
+    /**
+     * Returns true if this is a portal to another dimension; false otherwise.
+     */
+    public boolean interdimensional() {
+        return interdimensional;
     }
     
     @Override

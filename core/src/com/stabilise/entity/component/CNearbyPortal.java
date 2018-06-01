@@ -27,6 +27,11 @@ public class CNearbyPortal extends AbstractComponent {
         
     }
     
+    public CNearbyPortal(Entity portal, Entity phantom) {
+        this.portal = portal;
+        this.phantom = phantom;
+    }
+    
     @Override
     public void init(Entity e) {
         // TODO

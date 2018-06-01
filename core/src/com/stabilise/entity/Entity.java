@@ -5,6 +5,7 @@ import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.controller.CPlayerController;
 import com.stabilise.entity.component.core.CCore;
 import com.stabilise.entity.component.core.CPhantom;
+import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
@@ -196,6 +197,10 @@ public class Entity extends GameObject implements Exportable {
      */
     public boolean damage(World w, IDamageSource src) {
         return post(w, EDamaged.damaged(src));
+    }
+    
+    public void nearbyPortal(Entity pe, CPortal pc) {
+        // TODO
     }
     
     /**

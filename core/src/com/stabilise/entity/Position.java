@@ -396,7 +396,7 @@ public abstract class Position implements Exportable, Cloneable {
      * @return diffX()^2 + diffY()^2
      * @throws NullPointerException if {@code other} is {@code null}.
      */
-    public float diffSq(Position other) {
+    public float distSq(Position other) {
         float dx = diffX(other);
         float dy = diffY(other);
         return dx*dx + dy*dy;
@@ -426,7 +426,7 @@ public abstract class Position implements Exportable, Cloneable {
      * @throws NullPointerException if {@code other} is {@code null}.
      */
     public boolean isWithinRange(Position other, float dist) {
-    	return diffSq(other) <= dist*dist;
+    	return distSq(other) <= dist*dist;
     }
     
     /**
