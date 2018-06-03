@@ -8,7 +8,7 @@ package com.stabilise.entity.event;
 public class EDimensionChange extends EntityEvent {
 	
 	public EDimensionChange() {
-		super(Type.DIMENSION_CHANGE);
+		super(Type.THROUGH_PORTAL);
 	}
 	
 }

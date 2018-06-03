@@ -1,13 +1,11 @@
 package com.stabilise.entity.component.core;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.component.CNearbyPortal;
 import com.stabilise.entity.component.CSliceAnchorer;
+import com.stabilise.entity.event.EPortalInRange;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Checks;
@@ -23,19 +21,18 @@ import com.stabilise.world.multiverse.Multiverse;
  * <p>A portal is a, well, portal, which if all things go well will provide a
  * seamless transition between two dimensions, or locations in a dimension.
  * 
- * <p>
- * 
  * @see CPhantom
  * @see CNearbyPortal
  */
 public class CPortal extends CCore {
     
-    /** If an entity comes within this squared distance of a portal, a phantom
-     * will be created of it. */
-    private static final float NEARBY_DIST_SQ = 8*8;
-    /** If an entity with a phantom is no longer within this squared distance
-     * of a portal, the phantom will be removed. */
-    private static final float NEARBY_MAX_DIST_SQ = 16*16;
+    /** If an entity comes within this squared distance of a portal, it is
+     * notified via {@link Entity#nearbyPortal(EPortalInRange)}. */
+    public static final float NEARBY_DIST_SQ = 8*8;
+    /** If an entity is no longer within this squared distance of a portal,
+     * it stops monitoring the portal. */
+    public static final float NEARBY_MAX_DIST_SQ = 16*16;
+    
     
     private static enum State {
         WAITING_FOR_DIMENSION,
@@ -75,8 +72,9 @@ public class CPortal extends CCore {
     private long pairID;
     
     
-    
-    private final Set<Long> nearbyEntityIDs = new HashSet<>();
+    /** Event to send to entities which come in range. Cached to avoid
+     * excessive object creation. */
+    private EPortalInRange nearbyEvent;
     
     
     
@@ -93,7 +91,9 @@ public class CPortal extends CCore {
     }
     
     private void onAddToWorld(World w, Entity e) {
-        id = e.id(); // cache the ID
+        // cache the ID (can't do it in init() since it wouldn'tve been set yet)
+        id = e.id(); 
+        nearbyEvent = new EPortalInRange(id);
         
     	// Only do the setup if we're the original portal
         if(original) {
@@ -190,16 +190,21 @@ public class CPortal extends CCore {
     
     private void updateOpen(World w, Entity e) {
         w.getNearbyEntities(e.pos).forEach(en -> {
-            // Ignore phantoms for now
-            if(en.isPhantom())
+            // Ignore phantoms and other portals for now
+            if(en.isPhantom() || en.isPortal())
                 return;
             
-            float dist = e.pos.distSq(en.pos);
-            if(dist < NEARBY_DIST_SQ) {
-                if(nearbyEntityIDs.add(en.id())) {
-                    // We have a new phantom to create!
-                    Entity ph = Entities.phantom(en, e);
-                    en.addComponent(new CNearbyPortal(e, ph));
+            if(e.pos.distSq(en.pos) < NEARBY_DIST_SQ) {
+                CNearbyPortal cnp = en.nearbyPortal(nearbyEvent);
+                
+                // cnp is non-null <=> the entity is newly-informed of this
+                // portal. In that case, if this portal is interdimensional,
+                // we create a phantom on the other side and let it know.
+                if(interdimensional && cnp != null) {
+                    Entity phantom = Entities.phantom(en, e);
+                    cnp.phantom = phantom;
+                    cnp.updatePhantomPos(en, this); // set pos before adding to world
+                    pairedWorld(w).addEntityDontSetID(phantom);
                 }
             }
         });

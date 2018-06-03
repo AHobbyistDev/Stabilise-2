@@ -1,5 +1,6 @@
 package com.stabilise.entity;
 
+import com.stabilise.entity.component.CNearbyPortal;
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.controller.CPlayerController;
@@ -9,6 +10,7 @@ import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
+import com.stabilise.entity.event.EPortalInRange;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.collect.WeightingArrayList;
@@ -176,11 +178,11 @@ public class Entity extends GameObject implements Exportable {
      * @return true if if the events was fully handled, i.e. no component
      * consumed the event; false if the event was halted by some component.
      */
-    public boolean post(World w, EntityEvent e) {
-        return components.iterateUntil(c -> c.handle(w, this, e))
-            && !core.handle(w, this, e)
-            && !controller.handle(w, this, e)
-            && !physics.handle(w, this, e);
+    public boolean post(World w, EntityEvent ev) {
+        return !components.any(c -> c.handle(w, this, ev))
+            && !core.handle(w, this, ev)
+            && !controller.handle(w, this, ev)
+            && !physics.handle(w, this, ev);
     }
     
     @Override
@@ -199,8 +201,25 @@ public class Entity extends GameObject implements Exportable {
         return post(w, EDamaged.damaged(src));
     }
     
-    public void nearbyPortal(Entity pe, CPortal pc) {
-        // TODO
+    /**
+     * Notifies this entity that there is a nearby portal. If this entity is
+     * not yet aware of the portal, this method adds a {@link CNearbyPortal}
+     * component to this entity and returns it. If this entity is already
+     * aware of the portal, this method returns {@code null}.
+     */
+    public CNearbyPortal nearbyPortal(EPortalInRange ev) {
+        // If the portal is already in range, a CNearbyPortal for that
+        // portal will return true, and we stop here.
+        if(components.anyBackwards(c -> c.handle(null, this, ev),
+                CNearbyPortal.COMPONENT_WEIGHT))
+            return null;
+        
+        CNearbyPortal cnp = new CNearbyPortal(ev.portalID);
+        addComponent(cnp);
+        
+        // TODO: notify the physics component
+        
+        return cnp;
     }
     
     /**
@@ -209,6 +228,15 @@ public class Entity extends GameObject implements Exportable {
      */
     public boolean isPlayerControlled() {
         return controller instanceof CPlayerController;
+    }
+    
+    /**
+     * Returns true if this entity is a portal.
+     * 
+     * @see CPortal
+     */
+    public boolean isPortal() {
+        return core instanceof CPortal;
     }
     
     /**

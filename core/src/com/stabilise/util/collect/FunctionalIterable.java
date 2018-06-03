@@ -53,35 +53,6 @@ public interface FunctionalIterable<E> extends Iterable<E> {
     }
     
     /**
-     * Iterates over all elements, stopping either when no more elements are
-     * available or the given predicate returns {@code false}.
-     * 
-     * <p>The default implementation behaves as if by:
-     * 
-     * <pre>
-     * for(E e : this) {
-     *     if(pred.test(i.next()))
-     *         return false;
-     * }
-     * return true;</pre>
-     * 
-     * <p>Implementors are encouraged to override this if a faster
-     * implementation is possible.
-     * 
-     * @return {@code true} if the predicate never returned true (i.e. never
-     * broke); {@code false} otherwise.
-     * @throws NullPointerException if {@code pred} is {@code null}.
-     */
-    default boolean iterateUntil(Predicate<? super E> pred) {
-        //Objects.requireNonNull(pred); // fail-fast
-        for(E e : this) {
-            if(pred.test(e))
-                return false;
-        }
-        return true;
-    }
-    
-    /**
      * Iterates over the elements, and returns {@code true} if the given
      * predicate is satisfied for any element.
      * 
@@ -97,6 +68,8 @@ public interface FunctionalIterable<E> extends Iterable<E> {
      * <p>Implementors are encouraged to override this if a faster
      * implementation is possible.
      * 
+     * @return {@code true} if the predicate returns {@code true} at least
+     * once; {@code false} otherwise.
      * @throws NullPointerException if {@code pred} is {@code null}.
      */
     default boolean any(Predicate<? super E> pred) {

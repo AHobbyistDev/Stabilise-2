@@ -2,8 +2,10 @@ package com.stabilise.entity.component;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.core.CPortal;
-import com.stabilise.util.Checks;
-import com.stabilise.util.annotation.Incomplete;
+import com.stabilise.entity.event.EPortalInRange;
+import com.stabilise.entity.event.EPortalOutOfRange;
+import com.stabilise.entity.event.EntityEvent;
+import com.stabilise.entity.event.EntityEvent.Type;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
@@ -14,41 +16,85 @@ import com.stabilise.world.World;
  * @see CPortal
  * @see CPhantom
  */
-@Incomplete
 public class CNearbyPortal extends AbstractComponent {
     
-    /** The portal that we are nearby. */
-    private Entity portal;
-    /** The phantom entity in the other dimension that we are controlling. */
-    private Entity phantom;
+    /** The {@link CNearbyPortal#getWeight() weight} of a CNearbyPortal
+     * component. We use Integer.MAX_VALUE so that this goes at the end of a
+     * component list, so that the phantom's state is updated after all other
+     * components have effected their changes. */
+    public static final int COMPONENT_WEIGHT = Integer.MAX_VALUE;
     
     
-    public CNearbyPortal() {
-        
-    }
     
-    public CNearbyPortal(Entity portal, Entity phantom) {
-        this.portal = portal;
-        this.phantom = phantom;
+    /** The ID of the portal that we are nearby. */
+    public long portalID;
+    private boolean remove = false;
+    
+    /** The phantom entity we are controlling; null if we don't have one
+     * (because the portal leads to the same dimension). */
+    public Entity phantom;
+    
+    
+    
+    
+    public CNearbyPortal() {}
+    
+    public CNearbyPortal(long portalID) {
+        this.portalID = portalID;
     }
     
     @Override
     public void init(Entity e) {
-        // TODO
+        // nothing to do
     }
     
     @Override
     public void update(World w, Entity e) {
-        CPortal p = (CPortal) portal.core;
-        phantom.pos.setSum(e.pos, p.offset).align();
+        Entity portal = w.getEntity(portalID);
+        if(portal != null) {
+            // If we're far enough away, we can stop tracking the portal
+            if(e.pos.distSq(portal.pos) > CPortal.NEARBY_MAX_DIST_SQ) {
+                remove = true;
+                e.post(w, new EPortalOutOfRange(portalID));
+                if(phantom != null)
+                    phantom.destroy();
+            }
+            // If we have a phantom, update its position to match ours
+            else if(phantom != null)
+                updatePhantomPos(e, (CPortal)portal.core);
+        } else {
+            // Portal is gone. This component's job is done.
+            remove = true;
+            if(phantom != null)
+                phantom.destroy();
+        }
+    }
+    
+    /**
+     * Updates the phantom's position appropriately (assuming {@link #phantom}
+     * is non-null).
+     * 
+     * @param e the entity this component is attached to
+     * @param portalCore the core of the portal though which the phantom lives
+     */
+    public void updatePhantomPos(Entity e, CPortal portalCore) {
+        phantom.pos.setSum(e.pos, portalCore.offset).align();
+    }
+    
+    @Override
+    public boolean shouldRemove() {
+        return remove;
+    }
+    
+    @Override
+    public boolean handle(World w, Entity e, EntityEvent ev) {
+        return ev.type().equals(Type.PORTAL_IN_RANGE) 
+                && ((EPortalInRange) ev).portalID == portalID;
     }
     
     @Override
     public int getWeight() {
-        // Put this at the very end of the component list so that we update the
-        // phantom's state after all other components have effected their
-        // changes.
-        return Integer.MAX_VALUE;
+        return COMPONENT_WEIGHT;
     }
     
     @Override
@@ -59,12 +105,12 @@ public class CNearbyPortal extends AbstractComponent {
     
     @Override
     public void importFromCompound(DataCompound c) {
-        Checks.TODO(); // TODO
+        portalID = c.getI64("portalID");
     }
     
     @Override
     public void exportToCompound(DataCompound c) {
-        Checks.TODO(); // TODO
+        c.put("portalID", portalID);
     }
     
 }

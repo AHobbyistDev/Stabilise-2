@@ -39,9 +39,13 @@ public class EntityEvent extends Event {
         TILE_COLLISION_V,
         DAMAGED,
         KILLED,
-        /** When the entity changes dimensions, and has its components swapped
-         * out with its phantom. */
-        DIMENSION_CHANGE,
+        /** When an entity goes through a portal, either to the same dimension
+         * or another dimension. */
+        THROUGH_PORTAL,
+        /** When an entity comes "in range" of a portal. */
+        PORTAL_IN_RANGE,
+        /** When an entity moves "out of range" of a portal. */
+        PORTAL_OUT_OF_RANGE,
     }
     
     public static final EntityEvent
