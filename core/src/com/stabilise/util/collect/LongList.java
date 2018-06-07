@@ -66,6 +66,26 @@ public class LongList {
     }
     
     /**
+     * Adds a long to this list via an insertion sort (i.e. the given long will
+     * be inserted in the place of the first entry greater than it, shifting
+     * all succeeding entries to the right to make room, if necessary).
+     */
+    public void addSorted(long l) {
+        if(size == data.length)
+            data = Arrays.copyOf(data, 2*size + 1);
+        int idx = 0;
+        while(idx < size && data[idx] <= l)
+            idx++;
+        if(idx == size)
+            data[size++] = l;
+        else {
+            System.arraycopy(data, idx, data, idx+1, size-idx);
+            data[idx] = l;
+            size++;
+        }
+    }
+    
+    /**
      * Sets the element at the specified index, ignoring the size of this list.
      * 
      * @throws ArrayIndexOutOfBoundsException if {@code index < 0 || index >=
@@ -83,6 +103,25 @@ public class LongList {
      */
     public long get(int index) {
         return data[index];
+    }
+    
+    /**
+     * Removes the specified long from this list, shifting all succeeding
+     * entries to the left if necessary.
+     * 
+     * @return true if the entry was removed; false if it was not present
+     */
+    public boolean remove(long l) {
+        int idx = 0;
+        while(idx < size && data[idx] != l)
+            idx++;
+        if(idx == size)
+            return false;
+        else {
+            size--;
+            System.arraycopy(data, idx+1, data, idx, size-idx);
+            return true;
+        }
     }
     
     /**

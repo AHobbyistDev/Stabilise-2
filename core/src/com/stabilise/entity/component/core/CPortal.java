@@ -53,6 +53,15 @@ public class CPortal extends CCore {
     
     private State state = State.WAITING_FOR_DIMENSION;
     
+    /** Anticlockwise rotation of the portal, in radians. An angle of 0 means
+     * the portal is 'facing right', i.e. entities enter from the right. An
+     * angle of pi means the portal is 'facing left', etc. */
+    public float rotation = 0f;
+    /** Half the height of the portal. */
+    public float halfWidth = 1.5f;
+    /** true if the portal may be entered from either side. */
+    public boolean doubleSided = false;
+    
     /** The position of the other portal in its own dimension. This shouldn't
      * be modified after either portal is added to the world. */
     public final Position otherPortalPos = Position.create();
@@ -189,25 +198,41 @@ public class CPortal extends CCore {
     }
     
     private void updateOpen(World w, Entity e) {
-        w.getNearbyEntities(e.pos).forEach(en -> {
-            // Ignore phantoms and other portals for now
+        w.getEntitiesNearby(e.pos).forEach(en -> {
+            // Ignore phantoms and portals (including ourselves!) for now
             if(en.isPhantom() || en.isPortal())
                 return;
             
-            if(e.pos.distSq(en.pos) < NEARBY_DIST_SQ) {
-                CNearbyPortal cnp = en.nearbyPortal(nearbyEvent);
-                
-                // cnp is non-null <=> the entity is newly-informed of this
-                // portal. In that case, if this portal is interdimensional,
-                // we create a phantom on the other side and let it know.
-                if(interdimensional && cnp != null) {
-                    Entity phantom = Entities.phantom(en, e);
-                    cnp.phantom = phantom;
-                    cnp.updatePhantomPos(en, this); // set pos before adding to world
-                    pairedWorld(w).addEntityDontSetID(phantom);
-                }
-            }
+            // Iterating backwards is admittedly a microoptimisation
+            if(e.pos.distSq(en.pos) < NEARBY_DIST_SQ)
+                informNearbyEntity(w, e, en);
         });
+    }
+    
+    private void informNearbyEntity(World w, Entity portal, Entity en) {
+        // If the entity already knows about is, one of its CNearbyPortal
+        // components will reject us here.
+        if(en.components.anyBackwards(c -> c.handle(null, en, nearbyEvent),
+                CNearbyPortal.COMPONENT_WEIGHT))
+            return;
+        
+        CNearbyPortal cnp = new CNearbyPortal(id);
+        en.addComponent(cnp);
+        
+        // Switch to notification mode so that cnp doesn't eat the event when
+        // posted. TODO: more elegant way?
+        nearbyEvent.notification = true;
+        en.post(w, nearbyEvent);
+        nearbyEvent.notification = false;
+        
+        // If this portal is interdimensional, we create a phantom on the other
+        // side and let the entity know.
+        if(interdimensional) {
+            Entity phantom = Entities.phantom(en, portal);
+            cnp.phantom = phantom;
+            cnp.updatePhantomPos(en, this); // set before adding to world
+            pairedWorld(w).addEntityDontSetID(phantom);
+        }
     }
     
     private void updateClosed(World w, Entity e) {

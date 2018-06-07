@@ -1,6 +1,5 @@
 package com.stabilise.entity;
 
-import com.stabilise.entity.component.CNearbyPortal;
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.controller.CPlayerController;
@@ -10,7 +9,6 @@ import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
-import com.stabilise.entity.event.EPortalInRange;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.collect.WeightingArrayList;
@@ -39,6 +37,9 @@ public class Entity extends GameObject implements Exportable {
     /** This entity's velocity, in tiles/sec (NOT tiles/tick). */
     public float       dx, dy;
     public boolean     facingRight;
+    /** Every entity has an associated AABB. This is used for physics (i.e.
+     * collision with tiles) and for hitbox detection. However, for entities
+     * which do not move nor get hit (e.g. portals), this often goes unused. */
     public AABB        aabb;
     
     // The three privileged components
@@ -199,27 +200,6 @@ public class Entity extends GameObject implements Exportable {
      */
     public boolean damage(World w, IDamageSource src) {
         return post(w, EDamaged.damaged(src));
-    }
-    
-    /**
-     * Notifies this entity that there is a nearby portal. If this entity is
-     * not yet aware of the portal, this method adds a {@link CNearbyPortal}
-     * component to this entity and returns it. If this entity is already
-     * aware of the portal, this method returns {@code null}.
-     */
-    public CNearbyPortal nearbyPortal(EPortalInRange ev) {
-        // If the portal is already in range, a CNearbyPortal for that
-        // portal will return true, and we stop here.
-        if(components.anyBackwards(c -> c.handle(null, this, ev),
-                CNearbyPortal.COMPONENT_WEIGHT))
-            return null;
-        
-        CNearbyPortal cnp = new CNearbyPortal(ev.portalID);
-        addComponent(cnp);
-        
-        // TODO: notify the physics component
-        
-        return cnp;
     }
     
     /**

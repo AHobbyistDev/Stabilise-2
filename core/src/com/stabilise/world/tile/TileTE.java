@@ -38,8 +38,7 @@ public abstract class TileTE<T extends TileEntity> extends Tile {
     public void handlePlace(WorldProvider world, Position pos) {
         super.handlePlace(world, pos);
         T t = createTE();
-        t.pos.set(pos);
-        world.setTileEntity(t);
+        world.setTileEntityAt(pos, t);
     }
     
     @Override

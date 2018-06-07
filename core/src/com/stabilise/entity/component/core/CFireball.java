@@ -138,7 +138,7 @@ public class CFireball extends CBaseProjectile {
         h.effects = tgt -> tgt.addComponent(new CEffectFire(60*5, 1));
         w.addHitbox(h, e.pos);
         
-        explosionSrc.createAt(e.pos);
+        explosionSrc.createAlwaysAt(e.pos);
         addImpactParticles(w, e, 500);
         
         w.getCamera().shake(0.1f, 30);

@@ -2,9 +2,12 @@ package com.stabilise.entity.component.physics;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
+import com.stabilise.entity.event.EPortalInRange;
+import com.stabilise.entity.event.EPortalOutOfRange;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Checks;
+import com.stabilise.util.collect.LongList;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
@@ -24,6 +27,8 @@ public class CPhysicsImpl extends CPhysics {
     
     private final Position tmp1 = Position.createFixed(); // for horizontal/verticalCollisions
     private final Position tmp2 = Position.createFixed(); // for row/columnValid
+    
+    private final LongList nearbyPortalIDs = new LongList();
     
     
     @Override
@@ -110,7 +115,7 @@ public class CPhysicsImpl extends CPhysics {
         
         // Check the vertical wall of tiles to the left/right of the entity
         int min = Maths.floor(Maths.min(e.pos.ly(), newPos.ly()) + e.aabb.minY());
-        int max = Maths.floor(Maths.max(e.pos.ly(), newPos.ly()) + e.aabb.maxY());
+        int max = Maths.ceil(Maths.max(e.pos.ly(), newPos.ly()) + e.aabb.maxY());
         
         tmp1.set(newPos.sx, newPos.sy, newPos.lx()+leadingEdge, min).align();
         for(int y = min; y <= max; y++) {
@@ -235,13 +240,26 @@ public class CPhysicsImpl extends CPhysics {
         }
     }
     
-    @Override public boolean onGround() { return onGround; }
+    @Override
+    public boolean onGround() {
+        return onGround;
+    }
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
+        switch(ev.type()) {
+            case PORTAL_IN_RANGE:
+                nearbyPortalIDs.addSorted(((EPortalInRange)ev).portalID);
+                break;
+            case PORTAL_OUT_OF_RANGE:
+                nearbyPortalIDs.remove(((EPortalOutOfRange)ev).portalID);
+                break;
+            default:
+                break;
+        }
         return false;
     }
-    
+        
     @Override
     public void importFromCompound(DataCompound c) {
         Checks.TODO(); // TODO

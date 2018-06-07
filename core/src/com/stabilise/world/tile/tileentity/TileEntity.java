@@ -83,7 +83,7 @@ public abstract class TileEntity extends GameObject implements Exportable {
     /**
      * Invoked when this tile entity is added to the world.
      * 
-     * @see WorldProvider#setTileEntity(TileEntity)
+     * @see WorldProvider#setTileEntityAt(TileEntity)
      */
     public abstract void handleAdd(World world);
     

@@ -79,9 +79,9 @@ public class Hitbox extends GameObject {
         
         moveToOwner(world);
         
-        for(Entity e : world.getEntities()) {
-            if(e.id() == ownerID) continue;
-            // TODO: broadphase
+        for(Entity e : world.getEntitiesNearby(pos)) {
+            if(e.id() == ownerID)
+                continue;
             if(e.aabb.intersects(boundingBox, pos.diffX(e.pos), pos.diffY(e.pos))) {
                 hit(world, e);
                 if(hits == 0)

@@ -205,12 +205,12 @@ public abstract class AbstractWorld implements World {
     @Override
     public void addEntity(Entity e) {
         e.setID(multiverse().getNextEntityID());
-        e.pos.align(); // play it safe
-        entitiesToAdd.add(e);
+        addEntityDontSetID(e);
     }
     
     @Override
     public void addEntityDontSetID(Entity e) {
+        e.pos.align(); // play it safe
         entitiesToAdd.add(e);
     }
     
@@ -269,7 +269,7 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
-    public FunctionalIterable<Entity> getNearbyEntities(Position pos) {
+    public FunctionalIterable<Entity> getEntitiesNearby(Position pos) {
         return getEntities(); // TODO
     }
     
@@ -279,7 +279,7 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
-    public FunctionalIterable<Hitbox> getNearbyHitboxes(Position pos) {
+    public FunctionalIterable<Hitbox> getHitboxesNearby(Position pos) {
         return getHitboxes(); // TODO
     }
     

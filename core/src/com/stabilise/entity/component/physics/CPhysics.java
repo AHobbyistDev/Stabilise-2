@@ -7,13 +7,14 @@ import com.stabilise.entity.component.Component;
 /**
  * Abstract physics component class.
  * 
- * @see CPhysicsImplOld
+ * @see CPhysicsImpl
  * @see CNoPhysics
  */
 public abstract class CPhysics extends AbstractComponent {
     
     
     public abstract boolean onGround();
+    
     
     
     @Override

@@ -29,7 +29,8 @@ import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
 
 /**
- * A PlayerController is a MobController which is managed by player input.
+ * A PlayerController is an entity controller component which is managed by
+ * player input.
  */
 public class CPlayerController extends CController implements Controllable, InputProcessor {
     
@@ -154,7 +155,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 break;
             case SUMMON_SWARM:
                 {
-                    int max = 1000;// + game.world.getRnd().nextInt(250);
+                    int max = 1000;
                     for(int i = 0; i < max; i++) {
                         Entity m = Entities.enemy();
                         m.pos.set(e.pos,

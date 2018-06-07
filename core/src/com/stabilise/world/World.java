@@ -123,7 +123,7 @@ public interface World extends WorldProvider {
     /**
      * @return A collection of entities "nearby" the specified position.
      */
-    FunctionalIterable<Entity> getNearbyEntities(Position pos);
+    FunctionalIterable<Entity> getEntitiesNearby(Position pos);
     
     /**
      * @return The collection of hitboxes in the world.
@@ -133,7 +133,7 @@ public interface World extends WorldProvider {
     /**
      * @return A collection of hitboxes "nearby" the specified position.
      */
-    FunctionalIterable<Hitbox> getNearbyHitboxes(Position pos);
+    FunctionalIterable<Hitbox> getHitboxesNearby(Position pos);
     
     /**
      * @return The collection of particles in the world.

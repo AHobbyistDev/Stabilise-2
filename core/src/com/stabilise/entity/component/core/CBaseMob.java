@@ -318,22 +318,19 @@ public abstract class CBaseMob extends CCore {
             float ddx = e.physics.onGround() ? acceleration : airAcceleration;
             
             if(direction.hasRight())
-                e.dx = (e.dx + ddx);
+                e.dx += ddx;
             else
-                e.dx = (e.dx - ddx);
+                e.dx -= ddx;
             
             // TODO: modulate based on max dx better
             //ddx *= (maxDx - Math.abs(dx));
             if(e.dx > maxDx)
-                e.dx = (maxDx);
+                e.dx = maxDx;
             else if(e.dx < -maxDx)
-                e.dx = (-maxDx);
+                e.dx = -maxDx;
             
             e.facingRight = direction.hasRight();
         }
-        
-        // TODO: no vertical movement implemented for now
-        //if(direction.hasVerticalComponent()) {}
         
         moving = true;
     }
@@ -392,7 +389,7 @@ public abstract class CBaseMob extends CCore {
         hasTint = true;
         //tintStrength = 1.0f;
         
-        ParticleIndicator p = srcDmgIndicator.createAt(srcDmgIndicator.dummyPos.set(e.pos, 0f, e.aabb.maxY()));
+        ParticleIndicator p = srcDmgIndicator.createAlwaysAt(srcDmgIndicator.dummyPos.set(e.pos, 0f, e.aabb.maxY()));
         p.text = String.valueOf(src.damage());
         p.orange = src.damage() == 0;
         

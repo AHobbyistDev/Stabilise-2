@@ -53,21 +53,20 @@ public class CNearbyPortal extends AbstractComponent {
         Entity portal = w.getEntity(portalID);
         if(portal != null) {
             // If we're far enough away, we can stop tracking the portal
-            if(e.pos.distSq(portal.pos) > CPortal.NEARBY_MAX_DIST_SQ) {
-                remove = true;
-                e.post(w, new EPortalOutOfRange(portalID));
-                if(phantom != null)
-                    phantom.destroy();
-            }
+            if(e.pos.distSq(portal.pos) > CPortal.NEARBY_MAX_DIST_SQ)
+                onPortalOutOfRange(w, e);
             // If we have a phantom, update its position to match ours
             else if(phantom != null)
                 updatePhantomPos(e, (CPortal)portal.core);
-        } else {
-            // Portal is gone. This component's job is done.
-            remove = true;
-            if(phantom != null)
-                phantom.destroy();
-        }
+        } else
+            onPortalOutOfRange(w, e);
+    }
+    
+    private void onPortalOutOfRange(World w, Entity e) {
+        remove = true; // remove this component
+        e.post(w, new EPortalOutOfRange(portalID)); // let other components know
+        if(phantom != null) // get rid of the phantom, if it exists
+            phantom.destroy();
     }
     
     /**
@@ -88,8 +87,9 @@ public class CNearbyPortal extends AbstractComponent {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        return ev.type().equals(Type.PORTAL_IN_RANGE) 
-                && ((EPortalInRange) ev).portalID == portalID;
+        // ev.matches() doesn't return true if it's just a notification
+        return ev.type().equals(Type.PORTAL_IN_RANGE)
+                && ((EPortalInRange) ev).matches(portalID);
     }
     
     @Override
