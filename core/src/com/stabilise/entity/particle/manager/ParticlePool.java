@@ -1,9 +1,12 @@
-package com.stabilise.entity.particle;
+package com.stabilise.entity.particle.manager;
 
 import java.util.function.Supplier;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import com.stabilise.entity.Position;
+import com.stabilise.entity.particle.Particle;
+import com.stabilise.entity.particle.ParticlePhysical;
 import com.stabilise.util.collect.Array;
 import com.stabilise.world.World;
 
@@ -16,7 +19,7 @@ import com.stabilise.world.World;
 class ParticlePool<T extends Particle> {
     
     /** Functions as the initial and the minimum capacity. */
-    private static final int CAPACITY_INITIAL = 1 << 4;
+    private static final int CAPACITY_INITIAL = 1 << 8;
     /** Maximum pool capacity. */
     private static final int CAPACITY_MAX = 1 << 13; // 9 expansions
     /** Number of active particles must be this many times the size of
@@ -44,6 +47,15 @@ class ParticlePool<T extends Particle> {
     private int expansionLoad = CAPACITY_INITIAL * LOAD_FACTOR;
     
     
+    // Cached convenience values for use by ParticleEmitters
+    
+    /** true if the particles may be cast to ParticlePhysical. */
+    public final boolean physical;
+    public final Position dummyPos1 = Position.create();
+    public final Position dummyPos2 = Position.create();
+    
+    
+    
     /**
      * Creates a new pool for particles of the specified class.
      * 
@@ -57,10 +69,13 @@ class ParticlePool<T extends Particle> {
             throw new IllegalStateException("Particle class " + clazz
                     + " not registered!");
         generator = (Supplier<T>)Particle.REGISTRY.get(id);
+        
+        this.physical = ParticlePhysical.class.isAssignableFrom(clazz);
     }
     
     /**
      * Gets a particle from this pool, instantiating a new one if necessary.
+     * The returned particle is in its {@link Particle#reset() reset} state.
      */
     T get() {
         activeParticles++;
@@ -69,6 +84,9 @@ class ParticlePool<T extends Particle> {
             p.reset();
             return p;
         }
+        
+        // No need to reset here since we reset when particles are inserted
+        // into the pool: see put().
         return pool.get(--poolSize);
     }
     
@@ -91,13 +109,14 @@ class ParticlePool<T extends Particle> {
      * particle when it is registered as destroyed (i.e. from within
      * {@link Particle#updateAndCheck(World)}).
      */
-    public void reclaim(T p) {
+    @SuppressWarnings("unchecked")
+    public void reclaim(Particle p) {
         if(activeParticles-- > expansionLoad && pool.length() < CAPACITY_MAX) {
             pool.resize(EXPANSION * pool.length());
             expansionLoad = pool.length() * LOAD_FACTOR;
         }
         
-        put(p);
+        put((T)p);
     }
     
     /**

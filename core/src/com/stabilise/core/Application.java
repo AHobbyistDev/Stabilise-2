@@ -19,6 +19,7 @@ import com.stabilise.util.AppDriver;
 import com.stabilise.util.ArrayUtil;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
+import com.stabilise.util.concurrent.ClearingQueue;
 
 /**
  * An {@code Application} is designed to form the basis of any program which
@@ -89,6 +90,10 @@ public abstract class Application {
     
     /** The application's background executor. */
     private final ExecutorService executor;
+    
+    /** Queue of tasks to be exeucted on the main thread (NOT by the
+     * application {@link #executor}. */
+    private final ClearingQueue<Runnable> queuedTasks = ClearingQueue.create();
     
     /** {@code true} if the application has been shut down. */
     private boolean stopped = false;
@@ -231,6 +236,7 @@ public abstract class Application {
     private void update() {
         tick();
         state.update();
+        queuedTasks.consume(Runnable::run); // clears the queue
         doSetState();
     }
     
@@ -450,6 +456,17 @@ public abstract class Application {
         return executor;
     }
     
+    /**
+     * Returns executor which runs tasks on the main thread. The tasks are run
+     * immediately after the next update tick.
+     * 
+     * <p>Note that this executor is very different to the one returned by
+     * {@link #getExecutor()}.
+     */
+    public final Executor getMainThreadExecutor() {
+        return r -> queuedTasks.add(Objects.requireNonNull(r));
+    }
+    
     //--------------------==========--------------------
     //------------=====Static Functions=====------------
     //--------------------==========--------------------
@@ -500,6 +517,20 @@ public abstract class Application {
     public static Executor executor() {
         try {
             return instance.getExecutor();
+        } catch(NullPointerException e) {
+            throw new IllegalStateException("An application does not exist!");
+        }
+    }
+    
+    /**
+     * Gets the current Application's main thread executor, as by {@link
+     * #getMainThreadExecutor()}.
+     * 
+     * @throws IllegalStateException if an Application is not running.
+     */
+    public static Executor mainThreadExecutor() {
+        try {
+            return instance.getMainThreadExecutor();
         } catch(NullPointerException e) {
             throw new IllegalStateException("An application does not exist!");
         }

@@ -22,16 +22,10 @@ public class CNoPhysics extends CPhysics {
     @Override public boolean handle(World w, Entity e, EntityEvent ev) { return false; }
     @Override public int getWeight() { return 0; }
     @Override public Action resolve(Component other) { return Action.REJECT; }
+    
     @Override public boolean onGround() { return false; }
     
-    @Override
-    public void importFromCompound(DataCompound c) {
-        // nothing to do
-    }
-    
-    @Override
-    public void exportToCompound(DataCompound c) {
-        // nothing to do
-    }
+    @Override public void importFromCompound(DataCompound c) {}
+    @Override public void exportToCompound(DataCompound c) {}
     
 }

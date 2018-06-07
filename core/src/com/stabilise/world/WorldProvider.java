@@ -3,7 +3,6 @@ package com.stabilise.world;
 import java.util.Random;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.GameObject;
 import com.stabilise.entity.Position;
 import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.Tiles;
@@ -160,20 +159,19 @@ public interface WorldProvider {
      * 
      * @return The tile entity at the given position, or {@code null} if no
      * such tile entity is present or loaded.
+     * @throws NullPointerException if {@code pos} is {@code null}.
      */
     default TileEntity getTileEntityAt(Position pos) {
         return getSliceAt(pos).getTileEntityAt(pos.ltx(), pos.lty());
     }
     
     /**
-     * Sets a tile entity at the location specified by its {@link
-     * GameObject#pos position}.
+     * Sets a tile entity at the given position, and sets its {@link
+     * TileEntity#pos posiiton} to {@code pos}.
      * 
-     * @param t The tile entity.
-     * 
-     * @throws NullPointerException if {@code t} is {@code null}.
+     * @throws NullPointerException if either argument is {@code null}.
      */
-    void setTileEntity(TileEntity t);
+    void setTileEntityAt(Position pos, TileEntity t);
     
     /**
      * Removes a tile entity at the given position.

@@ -343,14 +343,14 @@ public final class AppDriver implements Runnable {
      * cumulative delays from updates or renders exceeds the specified time,
      * this driver will not attempt to catch up on scheduled updates.
      * 
-     * <p>The default value for this is 5 seconds.
+     * <p>The default value is 5 seconds.
      * 
      * @param time The delay threshold.
      * @param unit The unit of the {@code time} argument.
      * 
      * @throws IllegalArgumentException if, when converted to nanoseconds,
-     * {@code < 0}, or the given value is lower than the number of nanoseconds
-     * per tick.
+     * {@code time < 0}, or the given value is lower than the number of
+     * nanoseconds per tick.
      * @return This AppDriver.
      */
     public AppDriver setDelaySkip(long time, TimeUnit unit) {
@@ -361,6 +361,31 @@ public final class AppDriver implements Runnable {
         if(time <= nsPerTick)
             throw new IllegalArgumentException("Illegal time; it is lower than "
                     + "nsPerTick.");
+        this.delaySkip = time;
+        return this;
+    }
+    
+    /**
+     * Sets the threshold delay time before a render is forced. If catching up
+     * on update ticks takes too long then the application may appear to be
+     * completely unresponsive since nothing new is being rendered in the
+     * meantime. Thus, we will force a render if the time to execute a string
+     * of updates takes longer than this time.
+     * 
+     * <p>The default value is 0.5 of a second.
+     * 
+     * @param time The force render threshold.
+     * @param unit The unit of the {@code time} argument.
+     * 
+     * @throws IllegalArgumentException if, when converted to nanoseconds,
+     * {@code time < 0}.
+     * @return This AppDriver.
+     */
+    public AppDriver setForceRender(long time, TimeUnit unit) {
+        time = unit.toNanos(time);
+        if(time < 0)
+            throw new IllegalArgumentException("Illegal time! In nanoseconds, "
+                    + "its value is: " + time);
         this.delaySkip = time;
         return this;
     }

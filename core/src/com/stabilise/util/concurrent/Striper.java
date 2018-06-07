@@ -25,8 +25,7 @@ public class Striper<T> {
      * 
      * @param numObjects The number of objects to split this striper into. This
      * is rounded to the next power of two.
-     * @param supplier A function to use to generate the objects. The integer
-     * parameter is each object's index.
+     * @param supplier A function to use to generate the objects.
      * 
      * @throws IllegalArgumentException if {@code numObjects < 1}.
      * @throws NullPointerException if {@code supplier} is {@code null}, or it

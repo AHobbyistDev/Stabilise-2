@@ -5,8 +5,8 @@ import com.stabilise.entity.GameCamera;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.Particle;
-import com.stabilise.entity.particle.ParticleManager;
-import com.stabilise.entity.particle.ParticleSource;
+import com.stabilise.entity.particle.manager.ParticleManager;
+import com.stabilise.entity.particle.manager.ParticleEmitter;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
@@ -98,6 +98,14 @@ public interface World extends WorldProvider {
      */
     void addHitbox(Hitbox h);
     
+    /**
+     * Adds a particle to the world. This is for {@link ParticleSource} use
+     * only!
+     * 
+     * <p>It is implicitly trusted that {@code p} is non-null.
+     */
+    void addParticle(Particle p);
+    
     // ==========Collection getters==========
     
     /**
@@ -113,9 +121,19 @@ public interface World extends WorldProvider {
     FunctionalIterable<Entity> getEntities();
     
     /**
+     * @return A collection of entities "nearby" the specified position.
+     */
+    FunctionalIterable<Entity> getEntitiesNearby(Position pos);
+    
+    /**
      * @return The collection of hitboxes in the world.
      */
     FunctionalIterable<Hitbox> getHitboxes();
+    
+    /**
+     * @return A collection of hitboxes "nearby" the specified position.
+     */
+    FunctionalIterable<Hitbox> getHitboxesNearby(Position pos);
     
     /**
      * @return The collection of particles in the world.
@@ -138,8 +156,8 @@ public interface World extends WorldProvider {
      * method is equivalent to - and provided as a convenient alternative for -
      * {@link #getParticleManager()}{@code .getSource(particleClass)}.
      */
-    default <T extends Particle> ParticleSource<T> particleSource(Class<T> particleClass) {
-        return getParticleManager().getSource(particleClass);
+    default <T extends Particle> ParticleEmitter<T> particleEmitter(Class<T> particleClass) {
+        return getParticleManager().getEmitter(particleClass);
     }
     
     /**

@@ -200,8 +200,8 @@ public class PositionFixed extends Position {
     
     @Override
     public PositionFixed globalify() {
-        lx += tileCoordFromSliceCoord(sx);
-        ly += tileCoordFromSliceCoord(sy);
+        lx += Position.tileCoordFromSliceCoord(sx);
+        ly += Position.tileCoordFromSliceCoord(sy);
         sx = 0;
         sy = 0;
         return this;

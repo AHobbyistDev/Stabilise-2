@@ -5,6 +5,7 @@ import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.controller.CPlayerController;
 import com.stabilise.entity.component.core.CCore;
 import com.stabilise.entity.component.core.CPhantom;
+import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
@@ -36,6 +37,9 @@ public class Entity extends GameObject implements Exportable {
     /** This entity's velocity, in tiles/sec (NOT tiles/tick). */
     public float       dx, dy;
     public boolean     facingRight;
+    /** Every entity has an associated AABB. This is used for physics (i.e.
+     * collision with tiles) and for hitbox detection. However, for entities
+     * which do not move nor get hit (e.g. portals), this often goes unused. */
     public AABB        aabb;
     
     // The three privileged components
@@ -175,11 +179,11 @@ public class Entity extends GameObject implements Exportable {
      * @return true if if the events was fully handled, i.e. no component
      * consumed the event; false if the event was halted by some component.
      */
-    public boolean post(World w, EntityEvent e) {
-        return components.iterateUntil(c -> c.handle(w, this, e))
-            && !core.handle(w, this, e)
-            && !controller.handle(w, this, e)
-            && !physics.handle(w, this, e);
+    public boolean post(World w, EntityEvent ev) {
+        return !components.any(c -> c.handle(w, this, ev))
+            && !core.handle(w, this, ev)
+            && !controller.handle(w, this, ev)
+            && !physics.handle(w, this, ev);
     }
     
     @Override
@@ -204,6 +208,15 @@ public class Entity extends GameObject implements Exportable {
      */
     public boolean isPlayerControlled() {
         return controller instanceof CPlayerController;
+    }
+    
+    /**
+     * Returns true if this entity is a portal.
+     * 
+     * @see CPortal
+     */
+    public boolean isPortal() {
+        return core instanceof CPortal;
     }
     
     /**

@@ -103,20 +103,21 @@ class GenProvider implements WorldProvider {
     }
     
 	@Override
-	public void setTileEntity(TileEntity t) {
-		doSetTileEntity(t, t.pos);
+	public void setTileEntityAt(Position pos, TileEntity t) {
+	    t.pos.set(pos);
+		doSetTileEntity(pos, t);
 	}
 	
 	@Override
 	public void removeTileEntityAt(Position pos) {
-		doSetTileEntity(null, pos);
+		doSetTileEntity(pos, null);
 	}
 	
     /**
-     * @param t may be null -- null means remove whatever TE is there
      * @param pos never null
+     * @param t may be null -- null means remove whatever TE is there
      */
-    private void doSetTileEntity(TileEntity t, Position pos) {
+    private void doSetTileEntity(Position pos, TileEntity t) {
         Slice s = getSliceAt(pos);
         
         if(!s.isDummy()) {

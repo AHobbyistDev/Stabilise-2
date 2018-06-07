@@ -70,7 +70,7 @@ public class CEnemyController extends CController {
             if(rnd < 0.45) { // idle
                 if(aggro && rnd < 0.15) { // attack!
                     Entity aggressor = w.getEntity(aggressorID);
-                    if(aggressor != null && e.pos.diffSq(aggressor.pos) < 4*4) {
+                    if(aggressor != null && e.pos.distSq(aggressor.pos) < 4*4) {
                         if(rnd < 0.005)
                             mob.specialAttack(w, Direction.DOWN);
                         else  

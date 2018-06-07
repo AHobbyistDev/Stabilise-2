@@ -55,6 +55,8 @@ public class WorldRenderer implements Renderer {
     private static final float DEFAULT_COL_BITS = DEFAULT_COL.toFloatBits();
     private static final Color ENEMY_TINT = new Color(0.7f, 0.15f, 0.65f, 1f);
     
+    private static final Color BACKGROUND_COL = new Color(0x92D1E4FF);
+    
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
     //--------------------==========--------------------
@@ -213,11 +215,6 @@ public class WorldRenderer implements Renderer {
             texItems[i._2] = skin.getRegion("item/" + i._1.split(":")[1]);
         });
         
-        //background = new Rectangle(screen.getWidth(), screen.getHeight());
-        //----background.fill(new Colour(0x92D1E4));
-        //background.colourVertices(new Colour(0xFFFFFF), new Colour(0xFF00FF), new Colour(0x00FFFF), new Colour(0xFFFF00));
-        //background.gradientTopToBottom(new Colour(0x000000), new Colour(0xC9300E));
-        
         tileRenderer.loadResources();
         hudRenderer.loadResources();
         
@@ -233,8 +230,7 @@ public class WorldRenderer implements Renderer {
     
     @Override
     public void unloadResources() {
-        for(Disposable d : disposables)
-            d.dispose();
+        disposables.forEach(Disposable::dispose);
         
         tileRenderer.unloadResources();
         hudRenderer.unloadResources();
@@ -293,6 +289,7 @@ public class WorldRenderer implements Renderer {
         
         profiler.next("camera"); // root.update.renderer.camera
         camObj.update(world);
+        
         // Updating camera matrix not needed anymore since we don't use global coords
         //camera.position.set((float)playerCamera.pos.getGlobalX(), (float)playerCamera.pos.getGlobalY(), 0f);
         //camera.update();
@@ -305,8 +302,7 @@ public class WorldRenderer implements Renderer {
     @Override
     public void render() {
         profiler.start("background"); // root.render.background
-        Color bCol = new Color(0x92D1E4FF); // RGBA is annoying in this case: ARGB > RGBA
-        Gdx.gl.glClearColor(bCol.r, bCol.g, bCol.b, 1);
+        Gdx.gl.glClearColor(BACKGROUND_COL.r, BACKGROUND_COL.g, BACKGROUND_COL.b, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         
         updateMatrices(false);
@@ -392,9 +388,8 @@ public class WorldRenderer implements Renderer {
         profiler.start("cursor"); // root.render.hud.cursor
         renderCursorItem();
         
-        updateMatrices(true);
-        
         profiler.next("hud"); // root.render.hud.hud
+        updateMatrices(true);
         hudRenderer.render();
         
         profiler.next("endbatch");
@@ -510,7 +505,6 @@ public class WorldRenderer implements Renderer {
             renderOn(tileRenderer.tiles[c.stack.getData()], e);
         else
             renderOn(texItems[c.stack.getItem().getID()], e);
-            //renderOn(shtItems.getRegion(c.stack.getItem().getID() - 1), e);
     }
     
     /**

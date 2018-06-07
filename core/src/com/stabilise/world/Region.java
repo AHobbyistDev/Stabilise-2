@@ -255,7 +255,7 @@ public class Region {
      * lighting, etc.
      */
     private void stitch(Region r) {
-        
+        // TODO
     }
     
     /**
@@ -265,6 +265,7 @@ public class Region {
     public void exportFromWorld(HostWorld world) {
     	state.setUnimported();
     	
+    	// For now just destroy all 
     	// Unload entities in the region...
         int minX = x() * Region.REGION_SIZE_IN_TILES;
         int maxX = minX + Region.REGION_SIZE_IN_TILES;

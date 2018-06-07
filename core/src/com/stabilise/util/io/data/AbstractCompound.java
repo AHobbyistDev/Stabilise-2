@@ -21,15 +21,21 @@ public abstract class AbstractCompound implements ITag, DataCompound {
     public abstract <T extends ITag> T putData(String name, T t);
     
     /**
-     * Puts everything in this compound into {@code c}. This method is public
-     * for convenience; external code should probably try to avoid using this.
+     * Puts everything from the given compound into this compound.
      */
-    public abstract void putAll(AbstractCompound c);
+    public void putAll(DataCompound c) {
+        ((AbstractCompound)c).putInto(this);
+    }
+    
+    /**
+     * Puts everything in this compound into the given compound.
+     */
+    protected abstract void putInto(AbstractCompound target);
     
     @Override
     public DataCompound copy(Format format) {
         AbstractCompound clone = format.newAbstractCompound();
-        putAll(clone);
+        clone.putAll(this);
         return clone;
     }
     

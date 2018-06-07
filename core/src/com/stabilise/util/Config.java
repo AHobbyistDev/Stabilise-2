@@ -58,7 +58,7 @@ public class Config {
         DataCompound def = defaults.convert(CONFIG_FORMAT);
         this.defaults = def.immutable();
         this.defaultsAsMap = def.asMapCompound();
-        this.defaultsAsMap.putAll(valuesAsMap); // fill up the values with the defaults
+        this.valuesAsMap.putAll(defaultsAsMap); // fill up the values with the defaults
         this.fileLoc = Objects.requireNonNull(fileLoc);
     }
     
@@ -78,7 +78,7 @@ public class Config {
      */
     public void resetToDefaults() {
         valuesAsMap.clear();
-        defaultsAsMap.putAll(valuesAsMap);
+        valuesAsMap.putAll(defaultsAsMap);
     }
     
     /**

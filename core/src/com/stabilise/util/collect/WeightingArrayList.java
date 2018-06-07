@@ -167,6 +167,28 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
             cons.accept(data[i]);
     }
     
+    /**
+     * Performs the given action on each element in this list whose weight is
+     * less than or equal to the specified weight. This method is useful if you
+     * only care about things near the start of a list.
+     */
+    public void forEach(Consumer<? super E> cons, int maxWeight) {
+        E e;
+        for(int i = 0; i < size && (e = data[i]).getWeight() <= maxWeight; i++)
+            cons.accept(e);
+    }
+    
+    /**
+     * Iterates <em>backwards</em> through this list, performing the given
+     * action on any each element whose weight is greater than or equal to the
+     * specified weight.
+     */
+    public void forEachBackwards(Consumer<? super E> cons, int minWeight) {
+        E e;
+        for(int i = size-1; i >= 0 && (e = data[i]).getWeight() >= minWeight; i--)
+            cons.accept(e);
+    }
+    
     @Override
     public void iterate(Predicate<? super E> pred) {
         for(int i = 0; i < size; i++)
@@ -175,17 +197,22 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
     }
     
     @Override
-    public boolean iterateUntil(Predicate<? super E> pred) {
-        for(int i = 0; i < size; i++)
-            if(pred.test(data[i]))
-                return false;
-        return true;
-    }
-    
-    @Override
     public boolean any(Predicate<? super E> pred) {
         for(int i = 0; i < size; i++)
             if(pred.test(data[i]))
+                return true;
+        return false;
+    }
+    
+    /**
+     * Much like {@link #any(Predicate)}, but iterates <em>backwards</em>
+     * through the list, and only tests the given predicate on elements with a
+     * weight greater than or equal to {@code minWeight}.
+     */
+    public boolean anyBackwards(Predicate<? super E> pred, int minWeight) {
+        E e;
+        for(int i = size-1; i >= 0 && (e = data[i]).getWeight() >= minWeight; i--)
+            if(pred.test(e))
                 return true;
         return false;
     }

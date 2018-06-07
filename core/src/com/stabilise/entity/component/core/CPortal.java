@@ -1,12 +1,11 @@
 package com.stabilise.entity.component.core;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
+import com.stabilise.entity.component.CNearbyPortal;
 import com.stabilise.entity.component.CSliceAnchorer;
+import com.stabilise.entity.event.EPortalInRange;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Checks;
@@ -22,19 +21,18 @@ import com.stabilise.world.multiverse.Multiverse;
  * <p>A portal is a, well, portal, which if all things go well will provide a
  * seamless transition between two dimensions, or locations in a dimension.
  * 
- * <p>
- * 
  * @see CPhantom
  * @see CNearbyPortal
  */
 public class CPortal extends CCore {
     
-    /** If an entity comes within this squared distance of a portal, a phantom
-     * will be created of it. */
-    private static final float NEARBY_DIST_SQ = 8*8;
-    /** If an entity with a phantom is no longer within this squared distance
-     * of a portal, the phantom will be removed. */
-    private static final float NEARBY_MAX_DIST_SQ = 16*16;
+    /** If an entity comes within this squared distance of a portal, it is
+     * notified via {@link Entity#nearbyPortal(EPortalInRange)}. */
+    public static final float NEARBY_DIST_SQ = 8*8;
+    /** If an entity is no longer within this squared distance of a portal,
+     * it stops monitoring the portal. */
+    public static final float NEARBY_MAX_DIST_SQ = 16*16;
+    
     
     private static enum State {
         WAITING_FOR_DIMENSION,
@@ -49,10 +47,20 @@ public class CPortal extends CCore {
      * Multiverse#getDimension(String)}. This is {@code null} if this portal
      * is dimension-local. */
     private String pairedDimension;
-    /** true if the paired portal is in the same dimension as this one. */
-    private boolean intradimensional;
+    /** true if this is a portal to another dimension; false if this is the
+     * same dimension. */
+    private boolean interdimensional;
     
     private State state = State.WAITING_FOR_DIMENSION;
+    
+    /** Anticlockwise rotation of the portal, in radians. An angle of 0 means
+     * the portal is 'facing right', i.e. entities enter from the right. An
+     * angle of pi means the portal is 'facing left', etc. */
+    public float rotation = 0f;
+    /** Half the height of the portal. */
+    public float halfWidth = 1.5f;
+    /** true if the portal may be entered from either side. */
+    public boolean doubleSided = false;
     
     /** The position of the other portal in its own dimension. This shouldn't
      * be modified after either portal is added to the world. */
@@ -73,20 +81,28 @@ public class CPortal extends CCore {
     private long pairID;
     
     
-    
-    private final Set<Long> nearbyEntityIDs = new HashSet<>();
+    /** Event to send to entities which come in range. Cached to avoid
+     * excessive object creation. */
+    private EPortalInRange nearbyEvent;
     
     
     
     public CPortal() {}
     
+    
+    /**
+     * @param dimension The dimension to connect to. null to make this an
+     * intradimensional (same dimension) portal.
+     */
     public CPortal(String dimension) {
         this.pairedDimension = dimension;
-        intradimensional = dimension == null;
+        interdimensional = dimension != null;
     }
     
     private void onAddToWorld(World w, Entity e) {
-        id = e.id(); // cache the ID
+        // cache the ID (can't do it in init() since it wouldn'tve been set yet)
+        id = e.id(); 
+        nearbyEvent = new EPortalInRange(id);
         
     	// Only do the setup if we're the original portal
         if(original) {
@@ -149,32 +165,78 @@ public class CPortal extends CCore {
     public void update(World w, Entity e) {
         switch(state) {
             case WAITING_FOR_DIMENSION:
-            	// Do all the work only if we are the original portal
-            	if(!original)
-            		return;
-            	
-            	World w2 = pairedWorld(w);
-            	Entity ope = pairedPortal(w2);
-            	
-            	// Might be null for a single tick if the other portal entity
-            	// is still queued to be added to the other dimension.
-            	if(ope == null)
-            		return;
-            	
-            	if(ope.getComponent(CSliceAnchorer.class).allSlicesActive(w2)) {
-            		state = State.OPEN;
-            		
-            		CPortal opc = (CPortal) ope.core;
-            		opc.state = State.OPEN;
-            	}
+            	updateWaiting(w, e);
                 break;
             case OPEN:
-                // nothing to do, really
+                updateOpen(w, e);
                 break;
             case CLOSED:
-                // do we remove ourselves?
+                updateClosed(w, e);
                 break;
         }
+    }
+    
+    private void updateWaiting(World w, Entity e) {
+        // Do all the work only if we are the original portal
+        if(!original)
+            return;
+        
+        World w2 = pairedWorld(w);
+        Entity ope = pairedPortal(w2);
+        
+        // Might be null for a single tick if the other portal entity
+        // is still queued to be added to the other dimension.
+        if(ope == null)
+            return;
+        
+        if(ope.getComponent(CSliceAnchorer.class).allSlicesActive(w2)) {
+            state = State.OPEN;
+            
+            CPortal opc = (CPortal) ope.core;
+            opc.state = State.OPEN;
+        }
+    }
+    
+    private void updateOpen(World w, Entity e) {
+        w.getEntitiesNearby(e.pos).forEach(en -> {
+            // Ignore phantoms and portals (including ourselves!) for now
+            if(en.isPhantom() || en.isPortal())
+                return;
+            
+            // Iterating backwards is admittedly a microoptimisation
+            if(e.pos.distSq(en.pos) < NEARBY_DIST_SQ)
+                informNearbyEntity(w, e, en);
+        });
+    }
+    
+    private void informNearbyEntity(World w, Entity portal, Entity en) {
+        // If the entity already knows about is, one of its CNearbyPortal
+        // components will reject us here.
+        if(en.components.anyBackwards(c -> c.handle(null, en, nearbyEvent),
+                CNearbyPortal.COMPONENT_WEIGHT))
+            return;
+        
+        CNearbyPortal cnp = new CNearbyPortal(id);
+        en.addComponent(cnp);
+        
+        // Switch to notification mode so that cnp doesn't eat the event when
+        // posted. TODO: more elegant way?
+        nearbyEvent.notification = true;
+        en.post(w, nearbyEvent);
+        nearbyEvent.notification = false;
+        
+        // If this portal is interdimensional, we create a phantom on the other
+        // side and let the entity know.
+        if(interdimensional) {
+            Entity phantom = Entities.phantom(en, portal);
+            cnp.phantom = phantom;
+            cnp.updatePhantomPos(en, this); // set before adding to world
+            pairedWorld(w).addEntityDontSetID(phantom);
+        }
+    }
+    
+    private void updateClosed(World w, Entity e) {
+        // TODO
     }
     
     @Override
@@ -219,6 +281,13 @@ public class CPortal extends CCore {
      */
     public Entity pairedPortal(World otherDimWorld) {
         return otherDimWorld.getEntity(pairID);
+    }
+    
+    /**
+     * Returns true if this is a portal to another dimension; false otherwise.
+     */
+    public boolean interdimensional() {
+        return interdimensional;
     }
     
     @Override

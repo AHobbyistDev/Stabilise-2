@@ -205,6 +205,13 @@ public class EventDispatcher {
         handlers.clear();
     }
     
+    /**
+     * Clears all listeners registered to the specified event.
+     */
+    public void clearListeners(Event e) {
+        handlers.remove(e);
+    }
+    
     // No point exposing this method since Listener is a package-private class.
     /**
      * Clears any listeners satisfying the specified predicate. This is

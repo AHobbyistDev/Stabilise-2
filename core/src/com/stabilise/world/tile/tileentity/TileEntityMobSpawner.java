@@ -5,7 +5,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleSmoke;
-import com.stabilise.entity.particle.ParticleSource;
+import com.stabilise.entity.particle.manager.ParticleEmitter;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
@@ -26,8 +26,8 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     private int ticksUntilNextSpawn = TICKS_BETWEEN_SPAWNS;
     private final Position centrePos = Position.create();
     
-    private ParticleSource<?> fireGen;
-    private ParticleSource<?> smokeGen;
+    private ParticleEmitter<?> fireGen;
+    private ParticleEmitter<?> smokeGen;
     
     
     @Override
@@ -35,8 +35,8 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
         if(playerInRange(w)) {
             // Ugly way of lazily initialising...
             if(fireGen == null) {
-                fireGen = w.particleSource(ParticleFlame.class);
-                smokeGen = w.particleSource(ParticleSmoke.class);
+                fireGen = w.particleEmitter(ParticleFlame.class);
+                smokeGen = w.particleEmitter(ParticleSmoke.class);
             }
             
             if(--ticksUntilNextSpawn == 0) {
@@ -58,7 +58,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      * @return {@code true} if a player is in range; {@code false} otherwise.
      */
     private boolean playerInRange(World world) {
-        return world.getPlayers().any(p -> centrePos.diffSq(p.pos) <= ACTIVATION_RANGE_SQUARED);
+        return world.getPlayers().any(p -> centrePos.distSq(p.pos) <= ACTIVATION_RANGE_SQUARED);
     }
     
     /**

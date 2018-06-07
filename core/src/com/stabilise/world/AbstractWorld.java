@@ -17,7 +17,7 @@ import com.stabilise.entity.Position;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.Particle;
-import com.stabilise.entity.particle.ParticleManager;
+import com.stabilise.entity.particle.manager.ParticleManager;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.ForTestingPurposes;
@@ -205,12 +205,12 @@ public abstract class AbstractWorld implements World {
     @Override
     public void addEntity(Entity e) {
         e.setID(multiverse().getNextEntityID());
-        e.pos.align(); // play it safe
-        entitiesToAdd.add(e);
+        addEntityDontSetID(e);
     }
     
     @Override
     public void addEntityDontSetID(Entity e) {
+        e.pos.align(); // play it safe
         entitiesToAdd.add(e);
     }
     
@@ -239,19 +239,14 @@ public abstract class AbstractWorld implements World {
         hitboxes.append(Objects.requireNonNull(h));
     }
     
-    /**
-     * Adds a particle to the world. This is for {@link ParticleSource} use
-     * only!
-     * 
-     * <p>It is implicitly trusted that {@code p} is non-null.
-     */
+    @Override
     public void addParticle(Particle p) {
         particleCount++;
         particles.append(p);
     }
     
     private boolean reclaimParticle(Particle p) {
-        particleSource(p.getClass()).reclaim(p);
+        getParticleManager().reclaim(p);
         return true;
     }
     
@@ -274,8 +269,18 @@ public abstract class AbstractWorld implements World {
     }
     
     @Override
+    public FunctionalIterable<Entity> getEntitiesNearby(Position pos) {
+        return getEntities(); // TODO
+    }
+    
+    @Override
     public FunctionalIterable<Hitbox> getHitboxes() {
         return hitboxes;
+    }
+    
+    @Override
+    public FunctionalIterable<Hitbox> getHitboxesNearby(Position pos) {
+        return getHitboxes(); // TODO
     }
     
     @Override

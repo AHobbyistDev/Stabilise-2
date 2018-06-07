@@ -8,16 +8,10 @@ import com.stabilise.world.World;
  */
 public class ParticleFlame extends ParticlePhysical {
     
-    //--------------------==========--------------------
-    //-----=====Static Constants and Variables=====-----
-    //--------------------==========--------------------
-    
-    /** The number of ticks after which the particle despawns. */
+    /** The number of ticks after which a flame particle despawns. */
     public static final int DESPAWN_TICKS = 30;
     
-    //--------------------==========--------------------
-    //-------------=====Member Variables=====-----------
-    //--------------------==========--------------------
+    
     
     /** The opacity of the particle. */
     public float opacity;
