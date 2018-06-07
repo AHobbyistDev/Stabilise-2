@@ -1,5 +1,6 @@
 package com.stabilise.entity.component.core;
 
+import com.badlogic.gdx.math.Vector2;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
@@ -10,6 +11,7 @@ import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Checks;
 import com.stabilise.util.io.data.DataCompound;
+import com.stabilise.util.maths.Interpolation;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 import com.stabilise.world.multiverse.Multiverse;
@@ -33,6 +35,8 @@ public class CPortal extends CCore {
      * it stops monitoring the portal. */
     public static final float NEARBY_MAX_DIST_SQ = 16*16;
     
+    private static final int OPEN_ANIMATION_DURATION = 30;
+    
     
     private static enum State {
         WAITING_FOR_DIMENSION,
@@ -40,8 +44,8 @@ public class CPortal extends CCore {
         CLOSED
     }
     
-    /** 1 block wide, 3 blocks high. */
-    private static final AABB AABB = new AABB(-0.5f, 0f, 1.0f, 3f);
+    /** 0.5 blocks wide, 3 blocks high. */
+    private static final AABB AABB = new AABB(-0.25f, -1.5f, 0.5f, 3f);
     
     /** Name of the paired dimension, for getting via {@link
      * Multiverse#getDimension(String)}. This is {@code null} if this portal
@@ -57,8 +61,16 @@ public class CPortal extends CCore {
      * the portal is 'facing right', i.e. entities enter from the right. An
      * angle of pi means the portal is 'facing left', etc. */
     public float rotation = 0f;
-    /** Half the height of the portal. */
-    public float halfWidth = 1.5f;
+    /** Points in the direction that this portal is facing (i.e. this is a
+     * unit vector in the direction given by {@link #rotation}). This is
+     * set to the correct value when the portal is added to the world. */
+    public Vector2 direction = new Vector2(1f, 0f);
+    /** The maximum height of the portal. This is <em>not</em> the portal's
+     * current height; for this refer to {@link #halfHeight}. */
+    public float height = 3f;
+    /** Half the current height of the portal. This may not necessarily be half
+     * of {@link #height} since we might be in an opening or closing animation. */
+    public float halfHeight = 0f;
     /** true if the portal may be entered from either side. */
     public boolean doubleSided = false;
     
@@ -85,6 +97,10 @@ public class CPortal extends CCore {
      * excessive object creation. */
     private EPortalInRange nearbyEvent;
     
+    // Animation stuff
+    private boolean animating = false;
+    private int animationTicks = 0;
+    
     
     
     public CPortal() {}
@@ -104,16 +120,21 @@ public class CPortal extends CCore {
         id = e.id(); 
         nearbyEvent = new EPortalInRange(id);
         
+        direction.rotateRad(rotation);
+        
     	// Only do the setup if we're the original portal
         if(original) {
+            // No need to clamp
+            
             // First clamp to the middle of a tile (since we have width 0.5 on
             // each side, this will centre the portal on a tile), then align.
-            e.pos.clampToTile().add(0.5f, 0).align();
-            otherPortalPos.clampToTile().add(0.5f, 0).align();
+            //e.pos.clampToTile().add(0.5f, 0).align();
+            //otherPortalPos.clampToTile().add(0.5f, 0).align();
             
             // Subtract the direction vector since we enter from one edge of the
             // first portal and exit from the opposite edge of the other.
-            offset.setDiff(otherPortalPos, e.pos).add(e.facingRight?1:-1, 0).align();
+            //offset.setDiff(otherPortalPos, e.pos).add(e.facingRight?1:-1, 0).align();
+            offset.setDiff(otherPortalPos, e.pos).align();
             
             // ope = "other portal entity", opc = "other portal core"
             Entity ope = Entities.portal(w.getDimensionName());
@@ -194,10 +215,23 @@ public class CPortal extends CCore {
             
             CPortal opc = (CPortal) ope.core;
             opc.state = State.OPEN;
+            
+            animating = true;
+            animationTicks = 0;
         }
     }
     
     private void updateOpen(World w, Entity e) {
+        if(animating) {
+            if(++animationTicks == OPEN_ANIMATION_DURATION) {
+                animating = false;
+                halfHeight = height/2;
+            } else {
+                float x = (float)animationTicks / OPEN_ANIMATION_DURATION;
+                halfHeight = Interpolation.CUBIC.easeOut(0f, height/2, x);
+            }
+        }
+        
         w.getEntitiesNearby(e.pos).forEach(en -> {
             // Ignore phantoms and portals (including ourselves!) for now
             if(en.isPhantom() || en.isPortal())

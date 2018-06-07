@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.core.Application;
 import com.stabilise.core.game.Game;
 import com.stabilise.core.state.SingleplayerState;
@@ -100,7 +101,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
         
         if(Gdx.input.isButtonPressed(Buttons.LEFT) && !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
             doInRadius(worldRenderer, (pos) -> game.world.breakTileAt(pos));
-        else if(Gdx.input.isButtonPressed(Buttons.RIGHT))
+        else if(Gdx.input.isButtonPressed(Buttons.RIGHT) && !Gdx.input.isKeyPressed(Keys.ALT_LEFT))
             doInRadius(worldRenderer, (pos) -> game.world.setTileAt(pos, tileID));
     }
     
@@ -194,9 +195,10 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 String dim = game.playerData.data.getDimensionName();
                 //String dim = "flatland";
                 Entity portal = Entities.portal(dim);
-                portal.pos.set(e.pos, e.facingRight ? 3f : -3f, 0f).align();
-                portal.facingRight = !e.facingRight;
+                portal.pos.set(e.pos, e.facingRight ? 3f : -3f, 1.5f).align();
+                //portal.facingRight = !e.facingRight;
                 CPortal pCore = (CPortal) portal.core;
+                pCore.rotation = e.facingRight ? Maths.PIf : 0f;
                 
                 if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
                 	pCore.otherPortalPos.set(0, 0, 0f, 0f);
@@ -220,9 +222,9 @@ public class CPlayerController extends CController implements Controllable, Inpu
     @Override
     public boolean keyDown(int keycode) {
         if(keycode == Keys.LEFT_BRACKET)
-            game.world.setTimeDelta(game.world.getTimeDelta() * 0.5f);
+            game.world.setTimeDelta(game.world.getTimeDelta() / 2);
         else if(keycode == Keys.RIGHT_BRACKET)
-            game.world.setTimeDelta(game.world.getTimeDelta() * 2f);
+            game.world.setTimeDelta(game.world.getTimeDelta() * 2);
         else if(keycode == Keys.P)
             ;//System.out.println(game.profiler.getData().toString());
         else if(keycode == Keys.O)
@@ -243,8 +245,29 @@ public class CPlayerController extends CController implements Controllable, Inpu
     @Override
     public boolean touchDown(int x, int y, int pointer, int button) {
         // Ctrl + leftclick = teleport
-        if(button == Buttons.LEFT && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
+        if(button == Buttons.LEFT && Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
             e.pos.set(worldRenderer.mouseCoords());
+        // Alt + rightclick = portal
+        else if(button == Buttons.RIGHT && Gdx.input.isKeyPressed(Keys.ALT_LEFT)) {
+            String dim = game.playerData.data.getDimensionName();
+            Entity portal = Entities.portal(dim);
+            
+            Position mouseCoords = worldRenderer.mouseCoords();
+            portal.pos.set(mouseCoords);
+            //portal.facingRight = !e.facingRight;
+            
+            CPortal pCore = (CPortal) portal.core;
+            float dx = e.pos.diffX(mouseCoords);
+            float dy = e.pos.diffY(mouseCoords);
+            pCore.rotation = MathUtils.atan2(-dy, -dx);
+            
+            if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
+                pCore.otherPortalPos.set(0, 0, 0f, 0f); // origin of other dim
+            else
+                // spawn the other portal at the same place
+                pCore.otherPortalPos.set(portal.pos);
+            
+            game.world.addEntity(portal);
         }
         return false;
     }

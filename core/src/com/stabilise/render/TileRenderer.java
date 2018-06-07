@@ -7,6 +7,7 @@ import static com.stabilise.world.Slice.SLICE_SIZE_MINUS_ONE;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
@@ -45,8 +46,8 @@ public class TileRenderer implements Renderer {
     // minCorner and maxCorner provide screen border cutoffs so that
     // renderSlice() can save some work by only rendering tiles on the
     // screen.
-    private final Position minCorner = Position.create();
-    private final Position maxCorner = Position.create();
+    private final Position minCorner = Position.createFixed();
+    private final Position maxCorner = Position.createFixed();
     private final Position camPosOtherDim = Position.create();
     
     
@@ -94,8 +95,8 @@ public class TileRenderer implements Renderer {
         //worldRenderer.batch.disableBlending();
         slicesRendered = 0;
         Position camPos = wr.camObj.pos;
-        minCorner.set(camPos, -wr.tilesHorizontal, -wr.tilesVertical).align().clampToTile();
-        maxCorner.set(camPos, wr.tilesHorizontal, wr.tilesVertical + 1).align().clampToTile();
+        minCorner.set(camPos, -wr.tilesHorizontal, -wr.tilesVertical).align();
+        maxCorner.set(camPos, wr.tilesHorizontal, wr.tilesVertical + 1).align();
         
         for(int x = minCorner.sx(); x <= maxCorner.sx(); x++) {
             for(int y = minCorner.sy(); y <= maxCorner.sy(); y++) {
@@ -121,10 +122,10 @@ public class TileRenderer implements Renderer {
         
         // Casting the corners' localX/Y to int is fine since we already
         // clamped minCorner and maxCorner in render().
-        int xMin = x == minCorner.sx() ? (int)minCorner.lx() : 0;
-        int yMin = y == minCorner.sy() ? (int)minCorner.ly() : 0;
-        int xMax = x == maxCorner.sx() ? (int)maxCorner.lx() : SLICE_SIZE_MINUS_ONE;
-        int yMax = y == maxCorner.sy() ? (int)maxCorner.ly() : SLICE_SIZE_MINUS_ONE;
+        int xMin = x == minCorner.sx() ? minCorner.ltx() : 0;
+        int yMin = y == minCorner.sy() ? minCorner.lty() : 0;
+        int xMax = x == maxCorner.sx() ? maxCorner.ltx() : SLICE_SIZE_MINUS_ONE;
+        int yMax = y == maxCorner.sy() ? maxCorner.lty() : SLICE_SIZE_MINUS_ONE;
         
         // Camera x/y at which to place the tile.
         float cx, cy;
@@ -205,6 +206,10 @@ public class TileRenderer implements Renderer {
         });
     }
     
+    /**
+     * @param pe portal entity
+     */
+    /*
     public void renderPortalView(Entity pe) {
         CPortal pc = (CPortal) pe.core;
         if(!pc.isOpen())
@@ -228,12 +233,17 @@ public class TileRenderer implements Renderer {
         
         float minGradDy, maxGradDy;
         
+        float halfHeight = pc.halfHeight*MathUtils.cos(pc.rotation);
         if(drawToRight) {
-        	minGradDy = diffY + pe.aabb.minY();
-            maxGradDy = diffY + pe.aabb.maxY();
+            minGradDy = diffY - halfHeight;
+            maxGradDy = diffY + halfHeight;
+        	//minGradDy = diffY + pe.aabb.minY();
+            //maxGradDy = diffY + pe.aabb.maxY();
         } else {
-        	minGradDy = diffY + pe.aabb.maxY();
-            maxGradDy = diffY + pe.aabb.minY();
+            minGradDy = diffY + halfHeight;
+            maxGradDy = diffY - halfHeight;
+        	//minGradDy = diffY + pe.aabb.maxY();
+            //maxGradDy = diffY + pe.aabb.minY();
         }
         
         // The camera's position if it were in the other dimension.
@@ -256,6 +266,61 @@ public class TileRenderer implements Renderer {
                     // dy/dx < maxGradDy/camDiffX.
                     // Rearranging to avoid division by zero, we get...
                     return dy*diffX > dx*minGradDy && dy*diffX < dx*maxGradDy;
+                });
+            }
+        }
+    }
+    */
+    
+    /**
+     * @param pe portal entity
+     */
+    public void renderPortalView(Entity pe) {
+        CPortal pc = (CPortal) pe.core;
+        if(!pc.isOpen())
+            return;
+        
+        Position camPos = wr.camObj.pos;
+        
+        float diffX = camPos.diffX(pe.pos);
+        float diffY = camPos.diffY(pe.pos);
+        
+        if(pc.direction.dot(diffX, diffY) > 0)
+            return;
+        
+        float xOff = pc.halfHeight*MathUtils.sin(pc.rotation);
+        float yOff = pc.halfHeight*MathUtils.cos(pc.rotation);
+        float minGradDx = diffX - xOff;
+        float maxGradDx = diffX + xOff;
+        float minGradDy = diffY + yOff;
+        float maxGradDy = diffY - yOff;
+        
+        // The camera's position if it were in the other dimension.
+        camPosOtherDim.setSum(camPos, pc.offset).align();
+        
+        //minCorner.set(camPosOtherDim, drawToRight ? diffX : -wr.tilesHorizontal, -wr.tilesVertical)
+        //        .clampToTile().align();
+        //maxCorner.set(camPosOtherDim, drawToRight ? wr.tilesHorizontal : diffX, wr.tilesVertical + 1)
+        //        .clampToTile().align();
+        
+        minCorner.set(camPosOtherDim, -wr.tilesHorizontal, -wr.tilesVertical)
+                .clampToTile().align();
+        maxCorner.set(camPosOtherDim, wr.tilesHorizontal, wr.tilesVertical + 1)
+                .clampToTile().align();
+        
+        World w = pc.pairedWorld(world);
+        
+        for(int sx = minCorner.sx(); sx <= maxCorner.sx(); sx++) {
+            for(int sy = minCorner.sy(); sy <= maxCorner.sy(); sy++) {
+                renderSlice(w.getSliceAt(sx, sy), camPosOtherDim, (x,y) -> {
+                    x += 0.5f; // centre on the tile
+                    y += 0.5f; // centre on the tile
+                    // We want
+                    // y/x > minGradDy/minGradDx, and
+                    // y/x < maxGradDy/maxGradDx.
+                    // Rearranging to avoid division by zero, we get...
+                    return y*minGradDx > x*minGradDy && y*maxGradDx < x*maxGradDy
+                           && pc.direction.dot(x-diffX, y-diffY) < 0;
                 });
             }
         }

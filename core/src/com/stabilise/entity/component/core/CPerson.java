@@ -1,6 +1,7 @@
 package com.stabilise.entity.component.core;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.stabilise.core.Constants;
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
@@ -19,7 +20,6 @@ import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
-import com.stabilise.util.maths.Vec2;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.util.shape.Polygon;
 import com.stabilise.util.shape.Shape;
@@ -120,13 +120,13 @@ public class CPerson extends CBaseMob {
     public static final int SPECIAL_SIDE_GROUND_COST_MANA = 50;
     public static final int SPECIAL_SIDE_GROUND_DURATION = 40;
     public static final int SPECIAL_SIDE_GROUND_FRAME_2_BEGIN = 16;
-    public static final Vec2 SPECIAL_SIDE_GROUND_ORIGIN = new Vec2(1.09f, 1.25f);
+    public static final Vector2 SPECIAL_SIDE_GROUND_ORIGIN = new Vector2(1.09f, 1.25f);
     
     // Up special (ground)
     public static final int SPECIAL_UP_GROUND_COST_MANA = 100;
     public static final int SPECIAL_UP_GROUND_DURATION = 40;
     public static final int SPECIAL_UP_GROUND_FRAME_2_BEGIN = 16;
-    public static final Vec2 SPECIAL_UP_GROUND_ORIGIN = new Vec2(0.25f,2.25f);
+    public static final Vector2 SPECIAL_UP_GROUND_ORIGIN = new Vector2(0.25f,2.25f);
     
     // Down special (ground)
     public static final int SPECIAL_DOWN_GROUND_COST_MANA = 100;
@@ -141,19 +141,19 @@ public class CPerson extends CBaseMob {
     public static final int SPECIAL_SIDE_AIR_COST_MANA = 50;
     public static final int SPECIAL_SIDE_AIR_DURATION = 30;
     public static final int SPECIAL_SIDE_AIR_FRAME_2_BEGIN = 10;
-    public static final Vec2 SPECIAL_SIDE_AIR_ORIGIN = new Vec2(1.02f,1.33f);
+    public static final Vector2 SPECIAL_SIDE_AIR_ORIGIN = new Vector2(1.02f,1.33f);
     
     // Up special (air)
     public static final int SPECIAL_UP_AIR_COST_MANA = 100;
     public static final int SPECIAL_UP_AIR_DURATION = 30;
     public static final int SPECIAL_UP_AIR_FRAME_2_BEGIN = 10;
-    public static final Vec2 SPECIAL_UP_AIR_ORIGIN = new Vec2(0.27f,2.18f);
+    public static final Vector2 SPECIAL_UP_AIR_ORIGIN = new Vector2(0.27f,2.18f);
     
     // Down special (air)
     public static final int SPECIAL_DOWN_AIR_COST_MANA = 100;
     public static final int SPECIAL_DOWN_AIR_DURATION = 30;
     public static final int SPECIAL_DOWN_AIR_FRAME_2_BEGIN = 10;
-    public static final Vec2 SPECIAL_DOWN_AIR_ORIGIN = new Vec2(0.33f,0.36f);
+    public static final Vector2 SPECIAL_DOWN_AIR_ORIGIN = new Vector2(0.33f,0.36f);
     
     
     private static final AABB AABB = new AABB(-0.4f, 0f, 0.8f, 1.8f);
@@ -474,7 +474,7 @@ public class CPerson extends CBaseMob {
             e.addComponent(new CEffectFireTrail(Constants.TICKS_PER_SECOND / 2));
     }
     
-    private void fireball(World w, Entity e, int manaCost, Vec2 originPoint) {
+    private void fireball(World w, Entity e, int manaCost, Vector2 originPoint) {
         if(useMana(manaCost)) {
             Entity f = Entities.fireball(e.id(), 5 + w.rnd().nextInt(5));
             
@@ -515,7 +515,7 @@ public class CPerson extends CBaseMob {
      * @param manaCost The mana cost of the storm.
      * @param originPoint The point from which the storm is to originate.
      */
-    private void fireballStorm(World w, Entity e, int manaCost, Vec2 originPoint) {
+    private void fireballStorm(World w, Entity e, int manaCost, Vector2 originPoint) {
         float px = e.facingRight ? originPoint.x : -originPoint.x;
         
         if(useMana(manaCost)) {
@@ -538,7 +538,7 @@ public class CPerson extends CBaseMob {
         }
     }
     
-    private void fireballRain(World w, Entity e, int manaCost, Vec2 originPoint) {
+    private void fireballRain(World w, Entity e, int manaCost, Vector2 originPoint) {
         float px = e.facingRight ? originPoint.x : -originPoint.x;
         
         if(useMana(manaCost)) {

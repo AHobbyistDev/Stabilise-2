@@ -530,7 +530,32 @@ public class WorldRenderer implements Renderer {
     }
     
     public void renderPortal(Entity e, CPortal c) {
-        renderOn(c.isOpen() ? texPortalOpened : texPortalClosed, e);
+        //renderOn(c.isOpen() ? texPortalOpened : texPortalClosed, e);
+        
+        /*
+        batch.draw(
+                tex, // region
+                camObj.pos.diffX(e.pos) + e.aabb.minX(), // x
+                camObj.pos.diffY(e.pos) + e.aabb.minY(), // y
+                e.aabb.width(), // width
+                e.aabb.height() // height
+        );
+        */
+        
+        if(c.isOpen()) {
+            batch.draw(
+                    texPortalOpened, // region
+                    camObj.pos.diffX(e.pos) - 0.25f, // x
+                    camObj.pos.diffY(e.pos) - c.halfHeight, // y
+                    0.25f, // originX
+                    c.halfHeight, // originY
+                    0.5f, // width
+                    2*c.halfHeight, // height
+                    1f, // scaleX
+                    1f, // scaleY
+                    Maths.toDegrees(c.rotation) // rotation
+            );
+        }
     }
     
     // ----------Particle rendering----------

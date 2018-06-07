@@ -2,6 +2,8 @@ package com.stabilise.util.maths;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import com.badlogic.gdx.math.Vector2;
+
 /**
  * A 2x2 row-major matrix. Such a matrix takes the form:
  * 
@@ -154,7 +156,7 @@ public class Matrix2 {
      * @throws NullPointerException if either argument is {@code null}.
      * @throws UnsupportedOperationException if {@code dest} is immutable.
      */
-    public Vec2 transform(Vec2 vec, Vec2 dest) {
+    public Vector2 transform(Vector2 vec, Vector2 dest) {
         return dest.set(
                 m00 * vec.x + m01 * vec.y,
                 m10 * vec.x + m11 * vec.y
@@ -169,8 +171,8 @@ public class Matrix2 {
      * @return The resultant vector, which is mutable iff {@code vec} is.
      * @throws NullPointerException if {@code vec} is {@code null}.
      */
-    public Vec2 transform(Vec2 vec) {
-        return new Vec2(
+    public Vector2 transform(Vector2 vec) {
+        return new Vector2(
                 m00 * vec.x + m01 * vec.y,
                 m10 * vec.x + m11 * vec.y
         );

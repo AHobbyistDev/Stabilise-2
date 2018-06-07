@@ -3,11 +3,11 @@ package com.stabilise.util.shape;
 
 import java.util.Arrays;
 
+import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.MathUtils;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.io.data.Exportable;
 import com.stabilise.util.maths.Matrix2;
-import com.stabilise.util.maths.TransMat;
 
 /**
  * A shape is a 2D object usually consisting of a number of vertices, which may
@@ -96,10 +96,10 @@ public abstract class Shape implements Exportable {
      * @return The transformed shape.
      * @throws NullPointerException if {@code m} is {@code null}.
      */
-    public Shape transform(TransMat m) {
+    public Shape transform(Affine2 m) {
         return transform((dest,o,x,y) -> {
-            dest[o]   = m.m00*x + m.m01*y + m.tx;
-            dest[o+1] = m.m10*x + m.m10*y + m.ty;
+            dest[o]   = m.m00*x + m.m01*y + m.m02;
+            dest[o+1] = m.m10*x + m.m10*y + m.m12;
         });
     }
     

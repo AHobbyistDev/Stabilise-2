@@ -1,7 +1,7 @@
 package com.stabilise.entity.model;
 
+import com.badlogic.gdx.math.Affine2;
 import com.stabilise.util.annotation.Incomplete;
-import com.stabilise.util.maths.TransMat;
 import com.stabilise.util.shape.Shape;
 
 /**
@@ -16,12 +16,12 @@ public class Bone {
     protected Shape hitbox;
     /** The local transformation matrix of this bone (encapsulates rotation &
      * translation). */
-    public final TransMat localTransMat;
+    public final Affine2 localTransMat;
     /** The total transformation matrix of this bone. If this bone does not
      * have a parent, this is just a reference to localTransMat. If this bone
      * <i>does</i> have a parent, this is equal to {@code parent.totalTransMat
      * * this.localTransMat}. */
-    public final TransMat totalTransMat;
+    public final Affine2 totalTransMat;
     
     /** This bone's parent. The bone is located relative to the parent, and
      * transformations to the parent propagate down to us. May be null, which
@@ -43,13 +43,13 @@ public class Bone {
      */
     public Bone(Shape hitbox) {
         baseHitbox = this.hitbox = hitbox;
-        localTransMat = totalTransMat = new TransMat();
+        localTransMat = totalTransMat = new Affine2();
     }
     
     public Bone(Shape hitbox, Bone parent) {
         baseHitbox = this.hitbox = hitbox;
-        localTransMat = new TransMat();
-        totalTransMat = new TransMat();
+        localTransMat = new Affine2();
+        totalTransMat = new Affine2();
         this.parent = parent;
     }
     
@@ -82,11 +82,11 @@ public class Bone {
         if(dirty) {
             updateLocalTransMat();
             if(parent != null)
-                parent.totalTransMat.mul(localTransMat, totalTransMat);
+                ;//parent.totalTransMat.mul(localTransMat, totalTransMat);
             dirty = false;
             flushed = true;
         } else if(parent != null && parent.flushed){
-            parent.totalTransMat.mul(localTransMat, totalTransMat);
+            //parent.totalTransMat.mul(localTransMat, totalTransMat);
             flushed = true;
         }
     }

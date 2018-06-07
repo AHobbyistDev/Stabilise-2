@@ -3,6 +3,7 @@ package com.stabilise.util.maths;
 import java.util.function.IntBinaryOperator;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * This class provides some utility methods and fields with mathematical
@@ -34,13 +35,13 @@ public class Maths {
     public static final float PIf = (float)Math.PI;
     
     /** The x-axis unit vector with components (1,0). */
-    public static final Vec2 VEC_X = new Vec2(1f, 0f);
+    public static final Vector2 VEC_X = new Vector2(1f, 0f);
     /** The y-axis unit vector with components (0,1). */
-    public static final Vec2 VEC_Y = new Vec2(0f, 1f);
+    public static final Vector2 VEC_Y = new Vector2(0f, 1f);
     /** A vector with components (1, 1). */
-    public static final Vec2 VEC_1_1 = new Vec2(1f, 1f);
+    public static final Vector2 VEC_1_1 = new Vector2(1f, 1f);
     /** Zero-vector. */
-    public static final Vec2 VEC_ZERO = new Vec2();
+    public static final Vector2 VEC_ZERO = new Vector2();
     
     /** The maximum value which can be held by an unsigned byte
      * (<tt>2<sup><font size=-1>8</font></sup>-1</tt>). */
