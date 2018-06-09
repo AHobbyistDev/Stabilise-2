@@ -258,6 +258,10 @@ public class Game implements Controllable, InputProcessor {
             case SAVE_LOG:
                 Log.saveLog(false, Stabilise.GAME_NAME + " v" + Constants.VERSION);
                 break;
+            case TOG_DEBUG_FLAG:
+                Debug.DEBUG = !Debug.DEBUG;
+                messages.send("DEBUG = " + Debug.DEBUG);
+                break;
             case TEST_RANDOM:
                 //Runtime r = Runtime.getRuntime();
                 //Log.get().postDebug(r.freeMemory()/(1024*1024) + "/" +
@@ -265,7 +269,7 @@ public class Game implements Controllable, InputProcessor {
                 //System.out.println(game.profiler.getData().toString());
                 //Log.get().postDebug(world.regions.toStringDebug());
                 //Log.get().postDebug("Player region: (" + player.pos.rx() + "," + player.pos.ry() + ")");
-                Debug.DEBUG = !Debug.DEBUG;
+                //Debug.DEBUG = !Debug.DEBUG;
                 break;
             default:
                 return playerController.handleControlPress(control);

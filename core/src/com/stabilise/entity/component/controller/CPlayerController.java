@@ -15,6 +15,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.component.core.CBaseMob;
 import com.stabilise.entity.component.core.CPortal;
+import com.stabilise.entity.damage.GeneralSource;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
@@ -168,7 +169,14 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 }
                 break;
             case KILL_MOBS:
-                game.world.destroyEntities();
+                if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
+                    for(Entity en : game.world.getEntities()) {
+                        if(en.core instanceof CBaseMob) {
+                            ((CBaseMob)en.core).damage(game.world, en, GeneralSource.voidDamage(9999));
+                        }
+                    }
+                } else
+                    game.world.destroyEntities();
                 break;
             case RESTORE:
                 mob.restore();

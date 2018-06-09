@@ -2,6 +2,7 @@ package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entities;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.damage.GeneralSource;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.ETileCollision;
@@ -17,7 +18,7 @@ import com.stabilise.world.World;
 /**
  * Basic mob implementation.
  * 
- * <p>TODO: will need a pretty heavy rewrite at some point
+ * <p>This class will need a pretty heavy rewrite sometime in the future.
  */
 public abstract class CBaseMob extends CCore {
     
@@ -31,12 +32,15 @@ public abstract class CBaseMob extends CCore {
     
     /** Possible state priorities. */
     public static enum StatePriority {
-        // For want of better names/identifiers
-        ORDINARY(0),        // An ordinary state from which a mob can do other stuff
-        OCCUPIED(1),        // A mob is considered 'occupied' if in a state with
-                            // this priority and must wait for it to finish before
-                            // being able to do other stuff
-        UNOVERRIDEABLE(2);  // This state can not be overridden
+        /** An ordinary state, in which a mob can do other stuff. */
+        ORDINARY(0),
+        /** A mob is considered 'occupied' if in a state with this priority
+         * (e.g. an attack animation) and must wait for it to finish before
+         * being able to do other stuff. */
+        OCCUPIED(1),
+        /** A state with this priority cannot be overridden by the mob (e.g.
+         * hitstun, or being dead). */
+        UNOVERRIDEABLE(2);
         
         /** The StatePriority's underlying integer value, for comparison
          * purposes. */
@@ -58,34 +62,35 @@ public abstract class CBaseMob extends CCore {
     
     /** States mobs may be in. */
     public static enum State {
+        //                 ground,canMove,canAct,        priority
         IDLE,
         RUN,
         SLIDE_FORWARD,
         SLIDE_BACK,
-        CROUCH(true, false, true),
-        JUMP_CROUCH(true, false, false, StatePriority.OCCUPIED),
-        JUMP(false, true, true),
-        FALL(false, true, true),
-        LAND_CROUCH(true, false, false, StatePriority.OCCUPIED),
-        BLOCK(true, true, false),
-        DODGE_AIR(false, true, false, StatePriority.OCCUPIED),
-        HITSTUN_GROUND(true, false, false, StatePriority.UNOVERRIDEABLE),
-        HITSTUN_AIR(false, false, false, StatePriority.UNOVERRIDEABLE),
-        SIDESTEP_BACK(true, false, false, StatePriority.OCCUPIED),
-        SIDESTEP_FORWARD(true, false, false, StatePriority.OCCUPIED),
-        DEAD(true, false, false, StatePriority.UNOVERRIDEABLE),
-        ATTACK_UP_GROUND(true, false, false, StatePriority.OCCUPIED),
-        ATTACK_DOWN_GROUND(true, false, false, StatePriority.OCCUPIED),
-        ATTACK_SIDE_GROUND(true, false, false, StatePriority.OCCUPIED),
-        SPECIAL_UP_GROUND(true, false, false, StatePriority.OCCUPIED),
-        SPECIAL_DOWN_GROUND(true, false, false, StatePriority.OCCUPIED),
-        SPECIAL_SIDE_GROUND(true, false, false, StatePriority.OCCUPIED),
-        ATTACK_UP_AIR(false, true, false, StatePriority.OCCUPIED),
-        ATTACK_DOWN_AIR(false, true, false, StatePriority.OCCUPIED),
-        ATTACK_SIDE_AIR(false, true, false, StatePriority.OCCUPIED),
-        SPECIAL_UP_AIR(false, true, false, StatePriority.OCCUPIED),
-        SPECIAL_DOWN_AIR(false, true, false, StatePriority.OCCUPIED),
-        SPECIAL_SIDE_AIR(false, true, false, StatePriority.OCCUPIED);
+        CROUCH             (true,  false, true                               ),
+        JUMP_CROUCH        (true,  false, false, StatePriority.OCCUPIED      ),
+        JUMP               (false, true,  true                               ),
+        FALL               (false, true,  true                               ),
+        LAND_CROUCH        (true,  false, false, StatePriority.OCCUPIED      ),
+        BLOCK              (true,  true,  false                              ),
+        DODGE_AIR          (false, true,  false, StatePriority.OCCUPIED      ),
+        HITSTUN_GROUND     (true,  false, false, StatePriority.UNOVERRIDEABLE),
+        HITSTUN_AIR        (false, false, false, StatePriority.UNOVERRIDEABLE),
+        SIDESTEP_BACK      (true,  false, false, StatePriority.OCCUPIED      ),
+        SIDESTEP_FORWARD   (true,  false, false, StatePriority.OCCUPIED      ),
+        DEAD               (true,  false, false, StatePriority.UNOVERRIDEABLE),
+        ATTACK_UP_GROUND   (true,  false, false, StatePriority.OCCUPIED      ),
+        ATTACK_DOWN_GROUND (true,  false, false, StatePriority.OCCUPIED      ),
+        ATTACK_SIDE_GROUND (true,  false, false, StatePriority.OCCUPIED      ),
+        SPECIAL_UP_GROUND  (true,  false, false, StatePriority.OCCUPIED      ),
+        SPECIAL_DOWN_GROUND(true,  false, false, StatePriority.OCCUPIED      ),
+        SPECIAL_SIDE_GROUND(true,  false, false, StatePriority.OCCUPIED      ),
+        ATTACK_UP_AIR      (false, true,  false, StatePriority.OCCUPIED      ),
+        ATTACK_DOWN_AIR    (false, true,  false, StatePriority.OCCUPIED      ),
+        ATTACK_SIDE_AIR    (false, true,  false, StatePriority.OCCUPIED      ),
+        SPECIAL_UP_AIR     (false, true,  false, StatePriority.OCCUPIED      ),
+        SPECIAL_DOWN_AIR   (false, true,  false, StatePriority.OCCUPIED      ),
+        SPECIAL_SIDE_AIR   (false, true,  false, StatePriority.OCCUPIED      );
         
         /** Whether or not the state is a ground state. */
         public final boolean ground;
@@ -96,47 +101,19 @@ public abstract class CBaseMob extends CCore {
         /** The priority required to change out of the state. */
         public final StatePriority priority;
         
-        /**
-         * Sets a State. The State has a default required duration of 0, a
-         * default priority of 0, is a ground state, and a Mob can move and act
-         * while in it.
-         */
+        
         private State() {
             this(true);
         }
         
-        /**
-         * Sets a State. The State has a default required duration of 0, a
-         * default priority of 0, and a Mob can move and act while in it.
-         * 
-         * @param ground Whether or not the state is a ground state.
-         */
         private State(boolean ground) {
             this(ground, true, true);
         }
         
-        /**
-         * Sets a State. The state has a default required duration of 0 and
-         * a default priority of ordinary.
-         * 
-         * @param ground Whether or not the state is a ground state.
-         * @param canMove Whether or not a Mob can move while in the state.
-         * @param canAct Whether or not a Mob can perform an action while in
-         * the state.
-         */
         private State(boolean ground, boolean canMove, boolean canAct) {
             this(ground, canMove, canAct, StatePriority.ORDINARY);
         }
         
-        /**
-         * Sets a State.
-         * 
-         * @param ground Whether or not the state is a ground state.
-         * @param canMove Whether or not a Mob can move while in the state.
-         * @param canAct Whether or not a Mob can perform an action while in
-         * the state.
-         * @param priority The state's priority value.
-         */
         private State(boolean ground, boolean canMove, boolean canAct, StatePriority priority) {
             this.ground = ground;
             this.canMove = canMove;
@@ -180,8 +157,6 @@ public abstract class CBaseMob extends CCore {
     
     /** Initial jump velocity. */
     public float jumpVelocity;
-    /** Vertical acceleration while swimming. TODO: Temporary */
-    public float swimAcceleration;
     /** Acceleration along the x-axis. */
     public float acceleration;
     /** How much of its horizontal acceleration an entity maintains while
@@ -208,6 +183,7 @@ public abstract class CBaseMob extends CCore {
     /** The strength of the mob's 'effect tint'. */
     public float tintStrength = 0.0f;
     
+    
     @Override
     public void init(Entity e) {
         this.e = e;
@@ -218,7 +194,7 @@ public abstract class CBaseMob extends CCore {
         stateTicks++;
         
         if(state == State.DEAD && stateTicks == DEATH_TICKS) {
-            spawnSmokeParticles(w, e);
+            srcSmoke.createCentredOutwardsBurst(w.rnd(), 30, 1f, 7f, e);
             e.destroy();
             return;
         }
@@ -226,16 +202,14 @@ public abstract class CBaseMob extends CCore {
         if(state == State.JUMP_CROUCH && stateTicks == stateLockDuration)
             doJump();
         
-        if(invulnerable) {
-            if(--invulnerabilityTicks == 0)
-                invulnerable = false;
-        }
+        if(invulnerable && --invulnerabilityTicks == 0)
+            invulnerable = false;
         
         if(hasTint) {
             if(dead)
-                tintStrength *= 0.99f;        // TODO: declare as a constant
+                tintStrength *= 0.99f;
             else
-                tintStrength -= 0.05f;        // TODO: declare as a constant
+                tintStrength -= 0.05f;
             if(tintStrength <= 0)
                 hasTint = false;
         }
@@ -270,29 +244,22 @@ public abstract class CBaseMob extends CCore {
         moving = false;
     }
     
-    /*
-    @Override
-    protected float getXFriction() {
-        if(moving)
-            return AIR_FRICTION;
-        else
-            return super.getXFriction();
-    }
-    */
-    
-    protected void onVerticalCollision(Entity e, ETileCollision ev) {
+    protected void onVerticalCollision(World w, Entity e, ETileCollision ev) {
         if(ev.dv < 0 && !wasOnGround) {
             jumpCount = 0;
             if(state.priority != StatePriority.UNOVERRIDEABLE) {
                 if(e.dy < -2*jumpVelocity) {
-                    //if(dy < -2*jumpVelocity)
-                    //    damage(-(int)(dy * dy * 2), -1, 0, 0);
-                    setState(State.LAND_CROUCH, false, 5);        // TODO: temporary constant duration
-                } else {
-                    stateLockDuration = 0;
-                }
+                    if(e.dy < -2.1*jumpVelocity)
+                        damage(w, e, GeneralSource.fallDamage((int)((-e.dy-2*jumpVelocity) * 2)));
+                    setState(State.LAND_CROUCH, true, 12);
+                } else
+                    onLand();
             }
         }
+    }
+    
+    protected void onLand() {
+        stateLockDuration = 0;
     }
     
     /**
@@ -322,8 +289,7 @@ public abstract class CBaseMob extends CCore {
             else
                 e.dx -= ddx;
             
-            // TODO: modulate based on max dx better
-            //ddx *= (maxDx - Math.abs(dx));
+            // in the future: modulate better than just setting a hard cap
             if(e.dx > maxDx)
                 e.dx = maxDx;
             else if(e.dx < -maxDx)
@@ -377,7 +343,7 @@ public abstract class CBaseMob extends CCore {
     
     @Override
     public boolean damage(World w, Entity e, IDamageSource src) {
-        if(invulnerable || dead)
+        if((invulnerable && !src.type().bypassesInvulFrames) || dead)
             return false;
         
         src.applyEffects(e);
@@ -386,13 +352,12 @@ public abstract class CBaseMob extends CCore {
         e.dx = (e.dx + src.impulseX());
         e.dy = (e.dy + src.impulseY());
         
-        hasTint = true;
-        //tintStrength = 1.0f;
-        
-        ParticleIndicator p = srcDmgIndicator.createAlwaysAt(srcDmgIndicator.dummyPos.set(e.pos, 0f, e.aabb.maxY()));
+        ParticleIndicator p = srcDmgIndicator.createAlwaysAt(
+                srcDmgIndicator.dummyPos.set(e.pos, 0f, e.aabb.maxY()));
         p.text = String.valueOf(src.damage());
         p.orange = src.damage() == 0;
         
+        hasTint = true;
         if(health <= 0) {
             health = 0;
             tintStrength = 0.6f;
@@ -416,13 +381,6 @@ public abstract class CBaseMob extends CCore {
             setState(State.DEAD, false, DEATH_TICKS);
         } else
             health = 1; // some component doesn't want us dead!
-    }
-    
-    /**
-     * Spawns smoke particles at the Mob's location.
-     */
-    private void spawnSmokeParticles(World w, Entity e) {
-        srcSmoke.createCentredOutwardsBurst(w.rnd(), 30, 1f, 7f, e);
     }
     
     protected void dropItem(World w, Entity e, ItemStack stack, float chance) {
@@ -475,7 +433,7 @@ public abstract class CBaseMob extends CCore {
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.TILE_COLLISION_V)
-            onVerticalCollision(e, (ETileCollision)ev);
+            onVerticalCollision(w, e, (ETileCollision)ev);
         else if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD) {
             srcDmgIndicator = w.particleEmitter(ParticleIndicator.class);
             srcSmoke = w.particleEmitter(ParticleSmoke.class);
@@ -501,7 +459,6 @@ public abstract class CBaseMob extends CCore {
         jumpVelocity = c.getF32("jumpVelocity");
         acceleration = c.getF32("acceleration");
         airAcceleration = c.getF32("airAcceleration");
-        swimAcceleration = c.getF32("swimAcceleration");
         maxDx = c.getF32("maxDx");
         
         jumpCrouchDuration = c.getI32("jumpCrouchDuration");
@@ -525,7 +482,6 @@ public abstract class CBaseMob extends CCore {
         c.put("jumpVelocity", jumpVelocity);
         c.put("acceleration", acceleration);
         c.put("airAcceleration", airAcceleration);
-        c.put("swimAcceleration", swimAcceleration);
         c.put("maxDx", maxDx);
         
         c.put("jumpCrouchDuration", jumpCrouchDuration);

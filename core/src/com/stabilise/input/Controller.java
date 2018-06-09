@@ -56,6 +56,7 @@ public class Controller implements InputProcessor {
         INTERACT        ("interact",     Keys.E,       true),
         TEST_RANDOM     ("testrandthing",Keys.F1,      true),
         ADVANCE_TICK    ("forceTick",    Keys.F2,      true),
+        TOG_DEBUG_FLAG  ("togDebugFlag", Keys.F12,     true),
         TOG_HITBOX_RENDER("togHbRender", Keys.H,       true),
         TOG_SLICE_BORDERS("sliceBorders",Keys.B,       true),
         TOG_REGION_TINT ("regionTint",   Keys.N,       true),

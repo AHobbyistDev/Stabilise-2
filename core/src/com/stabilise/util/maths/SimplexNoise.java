@@ -83,7 +83,7 @@ public class SimplexNoise implements INoise {
     
     @Override
     public float noise(double x, double y) {
-        float n0, n1, n2;    // Noise contributions from the three corners
+        float n0, n1, n2; // Noise contributions from the three corners
         
         // Skew the input space to determine which simplex cell we're in
         double s = (x + y) * SKEW_2D;        // Skew factor for 2D

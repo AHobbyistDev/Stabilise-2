@@ -9,13 +9,13 @@ import com.stabilise.entity.Position;
 import com.stabilise.entity.component.effect.CEffectFire;
 import com.stabilise.entity.component.effect.CEffectFireTrail;
 import com.stabilise.entity.damage.IDamageSource;
-import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.ParticleExplosion;
 import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleHeal;
 import com.stabilise.entity.particle.manager.ParticleEmitter;
+import com.stabilise.item.Items;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.io.data.DataCompound;
@@ -192,6 +192,7 @@ public class CPerson extends CBaseMob {
     private int damageDealt = 0;
     
     private ParticleEmitter<?> fireParticles;
+    private ParticleEmitter<?> healParticles;
     
     @Override
     public AABB getAABB() {
@@ -212,7 +213,6 @@ public class CPerson extends CBaseMob {
         maxJumpCount = 2;
         jumpVelocity = 16f;
         jumpCrouchDuration = 8;
-        swimAcceleration = 0.08f;
         acceleration = 1.5f;
         //airAcceleration = acceleration * 0.15f;
         airAcceleration = acceleration;
@@ -233,7 +233,9 @@ public class CPerson extends CBaseMob {
         if(ticksSinceHealthLoss >= 80) {
             if(ticksSinceHealthLoss >= 360 || ticksSinceHealthLoss % 3 == 0) {
                 if(increaseHealth(1)) {
-                    w.particleEmitter(ParticleHeal.class).createBurst(
+                    if(healParticles == null)
+                        healParticles = w.particleEmitter(ParticleHeal.class);
+                    healParticles.createBurst(
                             1, 0.2f, 2.0f,
                             Maths.PIf / 6.0f,
                             Maths.PIf * 5.0f / 6.0f,
@@ -565,40 +567,29 @@ public class CPerson extends CBaseMob {
     }
     
     @Override
-    protected void onVerticalCollision(Entity e, ETileCollision ev) {
-        // TODO: OVERRIDING THIS IS NOT SMART (there's a lot of duplicated code,
-        // and it fucked up the current crappy double jump implementation).
-        if(ev.dv < 0 && !wasOnGround) {
-            jumpCount = 0;
-            if(state.priority != StatePriority.UNOVERRIDEABLE) {
-                if(e.dy < 2 * -jumpVelocity) {
-                    setState(State.LAND_CROUCH, false, 20);        // TODO: temporary constant duration
-                } else {
-                    switch(state) {
-                        case ATTACK_SIDE_AIR:
-                            if(ATTACK_SIDE_AIR_DURATION - stateTicks > 10)
-                                setState(State.LAND_CROUCH, false, 20);
-                            else
-                                stateLockDuration = 0;
-                            break;
-                        case ATTACK_UP_AIR:
-                            if(ATTACK_UP_AIR_DURATION - stateTicks > 10)
-                                setState(State.LAND_CROUCH, false, 20);
-                            else
-                                stateLockDuration = 0;
-                            break;
-                        case ATTACK_DOWN_AIR:
-                            if(ATTACK_DOWN_AIR_DURATION - stateTicks > 10)
-                                setState(State.LAND_CROUCH, false, 20);
-                            else
-                                stateLockDuration = 0;
-                            break;
-                        default:
-                            stateLockDuration = 0;
-                            break;
-                    }
-                }
-            }
+    protected void onLand() {
+        switch(state) {
+            case ATTACK_SIDE_AIR:
+                if(ATTACK_SIDE_AIR_DURATION - stateTicks > 10)
+                    setState(State.LAND_CROUCH, false, 15);
+                else
+                    stateLockDuration = 0;
+                break;
+            case ATTACK_UP_AIR:
+                if(ATTACK_UP_AIR_DURATION - stateTicks > 10)
+                    setState(State.LAND_CROUCH, false, 15);
+                else
+                    stateLockDuration = 0;
+                break;
+            case ATTACK_DOWN_AIR:
+                if(ATTACK_DOWN_AIR_DURATION - stateTicks > 10)
+                    setState(State.LAND_CROUCH, false, 15);
+                else
+                    stateLockDuration = 0;
+                break;
+            default:
+                stateLockDuration = 0;
+                break;
         }
     }
     
@@ -789,6 +780,11 @@ public class CPerson extends CBaseMob {
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
             fireParticles = w.particleEmitter(ParticleFlame.class);
+        else if(ev.type() == EntityEvent.Type.KILLED) {
+            dropItem(w, e, Items.APPLE.stackOf(1), 0.02f);
+            dropItem(w, e, Items.SWORD.stackOf(1), 0.02f);
+            dropItem(w, e, Items.ARROW.stackOf(1), 0.02f);
+        }
         return super.handle(w, e, ev);
     }
     

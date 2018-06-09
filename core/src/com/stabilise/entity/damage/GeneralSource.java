@@ -68,4 +68,12 @@ public class GeneralSource implements IDamageSource {
         return new GeneralSource(true, DamageType.FIRE, -1, damage);
     }
     
+    public static GeneralSource fallDamage(int damage) {
+        return new GeneralSource(true, DamageType.INERTIA, -1, damage);
+    }
+    
+    public static GeneralSource voidDamage(int damage) {
+        return new GeneralSource(true, DamageType.VOID, -1, damage);
+    }
+    
 }

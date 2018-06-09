@@ -114,7 +114,6 @@ public class Hitbox extends GameObject {
      * @return {@code true} if a collision was made; {@code false} if not.
      */
     protected boolean hit(World w, Entity e) {
-        // TODO: current implementation of collision resolution is crude and temporary
         if(e.damage(w, createSrc())) {
             onHit();
             w.getCamera().shake(damage * 0.0025f, 5);

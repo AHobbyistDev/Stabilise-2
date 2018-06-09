@@ -30,7 +30,6 @@ public class CGenericEnemy extends CBaseMob {
         
         jumpVelocity = 15f;
         jumpCrouchDuration = 8;
-        swimAcceleration = 0.08f;
         acceleration = 0.8f;
         airAcceleration = 0.2f;
         maxDx = 13f;

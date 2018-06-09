@@ -288,7 +288,6 @@ public class Maths {
         // (a+b)/2 = (((a & b) << 1) + (a ^ b)) / 2
         //         = (((a & b) << 1) + (a ^ b)) >> 1 
         //         = (a & b) + ((a ^ b) >> 1)        [the shifts cancel out]
-        // return (a & b) + ((a ^ b) >> 1);
         return (a & b) + ((a ^ b) >> 1);
     }
     
