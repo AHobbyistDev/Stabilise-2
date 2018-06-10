@@ -188,11 +188,19 @@ public interface WorldProvider {
     Random rnd();
     
     /**
-     * Returns {@code true} {@code 1/n}<sup><font size=-1>th</font></sup> of
+     * Returns '{@code true}' {@code 1/n}<sup><font size=-1>th</font></sup> of
      * the time. Equivalent to {@code rnd().nextInt(n) == 0}.
      */
     default boolean chance(int n) {
         return rnd().nextInt(n) == 0;
+    }
+    
+    /**
+     * Returns '{@code true}' {@code perc%} of the time. Equivalent to {@code
+     * rnd().nextFloat() < perc}.
+     */
+    default boolean chance(float perc) {
+        return rnd().nextFloat() < perc;
     }
     
 }

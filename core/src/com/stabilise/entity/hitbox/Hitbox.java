@@ -1,5 +1,7 @@
 package com.stabilise.entity.hitbox;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import com.stabilise.entity.Entity;
@@ -50,6 +52,11 @@ public class Hitbox extends GameObject {
     public Consumer<Entity> effects = null;
     
     
+    /** Holds the IDs of the entities hit, so that we don't hit a single entity
+     * more than once. */
+    public final Set<Long> entitiesHit;
+    
+    
     /**
      * Creates a new Hitbox.
      * 
@@ -58,10 +65,25 @@ public class Hitbox extends GameObject {
      * @param damage The damage the hitbox deals.
      */
     public Hitbox(long ownerID, Shape boundingBox, int damage) {
+        this(ownerID, boundingBox, damage, createCollisionSet());
+    }
+    
+    /**
+     * Creates a new Hitbox.
+     * 
+     * @param owner The Hitbox's owner.
+     * @param boundingBox The Hitbox's bounding box.
+     * @param damage The damage the hitbox deals.
+     * @param collisionSet Set to use to track which entities have been hit to
+     * avoid hitting them twice. This is accepted as an argument so that
+     * multiple hitboxes for the same attack don't all hit.
+     */
+    public Hitbox(long ownerID, Shape boundingBox, int damage, Set<Long> collisionSet) {
         super(true);
         this.ownerID = ownerID;
         this.boundingBox = boundingBox;
         this.damage = damage;
+        this.entitiesHit = collisionSet;
     }
     
     /**
@@ -73,16 +95,13 @@ public class Hitbox extends GameObject {
      */
     @Override
     protected void update(World world) {
-    	// No need to check since this is done by updateAndCheck().
-        //if(isDestroyed())
-        //    return;
-        
         moveToOwner(world);
         
         for(Entity e : world.getEntitiesNearby(pos)) {
-            if(e.id() == ownerID)
+            if(e.id() == ownerID || entitiesHit.contains(e.id()))
                 continue;
             if(e.aabb.intersects(boundingBox, pos.diffX(e.pos), pos.diffY(e.pos))) {
+                entitiesHit.add(e.id());
                 hit(world, e);
                 if(hits == 0)
                     break;
@@ -115,7 +134,7 @@ public class Hitbox extends GameObject {
      */
     protected boolean hit(World w, Entity e) {
         if(e.damage(w, createSrc())) {
-            onHit();
+            onHit(w);
             w.getCamera().shake(damage * 0.0025f, 5);
             return true;
         }
@@ -138,7 +157,7 @@ public class Hitbox extends GameObject {
     /**
      * Called when the hitbox successfully collides with something.
      */
-    protected void onHit() {
+    protected void onHit(World w) {
         if(--hits == 0)
             destroy();
     }
@@ -146,6 +165,13 @@ public class Hitbox extends GameObject {
     @Override
     public void render(WorldRenderer renderer) {
         // hitboxes are not rendered
+    }
+    
+    
+    
+    
+    public static Set<Long> createCollisionSet() {
+        return new HashSet<Long>();
     }
     
 }

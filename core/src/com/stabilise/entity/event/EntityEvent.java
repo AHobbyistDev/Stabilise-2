@@ -46,6 +46,8 @@ public class EntityEvent extends Event {
         PORTAL_IN_RANGE,
         /** When an entity moves "out of range" of a portal. */
         PORTAL_OUT_OF_RANGE,
+        /** When a linked hitbox hits something. */
+        HITBOX_COLLISION,
     }
     
     public static final EntityEvent
@@ -54,6 +56,7 @@ public class EntityEvent extends Event {
             DESTROYED          = new EntityEvent(Type.DESTROYED);
     
     private final Type type;
+    public boolean handled = false;
     
     protected EntityEvent(Type type) {
         super(type.name());

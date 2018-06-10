@@ -161,7 +161,7 @@ public class WorldRenderer implements Renderer {
         //if(!shader.isCompiled())
         //    throw new RuntimeException("Shader could not compile: " + shader.getLog());
         
-        batch = register(new SpriteBatch(4096));
+        batch = register(new SpriteBatch(8191));
         
         camera = new OrthographicCamera();
         hudCamera = new OrthographicCamera();

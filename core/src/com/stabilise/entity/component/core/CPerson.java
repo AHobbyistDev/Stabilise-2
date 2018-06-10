@@ -1,5 +1,7 @@
 package com.stabilise.entity.component.core;
 
+import java.util.Set;
+
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.stabilise.core.Constants;
@@ -189,7 +191,10 @@ public class CPerson extends CBaseMob {
     
     /** The amount of damage dealt by an attack - for carrying over multiple
      * frames. */
-    private int damageDealt = 0;
+    private int curAtkDamageDealt = 0;
+    /** Collision set for the current attack - for carrying over multiple
+     * frames. */
+    private Set<Long> curAtkCollisionSet;
     
     private ParticleEmitter<?> fireParticles;
     private ParticleEmitter<?> healParticles;
@@ -259,10 +264,13 @@ public class CPerson extends CBaseMob {
         switch(state) {
             case ATTACK_SIDE_GROUND:
                 if(stateTicks == ATTACK_SIDE_GROUND_FRAME_2_BEGIN) {
-                    damageDealt = w.rnd().nextInt(16) + 5;
+                    curAtkDamageDealt = w.rnd().nextInt(16) + 5;
+                    curAtkCollisionSet = Hitbox.createCollisionSet();
+                    
                     Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_SIDE_GROUND_HITBOX_1
-                            : ATTACK_SIDE_GROUND_HITBOX_1_FLIPPED, damageDealt);
+                            : ATTACK_SIDE_GROUND_HITBOX_1_FLIPPED,
+                            curAtkDamageDealt, curAtkCollisionSet);
                     h.hits = -1;
                     h.force = ATTACK_SIDE_GROUND_FORCE;
                     h.fx = e.facingRight ? 1.0f : -1.0f;
@@ -270,7 +278,8 @@ public class CPerson extends CBaseMob {
                 } else if(stateTicks == ATTACK_SIDE_GROUND_FRAME_3_BEGIN) {
                     Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_SIDE_GROUND_HITBOX_2
-                            : ATTACK_SIDE_GROUND_HITBOX_2_FLIPPED, damageDealt);
+                            : ATTACK_SIDE_GROUND_HITBOX_2_FLIPPED,
+                            curAtkDamageDealt, curAtkCollisionSet);
                     h.hits = -1;
                     h.force = ATTACK_SIDE_GROUND_FORCE;
                     h.fx = e.facingRight ? -1.0f : 1.0f;
@@ -305,10 +314,13 @@ public class CPerson extends CBaseMob {
                 break;
             case ATTACK_SIDE_AIR:
                 if(stateTicks == ATTACK_SIDE_AIR_FRAME_2_BEGIN) {
-                    damageDealt = w.rnd().nextInt(16) + 5;
+                    curAtkDamageDealt = w.rnd().nextInt(16) + 5;
+                    curAtkCollisionSet = Hitbox.createCollisionSet();
+                    
                     Hitbox h = new Hitbox(e.id(), e.facingRight ?
                             ATTACK_SIDE_AIR_HITBOX_1
-                            : ATTACK_SIDE_AIR_HITBOX_1_FLIPPED, damageDealt);
+                            : ATTACK_SIDE_AIR_HITBOX_1_FLIPPED,
+                            curAtkDamageDealt, curAtkCollisionSet);
                     h.hits = -1;
                     h.force = 0.3f;
                     h.fx = e.facingRight ? 1.0f : -1.0f;
@@ -316,7 +328,8 @@ public class CPerson extends CBaseMob {
                 } else if(stateTicks == ATTACK_SIDE_AIR_FRAME_3_BEGIN) {
                     Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_SIDE_AIR_HITBOX_2
-                            : ATTACK_SIDE_AIR_HITBOX_2_FLIPPED, damageDealt);
+                            : ATTACK_SIDE_AIR_HITBOX_2_FLIPPED,
+                            curAtkDamageDealt, curAtkCollisionSet);
                     h.hits = -1;
                     h.force = 0.3f;
                     h.fx = e.facingRight ? 1.0f : -1.0f;
@@ -325,10 +338,13 @@ public class CPerson extends CBaseMob {
                 break;
             case ATTACK_UP_AIR:
                 if(stateTicks == ATTACK_UP_AIR_FRAME_2_BEGIN) {
-                    damageDealt = w.rnd().nextInt(16) + 5;
+                    curAtkDamageDealt = w.rnd().nextInt(16) + 5;
+                    curAtkCollisionSet = Hitbox.createCollisionSet();
+                    
                     Hitbox h1 = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_UP_AIR_HITBOX_1_1
-                            : ATTACK_UP_AIR_HITBOX_1_1_FLIPPED, damageDealt);
+                            : ATTACK_UP_AIR_HITBOX_1_1_FLIPPED,
+                            curAtkDamageDealt, curAtkCollisionSet);
                     h1.hits = -1;
                     h1.force = 0.3f;
                     //h1.fx = e.facingRight ? 0.86f : -0.85f;
@@ -337,7 +353,8 @@ public class CPerson extends CBaseMob {
                     
                     Hitbox h2 = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_UP_AIR_HITBOX_1_2
-                            : ATTACK_UP_AIR_HITBOX_1_2_FLIPPED, damageDealt);
+                            : ATTACK_UP_AIR_HITBOX_1_2_FLIPPED,
+                            curAtkDamageDealt, curAtkCollisionSet);
                     h2.hits = -1;
                     h2.force = 0.3f;
                     //h2.fx = e.facingRight ? 0.5f : -0.5f;
@@ -346,7 +363,8 @@ public class CPerson extends CBaseMob {
                 } else if(stateTicks == ATTACK_UP_AIR_FRAME_3_BEGIN) {
                     Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_UP_AIR_HITBOX_2
-                            : ATTACK_UP_AIR_HITBOX_2_FLIPPED, damageDealt);
+                            : ATTACK_UP_AIR_HITBOX_2_FLIPPED,
+                            curAtkDamageDealt, curAtkCollisionSet);
                     h.hits = -1;
                     h.force = 0.3f;
                     h.fy = 1.0f;
@@ -355,10 +373,13 @@ public class CPerson extends CBaseMob {
                 break;
             case ATTACK_DOWN_AIR:
                 if(stateTicks == ATTACK_DOWN_AIR_FRAME_2_BEGIN) {
-                    damageDealt = w.rnd().nextInt(16) + 5;
+                    curAtkDamageDealt = w.rnd().nextInt(16) + 5;
+                    curAtkCollisionSet = Hitbox.createCollisionSet();
+                    
                     Hitbox h1 = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_DOWN_AIR_HITBOX_1_1
-                            : ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED, damageDealt);
+                            : ATTACK_DOWN_AIR_HITBOX_1_1_FLIPPED,
+                            curAtkDamageDealt, curAtkCollisionSet);
                     h1.hits = -1;
                     h1.force = 0.3f;
                     h1.fy = -1.0f;
@@ -366,7 +387,8 @@ public class CPerson extends CBaseMob {
                     
                     Hitbox h2 = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_DOWN_AIR_HITBOX_1_2
-                            : ATTACK_DOWN_AIR_HITBOX_1_2_FLIPPED, damageDealt);
+                            : ATTACK_DOWN_AIR_HITBOX_1_2_FLIPPED,
+                            curAtkDamageDealt, curAtkCollisionSet);
                     h2.hits = -1;
                     h2.force = 0.3f;
                     h2.fy = -1.0f;
@@ -374,7 +396,8 @@ public class CPerson extends CBaseMob {
                 } else if(stateTicks == ATTACK_DOWN_AIR_FRAME_3_BEGIN) {
                     Hitbox h = new Hitbox(e.id(), e.facingRight
                             ? ATTACK_DOWN_AIR_HITBOX_2
-                            : ATTACK_DOWN_AIR_HITBOX_2_FLIPPED, damageDealt);
+                            : ATTACK_DOWN_AIR_HITBOX_2_FLIPPED,
+                            curAtkDamageDealt, curAtkCollisionSet);
                     h.hits = -1;
                     h.force = 0.3f;
                     h.fy = -1.0f;
@@ -393,8 +416,11 @@ public class CPerson extends CBaseMob {
             case SPECIAL_DOWN_GROUND:
                 if(stateTicks == SPECIAL_DOWN_GROUND_FRAME_2_BEGIN) {
                     if(useMana(SPECIAL_DOWN_GROUND_COST_MANA)) {
+                        curAtkDamageDealt = w.rnd().nextInt(16) + 5;
+                        curAtkCollisionSet = Hitbox.createCollisionSet();
+                        
                         Hitbox h1 = new Hitbox(e.id(), SPECIAL_DOWN_GROUND_HITBOX_1,
-                                w.rnd().nextInt(16)+5);
+                                curAtkDamageDealt, curAtkCollisionSet);
                         h1.hits = -1;
                         h1.force = 14f;
                         h1.fx = 0.5f;
@@ -403,7 +429,7 @@ public class CPerson extends CBaseMob {
                         w.addHitbox(h1, e.pos);
                         
                         Hitbox h2 = new Hitbox(e.id(), SPECIAL_DOWN_GROUND_HITBOX_2,
-                                w.rnd().nextInt(16)+5);
+                                curAtkDamageDealt, curAtkCollisionSet);
                         h2.hits = -1;
                         h2.force = 14f;
                         h2.fx = -0.5f;
@@ -781,9 +807,9 @@ public class CPerson extends CBaseMob {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
             fireParticles = w.particleEmitter(ParticleFlame.class);
         else if(ev.type() == EntityEvent.Type.KILLED) {
-            dropItem(w, e, Items.APPLE.stackOf(1), 0.02f);
-            dropItem(w, e, Items.SWORD.stackOf(1), 0.02f);
-            dropItem(w, e, Items.ARROW.stackOf(1), 0.02f);
+            dropItem(w, e, Items.APPLE, 1, 0.02f);
+            dropItem(w, e, Items.SWORD, 1, 0.02f);
+            dropItem(w, e, Items.ARROW, 1, 0.02f);
         }
         return super.handle(w, e, ev);
     }

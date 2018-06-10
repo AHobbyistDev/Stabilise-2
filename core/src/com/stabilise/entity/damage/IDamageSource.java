@@ -47,6 +47,12 @@ public interface IDamageSource {
     default void applyEffects(Entity e) {}
     
     /**
+     * Returns true if this damage source grants invincibility frames; false
+     * if not.
+     */
+    boolean invincibilityFrames();
+    
+    /**
      * Returns the impulse along the x-direction to apply upon dealing damage.
      * 
      * <p>The default implementation returns 0.

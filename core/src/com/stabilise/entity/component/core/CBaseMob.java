@@ -10,7 +10,7 @@ import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.particle.ParticleIndicator;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.entity.particle.manager.ParticleEmitter;
-import com.stabilise.item.ItemStack;
+import com.stabilise.item.Item;
 import com.stabilise.util.Direction;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
@@ -364,8 +364,10 @@ public abstract class CBaseMob extends CCore {
             kill(w, e, src);
         } else {
             tintStrength = 0.75f;
-            invulnerable = true;
-            invulnerabilityTicks = INVULNERABILITY_TICKS;
+            if(src.invincibilityFrames()) {
+                invulnerable = true;
+                invulnerabilityTicks = INVULNERABILITY_TICKS;
+            }
         }
         
         return true;
@@ -383,9 +385,9 @@ public abstract class CBaseMob extends CCore {
             health = 1; // some component doesn't want us dead!
     }
     
-    protected void dropItem(World w, Entity e, ItemStack stack, float chance) {
-        if(w.rnd().nextFloat() < chance) {
-            Entity ei = Entities.item(w, stack);
+    protected void dropItem(World w, Entity e, Item item, int quantity, float chance) {
+        if(w.chance(chance)) {
+            Entity ei = Entities.item(w, item.stackOf(quantity));
             ei.pos.set(e.pos);
             w.addEntity(ei);
         }
@@ -438,7 +440,8 @@ public abstract class CBaseMob extends CCore {
             srcDmgIndicator = w.particleEmitter(ParticleIndicator.class);
             srcSmoke = w.particleEmitter(ParticleSmoke.class);
         } else if(ev.type() == EntityEvent.Type.DAMAGED) {
-            return damage(w, e, ((EDamaged)ev).src);
+            if(damage(w, e, ((EDamaged)ev).src))
+                ev.handled = true; // don't cancel propagation to other components
         }
         return false;
     }

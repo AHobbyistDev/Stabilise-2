@@ -8,6 +8,7 @@ public class GeneralSource implements IDamageSource {
     public int damage;
     public DamageType type;
     public final long sourceID;
+    public boolean iFrames = false;
     public float fx = 0f, fy = 0f;
     
     
@@ -36,6 +37,11 @@ public class GeneralSource implements IDamageSource {
     @Override
     public long sourceID() {
         return sourceID;
+    }
+    
+    @Override
+    public boolean invincibilityFrames() {
+        return iFrames;
     }
     
     @Override

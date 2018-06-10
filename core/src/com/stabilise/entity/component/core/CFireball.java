@@ -2,6 +2,7 @@ package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.effect.CEffectFire;
+import com.stabilise.entity.event.ELinkedHitboxCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.hitbox.LinkedHitbox;
@@ -57,7 +58,7 @@ public class CFireball extends CBaseProjectile {
         
         hitbox.force = 3f;
         hitbox.effects = tgt -> tgt.addComponent(new CEffectFire(60*7, 2));
-        hitbox.hits = 1000000; // TODO: temporary for fun
+        hitbox.hits = 1;
         hitbox.persistenceTimer = -1;
         
         float div = Math.abs(e.dx) + Math.abs(e.dy);
@@ -111,6 +112,8 @@ public class CFireball extends CBaseProjectile {
     
     @Override
     protected void onImpact(World w, Entity e) {
+        if(e.isDestroyed())
+            return;
         e.destroy();
         
         /*
@@ -130,7 +133,7 @@ public class CFireball extends CBaseProjectile {
         }
         //*/
         
-        Hitbox h = new Hitbox(ownerID, SPLASH_HITBOX, 2*damage);
+        Hitbox h = new Hitbox(ownerID, SPLASH_HITBOX, 2*damage, hitbox.entitiesHit);
         h.persistent = true;
         h.persistenceTimer = 3;
         h.stickToOwner = false;
@@ -149,20 +152,21 @@ public class CFireball extends CBaseProjectile {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD) {
             particleSrc = w.particleEmitter(ParticleFlame.class);
             explosionSrc = w.particleEmitter(ParticleExplosion.class);
+        } else if(ev.type() == EntityEvent.Type.HITBOX_COLLISION) {
+            if(((ELinkedHitboxCollision)ev).hitsRemaining == 0)
+                onImpact(w, e);
         }
         return super.handle(w, e, ev);
     }
     
     @Override
     public void importFromCompound(DataCompound c) {
-        // TODO
-        Checks.TODO();
+        Checks.TODO(); // TODO
     }
     
     @Override
     public void exportToCompound(DataCompound c) {
-        // TODO
-        Checks.TODO();
+        Checks.TODO(); // TODO
     }
     
 }

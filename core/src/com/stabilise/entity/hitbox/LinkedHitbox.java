@@ -1,6 +1,7 @@
 package com.stabilise.entity.hitbox;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.event.ELinkedHitboxCollision;
 import com.stabilise.util.shape.Shape;
 import com.stabilise.world.World;
 
@@ -37,9 +38,13 @@ public class LinkedHitbox extends Hitbox {
     }
     
     @Override
-    public void destroy() {
-        super.destroy();
-        //linkedEntity.destroy(); // TODO
+    protected void onHit(World w) {
+        super.onHit(w);
+        
+        // Inform the linked entity that we hit something
+        Entity e = w.getEntity(linkedID);
+        if(e != null)
+            e.post(w, new ELinkedHitboxCollision(hits));
     }
     
 }

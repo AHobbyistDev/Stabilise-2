@@ -108,9 +108,9 @@ public class CGenericEnemy extends CBaseMob {
         if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD)
             srcFlame = w.particleEmitter(ParticleFlame.class);
         else if(ev.type() == EntityEvent.Type.KILLED) {
-            dropItem(w, e, Items.APPLE.stackOf(1), 0.02f);
-            dropItem(w, e, Items.SWORD.stackOf(1), 0.02f);
-            dropItem(w, e, Items.ARROW.stackOf(1), 0.02f);
+            dropItem(w, e, Items.APPLE, 1, 0.02f);
+            dropItem(w, e, Items.SWORD, 1, 0.02f);
+            dropItem(w, e, Items.ARROW, 1, 0.02f);
         }
         return super.handle(w, e, ev);
     }

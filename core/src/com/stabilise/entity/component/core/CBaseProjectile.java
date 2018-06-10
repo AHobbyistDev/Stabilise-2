@@ -11,13 +11,14 @@ import com.stabilise.world.World;
 
 public abstract class CBaseProjectile extends CCore {
     
+    /** ID of the entity that created this projectile. */
     protected long ownerID;
-    /** The projectile's hitbox. */
     public LinkedHitbox hitbox;
     
     private Shape baseShape;
-    /** The rotation of the projectile. */
+    /** The rotation of the projectile, in radians. Recalculated every tick. */
     public float rotation = 0;
+    
     
     protected abstract LinkedHitbox getHitbox(Entity e, long ownerID);
     
