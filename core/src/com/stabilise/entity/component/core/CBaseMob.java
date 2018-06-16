@@ -126,7 +126,10 @@ public abstract class CBaseMob extends CCore {
     //-------------=====Member Variables=====-----------
     //--------------------==========--------------------
     
+    /** Convenience reference to the entity */
     public Entity e;
+    
+    public boolean facingRight;
     
     /** The mob's state. */
     public State state = State.IDLE;
@@ -221,7 +224,7 @@ public abstract class CBaseMob extends CCore {
         
         if(wasOnGround) {
             if(moving) {
-                if((e.facingRight && e.dx > 0) || (!e.facingRight && e.dx < 0))
+                if((facingRight && e.dx > 0) || (!facingRight && e.dx < 0))
                     setState(State.RUN, true);
                 else
                     setState(State.SLIDE_BACK, true);
@@ -229,7 +232,7 @@ public abstract class CBaseMob extends CCore {
                 if(e.dx == 0f)
                     setState(State.IDLE, true);
                 else
-                    if((e.facingRight && e.dx > 0) || (!e.facingRight && e.dx < 0))
+                    if((facingRight && e.dx > 0) || (!facingRight && e.dx < 0))
                         setState(State.SLIDE_FORWARD, true);
                     else
                         setState(State.SLIDE_BACK, true);
@@ -295,7 +298,7 @@ public abstract class CBaseMob extends CCore {
             else if(e.dx < -maxDx)
                 e.dx = -maxDx;
             
-            e.facingRight = direction.hasRight();
+            facingRight = direction.hasRight();
         }
         
         moving = true;
@@ -448,6 +451,8 @@ public abstract class CBaseMob extends CCore {
     
     @Override
     public void importFromCompound(DataCompound c) {
+        facingRight = c.getBool("facingRight");
+        
         state = State.values()[c.getI32("state")];
         stateTicks = c.getI32("stateTicks");
         stateLockDuration = c.getI32("stateLockDuration");
@@ -471,6 +476,8 @@ public abstract class CBaseMob extends CCore {
     
     @Override
     public void exportToCompound(DataCompound c) {
+        c.put("facingRight", facingRight);
+        
         c.put("state", state.ordinal());
         c.put("stateTicks", stateTicks);
         c.put("stateLockDuration", stateLockDuration);

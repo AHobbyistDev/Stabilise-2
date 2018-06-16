@@ -58,7 +58,7 @@ public class CFireball extends CBaseProjectile {
         
         hitbox.force = 3f;
         hitbox.effects = tgt -> tgt.addComponent(new CEffectFire(60*7, 2));
-        hitbox.hits = 1;
+        hitbox.hits = 3;
         hitbox.persistenceTimer = -1;
         
         float div = Math.abs(e.dx) + Math.abs(e.dy);

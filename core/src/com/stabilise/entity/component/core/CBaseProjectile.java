@@ -49,7 +49,7 @@ public abstract class CBaseProjectile extends CCore {
         if(hitbox != null)
             hitbox.boundingBox = baseShape.rotate(rotation);
         
-        e.facingRight = e.dx > 0;
+        //e.facingRight = e.dx > 0;
     }
     
     protected void onImpact(World w, Entity e) {

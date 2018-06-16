@@ -54,7 +54,7 @@ public class Entities {
         //return e(p(), new CEnemyController(), new CGenericEnemy())
         //        .addComponent(new CBasicArmour());
         return e(new CPlayerPerson(), p(), new CEnemyController())
-                .addComponent(new CDamageAmplifier(2));
+                .addComponent(new CDamageAmplifier(1.2f));
     }
     
     public static Entity person() {

@@ -141,7 +141,7 @@ public class CPortal extends CCore {
             CPortal opc = (CPortal) ope.core;
             
             ope.pos.set(otherPortalPos);
-            ope.facingRight = !e.facingRight;
+            //ope.facingRight = !e.facingRight;
             
             opc.original = false;
             opc.pairID = id;

@@ -445,13 +445,13 @@ public class WorldRenderer implements Renderer {
         */
         batch.draw(
                 texEnemy, // region
-                camObj.pos.diffX(e.pos) - (e.facingRight ? 0.5f : -0.5f), // x
+                camObj.pos.diffX(e.pos) - (c.facingRight ? 0.5f : -0.5f), // x
                 camObj.pos.diffY(e.pos), // y
                 0f, // originX
                 0f, // originY
                 1f, // width
                 2f, // height
-                e.facingRight ? 1f : -1f, // scaleX
+                c.facingRight ? 1f : -1f, // scaleX
                 1f, // scaleY
                 0f // rotation
         );
@@ -522,7 +522,7 @@ public class WorldRenderer implements Renderer {
         
         batch.setColor(colTmp);
         
-        personModel.setFlipped(!e.facingRight);
+        personModel.setFlipped(!s.facingRight);
         personModel.setState(s.getState(), s.stateTicks);
         personModel.render(batch, camObj.pos.diffX(e.pos), camObj.pos.diffY(e.pos));
         

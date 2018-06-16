@@ -138,7 +138,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 else if(controller.isControlPressed(Control.DOWN))
                     mob.attack(game.world, Direction.DOWN);
                 else
-                    mob.attack(game.world, e.facingRight ? Direction.RIGHT : Direction.LEFT);
+                    mob.attack(game.world, mob.facingRight ? Direction.RIGHT : Direction.LEFT);
                 break;
             case SPECIAL:
                 if(controller.isControlPressed(Control.UP))
@@ -146,12 +146,12 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 else if(controller.isControlPressed(Control.DOWN))
                     mob.specialAttack(game.world, Direction.DOWN);
                 else
-                    mob.specialAttack(game.world, e.facingRight ? Direction.RIGHT : Direction.LEFT);
+                    mob.specialAttack(game.world, mob.facingRight ? Direction.RIGHT : Direction.LEFT);
                 break;
             case SUMMON:
                 {
                     Entity m = Entities.enemy();
-                    m.pos.set(e.pos, (e.facingRight ? 5 : -5), 0f);
+                    m.pos.set(e.pos, (mob.facingRight ? 5 : -5), 0f);
                     game.world.addEntity(m);
                 }
                 break;
@@ -203,10 +203,10 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 String dim = game.playerData.data.getDimensionName();
                 //String dim = "flatland";
                 Entity portal = Entities.portal(dim);
-                portal.pos.set(e.pos, e.facingRight ? 3f : -3f, 1.5f).align();
+                portal.pos.set(e.pos, mob.facingRight ? 3f : -3f, 1.5f).align();
                 //portal.facingRight = !e.facingRight;
                 CPortal pCore = (CPortal) portal.core;
-                pCore.rotation = e.facingRight ? Maths.PIf : 0f;
+                pCore.rotation = mob.facingRight ? Maths.PIf : 0f;
                 
                 if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
                 	pCore.otherPortalPos.set(0, 0, 0f, 0f);

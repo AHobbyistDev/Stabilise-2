@@ -36,7 +36,6 @@ public class Entity extends GameObject implements Exportable {
   //public final Position pos;     // inherited from GameObject
     /** This entity's velocity, in tiles/sec (NOT tiles/tick). */
     public float       dx, dy;
-    public boolean     facingRight;
     /** Every entity has an associated AABB. This is used for physics (i.e.
      * collision with tiles) and for hitbox detection. However, for entities
      * which do not move nor get hit (e.g. portals), this often goes unused. */
@@ -239,7 +238,6 @@ public class Entity extends GameObject implements Exportable {
         dc.getInto(pos);
         dx = dc.getF32("dx");
         dy = dc.getF32("dy");
-        facingRight = dc.getBool("facingRight");
         
         DataCompound comp = dc.getCompound("components");
         
@@ -270,7 +268,6 @@ public class Entity extends GameObject implements Exportable {
         dc.put(pos);
         dc.put("dx", dx);
         dc.put("dy", dy);
-        dc.put("facingRight", facingRight);
         
         DataCompound comp = dc.childCompound("components");
         Component.toCompound(comp.childCompound("core"), core);

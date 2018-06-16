@@ -18,7 +18,7 @@ import com.stabilise.world.tile.Tile;
  */
 public class CPhysicsImpl extends CPhysics {
     
-    private static final float eps = 0.00001f;
+    private static final float eps = 0.000001f;
     
     public boolean dxp, dyp; // "dx/dy positive?"
     public boolean onGround;
@@ -115,7 +115,7 @@ public class CPhysicsImpl extends CPhysics {
         
         // Check the vertical wall of tiles to the left/right of the entity
         int min = Maths.floor(Maths.min(e.pos.ly(), newPos.ly()) + e.aabb.minY());
-        int max = Maths.ceil(Maths.max(e.pos.ly(), newPos.ly()) + e.aabb.maxY());
+        int max = Maths.floor(Maths.max(e.pos.ly(), newPos.ly()) + e.aabb.maxY());
         
         tmp1.set(newPos.sx, newPos.sy, newPos.lx()+leadingEdge, min).align();
         for(int y = min; y <= max; y++) {

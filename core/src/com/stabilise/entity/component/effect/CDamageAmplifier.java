@@ -14,14 +14,14 @@ public class CDamageAmplifier extends AbstractComponent {
     public static final CDamageAmplifier AMPLIFIER = new CDamageAmplifier();
     
     
-    public int amp;
+    public float amp;
     
     /** Amplifies damage 10x */
     public CDamageAmplifier() {
         this(10);
     }
     
-    public CDamageAmplifier(int amp) {
+    public CDamageAmplifier(float amp) {
         this.amp = amp;
     }
     
@@ -32,7 +32,7 @@ public class CDamageAmplifier extends AbstractComponent {
     public boolean handle(World w, Entity e, EntityEvent ev) {
         if(ev.type() == EntityEvent.Type.DAMAGED) {
             EDamaged dmg = (EDamaged)ev;
-            dmg.src.setDamage(dmg.src.damage() * amp);
+            dmg.src.setDamage((int)(dmg.src.damage() * amp));
         }
         return false;
     }

@@ -90,8 +90,7 @@ public class FragList<E> implements SimpleList<E>, RandomAccess {
     /** The backing array.
      * Invariant: length >= size */
     private E[] data;
-    /** The size of this list.
-     * Invariant: size <= lastElement */
+    /** The size of this list. */
     private int size = 0;
     /** The index of the last element. Equivalent to size for a traditional
      * list.

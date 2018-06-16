@@ -48,13 +48,13 @@ public class CGenericEnemy extends CBaseMob {
     @Override
     public void attack(World w, Direction direction) {
         Polygon p = new Polygon(new float[] { 0.5f,0.0f, 0.5f,2.0f, 3.5f,3.0f, 3.5f,-1.0f });
-        Hitbox h = new Hitbox(e.id(), e.facingRight
+        Hitbox h = new Hitbox(e.id(), facingRight
                 ? p
                 : p.reflect(),
                 w.rnd().nextInt(5) + 8);
         h.hits = -1;
         h.force = 75f;
-        h.fx = e.facingRight ? 1f : -1f;
+        h.fx = facingRight ? 1f : -1f;
         h.fy = 0.2f;
         h.persistent = true;
         h.persistenceTimer = 5;
@@ -63,7 +63,7 @@ public class CGenericEnemy extends CBaseMob {
         float d = Math.abs(e.dx);
         
         Position dummyPos = srcSmoke.dummyPos;
-        if(e.facingRight) {
+        if(facingRight) {
             dummyPos.set(e.pos, 0.5f, 0f);
             srcSmoke.createBurst(150, dummyPos, 0f, 2f, 3f+d, 30f+d, -Maths.PIf/4, Maths.PIf/4);
             srcFlame.createBurst(150, dummyPos, 0f, 2f, 2f+d, 10f+d, -Maths.PIf/4, Maths.PIf/4);
@@ -77,13 +77,13 @@ public class CGenericEnemy extends CBaseMob {
     @Override
     public void specialAttack(World w, Direction direction) {
         Polygon p = new Polygon(new float[] { 0.5f,0.0f, 0.5f,2.0f, 20.0f,3.0f, 20.0f,-1.0f });
-        Hitbox h = new Hitbox(e.id(), e.facingRight
+        Hitbox h = new Hitbox(e.id(), facingRight
                 ? p
                 : p.reflect(),
                 w.rnd().nextInt(5) + 8);
         h.hits = -1;
         h.force = 45f;
-        h.fx = e.facingRight ? 1f : -1f;
+        h.fx = facingRight ? 1f : -1f;
         h.fy = 0.2f;
         h.persistent = true;
         h.persistenceTimer = 5;
@@ -92,7 +92,7 @@ public class CGenericEnemy extends CBaseMob {
         float d = Math.abs(e.dx);
         
         Position dummyPos = srcSmoke.dummyPos;
-        if(e.facingRight) {
+        if(facingRight) {
             dummyPos.set(e.pos, 0.5f, 0f);
             srcSmoke.createBurst(150, dummyPos, 0f, 2f, 2f+d, 90f+d, -Maths.PIf/16, Maths.PIf/16);
             srcFlame.createBurst(150, dummyPos, 0f, 2f, 2f+d, 35f+d, -Maths.PIf/16, Maths.PIf/16);
