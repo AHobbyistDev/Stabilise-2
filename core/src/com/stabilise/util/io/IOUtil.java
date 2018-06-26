@@ -205,7 +205,8 @@ public class IOUtil {
      */
     public static void safelySaveFile(FileHandle file,
             IOConsumer<FileHandle> saveOperation) throws IOException {
-        FileHandle tmp = file.sibling(file.name() + "_tmp");
+        FileHandle tmp = file.sibling(file.nameWithoutExtension() + "_tmp." +
+            file.extension());
         if(tmp.exists() && !tmp.delete())
             throw new IOException("Failed to delete " + tmp);
         saveOperation.accept(tmp);
