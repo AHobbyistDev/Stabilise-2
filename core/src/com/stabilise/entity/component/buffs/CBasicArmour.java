@@ -23,7 +23,6 @@ public class CBasicArmour extends AbstractComponent {
         return Action.KEEP_BOTH;
     }
     
-    @Override public void init(Entity e) {}
     @Override public void update(World w, Entity e, float dt) {}
     
     @Override

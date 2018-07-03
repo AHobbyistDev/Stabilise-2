@@ -21,7 +21,6 @@ public class CUnkillable extends AbstractComponent {
         return Action.REJECT;
     }
     
-    @Override public void init(Entity e) {}
     @Override public void update(World w, Entity e, float dt) {}
     
     @Override

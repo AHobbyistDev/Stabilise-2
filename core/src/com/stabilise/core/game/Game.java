@@ -8,6 +8,7 @@ import com.stabilise.core.Constants;
 import com.stabilise.core.main.Stabilise;
 import com.stabilise.core.state.MainMenuState;
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.CCamera;
 import com.stabilise.entity.component.controller.CPlayerController;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
@@ -42,6 +43,7 @@ public class Game implements Controllable, InputProcessor {
     public final HostWorld world;
     public final PlayerData playerData;
     public final Entity player;
+    public final CCamera camera;
     
     /** The controller. */
     public Controller controller;
@@ -87,6 +89,9 @@ public class Game implements Controllable, InputProcessor {
         playerController = new CPlayerController(controller, this);
         player.controller = playerController;
         playerController.init(player);
+        
+        camera = new CCamera();
+        player.addComponent(camera);
         
         this.messages = new Messages(this);
     }

@@ -135,7 +135,8 @@ public class Hitbox extends GameObject {
     protected boolean hit(World w, Entity e) {
         if(e.damage(w, createSrc())) {
             onHit(w);
-            w.getCamera().shake(damage * 0.0025f, 5);
+            // TODO: shake
+            //w.getCamera().shake(damage * 0.0025f, 5);
             return true;
         }
         return false;

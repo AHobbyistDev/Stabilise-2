@@ -1,7 +1,6 @@
 package com.stabilise.world;
 
 import com.stabilise.entity.Entity;
-import com.stabilise.entity.GameCamera;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.hitbox.Hitbox;
 import com.stabilise.entity.particle.Particle;
@@ -159,11 +158,6 @@ public interface World extends WorldProvider {
     default <T extends Particle> ParticleEmitter<T> particleEmitter(Class<T> particleClass) {
         return getParticleManager().getEmitter(particleClass);
     }
-    
-    /**
-     * Gets this world's camera.
-     */
-    GameCamera getCamera();
     
     // ==========World component getters and setters==========
     

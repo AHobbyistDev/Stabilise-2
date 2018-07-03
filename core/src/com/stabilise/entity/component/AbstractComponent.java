@@ -16,6 +16,16 @@ public abstract class AbstractComponent implements Component {
     /**
      * {@inheritDoc}
      * 
+     * The default implementation does nothing.
+     */
+    @Override
+    public void init(Entity e) {
+        
+    }
+    
+    /**
+     * {@inheritDoc}
+     * 
      * <p>The default implementation returns {@code false}.
      */
     @Override

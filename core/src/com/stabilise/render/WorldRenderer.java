@@ -27,6 +27,7 @@ import com.stabilise.core.Application;
 import com.stabilise.core.Resources;
 import com.stabilise.core.game.Game;
 import com.stabilise.entity.*;
+import com.stabilise.entity.component.CCamera;
 import com.stabilise.entity.component.controller.CPlayerController;
 import com.stabilise.entity.component.core.*;
 import com.stabilise.entity.particle.*;
@@ -65,8 +66,8 @@ public class WorldRenderer implements Renderer {
     
     /** Holds a reference to the world. */
     public final AbstractWorld world;
-    /** The camera. */
-    public final GameCamera camObj;
+    /** The camera attached to the player. */
+    public final CCamera camObj;
     public final CPlayerController controller;
     
     //public final HUDRenderer hudRenderer;
@@ -139,14 +140,16 @@ public class WorldRenderer implements Renderer {
      * 
      * @param game The game.
      * @param world The game world.
-     * @param player The player entity.
+     * @param camera The camera focused on the player.
+     * @param controller The player controller. We need this so that we know
+     * where to render the mouse cursor.
      */
-    public WorldRenderer(Game game, AbstractWorld world, Entity player, CPlayerController controller) {
+    public WorldRenderer(Game game, AbstractWorld world,
+            CCamera camera, CPlayerController controller) {
         super();
         
         this.world = world;
-        
-        camObj = world.camera;
+        this.camObj = camera;
         this.controller = controller;
         
         tileRenderer = new TileRenderer(this);
@@ -287,8 +290,8 @@ public class WorldRenderer implements Renderer {
         profiler.next("tileRenderer"); // root.update.renderer.tileRenderer
         tileRenderer.update();
         
-        profiler.next("camera"); // root.update.renderer.camera
-        camObj.update(world, 0f);
+        //profiler.next("camera"); // root.update.renderer.camera
+        //camObj.update(world, 0f);
         
         // Updating camera matrix not needed anymore since we don't use global coords
         //camera.position.set((float)playerCamera.pos.getGlobalX(), (float)playerCamera.pos.getGlobalY(), 0f);

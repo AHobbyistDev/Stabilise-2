@@ -439,7 +439,9 @@ public class CPerson extends CBaseMob {
                         
                         fireParticles.createBurst(300, e.pos, 0.1f, 5f, 0, (float)Math.PI);
                         w.particleEmitter(ParticleExplosion.class).createAt(e.pos);
-                        w.getCamera().shake(0.1f, 30);
+                        
+                        // TODO: shake
+                        //w.getCamera().shake(0.1f, 30);
                     } else {
                         fireParticles.createBurst(100, e.pos, 0.1f, 5f, 0, (float)Math.PI);
                     }

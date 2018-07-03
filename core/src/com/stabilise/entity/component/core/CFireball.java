@@ -144,7 +144,8 @@ public class CFireball extends CBaseProjectile {
         explosionSrc.createAlwaysAt(e.pos);
         addImpactParticles(w, e, 500);
         
-        w.getCamera().shake(0.1f, 30);
+        // TODO: shake again
+        //w.getCamera().shake(0.1f, 30);
     }
     
     @Override

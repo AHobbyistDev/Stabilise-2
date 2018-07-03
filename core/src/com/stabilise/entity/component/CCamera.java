@@ -1,20 +1,22 @@
-package com.stabilise.entity;
+package com.stabilise.entity.component;
 
-import com.stabilise.render.WorldRenderer;
+import com.stabilise.entity.Entity;
+import com.stabilise.entity.Position;
+import com.stabilise.entity.PositionFree;
 import com.stabilise.util.Checks;
 import com.stabilise.util.collect.SimpleList;
 import com.stabilise.util.collect.UnorderedArrayList;
+import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
 /**
  * The GameCamera controls the player's perspective, and hence which parts of
  * the world are visible to them.
  */
-public class GameCamera extends GameObject {
+public class CCamera extends AbstractComponent {
     
-    /** The entity upon which to focus the camera. */
-    private Entity focus;
-    
+    /** Position of the camera. */
+    public final PositionFree pos = Position.create();
     /** Real position (i.e. ignoring shake). */
     public final PositionFree realPos = Position.create();
     
@@ -24,20 +26,18 @@ public class GameCamera extends GameObject {
     private final SimpleList<Shake> shakes = new UnorderedArrayList<>();
     
     
-    /**
-     * Creates a new GameCamera.
-     */
-    public GameCamera() {
-        super(true);
-        setFocus(null);
+    
+    @Override
+    public void init(Entity e) {
+        realPos.set(e.pos);
+        realPos.ly += e.aabb.centreY();
+        realPos.align();
     }
     
     @Override
-    public void update(World w, float dt) {
-        if(focus != null) {
-            realPos.lx += realPos.diffX(focus.pos) * followStrength;
-            realPos.ly += (realPos.diffY(focus.pos) + focus.aabb.centreY()) * followStrength;
-        }
+    public void update(World w, Entity e, float dt) {
+        realPos.lx += realPos.diffX(e.pos) * followStrength;
+        realPos.ly += (realPos.diffY(e.pos) + e.aabb.centreY()) * followStrength;
         
         realPos.align();
         pos.set(realPos);
@@ -53,31 +53,7 @@ public class GameCamera extends GameObject {
         
         // Unimportant TODOs:
         // Focus on multiple entities
-        // Function for capping off-centre-ness
-    }
-    
-    @Override
-    public void render(WorldRenderer renderer) {
-        // nothing to see here, move along
-    }
-    
-    @Override
-    public void destroy() {
-        focus = null; // help the gc
-    }
-    
-    /**
-     * Sets the entity upon which to focus the camera. If {@code e} is null,
-     * the camera will freeze.
-     */
-    public void setFocus(Entity e) {
-        focus = e;
-        
-        if(e != null) {
-            realPos.set(e.pos);
-            realPos.ly += e.aabb.centreY();
-            realPos.align();
-        }
+        // Way of capping off-centre-ness
     }
     
     /**
@@ -94,11 +70,11 @@ public class GameCamera extends GameObject {
     }
     
     /**
-     * Moves the camera to the same coordinates as its focus.
+     * Moves the camera to the same coordinates as the entity.
      */
-    public void snapToFocus() {
-        realPos.set(focus.pos);
-        realPos.ly += focus.aabb.centreY();
+    public void snapToFocus(Entity e) {
+        realPos.set(e.pos);
+        realPos.ly += e.aabb.centreY();
         realPos.align();
     }
     
@@ -108,6 +84,31 @@ public class GameCamera extends GameObject {
     public void shake(float strength, int duration) {
         shakes.append(new Shake(strength, duration));
     }
+    
+    @Override
+    public int getWeight() {
+        // not *that* important, but update the camera after everything else
+        return Integer.MAX_VALUE;
+    }
+    
+    @Override
+    public Action resolve(Component c) {
+        return Action.REJECT;
+    }
+    
+    @Override
+    public void importFromCompound(DataCompound c) {
+        Checks.TODO(); // TODO
+    }
+    
+    @Override
+    public void exportToCompound(DataCompound c) {
+        Checks.TODO(); // TODO
+    }
+    
+    
+    
+    
     
     private static class Shake {
         
