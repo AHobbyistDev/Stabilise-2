@@ -13,8 +13,8 @@ public abstract class ParticlePhysical extends Particle {
     
     
     @Override
-    protected void update(World world) {
-        super.update(world);
+    protected void update(World world, float dt) {
+        super.update(world, dt);
         
         // Crude euler integration.
         pos.addX(dx * world.getTimeIncrement());

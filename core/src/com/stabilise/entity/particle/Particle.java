@@ -47,7 +47,7 @@ public abstract class Particle extends GameObject {
     }
     
     @Override
-    protected void update(World world) {
+    protected void update(World world, float dt) {
         age++;
     }
     

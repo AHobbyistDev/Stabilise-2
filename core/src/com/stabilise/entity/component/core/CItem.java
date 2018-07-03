@@ -62,7 +62,7 @@ public class CItem extends CCore {
     }
     
     @Override
-    public void update(World w, Entity e) {
+    public void update(World w, Entity e, float dt) {
         if(e.age == DESPAWN_TICKS) {
             e.destroy();
             return;

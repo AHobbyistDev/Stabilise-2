@@ -29,7 +29,7 @@ public abstract class CEffect extends AbstractComponent {
     }
     
     @Override
-    public void update(World w, Entity e) {
+    public void update(World w, Entity e, float dt) {
         age++;
     }
     

@@ -156,7 +156,7 @@ public abstract class AbstractWorld implements World {
         profiler.next("tileEntity"); // root.update.game.world.tileEntity
         updateObjects(getTileEntities());
         profiler.next("particle"); // root.update.game.world.particle
-        getParticles().iterate(p -> p.updateAndCheck(this) && reclaimParticle(p));
+        getParticles().iterate(p -> p.updateAndCheck(this, timeIncrement) && reclaimParticle(p));
         
         // Do a particle cleanup every 5 seconds
         if(getAge() % 300 == 0)
@@ -182,7 +182,7 @@ public abstract class AbstractWorld implements World {
      * true}.
      */
     protected void updateObjects(FunctionalIterable<? extends GameObject> objects) {
-        objects.iterate(o -> o.updateAndCheck(this));
+        objects.iterate(o -> o.updateAndCheck(this, timeIncrement));
     }
     
     /**

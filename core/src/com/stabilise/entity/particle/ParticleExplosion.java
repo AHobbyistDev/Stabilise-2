@@ -52,8 +52,8 @@ public class ParticleExplosion extends Particle {
     }
     
     @Override
-    protected void update(World world) {
-        super.update(world);
+    protected void update(World world, float dt) {
+        super.update(world, dt);
         
         float ratio = (float)age/DESPAWN_TICKS;
         

@@ -31,7 +31,7 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     
     
     @Override
-    protected void update(World w) {
+    protected void update(World w, float dt) {
         if(playerInRange(w)) {
             // Ugly way of lazily initialising...
             if(fireGen == null) {

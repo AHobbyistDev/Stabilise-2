@@ -25,7 +25,7 @@ public class CIdleController extends CController {
     }
 
     @Override
-    public void update(World w, Entity e) {
+    public void update(World w, Entity e, float dt) {
         // do nothing
     }
 

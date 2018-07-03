@@ -39,9 +39,10 @@ public class CPortal extends CCore {
     
     
     private static enum State {
+        UNINITIALISED,
         WAITING_FOR_DIMENSION,
         OPEN,
-        CLOSED
+        CLOSED,
     }
     
     /** 0.5 blocks wide, 3 blocks high. */
@@ -55,7 +56,7 @@ public class CPortal extends CCore {
      * same dimension. */
     private boolean interdimensional;
     
-    private State state = State.WAITING_FOR_DIMENSION;
+    private State state = State.UNINITIALISED;
     
     /** Anticlockwise rotation of the portal, in radians. An angle of 0 means
      * the portal is 'facing right', i.e. entities enter from the right. An
@@ -95,7 +96,7 @@ public class CPortal extends CCore {
     
     /** Event to send to entities which come in range. Cached to avoid
      * excessive object creation. */
-    private EPortalInRange nearbyEvent;
+    private EPortalInRange nearbyTestEvent, nearbyInformEvent;
     
     // Animation stuff
     private boolean animating = false;
@@ -118,43 +119,10 @@ public class CPortal extends CCore {
     private void onAddToWorld(World w, Entity e) {
         // cache the ID (can't do it in init() since it wouldn'tve been set yet)
         id = e.id(); 
-        nearbyEvent = new EPortalInRange(id);
+        nearbyTestEvent = new EPortalInRange(id, true);
+        nearbyInformEvent = new EPortalInRange(id, false);
         
         direction.rotateRad(rotation);
-        
-    	// Only do the setup if we're the original portal
-        if(original) {
-            // No need to clamp
-            
-            // First clamp to the middle of a tile (since we have width 0.5 on
-            // each side, this will centre the portal on a tile), then align.
-            //e.pos.clampToTile().add(0.5f, 0).align();
-            //otherPortalPos.clampToTile().add(0.5f, 0).align();
-            
-            // Subtract the direction vector since we enter from one edge of the
-            // first portal and exit from the opposite edge of the other.
-            //offset.setDiff(otherPortalPos, e.pos).add(e.facingRight?1:-1, 0).align();
-            offset.setDiff(otherPortalPos, e.pos).align();
-            
-            // ope = "other portal entity", opc = "other portal core"
-            Entity ope = Entities.portal(w.getDimensionName());
-            CPortal opc = (CPortal) ope.core;
-            
-            ope.pos.set(otherPortalPos);
-            //ope.facingRight = !e.facingRight;
-            
-            opc.original = false;
-            opc.pairID = id;
-            opc.otherPortalPos.set(e.pos);
-            opc.offset.set(offset).reflect().align();
-            opc.state = State.WAITING_FOR_DIMENSION;
-            
-            World w2 = w.multiverse().loadDimension(pairedDimension);
-            w2.addEntity(ope);
-            ope.getComponent(CSliceAnchorer.class).anchorAll(w2, ope); // preanchor all slices
-            
-            pairID = ope.id();
-        }
     }
     
     /**
@@ -183,8 +151,11 @@ public class CPortal extends CCore {
     }
     
     @Override
-    public void update(World w, Entity e) {
+    public void update(World w, Entity e, float dt) {
         switch(state) {
+            case UNINITIALISED:
+                updateUninitialised(w, e);
+                break;
             case WAITING_FOR_DIMENSION:
             	updateWaiting(w, e);
                 break;
@@ -195,6 +166,46 @@ public class CPortal extends CCore {
                 updateClosed(w, e);
                 break;
         }
+    }
+    
+    private void updateUninitialised(World w, Entity e) {
+        // Only do the setup if we're the original portal
+        if(original) {
+            // No need to clamp
+            
+            // First clamp to the middle of a tile (since we have width 0.5 on
+            // each side, this will centre the portal on a tile), then align.
+            //e.pos.clampToTile().add(0.5f, 0).align();
+            //otherPortalPos.clampToTile().add(0.5f, 0).align();
+            
+            // Subtract the direction vector since we enter from one edge of the
+            // first portal and exit from the opposite edge of the other.
+            //offset.setDiff(otherPortalPos, e.pos).add(e.facingRight?1:-1, 0).align();
+            offset.setDiff(otherPortalPos, e.pos).align();
+            
+            // ope = "other portal entity", opc = "other portal core"
+            Entity ope = Entities.portal(w.getDimensionName());
+            CPortal opc = (CPortal) ope.core;
+            
+            ope.pos.set(otherPortalPos);
+            //ope.facingRight = !e.facingRight;
+            
+            opc.original = false;
+            opc.pairID = id;
+            opc.otherPortalPos.set(e.pos);
+            opc.offset.set(offset).reflect().align();
+            opc.state = State.WAITING_FOR_DIMENSION;
+            
+            World w2 = interdimensional
+                    ? w.multiverse().loadDimension(pairedDimension)
+                    : w;
+            w2.addEntity(ope);
+            ope.getComponent(CSliceAnchorer.class).anchorAll(w2, ope); // preanchor all slices
+            
+            pairID = ope.id();
+        }
+        
+        state = State.WAITING_FOR_DIMENSION;
     }
     
     private void updateWaiting(World w, Entity e) {
@@ -237,7 +248,6 @@ public class CPortal extends CCore {
             if(en.isPhantom() || en.isPortal())
                 return;
             
-            // Iterating backwards is admittedly a microoptimisation
             if(e.pos.distSq(en.pos) < NEARBY_DIST_SQ)
                 informNearbyEntity(w, e, en);
         });
@@ -246,18 +256,19 @@ public class CPortal extends CCore {
     private void informNearbyEntity(World w, Entity portal, Entity en) {
         // If the entity already knows about is, one of its CNearbyPortal
         // components will reject us here.
-        if(en.components.anyBackwards(c -> c.handle(null, en, nearbyEvent),
+        
+        // Iterating backwards is admittedly a microoptimisation over using
+        // en.post().
+        if(en.components.anyBackwards(c -> c.handle(w, en, nearbyTestEvent),
                 CNearbyPortal.COMPONENT_WEIGHT))
             return;
         
+        // Entity doesn't already know about this portal, so let's send the
+        // actual inform event and add in the component.
+        en.post(w, nearbyInformEvent);
+        
         CNearbyPortal cnp = new CNearbyPortal(id);
         en.addComponent(cnp);
-        
-        // Switch to notification mode so that cnp doesn't eat the event when
-        // posted. TODO: more elegant way?
-        nearbyEvent.notification = true;
-        en.post(w, nearbyEvent);
-        nearbyEvent.notification = false;
         
         // If this portal is interdimensional, we create a phantom on the other
         // side and let the entity know.
@@ -306,7 +317,9 @@ public class CPortal extends CCore {
      * multiverse).
      */
     public World pairedWorld(World w) {
-        return w.multiverse().getDimension(pairedDimension);
+        return interdimensional
+                ? w.multiverse().getDimension(pairedDimension)
+                : w;
     }
     
     /**

@@ -41,8 +41,8 @@ public class CEffectFire extends CParticleEffect<ParticleFlame> {
     }
     
     @Override
-    public void update(World w, Entity e) {
-        super.update(w, e);
+    public void update(World w, Entity e, float dt) {
+        super.update(w, e, dt);
         
         createFireParticle(w, e);
         

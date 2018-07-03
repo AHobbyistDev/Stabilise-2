@@ -35,8 +35,8 @@ public class ParticleIndicator extends Particle {
     
     
     @Override
-    protected void update(World world) {
-        super.update(world);
+    protected void update(World world, float dt) {
+        super.update(world, dt);
         
         pos.addY(dy); // no real need to align
         dy *= 0.95f;

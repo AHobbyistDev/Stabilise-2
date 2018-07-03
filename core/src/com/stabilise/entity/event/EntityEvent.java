@@ -42,6 +42,9 @@ public class EntityEvent extends Event {
         /** When an entity goes through a portal, either to the same dimension
          * or another dimension. */
         THROUGH_PORTAL,
+        /** When an entity comes "in range" of a portal; an event of this type
+         * is sent to determine whether an entity is already aware of a portal. */
+        TRY_NEARBY_PORTAL,
         /** When an entity comes "in range" of a portal. */
         PORTAL_IN_RANGE,
         /** When an entity moves "out of range" of a portal. */
@@ -56,7 +59,6 @@ public class EntityEvent extends Event {
             DESTROYED          = new EntityEvent(Type.DESTROYED);
     
     private final Type type;
-    public boolean handled = false;
     
     protected EntityEvent(Type type) {
         super(type.name());

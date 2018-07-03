@@ -1,5 +1,6 @@
 package com.stabilise.entity;
 
+import com.badlogic.gdx.math.Vector2;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.Exportable;
 import com.stabilise.util.maths.Maths;
@@ -290,6 +291,23 @@ public abstract class Position implements Exportable, Cloneable {
      */
     public abstract Position addY(int dy);
     
+    /**
+     * Adds another position to this one.
+     * 
+     * @return this Position.
+     */
+    public Position add(Position other) {
+        return setSum(this, other);
+    }
+    
+    /**
+     * Subtracts the other position from this one.
+     * 
+     * @return this Position.
+     */
+    public Position sub(Position other) {
+        return setDiff(this, other);
+    }
     
     /**
      * Reflects this Position (i.e., negates everything). This method does not
@@ -445,6 +463,15 @@ public abstract class Position implements Exportable, Cloneable {
      */
     public boolean isInSlice(int sx, int sy) {
         return this.sx == sx && this.sy == sy;
+    }
+    
+    /**
+     * Treating this Position as a vector, takes the dot product with {@code
+     * v}. This Position should be {@link #globalify() globalified} before
+     * invoking this for a correct result.
+     */
+    public float dot(Vector2 v) {
+        return v.dot(lx(), ly());
     }
     
     /**

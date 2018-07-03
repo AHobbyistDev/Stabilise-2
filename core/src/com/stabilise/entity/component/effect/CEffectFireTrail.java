@@ -27,8 +27,8 @@ public class CEffectFireTrail extends CParticleEffect<ParticleFlame> {
     }
     
     @Override
-    public void update(World w, Entity e) {
-        super.update(w, e);
+    public void update(World w, Entity e, float dt) {
+        super.update(w, e, dt);
         
         Position dummyPos = emitter.dummyPos;
         emitter.createBurst(5, dummyPos.set(e.pos, -0.2f, -0.2f), 0.4f, 0.4f, 0.2f, 1.0f, 0f, Maths.TAUf);

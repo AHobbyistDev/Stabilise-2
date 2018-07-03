@@ -288,7 +288,7 @@ public class WorldRenderer implements Renderer {
         tileRenderer.update();
         
         profiler.next("camera"); // root.update.renderer.camera
-        camObj.update(world);
+        camObj.update(world, 0f);
         
         // Updating camera matrix not needed anymore since we don't use global coords
         //camera.position.set((float)playerCamera.pos.getGlobalX(), (float)playerCamera.pos.getGlobalY(), 0f);

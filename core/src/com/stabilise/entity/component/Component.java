@@ -46,8 +46,9 @@ public interface Component extends IWeightProvider,
      * 
      * @param w The world.
      * @param e The entity this component is being updated as part of.
+     * @param dt The number of seconds since the last update tick.
      */
-    void update(World w, Entity e);
+    void update(World w, Entity e, float dt);
     
     /**
      * Checks for whether or not this component should be removed.

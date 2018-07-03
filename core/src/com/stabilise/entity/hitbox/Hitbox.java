@@ -94,7 +94,7 @@ public class Hitbox extends GameObject {
      * applicable and resolving the collision appropriately.
      */
     @Override
-    protected void update(World world) {
+    protected void update(World world, float dt) {
         moveToOwner(world);
         
         for(Entity e : world.getEntitiesNearby(pos)) {

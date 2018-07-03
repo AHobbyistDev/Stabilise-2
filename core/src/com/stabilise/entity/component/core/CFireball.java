@@ -79,8 +79,8 @@ public class CFireball extends CBaseProjectile {
     }
     
     @Override
-    public void update(World w, Entity e) {
-        super.update(w, e);
+    public void update(World w, Entity e, float dt) {
+        super.update(w, e, dt);
         
         float div = Math.abs(e.dx) + Math.abs(e.dy);
         if(div != 0) {

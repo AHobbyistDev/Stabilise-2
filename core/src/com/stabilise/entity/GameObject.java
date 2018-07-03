@@ -32,8 +32,10 @@ public abstract class GameObject {
      * #updateAndCheck(World)}.
      * 
      * @param world The world in which this GameObject is present. Never null.
+     * @param dt The number of seconds since the last update tick. Typically
+     * equal to 1/ticksPerSecond.
      */
-    protected void update(World world) {
+    protected void update(World world, float dt) {
         // do nothing
     }
     
@@ -51,13 +53,15 @@ public abstract class GameObject {
      * return isDestroyed();</pre>
      * 
      * @param world The world in which this GameObject is present. Never null.
+     * @param dt The number of seconds since the last update tick. Typically
+     * equal to 1/ticksPerSecond.
      * 
      * @return {@code true} if this GameObject is considered destroyed and
      * should be removed from the world ASAP; {@code false} otherwise.
      */
-    public boolean updateAndCheck(World world) {
+    public boolean updateAndCheck(World world, float dt) {
         if(!destroyed) // don't update if already destroyed!
-            update(world);
+            update(world, dt);
         return destroyed;
     }
     

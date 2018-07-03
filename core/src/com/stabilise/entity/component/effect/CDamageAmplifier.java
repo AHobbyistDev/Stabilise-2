@@ -26,7 +26,7 @@ public class CDamageAmplifier extends AbstractComponent {
     }
     
     @Override public void init(Entity e) {}
-    @Override public void update(World w, Entity e) {}
+    @Override public void update(World w, Entity e, float dt) {}
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {

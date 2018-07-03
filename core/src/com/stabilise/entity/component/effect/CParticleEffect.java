@@ -19,8 +19,8 @@ public abstract class CParticleEffect<T extends Particle> extends CEffect {
     }
     
     @Override
-    public void update(World w, Entity e) {
-        super.update(w, e);
+    public void update(World w, Entity e, float dt) {
+        super.update(w, e, dt);
         
         if(emitter == null)
             emitter = w.particleEmitter(particleClass());

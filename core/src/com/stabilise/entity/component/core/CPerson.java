@@ -227,8 +227,8 @@ public class CPerson extends CBaseMob {
     }
     
     @Override
-    public void update(World w, Entity e) {
-        super.update(w, e);
+    public void update(World w, Entity e, float dt) {
+        super.update(w, e, dt);
         
         ticksSinceHealthLoss++;
         ticksSinceStaminaLoss++;

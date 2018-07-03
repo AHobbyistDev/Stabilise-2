@@ -2,11 +2,13 @@ package com.stabilise.entity.component.physics;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
+import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.event.EPortalInRange;
 import com.stabilise.entity.event.EPortalOutOfRange;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Checks;
+import com.stabilise.util.Log;
 import com.stabilise.util.collect.LongList;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
@@ -27,6 +29,7 @@ public class CPhysicsImpl extends CPhysics {
     
     private final Position tmp1 = Position.createFixed(); // for horizontal/verticalCollisions
     private final Position tmp2 = Position.createFixed(); // for row/columnValid
+    private final Position tmp3 = Position.create(); // for portals
     
     private final LongList nearbyPortalIDs = new LongList();
     
@@ -35,7 +38,7 @@ public class CPhysicsImpl extends CPhysics {
     public void init(Entity e) {}
     
     @Override
-    public void update(World w, Entity e) {
+    public void update(World w, Entity e, float dt) {
         float dxi = e.dx * w.getTimeIncrement();
         float dyi = e.dy * w.getTimeIncrement() + w.getGravity2ndOrder();
         
@@ -74,14 +77,55 @@ public class CPhysicsImpl extends CPhysics {
                 horizontalCollisions(w, e);
         }
         
-        // Even if unaligned, entity.update() will do it for us
-        // nvm, need it aligned for getXFriction
-        e.pos.set(newPos).align();
         
-        e.dy += w.getGravityIncrement(); // apply after updating y
+        interactWithPortals(w, e);
+        
+        
+        
+        // apply after updating y
+        e.dy += w.getGravityIncrement();
         
         e.dx *= getXFriction(w, e);
         e.dy *= getYFriction(w, e);
+        
+        // Even if unaligned, entity.update() will do it for us
+        // nvm, need it aligned for getXFriction
+        e.pos.set(newPos).align();
+    }
+    
+    private void interactWithPortals(World w, Entity e) {
+        // TODO: temporary crude "going through portal" logic.
+        for(int i = 0; i < nearbyPortalIDs.size(); i++) {
+            Entity pe = w.getEntity(nearbyPortalIDs.get(i));
+            if(pe == null) {
+                Log.get().postWarning("CPhysicsImpl: nearby portal (id: " +
+                        nearbyPortalIDs.get(i) + ") is null? (For future me: " +
+                        "is this even an issue?)");
+                continue;
+            }
+            CPortal pc = (CPortal) pe.core;
+            
+            // Crude "did we go through the portal?" check
+            // In the future:
+            // - check collision with portal edges so we only go through if we
+            //   completely fit
+            // - check collisions with stuff through the portal?
+            
+            float dot1 = tmp3.setDiff(e.pos,  pe.pos).globalify().dot(pc.direction);
+            float dot2 = tmp3.setDiff(newPos, pe.pos).globalify().dot(pc.direction);
+            
+            // (1) dot1 > 0 if we started on the side the portal is pointing to
+            // (2) dot1*dot2 < 0 if we cross the portal axis
+            // (3) crudely check to see if we're within 2 tiles of the portal
+            if(dot1 > 0 && dot1*dot2 < 0 && e.pos.distSq(pe.pos) < 4f) {
+                e.goThroughPortal(w, pe);
+                
+                // goThroughPortal() will change pos; we have to manually offset
+                // newPos so the rest of update() doesn't teleport us.
+                newPos.add(pc.offset);
+                return;
+            }
+        }
     }
     
     /**

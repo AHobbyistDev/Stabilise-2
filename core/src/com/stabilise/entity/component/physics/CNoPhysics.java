@@ -18,7 +18,7 @@ public class CNoPhysics extends CPhysics {
     private CNoPhysics() {}
     
     @Override public void init(Entity e) {}
-    @Override public void update(World w, Entity e) {}
+    @Override public void update(World w, Entity e, float dt) {}
     @Override public boolean handle(World w, Entity e, EntityEvent ev) { return false; }
     @Override public int getWeight() { return 0; }
     @Override public Action resolve(Component other) { return Action.REJECT; }

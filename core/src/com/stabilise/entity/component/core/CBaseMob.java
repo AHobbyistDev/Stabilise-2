@@ -193,7 +193,7 @@ public abstract class CBaseMob extends CCore {
     }
     
     @Override
-    public void update(World w, Entity e) {
+    public void update(World w, Entity e, float dt) {
         stateTicks++;
         
         if(state == State.DEAD && stateTicks == DEATH_TICKS) {
@@ -442,10 +442,9 @@ public abstract class CBaseMob extends CCore {
         else if(ev.type() == EntityEvent.Type.ADDED_TO_WORLD) {
             srcDmgIndicator = w.particleEmitter(ParticleIndicator.class);
             srcSmoke = w.particleEmitter(ParticleSmoke.class);
-        } else if(ev.type() == EntityEvent.Type.DAMAGED) {
-            if(damage(w, e, ((EDamaged)ev).src))
-                ev.handled = true; // don't cancel propagation to other components
-        }
+        } else if(ev.type() == EntityEvent.Type.DAMAGED)
+            damage(w, e, ((EDamaged)ev).src);
+        
         return false;
     }
     

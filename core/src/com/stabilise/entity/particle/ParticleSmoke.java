@@ -29,11 +29,11 @@ public class ParticleSmoke extends ParticlePhysical {
     }
     
     @Override
-    protected void update(World world) {
+    protected void update(World world, float dt) {
         dx *= 0.92f;
         dy -= (dy - 0.4f) * 0.08f;
         
-        super.update(world);
+        super.update(world, dt);
         
         if(despawn == -1)
             despawn = 120 + (int)(30*world.rnd().nextGaussian());

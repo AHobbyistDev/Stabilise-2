@@ -18,8 +18,8 @@ public class ParticleFlame extends ParticlePhysical {
     
     
     @Override
-    protected void update(World world) {
-        super.update(world);
+    protected void update(World world, float dt) {
+        super.update(world, dt);
         
         dy += -0.02f / 32f; //world.gravity / 32f;
         

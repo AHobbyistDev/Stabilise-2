@@ -49,7 +49,7 @@ public class CNearbyPortal extends AbstractComponent {
     }
     
     @Override
-    public void update(World w, Entity e) {
+    public void update(World w, Entity e, float dt) {
         Entity portal = w.getEntity(portalID);
         if(portal != null) {
             // If we're far enough away, we can stop tracking the portal
@@ -58,7 +58,7 @@ public class CNearbyPortal extends AbstractComponent {
             // If we have a phantom, update its position to match ours
             else if(phantom != null)
                 updatePhantomPos(e, (CPortal)portal.core);
-        } else
+        } else // portal is null which means it's gone, so we forget about it
             onPortalOutOfRange(w, e);
     }
     
@@ -87,9 +87,8 @@ public class CNearbyPortal extends AbstractComponent {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        // ev.matches() doesn't return true if it's just a notification
-        return ev.type().equals(Type.PORTAL_IN_RANGE)
-                && ((EPortalInRange) ev).matches(portalID);
+        return ev.type().equals(Type.TRY_NEARBY_PORTAL)
+                && ((EPortalInRange) ev).portalID == portalID;
     }
     
     @Override

@@ -85,22 +85,22 @@ public class Entity extends GameObject implements Exportable {
     }
     
     @Override
-    protected void update(World world) {
+    protected void update(World world, float dt) {
         age++;
         
         world.profiler().start("components");
         
         components.iterate(c -> {
-            c.update(world, this);
+            c.update(world, this, dt);
             return c.shouldRemove();
         });
         
         world.profiler().next("controller");
-        controller.update(world, this);
+        controller.update(world, this, dt);
         world.profiler().next("core");
-        core.update(world, this);
+        core.update(world, this, dt);
         world.profiler().next("physics");
-        physics.update(world, this);
+        physics.update(world, this, dt);
         world.profiler().end();
         
         // After all is said and done, realign the entity's position
@@ -108,8 +108,8 @@ public class Entity extends GameObject implements Exportable {
     }
     
     @Override
-    public boolean updateAndCheck(World world) {
-    	if(super.updateAndCheck(world)) {
+    public boolean updateAndCheck(World world, float dt) {
+    	if(super.updateAndCheck(world, dt)) {
     		post(world, EntityEvent.REMOVED_FROM_WORLD);
     		return true;
     	}
@@ -179,12 +179,10 @@ public class Entity extends GameObject implements Exportable {
      * consumed the event; false if the event was halted by some component.
      */
     public boolean post(World w, EntityEvent ev) {
-        return (
-               !components.any(c -> c.handle(w, this, ev))
+        return !components.any(c -> c.handle(w, this, ev))
             && !core.handle(w, this, ev)
             && !controller.handle(w, this, ev)
-            && !physics.handle(w, this, ev)
-               ) || ev.handled;
+            && !physics.handle(w, this, ev);
     }
     
     @Override
@@ -201,6 +199,22 @@ public class Entity extends GameObject implements Exportable {
      */
     public boolean damage(World w, IDamageSource src) {
         return post(w, EDamaged.damaged(src));
+    }
+    
+    /**
+     * 
+     * 
+     * @param w
+     * @param pe the portal entity
+     */
+    public void goThroughPortal(World w, Entity pe) {
+        CPortal pc = (CPortal) pe.core;
+        if(pc.interdimensional()) {
+            // TODO
+        } else {
+            pos.add(pc.offset).align();
+        }
+        // TODO: post event
     }
     
     /**

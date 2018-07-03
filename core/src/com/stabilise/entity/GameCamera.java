@@ -33,7 +33,7 @@ public class GameCamera extends GameObject {
     }
     
     @Override
-    public void update(World w) {
+    public void update(World w, float dt) {
         if(focus != null) {
             realPos.lx += realPos.diffX(focus.pos) * followStrength;
             realPos.ly += (realPos.diffY(focus.pos) + focus.aabb.centreY()) * followStrength;

@@ -66,8 +66,8 @@ public abstract class TileEntity extends GameObject implements Exportable {
      * destroyed} again).
      */
     @Override
-    public boolean updateAndCheck(World world) {
-    	boolean ret = super.updateAndCheck(world);
+    public boolean updateAndCheck(World world, float dt) {
+    	boolean ret = super.updateAndCheck(world, dt);
     	// We reset the destroyed flag as to permit behaviour wherein a
     	// tile entity may add and remove itself from the update list
     	// repeatedly as it wills.

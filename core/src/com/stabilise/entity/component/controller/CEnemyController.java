@@ -37,7 +37,7 @@ public class CEnemyController extends CController {
     }
     
     @Override
-    public void update(World w, Entity e) {
+    public void update(World w, Entity e, float dt) {
         if(true/*!e.dead*/) {
             if(--actionTimeout <= 0) {
                 refreshAction(w, e);

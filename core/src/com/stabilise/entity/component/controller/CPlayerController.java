@@ -78,7 +78,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
     }
     
     @Override
-    public void update(World world, Entity e) {
+    public void update(World world, Entity e, float dt) {
         if(controller.isControlPressed(Control.LEFT) && controller.isControlPressed(Control.RIGHT))
             ;// do nothing
         else if(controller.isControlPressed(Control.LEFT))
@@ -200,21 +200,23 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 break;
             case PORTAL:
                 //String dim = "overworld";
-                String dim = game.playerData.data.getDimensionName();
+                String dim = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)
+                        ? null : game.playerData.data.getDimensionName();
                 //String dim = "flatland";
-                Entity portal = Entities.portal(dim);
-                portal.pos.set(e.pos, mob.facingRight ? 3f : -3f, 1.5f).align();
+                Entity pe = Entities.portal(dim);
+                pe.pos.set(e.pos, mob.facingRight ? 3f : -3f, 1.5f).align();
                 //portal.facingRight = !e.facingRight;
-                CPortal pCore = (CPortal) portal.core;
-                pCore.rotation = mob.facingRight ? Maths.PIf : 0f;
+                CPortal pc = (CPortal) pe.core;
+                pc.rotation = mob.facingRight ? Maths.PIf : 0f;
                 
-                if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
-                	pCore.otherPortalPos.set(0, 0, 0f, 0f);
-                else
-                	// spawn the other portal at the same place
-                	pCore.otherPortalPos.set(portal.pos);
+                if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
+                    // For now put the exit portal twice as far away
+                    pc.otherPortalPos.set(pe.pos).addX(mob.facingRight ? 12f : -12f);
+                } else
+                	// if other dim, spawn the other portal at the same place
+                	pc.otherPortalPos.set(pe.pos);
                 
-                game.world.addEntity(portal);
+                game.world.addEntity(pe);
                 break;
             default:
                 return false;

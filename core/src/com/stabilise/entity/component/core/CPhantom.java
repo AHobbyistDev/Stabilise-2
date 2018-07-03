@@ -38,7 +38,7 @@ public class CPhantom extends CCore {
     }
     
     @Override
-    public void update(World w, Entity e) {
+    public void update(World w, Entity e, float dt) {
         // Do nothing?
     }
     
