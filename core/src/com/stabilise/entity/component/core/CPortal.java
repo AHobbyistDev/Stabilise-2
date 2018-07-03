@@ -171,16 +171,8 @@ public class CPortal extends CCore {
     private void updateUninitialised(World w, Entity e) {
         // Only do the setup if we're the original portal
         if(original) {
-            // No need to clamp
-            
-            // First clamp to the middle of a tile (since we have width 0.5 on
-            // each side, this will centre the portal on a tile), then align.
-            //e.pos.clampToTile().add(0.5f, 0).align();
-            //otherPortalPos.clampToTile().add(0.5f, 0).align();
-            
             // Subtract the direction vector since we enter from one edge of the
             // first portal and exit from the opposite edge of the other.
-            //offset.setDiff(otherPortalPos, e.pos).add(e.facingRight?1:-1, 0).align();
             offset.setDiff(otherPortalPos, e.pos).align();
             
             // ope = "other portal entity", opc = "other portal core"
@@ -188,7 +180,6 @@ public class CPortal extends CCore {
             CPortal opc = (CPortal) ope.core;
             
             ope.pos.set(otherPortalPos);
-            //ope.facingRight = !e.facingRight;
             
             opc.original = false;
             opc.pairID = id;

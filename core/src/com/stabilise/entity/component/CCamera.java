@@ -3,6 +3,9 @@ package com.stabilise.entity.component;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.PositionFree;
+import com.stabilise.entity.event.EThroughPortal;
+import com.stabilise.entity.event.EntityEvent;
+import com.stabilise.entity.event.EntityEvent.Type;
 import com.stabilise.util.Checks;
 import com.stabilise.util.collect.SimpleList;
 import com.stabilise.util.collect.UnorderedArrayList;
@@ -25,6 +28,10 @@ public class CCamera extends AbstractComponent {
     
     private final SimpleList<Shake> shakes = new UnorderedArrayList<>();
     
+    /** The world that the entity -- and also this camera -- is in. Updated
+     * when the entity moves dimensions via a portal. */
+    public World world = null;
+    
     
     
     @Override
@@ -36,6 +43,9 @@ public class CCamera extends AbstractComponent {
     
     @Override
     public void update(World w, Entity e, float dt) {
+        if(world == null)
+            world = w;
+        
         realPos.lx += realPos.diffX(e.pos) * followStrength;
         realPos.ly += (realPos.diffY(e.pos) + e.aabb.centreY()) * followStrength;
         
@@ -83,6 +93,14 @@ public class CCamera extends AbstractComponent {
      */
     public void shake(float strength, int duration) {
         shakes.append(new Shake(strength, duration));
+    }
+    
+    @Override
+    public boolean handle(World w, Entity e, EntityEvent ev) {
+        if(ev.type().equals(Type.THROUGH_PORTAL))
+            world = ((EThroughPortal)ev).portalCore.pairedWorld(w);
+        
+        return false;
     }
     
     @Override

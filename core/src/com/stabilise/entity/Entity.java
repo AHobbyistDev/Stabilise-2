@@ -9,6 +9,7 @@ import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
+import com.stabilise.entity.event.EThroughPortal;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.collect.WeightingArrayList;
@@ -209,6 +210,9 @@ public class Entity extends GameObject implements Exportable {
      */
     public void goThroughPortal(World w, Entity pe) {
         CPortal pc = (CPortal) pe.core;
+
+        post(w, new EThroughPortal(pe, pc));
+        
         if(pc.interdimensional()) {
             // TODO
         } else {

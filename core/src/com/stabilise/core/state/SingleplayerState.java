@@ -75,10 +75,6 @@ public class SingleplayerState implements State {
         renderer = null;
         
         pop.dispose();
-        
-        // Try to garbage collect everything which has been unloaded
-        //game = null;        // <-- No-can-do, crashes in update() at if(!game.running)
-        System.gc();
     }
     
     @Override
