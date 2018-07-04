@@ -12,6 +12,7 @@ import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Checks;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Interpolation;
+import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
 import com.stabilise.world.World;
 import com.stabilise.world.multiverse.Multiverse;
@@ -185,6 +186,8 @@ public class CPortal extends CCore {
             opc.pairID = id;
             opc.otherPortalPos.set(e.pos);
             opc.offset.set(offset).reflect().align();
+            opc.rotation = (rotation + Maths.PIf) % Maths.TAUf;
+            //opc.direction.set(direction).scl(-1); // no need; set by onAddToWorld()
             opc.state = State.WAITING_FOR_DIMENSION;
             
             World w2 = interdimensional
@@ -214,12 +217,13 @@ public class CPortal extends CCore {
         
         if(ope.getComponent(CSliceAnchorer.class).allSlicesActive(w2)) {
             state = State.OPEN;
+            animating = true;
+            animationTicks = 0;
             
             CPortal opc = (CPortal) ope.core;
             opc.state = State.OPEN;
-            
-            animating = true;
-            animationTicks = 0;
+            opc.animating = true;
+            opc.animationTicks = 0;
         }
     }
     

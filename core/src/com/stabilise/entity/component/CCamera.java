@@ -97,8 +97,12 @@ public class CCamera extends AbstractComponent {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        if(ev.type().equals(Type.THROUGH_PORTAL))
-            world = ((EThroughPortal)ev).portalCore.pairedWorld(w);
+        if(ev.type().equals(Type.THROUGH_PORTAL)) {
+            EThroughPortal ev0 = (EThroughPortal) ev;
+            pos.add(ev0.portalCore.offset).align();
+            realPos.add(ev0.portalCore.offset).align();
+            world = ev0.portalCore.pairedWorld(w);
+        }
         
         return false;
     }
