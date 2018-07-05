@@ -2,13 +2,14 @@ package com.stabilise.entity.component.physics;
 
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
+import com.stabilise.entity.component.CThroughPortal;
 import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.event.EPortalInRange;
 import com.stabilise.entity.event.EPortalOutOfRange;
+import com.stabilise.entity.event.EThroughPortal;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Checks;
-import com.stabilise.util.Log;
 import com.stabilise.util.collect.LongList;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
@@ -77,30 +78,29 @@ public class CPhysicsImpl extends CPhysics {
                 horizontalCollisions(w, e);
         }
         
-        
         interactWithPortals(w, e);
         
         
+        // Even if unaligned, entity.update() will do it for us
+        // nvm, need it aligned for getXFriction
+        e.pos.set(newPos).align();
         
         // apply after updating y
         e.dy += w.getGravityIncrement();
         
         e.dx *= getXFriction(w, e);
         e.dy *= getYFriction(w, e);
-        
-        // Even if unaligned, entity.update() will do it for us
-        // nvm, need it aligned for getXFriction
-        e.pos.set(newPos).align();
     }
     
+    /**
+     * Temporary crude "going through portal" logic
+     */
     private void interactWithPortals(World w, Entity e) {
-        // TODO: temporary crude "going through portal" logic.
         for(int i = 0; i < nearbyPortalIDs.size(); i++) {
             Entity pe = w.getEntity(nearbyPortalIDs.get(i));
             if(pe == null) {
-                Log.get().postWarning("CPhysicsImpl: nearby portal (id: " +
-                        nearbyPortalIDs.get(i) + ") is null? (For future me: " +
-                        "is this even an issue?)");
+                nearbyPortalIDs.removeAt(i);
+                i--;
                 continue;
             }
             CPortal pc = (CPortal) pe.core;
@@ -118,11 +118,18 @@ public class CPhysicsImpl extends CPhysics {
             // (2) dot1*dot2 < 0 if we cross the portal axis
             // (3) crudely check to see if we're within 2 tiles of the portal
             if(dot1 > 0 && dot1*dot2 < 0 && e.pos.distSq(pe.pos) < 4f) {
-                e.goThroughPortal(w, pe);
+                // If interdimensional, don't effect going through the portal
+                // now. If intradimensional, however, it's simple enough that
+                // we can just carry out going through it now.
+                if(pc.interdimensional()) {
+                    e.addComponent(new CThroughPortal(nearbyPortalIDs.get(i)));
+                } else {
+                    e.pos.add(pc.offset).align();
+                    newPos.add(pc.offset).align();
+                    // Let other components know we just went through a portal
+                    e.post(w, new EThroughPortal(pe, pc));
+                }
                 
-                // goThroughPortal() will change pos; we have to manually offset
-                // newPos so the rest of update() doesn't teleport us.
-                newPos.add(pc.offset);
                 return;
             }
         }

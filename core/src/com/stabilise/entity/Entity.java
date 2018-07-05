@@ -9,9 +9,9 @@ import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
-import com.stabilise.entity.event.EThroughPortal;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.render.WorldRenderer;
+import com.stabilise.util.Checks;
 import com.stabilise.util.collect.WeightingArrayList;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
@@ -48,7 +48,7 @@ public class Entity extends GameObject implements Exportable {
     public CController controller;
     
     // ad hoc components
-    public final WeightingArrayList<Component> components =
+    public WeightingArrayList<Component> components =
             new WeightingArrayList<>(new Component[2]);
     
     
@@ -89,12 +89,12 @@ public class Entity extends GameObject implements Exportable {
     protected void update(World world, float dt) {
         age++;
         
-        world.profiler().start("components");
-        
-        components.iterate(c -> {
-            c.update(world, this, dt);
-            return c.shouldRemove();
-        });
+        // Run controller first so that input is dealt with first
+        // Then run the core to affect any core behaviour
+        // Then run physics to move the entity around
+        // Finally run all the ad hoc components. These come last largely so
+        // that any CNearbyPortal components update the phantom positions
+        // after all other movement has been effected.
         
         world.profiler().next("controller");
         controller.update(world, this, dt);
@@ -103,6 +103,12 @@ public class Entity extends GameObject implements Exportable {
         world.profiler().next("physics");
         physics.update(world, this, dt);
         world.profiler().end();
+        
+        world.profiler().start("components");
+        components.iterate(c -> {
+            c.update(world, this, dt);
+            return c.shouldRemove();
+        });
         
         // After all is said and done, realign the entity's position
         pos.align();
@@ -145,6 +151,11 @@ public class Entity extends GameObject implements Exportable {
      * @throws NullPointerException if {@code c} is {@code null}.
      */
     public Entity addComponent(Component c) {
+        // TODO: think about how to deal with in the future:
+        // WeightingArrayList allows elements to be added to the list while the
+        // list is being iterated over. For us this means that a component may
+        // add a new component when it is updated. However due to the way 
+        
         if(components.add(c))
         	c.init(this);
         return this;
@@ -203,22 +214,64 @@ public class Entity extends GameObject implements Exportable {
     }
     
     /**
+     * Swaps the components of this entity with the given entity (which should
+     * be this entity's phantom.)
      * 
-     * 
-     * @param w
-     * @param pe the portal entity
+     * @throws IllegalStateException if the other entity doesn't have the same
+     * ID as this one.
      */
-    public void goThroughPortal(World w, Entity pe) {
-        CPortal pc = (CPortal) pe.core;
-
-        post(w, new EThroughPortal(pe, pc));
+    public void swapComponents(Entity other) {
+        if(other.id != id)
+            Checks.ISE("Swapping components of entities with different IDs: " +
+                    id + ", " + other.id);
         
-        if(pc.interdimensional()) {
-            // TODO
-        } else {
-            pos.add(pc.offset).align();
-        }
-        // TODO: post event
+        // Swap destroyed flags
+        boolean tmp1 = other.destroyed;
+        other.destroyed = destroyed;
+        destroyed = tmp1;
+        
+        // Swap positions
+        Position tmp2 = other.pos.clone();
+        other.pos.set(pos);
+        pos.set(tmp2);
+        
+        // Swap age
+        long tmp3 = other.age;
+        other.age = age;
+        age = tmp3;
+        
+        // Swap dx, dy
+        float tmp4 = other.dx;
+        other.dx = dx;
+        dx = tmp4;
+        tmp4 = other.dy;
+        other.dy = dy;
+        dy = tmp4;
+        
+        // Swap AABB
+        AABB tmp5 = other.aabb;
+        other.aabb = aabb;
+        aabb = tmp5;
+        
+        // Swap core
+        CCore tmp6 = other.core;
+        other.core = core;
+        core = tmp6;
+        
+        // Swap physics
+        CPhysics tmp7 = other.physics;
+        other.physics = physics;
+        physics = tmp7;
+        
+        // Swap controller
+        CController tmp8 = other.controller;
+        other.controller = controller;
+        controller = tmp8;
+        
+        // Swap ad hoc components
+        WeightingArrayList<Component> tmp9 = other.components;
+        other.components = components;
+        components = tmp9;
     }
     
     /**

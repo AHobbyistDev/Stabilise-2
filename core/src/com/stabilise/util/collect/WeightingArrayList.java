@@ -31,6 +31,22 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
     private E[] data;
     private int size = 0;
     
+    // Since this class allows list modification during iteration, inserting a
+    // low weight element may cause a higher weight element to be iterated over
+    // more than once (since it will be shifted right in the array). To avoid
+    // any possibility of this occurring we use itrIdx and itrInc.
+    
+    /** Used instead of a local index variable when iterating. When an element
+     * is inserted before this index, itrInc is incremented so that the current
+     * element being iterated over is not iterated again. In each iteration
+     * function where itrIdx is used, we store the value of itrIdx when the
+     * function begins and reset to that when we are done as to allow reentrant
+     * iteration (i.e. allow nested iterations). */
+    private int itrIdx = -1;
+    /** itrIdx increment amount during iteration. This is incremented when an
+     * element it added in a position before itrIdx. */
+    private int itrInc = 1;
+    
     
     /**
      * Creates a WeightingArrayList using the given initial internal array.
@@ -163,8 +179,13 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
     
     @Override
     public void forEach(Consumer<? super E> cons) {
-        for(int i = 0; i < size; i++)
-            cons.accept(data[i]);
+        //for(int i = 0; i < size; i++)
+        //    cons.accept(data[i]);
+        
+        int oldItrIdx = itrIdx;
+        for(itrIdx = 0; itrIdx < size; itrIdx += itrInc, itrInc = 1)
+            cons.accept(data[itrIdx]);
+        itrIdx = oldItrIdx;
     }
     
     /**
@@ -173,17 +194,30 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
      * only care about things near the start of a list.
      */
     public void forEach(Consumer<? super E> cons, int maxWeight) {
+        //E e;
+        //for(int i = 0; i < size && (e = data[i]).getWeight() <= maxWeight; i++)
+        //    cons.accept(e);
+        
+        int oldItrIdx = itrIdx;
         E e;
-        for(int i = 0; i < size && (e = data[i]).getWeight() <= maxWeight; i++)
+        for(itrIdx = 0; itrIdx < size && (e = data[itrIdx]).getWeight() <= maxWeight;
+                itrIdx += itrInc, itrInc = 1)
             cons.accept(e);
+        itrIdx = oldItrIdx;
     }
     
     /**
      * Iterates <em>backwards</em> through this list, performing the given
      * action on any each element whose weight is greater than or equal to the
      * specified weight.
+     * 
+     * <p>Important note: make absolutely sure that no new elements are added
+     * to this list during this backwards iteration, or elements may be
+     * skipped!
      */
     public void forEachBackwards(Consumer<? super E> cons, int minWeight) {
+        // Can't use itrIdx because it's only set up for forwards iteration.
+        
         E e;
         for(int i = size-1; i >= 0 && (e = data[i]).getWeight() >= minWeight; i--)
             cons.accept(e);
@@ -191,16 +225,38 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
     
     @Override
     public void iterate(Predicate<? super E> pred) {
-        for(int i = 0; i < size; i++)
-            if(pred.test(data[i]))
-                doRemove(i);
+        //for(int i = 0; i < size; i++) {
+        //    if(pred.test(data[i])) {
+        //        doRemove(i);
+        //        i--;
+        //    }
+        //}
+        
+        int oldItrIdx = itrIdx;
+        for(itrIdx = 0; itrIdx < size; itrIdx += itrInc, itrInc = 1) {
+            if(pred.test(data[itrIdx])) {
+                doRemove(itrIdx);
+                itrIdx--;
+            }
+        }
+        itrIdx = oldItrIdx;
     }
     
     @Override
     public boolean any(Predicate<? super E> pred) {
-        for(int i = 0; i < size; i++)
-            if(pred.test(data[i]))
+        //for(int i = 0; i < size; i++)
+        //    if(pred.test(data[i]))
+        //        return true;
+        //return false;
+        
+        int oldItrIdx = itrIdx;
+        for(itrIdx = 0; itrIdx < size; itrIdx += itrInc, itrInc = 1) {
+            if(pred.test(data[itrIdx])) {
+                itrIdx = oldItrIdx;
                 return true;
+            }
+        }
+        itrIdx = oldItrIdx;
         return false;
     }
     
@@ -208,8 +264,15 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
      * Much like {@link #any(Predicate)}, but iterates <em>backwards</em>
      * through the list, and only tests the given predicate on elements with a
      * weight greater than or equal to {@code minWeight}.
+     * 
+     * <p>Important note: make absolutely sure that no new elements are added
+     * to this list during this backwards iteration, or elements may be
+     * skipped!
      */
     public boolean anyBackwards(Predicate<? super E> pred, int minWeight) {
+        // Can't use itrIdx here because it's only set up for forwards
+        // iteration.
+        
         E e;
         for(int i = size-1; i >= 0 && (e = data[i]).getWeight() >= minWeight; i--)
             if(pred.test(e))
@@ -219,15 +282,42 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
     
     @Override
     public boolean all(Predicate<? super E> pred) {
-        for(int i = 0; i < size; i++)
-            if(!pred.test(data[i]))
+        //for(int i = 0; i < size; i++)
+        //    if(!pred.test(data[i]))
+        //        return false;
+        //return true;
+        
+        int oldItrIdx = itrIdx;
+        for(itrIdx = 0; itrIdx < size; itrIdx += itrInc, itrInc = 1) {
+            if(!pred.test(data[itrIdx])) {
+                itrIdx = oldItrIdx;
                 return false;
+            }
+        }
+        itrIdx = oldItrIdx;
         return true;
     }
+    
+    /**
+     * Internally swaps this WeightingArrayList with the given other list.
+     */
+    /*
+    public void swap(WeightingArrayList<E> other) {
+        E[] tmpData = other.data;
+        other.data = data;
+        data = tmpData;
+        
+        int tmpSize = other.size;
+        other.size = size;
+        size = tmpSize;
+    }
+    */
     
     //--------------------==========--------------------
     //-------------=====Nested Classes=====-------------
     //--------------------==========--------------------
+    
+    // TODO: use itrIdx co in the iterators
     
     private class Itr implements Iterator<E> {
         

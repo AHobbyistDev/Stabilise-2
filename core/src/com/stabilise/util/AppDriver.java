@@ -252,7 +252,7 @@ public final class AppDriver implements Runnable {
         
         // We can't just sleep nsPerTick - (System.nanoTime()-lastTickStart),
         // since we should account for time spent by whatever enclosing code
-        // is is that invokes this function. So try to account for it by
+        // it is that invokes this function. So try to account for it by
         // subtracting off the difference between actual sleep time
         // (lastTickStart - lastFrameEnd) and the expected sleep time
         // (lastSleep). (This assumes the overhead of the enclosing code is the

@@ -18,6 +18,7 @@ import com.stabilise.util.Debug;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.HostWorld;
+import com.stabilise.world.World;
 import com.stabilise.world.Worlds.WorldBundle;
 import com.stabilise.world.multiverse.HostMultiverse;
 import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
@@ -69,11 +70,7 @@ public class Game implements Controllable, InputProcessor {
     
     
     /**
-     * Creates a new Game instance.
-     * 
      * @param worldBundle The world and player data.
-     * 
-     * @throws NullPointerException if {@code worldBundle} is {@code null}.
      */
     public Game(WorldBundle worldBundle) {
         this.multiverse = worldBundle.getHostMultiverse();
@@ -85,7 +82,6 @@ public class Game implements Controllable, InputProcessor {
         
         controller = new Controller(this);
         
-        // TODO: Hardcoding this is poor design and should be changed in the future
         playerController = new CPlayerController(controller, this);
         player.controller = playerController;
         playerController.init(player);
@@ -148,10 +144,10 @@ public class Game implements Controllable, InputProcessor {
     }
     
     /**
-     * Gets the game world.
+     * Gets the world that the player is in.
      */
-    public HostWorld getWorld() {
-        return world;
+    public World getWorld() {
+        return camera.world;
     }
     
     /**
@@ -293,7 +289,7 @@ public class Game implements Controllable, InputProcessor {
         return false;
     }
     
-    private int keyValue(int keycode) {
+    private static int keyValue(int keycode) {
         switch(keycode) {
             case Keys.NUM_0:
             case Keys.NUMPAD_0:

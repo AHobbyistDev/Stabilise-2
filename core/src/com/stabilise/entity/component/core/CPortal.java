@@ -6,6 +6,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.component.CNearbyPortal;
 import com.stabilise.entity.component.CSliceAnchorer;
+import com.stabilise.entity.component.Component;
 import com.stabilise.entity.event.EPortalInRange;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.render.WorldRenderer;
@@ -90,9 +91,9 @@ public class CPortal extends CCore {
     private boolean original = true;
     
     /** Cache this portal's entity ID for convenience here. */
-    private long id;
+    public long id;
     /** The ID of the paired portal. */
-    private long pairID;
+    public long pairID;
     
     
     /** Event to send to entities which come in range. Cached to avoid
@@ -183,11 +184,14 @@ public class CPortal extends CCore {
             ope.pos.set(otherPortalPos);
             
             opc.original = false;
+            opc.pairedDimension = w.getDimensionName();
+            opc.interdimensional = interdimensional;
             opc.pairID = id;
             opc.otherPortalPos.set(e.pos);
             opc.offset.set(offset).reflect().align();
             opc.rotation = (rotation + Maths.PIf) % Maths.TAUf;
             //opc.direction.set(direction).scl(-1); // no need; set by onAddToWorld()
+            opc.height = height;
             opc.state = State.WAITING_FOR_DIMENSION;
             
             World w2 = interdimensional
@@ -255,7 +259,7 @@ public class CPortal extends CCore {
         // Iterating backwards is admittedly a microoptimisation over using
         // en.post().
         if(en.components.anyBackwards(c -> c.handle(w, en, nearbyTestEvent),
-                CNearbyPortal.COMPONENT_WEIGHT))
+                Component.WEIGHT_NEARBY_PORTAL))
             return;
         
         // Entity doesn't already know about this portal, so let's send the

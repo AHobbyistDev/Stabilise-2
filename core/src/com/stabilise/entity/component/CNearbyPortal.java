@@ -4,8 +4,8 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.event.EPortalInRange;
 import com.stabilise.entity.event.EPortalOutOfRange;
+import com.stabilise.entity.event.EThroughPortal;
 import com.stabilise.entity.event.EntityEvent;
-import com.stabilise.entity.event.EntityEvent.Type;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
@@ -17,14 +17,6 @@ import com.stabilise.world.World;
  * @see CPhantom
  */
 public class CNearbyPortal extends AbstractComponent {
-    
-    /** The {@link CNearbyPortal#getWeight() weight} of a CNearbyPortal
-     * component. We use Integer.MAX_VALUE so that this goes at the end of a
-     * component list, so that the phantom's state is updated after all other
-     * components have effected their changes. */
-    public static final int COMPONENT_WEIGHT = Integer.MAX_VALUE;
-    
-    
     
     /** The ID of the portal that we are nearby. */
     public long portalID;
@@ -41,11 +33,6 @@ public class CNearbyPortal extends AbstractComponent {
     
     public CNearbyPortal(long portalID) {
         this.portalID = portalID;
-    }
-    
-    @Override
-    public void init(Entity e) {
-        // nothing to do
     }
     
     @Override
@@ -87,13 +74,40 @@ public class CNearbyPortal extends AbstractComponent {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        return ev.type().equals(Type.TRY_NEARBY_PORTAL)
-                && ((EPortalInRange) ev).portalID == portalID;
+        switch(ev.type()) {
+            case TRY_NEARBY_PORTAL:
+                return ((EPortalInRange) ev).portalID == portalID;
+            case THROUGH_PORTAL:
+                EThroughPortal ev0 = (EThroughPortal) ev;
+                if(ev0.portal.id() == portalID)
+                    goThroughPortal(w, e, ev0);
+                return false;
+            default:
+                return false;
+        }
+    }
+    
+    private void goThroughPortal(World w, Entity e, EThroughPortal ev) {
+        CPortal pc = ev.portalCore;
+        
+        if(pc.interdimensional()) {
+            e.swapComponents(phantom);
+            
+            ev.newEntity = phantom;
+            
+            // We now swap to being the associated "nearby portal" component
+            // for the portal we just came out of, and the original entity is
+            // now the phantom.
+            portalID = pc.pairID;
+            phantom = e;
+        } else {
+            //e.pos.add(pc.offset).align();
+        }
     }
     
     @Override
     public int getWeight() {
-        return COMPONENT_WEIGHT;
+        return Component.WEIGHT_NEARBY_PORTAL;
     }
     
     @Override

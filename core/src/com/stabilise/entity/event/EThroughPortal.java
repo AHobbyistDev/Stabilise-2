@@ -16,6 +16,15 @@ public class EThroughPortal extends EntityEvent {
     public final CPortal portalCore;
     
     
+    /** The new entity object for the entity that went through the portal. That
+     * is, this will be its former phantom if the portal was interdimensional,
+     * and is set by the CNearbyPortal component. This is needed so that the
+     * physics component continues to update the correct entity after its
+     * components are swapped out with those of the phantom. This is null if
+     * the portal is intradimensional. */
+    public Entity newEntity = null;
+    
+    
     public EThroughPortal(Entity portal, CPortal portalCore) {
         super(Type.THROUGH_PORTAL);
         this.portal = portal;

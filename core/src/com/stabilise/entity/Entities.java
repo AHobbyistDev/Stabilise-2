@@ -54,7 +54,8 @@ public class Entities {
         //return e(p(), new CEnemyController(), new CGenericEnemy())
         //        .addComponent(new CBasicArmour());
         return e(new CPlayerPerson(), p(), new CEnemyController())
-                .addComponent(new CDamageAmplifier(1.2f));
+                .addComponent(new CBasicArmour())
+                .addComponent(new CDamageAmplifier(1.4f));
     }
     
     public static Entity person() {
@@ -66,8 +67,14 @@ public class Entities {
                 .addComponent(new CSliceAnchorer());
     }
     
+    /**
+     * Creates a phantom for the given base entity through the given portal.
+     * The phantom's ID will be set to the base's ID.
+     */
     public static Entity phantom(Entity base, Entity portal) {
-        return e(new CPhantom(base, portal), CNoPhysics.INSTANCE, co());
+        Entity ph = e(new CPhantom(base, portal), CNoPhysics.INSTANCE, co());
+        ph.setID(base.id());
+        return ph;
     }
     
 }

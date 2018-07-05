@@ -43,7 +43,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
     public Controller controller;
     
     /** A reference to the game. */
-    public Game game;
+    public final Game game;
     /** A reference to the world renderer. */
     private WorldRenderer worldRenderer;
     

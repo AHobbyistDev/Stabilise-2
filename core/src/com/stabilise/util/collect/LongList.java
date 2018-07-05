@@ -118,10 +118,21 @@ public class LongList {
         if(idx == size)
             return false;
         else {
-            size--;
-            System.arraycopy(data, idx+1, data, idx, size-idx);
+            removeAt(idx);
             return true;
         }
+    }
+    
+    /**
+     * Removes a long at the specified index, shifting all succeeding entries
+     * to the left if necessary. Does nothing if the given index is
+     * out-of-bounds.
+     */
+    public void removeAt(int idx) {
+        if(idx < 0 || idx >= size)
+            return;
+        size--;
+        System.arraycopy(data, idx+1, data, idx, size-idx);
     }
     
     /**

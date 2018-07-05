@@ -45,11 +45,11 @@ public abstract class AbstractComponent implements Component {
     /**
      * {@inheritDoc}
      * 
-     * <p>The default implementation returns {@code 0}.
+     * <p>The default implementation returns {@link Component#WEIGHT_NORMAL}.
      */
     @Override
     public int getWeight() {
-        return 0;
+        return Component.WEIGHT_NORMAL;
     }
     
     // We don't override resolve(Component) as to force implementors to think

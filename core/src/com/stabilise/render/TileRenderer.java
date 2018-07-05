@@ -34,8 +34,6 @@ public class TileRenderer implements Renderer {
     
     /** A reference to the world renderer. */
     public final WorldRenderer wr;
-    /** A reference to the world. */
-    public final World world;
     
     /** Number of slices rendered on each render step. */
     int slicesRendered = 0;
@@ -58,7 +56,6 @@ public class TileRenderer implements Renderer {
      */
     public TileRenderer(WorldRenderer worldRenderer) {
         this.wr = worldRenderer;
-        world = worldRenderer.world;
     }
     
     @Override
@@ -100,7 +97,7 @@ public class TileRenderer implements Renderer {
         
         for(int x = minCorner.sx(); x <= maxCorner.sx(); x++) {
             for(int y = minCorner.sy(); y <= maxCorner.sy(); y++) {
-                renderSlice(world.getSliceAt(x, y), wr.camObj.pos, (dx,dy) -> true);
+                renderSlice(wr.world.getSliceAt(x, y), wr.camObj.pos, (dx,dy) -> true);
             }
         }
         //worldRenderer.batch.enableBlending();
@@ -186,9 +183,9 @@ public class TileRenderer implements Renderer {
     }
     
     public void renderRegionTint(ShapeRenderer shapes) {
-        if(!world.isHost())
+        if(!wr.world.isHost())
             return;
-        HostWorld w = world.asHost();
+        HostWorld w = wr.world.asHost();
         
         Position camPos = wr.camObj.pos;
         
@@ -242,7 +239,7 @@ public class TileRenderer implements Renderer {
         maxCorner.set(camPosOtherDim, wr.tilesHorizontal, wr.tilesVertical + 1)
                 .clampToTile().align();
         
-        World w = pc.pairedWorld(world);
+        World w = pc.pairedWorld(wr.world);
         
         for(int sx = minCorner.sx(); sx <= maxCorner.sx(); sx++) {
             for(int sy = minCorner.sy(); sy <= maxCorner.sy(); sy++) {

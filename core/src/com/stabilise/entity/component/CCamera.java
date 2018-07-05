@@ -109,23 +109,22 @@ public class CCamera extends AbstractComponent {
     
     @Override
     public int getWeight() {
-        // not *that* important, but update the camera after everything else
-        return Integer.MAX_VALUE;
+        return Component.WEIGHT_CAMERA;
     }
     
     @Override
     public Action resolve(Component c) {
-        return Action.REJECT;
+        return Action.REJECT; // only one camera!
     }
     
     @Override
     public void importFromCompound(DataCompound c) {
-        Checks.TODO(); // TODO
+        // nothing to see here, move along
     }
     
     @Override
     public void exportToCompound(DataCompound c) {
-        Checks.TODO(); // TODO
+        // nothing to see here, move along
     }
     
     

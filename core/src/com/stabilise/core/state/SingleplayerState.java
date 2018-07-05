@@ -16,13 +16,9 @@ import com.stabilise.world.Worlds.WorldBundle;
  */
 public class SingleplayerState implements State {
     
-    /** The game. */
     public Game game;
-    
-    /** The renderer to use for rendering the world. */
     public WorldRenderer renderer;
     
-    /** The profiler. */
     public Profiler profiler = Application.get().profiler;
     
     /** temporary public sound effect */
@@ -30,15 +26,9 @@ public class SingleplayerState implements State {
     
     
     /**
-     * Creates a new SingleplayerState instance.
-     * 
      * @param worldBundle The world and player data.
-     * 
-     * @throws NullPointerException if {@code bundle} is {@code null}.
      */
     public SingleplayerState(WorldBundle worldBundle) {
-        super();
-        
         game = new Game(worldBundle);
     }
     

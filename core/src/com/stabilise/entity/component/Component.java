@@ -1,6 +1,7 @@
 package com.stabilise.entity.component;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.buffs.CUnkillable;
 import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.core.CCore;
 import com.stabilise.entity.component.physics.CPhysics;
@@ -30,6 +31,28 @@ import com.stabilise.world.World;
 public interface Component extends IWeightProvider,
                                     IDuplicateResolver<Component>,
                                     Exportable {
+    
+    // Common component weights, collected in one location so that I don't have
+    // to search through various files to learn what weights are used by what.
+    
+    /** Normal weight for most components. */
+    public static final int WEIGHT_NORMAL = 0;
+    /** Slightly lower weight, to be used for components such as {@link
+     * CUnkillable} which are likely to intercept and cancel events. */
+    public static final int WEIGHT_HIGH = -1;
+    /** Larger weight for the slice anchorer so that it applies its changes
+     * after most positional updates have had a chance to take place. */
+    public static final int WEIGHT_SLICE_ANCHORER = 1000;
+    /** Larger weight for "nearby portal" components so that the phantom's
+     * position is updates after most positional updates have had a chance to
+     * take place. */
+    public static final int WEIGHT_NEARBY_PORTAL = 10_000;
+    /** Camera has a large weight so that it updates after most other things. */
+    public static final int WEIGHT_CAMERA = 100_000;
+    /** Extremely large weight so that a CThroughPortal component is the very
+     * last component updated in a tick. */
+    public static final int WEIGHT_CHANGE_DIMENSION = Integer.MAX_VALUE - 5;
+    
     
     /**
      * Initialises this component. Invoked when {@link

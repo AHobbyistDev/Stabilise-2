@@ -242,9 +242,7 @@ public class CSliceAnchorer extends AbstractComponent {
     
     @Override
     public int getWeight() {
-        // Pretty far down in the list; we apply slice updates after all
-        // positional changes have taken place.
-        return 1000;
+        return Component.WEIGHT_SLICE_ANCHORER;
     }
     
     @Override
