@@ -1,6 +1,8 @@
 package com.stabilise.entity.component;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.core.CPortal;
+import com.stabilise.entity.event.EThroughPortalInter;
 import com.stabilise.util.Checks;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
@@ -29,29 +31,25 @@ public class CThroughPortal extends AbstractComponent {
     
     @Override
     public void update(World w, Entity e, float dt) {
-        Entity phantom = getPhantom(e);
-        if(phantom == null)
-            Checks.ISE("No phantom?");
-        
-        
-        
+        switchDim(w, e);
     }
     
-    // A pretty inefficient way to get the phantom since we need to iterate
-    // through all the entity's components, but at the moment I can't think of
-    // a better way of going about this. Ah well, guess it's just one of the
-    // tradeoffs of using this approach to going through portals.
-    private Entity getPhantom(Entity e) {
-        CNearbyPortal np;
-        for(Component c : e.components) {
-            if(c instanceof CNearbyPortal) {
-                np = (CNearbyPortal) c;
-                if(np.portalID == portalID) {
-                    return np.phantom;
-                }
-            }
+    private void switchDim(World w1, Entity e1) {
+        Entity pe = w1.getEntity(portalID);
+        CPortal pc = (CPortal) pe.core;
+        
+        World w2 = pc.pairedWorld(w1);
+        Entity e2 = w2.getEntity(e1.id()); // the phantom, should have same ID
+        
+        e1.swapComponents(e2);
+        
+        if(e2.isPlayerControlled()) {
+            w1.asAbstract().unsetPlayer(e1);
+            w2.asAbstract().setPlayer(e2);
         }
-        return null;
+        
+        // Phantom is now the new entity; post the event
+        e2.post(w2, new EThroughPortalInter(pe, pc, e1, w1));
     }
     
     @Override

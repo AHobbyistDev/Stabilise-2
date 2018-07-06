@@ -3,9 +3,8 @@ package com.stabilise.entity.component;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.PositionFree;
-import com.stabilise.entity.event.EThroughPortal;
+import com.stabilise.entity.event.EThroughPortalIntra;
 import com.stabilise.entity.event.EntityEvent;
-import com.stabilise.entity.event.EntityEvent.Type;
 import com.stabilise.util.Checks;
 import com.stabilise.util.collect.SimpleList;
 import com.stabilise.util.collect.UnorderedArrayList;
@@ -97,11 +96,11 @@ public class CCamera extends AbstractComponent {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        if(ev.type().equals(Type.THROUGH_PORTAL)) {
-            EThroughPortal ev0 = (EThroughPortal) ev;
+        if(ev instanceof EThroughPortalIntra) {
+            EThroughPortalIntra ev0 = (EThroughPortalIntra) ev;
             pos.add(ev0.portalCore.offset).align();
             realPos.add(ev0.portalCore.offset).align();
-            world = ev0.portalCore.pairedWorld(w);
+            world = w;
         }
         
         return false;

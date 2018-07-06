@@ -17,6 +17,7 @@ import com.stabilise.entity.component.core.CBaseMob;
 import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.damage.GeneralSource;
 import com.stabilise.entity.event.EntityEvent;
+import com.stabilise.entity.event.EntityEvent.Type;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
 import com.stabilise.input.Controller.Control;
@@ -42,8 +43,10 @@ public class CPlayerController extends CController implements Controllable, Inpu
     /** A reference to the PlayerController's controller. */
     public Controller controller;
     
-    /** A reference to the game. */
+    /** A reference to the game. (TODO: hopefully temporary?) */
     public final Game game;
+    /** A reference to the world the player is in. */
+    public World world;
     /** A reference to the world renderer. */
     private WorldRenderer worldRenderer;
     
@@ -57,13 +60,13 @@ public class CPlayerController extends CController implements Controllable, Inpu
     /**
      * Creates a new PlayerController.
      * 
-     * @param controller The Controller which provides input for the
+     * @param controller The Controller which provides input for this
      * PlayerController.
-     * @param The game which is currently active.
      */
-    public CPlayerController(Controller controller, Game game) {
+    public CPlayerController(Controller controller, Game game, World world) {
         this.controller = controller;
         this.game = game;
+        this.world = world;
         
         int tmpMaxID = 1;
         while(Tile.TILES.containsID(tmpMaxID))
@@ -101,9 +104,9 @@ public class CPlayerController extends CController implements Controllable, Inpu
         }
         
         if(Gdx.input.isButtonPressed(Buttons.LEFT) && !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
-            doInRadius(worldRenderer, (pos) -> game.world.breakTileAt(pos));
+            doInRadius(worldRenderer, (pos) -> world.breakTileAt(pos));
         else if(Gdx.input.isButtonPressed(Buttons.RIGHT) && !Gdx.input.isKeyPressed(Keys.ALT_LEFT))
-            doInRadius(worldRenderer, (pos) -> game.world.setTileAt(pos, tileID));
+            doInRadius(worldRenderer, (pos) -> world.setTileAt(pos, tileID));
     }
     
     /**
@@ -134,25 +137,25 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 break;
             case ATTACK:
                 if(controller.isControlPressed(Control.UP))
-                    mob.attack(game.world, Direction.UP);
+                    mob.attack(world, Direction.UP);
                 else if(controller.isControlPressed(Control.DOWN))
-                    mob.attack(game.world, Direction.DOWN);
+                    mob.attack(world, Direction.DOWN);
                 else
-                    mob.attack(game.world, mob.facingRight ? Direction.RIGHT : Direction.LEFT);
+                    mob.attack(world, mob.facingRight ? Direction.RIGHT : Direction.LEFT);
                 break;
             case SPECIAL:
                 if(controller.isControlPressed(Control.UP))
-                    mob.specialAttack(game.world, Direction.UP);
+                    mob.specialAttack(world, Direction.UP);
                 else if(controller.isControlPressed(Control.DOWN))
-                    mob.specialAttack(game.world, Direction.DOWN);
+                    mob.specialAttack(world, Direction.DOWN);
                 else
-                    mob.specialAttack(game.world, mob.facingRight ? Direction.RIGHT : Direction.LEFT);
+                    mob.specialAttack(world, mob.facingRight ? Direction.RIGHT : Direction.LEFT);
                 break;
             case SUMMON:
                 {
                     Entity m = Entities.enemy();
                     m.pos.set(e.pos, (mob.facingRight ? 5 : -5), 0f);
-                    game.world.addEntity(m);
+                    world.addEntity(m);
                 }
                 break;
             case SUMMON_SWARM:
@@ -161,29 +164,29 @@ public class CPlayerController extends CController implements Controllable, Inpu
                     for(int i = 0; i < max; i++) {
                         Entity m = Entities.enemy();
                         m.pos.set(e.pos,
-                                - 10 + game.world.rnd().nextFloat() * 20,
-                                1 + + game.world.rnd().nextFloat() * 10
+                                - 10 + world.rnd().nextFloat() * 20,
+                                1 + + world.rnd().nextFloat() * 10
                         );
-                        game.world.addEntity(m);
+                        world.addEntity(m);
                     }
                 }
                 break;
             case KILL_MOBS:
                 if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
-                    for(Entity en : game.world.getEntities()) {
+                    for(Entity en : world.getEntities()) {
                         if(en.core instanceof CBaseMob) {
-                            ((CBaseMob)en.core).damage(game.world, en, GeneralSource.voidDamage(9999));
+                            ((CBaseMob)en.core).damage(world, en, GeneralSource.voidDamage(9999));
                         }
                     }
                 } else
-                    game.world.destroyEntities();
+                    world.asAbstract().destroyEntities();
                 break;
             case RESTORE:
                 mob.restore();
                 break;
             case INTERACT:
                 Position p = e.pos.clone().clampToTile().add(0,-1).align();
-                game.world.getTileAt(p).handleInteract(game.world, p, e);
+                world.getTileAt(p).handleInteract(world, p, e);
                 break;
             case PREV_TILE:
                 scrolled(-1);
@@ -216,7 +219,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 	// if other dim, spawn the other portal at the same place
                 	pc.otherPortalPos.set(pe.pos);
                 
-                game.world.addEntity(pe);
+                world.addEntity(pe);
                 break;
             default:
                 return false;
@@ -232,9 +235,9 @@ public class CPlayerController extends CController implements Controllable, Inpu
     @Override
     public boolean keyDown(int keycode) {
         if(keycode == Keys.LEFT_BRACKET)
-            game.world.setTimeDelta(game.world.getTimeDelta() / 2);
+            world.setTimeDelta(world.getTimeDelta() / 2);
         else if(keycode == Keys.RIGHT_BRACKET)
-            game.world.setTimeDelta(game.world.getTimeDelta() * 2);
+            world.setTimeDelta(world.getTimeDelta() * 2);
         else if(keycode == Keys.P)
             ;//System.out.println(game.profiler.getData().toString());
         else if(keycode == Keys.O)
@@ -277,7 +280,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 // spawn the other portal at the same place
                 pCore.otherPortalPos.set(portal.pos);
             
-            game.world.addEntity(portal);
+            world.addEntity(portal);
         }
         return false;
     }
@@ -310,6 +313,8 @@ public class CPlayerController extends CController implements Controllable, Inpu
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
+        if(ev.type().equals(Type.THROUGH_PORTAL_INTER))
+            world = w;
         return false;
     }
     

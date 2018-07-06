@@ -39,9 +39,12 @@ public class EntityEvent extends Event {
         TILE_COLLISION_V,
         DAMAGED,
         KILLED,
-        /** When an entity goes through a portal, either to the same dimension
-         * or another dimension. */
-        THROUGH_PORTAL,
+        /** When an entity goes through a portal to the same dimension. Posted
+         * <em>after</em> moving through the portal has been effected. */
+        THROUGH_PORTAL_INTRA,
+        /** When an entity goes through a portal to another dimension. Posted
+         * <em>after</em> moving through the portal has been effected. */
+        THROUGH_PORTAL_INTER,
         /** When an entity comes "in range" of a portal; an event of this type
          * is sent to determine whether an entity is already aware of a portal. */
         TRY_NEARBY_PORTAL,

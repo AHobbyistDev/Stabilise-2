@@ -43,9 +43,6 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
      * function begins and reset to that when we are done as to allow reentrant
      * iteration (i.e. allow nested iterations). */
     private int itrIdx = -1;
-    /** itrIdx increment amount during iteration. This is incremented when an
-     * element it added in a position before itrIdx. */
-    private int itrInc = 1;
     
     
     /**
@@ -94,6 +91,8 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
                     shift(i);
                     data[i] = e;
                     size++;
+                    if(i <= itrIdx)
+                        itrIdx++;
                     return true;
                 } else { // w2 == w
                     if(data[i].equals(e)) {
@@ -183,7 +182,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
         //    cons.accept(data[i]);
         
         int oldItrIdx = itrIdx;
-        for(itrIdx = 0; itrIdx < size; itrIdx += itrInc, itrInc = 1)
+        for(itrIdx = 0; itrIdx < size; itrIdx++)
             cons.accept(data[itrIdx]);
         itrIdx = oldItrIdx;
     }
@@ -200,8 +199,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
         
         int oldItrIdx = itrIdx;
         E e;
-        for(itrIdx = 0; itrIdx < size && (e = data[itrIdx]).getWeight() <= maxWeight;
-                itrIdx += itrInc, itrInc = 1)
+        for(itrIdx = 0; itrIdx < size && (e = data[itrIdx]).getWeight() <= maxWeight; itrIdx++)
             cons.accept(e);
         itrIdx = oldItrIdx;
     }
@@ -233,7 +231,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
         //}
         
         int oldItrIdx = itrIdx;
-        for(itrIdx = 0; itrIdx < size; itrIdx += itrInc, itrInc = 1) {
+        for(itrIdx = 0; itrIdx < size; itrIdx++) {
             if(pred.test(data[itrIdx])) {
                 doRemove(itrIdx);
                 itrIdx--;
@@ -250,7 +248,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
         //return false;
         
         int oldItrIdx = itrIdx;
-        for(itrIdx = 0; itrIdx < size; itrIdx += itrInc, itrInc = 1) {
+        for(itrIdx = 0; itrIdx < size; itrIdx++) {
             if(pred.test(data[itrIdx])) {
                 itrIdx = oldItrIdx;
                 return true;
@@ -288,7 +286,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
         //return true;
         
         int oldItrIdx = itrIdx;
-        for(itrIdx = 0; itrIdx < size; itrIdx += itrInc, itrInc = 1) {
+        for(itrIdx = 0; itrIdx < size; itrIdx++) {
             if(!pred.test(data[itrIdx])) {
                 itrIdx = oldItrIdx;
                 return false;

@@ -6,7 +6,8 @@ import com.stabilise.entity.component.CThroughPortal;
 import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.event.EPortalInRange;
 import com.stabilise.entity.event.EPortalOutOfRange;
-import com.stabilise.entity.event.EThroughPortal;
+import com.stabilise.entity.event.EThroughPortalInter;
+import com.stabilise.entity.event.EThroughPortalIntra;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Checks;
@@ -30,7 +31,7 @@ public class CPhysicsImpl extends CPhysics {
     
     private final Position tmp1 = Position.createFixed(); // for horizontal/verticalCollisions
     private final Position tmp2 = Position.createFixed(); // for row/columnValid
-    private final Position tmp3 = Position.create(); // for portals
+    private final Position tmp3 = Position.create(); // for interactWithPortals
     
     private final LongList nearbyPortalIDs = new LongList();
     
@@ -127,7 +128,7 @@ public class CPhysicsImpl extends CPhysics {
                     e.pos.add(pc.offset).align();
                     newPos.add(pc.offset).align();
                     // Let other components know we just went through a portal
-                    e.post(w, new EThroughPortal(pe, pc));
+                    e.post(w, new EThroughPortalIntra(pe, pc));
                 }
                 
                 return;
@@ -304,6 +305,12 @@ public class CPhysicsImpl extends CPhysics {
                 break;
             case PORTAL_OUT_OF_RANGE:
                 nearbyPortalIDs.remove(((EPortalOutOfRange)ev).portalID);
+                break;
+            case THROUGH_PORTAL_INTER:
+                // Update our tracking of the portal we just came through;
+                // discard the rest.
+                nearbyPortalIDs.clear();
+                nearbyPortalIDs.add(((EThroughPortalInter) ev).portalCore.pairID);
                 break;
             default:
                 break;

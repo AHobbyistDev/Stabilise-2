@@ -1,3 +1,1 @@
-A 2D tile-based platformer with hopefully other fancy features, akin to Terraria.
-
-This is a work-in-progress hobby and probably shouldn't be taken seriously by anyone.
+A 2D tile-based game, hopefully with other fancy features someday. This is an unfinished hobby project and probably shouldn't be taken seriously by anyone.

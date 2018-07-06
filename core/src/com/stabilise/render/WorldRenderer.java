@@ -65,7 +65,7 @@ public class WorldRenderer implements Renderer {
     float pixelsPerTile = 32;
     
     /** Holds a reference to the world. */
-    public final AbstractWorld world;
+    public AbstractWorld world;
     /** The camera attached to the player. */
     public final CCamera camObj;
     public final CPlayerController controller;
@@ -139,16 +139,13 @@ public class WorldRenderer implements Renderer {
      * Creates a new world renderer.
      * 
      * @param game The game.
-     * @param world The game world.
      * @param camera The camera focused on the player.
      * @param controller The player controller. We need this so that we know
      * where to render the mouse cursor.
      */
-    public WorldRenderer(Game game, AbstractWorld world,
-            CCamera camera, CPlayerController controller) {
+    public WorldRenderer(Game game, CCamera camera, CPlayerController controller) {
         super();
         
-        this.world = world;
         this.camObj = camera;
         this.controller = controller;
         
@@ -300,10 +297,16 @@ public class WorldRenderer implements Renderer {
         //shapes.setProjectionMatrix(camera.combined);
         
         profiler.end(); // root.update.renderer
+        
+        if(camObj.world != null)
+            world = camObj.world.asAbstract();
     }
     
     @Override
     public void render() {
+        if(world == null)
+            return;
+        
         profiler.start("background"); // root.render.background
         Gdx.gl.glClearColor(BACKGROUND_COL.r, BACKGROUND_COL.g, BACKGROUND_COL.b, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);

@@ -7,6 +7,7 @@ import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EDamaged;
 import com.stabilise.entity.event.ETileCollision;
 import com.stabilise.entity.event.EntityEvent;
+import com.stabilise.entity.event.EntityEvent.Type;
 import com.stabilise.entity.particle.ParticleIndicator;
 import com.stabilise.entity.particle.ParticleSmoke;
 import com.stabilise.entity.particle.manager.ParticleEmitter;
@@ -444,6 +445,8 @@ public abstract class CBaseMob extends CCore {
             srcSmoke = w.particleEmitter(ParticleSmoke.class);
         } else if(ev.type() == EntityEvent.Type.DAMAGED)
             damage(w, e, ((EDamaged)ev).src);
+        else if(ev.type() == Type.THROUGH_PORTAL_INTER)
+            this.e = e; // update our ref to e
         
         return false;
     }

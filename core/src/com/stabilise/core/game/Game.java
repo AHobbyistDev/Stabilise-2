@@ -17,7 +17,6 @@ import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Debug;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
-import com.stabilise.world.HostWorld;
 import com.stabilise.world.World;
 import com.stabilise.world.Worlds.WorldBundle;
 import com.stabilise.world.multiverse.HostMultiverse;
@@ -40,8 +39,6 @@ public class Game implements Controllable, InputProcessor {
     private boolean advanceTick = false;
     
     private final HostMultiverse multiverse;
-    /** The game's world instance. */
-    public final HostWorld world;
     public final PlayerData playerData;
     public final Entity player;
     public final CCamera camera;
@@ -74,7 +71,6 @@ public class Game implements Controllable, InputProcessor {
      */
     public Game(WorldBundle worldBundle) {
         this.multiverse = worldBundle.getHostMultiverse();
-        this.world = worldBundle.getHostWorld();
         this.playerData = worldBundle.getPlayerData();
         this.player = worldBundle.getPlayerEntity();
         
@@ -82,7 +78,7 @@ public class Game implements Controllable, InputProcessor {
         
         controller = new Controller(this);
         
-        playerController = new CPlayerController(controller, this);
+        playerController = new CPlayerController(controller, this, worldBundle.getHostWorld());
         player.controller = playerController;
         playerController.init(player);
         

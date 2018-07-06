@@ -4,7 +4,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.event.EPortalInRange;
 import com.stabilise.entity.event.EPortalOutOfRange;
-import com.stabilise.entity.event.EThroughPortal;
+import com.stabilise.entity.event.EThroughPortalInter;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
@@ -77,31 +77,18 @@ public class CNearbyPortal extends AbstractComponent {
         switch(ev.type()) {
             case TRY_NEARBY_PORTAL:
                 return ((EPortalInRange) ev).portalID == portalID;
-            case THROUGH_PORTAL:
-                EThroughPortal ev0 = (EThroughPortal) ev;
-                if(ev0.portal.id() == portalID)
-                    goThroughPortal(w, e, ev0);
+            case THROUGH_PORTAL_INTER:
+                EThroughPortalInter ev0 = (EThroughPortalInter) ev;
+                if(ev0.portal.id() == portalID) {
+                    // We now swap to being the associated "nearby portal"
+                    // component for the portal we just came out of, and the
+                    // original entity is now the phantom.
+                    portalID = ev0.portalCore.pairID;
+                    phantom = ev0.oldEntity;
+                }
                 return false;
             default:
                 return false;
-        }
-    }
-    
-    private void goThroughPortal(World w, Entity e, EThroughPortal ev) {
-        CPortal pc = ev.portalCore;
-        
-        if(pc.interdimensional()) {
-            e.swapComponents(phantom);
-            
-            ev.newEntity = phantom;
-            
-            // We now swap to being the associated "nearby portal" component
-            // for the portal we just came out of, and the original entity is
-            // now the phantom.
-            portalID = pc.pairID;
-            phantom = e;
-        } else {
-            //e.pos.add(pc.offset).align();
         }
     }
     

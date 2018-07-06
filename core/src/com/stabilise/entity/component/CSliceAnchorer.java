@@ -5,6 +5,7 @@ import static com.stabilise.core.Constants.LOADED_SLICE_RADIUS;
 import com.stabilise.core.Constants;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
+import com.stabilise.entity.event.EThroughPortalInter;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.util.Checks;
 import com.stabilise.util.io.data.DataCompound;
@@ -233,10 +234,25 @@ public class CSliceAnchorer extends AbstractComponent {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        if(ev.equals(EntityEvent.ADDED_TO_WORLD))
-            anchorAll(w, e, true);
-        else if(ev.equals(EntityEvent.REMOVED_FROM_WORLD))
-        	deanchorAll(w);
+        switch(ev.type()) {
+            case ADDED_TO_WORLD:
+                anchorAll(w, e);
+                break;
+            case REMOVED_FROM_WORLD:
+                deanchorAll(w);
+                break;
+            case THROUGH_PORTAL_INTRA:
+                refresh(w, e);
+                break;
+            case THROUGH_PORTAL_INTER:
+                EThroughPortalInter ev0 = (EThroughPortalInter) ev;
+                deanchorAll(ev0.oldWorld);
+                disabled = false; // bit of a hack, but it works
+                anchorAll(w, e, false);
+                break;
+            default:
+                break;
+        }
         return false;
     }
     

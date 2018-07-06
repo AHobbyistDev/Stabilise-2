@@ -285,6 +285,8 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Hitbox improvements (tracking hit entities, event to linked entities, optional invul frames)
 04/07/18
 	- Entities can move through portals within the same dimension!
+06/07/18
+    - Interdimensional portals now work!!!
 
 
 
