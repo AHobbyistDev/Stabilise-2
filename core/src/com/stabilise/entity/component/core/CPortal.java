@@ -272,15 +272,24 @@ public class CPortal extends CCore {
         // If this portal is interdimensional, we create a phantom on the other
         // side and let the entity know.
         if(interdimensional) {
-            Entity phantom = Entities.phantom(en);
-            cnp.phantom = phantom;
-            cnp.updatePhantomPos(en, this); // set before adding to world
-            pairedWorld(w).addEntityDontSetID(phantom);
+            // If phantom is non-null, then it is already a phantom of another
+            // portal linked to the same dimension. This is fine; we let cnp
+            // track it too.
+            Entity phantom = pairedWorld(w).getEntity(en.id());
+            if(phantom == null) {
+                phantom = Entities.phantom(en);
+                cnp.phantom = phantom;
+                cnp.updatePhantomPos(en, this); // set before adding to world
+                pairedWorld(w).addEntityDontSetID(phantom);
+            } else {
+                ((CPhantom)phantom.core).anchors++;
+                cnp.phantom = phantom;
+            }
         }
     }
     
     private void updateClosed(World w, Entity e) {
-        // TODO
+        e.destroy();
     }
     
     @Override

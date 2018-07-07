@@ -48,7 +48,7 @@ public class CThroughPortal extends AbstractComponent {
             return;
         }
         
-        ((CPhantom)e2.core).base = e2;
+        ((CPhantom)e2.core).original = e2;
         
         e1.swapComponents(e2);
         

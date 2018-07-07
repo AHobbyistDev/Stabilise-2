@@ -22,16 +22,25 @@ import com.stabilise.world.World;
 public class CPhantom extends CCore {
     
     /** The entity in the other dimension that we are the phantom of. */
-    public Entity base;
+    public Entity original;
+    
+    /** A phantom may be linked to multiple nearby portals to/from the same
+     * dimension. If the original entity moves out of range of one of the
+     * portals we don't want the phantom to disappear immediately since it is
+     * still linked to the others. As such we keep a count of how many portals
+     * this phantom is 'anchored' to and only remove it when all anchors are
+     * gone. Default: 1. */
+    public int anchors = 1;
     
     
     public CPhantom() {}
     
     /**
-     * @param base the entity in the other dimension that we are the phantom of
+     * @param original the entity in the other dimension that we are the
+     * phantom of
      */
-    public CPhantom(Entity base) {
-    	this.base = base;
+    public CPhantom(Entity original) {
+    	this.original = original;
     }
     
     @Override
@@ -46,7 +55,7 @@ public class CPhantom extends CCore {
     
     @Override
     public AABB getAABB() {
-        return base.core.getAABB();
+        return original.core.getAABB();
     }
     
     @Override

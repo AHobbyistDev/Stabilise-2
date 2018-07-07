@@ -33,6 +33,7 @@ public class Entities {
         return e(new CPlayerPerson())
                 //.addComponent(new CInvulnerability())
                 .addComponent(new CUnkillable())
+                //.addComponent(new CDebug())
                 .addComponent(new CSliceAnchorer());
     }
     

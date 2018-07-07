@@ -1,6 +1,7 @@
 package com.stabilise.entity.component;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.core.CPhantom;
 import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.event.EPortalInRange;
 import com.stabilise.entity.event.EPortalOutOfRange;
@@ -37,22 +38,27 @@ public class CNearbyPortal extends AbstractComponent {
     
     @Override
     public void update(World w, Entity e, float dt) {
+        if(remove)
+            return;
+        
         Entity portal = w.getEntity(portalID);
         if(portal != null) {
             // If we're far enough away, we can stop tracking the portal
             if(e.pos.distSq(portal.pos) > CPortal.NEARBY_MAX_DIST_SQ)
-                onPortalOutOfRange(w, e);
+                onPortalOutOfRange(w, e, true);
             // If we have a phantom, update its position to match ours
             else if(phantom != null)
                 updatePhantomPos(e, (CPortal)portal.core);
         } else // portal is null which means it's gone, so we forget about it
-            onPortalOutOfRange(w, e);
+            onPortalOutOfRange(w, e, true);
     }
     
-    private void onPortalOutOfRange(World w, Entity e) {
+    private void onPortalOutOfRange(World w, Entity e, boolean destroyPhantom) {
         remove = true; // remove this component
         e.post(w, new EPortalOutOfRange(portalID)); // let other components know
-        if(phantom != null) // get rid of the phantom, if it exists
+        
+        // get rid of the phantom, if it exists and it isn't needed for other portals
+        if(destroyPhantom && phantom != null && --((CPhantom)phantom.core).anchors == 0)
             phantom.destroy();
     }
     
@@ -85,7 +91,16 @@ public class CNearbyPortal extends AbstractComponent {
                     // original entity is now the phantom.
                     portalID = ev0.portalCore.pairID;
                     phantom = ev0.oldEntity;
-                }
+                } else if(e == phantom)
+                    // The entity just got swapped into its phantom! This means
+                    // that the entity went through a different portal to the
+                    // same dimension. In this case we shut down this component
+                    // *carefully*, i.e. without our phantom/the entity.
+                    onPortalOutOfRange(w, e, false);
+                else
+                    // we're in a completely different dimension -- time for
+                    // the phantom to go!
+                    onPortalOutOfRange(w, e, true);
                 return false;
             default:
                 return false;

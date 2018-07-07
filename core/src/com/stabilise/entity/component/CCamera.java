@@ -23,7 +23,7 @@ public class CCamera extends AbstractComponent {
     public final PositionFree realPos = Position.create();
     
     /** The strength with which the camera follows the focus. */
-    private float followStrength = 0.25f;
+    private float followStrength = 1.0f; //0.25f;
     
     private final SimpleList<Shake> shakes = new UnorderedArrayList<>();
     

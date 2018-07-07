@@ -1,8 +1,6 @@
-package com.stabilise.entity;
+package com.stabilise.entity.component;
 
-import com.stabilise.entity.component.AbstractComponent;
-import com.stabilise.entity.component.Component;
-import com.stabilise.entity.event.EPortalInRange;
+import com.stabilise.entity.Entity;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.event.EntityEvent.Type;
 import com.stabilise.util.io.data.DataCompound;
@@ -17,8 +15,8 @@ public class CDebug extends AbstractComponent {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        if(ev.type().equals(Type.PORTAL_IN_RANGE))
-            System.out.println("Portal in range: " + ((EPortalInRange)ev).portalID);
+        if(ev.type().equals(Type.DESTROYED))
+            System.out.println("Destroyed??");
         return false;
     }
     
