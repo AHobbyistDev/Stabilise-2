@@ -71,8 +71,8 @@ public class Entities {
      * Creates a phantom for the given base entity through the given portal.
      * The phantom's ID will be set to the base's ID.
      */
-    public static Entity phantom(Entity base, Entity portal) {
-        Entity ph = e(new CPhantom(base, portal), CNoPhysics.INSTANCE, co());
+    public static Entity phantom(Entity base) {
+        Entity ph = e(new CPhantom(base), CNoPhysics.INSTANCE, co());
         ph.setID(base.id());
         return ph;
     }

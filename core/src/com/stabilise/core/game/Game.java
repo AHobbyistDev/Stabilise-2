@@ -267,11 +267,11 @@ public class Game implements Controllable, InputProcessor {
                 //Log.get().postDebug(world.regions.toStringDebug());
                 //Log.get().postDebug("Player region: (" + player.pos.rx() + "," + player.pos.ry() + ")");
                 //Debug.DEBUG = !Debug.DEBUG;
-                break;
+                //break;
             default:
                 return playerController.handleControlPress(control);
         }
-        return true;
+        return false;
     }
     
     @Override
@@ -334,12 +334,12 @@ public class Game implements Controllable, InputProcessor {
     
     @Override
     public boolean touchDown(int x, int y, int pointer, int button) {
-        return playerController.touchDown(x, y, pointer, button);
+        return false;
     }
     
     @Override
     public boolean touchUp(int x, int y, int pointer, int button) {
-        return playerController.touchUp(x, y, pointer, button);
+        return false;
     }
     
     @Override
@@ -354,7 +354,7 @@ public class Game implements Controllable, InputProcessor {
     
     @Override
     public boolean scrolled(int amount) {
-        return playerController.scrolled(amount);
+        return false;
     }
     
 }

@@ -39,6 +39,7 @@ public abstract class AbstractWorld implements World {
     protected final Multiverse<?> multiverse;
     /** This world's dimension. */
     protected final Dimension dimension;
+    public String dimensionName;
     
     /** All players in the world. Maps IDs -> player Entities. */
     protected final Map<Long, Entity> players = new HashMap<>(1);
@@ -354,7 +355,8 @@ public abstract class AbstractWorld implements World {
     
     @Override
     public String getDimensionName() {
-        return dimension.info.name;
+        //return dimension.info.name;
+        return dimensionName;
     }
     
     @Override

@@ -35,7 +35,7 @@ public interface Printable {
                 sb.append("[UNPRINTABLE]");
             }
         }
-        sb.append("}");
+        sb.append("\n}");
         System.out.println(sb.toString());
     }
     

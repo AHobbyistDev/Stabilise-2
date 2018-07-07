@@ -1,9 +1,11 @@
 package com.stabilise.entity.component;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.component.core.CPhantom;
 import com.stabilise.entity.component.core.CPortal;
 import com.stabilise.entity.event.EThroughPortalInter;
 import com.stabilise.util.Checks;
+import com.stabilise.util.Log;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.world.World;
 
@@ -40,6 +42,13 @@ public class CThroughPortal extends AbstractComponent {
         
         World w2 = pc.pairedWorld(w1);
         Entity e2 = w2.getEntity(e1.id()); // the phantom, should have same ID
+        
+        if(e2 == null) {
+            Log.get().postWarning("No phantom to switch into!");
+            return;
+        }
+        
+        ((CPhantom)e2.core).base = e2;
         
         e1.swapComponents(e2);
         

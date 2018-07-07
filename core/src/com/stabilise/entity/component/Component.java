@@ -6,6 +6,7 @@ import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.core.CCore;
 import com.stabilise.entity.component.physics.CPhysics;
 import com.stabilise.entity.event.EntityEvent;
+import com.stabilise.util.Printable;
 import com.stabilise.util.collect.IDuplicateResolver;
 import com.stabilise.util.collect.IWeightProvider;
 import com.stabilise.util.io.data.DataCompound;
@@ -30,7 +31,8 @@ import com.stabilise.world.World;
  */
 public interface Component extends IWeightProvider,
                                     IDuplicateResolver<Component>,
-                                    Exportable {
+                                    Exportable,
+                                    Printable {
     
     // Common component weights, collected in one location so that I don't have
     // to search through various files to learn what weights are used by what.

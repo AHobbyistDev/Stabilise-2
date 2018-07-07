@@ -73,4 +73,10 @@ public abstract class AbstractComponent implements Component {
         return getClass().equals(o.getClass());
     }
     
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "@" +
+                Integer.toHexString(System.identityHashCode(this));
+    }
+    
 }

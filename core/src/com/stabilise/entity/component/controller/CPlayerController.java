@@ -202,13 +202,13 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 Log.get().postInfo(e.core.toString());
                 break;
             case PORTAL:
-                //String dim = "overworld";
                 String dim = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)
-                        ? null : game.playerData.data.getDimensionName();
-                //String dim = "flatland";
+                        ? null
+                        : ( world.getDimensionName().equals("overworld")
+                            ? game.playerData.data.getDimensionName()
+                            : "overworld" );
                 Entity pe = Entities.portal(dim);
                 pe.pos.set(e.pos, mob.facingRight ? 3f : -3f, 1.5f).align();
-                //portal.facingRight = !e.facingRight;
                 CPortal pc = (CPortal) pe.core;
                 pc.rotation = mob.facingRight ? Maths.PIf : 0f;
                 
@@ -220,6 +220,9 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 	pc.otherPortalPos.set(pe.pos);
                 
                 world.addEntity(pe);
+                break;
+            case TEST_RANDOM:
+                e.components.forEach(c -> c.debugPrint());
                 break;
             default:
                 return false;
@@ -249,12 +252,12 @@ public class CPlayerController extends CController implements Controllable, Inpu
     public boolean keyUp(int keycode) {
         return false;
     }
-
+    
     @Override
     public boolean keyTyped(char character) {
         return false;
     }
-
+    
     @Override
     public boolean touchDown(int x, int y, int pointer, int button) {
         // Ctrl + leftclick = teleport
@@ -262,39 +265,40 @@ public class CPlayerController extends CController implements Controllable, Inpu
             e.pos.set(worldRenderer.mouseCoords());
         // Alt + rightclick = portal
         else if(button == Buttons.RIGHT && Gdx.input.isKeyPressed(Keys.ALT_LEFT)) {
-            String dim = game.playerData.data.getDimensionName();
-            Entity portal = Entities.portal(dim);
+            String dim = world.getDimensionName().equals("overworld")
+                    ? game.playerData.data.getDimensionName()
+                    : "overworld";
+            Entity pe = Entities.portal(dim);
             
             Position mouseCoords = worldRenderer.mouseCoords();
-            portal.pos.set(mouseCoords);
-            //portal.facingRight = !e.facingRight;
+            pe.pos.set(mouseCoords);
             
-            CPortal pCore = (CPortal) portal.core;
+            CPortal pc = (CPortal) pe.core;
             float dx = e.pos.diffX(mouseCoords);
             float dy = e.pos.diffY(mouseCoords);
-            pCore.rotation = MathUtils.atan2(-dy, -dx);
+            pc.rotation = MathUtils.atan2(-dy, -dx);
             
             if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
-                pCore.otherPortalPos.set(0, 0, 0f, 0f); // origin of other dim
+                pc.otherPortalPos.set(0, 0, 0f, 0f); // origin of other dim
             else
                 // spawn the other portal at the same place
-                pCore.otherPortalPos.set(portal.pos);
+                pc.otherPortalPos.set(pe.pos);
             
-            world.addEntity(portal);
+            world.addEntity(pe);
         }
         return false;
     }
-
+    
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         return false;
     }
-
+    
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         return false;
     }
-
+    
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
         return false;
@@ -313,8 +317,10 @@ public class CPlayerController extends CController implements Controllable, Inpu
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        if(ev.type().equals(Type.THROUGH_PORTAL_INTER))
+        if(ev.type().equals(Type.THROUGH_PORTAL_INTER)) {
             world = w;
+            this.e = e;
+        }
         return false;
     }
     

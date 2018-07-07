@@ -1,6 +1,7 @@
 package com.stabilise.entity.component.core;
 
 import com.stabilise.entity.Entity;
+import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Checks;
 import com.stabilise.util.io.data.DataCompound;
@@ -22,19 +23,15 @@ public class CPhantom extends CCore {
     
     /** The entity in the other dimension that we are the phantom of. */
     public Entity base;
-    /** The portal that connects us to the dimension that our base is from. */
-    public Entity portal;
     
     
     public CPhantom() {}
     
     /**
      * @param base the entity in the other dimension that we are the phantom of
-     * @param portal the portal that connects to the dimension the base is in
      */
-    public CPhantom(Entity base, Entity portal) {
+    public CPhantom(Entity base) {
     	this.base = base;
-    	this.portal = portal;
     }
     
     @Override
@@ -50,6 +47,14 @@ public class CPhantom extends CCore {
     @Override
     public AABB getAABB() {
         return base.core.getAABB();
+    }
+    
+    @Override
+    public boolean handle(World w, Entity e, EntityEvent ev) {
+        return false;
+        
+        // TODO: propagate hits but not lifetime events such as REMOVED_FROM_WORLD
+        //return base.post(w, ev);
     }
     
     @Override

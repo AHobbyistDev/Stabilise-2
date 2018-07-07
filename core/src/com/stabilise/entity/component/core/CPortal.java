@@ -272,7 +272,7 @@ public class CPortal extends CCore {
         // If this portal is interdimensional, we create a phantom on the other
         // side and let the entity know.
         if(interdimensional) {
-            Entity phantom = Entities.phantom(en, portal);
+            Entity phantom = Entities.phantom(en);
             cnp.phantom = phantom;
             cnp.updatePhantomPos(en, this); // set before adding to world
             pairedWorld(w).addEntityDontSetID(phantom);

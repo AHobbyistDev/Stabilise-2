@@ -230,10 +230,10 @@ public class Entity extends GameObject implements Exportable {
         other.destroyed = destroyed;
         destroyed = tmp1;
         
-        // Swap positions
-        Position tmp2 = other.pos.clone();
-        other.pos.set(pos);
-        pos.set(tmp2);
+        // No need to swap positions
+        //Position tmp2 = other.pos.clone();
+        //other.pos.set(pos);
+        //pos.set(tmp2);
         
         // Swap age
         long tmp3 = other.age;
@@ -361,8 +361,6 @@ public class Entity extends GameObject implements Exportable {
      * e.importFromCompound(c);
      * return e;
      * </pre>
-     * 
-     * @return the entity
      */
     public static Entity fromCompound(DataCompound c) {
         Entity e = new Entity();

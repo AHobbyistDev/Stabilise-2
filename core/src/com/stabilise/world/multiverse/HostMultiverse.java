@@ -91,6 +91,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
             throw new IllegalArgumentException("Invalid dim: \"" + name + "\"");
         
         world = dim.createHost(this);
+        world.dimensionName = name;
         dimensions.put(name, world);
         
         executor.execute(world.preloadJob::run);
