@@ -25,8 +25,6 @@ public class HUDRenderer implements Renderer {
     private final WorldRenderer wr;
     private final Game game;
     
-    private final Entity player;
-    
     // Profiler stuff
     private final Profiler profiler = Application.get().profiler;
     private Profiler.SectionData profilerData;
@@ -45,8 +43,6 @@ public class HUDRenderer implements Renderer {
     public HUDRenderer(Game game, WorldRenderer worldRenderer) {
         this.game = game;
         this.wr = worldRenderer;
-        
-        player = game.player;
         
         profilerData = profiler.getData();
         profilerLevel = profilerData;
@@ -67,6 +63,8 @@ public class HUDRenderer implements Renderer {
     @Override
     public void render() {
         if(game.debug) {
+            Entity player = game.camera.entity;
+            
             wr.debugFont.setColor(Color.WHITE);
             wr.debugFont.draw(wr.batch,
                     "Stabilise II v" + Constants.VERSION + "\n" +
@@ -89,7 +87,7 @@ public class HUDRenderer implements Renderer {
             );
         }
         
-        if(game.ticks - game.messages.getLastMsgTick() < 3*Constants.TICKS_PER_SECOND) {
+        if(game.ticks - game.messages.getLastMsgTick() < 5*Constants.TICKS_PER_SECOND) {
             wr.msgFont.setColor(Color.WHITE);
             wr.msgFont.draw(wr.batch,
                 game.messages.getLastMsg(), // str

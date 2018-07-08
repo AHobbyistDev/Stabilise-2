@@ -56,9 +56,16 @@ public class CNearbyPortal extends AbstractComponent {
     private void onPortalOutOfRange(World w, Entity e, boolean destroyPhantom) {
         remove = true; // remove this component
         e.post(w, new EPortalOutOfRange(portalID)); // let other components know
-        
-        // get rid of the phantom, if it exists and it isn't needed for other portals
-        if(destroyPhantom && phantom != null && --((CPhantom)phantom.core).anchors == 0)
+        if(destroyPhantom)
+            destroyPhantom();
+    }
+    
+    /**
+     * Gets rid of the phantom, if it exists and isn't needed for other
+     * portals.
+     */
+    private void destroyPhantom() {
+        if(phantom != null && --((CPhantom)phantom.core).anchors == 0)
             phantom.destroy();
     }
     
@@ -101,10 +108,14 @@ public class CNearbyPortal extends AbstractComponent {
                     // we're in a completely different dimension -- time for
                     // the phantom to go!
                     onPortalOutOfRange(w, e, true);
-                return false;
+                break;
+            case REMOVED_FROM_WORLD:
+                destroyPhantom();
+                break;
             default:
-                return false;
+                break;
         }
+        return false;
     }
     
     @Override

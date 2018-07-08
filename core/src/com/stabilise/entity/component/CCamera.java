@@ -13,7 +13,8 @@ import com.stabilise.world.World;
 
 /**
  * The GameCamera controls the player's perspective, and hence which parts of
- * the world are visible to them.
+ * the world are visible to them. Also keeps track of the player and the world
+ * the player is in for rendering and control purposes.
  */
 public class CCamera extends AbstractComponent {
     
@@ -27,9 +28,13 @@ public class CCamera extends AbstractComponent {
     
     private final SimpleList<Shake> shakes = new UnorderedArrayList<>();
     
+    
     /** The world that the entity -- and also this camera -- is in. Updated
      * when the entity moves dimensions via a portal. */
     public World world = null;
+    /** Stores the entity for convenience. Updated when the entity swaps out
+     * with a phantom. */
+    public Entity entity = null;
     
     
     
@@ -38,6 +43,8 @@ public class CCamera extends AbstractComponent {
         realPos.set(e.pos);
         realPos.ly += e.aabb.centreY();
         realPos.align();
+        
+        entity = e;
     }
     
     @Override
@@ -59,10 +66,6 @@ public class CCamera extends AbstractComponent {
         });
         
         pos.align();
-        
-        // Unimportant TODOs:
-        // Focus on multiple entities
-        // Way of capping off-centre-ness
     }
     
     /**
@@ -100,7 +103,9 @@ public class CCamera extends AbstractComponent {
             EThroughPortalIntra ev0 = (EThroughPortalIntra) ev;
             pos.add(ev0.portalCore.offset).align();
             realPos.add(ev0.portalCore.offset).align();
+            
             world = w;
+            entity = e;
         }
         
         return false;

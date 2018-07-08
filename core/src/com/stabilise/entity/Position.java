@@ -818,7 +818,7 @@ public abstract class Position implements Exportable, Cloneable {
     public static double tileCoordRelativeToSliceFromTileCoordFree(double c) {
         double rem = Maths.remainder(c, Slice.SLICE_SIZE);
         // See comment in function below this for why we do this check.
-        if(rem == 16.0d) // TODO: hardcoded 16 is bad
+        if(rem == Slice.SLICE_SIZE)
             rem = Slice.SLICE_SIZE_MINUS_EPSd;
         return rem;
     }

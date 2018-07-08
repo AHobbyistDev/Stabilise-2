@@ -1,19 +1,13 @@
 TOP PRIORITY
-- Get multidimensional worlds working
-    - Step 1: Refactor region loading architecture
-         DONE
-    - Step 2: Portal
-         IN PROGRESS
 - Character model
-    ON HOLD
 
 HIGH PRIORITY
 - Menus
 - Entity saving in worlds
 - Proper world loading/unloading akin to what RegionStore does for regions
 - Improve entity physics
-    - Allow one-way collisions (e.g., platforms)
-    - Allow collisions with portals, so you can't only partially be in a portal
+	- Fig bugs
+    - Allow one-way collisions (e.g. platforms)
     - (Possibly allow sloped tiles)
 
 TODO EVENTUALLY

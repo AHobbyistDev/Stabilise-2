@@ -40,7 +40,6 @@ public class Game implements Controllable, InputProcessor {
     
     private final HostMultiverse multiverse;
     public final PlayerData playerData;
-    public final Entity player;
     public final CCamera camera;
     
     /** The controller. */
@@ -60,9 +59,9 @@ public class Game implements Controllable, InputProcessor {
     /** Whether or not the debug display is active. */
     public boolean debug = false;
     
-    /** The game profiler. */
+    /** The game profiler. Passed to the multiverse and all worlds and objects
+     * in it to build up a profiling tree. */
     public Profiler profiler = Application.get().profiler;
-    /** The game's logging agent. */
     private final Log log = Log.getAgent("GAME");
     
     
@@ -72,13 +71,15 @@ public class Game implements Controllable, InputProcessor {
     public Game(WorldBundle worldBundle) {
         this.multiverse = worldBundle.getHostMultiverse();
         this.playerData = worldBundle.getPlayerData();
-        this.player = worldBundle.getPlayerEntity();
         
         log.postInfo("Initiating game...");
         
         controller = new Controller(this);
         
-        playerController = new CPlayerController(controller, this, worldBundle.getHostWorld());
+        World world = worldBundle.getHostWorld();
+        Entity player = worldBundle.getPlayerEntity();
+        
+        playerController = new CPlayerController(controller, this, world);
         player.controller = playerController;
         playerController.init(player);
         
@@ -269,9 +270,9 @@ public class Game implements Controllable, InputProcessor {
                 //Debug.DEBUG = !Debug.DEBUG;
                 //break;
             default:
-                return playerController.handleControlPress(control);
+                break;
         }
-        return false;
+        return playerController.handleControlPress(control);
     }
     
     @Override
