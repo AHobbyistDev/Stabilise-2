@@ -136,6 +136,14 @@ public interface Component extends IWeightProvider,
     @Override
     Action resolve(Component c);
     
+    /**
+     * Returns true if this component is transient -- that is, if it isn't
+     * saved. Components such as {@link CEntityTracker} and {@link
+     * CThroughPortal} which are not part of an entity's persistent in-world
+     * state are typically transient. Most components are however not transient,
+     * and would return false.
+     */
+    boolean isTransient();
     
     /**
      * {@inheritDoc}

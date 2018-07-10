@@ -56,6 +56,17 @@ public abstract class AbstractComponent implements Component {
     // about how to resolve duplicates.
     
     
+    /**
+     * {@inheritDoc}
+     * 
+     * <p>The default implementation returns {@code false}.
+     */
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
+    
+    
     @Override
     public int hashCode() {
         throw Checks.badAssert("Hash code not designed");

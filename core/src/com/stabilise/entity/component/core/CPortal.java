@@ -191,6 +191,7 @@ public class CPortal extends CCore {
             opc.offset.set(offset).reflect().align();
             opc.rotation = (rotation + Maths.PIf) % Maths.TAUf;
             //opc.direction.set(direction).scl(-1); // no need; set by onAddToWorld()
+            opc.doubleSided = doubleSided;
             opc.height = height;
             opc.state = State.WAITING_FOR_DIMENSION;
             

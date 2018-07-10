@@ -219,6 +219,9 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 	// if other dim, spawn the other portal at the same place
                 	pc.otherPortalPos.set(pe.pos);
                 
+                if(Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
+                    pc.doubleSided = true;
+                
                 world.addEntity(pe);
                 break;
             case TEST_RANDOM:

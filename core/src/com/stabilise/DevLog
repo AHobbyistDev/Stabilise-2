@@ -16,8 +16,6 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 17/12/13
 	- Beginning migration of worlds to saved worlds
 	- Beginning migration of game to client-server architecture (not really - just creating relevant classes in advance)
-18/12/13
-	- Term 4/1 finished; can finally begin spending dedicated time coding
 19/12/13
 	- Added TextBox.java
 	- Added the ability to create and select worlds
@@ -25,7 +23,6 @@ Project Start to 05/12/13 (Specific dates unknown/can't be bothered to dig up)
 	- Added support for fonts with lowercase letters
 	- Added world creation via the main menu - saves world info file
 	- ButtonGrid.java is now ComponentGrid.java
-	- [60 tps concerns, network flooding, graphical interpolation]
 21/12/13
 	- Added slice saving and loading
 	- Initial implementation of regions

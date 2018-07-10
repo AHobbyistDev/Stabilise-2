@@ -115,10 +115,13 @@ public class CPhysicsImpl extends CPhysics {
             float dot1 = tmp3.setDiff(e.pos,  pe.pos).globalify().dot(pc.direction);
             float dot2 = tmp3.setDiff(newPos, pe.pos).globalify().dot(pc.direction);
             
-            // (1) dot1 > 0 if we started on the side the portal is pointing to
+            // (1) dot1 > 0 || doubleSided if we started on the side the portal
+            //     is pointing to, or the portal is double-sided so either side
+            //     works.
             // (2) dot1*dot2 < 0 if we cross the portal axis
-            // (3) crudely check to see if we're within 2 tiles of the portal
-            if(dot1 > 0 && dot1*dot2 < 0 && e.pos.distSq(pe.pos) < 4f) {
+            // (3) crudely check to see if we're within range
+            if((pc.doubleSided || dot1 > 0) && dot1*dot2 < 0
+                    && e.pos.distSq(pe.pos) < pc.halfHeight*pc.halfHeight + 0.2f) {
                 // If interdimensional, don't effect going through the portal
                 // now. If intradimensional, however, it's simple enough that
                 // we can just carry out going through it now.

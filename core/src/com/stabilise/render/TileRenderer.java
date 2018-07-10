@@ -216,11 +216,14 @@ public class TileRenderer implements Renderer {
         float diffX = camPos.diffX(pe.pos);
         float diffY = camPos.diffY(pe.pos);
         
-        if(pc.direction.dot(diffX, diffY) > 0)
+        float dot = pc.direction.dot(diffX, diffY);
+        
+        if(!pc.doubleSided && dot > 0)
             return;
         
-        float xOff = pc.halfHeight*MathUtils.sin(pc.rotation);
-        float yOff = pc.halfHeight*MathUtils.cos(pc.rotation);
+        float sgn = dot > 0 ? -1 : 1;
+        float xOff = sgn*pc.halfHeight*MathUtils.sin(pc.rotation);
+        float yOff = sgn*pc.halfHeight*MathUtils.cos(pc.rotation);
         float minGradDx = diffX - xOff;
         float maxGradDx = diffX + xOff;
         float minGradDy = diffY + yOff;
@@ -228,11 +231,6 @@ public class TileRenderer implements Renderer {
         
         // The camera's position if it were in the other dimension.
         camPosOtherDim.setSum(camPos, pc.offset).align();
-        
-        //minCorner.set(camPosOtherDim, drawToRight ? diffX : -wr.tilesHorizontal, -wr.tilesVertical)
-        //        .clampToTile().align();
-        //maxCorner.set(camPosOtherDim, drawToRight ? wr.tilesHorizontal : diffX, wr.tilesVertical + 1)
-        //        .clampToTile().align();
         
         minCorner.set(camPosOtherDim, -wr.tilesHorizontal, -wr.tilesVertical)
                 .clampToTile().align();
@@ -251,7 +249,9 @@ public class TileRenderer implements Renderer {
                     // y/x < maxGradDy/maxGradDx.
                     // Rearranging to avoid division by zero, we get...
                     return y*minGradDx > x*minGradDy && y*maxGradDx < x*maxGradDy
-                           && pc.direction.dot(x-diffX, y-diffY) < 0;
+                    // We also only want tiles behind the portal to be rendered.
+                    // Multiplication by dot lets double-sided portals work
+                           && dot*pc.direction.dot(x-diffX, y-diffY) > 0;
                 });
             }
         }
