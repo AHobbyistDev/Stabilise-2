@@ -10,6 +10,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.character.CharacterData;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
+import com.stabilise.entity.component.CEntityTracker;
 import com.stabilise.util.Profiler;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.io.IOUtil;
@@ -62,12 +63,6 @@ public class HostMultiverse extends Multiverse<HostWorld> {
     }
     
     @Override
-    public void update() {
-        info.age++;
-        super.update();
-    }
-    
-    @Override
     @ThreadUnsafeMethod
     public HostWorld loadDimension(String name) {
         HostWorld world = getDimension(name);
@@ -112,20 +107,23 @@ public class HostMultiverse extends Multiverse<HostWorld> {
      * @throws NullPointerException if {@code player} is {@code null}.
      */
     @ThreadUnsafeMethod
-    public PlayerBundle addPlayer(CharacterData player, boolean integrated) {
+    public PlayerBundle addPlayer(CharacterData player) {
         PlayerData data = players.get(player.hash);
         if(data == null)
             data = new PlayerData(player);
         if(!data.load())
             return null;
         players.putIfAbsent(player.hash, data);
+        
         HostWorld world = loadDimension(data.dimension);
         Entity playerEntity = world.addPlayer(data);
-        if(integrated) {
-            integratedClient = true;
-            integratedCharacter = player;
-            integratedPlayer = playerEntity;
-        }
+        
+        // Stick on a tracker
+        CEntityTracker tracker = new CEntityTracker();
+        playerEntity.addComponent(tracker);
+        tracker.world = world;
+        data.tracker = tracker;
+        
         return new PlayerBundle(world, playerEntity, data);
     }
     
@@ -160,37 +158,39 @@ public class HostMultiverse extends Multiverse<HostWorld> {
     public void save() {
     	// TODO: pass everything off to the executor
     	
-        try {
-            info.save();
-        } catch(IOException e) {
-            throw new RuntimeException("Could not save world info!", e);
-        }
+        getExecutor().execute(() -> {
+            try {
+                info.save();
+            } catch(IOException e) {
+                //throw new RuntimeException("Could not save world info!", e);
+                log.postSevere("Could not save world info!", e);
+            }
+        });
         
         for(HostWorld dim : dimensions.values())
             dim.save();
         
+        savePlayers();
+    }
+    
+    private void savePlayers() {
         for(PlayerData p : players.values()) {
-            p.lastPos.set(p.playerMob.pos);
-            try {
-                p.save();
-            } catch(IOException e) {
-                throw new RuntimeException("Could not save player!", e);
-            }
+            p.lastPos.set(p.tracker.entity.pos);
+            p.dimension = p.tracker.world.getDimensionName();
+            
+            this.getExecutor().execute(() -> {
+                try {
+                    p.save();
+                } catch(IOException e) {
+                    log.postSevere("Could not save player: " + p, e);
+                }
+            });
         }
     }
     
     @Override
     protected void closeExtra() {
-        for(PlayerData p : players.values()) {
-            p.lastPos.set(p.playerMob.pos);
-            this.getExecutor().execute(() -> {
-                try {
-                    p.save();
-                } catch(IOException e) {
-                    log.postSevere("Could not save " + p, e);
-                }
-            });
-        }
+        savePlayers();
     }
     
     //--------------------==========--------------------
@@ -207,10 +207,12 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         
         /** The player's global data. */
         public final CharacterData data;
-        
-        public Entity playerMob;
+        /** Tracks the player so that we know what to save when save time
+         * comes. */
+        private CEntityTracker tracker;
         
         private final FileHandle file;
+        
         
         /** Whether or not the character is new to the world. */
         public boolean newToWorld = true;

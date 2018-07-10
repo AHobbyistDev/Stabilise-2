@@ -85,7 +85,6 @@ public class HostWorld extends AbstractWorld {
      */
     public Entity addPlayer(PlayerData data) {
         Entity p = Entities.player();
-        data.playerMob = p;
         if(data.newToWorld) {
             data.newToWorld = false;
             // TODO: For now I'm placing the character at (0,0) of the spawn

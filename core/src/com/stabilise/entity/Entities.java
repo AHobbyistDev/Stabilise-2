@@ -52,11 +52,14 @@ public class Entities {
     }
     
     public static Entity enemy() {
-        //return e(p(), new CEnemyController(), new CGenericEnemy())
-        //        .addComponent(new CBasicArmour());
         return e(new CPlayerPerson(), p(), new CEnemyController())
                 .addComponent(new CBasicArmour())
                 .addComponent(new CDamageAmplifier(1.4f));
+    }
+    
+    public static Entity enemy2() {
+        return e(new CGenericEnemy(), p(), new CEnemyController())
+                .addComponent(new CBasicArmour());
     }
     
     public static Entity person() {

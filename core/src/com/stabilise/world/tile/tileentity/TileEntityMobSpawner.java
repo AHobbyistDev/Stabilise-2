@@ -83,9 +83,9 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
     /**
      * Spawns a flame particle on the spawner.
      */
-    private void spawnParticle(World world) {
-        fireGen.createBurstOnTile(1, pos, 0.02f, 0.07f,
-                (float)Math.PI / 6.0f, (float)Math.PI * 5.0f / 6.0f);
+    private void spawnParticle(World w) {
+        fireGen.createBurstOnTile(w, 1, pos, 0.02f, 0.07f,
+                Maths.PIf / 6.0f, Maths.PIf * 5.0f / 6.0f);
     }
     
     /**
@@ -93,8 +93,8 @@ public class TileEntityMobSpawner extends TileEntity implements Updated {
      * 
      * @param e The mob.
      */
-    private void spawnParticleOnMob(World world, Entity e) {
-        smokeGen.createBurst(1, 0.04f, 0.12f, 0, (float)Maths.TAU, e);
+    private void spawnParticleOnMob(World w, Entity e) {
+        smokeGen.createBurst(w, 1, 0.04f, 0.12f, 0, Maths.TAUf, e);
     }
     
     @Override

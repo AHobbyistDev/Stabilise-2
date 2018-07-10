@@ -398,7 +398,7 @@ public class RegionStore {
             CachedRegion cr = cache.get(r.loc);
             
             if(cr.unmark()) {
-                // If the region is slated to be added to the world and it's
+                // If the region is slated to be added to the world and it has
                 // been prepared (e.g., if we're at the save part of the LOAD
                 // -> GENERATE -> SAVE -> ADD TO PRIMARY chain (but not 
                 // necessarily; this could just be part of a CACHE -> DO 

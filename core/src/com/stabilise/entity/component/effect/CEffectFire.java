@@ -55,8 +55,8 @@ public class CEffectFire extends CParticleEffect<ParticleFlame> {
      * 
      * @param target The target of the effect.
      */
-    private void createFireParticle(World world, Entity target) {
-        emitter.createBurst(1, 0.2f, 2.0f, Maths.PIf / 6.0f,
+    private void createFireParticle(World w, Entity target) {
+        emitter.createBurst(w, 1, 0.2f, 2.0f, Maths.PIf / 6.0f,
                 Maths.PIf * 5.0f / 6.0f, target);
     }
     

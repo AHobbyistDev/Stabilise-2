@@ -11,8 +11,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.stabilise.character.CharacterData;
-import com.stabilise.entity.Entity;
+import com.stabilise.entity.particle.manager.ParticleManager;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.AbstractWorld;
@@ -43,20 +42,12 @@ public abstract class Multiverse<W extends AbstractWorld> {
     /** The WorldInfo. Dimensions should treat this as read-only. */
     public final WorldInfo info;
     
+    /** The global particle manager, shared between worlds. */
+    public final ParticleManager particleManager = new ParticleManager();
+    
     /** Profile any world's operation with this. Never {@code null}. */
     protected Profiler profiler;
     protected final Log log = Log.getAgent("Multiverse");
-    
-    // Integrated player stuff
-    /** {@code true} if we're providing for an integrated client. {@code false}
-     * by default. */
-    protected boolean integratedClient = false;
-    /** The integrated client's character data. {@code null} if there is no
-     * integrated client. */
-    protected CharacterData integratedCharacter = null;
-    /** The integrated client's player. {@code null} if there is no integrated
-     * client. */
-    protected Entity integratedPlayer = null;
     
     
     /**
@@ -95,6 +86,12 @@ public abstract class Multiverse<W extends AbstractWorld> {
      */
     public void update() {
         dimensions.values().removeIf(AbstractWorld::update);
+        
+        info.age++;
+        // Do a particle cleanup every 10-ish seconds
+        if(info.age % 600 == 0)
+            particleManager.cleanup();
+        
     }
     
     /**
@@ -177,6 +174,8 @@ public abstract class Multiverse<W extends AbstractWorld> {
      * @throws RuntimeException if an I/O error occurred while saving.
      */
     public void close() {
+        particleManager.shutdown();
+        
         for(AbstractWorld dim : dimensions.values())
             dim.close();
         

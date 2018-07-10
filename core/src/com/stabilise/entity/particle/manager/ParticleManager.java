@@ -2,7 +2,6 @@ package com.stabilise.entity.particle.manager;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -12,7 +11,6 @@ import com.stabilise.entity.particle.Particle;
 import com.stabilise.util.Checks;
 import com.stabilise.util.box.I32Box;
 import com.stabilise.util.concurrent.event.Event;
-import com.stabilise.world.AbstractWorld;
 
 
 /**
@@ -28,7 +26,6 @@ import com.stabilise.world.AbstractWorld;
 @NotThreadSafe
 public class ParticleManager {
     
-    private final AbstractWorld world;
     /** Caches all the particle pools. */
     private final Map<Class<? extends Particle>, ParticlePool<? extends Particle>> pools =
             new IdentityHashMap<>();
@@ -40,21 +37,16 @@ public class ParticleManager {
     
     /**
      * Creates a new particle manager.
-     * 
-     * @throws NullPointerException if {@code world} is {@code null}.
      */
-    public ParticleManager(AbstractWorld world) {
-        this.world = Objects.requireNonNull(world);
-        
+    public ParticleManager() {
         refreshReductionFactor();
         
-        // TODO: weak reference or deregister somewhere
         Settings.NOTIFIER.addListener(Application.mainThreadExecutor(),
                 new Event("particles"), this::onSettingChanged);
     }
     
     /**
-     * Returns a generator, or <i>source</i>, for particles of the specified
+     * Returns an emitter, or <i>source</i>, for particles of the specified
      * type.
      * 
      * @throws NullPointerException if {@code particleClass} is {@code null}.
@@ -70,7 +62,7 @@ public class ParticleManager {
             pool = new ParticlePool<>(particleClass);
             pools.put(particleClass, pool);
         }
-        return new ParticleEmitter<>(pool, world, reductionFactor);
+        return new ParticleEmitter<>(pool, reductionFactor);
     }
     
     private void onSettingChanged(Event e) {
@@ -105,6 +97,14 @@ public class ParticleManager {
      */
     public void cleanup() {
         pools.values().forEach(ParticlePool::flush);
+    }
+    
+    /**
+     * Shuts down this particle manager by deregistering its event listener.
+     */
+    public void shutdown() {
+        Settings.NOTIFIER.removeListener(new Event("particles"), this::onSettingChanged);
+        pools.clear(); // also prod the gc
     }
     
 }

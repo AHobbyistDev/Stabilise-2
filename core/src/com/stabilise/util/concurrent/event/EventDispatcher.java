@@ -192,7 +192,8 @@ public class EventDispatcher {
                 try {
                     li.execute(e);
                 } catch(RejectedExecutionException ex) {
-                    Log.get().postSevere("Event listener rejected! Did the executor shut down?", ex);
+                    Log.get().postSevere("Listener for event " + e + 
+                            " rejected! Did the executor shut down?", ex);
                 }
             }
         }

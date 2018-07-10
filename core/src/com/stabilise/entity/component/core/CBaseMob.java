@@ -198,7 +198,7 @@ public abstract class CBaseMob extends CCore {
         stateTicks++;
         
         if(state == State.DEAD && stateTicks == DEATH_TICKS) {
-            srcSmoke.createCentredOutwardsBurst(w.rnd(), 30, 1f, 7f, e);
+            srcSmoke.createCentredOutwardsBurst(w, 30, 1f, 7f, e);
             e.destroy();
             return;
         }
@@ -356,7 +356,7 @@ public abstract class CBaseMob extends CCore {
         e.dx = (e.dx + src.impulseX());
         e.dy = (e.dy + src.impulseY());
         
-        ParticleIndicator p = srcDmgIndicator.createAlwaysAt(
+        ParticleIndicator p = srcDmgIndicator.createAlwaysAt(w,
                 srcDmgIndicator.dummyPos.set(e.pos, 0f, e.aabb.maxY()));
         p.text = String.valueOf(src.damage());
         p.orange = src.damage() == 0;

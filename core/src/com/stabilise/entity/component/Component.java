@@ -30,29 +30,49 @@ import com.stabilise.world.World;
  * is loaded from a save file.
  */
 public interface Component extends IWeightProvider,
-                                    IDuplicateResolver<Component>,
-                                    Exportable,
-                                    Printable {
+                                   IDuplicateResolver<Component>,
+                                   Exportable,
+                                   Printable {
     
     // Common component weights, collected in one location so that I don't have
     // to search through various files to learn what weights are used by what.
+    // There are three considerations to make when deciding on a good weight
+    // for a component.
+    // 1) Update order. If we want component A to be updated after component B
+    //    for some reason or another, then we want to ensure component A has
+    //    a larger weight.
+    // 2) Event propagation. Since propagation of an event may be cancelled by
+    //    any component, components which are there to intercept events (e.g.
+    //    the CUnkillable component to prevent an entity from being killed)
+    //    should have a lower weight than other components that might react to
+    //    that event.
+    // 3) List modification. Since adding to/removing from a list shifts each
+    //    entry after it, it can be costly to add/remove components near the
+    //    start of the list too often. As such it may be a good idea to give
+    //    components which are likely to stick around a lower weight than
+    //    those which may be added and removed repeatedly.
     
     /** Normal weight for most components. */
     public static final int WEIGHT_NORMAL = 0;
+    /** Extremely negative weight for trackers since they aren't expected to 
+     * ever be removed from an entity (consideration 3). */
+    public static final int WEIGHT_TRACKER = Integer.MIN_VALUE;
     /** Slightly lower weight, to be used for components such as {@link
-     * CUnkillable} which are likely to intercept and cancel events. */
+     * CUnkillable} which are likely to intercept and cancel events
+     * (consideration 2). */
     public static final int WEIGHT_HIGH = -1;
     /** Larger weight for the slice anchorer so that it applies its changes
-     * after most positional updates have had a chance to take place. */
+     * after most positional updates have had a chance to take place
+     * (consideration 1). */
     public static final int WEIGHT_SLICE_ANCHORER = 1000;
+    /** Camera has a large weight so that it updates after most other things. */
+    public static final int WEIGHT_CAMERA = 10_000;
     /** Larger weight for "nearby portal" components so that the phantom's
      * position is updates after most positional updates have had a chance to
-     * take place. */
-    public static final int WEIGHT_NEARBY_PORTAL = 10_000;
-    /** Camera has a large weight so that it updates after most other things. */
-    public static final int WEIGHT_CAMERA = 100_000;
+     * take place (consideration 1). */
+    public static final int WEIGHT_NEARBY_PORTAL = 100_000;
     /** Extremely large weight so that a CThroughPortal component is the very
-     * last component updated in a tick. */
+     * last component updated in a tick (consideration 1, 3). */
     public static final int WEIGHT_CHANGE_DIMENSION = Integer.MAX_VALUE - 5;
     
     
@@ -61,7 +81,7 @@ public interface Component extends IWeightProvider,
      * Entity#addComponent(Component) added to an entity}, immediately
      * <em>after</em> being added to the entity's list of components (that is,
      * only if this component was successfully added, and was not rejected).
-     * If this is one of the entity's priviliged three components, this is
+     * If this is one of the entity's privileged three components, this is
      * invoked by the entity's constructor.
      */
     void init(Entity e);

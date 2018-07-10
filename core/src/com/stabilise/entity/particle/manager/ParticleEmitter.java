@@ -1,7 +1,5 @@
 package com.stabilise.entity.particle.manager;
 
-import java.util.Random;
-
 import javax.annotation.Nullable;
 
 import com.badlogic.gdx.math.MathUtils;
@@ -12,7 +10,6 @@ import com.stabilise.entity.particle.ParticlePhysical;
 import com.stabilise.util.box.I32Box;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.util.shape.AABB;
-import com.stabilise.world.AbstractWorld;
 import com.stabilise.world.World;
 
 
@@ -29,11 +26,6 @@ public class ParticleEmitter<T extends Particle> {
     
     private final ParticlePool<T> pool;
     
-    /** Reference to the world -- to add particles. */
-    private final AbstractWorld world;
-    /** Reference to the world's rng. */
-    private final Random rnd;
-    
     /** Dummy Position object provided for convenience. */
     public final Position dummyPos; // DON'T USE THIS ONE IN HERE
     private final Position dumPos2; // Internal - use this one!
@@ -46,17 +38,14 @@ public class ParticleEmitter<T extends Particle> {
     /**
      * Creates a new particle source.
      * 
-     * @param world The world in which to generate particles.
      * @param clazz The class of the particle to generate.
      * 
      * @throws NullPointerException if {@code clazz} is null.
      * @throws IllegalArgumentException if particles of the given class have
      * not been registered.
      */
-    ParticleEmitter(ParticlePool<T> pool, AbstractWorld world, I32Box reductionFactor) {
+    ParticleEmitter(ParticlePool<T> pool, I32Box reductionFactor) {
         this.pool = pool;
-        this.world = world;
-        this.rnd = world.rnd();
         
         this.dummyPos = pool.dummyPos1;
         this.dumPos2 = pool.dummyPos2;
@@ -95,8 +84,8 @@ public class ParticleEmitter<T extends Particle> {
      * the game's particle setting being lowered
      */
     @Nullable
-    public T create() {
-        return canMake() ? createAlways() : null;
+    public T create(World w) {
+        return canMake() ? createAlways(w) : null;
     }
     
     /**
@@ -109,8 +98,8 @@ public class ParticleEmitter<T extends Particle> {
      * the game's particle setting being lowered
      */
     @Nullable
-    public T createAt(Position pos) {
-        T p = create();
+    public T createAt(World w, Position pos) {
+        T p = create(w);
         if(p != null)
             p.pos.set(pos);
         return p;
@@ -121,9 +110,9 @@ public class ParticleEmitter<T extends Particle> {
      * World#addParticle(Particle) addParticle(particle)}, and then returns
      * the particle.
      */
-    public T createAlways() {
+    public T createAlways(World w) {
         T p = pool.get();
-        world.addParticle(p);
+        w.addParticle(p);
         return p;
     }
     
@@ -132,32 +121,32 @@ public class ParticleEmitter<T extends Particle> {
      * World#addParticle(Particle) addParticle(particle)}, and then returns
      * the particle.
      */
-    public T createAlwaysAt(Position pos) {
+    public T createAlwaysAt(World w, Position pos) {
         T p = pool.get();
         p.pos.set(pos);
-        world.addParticle(p);
+        w.addParticle(p);
         return p;
     }
     
     
     
     @SuppressWarnings("unused")
-    private void create(Position pos, float dx, float dy) {
+    private void create(World w, Position pos, float dx, float dy) {
         if(canMake())
-            createAlways(pos, dx, dy);
+            createAlways(w, pos, dx, dy);
     }
     
-    private void createAlways(Position pos, float dx, float dy) {
+    private void createAlways(World w, Position pos, float dx, float dy) {
         if(pool.physical) {
             ParticlePhysical p = (ParticlePhysical)pool.get();
             p.pos.set(pos);
             p.dx = dx;
             p.dy = dy;
-            world.addParticle(p);
+            w.addParticle(p);
         } else {
             Particle p = pool.get();
             p.pos.set(pos, dx, dy);
-            world.addParticle(p);
+            w.addParticle(p);
         }
     }
     
@@ -179,10 +168,10 @@ public class ParticleEmitter<T extends Particle> {
      * @param maxAngle The maximum angle at which to direct the particles,
      * in radians.
      */
-    public void createBurst(int numParticles, Position pos,
+    public void createBurst(World w, int numParticles, Position pos,
             float minV, float maxV, float minAngle, float maxAngle) {
         for(int i = 0; i < adjustCount(numParticles); i++)
-            createBurstParticle(pos, minV, maxV, minAngle, maxAngle);
+            createBurstParticle(w, pos, minV, maxV, minAngle, maxAngle);
     }
     
     /**
@@ -208,11 +197,11 @@ public class ParticleEmitter<T extends Particle> {
      * @param maxAngle The maximum angle at which to direct the particles,
      * in radians.
      */
-    public void createBurst(int numParticles, Position cornerPos, float width,
+    public void createBurst(World w, int numParticles, Position cornerPos, float width,
             float height, float minV, float maxV, float minAngle, float maxAngle) {
         for(int i = 0; i < adjustCount(numParticles); i++)
-            createBurstParticle(
-                    dumPos2.set(cornerPos, rnd.nextFloat()*width, rnd.nextFloat()*height),
+            createBurstParticle(w,
+                    dumPos2.set(cornerPos, w.rnd().nextFloat()*width, w.rnd().nextFloat()*height),
                     minV, maxV, minAngle, maxAngle);
     }
     
@@ -224,14 +213,14 @@ public class ParticleEmitter<T extends Particle> {
      * 
      * @throws NullPointerException if {@code aabb} is {@code null}.
      */
-    public void createBurst(int numParticles, Position pos,
+    public void createBurst(World w, int numParticles, Position pos,
             float minV, float maxV, float minAngle, float maxAngle,
             AABB aabb) {
         for(int i = 0; i < adjustCount(numParticles); i++)
-            createBurstParticle(
+            createBurstParticle(w,
                     dumPos2.set(pos,
-                            aabb.minX() + rnd.nextFloat() * aabb.width(),
-                            aabb.minY() + rnd.nextFloat() * aabb.height()
+                            aabb.minX() + w.rnd().nextFloat() * aabb.width(),
+                            aabb.minY() + w.rnd().nextFloat() * aabb.height()
                     ),
                     minV, maxV, minAngle, maxAngle);
     }
@@ -243,10 +232,10 @@ public class ParticleEmitter<T extends Particle> {
      * 
      * @throws NullPointerException if {@code e} is {@code null}.
      */
-    public void createBurst(int numParticles,
+    public void createBurst(World w, int numParticles,
             float minV, float maxV, float minAngle, float maxAngle,
             Entity e) {
-        createBurst(numParticles, e.pos, minV, maxV, minAngle, maxAngle, e.aabb);
+        createBurst(w, numParticles, e.pos, minV, maxV, minAngle, maxAngle, e.aabb);
     }
     
     /**
@@ -255,49 +244,49 @@ public class ParticleEmitter<T extends Particle> {
      * the particles are placed somewhere on the tile specified by the
      * given tile coordinates.
      */
-    public void createBurstOnTile(int numParticles, Position pos,
+    public void createBurstOnTile(World w, int numParticles, Position pos,
             float minV, float maxV, float minAngle, float maxAngle) {
-        createBurst(numParticles, pos.clone().add(rnd.nextFloat(), rnd.nextFloat()),
+        createBurst(w, numParticles, pos.clone().add(w.rnd().nextFloat(), w.rnd().nextFloat()),
                 minV, maxV, minAngle, maxAngle);
     }
     
-    private void createBurstParticle(Position pos,
+    private void createBurstParticle(World w, Position pos,
             float minV, float maxV, float minAngle, float maxAngle) {
-        float v = minV + rnd.nextFloat() * (maxV - minV);
-        float angle = minAngle + rnd.nextFloat() * (maxAngle - minAngle);
+        float v = minV + w.rnd().nextFloat() * (maxV - minV);
+        float angle = minAngle + w.rnd().nextFloat() * (maxAngle - minAngle);
         float dx = v * MathUtils.cos(angle);
         float dy = v * MathUtils.sin(angle);
-        createAlways(pos, dx, dy);
+        createAlways(w, pos, dx, dy);
     }
     
-    public void createOutwardsBurst(int numParticles, Position pos,
+    public void createOutwardsBurst(World w, int numParticles, Position pos,
             boolean burstX, boolean burstY, float maxX, float maxY,
             AABB aabb) {
-        float w = aabb.width();
-        float h = aabb.height();
+        float dx = aabb.width();
+        float dy = aabb.height();
         for(int i = 0; i < adjustCount(numParticles); i++) {
-            float xp = rnd.nextFloat();
-            float yp = rnd.nextFloat();
-            createAlways(
-                    dumPos2.set(pos, w, h),
+            float xp = w.rnd().nextFloat();
+            float yp = w.rnd().nextFloat();
+            createAlways(w,
+                    dumPos2.set(pos, dx, dy),
                     burstX ? (2*xp - 1) * maxX : 0f,
                     burstY ? (2*yp - 1) * maxY : 0f
             );
         }
     }
     
-    public void createOutwardsBurst(int numParticles,
+    public void createOutwardsBurst(World w, int numParticles,
             boolean burstX, boolean burstY, float maxX, float maxY,
             Entity e) {
-        createOutwardsBurst(numParticles, e.pos,
+        createOutwardsBurst(w, numParticles, e.pos,
                 burstX, burstY, maxX, maxY, e.aabb);
     }
     
-    public void createCentredOutwardsBurst(Random rnd, int numParticles,
+    public void createCentredOutwardsBurst(World w, int numParticles,
             float minV, float maxV, Entity e) {
         dumPos2.set(e.pos, e.aabb.centreX(), e.aabb.centreY());
         for(int i = 0; i < adjustCount(numParticles); i++)
-            createBurstParticle(dumPos2, minV, maxV, 0f, Maths.TAUf);
+            createBurstParticle(w, dumPos2, minV, maxV, 0f, Maths.TAUf);
     }
     
 }

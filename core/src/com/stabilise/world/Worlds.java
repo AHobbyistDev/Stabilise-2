@@ -366,7 +366,7 @@ public class Worlds {
                         bMulti.set(new HostMultiverse(worldInfo, profiler));
                         
                         t.next(50, "Creating the player");
-                        bPlayer.set(bMulti.get().addPlayer(integratedPlayer, true));
+                        bPlayer.set(bMulti.get().addPlayer(integratedPlayer));
                         bWorld.set(bPlayer.get().world);
                     } else {
                         throw new RuntimeException("Client is NYI");

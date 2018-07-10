@@ -100,14 +100,14 @@ public class CFireball extends CBaseProjectile {
     }
     
     private void addFlightParticles(World w, Entity e, int particles) {
-        particleSrc.createBurst(particles, e.pos, 0.5f, 2.5f, 0f, Maths.TAUf);
+        particleSrc.createBurst(w, particles, e.pos, 0.5f, 2.5f, 0f, Maths.TAUf);
     }
     
     /**
      * Creates fire particles about the fireball's location of impact.
      */
     private void addImpactParticles(World w, Entity e, int particles) {
-        particleSrc.createBurst(particles, e.pos, 0.01f, 4.0f, 0f, Maths.TAUf);
+        particleSrc.createBurst(w, particles, e.pos, 0.01f, 4.0f, 0f, Maths.TAUf);
     }
     
     @Override
@@ -141,7 +141,7 @@ public class CFireball extends CBaseProjectile {
         h.effects = tgt -> tgt.addComponent(new CEffectFire(60*5, 1));
         w.addHitbox(h, e.pos);
         
-        explosionSrc.createAlwaysAt(e.pos);
+        explosionSrc.createAlwaysAt(w, e.pos);
         addImpactParticles(w, e, 500);
         
         // TODO: shake again

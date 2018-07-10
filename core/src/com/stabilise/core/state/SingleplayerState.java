@@ -16,7 +16,7 @@ import com.stabilise.world.Worlds.WorldBundle;
  */
 public class SingleplayerState implements State {
     
-    public Game game;
+    public final Game game;
     public WorldRenderer renderer;
     
     public Profiler profiler = Application.get().profiler;

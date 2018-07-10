@@ -2,9 +2,9 @@ TOP PRIORITY
 - Character model
 
 HIGH PRIORITY
+- Proper "through portal" rendering (i.e. entities, background, etc)
 - Menus
 - Entity saving in worlds
-- Proper world loading/unloading akin to what RegionStore does for regions
 - Improve entity physics
 	- Fig bugs
     - Allow one-way collisions (e.g. platforms)
@@ -13,4 +13,4 @@ HIGH PRIORITY
 TODO EVENTUALLY
 - Structure generation
 - Prepping spawn
-- Either abuse weak references or get the world's particle manager to deregister its event listener.
+- Proper world loading/unloading akin to what RegionStore does for regions

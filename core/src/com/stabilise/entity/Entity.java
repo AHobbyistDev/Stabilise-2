@@ -93,8 +93,9 @@ public class Entity extends GameObject implements Exportable {
         // Then run the core to affect any core behaviour
         // Then run physics to move the entity around
         // Finally run all the ad hoc components. These come last largely so
-        // that any CNearbyPortal components update the phantom positions
-        // after all other movement has been effected.
+        // that the camera component (if it exists) updates and any
+        // CNearbyPortal components update the phantom positions after all
+        // other movement has been effected.
         
         world.profiler().next("controller");
         controller.update(world, this, dt);

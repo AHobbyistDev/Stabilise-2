@@ -240,7 +240,7 @@ public class CPerson extends CBaseMob {
                 if(increaseHealth(1)) {
                     if(healParticles == null)
                         healParticles = w.particleEmitter(ParticleHeal.class);
-                    healParticles.createBurst(
+                    healParticles.createBurst(w,
                             1, 0.2f, 2.0f,
                             Maths.PIf / 6.0f,
                             Maths.PIf * 5.0f / 6.0f,
@@ -437,13 +437,13 @@ public class CPerson extends CBaseMob {
                         h2.effects = tgt -> tgt.addComponent(new CEffectFire(60*7, 3));
                         w.addHitbox(h2, e.pos);
                         
-                        fireParticles.createBurst(300, e.pos, 0.1f, 5f, 0, (float)Math.PI);
-                        w.particleEmitter(ParticleExplosion.class).createAt(e.pos);
+                        fireParticles.createBurst(w, 300, e.pos, 0.1f, 5f, 0, (float)Math.PI);
+                        w.particleEmitter(ParticleExplosion.class).createAt(w, e.pos);
                         
                         // TODO: shake
                         //w.getCamera().shake(0.1f, 30);
                     } else {
-                        fireParticles.createBurst(100, e.pos, 0.1f, 5f, 0, (float)Math.PI);
+                        fireParticles.createBurst(w, 100, e.pos, 0.1f, 5f, 0, (float)Math.PI);
                     }
                 }
                 break;
@@ -533,7 +533,7 @@ public class CPerson extends CBaseMob {
                 maxAngle = Maths.PIf * 7/6;
             }
             
-            fireParticles.createBurst(6, dummyPos, 1f, 5f, minAngle, maxAngle);
+            fireParticles.createBurst(w, 6, dummyPos, 1f, 5f, minAngle, maxAngle);
         }
     }
     
@@ -560,7 +560,7 @@ public class CPerson extends CBaseMob {
             }
         } else {
             Position dummyPos = fireParticles.dummyPos;
-            fireParticles.createBurst(12, dummyPos.set(e.pos, px, originPoint.y),
+            fireParticles.createBurst(w, 12, dummyPos.set(e.pos, px, originPoint.y),
                     1f, 5f, MathUtils.PI / 3f, MathUtils.PI * 0.6666f);
         }
     }
@@ -586,7 +586,7 @@ public class CPerson extends CBaseMob {
             }
         } else {
             Position dummyPos = fireParticles.dummyPos;
-            fireParticles.createBurst(12, dummyPos.set(e.pos, px, originPoint.y), 
+            fireParticles.createBurst(w, 12, dummyPos.set(e.pos, px, originPoint.y), 
                     1f, 5f, (1.5f - (1f/6))*MathUtils.PI, (1.5f + (1f/6))*MathUtils.PI);
         }
     }

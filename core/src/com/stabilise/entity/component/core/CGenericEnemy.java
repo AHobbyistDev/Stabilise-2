@@ -65,12 +65,12 @@ public class CGenericEnemy extends CBaseMob {
         Position dummyPos = srcSmoke.dummyPos;
         if(facingRight) {
             dummyPos.set(e.pos, 0.5f, 0f);
-            srcSmoke.createBurst(150, dummyPos, 0f, 2f, 3f+d, 30f+d, -Maths.PIf/4, Maths.PIf/4);
-            srcFlame.createBurst(150, dummyPos, 0f, 2f, 2f+d, 10f+d, -Maths.PIf/4, Maths.PIf/4);
+            srcSmoke.createBurst(w, 150, dummyPos, 0f, 2f, 3f+d, 30f+d, -Maths.PIf/4, Maths.PIf/4);
+            srcFlame.createBurst(w, 150, dummyPos, 0f, 2f, 2f+d, 10f+d, -Maths.PIf/4, Maths.PIf/4);
         } else {
             dummyPos.set(e.pos, -0.5f, 0f);
-            srcSmoke.createBurst(150, dummyPos, 0f, 2f, 3f+d, 30f+d, 3*Maths.PIf/4, 5*Maths.PIf/4);
-            srcFlame.createBurst(150, dummyPos, 0f, 2f, 2f+d, 10f+d, 3*Maths.PIf/4, 5*Maths.PIf/4);
+            srcSmoke.createBurst(w, 150, dummyPos, 0f, 2f, 3f+d, 30f+d, 3*Maths.PIf/4, 5*Maths.PIf/4);
+            srcFlame.createBurst(w, 150, dummyPos, 0f, 2f, 2f+d, 10f+d, 3*Maths.PIf/4, 5*Maths.PIf/4);
         }
     }
     
@@ -94,12 +94,12 @@ public class CGenericEnemy extends CBaseMob {
         Position dummyPos = srcSmoke.dummyPos;
         if(facingRight) {
             dummyPos.set(e.pos, 0.5f, 0f);
-            srcSmoke.createBurst(150, dummyPos, 0f, 2f, 2f+d, 90f+d, -Maths.PIf/16, Maths.PIf/16);
-            srcFlame.createBurst(150, dummyPos, 0f, 2f, 2f+d, 35f+d, -Maths.PIf/16, Maths.PIf/16);
+            srcSmoke.createBurst(w, 150, dummyPos, 0f, 2f, 2f+d, 90f+d, -Maths.PIf/16, Maths.PIf/16);
+            srcFlame.createBurst(w, 150, dummyPos, 0f, 2f, 2f+d, 35f+d, -Maths.PIf/16, Maths.PIf/16);
         } else {
             dummyPos.set(e.pos, -0.5f, 0f);
-            srcSmoke.createBurst(150, dummyPos, 0f, 2f, 2f+d, 90f+d, 15*Maths.PIf/16, 17*Maths.PIf/16);
-            srcFlame.createBurst(150, dummyPos, 0f, 2f, 2f+d, 35f+d, 15*Maths.PIf/16, 17*Maths.PIf/16);
+            srcSmoke.createBurst(w, 150, dummyPos, 0f, 2f, 2f+d, 90f+d, 15*Maths.PIf/16, 17*Maths.PIf/16);
+            srcFlame.createBurst(w, 150, dummyPos, 0f, 2f, 2f+d, 35f+d, 15*Maths.PIf/16, 17*Maths.PIf/16);
         }
     }
     

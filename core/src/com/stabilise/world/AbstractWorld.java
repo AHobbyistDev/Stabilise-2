@@ -39,6 +39,9 @@ public abstract class AbstractWorld implements World {
     protected final Multiverse<?> multiverse;
     /** This world's dimension. */
     protected final Dimension dimension;
+    /** This world's game might not necessarily be the same as the dimension's
+     * name; in particular a player's private dimension is uniquely named to
+     * them. Thus, it needs to be stored separately. */
     public String dimensionName;
     
     /** All players in the world. Maps IDs -> player Entities. */
@@ -66,8 +69,6 @@ public abstract class AbstractWorld implements World {
      * the world. */
     public int hitboxCount = 0;
     
-    /** This world's particle manager. */
-    public final ParticleManager particleManager = new ParticleManager(this);
     /** Stores all particles in the world. This should remain empty if this is
      * a server world.
      * <p>Implementation note: This is a FragList as we want to maintain local
@@ -155,10 +156,6 @@ public abstract class AbstractWorld implements World {
         updateObjects(getTileEntities());
         profiler.next("particle"); // root.update.game.world.particle
         getParticles().iterate(p -> p.updateAndCheck(this, timeIncrement) && reclaimParticle(p));
-        
-        // Do a particle cleanup every 5 seconds
-        if(getAge() % 300 == 0)
-            particleManager.cleanup();
         
         // Now, add all queued entities
         profiler.next("entity"); // root.update.game.world.entity
@@ -292,7 +289,7 @@ public abstract class AbstractWorld implements World {
     
     @Override
     public ParticleManager getParticleManager() {
-        return particleManager;
+        return multiverse.particleManager;
     }
     
     // ========== Stuff ==========
