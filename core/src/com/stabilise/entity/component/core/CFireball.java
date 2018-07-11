@@ -21,7 +21,7 @@ import com.stabilise.world.World;
 public class CFireball extends CBaseProjectile {
     
     /** The fireball hitbox template. */
-    private static final AABB FIREBALL_BOUNDING_BOX = new AABB(-0.05f, -0.05f, 0.1f, 0.1f);
+    private static final AABB FIREBALL_BOUNDING_BOX = new AABB(-0.0625f, -0.0625f, 0.125f, 0.125f);
     private static final Polygon FIREBALL_HITBOX = Polygon.rectangle(-0.25f, -0.25f, 0.5f, 0.5f);
     /** Default fireball damage. */
     private static final int DEFAULT_FIREBALL_DAMAGE = 10;

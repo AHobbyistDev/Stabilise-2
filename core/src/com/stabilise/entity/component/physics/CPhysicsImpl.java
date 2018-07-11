@@ -22,7 +22,7 @@ import com.stabilise.world.tile.Tile;
  */
 public class CPhysicsImpl extends CPhysics {
     
-    private static final float eps = 0.000001f;
+    private static final float eps = 0f; // 0.000001f;
     
     public boolean dxp, dyp; // "dx/dy positive?"
     public boolean onGround;

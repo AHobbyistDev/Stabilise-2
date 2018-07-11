@@ -35,7 +35,7 @@ public class CItem extends CCore {
     
     private static final double MERGE_RANGE_SQ = 2*2;
     
-    private static final AABB ENT_AABB = new AABB(-0.4f, 0f, 0.8f, 0.8f);
+    private static final AABB ENT_AABB = new AABB(-0.375f, 0f, 0.75f, 0.75f);
     
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------

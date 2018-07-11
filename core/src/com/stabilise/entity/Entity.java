@@ -152,11 +152,6 @@ public class Entity extends GameObject implements Exportable {
      * @throws NullPointerException if {@code c} is {@code null}.
      */
     public Entity addComponent(Component c) {
-        // TODO: think about how to deal with in the future:
-        // WeightingArrayList allows elements to be added to the list while the
-        // list is being iterated over. For us this means that a component may
-        // add a new component when it is updated. However due to the way 
-        
         if(components.add(c))
         	c.init(this);
         return this;

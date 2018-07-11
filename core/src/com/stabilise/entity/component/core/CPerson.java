@@ -158,8 +158,8 @@ public class CPerson extends CBaseMob {
     public static final Vector2 SPECIAL_DOWN_AIR_ORIGIN = new Vector2(0.33f,0.36f);
     
     
-    private static final AABB AABB = new AABB(-0.4f, 0f, 0.8f, 1.8f);
-    //private static final AABB AABB = new AABB(-0.375f, 0f, 0.75f, 1.8f);
+    //private static final AABB AABB = new AABB(-0.4f, 0f, 0.8f, 1.8f);
+    private static final AABB AABB = new AABB(-0.375f, 0f, 0.75f, 1.75f);
     //private static final AABB AABB = new AABB(-0.05f, -0.05f, 0.1f, 0.1f);
     
     //--------------------==========--------------------

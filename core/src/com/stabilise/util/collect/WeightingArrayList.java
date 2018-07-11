@@ -26,7 +26,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
         extends AbstractList<E>
         implements SimpleList<E>, RandomAccess {
     
-    private static final int BINARY_SEARCH_THRESHOLD = Integer.MAX_VALUE; // TODO: temporary value
+    private static final int BINARY_SEARCH_THRESHOLD = Integer.MAX_VALUE; // TODO: temporary
     
     private E[] data;
     private int size = 0;
@@ -34,7 +34,7 @@ public class WeightingArrayList<E extends IWeightProvider & IDuplicateResolver<E
     // Since this class allows list modification during iteration, inserting a
     // low weight element may cause a higher weight element to be iterated over
     // more than once (since it will be shifted right in the array). To avoid
-    // any possibility of this occurring we use itrIdx and itrInc.
+    // any possibility of this occurring we use itrIdx.
     
     /** Used instead of a local index variable when iterating. When an element
      * is inserted before this index, itrInc is incremented so that the current

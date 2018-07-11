@@ -2,7 +2,11 @@ TOP PRIORITY
 - Character model
 
 HIGH PRIORITY
-- Proper "through portal" rendering (i.e. entities, background, etc)
+- Improve portals
+    - Proper "through portal" rendering (i.e. entities, background, etc)
+    - Hitboxes through portals
+    - Linked hitboxes of entities that go through portals
+    - No phantom for intradimensional portals? 
 - Menus
 - Entity saving in worlds
 - Improve entity physics
