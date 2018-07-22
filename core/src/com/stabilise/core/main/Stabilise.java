@@ -73,7 +73,6 @@ public class Stabilise extends Application {
                 "II esilibatS",
                 "20% less bugs!",
                 "20% more bugs!",
-                "[Insert witty subtitle here]",
                 "May contain traces of nuts",
                 "Not suitable for children under the age of 84",
                 "Take twice daily for fast, effective results!",
@@ -82,6 +81,7 @@ public class Stabilise extends Application {
                 "Now with excavators!",
                 "No refunds!",
                 "Not even in early access yet",
+                "Not even in alpha yet",
                 "In perpetual development",
                 "Has no content!",
                 "Barely functional"

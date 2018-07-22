@@ -59,15 +59,8 @@ public class CharacterData implements Exportable {
      * tags. */
     public String hash;
     
-    /** The character's level. */
-    public int level;
-    /** The character's xp. */
-    public int xp;
-    
     /** The character's max health. */
     public int maxHealth;
-    /** The character's max stamina. */
-    public int maxStamina;
     /** The character's max mana. */
     public int maxMana;
     
@@ -168,10 +161,7 @@ public class CharacterData implements Exportable {
     public void importFromCompound(DataCompound o) {
         hash = o.getString("hash");
         name = o.getString("name");
-        level = o.getI32("level");
-        xp = o.getI32("xp");
         maxHealth = o.getI32("maxHealth");
-        maxStamina = o.getI32("maxStamina");
         maxMana = o.getI32("maxMana");
         
         inventory.importFromCompound(o.getCompound("inventory"));
@@ -181,10 +171,7 @@ public class CharacterData implements Exportable {
     public void exportToCompound(DataCompound o) {
         o.put("hash", hash);
         o.put("name", name);
-        o.put("level", level);
-        o.put("xp", xp);
         o.put("maxHealth", maxHealth);
-        o.put("maxStamina", maxStamina);
         o.put("maxMana", maxMana);
         
         inventory.exportToCompound(o.childCompound("inventory"));
