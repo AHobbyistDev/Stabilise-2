@@ -352,6 +352,7 @@ public abstract class CBaseMob extends CCore {
         
         src.applyEffects(e);
         
+        applyDamageReduction(src);
         health -= src.damage();
         e.dx = (e.dx + src.impulseX());
         e.dy = (e.dy + src.impulseY());
@@ -375,6 +376,15 @@ public abstract class CBaseMob extends CCore {
         }
         
         return true;
+    }
+    
+    /**
+     * Applies damage reduction (e.g. due to armour) to the given incoming
+     * damage source. The default implementation does nothing and is intended
+     * to be overridden.
+     */
+    protected void applyDamageReduction(IDamageSource src) {
+        
     }
     
     /**

@@ -16,6 +16,8 @@ import com.stabilise.core.Constants;
 import com.stabilise.core.Resources;
 import com.stabilise.item.BoundedContainer;
 import com.stabilise.item.Container;
+import com.stabilise.item.armour.Armour;
+import com.stabilise.item.weapon.Weapon;
 import com.stabilise.util.Log;
 import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.io.IOUtil;
@@ -68,7 +70,14 @@ public class CharacterData implements Exportable {
     public final Container inventory =
             new BoundedContainer(Constants.INVENTORY_CAPACITY);
     
+    /** Equipped armour. */
+    public final Armour[] armour = new Armour[4];
+    /** Equipped weapon. */
+    public Weapon weapon;
+    
+    
     private boolean loaded = false;
+    
     
     
     /**
@@ -98,7 +107,7 @@ public class CharacterData implements Exportable {
      * to that of the current time, and generating the character's hash.
      */
     public void create() {
-        creationDate = System.currentTimeMillis();//new Date().getTime();
+        creationDate = System.currentTimeMillis();
         lastPlayed = creationDate;
         
         genHash();
@@ -109,7 +118,7 @@ public class CharacterData implements Exportable {
      */
     private void genHash() {
         // Hash based on a bunch of things hopefully unique to the user to
-        // minimise hash collisions
+        // minimise hash collisions.
         HashFunction hf = Hashing.sha256();
         HashCode hc = hf.newHasher()
                .putLong(creationDate)
@@ -214,7 +223,7 @@ public class CharacterData implements Exportable {
     public String toString() {
         return (name != null && hash != null) ?
                 "CharacterData[\"" + name + "\"," + hash + "]" :
-                "UnitialisedCharacterData";
+                "CharacterData[Uninitialised]";
     }
     
     //--------------------==========--------------------

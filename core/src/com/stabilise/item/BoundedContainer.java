@@ -9,7 +9,6 @@ import java.util.Comparator;
  */
 public class BoundedContainer extends Container {
     
-    /** The container's items. */
     private ItemStack[] items;
     
     

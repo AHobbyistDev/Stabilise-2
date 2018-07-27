@@ -105,6 +105,9 @@ class TileBuilder {
     // liquids only
     float viscosity;
     
+    
+    
+    /** package-private constructor */
     TileBuilder() {
         
     }

@@ -30,7 +30,7 @@ public class Entities {
     
     
     public static Entity player() {
-        return e(new CPlayerPerson())
+        return e(new CPlayerPerson().upgradeEquipment())
                 //.addComponent(new CInvulnerability())
                 .addComponent(new CUnkillable())
                 //.addComponent(new CDebug())

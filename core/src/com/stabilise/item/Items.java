@@ -17,7 +17,6 @@ public class Items {
     
     // Invoked when this class is loaded into memory
     static {
-        // ...funnily enough, invoking this in fact loads Item into memory.
         if(!Item.isRegistered())
             throw new IllegalStateException(
                     Items.class.toString() + " loaded into memory before"

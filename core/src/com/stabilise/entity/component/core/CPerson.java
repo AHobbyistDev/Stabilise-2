@@ -10,6 +10,7 @@ import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.component.effect.CEffectFire;
 import com.stabilise.entity.component.effect.CEffectFireTrail;
+import com.stabilise.entity.damage.DamageType;
 import com.stabilise.entity.damage.IDamageSource;
 import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.hitbox.Hitbox;
@@ -18,6 +19,8 @@ import com.stabilise.entity.particle.ParticleFlame;
 import com.stabilise.entity.particle.ParticleHeal;
 import com.stabilise.entity.particle.manager.ParticleEmitter;
 import com.stabilise.item.Items;
+import com.stabilise.item.armour.Armour;
+import com.stabilise.item.weapon.Weapon;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.io.data.DataCompound;
@@ -166,10 +169,6 @@ public class CPerson extends CBaseMob {
     //-------------=====Member Variables=====-----------
     //--------------------==========--------------------
     
-    /** The person's max stamina. */
-    public int maxStamina;
-    /** The person's stamina. */
-    public int stamina;
     /** The person's max mana. */
     public int maxMana;
     /** The person's mana. */
@@ -178,16 +177,20 @@ public class CPerson extends CBaseMob {
     /** Whether or not the mob's health changed since the last tick. */
     public boolean healthChanged = false;
     /** Whether or not the mob's mana changed since the last tick. */
-    public boolean staminaChanged = false;
-    /** Whether or not the mob's mana changed since the last tick. */
     public boolean manaChanged = false;
     
     /** The number of ticks since the mob last lost health. */
     public int ticksSinceHealthLoss = 0;
-    /** The number of ticks since the mob last lost stamina. */
-    public int ticksSinceStaminaLoss = 0;
     /** The number of ticks since the mob last lost mana. */
     public int ticksSinceManaLoss = 0;
+    
+    
+    public Armour amrHead = Armour.TIER_1_HEAD;
+    public Armour amrBody = Armour.TIER_1_BODY;
+    public Armour amrArms = Armour.TIER_1_ARMS;
+    public Armour amrLegs = Armour.TIER_1_LEGS;
+    public Weapon weapon  = Weapon.SWORD_TIER_1;
+    
     
     /** The amount of damage dealt by an attack - for carrying over multiple
      * frames. */
@@ -210,8 +213,6 @@ public class CPerson extends CBaseMob {
         
         maxHealth = 100;
         health = 100;
-        maxStamina = 100;
-        stamina = 100;
         maxMana = 500000;
         mana = 500000;
         
@@ -226,12 +227,25 @@ public class CPerson extends CBaseMob {
         state = State.IDLE;
     }
     
+    /**
+     * Temporary function that improves the temporary weapon/armour that we
+     * have equipped.
+     */
+    public CPerson upgradeEquipment() {
+        amrHead = Armour.TIER_2_HEAD;
+        amrBody = Armour.TIER_2_BODY;
+        amrArms = Armour.TIER_2_ARMS;
+        amrLegs = Armour.TIER_2_LEGS;
+        weapon = Weapon.SWORD_TIER_2;
+        
+        return this;
+    }
+    
     @Override
     public void update(World w, Entity e, float dt) {
         super.update(w, e, dt);
         
         ticksSinceHealthLoss++;
-        ticksSinceStaminaLoss++;
         ticksSinceManaLoss++;
         
         // Regen health/mana/stamina
@@ -250,11 +264,6 @@ public class CPerson extends CBaseMob {
             }
         }
         
-        if(ticksSinceStaminaLoss >= 60) {
-            if(ticksSinceStaminaLoss >= 300 || ticksSinceStaminaLoss % 2 == 0)
-                increaseStamina(1);
-        }
-        
         if(ticksSinceManaLoss >= 60) {
             if(ticksSinceManaLoss >= 300 || ticksSinceManaLoss % 2 == 0)
                 increaseMana(1);
@@ -264,7 +273,7 @@ public class CPerson extends CBaseMob {
         switch(state) {
             case ATTACK_SIDE_GROUND:
                 if(stateTicks == ATTACK_SIDE_GROUND_FRAME_2_BEGIN) {
-                    curAtkDamageDealt = w.rnd().nextInt(16) + 5;
+                    curAtkDamageDealt = weapon.getDamage(); //w.rnd().nextInt(16) + 5;
                     curAtkCollisionSet = Hitbox.createCollisionSet();
                     
                     Hitbox h = new Hitbox(e.id(), facingRight
@@ -291,7 +300,7 @@ public class CPerson extends CBaseMob {
                     Hitbox h = new Hitbox(e.id(), facingRight
                             ? ATTACK_UP_GROUND_HITBOX
                             : ATTACK_UP_GROUND_HITBOX_FLIPPED,
-                            w.rnd().nextInt(16) + 20);
+                            weapon.getDamage() + w.rnd().nextInt(10)); //w.rnd().nextInt(16) + 20);
                     h.hits = -1;
                     h.force = ATTACK_UP_GROUND_FORCE;
                     h.fy = 1.0f;
@@ -305,7 +314,7 @@ public class CPerson extends CBaseMob {
                     Hitbox h = new Hitbox(e.id(), facingRight
                             ? ATTACK_DOWN_GROUND_HITBOX
                             : ATTACK_DOWN_GROUND_HITBOX_FLIPPED,
-                            w.rnd().nextInt(16) + 5);
+                            weapon.getDamage()); //w.rnd().nextInt(16) + 5);
                     h.hits = -1;
                     h.force = ATTACK_DOWN_GROUND_FORCE;
                     h.fx = facingRight ? 1.0f : -1.0f;
@@ -314,7 +323,7 @@ public class CPerson extends CBaseMob {
                 break;
             case ATTACK_SIDE_AIR:
                 if(stateTicks == ATTACK_SIDE_AIR_FRAME_2_BEGIN) {
-                    curAtkDamageDealt = w.rnd().nextInt(16) + 5;
+                    curAtkDamageDealt = weapon.getDamage(); //w.rnd().nextInt(16) + 5;
                     curAtkCollisionSet = Hitbox.createCollisionSet();
                     
                     Hitbox h = new Hitbox(e.id(), facingRight ?
@@ -338,7 +347,7 @@ public class CPerson extends CBaseMob {
                 break;
             case ATTACK_UP_AIR:
                 if(stateTicks == ATTACK_UP_AIR_FRAME_2_BEGIN) {
-                    curAtkDamageDealt = w.rnd().nextInt(16) + 5;
+                    curAtkDamageDealt = weapon.getDamage(); //w.rnd().nextInt(16) + 5;
                     curAtkCollisionSet = Hitbox.createCollisionSet();
                     
                     Hitbox h1 = new Hitbox(e.id(), facingRight
@@ -373,7 +382,7 @@ public class CPerson extends CBaseMob {
                 break;
             case ATTACK_DOWN_AIR:
                 if(stateTicks == ATTACK_DOWN_AIR_FRAME_2_BEGIN) {
-                    curAtkDamageDealt = w.rnd().nextInt(16) + 5;
+                    curAtkDamageDealt = weapon.getDamage(); //w.rnd().nextInt(16) + 5;
                     curAtkCollisionSet = Hitbox.createCollisionSet();
                     
                     Hitbox h1 = new Hitbox(e.id(), facingRight
@@ -460,30 +469,6 @@ public class CPerson extends CBaseMob {
                     fireballRain(w, e, SPECIAL_DOWN_AIR_COST_MANA, SPECIAL_DOWN_AIR_ORIGIN);
                     e.dy += 10f;
                     e.addComponent(new CEffectFireTrail(Constants.TICKS_PER_SECOND / 3));
-                    /*
-                    if(useMana(SPECIAL_DOWN_AIR_COST_MANA)) {
-                        EntityBigFireball f = new EntityBigFireball(w, this);
-                        f.x = e.x + (facingRight ? SPECIAL_DOWN_AIR_ORIGIN.x
-                                : -SPECIAL_DOWN_AIR_ORIGIN.x);
-                        f.y = e.y + SPECIAL_DOWN_AIR_ORIGIN.y;
-                        f.dy = Math.min(0f, dy + w.getRnd().nextFloat() * 3.0f - 10f);
-                        w.addEntity(f);
-                    } else {
-                        double minAngle, maxAngle, px;
-                        
-                        minAngle = -1.0D * Math.PI / 3.0D;
-                        maxAngle = -2.0D * Math.PI / 3.0D;
-                        
-                        if(facingRight) {
-                            px = e.x + SPECIAL_DOWN_AIR_ORIGIN.x;
-                        } else {
-                            px = e.x - SPECIAL_DOWN_AIR_ORIGIN.x;
-                        }
-                        
-                        particleSrc.createBurst(6, px, e.y + SPECIAL_DOWN_AIR_ORIGIN.y,
-                                0.03f, 0.08f, (float)minAngle, (float)maxAngle);
-                    }
-                    */
                 }
                 break;
             default:
@@ -705,29 +690,7 @@ public class CPerson extends CBaseMob {
     @Override
     public void restore() {
         increaseHealth(maxHealth);
-        increaseStamina(maxStamina);
         increaseMana(maxMana);
-    }
-    
-    /**
-     * Attempts to consume some of the person's stamina.
-     * 
-     * @param stamina The amount of stamina to use.
-     * 
-     * @return {@code true} if the person had an amount of stamina greater
-     * than or equal to the given value; {@code false} otherwise.
-     */
-    @SuppressWarnings("unused")
-    private boolean useStamina(int stamina) {
-        ticksSinceStaminaLoss = 0;
-        
-        if(this.stamina < stamina)
-            return false;
-        
-        staminaChanged = true;
-        this.stamina -= stamina;
-        
-        return true;
     }
     
     /**
@@ -770,22 +733,6 @@ public class CPerson extends CBaseMob {
     }
     
     /**
-     * Increases the person's stamina.
-     * 
-     * @param amount The amount by which to increase the person's stamina.
-     */
-    private void increaseStamina(int amount) {
-        if(stamina == maxStamina)
-            return;
-        
-        stamina += amount;
-        if(stamina > maxStamina)
-            stamina = maxStamina;
-        
-        staminaChanged = true;
-    }
-    
-    /**
      * Increases the person's mana.
      * 
      * @param amount The amount by which to increase the person's mana.
@@ -823,16 +770,22 @@ public class CPerson extends CBaseMob {
     }
     
     @Override
+    protected void applyDamageReduction(IDamageSource src) {
+        if(src.type().equals(DamageType.ATTACK)) {
+            float reduction = amrHead.reduction + amrBody.reduction
+                    + amrArms.reduction + amrLegs.reduction;
+            src.setDamage((int)(src.damage()*(1-reduction)));
+        }
+    }
+    
+    @Override
     public void importFromCompound(DataCompound c) {
         super.importFromCompound(c);
         
-        maxStamina = c.getI32("maxStamina");
-        stamina = c.getI32("stamina");
         maxMana = c.getI32("maxMana");
         mana = c.getI32("mana");
         
         ticksSinceHealthLoss = c.getI32("ticksSinceHpLoss");
-        ticksSinceStaminaLoss = c.getI32("ticksSinceSpLoss");
         ticksSinceManaLoss = c.getI32("ticksSinceMpLoss");
     }
     
@@ -840,13 +793,10 @@ public class CPerson extends CBaseMob {
     public void exportToCompound(DataCompound c) {
         super.exportToCompound(c);
         
-        c.put("maxStamina", maxStamina);
-        c.put("stamina", stamina);
         c.put("maxMana", maxMana);
         c.put("mana", mana);
         
         c.put("ticksSinceHpLoss", ticksSinceHealthLoss);
-        c.put("ticksSinceSpLoss", ticksSinceStaminaLoss);
         c.put("ticksSinceMpLoss", ticksSinceManaLoss);
     }
     
