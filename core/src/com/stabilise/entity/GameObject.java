@@ -6,6 +6,9 @@ import com.stabilise.world.World;
 /**
  * A GameObject is an object which exists within the game world. GameObjects
  * may be updated every tick, rendered if appropriate, and destroyed.
+ *
+ * <p>The main examples of GameObjects are Entities, TileEntities, Particles,
+ * and Hitboxes.
  */
 public abstract class GameObject {
     
@@ -29,7 +32,7 @@ public abstract class GameObject {
     
     /**
      * Updates this GameObject. This is only ever called through {@link
-     * #updateAndCheck(World)}.
+     * #updateAndCheck(World, float)}.
      * 
      * @param world The world in which this GameObject is present. Never null.
      * @param dt The number of seconds since the last update tick. Typically
@@ -89,9 +92,8 @@ public abstract class GameObject {
     }
     
     /**
-     * Checks for whether or not this GameObject is considered destroyed. If
-     * {@code true} is returned, this GameObject should be removed from the
-     * world ASAP.
+     * Checks for whether this GameObject is considered destroyed. If {@code
+     * true} is returned, this GameObject should be removed from the world ASAP.
      */
     public final boolean isDestroyed() {
         return destroyed;

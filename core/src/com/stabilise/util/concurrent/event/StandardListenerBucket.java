@@ -33,7 +33,7 @@ class StandardListenerBucket<E extends Event> implements ListenerBucket<E> {
     }
     
     @Override
-    public Listener<? super E>[] post(E e) {
+    public Listener<? super E>[] dispatch(E e) {
         @SuppressWarnings("unchecked")
         Listener<? super E>[] arr = listeners.toArray(new Listener[listeners.size()]);
         listeners.removeIf(Listener::consumeUse);

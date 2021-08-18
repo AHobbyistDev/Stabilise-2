@@ -25,6 +25,7 @@ import com.stabilise.item.IContainer;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
 import com.stabilise.util.Log;
+import com.stabilise.util.Printable;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.maths.Maths;
 import com.stabilise.world.World;
@@ -104,7 +105,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
         }
         
         if(Gdx.input.isButtonPressed(Buttons.LEFT) && !Gdx.input.isKeyPressed(Keys.CONTROL_LEFT))
-            doInRadius(worldRenderer, (pos) -> world.breakTileAt(pos));
+            doInRadius(worldRenderer, world::breakTileAt);
         else if(Gdx.input.isButtonPressed(Buttons.RIGHT) && !Gdx.input.isKeyPressed(Keys.ALT_LEFT))
             doInRadius(worldRenderer, (pos) -> world.setTileAt(pos, tileID));
     }
@@ -165,7 +166,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
                         Entity m = Entities.enemy();
                         m.pos.set(e.pos,
                                 - 10 + world.rnd().nextFloat() * 20,
-                                1 + + world.rnd().nextFloat() * 10
+                                1 + world.rnd().nextFloat() * 10
                         );
                         world.addEntity(m);
                     }
@@ -175,7 +176,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 if(Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
                     for(Entity en : world.getEntities()) {
                         if(en.core instanceof CBaseMob) {
-                            ((CBaseMob)en.core).damage(world, en, GeneralSource.voidDamage(9999));
+                            en.core.damage(world, en, GeneralSource.voidDamage(9999));
                         }
                     }
                 } else
@@ -189,10 +190,10 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 world.getTileAt(p).handleInteract(world, p, e);
                 break;
             case PREV_TILE:
-                scrolled(-1);
+                scrolled(0,-1);
                 break;
             case NEXT_TILE:
-                scrolled(1);
+                scrolled(0,1);
                 break;
             case CLEAR_INVENTORY:
                 if(e.core instanceof IContainer)
@@ -225,7 +226,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 world.addEntity(pe);
                 break;
             case TEST_RANDOM:
-                e.components.forEach(c -> c.debugPrint());
+                e.components.forEach(Printable::debugPrint);
                 break;
             default:
                 return false;
@@ -240,6 +241,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
     
     @Override
     public boolean keyDown(int keycode) {
+        // TODO awful temp code, should all go through handleControlPress
         if(keycode == Keys.LEFT_BRACKET)
             world.setTimeDelta(world.getTimeDelta() / 2);
         else if(keycode == Keys.RIGHT_BRACKET)
@@ -308,13 +310,13 @@ public class CPlayerController extends CController implements Controllable, Inpu
     }
     
     @Override
-    public boolean scrolled(int amount) {
+    public boolean scrolled(float amountX, float amountY) {
         if(Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
-            radius -= amount;
+            radius -= amountY;
             if(radius < 1)
                 radius = 0.5f;
         } else
-            tileID = 1 + Maths.remainder(tileID + amount - 1, maxTileID);
+            tileID = 1 + Maths.remainder(tileID + (int)amountY - 1, maxTileID);
         return true;
     }
     

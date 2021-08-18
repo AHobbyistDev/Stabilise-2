@@ -12,14 +12,18 @@ import com.stabilise.world.World;
  * 
  * <p>All subclasses of Particle should have the default parameterless
  * constructor and should not perform any construction initialisation (as
- * particles may be initialised {@link TheUnsafe unsafely} at runtime);
- * instead, any initialisation code should be performed by {@link #reset()}.
+ * particles may potentially be initialised {@link com.stabilise.util.TheUnsafe
+ * unsafely} at runtime); instead, any initialisation code should be performed
+ * by {@link #reset()}.
  */
 public abstract class Particle extends GameObject {
     
     public static final TypeFactory<Particle> REGISTRY = new TypeFactory<>(
             new RegistryParams("ParticleRegistry", 8));
     
+    // TODO Put the registry in another class (e.g. one called Particles);
+    //  referring to a subclass from here is kinda iffy and could lead to class
+    //  loading deadlock.
     static {
         register(0, ParticleFlame.class, ParticleFlame::new);
         register(1, ParticleSmoke.class, ParticleSmoke::new);
@@ -53,7 +57,7 @@ public abstract class Particle extends GameObject {
     
     /**
      * Resets this particle to a default state, and releases any used
-     * resources, etc, in such a way that this particle can henceforth be
+     * resources, etc., in such a way that this particle can henceforth be
      * reused as if constructed anew.
      * 
      * <p>Subclasses should remember to invoke {@code super.reset()} if this

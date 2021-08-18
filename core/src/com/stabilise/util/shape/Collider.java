@@ -19,9 +19,9 @@ public class Collider {
     private Collider() { throw new AssertionError(); } // non-instantiable
     
     /** Collision tester - normal. */
-    private static interface ColTestNor extends BiPredicate<Shape, Shape> {}
+    private interface ColTestNor extends BiPredicate<Shape, Shape> {}
     /** Collision tester w/ offset/translation. */
-    private static interface ColTestOff {
+    private interface ColTestOff {
         /** Tests for shape intersection with s1 offset by (dx,dy). */
         boolean test(Shape s1, Shape s2, float dx, float dy);
     }

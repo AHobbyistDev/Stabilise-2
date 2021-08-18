@@ -260,7 +260,7 @@ public class Simulation implements Comparable<Simulation> {
             }
             sb.append('\n');
         }
-        System.out.println(sb.toString());
+        System.out.println(sb);
     }
     
     public static int runSim(int[][] board) {

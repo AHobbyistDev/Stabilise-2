@@ -15,7 +15,7 @@ import com.stabilise.world.WorldProvider;
  * addition is able to be updated each tick.
  * 
  * <p>Tile entities may not be added to the world by another tile entity, and
- * and a queue for tile entities is hence not required.
+ * a queue for tile entities is hence not required.
  */
 public abstract class TileEntity extends GameObject implements Exportable {
     
@@ -24,6 +24,9 @@ public abstract class TileEntity extends GameObject implements Exportable {
             new TypeFactory<>(new RegistryParams("TileEntities", 4));
     
     // Register all tile entity types.
+    // TODO Put the registry in another class (e.g. one called TileEntities);
+    //  referring to a subclass from here is kinda iffy and could lead to class
+    //  loading deadlock.
     static {
         TILE_ENTITIES.register(0, TileEntityChest.class, TileEntityChest::new);
         TILE_ENTITIES.register(1, TileEntityMobSpawner.class, TileEntityMobSpawner::new);
@@ -54,7 +57,7 @@ public abstract class TileEntity extends GameObject implements Exportable {
     }
     
     /** Implement this to make {@link #requiresUpdates()} return true. */
-    static interface Updated {}
+    interface Updated {}
     
     /**
      * Updates this tile entity iff {@link #isDestroyed()} returns {@code
@@ -83,7 +86,7 @@ public abstract class TileEntity extends GameObject implements Exportable {
     /**
      * Invoked when this tile entity is added to the world.
      * 
-     * @see WorldProvider#setTileEntityAt(TileEntity)
+     * @see WorldProvider#setTileEntityAt(Position, TileEntity)
      */
     public abstract void handleAdd(World world);
     
@@ -128,7 +131,7 @@ public abstract class TileEntity extends GameObject implements Exportable {
     
     /**
      * Creates a tile entity object from its DataCompound representation. The
-     * given compound should at least contain the "id" and position tags..
+     * given compound should at least contain the "id" and position tags.
      * 
      * @param c The compound from which to read the tile entity.
      * 

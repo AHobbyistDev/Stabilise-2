@@ -141,7 +141,7 @@ public interface FunctionalIterable<E> extends Iterable<E> {
      * 
      * @throws NullPointerException if {@code itr} is {@code null}.
      */
-    public static <T> FunctionalIterable<T> wrap(Iterable<T> itr) {
+    static <T> FunctionalIterable<T> wrap(Iterable<T> itr) {
         if(itr instanceof FunctionalIterable)
             return (FunctionalIterable<T>)itr;
         Objects.requireNonNull(itr); // fail-fast
@@ -153,7 +153,7 @@ public interface FunctionalIterable<E> extends Iterable<E> {
      * 
      * @throws NullPointerException if either argument is {@code null}.
      */
-    public static <T> FunctionalIterable<T> wrap(Iterable<T> itr, IntSupplier size) {
+    static <T> FunctionalIterable<T> wrap(Iterable<T> itr, IntSupplier size) {
         Objects.requireNonNull(itr);
         Objects.requireNonNull(size);
         return new FunctionalIterable<T>() {

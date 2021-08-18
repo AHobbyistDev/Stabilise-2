@@ -19,7 +19,7 @@ public class LinkedHitbox extends Hitbox {
     /**
      * Creates a new Hitbox.
      * 
-     * @param owner The Hitbox's owner.
+     * @param ownerID The ID of the Hitbox's owner.
      * @param boundingBox The Hitbox's bounding box.
      * @param damage The damage the hitbox deals.
      */

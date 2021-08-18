@@ -4,7 +4,7 @@ package com.stabilise.world.tile;
  * This class contains explicit references to all the tiles in the game.
  * 
  * <p>Note that this class should only be loaded into memory <i>after</i>
- * {@link Tile.TILES} has been populated by invocation of
+ * {@link Tile#TILES} has been populated by invocation of
  * {@link Tile#registerTiles()}.
  */
 public class Tiles {
@@ -19,7 +19,7 @@ public class Tiles {
     static {
         if(!Tile.isRegistered())
             throw new IllegalStateException(
-                    Tiles.class.toString() + " loaded into memory before Tile.registerItems()"
+                    Tiles.class + " loaded into memory before Tile.registerItems()"
                     + " was invoked!"
             );
     }

@@ -14,8 +14,6 @@ import com.stabilise.util.Printable;
 import com.stabilise.util.box.Box;
 import com.stabilise.util.box.Boxes;
 import com.stabilise.util.concurrent.event.EventDispatcher;
-import com.stabilise.util.concurrent.task.TaskHandle;
-import com.stabilise.util.concurrent.task.TaskView;
 import com.stabilise.util.concurrent.task.TaskEvent.FailEvent;
 
 
@@ -96,7 +94,7 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
         if(testCancel()) // cancel test no.1
             return;
         
-        events.post(TaskEvent.START);
+        events.dispatch(TaskEvent.START);
         
         try {
             task.run(this);
@@ -185,8 +183,8 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
         if(!tracker.setState(State.COMPLETION_PENDING, State.COMPLETED))
             throw new IllegalStateException();
         
-        events.post(TaskEvent.STOP);
-        events.post(TaskEvent.COMPLETE);
+        events.dispatch(TaskEvent.STOP);
+        events.dispatch(TaskEvent.COMPLETE);
         
         if(next != null) {
             next.owner = owner;
@@ -215,8 +213,8 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
                 !tracker.setState(State.COMPLETION_PENDING, State.FAILED))
             throw new IllegalStateException();
         
-        events.post(TaskEvent.STOP);
-        events.post(new FailEvent(t));
+        events.dispatch(TaskEvent.STOP);
+        events.dispatch(new FailEvent(t));
         
         owner.fail(t); // bring the entire Task down with us
         
@@ -241,13 +239,13 @@ class TaskUnit implements Runnable, TaskHandle, TaskView, Printable {
     
     /**
      * "Prepublishes"/"minipublishes" this unit by invoking {@link
-     * Task#onUnitStart()} if this unit is the first in a recognisably distinct
-     * stream of tasks (i.e. a standalone parallel unit or the first in a
-     * sequential list).
+     * TaskImpl#onUnitStart()} if this unit is the first in a recognisably
+     * distinct stream of tasks (i.e. a standalone parallel unit or the first in
+     * a sequential list).
      * 
      * <p>It is absolutely critical for proper task execution that every
      * invocation of onUnitStart() has an associated invocation of {@link
-     * Task#onUnitStop()} (see {@link #unpublish()}).
+     * TaskImpl#onUnitStop()} (see {@link #unpublish()}).
      */
     private void prepublish() {
         // Only invoke onUnitStart for parallel units and for the first unit in

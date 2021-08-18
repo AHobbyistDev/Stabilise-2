@@ -18,8 +18,8 @@ import com.stabilise.util.io.data.DataCompound;
 
 /**
  * A Controller translates key input into configurable controls.
- * 
- * @see InputManager
+ *
+ * @see Controllable
  */
 public class Controller implements InputProcessor {
     
@@ -28,7 +28,7 @@ public class Controller implements InputProcessor {
     //--------------------==========--------------------
     
     /** Game controls. */
-    public static enum Control {
+    public enum Control {
         LEFT            ("left",         Keys.LEFT),
         RIGHT           ("right",        Keys.RIGHT),
         UP              ("up",           Keys.UP),
@@ -71,9 +71,9 @@ public class Controller implements InputProcessor {
         public final String fieldName;
         /** The default key. */
         public final int defaultKey;
-        /** Whether or not the control is a developer control to be used for
-         * testing. If {@code true}, the control will be inaccessible in
-         * non-dev versions. */
+        /** Whether the control is a developer control to be used for testing.
+         * If {@code true}, the control will be inaccessible in non-dev
+         * versions. */
         public final boolean devControl;
         /** Whether this is a valid control. An invalid control should not be
          * used. */
@@ -88,7 +88,7 @@ public class Controller implements InputProcessor {
          * @param defaultKey The default key bound to the Control. It is
          * implicitly trusted that this value is unique.
          */
-        private Control(String fieldName, int defaultKey) {
+        Control(String fieldName, int defaultKey) {
             this(fieldName, defaultKey, false);
         }
         
@@ -99,10 +99,10 @@ public class Controller implements InputProcessor {
          * implicitly trusted that this value is unique.
          * @param defaultKey The default key bound to the Control. It is
          * implicitly trusted that this value is unique.
-         * @param devControl Whether or not the control is a control exclusive
+         * @param devControl Whether the control is a control exclusive
          * to developer versions of the application.
          */
-        private Control(String fieldName, int defaultKey, boolean devControl) {
+        Control(String fieldName, int defaultKey, boolean devControl) {
             this.fieldName = fieldName;
             this.defaultKey = defaultKey;
             this.devControl = devControl;
@@ -110,7 +110,7 @@ public class Controller implements InputProcessor {
             valid = !devControl || Constants.DEV_VERSION;
         }
         
-    };
+    }
     
     /** The actual config data. */
     private static final Config CONFIG = new Config(getDefaults(), Resources.DIR_CONFIG.child("controls.txt"));
@@ -121,7 +121,7 @@ public class Controller implements InputProcessor {
      * {@link #CONTROL_MAP}. */
     private static final BiMap<Control, Integer> KEY_MAP = CONTROL_MAP.inverse();
     
-    /** Whether or not the controller mappings have been set up. */
+    /** Whether the controller mappings have been set up. */
     private static boolean initialised = false;
     
     static {
@@ -207,7 +207,7 @@ public class Controller implements InputProcessor {
     }
     
     @Override
-    public boolean scrolled(int amount) {
+    public boolean scrolled(float amountX, float amountY) {
         return false;
     }
     
@@ -267,7 +267,7 @@ public class Controller implements InputProcessor {
      * Loads the key controls config.
      */
     public static void loadConfig() {
-        boolean changes = false;
+        boolean changes;
         try {
             changes = CONFIG.load();
         } catch(IOException e) {
@@ -287,8 +287,7 @@ public class Controller implements InputProcessor {
         CONTROL_MAP.clear();
         
         Control[] controls = Control.values();
-        for(int i = 0; i < controls.length; i++) {
-            Control c = controls[i];
+        for(Control c : controls) {
             if(!c.valid)
                 continue;
             int key = CONFIG.values.getI32(c.fieldName);
@@ -308,7 +307,7 @@ public class Controller implements InputProcessor {
                     return true;
                 }
             }
-            
+        
             // Update the entry in CONTROL_MAP. We don't need to update KEY_MAP
             // since it's backed by CONTROL_MAP.
             CONTROL_MAP.put(key, c);

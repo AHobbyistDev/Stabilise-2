@@ -17,21 +17,23 @@ import com.stabilise.world.tile.Tile;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
 /**
- * The game.
+ * The main game itself! See {@link Application} docs to see how to run.
  */
 public class Stabilise extends Application {
     
-    /** The game name. */
+    /** The game name -- to display as the window title. */
     public static final String GAME_NAME = "Stabilise II";
     
-    /** Whether or not the game has bootstrapped. */
+    /** Whether the game has bootstrapped, so that {@link #bootstrap()} only
+     * does its thing once. */
     private static boolean bootstrapped = false;
     
     
     /**
      * Creates the game.
      * 
-     * @param args Command-line arguments.
+     * @param args Command-line arguments. Unused other than printing to the log
+     *             for now.
      */
     public Stabilise(String[] args) {
         super(Constants.TICKS_PER_SECOND);
@@ -91,7 +93,8 @@ public class Stabilise extends Application {
     /**
      * Loads into memory or otherwise sets up core components of the game. This
      * should be invoked as the game is displaying its splash screen - i.e., as
-     * a {@link LoadingState} is the current state.
+     * a {@link com.stabilise.core.state.LoadingState LoadingState} is the
+     * current state.
      * 
      * <p>Note that this should be invoked <i>as the application starts</i>, or
      * a variety of problems may result if the application attempts to work

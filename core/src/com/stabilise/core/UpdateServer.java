@@ -105,8 +105,7 @@ public class UpdateServer extends Server implements IServerUpdate {
         if(!Resources.US_GAMEFILES.exists()) {
             System.out.println("Packing gamefiles...");
             Collection<FileHandle> includedDirs = new HashSet<>();
-            for(FileHandle f : Resources.GAMEFILES_DIRS)
-                includedDirs.add(f);
+            includedDirs.addAll(Arrays.asList(Resources.GAMEFILES_DIRS));
             try {
                 IOUtil.zip(Resources.DIR_APP, Resources.US_GAMEFILES, includedDirs, true);
             } catch(IOException e) {
@@ -136,7 +135,7 @@ public class UpdateServer extends Server implements IServerUpdate {
             }
         } else {
             String localPath = Resources.relativiseUpdateServer(file);
-            byte[] checksum = null;
+            byte[] checksum;
             try {
                 checksum = IOUtil.checksum(file);
             } catch(IOException e) {

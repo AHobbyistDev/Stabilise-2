@@ -65,8 +65,7 @@ public interface WorldProvider {
     }
     
     /**
-     * Gets a tile at the given position. Fractional coordinates are rounded
-     * down.
+     * Gets a tile at the given position.
      * 
      * <p>IMPORTANT NOTE: make sure the position is {@link Position#align()
      * aligned} before invoking this, or this will chuck an exception.
@@ -75,7 +74,7 @@ public interface WorldProvider {
      * 
      * @return The tile at the given coordinates, or the {@link Tiles#barrier
      * barrier} tile if no such tile is loaded.
-     * @throws ArrrayIndexOutOfBoundsException if {@code pos} is not {@link
+     * @throws ArrayIndexOutOfBoundsException if {@code pos} is not {@link
      * Position#align() aligned}.
      */
     default Tile getTileAt(Position pos) {
@@ -83,8 +82,7 @@ public interface WorldProvider {
     }
     
     /**
-     * Gets the ID of the tile at the given position. Fractional coordinates 
-     * are rounded down.
+     * Gets the ID of the tile at the given position.
      * 
      * <p>IMPORTANT NOTE: make sure the position is {@link Position#align()
      * aligned} before invoking this, or this will chuck an exception.
@@ -93,7 +91,7 @@ public interface WorldProvider {
      * 
      * @return The ID of the tile at the given coordinates, or the ID of the
      * {@link Tiles#barrier barrier} tile if no such tile is loaded.
-     * @throws ArrrayIndexOutOfBoundsException if {@code pos} is not {@link
+     * @throws ArrayIndexOutOfBoundsException if {@code pos} is not {@link
      * Position#align() aligned}.
      */
     default int getTileIDAt(Position pos) {
@@ -108,7 +106,7 @@ public interface WorldProvider {
      * 
      * @param tile The tile to set.
      * 
-     * @throws ArrrayIndexOutOfBoundsException if {@code pos} is not {@link
+     * @throws ArrayIndexOutOfBoundsException if {@code pos} is not {@link
      * Position#align() aligned}.
      */
     default void setTileAt(Position pos, Tile tile) {
@@ -124,7 +122,7 @@ public interface WorldProvider {
      * 
      * @param id The ID of the tile to set.
      * 
-     * @throws ArrrayIndexOutOfBoundsException if {@code pos} is not {@link
+     * @throws ArrayIndexOutOfBoundsException if {@code pos} is not {@link
      * Position#align() aligned}.
      */
     default void setTileAt(Position pos, int id) {

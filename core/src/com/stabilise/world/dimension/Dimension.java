@@ -260,8 +260,7 @@ public abstract class Dimension {
     
     /**
      * @return The name of the default dimension, or {@code null} if the
-     * the dimensions have not yet been {@link #registerDimensions()
-     * registered}.
+     * dimensions have not yet been {@link #registerDimensions() registered}.
      */
     public static String defaultDimensionName() {
         return defaultDim;
@@ -294,7 +293,7 @@ public abstract class Dimension {
      * 
      * <p>This should only be invoked from {@link #registerDimensions()}.
      * 
-     * @param isDefault Whether or not this is the default dimension.
+     * @param isDefault Whether this is the default dimension.
      * @param name The name of the dimension.
      * @param dimClass The dimension's class.
      * 

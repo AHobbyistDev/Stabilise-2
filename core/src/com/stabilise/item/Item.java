@@ -156,7 +156,7 @@ public class Item implements Exportable {
      * @param quantity The number of items in the stack.
      */
     public ItemStack stackOfConstrained(int quantity) {
-        return stackOf(quantity >= getMaxStackSize() ? getMaxStackSize() : quantity);
+        return stackOf(Math.min(quantity, getMaxStackSize()));
     }
     
     /**

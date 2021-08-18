@@ -20,7 +20,6 @@ import com.stabilise.util.io.DataOutStream;
  * <li>{@link #readData(DataInStream)}
  * <li>{@link #childCompound(String)}
  * <li>{@link #childList(String)}
- * <li>{@link #setWriteMode()}
  * </ul>
  * 
  * <p>Furthermore, this class wraps child compounds and lists (as returned

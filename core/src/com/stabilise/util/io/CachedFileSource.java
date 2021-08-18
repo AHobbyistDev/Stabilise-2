@@ -40,9 +40,9 @@ public abstract class CachedFileSource extends FileSource {
     }
     
     /**
-     * As {@link #read(byte[], int, int)}, but reads from {@link #fileBytes}
-     * starting at {@code idx}, and reads more bytes from the underlying
-     * FileSource if necessary. To be used by attached readers.
+     * As {@link #read(byte[], int, int)}, but reads from the bytes of the
+     * cached source starting at {@code idx}, and reads more bytes from the
+     * underlying FileSource if necessary. To be used by attached readers.
      */
     abstract int read(int idx, byte[] buf, int off, int len) throws IOException;
     
@@ -153,8 +153,8 @@ public abstract class CachedFileSource extends FileSource {
         
         protected CachedFileSourceImpl(InputStream src) throws IOException {
             // +1 for 1-byte safezone in readAll() so we can more easily tell
-            // whether or not we've read all of the file without expanding
-            // fileBytes and attempting to read another chunk.
+            // whether we've read all of the file without expanding fileBytes
+            // and attempting to read another chunk.
             fileBytes = new byte[src.available() + 1];
             this.src = src;
         }

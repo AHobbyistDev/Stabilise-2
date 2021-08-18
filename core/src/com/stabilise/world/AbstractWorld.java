@@ -172,8 +172,8 @@ public abstract class AbstractWorld implements World {
     
     /**
      * Iterates over the specified collection of GameObjects as per {@link
-     * GameObject#updateAndCheck(World)}. GameObjects are removed from the
-     * collection by the iterable if {@code updateAndCheck()} returns {@code
+     * GameObject#updateAndCheck(World, float)}. GameObjects are removed from
+     * the collection by the iterable if {@code updateAndCheck()} returns {@code
      * true}.
      */
     protected void updateObjects(FunctionalIterable<? extends GameObject> objects) {
@@ -239,6 +239,10 @@ public abstract class AbstractWorld implements World {
         particles.append(p);
     }
     
+    /**
+     * Returns true for aesthetic convenience when chaining this with && in a
+     * lambda.
+     */
     private boolean reclaimParticle(Particle p) {
         getParticleManager().reclaim(p);
         return true;

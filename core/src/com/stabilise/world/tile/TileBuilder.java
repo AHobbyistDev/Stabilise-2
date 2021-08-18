@@ -29,17 +29,17 @@ class TileBuilder {
         
         AIR(),
         DIRT(H_DIRT, F_DEF),
-        GRASS(H_DIRT, F_DEF, b -> new TileGrass(b)),
+        GRASS(H_DIRT, F_DEF, TileGrass::new),
         STONE(H_STONE, F_DEF),
         WOOD(H_WOOD, F_DEF),
         INVUL(H_INVUL, F_DEF),
         ICE(H_DIRT, F_ICE),
         WATER(0.12f),
         LAVA(0.12f),
-        CHEST(H_WOOD, F_DEF, b -> new TileChest(b)),
-        SPWNR(H_STONE, F_DEF, b -> new TileMobSpawner(b)),
-        ORE(H_STONE, F_DEF, b -> new TileOre(b)),
-        SPREAD(H_STONE, F_DEF, b -> new TileVoidSpread(b));
+        CHEST(H_WOOD, F_DEF, TileChest::new),
+        SPWNR(H_STONE, F_DEF, TileMobSpawner::new),
+        ORE(H_STONE, F_DEF, TileOre::new),
+        SPREAD(H_STONE, F_DEF, TileVoidSpread::new);
         
         private final Function<TileBuilder, Tile> constructor;
         
@@ -52,8 +52,8 @@ class TileBuilder {
         
         
         /** Air tile */
-        private Template() {
-            constructor = b -> new TileAir(b);
+        Template() {
+            constructor = TileAir::new;
             solid = false;
             hardness = 0f;
             friction = F_AIR;
@@ -63,12 +63,12 @@ class TileBuilder {
         }
         
         /** Solid tile */
-        private Template(float hardness, float friction) {
-            this(hardness, friction, b -> new Tile(b));
+        Template(float hardness, float friction) {
+            this(hardness, friction, Tile::new);
         }
         
         /** Solid tile */
-        private Template(float hardness, float friction, Function<TileBuilder, Tile> b) {
+        Template(float hardness, float friction, Function<TileBuilder, Tile> b) {
             this.constructor = b;
             solid = true;
             this.hardness = hardness;
@@ -79,8 +79,8 @@ class TileBuilder {
         }
         
         /** Fluid tile */
-        private Template(float viscosity) {
-            constructor = b -> new TileFluid(b);
+        Template(float viscosity) {
+            constructor = TileFluid::new;
             solid = false;
             hardness = friction = 0f;
             this.viscosity = viscosity;

@@ -190,7 +190,7 @@ public final class TaskBuilder<R, T extends Task> {
      * 
      * @throws IllegalStateException if the task has already been built, or no
      * task units have been declared.
-     * @see EventDispatcher#addListener(Event, EventHandler)
+     * @see EventDispatcher#addListener(Executor, Event, EventHandler)
      */
     public <E extends Event> TaskBuilder<R, T> onEvent(E e, EventHandler<? super E> h) {
         checkState();
@@ -227,7 +227,8 @@ public final class TaskBuilder<R, T extends Task> {
     }
     
     /**
-     * Builds, starts and returns the Task.
+     * Builds, starts and returns the Task. Equivalent to
+     * {@code build().start()}.
      * 
      * @throws IllegalStateException if the task has already been built, a
      * group has not been closed, no task units have been declared, or we're

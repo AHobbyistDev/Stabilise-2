@@ -68,7 +68,7 @@ public enum Format {
     private final Supplier<AbstractCompound> compoundSup;
     private final Supplier<AbstractDataList> listSup;
     
-    private Format(Supplier<AbstractCompound> compoundSup, Supplier<AbstractDataList> listSup) {
+    Format(Supplier<AbstractCompound> compoundSup, Supplier<AbstractDataList> listSup) {
         this.compoundSup = compoundSup;
         this.listSup = listSup;
     }

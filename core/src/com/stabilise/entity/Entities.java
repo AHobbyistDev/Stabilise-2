@@ -22,7 +22,7 @@ public class Entities {
     /** Returns the {@link CIdleController#INSTANCE idle controller}. */
     private static CController   co() { return CIdleController.INSTANCE; }
     
-    /** Constructs an entity with the given core, physics, and controllr components. */
+    /** Constructs an entity with the given core, physics, and controller components. */
     private static Entity e(CCore c, CPhysics p, CController co) 
                                       { return new Entity(c, p, co);    }
     public  static Entity e(CCore c)  { return e(c, p(), co());         }
@@ -47,7 +47,7 @@ public class Entities {
         return e(new CFireball(ownerID, damage));
     }
     
-    public static Entity item(World w, ItemStack s) {
+    public static Entity item(ItemStack s) {
         return e(new CItem(s));
     }
     

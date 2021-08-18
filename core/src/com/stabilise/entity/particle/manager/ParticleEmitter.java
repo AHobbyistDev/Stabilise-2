@@ -36,13 +36,10 @@ public class ParticleEmitter<T extends Particle> {
     
     
     /**
-     * Creates a new particle source.
+     * Creates a new ParticleEmitter.
      * 
-     * @param clazz The class of the particle to generate.
-     * 
-     * @throws NullPointerException if {@code clazz} is null.
-     * @throws IllegalArgumentException if particles of the given class have
-     * not been registered.
+     * @param pool The pool underlying this emitter.
+     * @param reductionFactor The reductionFactor of the ParticleManager.
      */
     ParticleEmitter(ParticlePool<T> pool, I32Box reductionFactor) {
         this.pool = pool;
@@ -206,10 +203,10 @@ public class ParticleEmitter<T extends Particle> {
     }
     
     /**
-     * Same as {@link #createBurst(int, Position, float, float, float, float,
-     * float, float)}, but the particles are placed at a random location on the
-     * specified AABB (which is in turn considered to be defined relative to
-     * the specified position).
+     * Same as {@link #createBurst(World, int, Position, float, float, float,
+     * float, float, float)}, but the particles are placed at a random location
+     * on the specified AABB (which is in turn considered to be defined relative
+     * to the specified position).
      * 
      * @throws NullPointerException if {@code aabb} is {@code null}.
      */
@@ -226,9 +223,9 @@ public class ParticleEmitter<T extends Particle> {
     }
     
     /**
-     * Same was {@link
-     * #createBurst(int, double, double, float, float, float, float)}, but
-     * the particles are placed somewhere on the specified entity.
+     * Same as {@link
+     * #createBurst(World, int, Position, float, float, float, float, AABB)},
+     * but the particles are placed somewhere on the specified entity.
      * 
      * @throws NullPointerException if {@code e} is {@code null}.
      */
@@ -240,7 +237,7 @@ public class ParticleEmitter<T extends Particle> {
     
     /**
      * Same as {@link
-     * #createBurst(int, Position, float, float, float, float)}, but
+     * #createBurst(World, int, Position, float, float, float, float)}, but
      * the particles are placed somewhere on the tile specified by the
      * given tile coordinates.
      */

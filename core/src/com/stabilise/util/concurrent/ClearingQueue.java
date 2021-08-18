@@ -111,7 +111,7 @@ public interface ClearingQueue<E> extends Iterable<E> {
      * </pre>
      */
     default Iterable<E> asNonClearing() {
-        return () -> nonClearingIterator();
+        return this::nonClearingIterator;
     }
     
     /**
@@ -132,7 +132,7 @@ public interface ClearingQueue<E> extends Iterable<E> {
      * easier in the event that a better/faster implementation than {@link
      * SynchronizedClearingQueue} is devised.
      */
-    public static <E> ClearingQueue<E> create() {
+    static <E> ClearingQueue<E> create() {
         return new SynchronizedClearingQueue<>();
     }
     

@@ -38,11 +38,11 @@ public enum NBTType {
     private final Class<? extends ITag> type;
     private final Supplier<ITag> fac;
     
-    private NBTType(int id, Class<? extends ITag> type) {
+    NBTType(int id, Class<? extends ITag> type) {
         this(id, type, null);
     }
     
-    private NBTType(int id, Class<? extends ITag> type, Supplier<ITag> fac) {
+    NBTType(int id, Class<? extends ITag> type, Supplier<ITag> fac) {
         this.id = (byte)id;
         this.type = type;
         this.fac = fac;

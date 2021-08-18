@@ -31,7 +31,7 @@ import com.stabilise.world.multiverse.Multiverse;
 public class CPortal extends CCore {
     
     /** If an entity comes within this squared distance of a portal, it is
-     * notified via {@link Entity#nearbyPortal(EPortalInRange)}. */
+     * notified by having {@link #nearbyTestEvent} posted. */
     public static final float NEARBY_DIST_SQ = 8*8;
     /** If an entity is no longer within this squared distance of a portal,
      * it stops monitoring the portal. */
@@ -40,7 +40,7 @@ public class CPortal extends CCore {
     private static final int OPEN_ANIMATION_DURATION = 30;
     
     
-    private static enum State {
+    private enum State {
         UNINITIALISED,
         WAITING_FOR_DIMENSION,
         OPEN,

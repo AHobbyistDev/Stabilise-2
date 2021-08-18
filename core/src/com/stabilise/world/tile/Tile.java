@@ -47,7 +47,7 @@ public class Tile {
     /** The tile's name. */
     private final String name;
     
-    /** Whether or not the tile is solid. */
+    /** Whether the tile is solid. */
     protected final boolean solid;
     /** The tile's hardness. */
     protected final float hardness;
@@ -102,8 +102,8 @@ public class Tile {
     }
     
     /**
-     * Handles being broken. {@link #handleRemove(World, Position)} is invoked
-     * in addition to any functionality here.
+     * Handles being broken. {@link #handleRemove(WorldProvider, Position)} is
+     * invoked in addition to any functionality here.
      * 
      * @param w The world.
      * @param pos The position of the tile.
@@ -165,7 +165,7 @@ public class Tile {
      */
     protected void createItemEntity(World w, Position pos, ItemStack stack) {
         if(stack != ItemStack.NO_STACK) {
-            Entity e = Entities.item(w, createStack(1));
+            Entity e = Entities.item(createStack(1));
             e.pos.set(pos, 0.5f, 0.1f);
             w.addEntity(e);
         }
@@ -309,7 +309,7 @@ public class Tile {
      * Registers a tile. This should only be called during initialisation of
      * the game.
      * 
-     * @param id The ID with which to register the tile.
+     * @param t The tile to register.
      * 
      * @throws IndexOutOfBoundsException if {@code id < 0}.
      * @throws NullPointerException if the tile or its name is {@code null}.

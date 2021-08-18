@@ -60,7 +60,7 @@ public class Hitbox extends GameObject {
     /**
      * Creates a new Hitbox.
      * 
-     * @param owner The Hitbox's owner.
+     * @param ownerID The ID of the Hitbox's owner.
      * @param boundingBox The Hitbox's bounding box.
      * @param damage The damage the hitbox deals.
      */
@@ -71,7 +71,7 @@ public class Hitbox extends GameObject {
     /**
      * Creates a new Hitbox.
      * 
-     * @param owner The Hitbox's owner.
+     * @param ownerID The ID of the Hitbox's owner.
      * @param boundingBox The Hitbox's bounding box.
      * @param damage The damage the hitbox deals.
      * @param collisionSet Set to use to track which entities have been hit to
@@ -172,7 +172,7 @@ public class Hitbox extends GameObject {
     
     
     public static Set<Long> createCollisionSet() {
-        return new HashSet<Long>();
+        return new HashSet<>();
     }
     
 }

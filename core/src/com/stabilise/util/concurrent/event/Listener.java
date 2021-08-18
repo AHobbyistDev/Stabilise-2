@@ -5,7 +5,7 @@ import java.util.concurrent.Executor;
 
 
 /**
- * This class encapsulates a registered event listener.
+ * This class encapsulates a registered event listener. Package-private.
  */
 class Listener<E extends Event> {
     

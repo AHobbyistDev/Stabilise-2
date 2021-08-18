@@ -3,7 +3,7 @@ package com.stabilise.util.concurrent.event;
 import java.util.Objects;
 
 /**
- * An Event represents an occurrence which may be distributed to listeners via
+ * An Event represents a notification which may be distributed to listeners via
  * an {@link EventDispatcher}.
  * 
  * <p>An Event is identified by the two things: its class and the name assigned

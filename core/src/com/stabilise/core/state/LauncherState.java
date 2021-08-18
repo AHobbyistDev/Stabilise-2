@@ -17,7 +17,7 @@ public class LauncherState implements State {
     private static final String game = Resources.DIR_APP.child(Resources.GAME_JAR).path();
     
     private enum State {
-        starting, updating, running;
+        starting, updating, running
     }
     
     private State state = State.starting;

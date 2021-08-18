@@ -87,8 +87,8 @@ public class I8Box implements ITag {
     @Override public boolean isString()  { return true; }
     
     @Override public boolean getAsBoolean() { return value != 0;           }
-    @Override public long    getAsLong()    { return (long) value;         }
-    @Override public double  getAsDouble()  { return (double) value;       }
+    @Override public long    getAsLong()    { return value;                }
+    @Override public double  getAsDouble()  { return value;                }
     @Override public String  getAsString()  { return Byte.toString(value); }
     
 }

@@ -49,7 +49,7 @@ public class CPlayerPerson extends CPerson implements IContainer {
     
     @Override
     public String toString() {
-        return "Player inventory: " + inventory.toString();
+        return "Player inventory: " + inventory;
     }
     
 }

@@ -34,15 +34,15 @@ public class Region {
     
     /** The length of an edge of the square of slices in a region. */
     public static final int REGION_SIZE = 16; // must be a power of two
-    /** {@link REGION_SIZE} - 1; minor optimisation purposes. */
+    /** {@link #REGION_SIZE} - 1; minor optimisation purposes. */
     public static final int REGION_SIZE_MINUS_ONE = REGION_SIZE - 1;
-    /** The power of 2 of {@link REGION_SIZE}; minor optimisation purposes. */
+    /** The power of 2 of {@link #REGION_SIZE}; minor optimisation purposes. */
     public static final int REGION_SIZE_SHIFT = Maths.log2(REGION_SIZE);
     /** The length of an edge of the square of tiles in a region. */
     public static final int REGION_SIZE_IN_TILES = Slice.SLICE_SIZE * REGION_SIZE;
-    /** {@link REGION_SIZE_IN_TILES} - 1; minor optimisation purposes. */
+    /** {@link #REGION_SIZE_IN_TILES} - 1; minor optimisation purposes. */
     public static final int REGION_SIZE_IN_TILES_MINUS_ONE = REGION_SIZE_IN_TILES - 1;
-    /** The power of 2 of {@link REGION_SIZE_IN_TILES}; minor optimisation
+    /** The power of 2 of {@link #REGION_SIZE_IN_TILES}; minor optimisation
      * purposes. */
     public static final int REGION_SIZE_IN_TILES_SHIFT = Maths.log2(REGION_SIZE_IN_TILES);
     
@@ -313,7 +313,7 @@ public class Region {
     }
     
     /**
-     * Checks for whether or not this region's file exists.
+     * Checks for whether this region's file exists.
      * 
      * @param world This region's parent world.
      * 
@@ -343,19 +343,17 @@ public class Region {
      * debug information.
      */
     public String toStringDebug() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Region[");
-        sb.append(String.format("%3d", loc.x()));
-        sb.append(',');
-        sb.append(String.format("%3d", loc.y()));
-        sb.append(": ");
-        sb.append(state);
-        sb.append("]");
-        return sb.toString();
+        return "Region[" +
+                String.format("%3d", loc.x()) +
+                ',' +
+                String.format("%3d", loc.y()) +
+                ": " +
+                state +
+                "]";
     }
     
     /**
-     * Checks for whether or not this is a dummy region.
+     * Checks for whether this is a dummy region.
      */
     public boolean isDummy() {
         return false;
@@ -409,14 +407,14 @@ public class Region {
         
         
         /**
-         * Creates a new Queuedstructure.
+         * Creates a new QueuedStructure.
          */
         public QueuedStructure() {
             // nothing to see here, move along
         }
         
         /**
-         * Creates a new Queuedstructure.
+         * Creates a new QueuedStructure.
          */
         public QueuedStructure(String structureName, int sliceX, int sliceY, int tileX, int tileY, int offsetX, int offsetY) {
             this.structureName = structureName;

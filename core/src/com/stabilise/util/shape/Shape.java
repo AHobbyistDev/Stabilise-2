@@ -68,7 +68,7 @@ public abstract class Shape implements Exportable {
      * each of its vertices, where applicable, and returns the transformed
      * shape. Each vertex is transformed by
      * <a href=http://en.wikipedia.org/wiki/Matrix_multiplication> multiplying
-     * </a> the the given transformation matrix by said vertex's representative
+     * </a> the given transformation matrix by said vertex's representative
      * 2D vector. This shape is unmodified.
      * 
      * @param m The transformation matrix.
@@ -162,7 +162,7 @@ public abstract class Shape implements Exportable {
     public abstract Shape sweep(float dx, float dy);
     
     /**
-     * Calculates whether or not this shape intersects with another.
+     * Calculates whether this shape intersects with another.
      * 
      * @return {@code true} if this shape intersects with {@code s}; {@code
      * false} otherwise.
@@ -173,7 +173,7 @@ public abstract class Shape implements Exportable {
     }
     
     /**
-     * Calculates whether or not this shape, translated by <tt>(dx,dy)</tt>,
+     * Calculates whether this shape, translated by <tt>(dx,dy)</tt>,
      * intersects with another.
      * 
      * @return {@code true} if this shape intersects with {@code s}; {@code
@@ -185,7 +185,7 @@ public abstract class Shape implements Exportable {
     }
     
     /**
-     * Calculates whether or this shape contains the specified shape.
+     * Calculates whether this shape contains the specified shape.
      * 
      * @return {@code true} if this shape contains {@code s}; {@code false}
      * otherwise.
@@ -194,7 +194,7 @@ public abstract class Shape implements Exportable {
     //public abstract boolean contains(Shape s);
     
     /**
-     * Calculates whether or not a point is within the bounds of the shape.
+     * Calculates whether a point is within the bounds of the shape.
      * 
      * <p>This method redirects to {@link #containsPoint(float, float)
      * containsPoint(p.x, p.y)}.
@@ -211,8 +211,7 @@ public abstract class Shape implements Exportable {
     */
     
     /**
-     * Calculates whether or not the given point is within the bounds of this
-     * shape.
+     * Calculates whether the given point is within the bounds of this shape.
      * 
      * @param x The x-coordinate of the point.
      * @param y The y-coordinate of the point.
@@ -338,7 +337,7 @@ public abstract class Shape implements Exportable {
         int n = verts.length - 2;
         for(int i = 2; i < n; i += 2)
             getAxis(dest, i, verts[i-2], verts[i-1], verts[i], verts[i+1]);
-        // Finally we add in the axis connecting the first and last vertices.
+        // Finally, we add in the axis connecting the first and last vertices.
         getAxis(dest, 0, verts[0], verts[1], verts[n], verts[n+1]);
     }
     
@@ -364,8 +363,8 @@ public abstract class Shape implements Exportable {
      */
     private static void getAxis(float[] dest, int offset, float x1, float y1,
             float x2, float y2) {
-        // This is what we're really doing:
-        // v1.sub(v2).rotate90Degrees();
+        // This is what we're really doing (in pseudocode):
+        // (v1 - v2).rotate90Degrees();
         // However, if we simplify that algebraically, we get:
         dest[offset  ] = y2 - y1;
         dest[offset+1] = x1 - x2;
@@ -469,7 +468,7 @@ public abstract class Shape implements Exportable {
      * A VertexFunction is a special function which transforms a vertex.
      */
     @FunctionalInterface
-    public static interface VertexFunction {
+    public interface VertexFunction {
         
         /**
          * Transforms a vertex. The resultant {@code x} should be placed in
@@ -483,7 +482,7 @@ public abstract class Shape implements Exportable {
          * @param x The x component of the input vertex.
          * @param y The y component of the input vertex.
          */
-        public void apply(float[] dest, int offset, float x, float y);
+        void apply(float[] dest, int offset, float x, float y);
         
         /**
          * Sets the resultant x and y in the destination array. This is a 

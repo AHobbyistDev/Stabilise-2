@@ -42,6 +42,8 @@ public abstract class Position implements Exportable, Cloneable {
     
     /**
      * Gets the x-coordinate of the region this Position is in.
+     *
+     * <p>N.B. "rx" is shorthand for "regionX"
      */
     public int rx() {
         return regionCoordFromSliceCoord(sx);
@@ -49,6 +51,8 @@ public abstract class Position implements Exportable, Cloneable {
     
     /**
      * Gets the x-coordinate of the region this Position is in.
+     *
+     * <p>N.B. "ry" is shorthand for "regionY"
      */
     public int ry() {
         return regionCoordFromSliceCoord(sy);
@@ -56,6 +60,8 @@ public abstract class Position implements Exportable, Cloneable {
     
     /**
      * Gets the x-coordinate of the slice this Position is in.
+     *
+     * <p>N.B. "sx" is shorthand for "sliceX"
      * 
      * @see #sx
      */
@@ -65,6 +71,8 @@ public abstract class Position implements Exportable, Cloneable {
     
     /**
      * Gets the y-coordinate of the slice this Position is in.
+     *
+     * <p>N.B. "sy" is shorthand for "sliceY"
      * 
      * @see #sy
      */
@@ -77,6 +85,8 @@ public abstract class Position implements Exportable, Cloneable {
      * Note that if this Position has not been {@link #align() aligned}, then
      * the returned value may not lie in the valid range of such local
      * coordinates.
+     *
+     * <p>N.B. "lx" is shorthand for "localX"
      */
     public abstract float lx();
     
@@ -85,23 +95,37 @@ public abstract class Position implements Exportable, Cloneable {
      * Note that if this Position has not been {@link #align() aligned}, then
      * the returned value may not lie in the valid range of such local
      * coordinates.
+     *
+     * <p>N.B. "ly" is shorthand for "localY"
      */
     public abstract float ly();
     
     /**
      * Gets the clamped/tile-coordinate equivalent of {@link #lx()}.
+     * Note that if this Position has not been {@link #align() aligned}, then
+     * the returned value may not lie in the valid range of such local
+     * coordinates.
+     *
+     * <p>N.B. "ltx" is shorthand for "localTileX"
      */
     public abstract int ltx();
     
     /**
      * Gets the clamped/local tile coordinate equivalent of {@link #ly}.
+     * Note that if this Position has not been {@link #align() aligned}, then
+     * the returned value may not lie in the valid range of such local
+     * coordinates.
+     *
+     * <p>N.B. "lty" is shorthand for "localTileY"
      */
     public abstract int lty();
     
     /**
      * Returns the x-coordinate of this Position, in tile-lengths, which is
      * equivalent (up to finite precision) to the position specified jointly by
-     * {@link #sx} and {@link #tileX}.
+     * {@link #sx()} and {@link #lx()}.
+     *
+     * <p>N.B. "gx" is shorthand for "globalX"
      * 
      * @see #tileCoordFromLocalCoords(int, float)
      */
@@ -112,7 +136,9 @@ public abstract class Position implements Exportable, Cloneable {
     /**
      * Returns the y-coordinate of this Position, in tile-lengths, which is
      * equivalent (up to finite precision) to the position specified jointly by
-     * {@link #sy} and {@link #tileY}.
+     * {@link #sy()} and {@link #ly()}.
+     *
+     * <p>N.B. "gy" is shorthand for "globalY"
      * 
      * @see #tileCoordFromLocalCoords(int, float)
      */
@@ -135,7 +161,7 @@ public abstract class Position implements Exportable, Cloneable {
     }
     
     /**
-     * Sets the local x-coordinate. If this is a fixed position, the fractional
+     * Sets the local x-coordinate. If this is a fixed Position, the fractional
      * information is lost. Note: this method does <em>not</em> align the
      * result!
      */
@@ -161,85 +187,87 @@ public abstract class Position implements Exportable, Cloneable {
     public abstract void setLy(int ly);
     
     /**
-     * Sets the coordinates of this Position, and then returns this Position
-     * object.
+     * Sets the coordinates of this {@code Position}, and then returns this
+     * {@code Position} object.
      */
     public abstract Position set(int sliceX, int sliceY, float localX, float localY);
     
     /**
-     * Sets the coordinates of this Position, and then returns this Position
-     * object.
+     * Sets the coordinates of this {@code Position}, and then returns this
+     * {@code Position} object.
      */
     public abstract Position set(int sliceX, int sliceY, int localX, int localY);
     
     /**
-     * Sets the coordinates of this Position, and then returns this Position
-     * object.
+     * Sets the coordinates of this {@code Position}, and then returns this
+     * {@code Position} object.
      */
     public abstract Position set(double x, double y);
     
     /**
-     * Sets this Position to the same value as the given Position, and then
-     * returns this Position object.
+     * Sets this {@code Position} to the same value as the given {@code
+     * Position}, and then returns this {@code Position} object.
      * 
      * @throws NullPointerException if {@code p} is {@code null}.
      */
     public abstract Position set(Position p);
     
     /**
-     * Sets this Position to the same value as the given Position, but with
-     * lx and ly incremented by dx and dy respectively. This method does not
-     * invoke {@link #align()}, so lx and ly may fall outside of the slice
-     * bounds.
+     * Sets this {@code Position} to the same value as the given {@code
+     * Position}, but with lx and ly incremented by dx and dy respectively. This
+     * method does not invoke {@link #align()}, so lx and ly may fall outside
+     * the slice bounds.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      * @throws NullPointerException if {@code p} is {@code null}.
      */
     public abstract Position set(Position p, float dx, float dy);
     
     /**
-     * Sets the x-component values of this Position to the same as those of the
-     * given position, but with dx added to lx. This method does not invoke
-     * {@link #alignX()}, so lx may fall outside of the slice bounds.
+     * Sets the x-component values of this {@code Position} to the same as those
+     * of the given {@code Position}, but with dx added to lx. This method does
+     * not invoke {@link #alignX()}, so lx may fall outside the slice bounds.
      *  
-     * @return this Position.
+     * @return this {@code Position}.
      * @throws NullPointerException if {@code p} is {@code null}.
      */
     public abstract Position setX(Position p, float dx);
     
     /**
-     * Sets the y-component values of this Position to the same as those of the
-     * given position, but with dy added to ly. This method does not invoke
-     * {@link #alignY()}, so ly may fall outside of the slice bounds.
+     * Sets the y-component values of this {@code Position} to the same as those
+     * of the given {@code Position}, but with dy added to ly. This method does
+     * not invoke {@link #alignY()}, so ly may fall outside the slice bounds.
      *  
-     * @return this Position.
+     * @return this {@code Position}.
      * @throws NullPointerException if {@code p} is {@code null}.
      */
     public abstract Position setY(Position p, float dy);
     
     /**
-     * Sets this Position to the sum of the two given positions, (i.e. this =
-     * p1 + p2). Warning: this method does not invoke {@link #align()}.
+     * Sets this {@code Position} to the sum of the two given {@code Position}s,
+     * (i.e. {@code this = p1 + p2}). Warning: this method does not invoke
+     * {@link #align()}.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      * @throws NullPointerException if either argument is {@code null}.
      */
     public abstract Position setSum(Position p1, Position p2);
     
     /**
-     * Sets this Position to the difference of the two given positions, (i.e.
-     * this = p1 - p2). Warning: this method does not invoke {@link #align()}.
+     * Sets this {@code Position} to the difference of the two given {@code
+     * Position}s, (i.e. {@code this = p1 - p2}). Warning: this method does not
+     * invoke {@link #align()}.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      * @throws NullPointerException if either argument is {@code null}.
      */
     public abstract Position setDiff(Position p1, Position p2);
     
     /**
      * Adds dx and dy to lx and ly respectively. This method does not invoke
-     * {@link #align()}, so lx and ly may fall outside of the slice bounds.
+     * {@link #align()}, so lx and ly may fall outside the slice bounds.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      */
     public Position add(float dx, float dy) {
         addX(dx);
@@ -249,25 +277,25 @@ public abstract class Position implements Exportable, Cloneable {
     
     /**
      * Adds dx to lx. This method does not invoke {@link #alignX()}, so lx may
-     * fall outside of the slice bounds.
+     * fall outside the slice bounds.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      */
     public abstract Position addX(float dx);
     
     /**
      * Adds dy to ly. This method does not invoke {@link #alignY()}, so ly may
-     * fall outside of the slice bounds.
+     * fall outside the slice bounds.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      */
     public abstract Position addY(float dy);
     
     /**
      * Adds dx and dy to lx and ly respectively. This method does not invoke
-     * {@link #align()}, so lx and ly may fall outside of the slice bounds.
+     * {@link #align()}, so lx and ly may fall outside the slice bounds.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      */
     public Position add(int dx, int dy) {
         addX(dx);
@@ -277,17 +305,17 @@ public abstract class Position implements Exportable, Cloneable {
     
     /**
      * Adds dx to lx. This method does not invoke {@link #alignX()}, so lx may
-     * fall outside of the slice bounds.
+     * fall outside the slice bounds.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      */
     public abstract Position addX(int dx);
     
     /**
      * Adds dy to ly. This method does not invoke {@link #alignY()}, so ly may
-     * fall outside of the slice bounds.
+     * fall outside the slice bounds.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      */
     public abstract Position addY(int dy);
     
@@ -310,11 +338,11 @@ public abstract class Position implements Exportable, Cloneable {
     }
     
     /**
-     * Reflects this Position (i.e., negates everything). This method does not
-     * invoke {@link #align()}, so lx and ly will almost certainly fall outside
-     * slice bounds.
+     * Reflects this {@code Position} about the origin (i.e., negates
+     * everything). This method does not invoke {@link #align()}, so lx and ly
+     * will almost certainly fall outside slice bounds.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      */
     public abstract Position reflect();
     
@@ -323,7 +351,7 @@ public abstract class Position implements Exportable, Cloneable {
      * overflowed into another slice, this method clamps them back and adjusts
      * {@link #sx} and {@link #sy} appropriately.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      * 
      * @see #alignX()
      * @see #alignY()
@@ -339,7 +367,7 @@ public abstract class Position implements Exportable, Cloneable {
      * you know only {@link #lx} has been changed and want to save slightly on
      * computation time.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      * 
      * @see #align()
      */
@@ -350,7 +378,7 @@ public abstract class Position implements Exportable, Cloneable {
      * you know only {@link #ly} has been changed and want to save slightly on
      * computation time.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      * 
      * @see #align()
      */
@@ -361,7 +389,7 @@ public abstract class Position implements Exportable, Cloneable {
      * #sy} to zero and changing {@code #lx} and {@link #ly} in accordance.
      * This method is essentially the opposite of {@link #align()}.
      * 
-     * @return this Position.
+     * @return this {@code Position}.
      */
     public abstract Position globalify();
     
@@ -369,7 +397,7 @@ public abstract class Position implements Exportable, Cloneable {
      * Returns the relative distance along the x-axis between the given
      * position and this one.
      * 
-     * @return other.x - x, in tile-lengths.
+     * @return {@code other.x - x}, in tile-lengths.
      * @throws NullPointerException if {@code other} is {@code null}.
      */
     public float diffX(Position other) {
@@ -380,7 +408,7 @@ public abstract class Position implements Exportable, Cloneable {
      * Returns the relative distance along the x-axis between the given
      * position and this one.
      * 
-     * @return other.x - x, in tile-lengths.
+     * @return {@code other.x - x}, in tile-lengths.
      */
     public float diffX(int otherSliceX, float otherTileX) {
         return (otherSliceX - sx) * Slice.SLICE_SIZE + otherTileX - lx();
@@ -390,7 +418,7 @@ public abstract class Position implements Exportable, Cloneable {
      * Returns the relative distance along the y-axis between the given
      * position and this one.
      * 
-     * @return other.y - y, in tile-lengths.
+     * @return {@code other.y - y}, in tile-lengths.
      * @throws NullPointerException if {@code other} is {@code null}.
      */
     public float diffY(Position other) {
@@ -401,7 +429,7 @@ public abstract class Position implements Exportable, Cloneable {
      * Returns the relative distance along the y-axis between the given
      * position and this one.
      * 
-     * @return other.y - y, in tile-lengths.
+     * @return {@code other.y - y}, in tile-lengths.
      */
     public float diffY(int otherSliceY, float otherTileY) {
         return (otherSliceY - sy) * Slice.SLICE_SIZE + otherTileY - ly();
@@ -411,7 +439,7 @@ public abstract class Position implements Exportable, Cloneable {
      * Returns the relative distance squared between the given position and
      * this one.
      * 
-     * @return diffX()^2 + diffY()^2
+     * @return {@code diffX()^2 + diffY()^2}
      * @throws NullPointerException if {@code other} is {@code null}.
      */
     public float distSq(Position other) {
@@ -437,8 +465,8 @@ public abstract class Position implements Exportable, Cloneable {
     }
     
     /**
-     * Checks for whether or not another position is within a radius of {@code
-     * dist} from this one.
+     * Checks for whether another position is within a radius of {@code dist}
+     * from this one.
      * 
      * @return {@code true} if {@code diffSq(other) <= dist*dist}.
      * @throws NullPointerException if {@code other} is {@code null}.
@@ -459,7 +487,7 @@ public abstract class Position implements Exportable, Cloneable {
     }
     
     /**
-     * Returns {@code getSliceX() == sx && getSliceY() == sy}.
+     * Returns {@code this.sx() == sx && this.sy() == sy}.
      */
     public boolean isInSlice(int sx, int sy) {
         return this.sx == sx && this.sy == sy;
@@ -838,6 +866,9 @@ public abstract class Position implements Exportable, Cloneable {
      */
     public static float tileCoordRelativeToSliceFromTileCoordFree2(float c) {
         float rem = Maths.remainder(c, Slice.SLICE_SIZE);
+        
+        // TODO: I'm pretty sure this doesn't entirely work properly.
+        
         // This is a very important adjustment that needs to be made in order
         // to ensure a correct result. To see this, let's peek at the code of
         // Maths.remainder():
@@ -850,7 +881,7 @@ public abstract class Position implements Exportable, Cloneable {
         //     num + div == div.
         // Thus, e.g. -0.0000001 may become 16.0. We do not want this. This
         // function should never return 16, only numbers strictly below it.
-        // Hence if rem comes out as 16.0f, we return a value as close as
+        // Hence, if rem comes out as 16.0f, we return a value as close as
         // possible to -- but still less than -- 16 within machine precision.
         // 
         // Strictly speaking, the error lies in Maths.remainder() and the fix

@@ -13,10 +13,7 @@ import com.stabilise.util.Log;
 import com.stabilise.util.TaskTimer;
 import com.stabilise.util.annotation.ThreadUnsafeMethod;
 import com.stabilise.util.annotation.UserThread;
-import com.stabilise.world.HostWorld;
-import com.stabilise.world.Region;
-import com.stabilise.world.RegionState;
-import com.stabilise.world.RegionStore;
+import com.stabilise.world.*;
 import com.stabilise.world.RegionStore.RegionCallback;
 import com.stabilise.world.dimension.Dimension;
 
@@ -43,7 +40,9 @@ public final class WorldGenerator {
     private final long seed;
     
     private final Executor executor;
-    /** Whether or not the generator has been shut down. This is volatile. */
+    /** If true, any pending generation requests will abort before starting.
+     * In-progress generation operations will be allowed to complete. This is =
+     * volatile. */
     private volatile boolean isShutdown = false;
     
     /** A reference to the region store, to cache/uncache regions. */
@@ -149,7 +148,7 @@ public final class WorldGenerator {
             // queued structures.
             r.implantStructures(regionStore);
             
-            r.forEachSlice(s -> s.buildLight()); // TODO: temporary
+            r.forEachSlice(Slice::buildLight); // TODO: temporary
             
             timer.stop();
             if(!alreadyGenerated)
@@ -179,7 +178,7 @@ public final class WorldGenerator {
      * Instructs the WorldGenerator to shut down.
      */
     @UserThread("MainThread")
-    public final void shutdown() {
+    public void shutdown() {
         isShutdown = true;
     }
     

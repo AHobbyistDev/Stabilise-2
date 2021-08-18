@@ -10,7 +10,7 @@ public interface TaskHandle {
     void setStatus(String status);
     
     /**
-     * Marks a single part as completed. Equivalent to {@link #increment(int)
+     * Marks a single part as completed. Equivalent to {@link #increment(long)
      * increment}{@code (1)}.
      * 
      * <p>Invoking this method publishes this task.
@@ -50,7 +50,7 @@ public interface TaskHandle {
     
     /**
      * Updates the status and marks a single part as completed. Equivalent to
-     * {@link #next(int, String) next}{@code (1, status)}.
+     * {@link #next(long, String) next}{@code (1, status)}.
      * 
      * <p>Invoking this method publishes this task.
      * 
@@ -62,7 +62,7 @@ public interface TaskHandle {
     
     /**
      * Updates the status and marks a specified number of parts as completed.
-     * Equivalent to invoking {@link #increment(int) increment}{@code (parts)}
+     * Equivalent to invoking {@link #increment(long) increment}{@code (parts)}
      * and then {@link #setStatus(String) setStatus}{@code (status)}.
      * 
      * <p>Invoking this method publishes this task.

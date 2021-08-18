@@ -50,7 +50,7 @@ public class Log {
      * A log level is used to indicate granularity to which log messages will
      * be posted.
      */
-    public static enum Level {
+    public enum Level {
         /** Not valid as a message type. Setting the log's output level to this
          * means no messages will be printed.  */
         NONE(0, true, null),
@@ -94,7 +94,7 @@ public class Log {
         /** This level's message tag. */
         private final String tag;
         
-        private Level(int value, boolean printLevelOnly, String tag) {
+        Level(int value, boolean printLevelOnly, String tag) {
             this.value = value;
             this.printLevelOnly = printLevelOnly;
             this.tag = tag;
@@ -136,7 +136,7 @@ public class Log {
     //--------------------==========--------------------
     
     /** The tag with which to prefix log entries. (e.g. "<i>[SERVER] - </i>") */
-    private String tag;
+    private final String tag;
     
     
     /**
@@ -168,7 +168,7 @@ public class Log {
             add(
                 level,
                 logLevel,
-                DATE.toString()
+                DATE
                     + " - [" + Thread.currentThread().getName() + "] - "
                     + level.tag + tag + msg
             );
@@ -195,11 +195,11 @@ public class Log {
         
         synchronized(entries) {
             DATE.setTime(System.currentTimeMillis());
-            prefix = DATE.toString()
+            prefix = DATE
                     + " - [" + Thread.currentThread().getName() + "] - "
                     + level.tag + tag;
             add(level, outputLevel, prefix + msg);
-            add(level, outputLevel, prefix + t.toString());
+            add(level, outputLevel, prefix + t);
             prefix += "    at ";
             for(StackTraceElement e : stackTrace)
                 add(level, outputLevel, prefix + e.toString());
@@ -356,7 +356,7 @@ public class Log {
     /**
      * Saves the most recent log entries to the file system.
      * 
-     * @param crashLog Whether or not the log being saved is that of a crash.
+     * @param crashLog Whether the log being saved is that of a crash.
      * @param prefixMessage The message with which to prefix the log dump.
      */
     public static void saveLog(boolean crashLog, String prefixMessage) {
@@ -370,7 +370,7 @@ public class Log {
     /**
      * Saves the most recent log entries to the file system.
      * 
-     * @param crashLog Whether or not the log being saved is that of a crash.
+     * @param crashLog Whether the log being saved is that of a crash.
      * @param prefixMessage The message with which to prefix the log dump.
      * @param file The file to which to save the log.
      */

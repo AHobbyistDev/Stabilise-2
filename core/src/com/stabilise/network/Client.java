@@ -24,7 +24,7 @@ import com.stabilise.util.maths.Maths;
  * connect to a {@link Server}. To use this, subclass this class and implement
  * {@link #doUpdate()} as you see fit.
  * 
- * <p>A client can connect to the server specified in it's constructor at any
+ * <p>A client can connect to the server specified in its constructor at any
  * time using {@link #connect()}, and may disconnect using {@link
  * #disconnect()}. {@link #update()} should be invoked at regular intervals by
  * a driver loop.
@@ -41,9 +41,9 @@ public abstract class Client implements PacketHandler {
      * actions. */
     public static final ProtocolSyncEvent EVENT_PROTOCOL_SYNC = TCPConnection.EVENT_PROTOCOL_SYNC;
     
-    private static enum State {
+    private enum State {
             DISCONNECTED,
-            CONNECTED;
+            CONNECTED
     }
     
     
@@ -90,8 +90,8 @@ public abstract class Client implements PacketHandler {
      * @param address The IP to connect to.
      * @param port The port to use.
      * @param initialProtocol The initial protocol.
-     * @param The packet handler to use. If {@code null}, this client is used
-     * as its own handler.
+     * @param handler The packet handler to use. If {@code null}, this client is
+     * used as its own handler.
      * 
      * @throws NullPointerException if either {@code address} or {@code
      * initialProtocol} are {@code null}.
@@ -131,7 +131,7 @@ public abstract class Client implements PacketHandler {
                     this::handleDisconnect
             );
             connection.open();
-            events.post(EVENT_CONNECTED);
+            events.dispatch(EVENT_CONNECTED);
         } catch(IOException e) {
             state = State.DISCONNECTED;
             log.postWarning("Could not connect to server at "
@@ -210,12 +210,12 @@ public abstract class Client implements PacketHandler {
     }
     
     private void handleProtocolSwitch(ProtocolSyncEvent e) {
-        events.post(e);
+        events.dispatch(e);
     }
     
     private void handleDisconnect(Event e) {
         disconnect();
-        events.post(e);
+        events.dispatch(e);
     }
     
 }

@@ -10,7 +10,7 @@ import com.stabilise.util.io.data.CompoundBuilder;
 /**
  * This class manages the game settings.
  * 
- * <p>Before interacting with this class, it it recommended that
+ * <p>Before interacting with this class, it is recommended that
  * {@link #initialise()} is invoked.
  */
 public class Settings {
@@ -23,7 +23,7 @@ public class Settings {
     public static final int PARTICLES_NONE = 2;
     
     
-    /** Whether or not the settings have been set up. */
+    /** Whether the settings have been set up. */
     private static boolean initialised = false;
     
     
@@ -65,7 +65,7 @@ public class Settings {
      * Loads the settings config.
      */
     public static void load() {
-        boolean changes = false;
+        boolean changes;
         try {
             changes = config.load();
         } catch(IOException e) {

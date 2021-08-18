@@ -7,7 +7,8 @@ import javax.annotation.concurrent.NotThreadSafe;
 import com.stabilise.util.Log;
 
 /**
- * This class provides a simple base for a registry to extend.
+ * This package-private class provides a simple base for a registry
+ * implementation to extend.
  * 
  * <p>Subclasses should invoke {@link #checkLock()} before registering an
  * object, and increment {@link #size} whenever something is successfully

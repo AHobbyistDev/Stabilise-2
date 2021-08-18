@@ -227,8 +227,7 @@ public class IOUtil {
     		Compression compression) throws IOException {
         try(DataInStream in = new DataInStream(new BufferedInputStream(
                 compression.wrap(file.read())))) {
-            DataCompound c = format.read(in);
-            return c;
+            return format.read(in);
         } catch(GdxRuntimeException e) {
             throw new IOException(e);
         }
@@ -590,7 +589,7 @@ public class IOUtil {
         int len = bufSize;
         byte[] buf = new byte[len];
         int count = 0;
-        MessageDigest md = null;
+        MessageDigest md;
         
         try {
             md = MessageDigest.getInstance("MD5");
@@ -663,7 +662,7 @@ public class IOUtil {
      * Consumer} which may throw an IOException.
      */
     @FunctionalInterface
-    public static interface IOConsumer<T> {
+    public interface IOConsumer<T> {
         
         /**
          * Performs an action on the given parameter.
@@ -675,11 +674,11 @@ public class IOUtil {
     }
     
     /**
-     * A alternative utility interface to {@code Runnable} which may throw an
+     * An alternative utility interface to {@code Runnable} which may throw an
      * IOException.
      */
     @FunctionalInterface
-    public static interface IORunnable {
+    public interface IORunnable {
         
         void run() throws IOException;
         
@@ -702,13 +701,11 @@ public class IOUtil {
         }
         
         private static String msg(byte[] expected, byte[] ours) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unequal checksums! Expected value is \"");
-            sb.append(StringUtil.toHexString(expected));
-            sb.append("\", but we calculated \"");
-            sb.append(StringUtil.toHexString(ours));
-            sb.append("\".");
-            return sb.toString();
+            return "Unequal checksums! Expected value is \"" +
+                    StringUtil.toHexString(expected) +
+                    "\", but we calculated \"" +
+                    StringUtil.toHexString(ours) +
+                    "\".";
         }
         
     }

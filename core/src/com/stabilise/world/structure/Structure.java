@@ -25,9 +25,9 @@ public class Structure {
      * 
      * @param regions source to use to get other regions
      * @param r the region to add this schematic to
-     * @param offsetX the x-coordinate at which this schematic is being placed,
+     * @param x the x-coordinate at which this schematic is being placed,
      * relative to the region
-     * @param offsetY ditto
+     * @param y ditto
      * @param addToNeighbours true if this schematic should add itself to the
      * region's neighbours.
      */

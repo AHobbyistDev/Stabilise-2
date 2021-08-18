@@ -43,7 +43,7 @@ class RetainedListenerBucket<E extends Event> implements ListenerBucket<E> {
     }
     
     @Override
-    public Listener<? super E>[] post(Event e) {
+    public Listener<? super E>[] dispatch(Event e) {
         // We ignore duplicate events rather than complain as to adhere to
         // the contract of post() in EventDispatcher.
         if(this.e != null) {

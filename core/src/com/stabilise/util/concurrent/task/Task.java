@@ -43,7 +43,7 @@ public interface Task extends TaskView {
         StringBuilder sb = new StringBuilder();
         for(TaskView t : view)
             printProgressBar(sb, t);
-        System.out.println(sb.toString());
+        System.out.println(sb);
     }
     
     static void printProgressBar(StringBuilder sb, TaskView view) {
@@ -156,7 +156,7 @@ public interface Task extends TaskView {
      * Creates a new TaskBuilderBuilder. This function is the main entry-point
      * for creating a Task.
      */
-    public static TaskBuilderBuilder builder() {
+    static TaskBuilderBuilder builder() {
         return new TaskBuilderBuilder();
     }
     
@@ -168,7 +168,7 @@ public interface Task extends TaskView {
      * 
      * @throws NullPointerException if {@code executor} is {@code null}.
      */
-    public static TaskBuilderBuilder builder(Executor executor) {
+    static TaskBuilderBuilder builder(Executor executor) {
         return builder().executor(executor);
     }
     

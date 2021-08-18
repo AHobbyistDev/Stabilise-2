@@ -45,7 +45,7 @@ public class TypeRegistry<T, V> extends AbstractRegistry<Class<? extends T>> {
     public TypeRegistry(RegistryParams params) {
         super(params);
         
-        values = new Array<V>(params.capacity);
+        values = new Array<>(params.capacity);
         idMap = new IdentityHashMap<>(params.capacity);
     }
     
@@ -71,7 +71,7 @@ public class TypeRegistry<T, V> extends AbstractRegistry<Class<? extends T>> {
         if(idMap.containsKey(objClass) && dupePolicy.handle(log, "Duplicate class " + objClass.getSimpleName()))
             return;
         values.setWithExpand(id, value, 2f);
-        idMap.put(objClass, Integer.valueOf(id));
+        idMap.put(objClass, id);
         size++;
         if(id > maxID)
             maxID = id;

@@ -8,7 +8,7 @@ import com.stabilise.util.Checks;
 /**
  * A task can generally be broken down into a number of small incremental
  * pieces, or "parts", which together constitute its entire operation. As a
- * task chugs along, it may increment this value to give an indication as to
+ * task chugs along it may increment this value to give an indication as to
  * how close it is to completion, and this general principle forms the basis of
  * progress bars, completion percentages, and the like.
  * 
@@ -33,7 +33,7 @@ import com.stabilise.util.Checks;
  * 
  * <p>To remedy this problem, we introduce report strategies - that is,
  * strategies for determining how much of a subtask's parts count contributes
- * to the overall parts count (or how much is is <i>reported</i>). For each
+ * to the overall parts count (or how much is <i>reported</i>). For each
  * subtask, we apply a report strategy to determine how many parts it will
  * contribute to the overall count. We offer 5 types of report strategies:
  * 
@@ -59,7 +59,7 @@ import com.stabilise.util.Checks;
  * parts altogether actually has 11, as every task is additionally allocated a
  * "completion part" which is only set when the task is completed. This
  * completion part is always bubbled up regardless of the report strategy used
- * (though, again, this may not always be the case - the the completion part
+ * (though, again, this may not always be the case - the completion part
  * may be rounded away if a task unit's reported parts must be rescaled to
  * prevent its parent's parts count from overflowing). In this example, the
  * task unit would've actually completed 5/11 of its parts, which corresponds
@@ -126,8 +126,8 @@ public final class ReportStrategy {
     
     /**
      * Manually specifies a "report this many" function. The function takes a
-     * task's total parts number as its input and returns the number of parts
-     * to report to its parent.
+     * task's total parts as its input and returns the number of parts to report
+     * to its parent.
      * 
      * <p>As the correctness of a function cannot be analysed at compile time,
      * a {@link BadReportStrategyException} may be thrown at runtime if the

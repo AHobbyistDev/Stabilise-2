@@ -43,7 +43,7 @@ public class Registry<K, V> extends AbstractRegistry<V> {
      * @throws IllegalArgumentException if {@code capacity < 0}.
      */
     protected Map<K, V> createUnderlyingMap(int capacity) {
-        return new HashMap<K, V>(capacity);
+        return new HashMap<>(capacity);
     }
     
     /**
@@ -89,7 +89,7 @@ public class Registry<K, V> extends AbstractRegistry<V> {
     }
     
     /**
-     * Checks for whether or not a value is mapped to the specified key.
+     * Checks for whether a value is mapped to the specified key.
      * 
      * @param key The key.
      * 

@@ -22,7 +22,7 @@ public class EntityEvent extends Event {
      * An identifying type for an event; enums can be 'switched' for efficient
      * handler code.
      */
-    public static enum Type {
+    public enum Type {
     	/** Posted when the entity is first added to the world. */
         ADDED_TO_WORLD,
         /** Posted immediately before an entity is removed from the world. This

@@ -25,7 +25,7 @@ public class RingBuffer<E> extends AbstractQueue<E> {
      * end points to where the next element will be inserted. This is the same
      * as start in two cases: the queue is completely empty or completely full.
      * As a result, the distinction between a full buffer and an empty one is
-     * whether or not the head element is null.
+     * whether the head element is null.
      */
     
     /** The index of the element at the head of the queue. */

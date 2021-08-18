@@ -120,7 +120,6 @@ public class Memorisation {
                     || s.equalsIgnoreCase("close") || s.equalsIgnoreCase("end"))) {
                 if(confirm("exit these questions"))
                     return true;
-                continue;
             } else {
                 print("Incorrect. The answer is \"" + q.answer + "\"");
                 return false;

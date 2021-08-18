@@ -35,10 +35,11 @@ import com.stabilise.util.concurrent.Tasks;
  *     the server, and then {@link AppDriver#run() runs} it. {@code run} will
  *     of course not return until the server terminates. Note that for this
  *     method of running to work, the Server must be constructed with {@link
- *     #Server(int)}, as to specify the tick rate when driving the server.
+ *     #Server(int, Protocol)}, as to specify the tick rate when driving the
+ *     server.
  * <li>Invoke {@link #runConcurrently()}, which starts a new thread and
  *     invokes {@code run} on that thread. As with the above point, the
- *     Server must be constructed through {@link #Server(int)}.
+ *     Server must be constructed through {@link #Server(int, Protocol)}.
  * </ul>
  * 
  * <p>To close a server, either invoke {@link #requestShutdown()} and wait for
@@ -60,14 +61,14 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
      * to close.
      * <p>{@code SHUTDOWN} indicates that a server is shutting down.
      * <p>{@code TERMINATED} indicates that a server has been terminated. */
-    private static enum State {
+    private enum State {
             UNSTARTED,
             BOOTING,
             STARTING,
             ACTIVE,
             CLOSE_REQUESTED,
             SHUTDOWN,
-            TERMINATED;
+            TERMINATED
     }
     
     //--------------------==========--------------------
@@ -103,7 +104,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
      * <p>A server constructed with this method may <i>not</i> be run using
      * {@link #run()} or {@link #runConcurrently()}, as for this a {@code
      * ticksPerSecond} value must be specified. For this, refer to the other
-     * constructor: {@link #Server(int)}.
+     * constructor: {@link #Server(int, Protocol)}.
      * 
      * @param initialProtocol The initial connection protocol.
      * 
@@ -133,7 +134,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
      * <p>A server constructed with this method may <i>not</i> be run using
      * {@link #run()} or {@link #runConcurrently()}, as for this a {@code
      * ticksPerSecond} value must be specified. For this, refer to the other
-     * constructor: {@link #Server(int)}.
+     * constructor: {@link #Server(int, ClientConnectionFactory)}.
      * 
      * @param clientFactory The factory to use to create clients.
      * 
@@ -149,7 +150,6 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
      * 
      * @param ticksPerSecond The number of update ticks per second to perform
      * while running as per {@link #run()} or {@link #runConcurrently()}.
-     * @param initialProtocol The initial connection protocol.
      * @param clientFactory The factory to use to create clients.
      * 
      * @throws NullPointerException if {@code clientFactory} is {@code null}.
@@ -290,8 +290,8 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
     protected void doUpdate() {}
     
     /**
-     * Checks for whether or not this server has been requested to shut down,
-     * and shuts it down via {@link #shutdown()} if so.
+     * Checks for whether this server has been requested to shut down, and shuts
+     * it down via {@link #shutdown()} if so.
      * 
      * @return {@code true} if the server was shut down; {@code false}
      * otherwise.
@@ -391,7 +391,7 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
      * @throws InterruptedException
      */
     public void waitUntilTerminated() throws InterruptedException {
-        Tasks.waitInterruptibly(state, () -> isTerminated());
+        Tasks.waitInterruptibly(state, this::isTerminated);
     }
     
     /**
@@ -418,7 +418,6 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
             } catch(IOException e1) {
                 log.postWarning("Failed to close client socket (" + e.getMessage() + ")");
             }
-            return;
         }
     }
     
@@ -474,12 +473,12 @@ public abstract class Server implements Runnable, Drivable, PacketHandler {
     /**
      * A factory for client TCPConnection handles.
      */
-    public static interface ClientConnectionFactory {
+    public interface ClientConnectionFactory {
         
         /**
          * Creates a TCPConnection object around the specified client socket.
          */
-        public TCPConnection create(Socket socket) throws IOException;
+        TCPConnection create(Socket socket) throws IOException;
         
     }
     

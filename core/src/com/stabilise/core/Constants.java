@@ -29,7 +29,7 @@ public class Constants {
     
     public static final String GAME_PACKAGE = "com.stabilise";
     
-    /** Indicates whether or not this copy of the game is a developer version.
+    /** Indicates whether this copy of the game is a developer version.
      * <p>This should be {@code false} for all public releases. */
     public static final boolean DEV_VERSION = true;
     
@@ -41,7 +41,7 @@ public class Constants {
     public static final Version BACKWARDS_VERSION = VERSION.clone();
     
     static {
-        if(VERSION.compareTo(BACKWARDS_VERSION) == -1)
+        if(VERSION.compareTo(BACKWARDS_VERSION) < 0)
             throw new AssertionError("The oldest game version we're "
                     + "backwards-compatible with (" + BACKWARDS_VERSION
                     + ") is somehow newer than our current version ("
@@ -63,7 +63,7 @@ public class Constants {
     /** Port for UDP broadcasts. */
     public static final int PORT_BROADCAST = 8226;
     public static final byte[] BROADCAST_MSG = "<<Stabilise II LAN search broadcast>>".getBytes();
-    public static final byte[] BROADCAST_RESPONSE = "<<Stabilise II LAN server reponse>>".getBytes();
+    public static final byte[] BROADCAST_RESPONSE = "<<Stabilise II LAN server response>>".getBytes();
     public static final InetAddress BROADCAST_ADDRESS;
     
     static {
@@ -126,7 +126,7 @@ public class Constants {
     private static int getBuild(Version version, FileHandle file) {
         if(DEV_VERSION) {
             try {
-                DataCompound tag = null;
+                DataCompound tag;
                 
                 if(file.exists()) {
                     tag = Try.of(() -> IOUtil.read(file, NBT, UNCOMPRESSED))

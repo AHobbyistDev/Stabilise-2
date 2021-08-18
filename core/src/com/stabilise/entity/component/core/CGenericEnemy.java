@@ -47,7 +47,7 @@ public class CGenericEnemy extends CBaseMob {
     
     @Override
     public void attack(World w, Direction direction) {
-        Polygon p = new Polygon(new float[] { 0.5f,0.0f, 0.5f,2.0f, 3.5f,3.0f, 3.5f,-1.0f });
+        Polygon p = new Polygon(0.5f,0.0f, 0.5f,2.0f, 3.5f,3.0f, 3.5f,-1.0f);
         Hitbox h = new Hitbox(e.id(), facingRight
                 ? p
                 : p.reflect(),

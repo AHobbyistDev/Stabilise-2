@@ -25,7 +25,7 @@ public class Waiter {
         COMPLETE,
         /** Indicates that the target of a {@code Waiter} did not complete
          * before timing out. */
-        TIMEOUT;
+        TIMEOUT
     }
     
     private final long endTime;

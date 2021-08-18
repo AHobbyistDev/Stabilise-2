@@ -18,8 +18,8 @@ interface ListenerBucket<E extends Event> {
      * l} is not null and listens for the same event as this bucket.
      * 
      * @return true if the listener was successfully registered; false if
-     * it should instead be executed immediately (see {@link
-     * RetainedEventDispatcher}).
+     * it should instead be executed immediately (as in a retained
+     * EventDispatcher).
      */
     boolean addListener(Listener<?> l);
     
@@ -40,7 +40,7 @@ interface ListenerBucket<E extends Event> {
      * <p>To avoid causing a bottleneck in the mutex we return an array of
      * triggered listeners rather than executing them directly.
      */
-    @Nullable Listener<? super E>[] post(E e);
+    @Nullable Listener<? super E>[] dispatch(E e);
     
     /**
      * Returns {@code true} if this bucket is empty and may be removed.

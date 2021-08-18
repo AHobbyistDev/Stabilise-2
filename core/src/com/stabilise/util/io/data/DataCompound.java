@@ -33,7 +33,7 @@ public interface DataCompound extends ITag, IContainerTag<DataCompound> {
      * @see Format#getDefaultFormat()
      * @see Format#setDefaultFormat(Format)
      */
-    public static DataCompound create() {
+    static DataCompound create() {
         return Format.getDefaultFormat().newCompound();
     }
     

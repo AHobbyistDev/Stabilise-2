@@ -53,27 +53,27 @@ public interface Component extends IWeightProvider,
     //    those which may be added and removed repeatedly.
     
     /** Normal weight for most components. */
-    public static final int WEIGHT_NORMAL = 0;
+    int WEIGHT_NORMAL = 0;
     /** Extremely negative weight for trackers since they aren't expected to 
      * ever be removed from an entity (consideration 3). */
-    public static final int WEIGHT_TRACKER = Integer.MIN_VALUE;
+    int WEIGHT_TRACKER = Integer.MIN_VALUE;
     /** Slightly lower weight, to be used for components such as {@link
      * CUnkillable} which are likely to intercept and cancel events
      * (consideration 2). */
-    public static final int WEIGHT_HIGH = -1;
+    int WEIGHT_HIGH = -1;
     /** Larger weight for the slice anchorer so that it applies its changes
      * after most positional updates have had a chance to take place
      * (consideration 1). */
-    public static final int WEIGHT_SLICE_ANCHORER = 1000;
+    int WEIGHT_SLICE_ANCHORER = 1000;
     /** Camera has a large weight so that it updates after most other things. */
-    public static final int WEIGHT_CAMERA = 10_000;
+    int WEIGHT_CAMERA = 10_000;
     /** Larger weight for "nearby portal" components so that the phantom's
      * position is updates after most positional updates have had a chance to
      * take place (consideration 1). */
-    public static final int WEIGHT_NEARBY_PORTAL = 100_000;
+    int WEIGHT_NEARBY_PORTAL = 100_000;
     /** Extremely large weight so that a CThroughPortal component is the very
      * last component updated in a tick (consideration 1, 3). */
-    public static final int WEIGHT_CHANGE_DIMENSION = Integer.MAX_VALUE - 5;
+    int WEIGHT_CHANGE_DIMENSION = Integer.MAX_VALUE - 5;
     
     
     /**
@@ -96,7 +96,7 @@ public interface Component extends IWeightProvider,
     void update(World w, Entity e, float dt);
     
     /**
-     * Checks for whether or not this component should be removed.
+     * Checks for whether this component should be removed.
      */
     boolean shouldRemove();
     
@@ -174,7 +174,7 @@ public interface Component extends IWeightProvider,
      * 
      * @see #toCompound(DataCompound, Component)
      */
-    public static Component fromCompound(DataCompound dc) {
+    static Component fromCompound(DataCompound dc) {
         int id = dc.getI32("id");
         Component c = Components.COMPONENT_TYPES.create(id);
         if(c == null)
@@ -192,7 +192,7 @@ public interface Component extends IWeightProvider,
      * @throws NullPointerException if either argument is null
      * @see #fromCompound(DataCompound)
      */
-    public static void toCompound(DataCompound dc, Component c) {
+    static void toCompound(DataCompound dc, Component c) {
         int id = Components.COMPONENT_TYPES.getID(c.getClass());
         dc.put("id", id);
         dc.put(c);

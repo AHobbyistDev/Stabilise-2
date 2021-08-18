@@ -13,7 +13,7 @@ public interface Printable {
      * {@code System.out.println(this.toString())}.
      */
     default void print() {
-        System.out.println(toString());
+        System.out.println(this);
     }
     
     /**
@@ -36,7 +36,7 @@ public interface Printable {
             }
         }
         sb.append("\n}");
-        System.out.println(sb.toString());
+        System.out.println(sb);
     }
     
 }

@@ -25,12 +25,7 @@ public class CUnkillable extends AbstractComponent {
     
     @Override
     public boolean handle(World w, Entity e, EntityEvent ev) {
-        switch(ev.type()) {
-            case KILLED:
-                return true;
-            default:
-                return false;
-        }
+        return ev.type() == EntityEvent.Type.KILLED;
     }
     
     @Override

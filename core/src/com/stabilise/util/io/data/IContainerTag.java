@@ -19,7 +19,7 @@ public interface IContainerTag<T extends IContainerTag<T>> {
      * compound will be in read mode.
      * 
      * @throws UnsupportedOperationException if this tag is of a format which
-     * cannot converted (e.g. {@link Format#BYTE_STREAM}).
+     * cannot be converted for whatever reason.
      */
     T convert(Format format);
     

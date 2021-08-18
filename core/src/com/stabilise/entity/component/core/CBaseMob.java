@@ -32,7 +32,7 @@ public abstract class CBaseMob extends CCore {
     protected static final int DEATH_TICKS = 40;
     
     /** Possible state priorities. */
-    public static enum StatePriority {
+    public enum StatePriority {
         /** An ordinary state, in which a mob can do other stuff. */
         ORDINARY(0),
         /** A mob is considered 'occupied' if in a state with this priority
@@ -48,7 +48,7 @@ public abstract class CBaseMob extends CCore {
         private final int value;
         
         
-        private StatePriority(int value) {
+        StatePriority(int value) {
             this.value = value;
         }
         
@@ -62,7 +62,7 @@ public abstract class CBaseMob extends CCore {
     }
     
     /** States mobs may be in. */
-    public static enum State {
+    public enum State {
         //                 ground,canMove,canAct,        priority
         IDLE,
         RUN,
@@ -93,35 +93,35 @@ public abstract class CBaseMob extends CCore {
         SPECIAL_DOWN_AIR   (false, true,  false, StatePriority.OCCUPIED      ),
         SPECIAL_SIDE_AIR   (false, true,  false, StatePriority.OCCUPIED      );
         
-        /** Whether or not the state is a ground state. */
+        /** Whether the state is a ground state. */
         public final boolean ground;
-        /** Whether or not a mob can move while in the state. */
+        /** Whether a mob can move while in the state. */
         public final boolean canMove;
-        /** Whether or not a mob can perform an action while in the state. */
+        /** Whether a mob can perform an action while in the state. */
         public final boolean canAct;
         /** The priority required to change out of the state. */
         public final StatePriority priority;
         
         
-        private State() {
+        State() {
             this(true);
         }
         
-        private State(boolean ground) {
+        State(boolean ground) {
             this(ground, true, true);
         }
         
-        private State(boolean ground, boolean canMove, boolean canAct) {
+        State(boolean ground, boolean canMove, boolean canAct) {
             this(ground, canMove, canAct, StatePriority.ORDINARY);
         }
         
-        private State(boolean ground, boolean canMove, boolean canAct, StatePriority priority) {
+        State(boolean ground, boolean canMove, boolean canAct, StatePriority priority) {
             this.ground = ground;
             this.canMove = canMove;
             this.canAct = canAct;
             this.priority = priority;
         }
-    };
+    }
     
     //--------------------==========--------------------
     //-------------=====Member Variables=====-----------
@@ -144,17 +144,17 @@ public abstract class CBaseMob extends CCore {
     public int maxHealth;
     /** The Mob's health. */
     public int health;
-    /** Whether or not the Mob is dead. */
+    /** Whether the Mob is dead. */
     public boolean dead = false;
     
     public boolean invulnerable = false;
     /** The number of ticks until the Mob loses its invulnerability. */
     public int invulnerabilityTicks = 0;
     
-    /** Whether or not the Mob is currently attempting to move. */
+    /** Whether the Mob is currently attempting to move. */
     public boolean moving = false;
     
-    /** Whether or not the Mob was on the ground at the end of the last tick. */
+    /** Whether the Mob was on the ground at the end of the last tick. */
     protected boolean wasOnGround = false;
     
     // The mob's physical properties
@@ -182,7 +182,7 @@ public abstract class CBaseMob extends CCore {
     protected ParticleEmitter<ParticleIndicator> srcDmgIndicator;
     protected ParticleEmitter<ParticleSmoke> srcSmoke;
     
-    /** Whether or not the mob has a tint. */
+    /** Whether the mob has a tint. */
     public boolean hasTint = false;
     /** The strength of the mob's 'effect tint'. */
     public float tintStrength = 0.0f;
@@ -420,8 +420,8 @@ public abstract class CBaseMob extends CCore {
      * Sets the Mob's state, which doesn't have a lock.
      * 
      * @param state The new state.
-     * @param validatePriority Whether or not the priority of the new state
-     * should be checked before being set.
+     * @param validatePriority Whether the priority of the new state should be
+     * checked before being set.
      */
     public void setState(State state, boolean validatePriority) {
         setState(state, validatePriority, 0);
@@ -431,8 +431,8 @@ public abstract class CBaseMob extends CCore {
      * Sets the Mob's state.
      * 
      * @param state The new state.
-     * @param validatePriority Whether or not the priority of the new state
-     * should be checked before being set.
+     * @param validatePriority Whether the priority of the new state should be
+     * checked before being set.
      * @param stateLockDuration The number of ticks for which the mob is
      * considered locked in the state.
      */

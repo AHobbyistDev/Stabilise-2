@@ -96,7 +96,7 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
      * Exposed for convenience.
      */
     public final void forEachTag(BiConsumer<String, ITag> action) {
-        data.entrySet().forEach(e -> action.accept(e.getKey(), e.getValue()));
+        data.forEach((key, value) -> action.accept(key, value));
     }
     
     @Override public void put(String name, DataCompound data) { putData(name, (ITag)data.convert(format())); }
@@ -211,21 +211,21 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
         return c.isInstance(t) ? Option.some((T)t) : Option.none();
     }
     
-    public Option<DataCompound> optCompound(String name) { return opt(name, DataCompound.class);                }
-    public Option<DataList>     optList    (String name) { return opt(name, DataList.class);                    }
-    public Option<Boolean>      optBool    (String name) { return opt(name, BoolBox.class).map(b -> b.get());   }
-    public Option<Byte>         optI8      (String name) { return opt(name, I8Box.class).map(b -> b.get());     }
-    public Option<Short>        optI16     (String name) { return opt(name, I16Box.class).map(b -> b.get());    }
-    public Option<Integer>      optI32     (String name) { return opt(name, I32Box.class).map(b -> b.get());    }
-    public Option<Long>         optI64     (String name) { return opt(name, I64Box.class).map(b -> b.get());    }
-    public Option<Float>        optF32     (String name) { return opt(name, F32Box.class).map(b -> b.get());    }
-    public Option<Double>       optF64     (String name) { return opt(name, F64Box.class).map(b -> b.get());    }
-    public Option<byte[]>       optI8Arr   (String name) { return opt(name, I8ArrBox.class).map(b -> b.get());  }
-    public Option<int[]>        optI32Arr  (String name) { return opt(name, I32ArrBox.class).map(b -> b.get()); }
-    public Option<long[]>       optI64Arr  (String name) { return opt(name, I64ArrBox.class).map(b -> b.get()); }
-    public Option<float[]>      optF32Arr  (String name) { return opt(name, F32ArrBox.class).map(b -> b.get()); }
-    public Option<double[]>     optF64Arr  (String name) { return opt(name, F64ArrBox.class).map(b -> b.get()); }
-    public Option<String>       optString  (String name) { return opt(name, StringBox.class).map(b -> b.get()); }
+    public Option<DataCompound> optCompound(String name) { return opt(name, DataCompound.class);                  }
+    public Option<DataList>     optList    (String name) { return opt(name, DataList.class);                      }
+    public Option<Boolean>      optBool    (String name) { return opt(name, BoolBox.class).map(BoolBox::get);     }
+    public Option<Byte>         optI8      (String name) { return opt(name, I8Box.class).map(I8Box::get);         }
+    public Option<Short>        optI16     (String name) { return opt(name, I16Box.class).map(I16Box::get);       }
+    public Option<Integer>      optI32     (String name) { return opt(name, I32Box.class).map(I32Box::get);       }
+    public Option<Long>         optI64     (String name) { return opt(name, I64Box.class).map(I64Box::get);       }
+    public Option<Float>        optF32     (String name) { return opt(name, F32Box.class).map(F32Box::get);       }
+    public Option<Double>       optF64     (String name) { return opt(name, F64Box.class).map(F64Box::get);       }
+    public Option<byte[]>       optI8Arr   (String name) { return opt(name, I8ArrBox.class).map(I8ArrBox::get);   }
+    public Option<int[]>        optI32Arr  (String name) { return opt(name, I32ArrBox.class).map(I32ArrBox::get); }
+    public Option<long[]>       optI64Arr  (String name) { return opt(name, I64ArrBox.class).map(I64ArrBox::get); }
+    public Option<float[]>      optF32Arr  (String name) { return opt(name, F32ArrBox.class).map(F32ArrBox::get); }
+    public Option<double[]>     optF64Arr  (String name) { return opt(name, F64ArrBox.class).map(F64ArrBox::get); }
+    public Option<String>       optString  (String name) { return opt(name, StringBox.class).map(b -> b.get());   }
     
     @Override
     public DataCompound convert(Format format) {
@@ -250,7 +250,7 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
     
     @Override
     public void read(String name, DataCompound o) {
-        o.optCompound(name).peek(c -> putAll(((AbstractCompound)c)));
+        o.optCompound(name).peek(c -> putAll((c)));
     }
     
     @Override
@@ -260,7 +260,7 @@ public abstract class MapCompound extends AbstractCompound implements Iterable<M
     
     @Override
     public void read(DataList l) {
-        putAll((AbstractCompound) l.getCompound());
+        putAll(l.getCompound());
     }
     
     @Override

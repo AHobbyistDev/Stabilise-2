@@ -80,10 +80,10 @@ public class Polygon extends Shape {
         float minY = verts[1];
         float maxY = minY;
         for(int i = 2; i < verts.length; i += 2) {
-            minX = Maths.min(minX, verts[i  ]);
-            maxX = Maths.max(maxX, verts[i  ]);
-            minY = Maths.min(minY, verts[i+1]);
-            maxY = Maths.max(maxY, verts[i+1]);
+            minX = Math.min(minX, verts[i  ]);
+            maxX = Math.max(maxX, verts[i  ]);
+            minY = Math.min(minY, verts[i+1]);
+            maxY = Math.max(maxY, verts[i+1]);
         }
         return new AABB(new float[] { minX, minY, maxX, maxY });
     }
@@ -184,7 +184,7 @@ public class Polygon extends Shape {
     /**
      * Constructs and returns a new Polygon with the specified vertices. The
      * returned polygon is equivalent to one constructed as if by
-     * {@link #Polygon(Vec2[]) new Polygon(vertices)}, however, this method
+     * {@link #Polygon(float[]) new Polygon(vertices)}, however, this method
      * provides faster performance as the supplied vertices are not checked for
      * validity. As such, constructing a Polygon using this method is suitable
      * only when it is known that the supplied vertices are valid.

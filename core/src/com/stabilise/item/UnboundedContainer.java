@@ -1,7 +1,6 @@
 package com.stabilise.item;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 
 
@@ -15,7 +14,7 @@ import java.util.Comparator;
 public class UnboundedContainer extends Container {
     
     /** The container's items. */
-    private ArrayList<ItemStack> items = new ArrayList<>();
+    private final ArrayList<ItemStack> items = new ArrayList<>();
     
     
     /**
@@ -110,7 +109,7 @@ public class UnboundedContainer extends Container {
     
     @Override
     public void sort(Comparator<ItemStack> comparator) {
-        Collections.sort(items, comparator);
+        items.sort(comparator);
     }
     
 }

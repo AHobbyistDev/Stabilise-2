@@ -44,6 +44,16 @@ public class EventDispatcher {
     
     
     /**
+     * Creates a new {@code EventDispatcher}. Equivalent to
+     * <pre>
+     *     new {@link #EventDispatcher(boolean, int) EventDispatcher(false, 0)}.
+     * </pre>
+     */
+    public EventDispatcher() {
+        this(false, 0);
+    }
+    
+    /**
      * @param retained true if this is a retained dispatcher; false if this is
      * a normal dispatcher.
      * @param concurrencyLevel The number of internal locks to use for this
@@ -70,7 +80,11 @@ public class EventDispatcher {
     }
     
     /**
-     * Adds a multi-use event listener.
+     * Adds a multi-use (i.e. not single-use) event listener.
+     *
+     * If this {@code EventDispatcher} is in retained mode and the event has
+     * already been posted, the {@code handler} will immediately be sent to
+     * {@code exec} for execution.
      * 
      * @param exec The executor with which to execute the handler.
      * @param event The event to listen for.
@@ -85,6 +99,10 @@ public class EventDispatcher {
     
     /**
      * Adds an event listener.
+     *
+     * If this {@code EventDispatcher} is in retained mode and the event has
+     * already been posted, the {@code handler} will immediately be sent to
+     * {@code exec} for execution.
      * 
      * @param exec The executor with which to execute the handler.
      * @param event The event to listen for.
@@ -103,7 +121,7 @@ public class EventDispatcher {
      * Registers the specified event listener.
      * 
      * @param e The event to listen for.
-     * @param l The event listener.
+     * @param li The event listener.
      * 
      * @throws NullPointerException if either argument is null.
      */
@@ -121,7 +139,9 @@ public class EventDispatcher {
             l.unlock();
         }
         
-        // Method hasn't returned = listener rejected = we should execute it now
+        // Method hasn't returned = listener rejected (because this is a
+        // retained dispatcher and the event has already been posted) = we
+        // should execute it now
         li.execute(e);
     }
     
@@ -159,12 +179,12 @@ public class EventDispatcher {
      * 
      * @throws NullPointerException if e is null.
      */
-    public final void post(Event e) {
-        doPost(Objects.requireNonNull(e));
+    public final void dispatch(Event e) {
+        doDispatch(Objects.requireNonNull(e));
     }
     
     @SuppressWarnings("unchecked")
-    private <E extends Event> void doPost(E e) {
+    private <E extends Event> void doDispatch(E e) {
         ListenerBucket<E> b;
         Listener<? super E>[] ls = null;
         
@@ -174,11 +194,11 @@ public class EventDispatcher {
         	b = (ListenerBucket<E>) handlers.get(e);
             if(retained) {
                 if(b == null)
-                    handlers.put(e, b = new RetainedListenerBucket<E>());
-                ls = b.post(e);
+                    handlers.put(e, b = new RetainedListenerBucket<>());
+                ls = b.dispatch(e);
             } else {
                 if(b != null) {
-                    ls = b.post(e);
+                    ls = b.dispatch(e);
                     if(b.isEmpty())
                         handlers.remove(e);
                 }

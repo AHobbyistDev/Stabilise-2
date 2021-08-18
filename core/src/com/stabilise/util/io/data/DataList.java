@@ -16,7 +16,7 @@ public interface DataList extends ITag, IContainerTag<DataList> {
      * @see Format#getDefaultFormat()
      * @see Format#setDefaultFormat(Format)
      */
-    public static DataList create() {
+    static DataList create() {
         return Format.getDefaultFormat().newList();
     }
     
@@ -51,7 +51,7 @@ public interface DataList extends ITag, IContainerTag<DataList> {
     void add(DataCompound data);
     /** If {@code data} is of a different format to this list, it will be
      * converted first. */
-    void add(DataList     data);
+    void add(DataList data);
     void add(boolean  data);
     void add(byte     data);
     void add(double   data);

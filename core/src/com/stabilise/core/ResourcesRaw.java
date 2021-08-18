@@ -30,7 +30,7 @@ public class ResourcesRaw {
         appName = "." + appName + "/";
         String dir = System.getProperty("user.home", ".");
         String os = System.getProperty("os.name").toLowerCase();
-        File appDir = null;
+        File appDir;
         
         if(os.contains("windows")) {
             String appDataDir = System.getenv("APPDATA");

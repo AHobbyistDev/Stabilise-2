@@ -41,7 +41,7 @@ import com.stabilise.world.loader.WorldLoader;
  * <p>A region lives in primary storage if it is either "anchored", or any of
  * its neighbours (the 8 adjacent regions) are anchored. Regions with with no
  * anchors nor anchored neighbours will be removed from primary storage
- * (AKA unloaded) during an {@link #update() update tick} after a short delay.
+ * (i.e. unloaded) during an {@link #update() update tick} after a short delay.
  * 
  * <p>Regions are (somewhat indirectly) added to primary storage via {@link
  * #anchorRegion(int, int)}. Regions are similarly indirectly removed from
@@ -91,8 +91,6 @@ import com.stabilise.world.loader.WorldLoader;
  * 
  * <h3>Region Lifecycle</h3>
  * 
- * TODO: Write in more detail about the lifecycle of a region
- * 
  * <pre>
  * (On anchor): PUT IN CACHE -> LOAD -> GENERATE -> SAVE -> MOVE TO PRIMARY
  * (On unload): MOVE TO CACHE -> SAVE -> REMOVE FROM CACHE
@@ -108,8 +106,7 @@ public class RegionStore {
     /** Wait time in seconds for {@link #waitUntilDone()}. */
     private static final int WAIT_TIME = 1;
     
-    /** The number of locks to stripe {@link #cacheLocks} and {@link
-     * #storeLocks} into. */
+    /** The number of locks to stripe {@link #locks} into. */
     private static final int STRIPE_FACTOR = 8;
     private static final IntBinaryOperator STRIPE_HASHER =
             Maths.genHashFunction(STRIPE_FACTOR, false);
@@ -131,7 +128,8 @@ public class RegionStore {
     private final ConcurrentMap<Point, CachedRegion> cache =
             new ConcurrentHashMap<>();
     
-    /** Regions which have been cached by the current thread. */
+    /** ThreadLocal which tracks the regions cached by each thread. Used by
+     * {@link #uncacheAll()}. */
     private final ThreadLocal<Map<Point, Region>> localCachedRegions =
             ThreadLocal.withInitial(HashMap::new);
     
@@ -252,7 +250,7 @@ public class RegionStore {
             }
         }
         
-        // Initiate the prepare outside of the synchronized block
+        // Initiate the prepare outside the synchronized block
         if(tryPrepare) {
         	loadTracker.startLoadOp(); // op is ended in moveToPrimary()
             prepareRegion(r, true);
@@ -477,7 +475,8 @@ public class RegionStore {
         // cause some hitches.
         synchronized(this) {
             if(regions.put(r.loc, r) != null) { // into primary
-                log.postWarning("Adding " + r + " to primary storage, but it's already there?");
+                log.postWarning("Adding " + r + " to primary storage, but "
+                        + "it's already there?");
                 return;
             }
             
@@ -715,6 +714,10 @@ public class RegionStore {
      * Uncaches any regions which have been cached by this thread. It is okay
      * to defensively invoke this method, as this does nothing if no regions
      * have been cached.
+     *
+     * <p>This method <em>should</em> be invoked by any thread that caches
+     * regions once it is done with them, or they may remain in the cache
+     * forever.
      */
     @UserThread("Any")
     public void uncacheAll() {

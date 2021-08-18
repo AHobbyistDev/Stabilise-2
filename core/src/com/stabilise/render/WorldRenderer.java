@@ -53,7 +53,10 @@ public class WorldRenderer implements Renderer {
     //--------------------==========--------------------
     
     private static final Color DEFAULT_COL = new Color(1f, 1f, 1f, 1f);
-    private static final float DEFAULT_COL_BITS = DEFAULT_COL.toFloatBits();
+    // TODO: Gdx seems to now have setPackedColor for usage with DEFAULT_COL_BITS but
+    // the implementation looks too computationally heavy. Let's just still with
+    // setColor(DEFAULT_COL) for now.
+    //private static final float DEFAULT_COL_BITS = DEFAULT_COL.toFloatBits();
     private static final Color ENEMY_TINT = new Color(0.7f, 0.15f, 0.65f, 1f);
     
     private static final Color BACKGROUND_COL = new Color(0x92D1E4FF);
@@ -318,7 +321,7 @@ public class WorldRenderer implements Renderer {
         profiler.next("tiles"); // root.render.tiles
         tileRenderer.render();
         
-        batch.setColor(DEFAULT_COL_BITS); // reset the tint colour
+        batch.setColor(DEFAULT_COL); // reset the tint colour
         
         profiler.next("entities"); // root.render.entities
         
@@ -336,7 +339,7 @@ public class WorldRenderer implements Renderer {
         profiler.start("portals"); // root.render.entities.portals
         for(Entity p : portals) {
             tileRenderer.renderPortalView(p);
-            batch.setColor(DEFAULT_COL_BITS); // reset the tint colour
+            batch.setColor(DEFAULT_COL); // reset the tint colour
             p.render(this);
         }
         portals.clear();
@@ -461,7 +464,7 @@ public class WorldRenderer implements Renderer {
                 0f // rotation
         );
         
-        batch.setColor(DEFAULT_COL_BITS);
+        batch.setColor(DEFAULT_COL);
     }
     
     /**
@@ -531,7 +534,7 @@ public class WorldRenderer implements Renderer {
         personModel.setState(s.getState(), s.stateTicks);
         personModel.render(batch, camObj.pos.diffX(e.pos), camObj.pos.diffY(e.pos));
         
-        batch.setColor(DEFAULT_COL_BITS);
+        batch.setColor(DEFAULT_COL);
     }
     
     public void renderPortal(Entity e, CPortal c) {
@@ -622,7 +625,7 @@ public class WorldRenderer implements Renderer {
                 p.radius, // scaleY
                 0f // rotation
         );
-        batch.setColor(DEFAULT_COL_BITS);
+        batch.setColor(DEFAULT_COL);
     }
     
     /**
@@ -642,7 +645,7 @@ public class WorldRenderer implements Renderer {
                 1f, // scaleY
                 0f // rotation
         );
-        batch.setColor(DEFAULT_COL_BITS);
+        batch.setColor(DEFAULT_COL);
     }
     
     /**
@@ -662,7 +665,7 @@ public class WorldRenderer implements Renderer {
                 1f, // scaleY
                 0f // rotation
         );
-        batch.setColor(DEFAULT_COL_BITS);
+        batch.setColor(DEFAULT_COL);
     }
     
     /**
@@ -682,7 +685,7 @@ public class WorldRenderer implements Renderer {
                 1f, // scaleY
                 0f // rotation
         );
-        batch.setColor(DEFAULT_COL_BITS);
+        batch.setColor(DEFAULT_COL);
     }
     
     private void renderCursorItem() {
@@ -716,7 +719,7 @@ public class WorldRenderer implements Renderer {
                     1f // height
             );
         */
-        batch.setColor(DEFAULT_COL_BITS);
+        batch.setColor(DEFAULT_COL);
     }
     
     // Shape rendering --------------------------------------------------------

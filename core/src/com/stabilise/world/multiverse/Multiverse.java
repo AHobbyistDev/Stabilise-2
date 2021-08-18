@@ -15,7 +15,6 @@ import com.stabilise.entity.particle.manager.ParticleManager;
 import com.stabilise.util.Log;
 import com.stabilise.util.Profiler;
 import com.stabilise.world.AbstractWorld;
-import com.stabilise.world.World;
 import com.stabilise.world.WorldInfo;
 
 /**
@@ -152,7 +151,7 @@ public abstract class Multiverse<W extends AbstractWorld> {
     }
     
     /**
-     * Checks for whether or not this WorldProvider has an integrated client
+     * Checks for whether this WorldProvider has an integrated client
      * associated with it. This returns {@code true} in all cases but for a
      * server with no integrated client.
      */
@@ -196,8 +195,8 @@ public abstract class Multiverse<W extends AbstractWorld> {
     
     /**
      * Performs any closing procedures which may be done in-between {@link
-     * World#close()} being invoked on every world, and the executor being
-     * shutdown.
+     * AbstractWorld#close()} being invoked on every world, and the executor
+     * being shutdown.
      * 
      * <p>The default implementation does nothing.
      */

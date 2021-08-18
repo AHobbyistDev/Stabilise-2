@@ -46,7 +46,7 @@ public class TextureSheet implements Disposable {
     
     /**
      * Gets the i<sup><font size=-1>th</font></sup> cell of this TextureSheet;
-     * equivalent to {@link #setRegion(int, int)
+     * equivalent to {@link #getRegion(int, int)
      * setRegion(i % rows, i / cols)}.
      * 
      * <p>{@code i} should remain within the range {@code 0 <= i < cols*rows}.

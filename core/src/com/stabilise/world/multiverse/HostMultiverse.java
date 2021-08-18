@@ -69,7 +69,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         if(world != null)
             return world;
         
-        Dimension dim = null;
+        Dimension dim;
         if(Dimension.isPlayerDimension(name)) {
             String hash = Dimension.extractPlayerHash(name);
             PlayerData dat = players.get(hash);
@@ -98,8 +98,6 @@ public class HostMultiverse extends Multiverse<HostWorld> {
      * Adds a player to a world.
      * 
      * @param player The CharacterData for the player to add.
-     * @param integrated {@code true} if this player should become that of the
-     * integrated client.
      * 
      * @return The PlayerBundle holding the player entity, data, and world the
      * player was added to, or {@code null} if the player data could not be
@@ -214,7 +212,7 @@ public class HostMultiverse extends Multiverse<HostWorld> {
         private final FileHandle file;
         
         
-        /** Whether or not the character is new to the world. */
+        /** Whether the character is new to the world. */
         public boolean newToWorld = true;
         /** The dimension the player is in. */
         public String dimension;

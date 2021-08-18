@@ -44,21 +44,21 @@ public abstract class AbstractDataList implements DataList, ITag {
     @Override
     public DataCompound childCompound() {
         DataCompound c = format().newCompound();
-        addData((ITag) c);
+        addData(c);
         return c;
     }
     
     @Override
     public DataList childList() {
         DataList l = format().newList();
-        addData((ITag) l);
+        addData(l);
         return l;
     }
     
     // WOW, TRULY I AM A BUG FAN OF REPETITION
     
-    @Override public void add(DataCompound data) { addData((ITag) data.convert(format())); }
-    @Override public void add(DataList data)     { addData((ITag) data.convert(format())); }
+    @Override public void add(DataCompound data) { addData(data.convert(format())); }
+    @Override public void add(DataList data)     { addData(data.convert(format())); }
     @Override public void add(boolean data)      { addData(box(data)); }
     @Override public void add(byte data)         { addData(box(data)); }
     @Override public void add(short data)        { addData(box(data)); }

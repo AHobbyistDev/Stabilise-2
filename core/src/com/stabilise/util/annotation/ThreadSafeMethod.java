@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 /**
  * Indicates that the annotated method is thread-safe.
  * 
- * @see javax.annotation.ThreadSafe
+ * @see javax.annotation.concurrent.ThreadSafe
  */
 @Documented
 @Target(ElementType.METHOD)

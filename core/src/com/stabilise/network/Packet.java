@@ -31,7 +31,7 @@ public abstract class Packet implements Sendable {
      * <p>This is package-private so that only protocol-independent packets can
      * be labelled important.
      */
-    static interface Important {}
+    interface Important {}
     
     
     /**
@@ -64,7 +64,7 @@ public abstract class Packet implements Sendable {
     }
     
     /**
-     * Checks for whether or not the this packet is a universal, or
+     * Checks for whether this packet is a universal, or
      * <i>protocol-independent</i>, packet.
      * 
      * <p>Protocol-independent packets may be sent using any protocol, and by

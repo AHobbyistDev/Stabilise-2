@@ -125,7 +125,7 @@ public class UpdateClient extends Client implements IClientUpdate {
         connect();
         if(!isConnected()) {
             System.out.println("Could not connect to update server... aborting");
-            events.post(evtGameReady);
+            events.dispatch(evtGameReady);
         }
     }
     
@@ -203,7 +203,7 @@ public class UpdateClient extends Client implements IClientUpdate {
         
         System.out.println("Update complete");
         
-        events.post(evtGameReady);
+        events.dispatch(evtGameReady);
     }
     
     @SuppressWarnings("unused")
@@ -217,7 +217,6 @@ public class UpdateClient extends Client implements IClientUpdate {
         } catch(IOException e) {
             System.out.println("Error while unzipping!");
             Application.crashApplication(e);
-            return;
         }
     }
     

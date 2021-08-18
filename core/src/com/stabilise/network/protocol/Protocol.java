@@ -57,8 +57,6 @@ public enum Protocol {
     
     /**
      * Registers a server (i.e. clientbound) packet.
-     * 
-     * @see TypeFactory#register(int, Class, Class...)
      */
     protected void registerServerPacket(int id, Class<? extends Packet> packetClass,
             Supplier<Packet> supplier) {
@@ -68,8 +66,6 @@ public enum Protocol {
     
     /**
      * Registers a client (i.e. serverbound) packet.
-     * 
-     * @see TypeFactory#register(int, Class, Class...)
      */
     protected void registerClientPacket(int id, Class<? extends Packet> packetClass,
             Supplier<Packet> supplier) {
@@ -247,7 +243,7 @@ public enum Protocol {
         // Offset of "- MAX_NORMAL_PACKET_ID - 1" to keep registry memory
         // footprint minimal.
         RESERVED_PACKETS.register(id - MAX_NORMAL_PACKET_ID - 1, packetClass, supplier);
-        PACKET_IDS.put(packetClass, Integer.valueOf(id));
+        PACKET_IDS.put(packetClass, id);
     }
     
     private static void checkPackets(Protocol protocol, TypeFactory<Packet> registry) {

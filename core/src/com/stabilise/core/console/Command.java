@@ -49,7 +49,7 @@ public abstract class Command {
         if(args.length == 0)
             return false;
         Command c = commands.get(args[0]);
-        return c != null ? c.exec(world, args) : false;
+        return c != null && c.exec(world, args);
     }
     
     public static String[] interpret(char[] cmd) {

@@ -30,7 +30,7 @@ public class RegistryNamespaced<V> extends IDRegistry<String, V> {
         super(params);
         
         if(defaultNamespace.indexOf(':') != -1)
-            throw new IllegalArgumentException("\':\' should not appear in defaultNamespace!");
+            throw new IllegalArgumentException("':' should not appear in defaultNamespace!");
         
         this.defaultNamespace = defaultNamespace + ":";
     }

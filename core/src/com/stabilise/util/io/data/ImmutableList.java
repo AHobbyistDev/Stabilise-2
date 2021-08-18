@@ -17,15 +17,15 @@ import com.stabilise.util.io.DataOutStream;
  * 
  * <ul>
  * <li>{@link #readData(DataInStream)}
- * <li>{@link #createCompound(String)}
- * <li>{@link #createList(String)}
- * <li>{@link #setWriteMode()}
+ * <li>{@link #read(String, DataCompound)}
+ * <li>{@link #read(DataList)}
+ * <li>{@link #childCompound()}
+ * <li>{@link #childList()}
  * <li>{@link #getTag(int)}
  * </ul>
  * 
  * <p>Furthermore, this class wraps child compounds and lists (as returned by
- * {@link #getCompound(int)} and {@link #optCompound(int)}) in their immutable
- * variants.
+ * {@link #getCompound(int)} in their immutable variants.
  */
 public class ImmutableList implements DataList {
     

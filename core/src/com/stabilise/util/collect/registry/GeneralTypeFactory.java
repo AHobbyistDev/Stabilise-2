@@ -82,7 +82,7 @@ public class GeneralTypeFactory<T> extends TypeRegistry<T, Factory<T>> {
     //-------------=====Nested Classes=====-------------
     //--------------------==========--------------------
     
-    public static interface Factory<T> {
+    public interface Factory<T> {
         
         /**
          * @throws RuntimeException if instantiation failed

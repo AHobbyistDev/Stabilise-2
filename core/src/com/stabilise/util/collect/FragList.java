@@ -298,7 +298,7 @@ public class FragList<E> implements SimpleList<E>, RandomAccess {
     }
     
     private int scaleLength() {
-        return (int)(data.length << 1) + 1;
+        return (data.length << 1) + 1;
     }
     
     /** Traverses the list starting from the current value of firstNull until

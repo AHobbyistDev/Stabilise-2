@@ -179,7 +179,7 @@ public class AABB extends Shape {
      * @throws IllegalArgumentException if {@code width < 0 || height < 0}.
      */
     public static AABB create(float x, float y, float width, float height) {
-        return new AABB(x, y, Checks.testMin(width, 0f), Checks.testMin(width, 0f));
+        return new AABB(x, y, Checks.testMin(width, 0f), Checks.testMin(height, 0f));
     }
     
     /**

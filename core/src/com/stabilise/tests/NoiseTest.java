@@ -30,8 +30,8 @@ public class NoiseTest {
         seed = new Random().nextLong();
         
         LongFunction<INoise> func = SIMPLEX ?
-                s -> new SimplexNoise(s) :
-                s -> new PerlinNoise(s);
+                SimplexNoise::new :
+                PerlinNoise::new;
         
         noise = new OctaveNoise(seed, func)
                 .addOctave(32, 32)

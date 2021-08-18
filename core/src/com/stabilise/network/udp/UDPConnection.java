@@ -64,11 +64,11 @@ public class UDPConnection {
     }
     
     public static void main(String[] args) {
-        new Thread(() -> doServer()).start();
-        new Thread(() -> doClient()).start();
-        new Thread(() -> doClient()).start();
-        new Thread(() -> doClient()).start();
-        new Thread(() -> doClient()).start();
+        new Thread(UDPConnection::doServer).start();
+        new Thread(UDPConnection::doClient).start();
+        new Thread(UDPConnection::doClient).start();
+        new Thread(UDPConnection::doClient).start();
+        new Thread(UDPConnection::doClient).start();
     }
     
 }

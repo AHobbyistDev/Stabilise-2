@@ -82,7 +82,7 @@ public final class TaskBuilderBuilder {
     }
     
     /**
-     * Begins building a {@link TaskOld}.
+     * Begins building a {@link Task}.
      * 
      * @throws IllegalStateException if task building has already began, or the
      * executor hasn't been set.

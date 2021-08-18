@@ -72,7 +72,7 @@ public interface Interpolation {
      * <p>The standard function for linear interpolation is:
      * <pre>f(x) = x</pre>
      */
-    public static final All LINEAR = newInterpolation(
+    All LINEAR = newInterpolation(
             x -> x,
             x -> x,
             x -> x
@@ -85,7 +85,7 @@ public interface Interpolation {
      * <p>The standard function for quadratic interpolation is:
      * <pre>f(x) = x<font size=-1><sup>2</sup></font></pre>
      */
-    public static final All QUADRATIC = newInterpolation(
+    All QUADRATIC = newInterpolation(
             x -> x*x,
             x -> x*(2-x),
             x -> x < 0.5f ? 2*x*x : 1 - 2*(--x)*x
@@ -98,7 +98,7 @@ public interface Interpolation {
      * <p>The standard function for cubic interpolation is:
      * <pre>f(x) = x<font size=-1><sup>3</sup></font></pre>
      */
-    public static final All CUBIC = newInterpolation(
+    All CUBIC = newInterpolation(
             x -> x*x*x,
             x -> 1 + (--x)*x*x,
             x -> x < 0.5f ? 4*x*x*x : 1 - 4*(--x)*x*x
@@ -111,7 +111,7 @@ public interface Interpolation {
      * <p>The standard function for quartic interpolation is:
      * <pre>f(x) = x<font size=-1><sup>4</sup></font></pre>
      */
-    public static final All QUARTIC = newInterpolation(
+    All QUARTIC = newInterpolation(
             x -> x*x*x*x,
             x -> 1 - x*x*x*x,
             x -> x < 0.5f ? 8*x*x*x*x : 1 - 8*(--x)*x*x*x
@@ -124,7 +124,7 @@ public interface Interpolation {
      * <p>The standard function for quintic interpolation is:
      * <pre>f(x) = x<font size=-1><sup>5</sup></font></pre>
      */
-    public static final All QUINTIC = newInterpolation(
+    All QUINTIC = newInterpolation(
             x -> x*x*x*x*x,
             x -> 1 - (--x)*x*x*x*x,
             x -> x < 0.5f ? 16*x*x*x*x*x : 1 + 16*(--x)*x*x*x*x
@@ -140,7 +140,7 @@ public interface Interpolation {
      * and {@code easeInOut}, sine and cosine functions with varying arguments
      * are appropriately used instead.
      */
-    public static final All SINUSOIDAL = newInterpolation(
+    All SINUSOIDAL = newInterpolation(
             // f(x) = 1 - cos(x*pi/2)
             x -> 1 - MathUtils.cos(x * Maths.PI_OVER_2f),
             x -> MathUtils.sin(x * Maths.PI_OVER_2f),
@@ -155,7 +155,7 @@ public interface Interpolation {
      * <p>The standard function for circular interpolation is:
      * <pre>f(x) = 1 - sqrt(1 - x<font size=-1><sup>2</sup></font>)</pre>
      */
-    public static final All CIRCULAR = newInterpolation(
+    All CIRCULAR = newInterpolation(
             // f(x) = 1 - sqrt(1-x^2)
             x -> 1 - (float)Math.sqrt(1 - x*x),
             x -> (float)Math.sqrt(x*(2-x)),
@@ -180,7 +180,7 @@ public interface Interpolation {
      * with customisable base and exponent skew. (This has base=2 and exponent
      * skew=10.) -->
      */
-    public static final All EXPONENTIAL = newInterpolation(
+    All EXPONENTIAL = newInterpolation(
             // f(x) = 2^(10(x-1))
             x -> x == 0f ? 0f : (float)Math.pow(2, 10*x - 10),
             x -> x == 1f ? 1f : 1 - (float)Math.pow(2, -10*x),
@@ -226,7 +226,7 @@ public interface Interpolation {
      * <p>This interpolation object is equivalent to what would be returned by
      * invoking {@link #backInterpolation(float) backInterpolation(1.70158)}.
      */
-    public static final All BACK = backInterpolation(1.70158f);
+    All BACK = backInterpolation(1.70158f);
     
     
     // ------------------------------------------------------------------------
@@ -277,7 +277,7 @@ public interface Interpolation {
      * 
      * @return A value interpolated between {@code start} and {@code end}.
      */
-    public static float lerp(float start, float end, float x) {
+    static float lerp(float start, float end, float x) {
         return start + (end - start) * x;
     }
     
@@ -294,7 +294,7 @@ public interface Interpolation {
      * @return The interpolation object.
      * @throws IllegalArgumentException Thrown if {@code degree < 1}.
      */
-    public static All polynomialInterpolation(final int degree) {
+    static All polynomialInterpolation(final int degree) {
         switch(degree) {
             case 1:
                 return LINEAR;
@@ -309,7 +309,7 @@ public interface Interpolation {
             default:
                 if(degree < 1)
                     throw new IllegalArgumentException("degree < 1");
-                final double n = (double)degree;
+                final double n = degree;
                 return newInterpolation(
                         x -> (float)Math.pow(x, n),
                         x -> 1 + (float)Math.pow(1-x, n),
@@ -332,7 +332,7 @@ public interface Interpolation {
      * @return The interpolation object.
      * @throws IllegalArgumentException Thrown if {@code degree < 1}.
      */
-    public static All polynomialInterpolation(final double degree) {
+    static All polynomialInterpolation(final double degree) {
         if((long)degree == degree)
             return polynomialInterpolation((int)degree);
         
@@ -431,7 +431,7 @@ public interface Interpolation {
      * 
      * @return The interpolation object.
      */
-    public static All backInterpolation(final float strength) {
+    static All backInterpolation(final float strength) {
         if(strength == 0f)
             return CUBIC;
         
@@ -486,7 +486,7 @@ public interface Interpolation {
      * transformation function.
      * @throws NullPointerException if {@code easeIn} is {@code null}.
      */
-    public static All newInterpolation(Interpolation easeIn) {
+    static All newInterpolation(Interpolation easeIn) {
         return newInterpolation(
                 easeIn,
                 x -> 1 - easeIn.transform(1-x),
@@ -501,7 +501,7 @@ public interface Interpolation {
      * 
      * @throws NullPointerException if any argument is {@code null}.
      */
-    public static All newInterpolation(Interpolation easeIn, Interpolation easeOut,
+    static All newInterpolation(Interpolation easeIn, Interpolation easeOut,
             Interpolation easeInOut) {
         return new All(
             Objects.requireNonNull(easeIn),
@@ -520,7 +520,7 @@ public interface Interpolation {
      * easeInOut} respectively.
      */
     @Immutable
-    public static final class All implements Interpolation {
+    final class All implements Interpolation {
         
         /**
          * An ease-in interpolation function f(x) is broadly characterised by:

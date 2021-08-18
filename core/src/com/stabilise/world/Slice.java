@@ -18,9 +18,9 @@ public class Slice {
     /** The length of an edge of the square of tiles in a slice. */
     public static final int SLICE_SIZE = 16; // must be a power of 2
     public static final float SLICE_SIZEf = (float) SLICE_SIZE;
-    /** {@link SLICE_SIZE} - 1; minor optimisation purposes. */
+    /** {@link #SLICE_SIZE} - 1; minor optimisation purposes. */
     public static final int SLICE_SIZE_MINUS_ONE = SLICE_SIZE - 1;
-    /** The power of 2 of {@link SLICE_SIZE}; minor optimisation purposes. */
+    /** The power of 2 of {@link #SLICE_SIZE}; minor optimisation purposes. */
     public static final int SLICE_SIZE_SHIFT = Maths.log2(SLICE_SIZE);
     /** See {@link Position#tileCoordRelativeToSliceFromTileCoordFree(double)}. */
     public static final double SLICE_SIZE_MINUS_EPSd = 15.9999995d; // TODO: calculate better epsilon
@@ -111,7 +111,7 @@ public class Slice {
      * 
      * @return The tile at the specified coordinates.
      * @throws ArrayIndexOutOfBoundsException if either x or y is {@code < 0 ||
-     * >= }{@link SLICE_SIZE}.
+     * >= }{@link #SLICE_SIZE}.
      */
     public Tile getTileAt(int x, int y) {
         return Tile.getTile(tiles[y][x]);
@@ -128,7 +128,7 @@ public class Slice {
      * 
      * @return The ID of the tile at the specified coordinates.
      * @throws ArrayIndexOutOfBoundsException if either x or y is {@code < 0 ||
-     * >= }{@link SLICE_SIZE}.
+     * >= }{@link #SLICE_SIZE}.
      */
     public int getTileIDAt(int x, int y) {
         return tiles[y][x];
@@ -144,7 +144,7 @@ public class Slice {
      * @param tile The tile.
      * 
      * @throws ArrayIndexOutOfBoundsException if either x or y is {@code < 0 ||
-     * >= }{@link SLICE_SIZE}.
+     * >= }{@link #SLICE_SIZE}.
      * @throws NullPointerException if {@code tile} is {@code null}.
      */
     public void setTileAt(int x, int y, Tile tile) {
@@ -161,7 +161,7 @@ public class Slice {
      * @param tileID The ID of the tile.
      * 
      * @throws ArrayIndexOutOfBoundsException if either x or y is {@code < 0 ||
-     * >= }{@link SLICE_SIZE}.
+     * >= }{@link #SLICE_SIZE}.
      */
     public void setTileIDAt(int x, int y, int tileID) {
         tiles[y][x] = tileID;
@@ -352,7 +352,7 @@ public class Slice {
     }
     
     /**
-     * Checks for whether or not this slice is a dummy slice.
+     * Checks for whether this slice is a dummy slice.
      */
     public boolean isDummy() {
         return false;

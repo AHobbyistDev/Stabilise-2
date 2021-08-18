@@ -97,8 +97,8 @@ public class OctaveNoise implements INoise {
      * {@inheritDoc}
      * 
      * <p>This class can break the contract of this method if {@link
-     * #doNotNormalise()} was invoked, in which case the returned noise will no
-     * longer be confined to [0,1], but rather [0,a] for some a.
+     * #normalise()} has not been invoked, in which case the returned noise will
+     * not be confined to [0,1], but rather [0,a] for some a.
      */
     @Override
     public float noise(double x) {
@@ -112,8 +112,8 @@ public class OctaveNoise implements INoise {
      * {@inheritDoc}
      * 
      * <p>This class can break the contract of this method if {@link
-     * #doNotNormalise()} was invoked, in which case the returned noise will no
-     * longer be confined to [0,1], but rather [0,a] for some a.
+     * #normalise()} has not been invoked, in which case the returned noise will
+     * not be confined to [0,1], but rather [0,a] for some a.
      */
     @Override
     public float noise(double x, double y) {
@@ -155,7 +155,7 @@ public class OctaveNoise implements INoise {
      * @param seed The seed for this noise.
      */
     public static OctaveNoise perlin(long seed) {
-        return new OctaveNoise(seed, s -> new PerlinNoise(s));
+        return new OctaveNoise(seed, PerlinNoise::new);
     }
     
     /**
@@ -164,7 +164,7 @@ public class OctaveNoise implements INoise {
      * @param seed The seed for this noise.
      */
     public static OctaveNoise simplex(long seed) {
-        return new OctaveNoise(seed, s -> new SimplexNoise(s));
+        return new OctaveNoise(seed, SimplexNoise::new);
     }
     
     //--------------------==========--------------------

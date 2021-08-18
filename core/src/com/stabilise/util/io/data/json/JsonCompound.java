@@ -46,7 +46,7 @@ public class JsonCompound extends MapCompound {
         for(Map.Entry<String, ITag> entry : data.entrySet()) {
             String name = entry.getKey();
             ITag tag = entry.getValue();
-            JsonValue v = null;
+            JsonValue v;
             
             if(tag instanceof JsonCompound) {
                 v = ((JsonCompound)tag).toJson();

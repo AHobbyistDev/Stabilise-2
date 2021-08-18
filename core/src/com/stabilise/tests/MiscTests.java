@@ -17,7 +17,7 @@ import com.stabilise.util.maths.Maths;
  * This class contains an assortment of tests I have conducted, primarily to
  * test performance in the interest of efficiency (and oftentimes misguidedly
  * so, probably). Test methods are left untouched as a point of reference for
- * other parts of code, and for future re-tests if such a need to reperform a
+ * other parts of code, and for future re-tests if such a need to re-perform a
  * test is found. It should be noted that the results of performance checks may
  * vary from system to system, so if one method of doing something is faster on
  * one system, it may in fact be slower on others.
@@ -113,8 +113,8 @@ public class MiscTests {
     protected static void gdxObjectMap() {
         int elements = 1024;
         int iterations = 1024;
-        HashMap<String, Object> map1 = new HashMap<String, Object>(elements);
-        ObjectMap<String, Object> map2 = new ObjectMap<String, Object>(elements);
+        HashMap<String, Object> map1 = new HashMap<>(elements);
+        ObjectMap<String, Object> map2 = new ObjectMap<>(elements);
         String[] keys = new String[elements];
         Object[] vals = new Object[elements];
         Random rnd = new Random();
@@ -175,7 +175,7 @@ public class MiscTests {
         t1.printComparison(t2);
     }
     
-    protected static final void hashPointCollisions2() {
+    protected static void hashPointCollisions2() {
         final int width = 1024;
         final int height = 1024;
         int[] pixels = new int[width*height];
@@ -197,7 +197,7 @@ public class MiscTests {
         dir.mkdirs();
         
         try {
-            ImageIO.write(image, "png", new File(dir, p.toString() + ".png"));
+            ImageIO.write(image, "png", new File(dir, p + ".png"));
         } catch (IOException e) {
             e.printStackTrace();
         }

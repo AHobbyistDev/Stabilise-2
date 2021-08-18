@@ -26,7 +26,7 @@ import com.stabilise.world.WorldStatistics;
  * RegionStore}.
  * 
  * <p>The actual code for loading a region is provided by {@link
- * IRegionLoaders}, and these are provided upon construction by {@link
+ * IRegionLoader}s, and these are provided upon construction by {@link
  * WorldFormat}.
  */
 public class WorldLoader {

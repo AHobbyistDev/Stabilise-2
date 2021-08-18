@@ -21,8 +21,6 @@ import javax.annotation.concurrent.NotThreadSafe;
  * 
  * <p>This class has been reconstructed from the decompiled Minecraft 1.7.10
  * source.
- * 
- * @param V The type of object to store.
  */
 @NotThreadSafe
 public class BiObjectIntMap<V> implements Iterable<V> {
@@ -60,7 +58,7 @@ public class BiObjectIntMap<V> implements Iterable<V> {
         if(value == null)
             throw new NullPointerException("value is null!");
         
-        map.put(value, Integer.valueOf(key));
+        map.put(value, key);
         list.setWithExpand(key, value, 1.25f);
     }
     
@@ -72,7 +70,7 @@ public class BiObjectIntMap<V> implements Iterable<V> {
      * @return The object's mapped key, or {@code -1} if {@code value} lacks an
      * associated key.
      */
-    public int getKey(Object value) {
+    public int getKey(V value) {
         Integer val = map.get(value);
         return val == null ? -1 : val.intValue();
     }
@@ -90,7 +88,7 @@ public class BiObjectIntMap<V> implements Iterable<V> {
     }
     
     /**
-     * Checks for whether or not a value is mapped to the specified key.
+     * Checks for whether a value is mapped to the specified key.
      * 
      * @return {@code true} if the key has a mapping; {@code false} otherwise.
      * @throws IndexOutOfBoundsException if {@code key < 0}.

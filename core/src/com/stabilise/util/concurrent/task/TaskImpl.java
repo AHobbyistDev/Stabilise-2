@@ -171,28 +171,4 @@ public class TaskImpl extends AbstractTask {
         return cancelled.get();
     }
     
-    //--------------------==========--------------------
-    //------------=====Static Functions=====------------
-    //--------------------==========--------------------
-    
-    /**
-     * Creates a new TaskBuilderBuilder. This function is the main entry-point
-     * for creating a Task.
-     */
-    public static TaskBuilderBuilder builder() {
-        return new TaskBuilderBuilder();
-    }
-    
-    /**
-     * Creates a new TaskBuilderBuilder. Equivalent to {@code
-     * builder().executor(executor)}.
-     * 
-     * @param executor The executor with which to run the task.
-     * 
-     * @throws NullPointerException if {@code executor} is {@code null}.
-     */
-    public static TaskBuilderBuilder builder(Executor executor) {
-        return builder().executor(executor);
-    }
-    
 }

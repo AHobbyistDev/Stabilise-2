@@ -50,7 +50,7 @@ public class CPhysicsImpl extends CPhysics {
         onGround = false;
         
         if(dxi > 1.0f || dxi < -1.0f || dyi > 1.0f || dyi < -1.0f) {
-            int divisor = Maths.ceil(Maths.max(Math.abs(dxi), Math.abs(dyi)));
+            int divisor = Maths.ceil(Math.max(Math.abs(dxi), Math.abs(dyi)));
             float xInc = dxi / divisor;   // x increments
             float yInc = dyi / divisor;   // y increments
             newPos.set(e.pos);
@@ -169,8 +169,8 @@ public class CPhysicsImpl extends CPhysics {
             return false;
         
         // Check the vertical wall of tiles to the left/right of the entity
-        int min = Maths.floor(Maths.min(e.pos.ly(), newPos.ly()) + e.aabb.minY());
-        int max = Maths.floor(Maths.max(e.pos.ly(), newPos.ly()) + e.aabb.maxY());
+        int min = Maths.floor(Math.min(e.pos.ly(), newPos.ly()) + e.aabb.minY());
+        int max = Maths.floor(Math.max(e.pos.ly(), newPos.ly()) + e.aabb.maxY());
         
         tmp1.set(newPos.sx, newPos.sy, newPos.lx()+leadingEdge, min).align();
         for(int y = min; y <= max; y++) {
@@ -198,8 +198,8 @@ public class CPhysicsImpl extends CPhysics {
             return false;
         
         // Check the horizontal wall of tiles at the top/bottom of the entity
-        int min = Maths.floor(Maths.min(e.pos.lx(), newPos.lx()) + e.aabb.minX());
-        int max = Maths.ceil(Maths.max(e.pos.lx(), newPos.lx()) + e.aabb.maxX());
+        int min = Maths.floor(Math.min(e.pos.lx(), newPos.lx()) + e.aabb.minX());
+        int max = Maths.ceil(Math.max(e.pos.lx(), newPos.lx()) + e.aabb.maxX());
         
         tmp1.set(newPos.sx, newPos.sy, min, newPos.ly()+leadingEdge).align();
         for(int x = min; x < max; x++) {

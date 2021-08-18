@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -50,7 +47,7 @@ public class Dependencies {
             System.out.println("Trying " + f.getAbsolutePath());
         if(f.isDirectory()) {
             File[] files = f.listFiles();
-            Arrays.sort(files, (f1, f2) -> f1.getAbsolutePath().compareTo(f2.getAbsolutePath()));
+            Arrays.sort(files, Comparator.comparing(File::getAbsolutePath));
             for(File child : files)
                 doLoadFile(child, badFiles);
         } else {

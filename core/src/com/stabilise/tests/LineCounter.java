@@ -66,7 +66,7 @@ public class LineCounter {
         isr.close();
         fis.close();
         classTotal++;
-        System.out.println(String.format("%4d  %4d - %s", realLines, lines, path.replace(dir, "")));
+        System.out.printf("%4d  %4d - %s%n", realLines, lines, path.replace(dir, ""));
     }
     
     private boolean isComment(String s) {

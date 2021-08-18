@@ -22,8 +22,8 @@ public class BoolBox implements ITag {
     
     /**
      * Returns a BoolBox encapsulating the specified value. This method may be
-     * preferable to constructing a new BoolBox as it reuses {@link TRUE} and
-     * {@link FALSE}.
+     * preferable to constructing a new BoolBox as it reuses {@link #TRUE} and
+     * {@link #FALSE}.
      * 
      * <p>Warning: ONLY use this if you don't plan on changing the boxed value,
      * or things will go very wrong.

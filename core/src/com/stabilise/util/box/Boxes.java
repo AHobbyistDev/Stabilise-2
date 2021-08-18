@@ -17,7 +17,7 @@ public class Boxes {
      * {@link Box#set(Object) set()}.
      */
     public static <T> Box<T> emptyMut() {
-        return new MutBox<T>(null);
+        return new MutBox<>(null);
     }
     
     /**
@@ -35,7 +35,7 @@ public class Boxes {
      * @param object The object to box. May be null.
      */
     public static <T> Box<T> box(T object) {
-        return new MutBox<T>(object);
+        return new MutBox<>(object);
     }
     
     /**
@@ -46,7 +46,7 @@ public class Boxes {
      * @see java.util.concurrent.atomic.AtomicReference
      */
     public static <T> Box<T> boxVolatile(T object) {
-        return new MutVolatileBox<T>(object);
+        return new MutVolatileBox<>(object);
     }
     
     public static BoolBox box(boolean data) {

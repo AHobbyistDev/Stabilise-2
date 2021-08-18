@@ -19,15 +19,15 @@ import com.stabilise.world.tile.tileentity.TileEntity;
 public interface World extends WorldProvider {
     
     /** The file name of the world info file. */
-    public static final String FILE_INFO = "info";
+    String FILE_INFO = "info";
     /** The name of the directory relative to the world dir in which dimension
      * data is stored. */
-    public static final String DIR_DIMENSIONS = "dimensions/";
+    String DIR_DIMENSIONS = "dimensions/";
     /** The name of the directory in which data about individual players is to
      * be stored. */
-    public static final String DIR_PLAYERS = "players/";
+    String DIR_PLAYERS = "players/";
     /** The file extension for player data files. */
-    public static final String EXT_PLAYERS = ".player";
+    String EXT_PLAYERS = ".player";
     
     
     /**
@@ -89,7 +89,7 @@ public interface World extends WorldProvider {
     }
     
     /**
-     * Adds a hitbox to the world. The hitbox's ID is assigned automatically.
+     * Adds a hitbox to the world. The hitbox' ID is assigned automatically.
      * 
      * @param h The hitbox.
      * 
@@ -98,7 +98,7 @@ public interface World extends WorldProvider {
     void addHitbox(Hitbox h);
     
     /**
-     * Adds a particle to the world. This is for {@link ParticleSource} use
+     * Adds a particle to the world. This is for {@link ParticleEmitter} use
      * only!
      * 
      * <p>It is implicitly trusted that {@code p} is non-null.
@@ -140,8 +140,8 @@ public interface World extends WorldProvider {
     FunctionalIterable<Particle> getParticles();
     
     /**
-     * @return The collection of {@link TileEntity.Updated updated} tile
-     * entities in the world.
+     * @return The collection of {@link TileEntity#requiresUpdates() updated}
+     * tile entities in the world.
      */
     FunctionalIterable<TileEntity> getTileEntities();
     
@@ -170,7 +170,8 @@ public interface World extends WorldProvider {
     
     /**
      * Adds a tile entity to the "update list" of tile entities, so that it may
-     * be updated as per {@link TileEntity#updateAndCheck(World)} every tick.
+     * be updated as per {@link TileEntity#updateAndCheck(World, float)} every
+     * tick.
      * The supplied tile entity will only be added if {@link
      * TileEntity#requiresUpdates()} returns {@code true}. To remove a tile
      * entity from the update list, either {@link TileEntity#destroy() destroy}
@@ -193,10 +194,9 @@ public interface World extends WorldProvider {
      * method does nothing asides from invoking {@link TileEntity#destroy()}.
      * 
      * <p>A technical point: {@code t} is not removed from the update list
-     * immediately; rather, it is removed by {@link Iterator#shouldRemove()} while
-     * iterating over the update list iff {@link
-     * TileEntity#updateAndCheck(World)} returns {@code true} (which it should,
-     * as this method invokes {@code t.destroy()}).
+     * immediately; rather, it is removed while iterating over the update list
+     * if {@link TileEntity#updateAndCheck(World, float)} returns {@code true}
+     * (which it should, as this method invokes {@code t.destroy()}).
      * 
      * @throws NullPointerException if {@code t} is {@code null}.
      */

@@ -27,9 +27,9 @@ import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
  */
 public class Game implements Controllable, InputProcessor {
     
-    /** Whether or not the game is currently running. */
+    /** Whether the game is currently running. */
     public boolean running = true;
-    /** Whether or not the game is currently paused. */
+    /** Whether the game is currently paused. */
     public boolean paused = false;
     
     /** Tracks the number of 'elapsed' ticks. Increments even if the game is
@@ -56,7 +56,7 @@ public class Game implements Controllable, InputProcessor {
     /** A reference to the game renderer. TODO: Temporary */
     public WorldRenderer renderer;
     
-    /** Whether or not the debug display is active. */
+    /** Whether the debug display is active. */
     public boolean debug = false;
     
     /** The game profiler. Passed to the multiverse and all worlds and objects
@@ -115,7 +115,6 @@ public class Game implements Controllable, InputProcessor {
                 Log.saveLog(true, "Game crashed but did not shut down.");
                 //close();            // Simply calling close() makes the game freeze
                 a.setState(new MainMenuState());
-                return;
             }
         }
     }
@@ -154,7 +153,7 @@ public class Game implements Controllable, InputProcessor {
      * {@link #closeMenu()} is preferable.
      * 
      * @param menu The menu.
-     * @param pause Whether or not to pause the game.
+     * @param pause Whether to pause the game.
      */
     /*
     public void setMenu(Menu menu, boolean pause) {
@@ -354,7 +353,7 @@ public class Game implements Controllable, InputProcessor {
     }
     
     @Override
-    public boolean scrolled(int amount) {
+    public boolean scrolled(float amountX, float amountY) {
         return false;
     }
     

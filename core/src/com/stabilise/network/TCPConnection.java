@@ -56,12 +56,12 @@ public class TCPConnection {
      * thread encountered an exception and shut down.
      * <p>{@code SHUTDOWN} indicates that a connection is shutting down.
      * <p>{@code TERMINATED} indicates that a connection has been terminated. */
-    private static enum State {
+    private enum State {
             STARTING,
             ACTIVE,
             CLOSE_REQUESTED,
             SHUTDOWN,
-            TERMINATED;
+            TERMINATED
     }
     
     private static final AtomicInteger CONNECTIONS_SERVER = new AtomicInteger(0);
@@ -325,7 +325,7 @@ public class TCPConnection {
                 syncQueue.clear();
             }
             
-            eventsNormal.post(new ProtocolSyncEvent(this, protocol));
+            eventsNormal.dispatch(new ProtocolSyncEvent(this, protocol));
         } else {
             if(!hasInitiallySynced)
                 log.postWarning("Our peer's initial protocol (" + peerProtocol
@@ -393,8 +393,9 @@ public class TCPConnection {
      * been reached.
      * 
      * @throws IOException if an I/O error occurs, or the stream has ended.
-     * @throws FaultyPacketRegistrationException if the packet was registered
-     * incorrectly (in this case the error lies in the registration code).
+     * @throws com.stabilise.network.protocol.Protocol.FaultyPacketRegistrationException
+     * if the packet was registered incorrectly (in this case the error lies in
+     * the registration code).
      */
     @UserThread("ReadThread")
     private void readPacket() throws IOException {
@@ -503,7 +504,7 @@ public class TCPConnection {
                 + packetsReceived + (packetsReceived == 1 ? " packet" : " packets")
                 + " received.");
         
-        eventsStateful.post(EVENT_CLOSED);
+        eventsStateful.dispatch(EVENT_CLOSED);
     }
     
     /**
@@ -585,8 +586,8 @@ public class TCPConnection {
     
     /**
      * Base implementation for TCP read/write threads. Provides an uncaught
-     * exception handler which invokes {@link TCPConnection#requestClose()},
-     * and the {@link #doJoin()} method.
+     * exception handler which invokes {@link
+     * TCPConnection#requestClose(String)}, and the {@link #doJoin()} method.
      */
     private abstract class TCPThread extends Thread {
         

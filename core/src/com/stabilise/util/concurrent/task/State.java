@@ -48,6 +48,6 @@ enum State {
     /**
      * Indicates a task or unit has failed, possibly due to cancellation.
      */
-    FAILED;
+    FAILED
     
 }

@@ -14,9 +14,9 @@ import com.stabilise.world.World;
 public class CEnemyController extends CController {
     
     /** Actions for the current, incredibly simplistic, AI. */
-    private static enum EnumAction {
-        IDLE, MOVE;
-    };
+    private enum EnumAction {
+        IDLE, MOVE
+    }
     
     /** The number of ticks for which the enemy is to continue its current
      * action.*/

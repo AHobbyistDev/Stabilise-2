@@ -16,7 +16,7 @@ public interface IDuplicateResolver<T> {
      * @see #REJECT
      * @see #KEEP_BOTH
      */
-    public static enum Action {
+    enum Action {
         /** Overwrite the old object with the new one. */
         OVERWRITE,
         /** Reject the new object and keep the old one. */

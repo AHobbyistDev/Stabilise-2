@@ -115,18 +115,17 @@ public class Worlds {
         
         // Check all folders in the worlds directory and determine their
         // validity as worlds.
-        for(int i = 0; i < worldDirs.length; i++) {
+        for(FileHandle worldDir : worldDirs) {
             try {
-                WorldInfo info = new WorldInfo(worldDirs[i].name());
+                WorldInfo info = new WorldInfo(worldDir.name());
                 if(!info.getFile().exists())
-                	continue;
+                    continue;
                 info.load(); // throws IOE
                 worlds.add(info);
             } catch(IOException e) {
                 Log.get().postWarning("Could not load world info for world \""
-                        + worldDirs[i].name() + "\"!" + ": "
+                        + worldDir.name() + "\"!" + ": "
                         + e.getClass().getSimpleName() + ": " + e.getMessage());
-                continue;
             }
         }
         
@@ -405,7 +404,7 @@ public class Worlds {
     
     /**
      * Encapsulates the items which may be built and returned by a {@link
-     * World#builder() WorldBuilder}.
+     * Worlds#builder() WorldBuilder}.
      */
     public static class WorldBundle {
         

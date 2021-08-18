@@ -342,7 +342,7 @@ public class Profiler {
     /**
      * A profiling section.
      */
-    private class Section {
+    private static class Section {
         
         /** The section's name. */
         private final String name;
@@ -352,7 +352,7 @@ public class Profiler {
         private long duration = 0L;
         /** true if we're currently timing. */
         private boolean active = false;
-        /** The sections's constituent sections. Lazily initialised by
+        /** The sections' constituent sections. Lazily initialised by
          * getConstituents(); null by default. */
         private Map<String, Section> constituents;
         

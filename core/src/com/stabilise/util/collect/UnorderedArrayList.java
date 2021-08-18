@@ -41,8 +41,8 @@ public class UnorderedArrayList<E>
     
     
     /**
-     * Creates a new UnorderedArrayList with an initial capacity of 16 and a scaling
-     * factor of {@code 2}.
+     * Creates a new UnorderedArrayList with an initial capacity of 16 and a
+     * scaling factor of {@code 2}.
      */
     public UnorderedArrayList() {
         this(16, 2f);
@@ -165,7 +165,6 @@ public class UnorderedArrayList<E>
         return Arrays.copyOf(data, size);
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public <T> T[] toArray(T[] a) {
         // Copied from ArrayList

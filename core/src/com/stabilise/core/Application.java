@@ -64,7 +64,8 @@ public abstract class Application {
     //-----=====Static Constants and Variables=====-----
     //--------------------==========--------------------
     
-    /** The application. */
+    /** Static reference to the Application singleton so that it can be accessed
+     * for convenience through {@link #get()}. */
     private static Application instance;
     
     //--------------------==========--------------------
@@ -76,6 +77,11 @@ public abstract class Application {
      * not abuse access to this. Note that {@link #profiler} is simply this
      * driver's profiler. */
     protected final AppDriver driver;
+    /** The application profiler (strictly speaking, it belongs to {@link
+     * #driver}). It is disabled by default.
+     * <p>This profiler is flushed automatically once per second; to use it,
+     * simply invoke {@code start}, {@code next} and {@code end} where desired. */
+    public final Profiler profiler;
     
     /** The listener which delegates to this Application. */
     private final InternalAppListener listener;
@@ -91,19 +97,17 @@ public abstract class Application {
     /** The application's background executor. */
     private final ExecutorService executor;
     
-    /** Queue of tasks to be exeucted on the main thread (NOT by the
-     * application {@link #executor}. */
+    /** Queue of tasks to be executed on the main thread (NOT by the
+     * application {@link #executor}). */
     private final ClearingQueue<Runnable> queuedTasks = ClearingQueue.create();
     
-    /** {@code true} if the application has been shut down. */
+    /** {@code true} if the application has been shut down. This will be set to
+     * true by {@link #lcListener} when it detects a shutdown. */
     private boolean stopped = false;
     /** {@code true} if the application is crashing. */
     private boolean crashing = false;
     
-    /** The application profiler. It is disabled by default.
-     * <p>This profiler is flushed automatically once per second; to use it,
-     * simply invoke {@code start}, {@code next} and {@code end} where desired. */
-    public final Profiler profiler;
+    
     
     private final Log log;
     
@@ -242,7 +246,7 @@ public abstract class Application {
     
     /**
      * Executes an update tick. This method is invoked a number of times per
-     * second equivalent to {@link #ticksPerSecond} specified in the
+     * second equivalent to {@code ticksPerSecond} as specified in the
      * Application constructor. The current state has {@link State#update()
      * update()} invoked immediately after this method is invoked.
      * 
@@ -328,7 +332,7 @@ public abstract class Application {
     /**
      * Crashes the application.
      * 
-     * <p>The application will attempt to shutdown as per an invocation of
+     * <p>The application will attempt to shut down as per an invocation of
      * {@link #shutdown()}, however it should be noted that depending on the
      * state of the application, doing so may not be possible.
      * 
@@ -338,7 +342,7 @@ public abstract class Application {
      */
     public final void crash(Throwable t) {
         if(crashing)        // TODO: Possibly append a log entry detailing the
-            return;         // double-crash and re-save the log?
+            return;         //       double-crash and re-save the log?
         crashing = true;
         if(t == null)
             t = new Exception(dummyExceptionMsg());
@@ -457,8 +461,8 @@ public abstract class Application {
     }
     
     /**
-     * Returns executor which runs tasks on the main thread. The tasks are run
-     * immediately after the next update tick.
+     * Returns an executor which runs tasks on the main thread. The tasks are
+     * run immediately after the next update tick.
      * 
      * <p>Note that this executor is very different to the one returned by
      * {@link #getExecutor()}.
@@ -490,7 +494,6 @@ public abstract class Application {
     public static Application create(int ticksPerSecond, Supplier<State> initialState) {
         Objects.requireNonNull(initialState);
         return new Application(ticksPerSecond) {
-            
             @Override
             protected State getInitialState() {
                 return initialState.get();
@@ -544,7 +547,7 @@ public abstract class Application {
      * 
      * @throws NullPointerException if an Application is not running (i.e., if
      * {@link #get()} would return {@code null}).
-     * @see Application#crash(Exception)
+     * @see Application#crash(Throwable)
      */
     public static void crashApplication(Throwable t) {
         instance.crash(t);

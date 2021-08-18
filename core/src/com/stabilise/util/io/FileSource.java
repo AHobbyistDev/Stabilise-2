@@ -132,14 +132,14 @@ public abstract class FileSource extends InputStream {
     }
     
     /**
-     * Polls for whether or not this is a {@link CachedFileSource}.
+     * Polls for whether this is a {@link CachedFileSource}.
      */
     public boolean isCached() {
         return this instanceof CachedFileSource;
     }
     
     /**
-     * Checks for whether or not this source has remaining bytes to send.
+     * Checks for whether this source has remaining bytes to send.
      */
     public boolean hasRemainingBytes() {
         try {

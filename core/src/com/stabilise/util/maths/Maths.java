@@ -56,8 +56,8 @@ public class Maths {
     
     
     /**
-     * Calculates whether or not a number is a power of two. Note that this
-     * method will erroneously report {@code 0} as a power of two.
+     * Calculates whether a number is a power of two. Note that this method will
+     * erroneously report {@code 0} as a power of two.
      * 
      * @return {@code true} if {@code n} is a power of two; {@code false}
      * otherwise.
@@ -307,10 +307,12 @@ public class Maths {
      * <p>Unlike {@link Math#min(float, float)}, this method does not perform
      * any 'unnecessary' computation (refer to Math.min() source to determine
      * which is preferable).
+     *
+     * @deprecated just use Math.min() aiya
      */
-    public static float min(float a, float b) {
-        return a < b ? a : b;
-    }
+    //public static float min(float a, float b) {
+    //    return a < b ? a : b;
+    //}
     
     /**
      * Returns the greater of the two provided numbers.
@@ -318,10 +320,12 @@ public class Maths {
      * <p>Unlike {@link Math#max(float, float)}, this method does not perform
      * any 'unnecessary' computation (refer to Math.max() source to determine
      * which is preferable).
+     *
+     * @deprecated Just use Math.max() aiya
      */
-    public static float max(float a, float b) {
-        return a > b ? a : b;
-    }
+    //public static float max(float a, float b) {
+    //    return a > b ? a : b;
+    //}
     
     /*
      * Calculates the inverse square root of {@code x}, or
@@ -431,8 +435,9 @@ public class Maths {
      * 
      * @param maxElements The maximum number of elements which are expected to
      * appear in the table.
-     * @param negateHashMapShift Whether or not to negate a background shift
-     * performed by certain map implementations.
+     * @param negateHashMapShift Whether to negate a background shift performed
+     * by certain map implementations. Doing so may result in less undesirable
+     * hash collisions.
      * 
      * @throws IllegalArgumentException if {@code maxElements <= 0}.
      */

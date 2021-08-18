@@ -174,9 +174,9 @@ public class CPerson extends CBaseMob {
     /** The person's mana. */
     public int mana;
     
-    /** Whether or not the mob's health changed since the last tick. */
+    /** Whether the mob's health changed since the last tick. */
     public boolean healthChanged = false;
-    /** Whether or not the mob's mana changed since the last tick. */
+    /** Whether the mob's mana changed since the last tick. */
     public boolean manaChanged = false;
     
     /** The number of ticks since the mob last lost health. */

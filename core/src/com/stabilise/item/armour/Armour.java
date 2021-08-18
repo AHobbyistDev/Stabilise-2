@@ -10,7 +10,7 @@ import com.stabilise.util.annotation.Incomplete;
 @Incomplete
 public class Armour extends Item {
     
-    public static enum ArmourType {
+    public enum ArmourType {
         HEAD, BODY, ARMS, LEGS
     }
     

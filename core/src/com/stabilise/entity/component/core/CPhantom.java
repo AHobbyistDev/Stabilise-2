@@ -17,7 +17,7 @@ import com.stabilise.world.World;
  * out with those of the phantom; the original then becomes the phantom.
  * 
  * @see CPortal
- * @see CNearbyPortal
+ * @see com.stabilise.entity.component.CNearbyPortal
  */
 public class CPhantom extends CCore {
     

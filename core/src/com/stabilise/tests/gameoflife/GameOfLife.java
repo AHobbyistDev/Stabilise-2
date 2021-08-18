@@ -36,8 +36,7 @@ public class GameOfLife {
         
         // again but no params
         for(Result r : results) {
-            System.out.println(
-                    String.format("%5d (%3d/%2d)", r.mana, r.cellsReduced, r.gen));
+            System.out.printf("%5d (%3d/%2d)%n", r.mana, r.cellsReduced, r.gen);
         }
         
         DataCompound saveData = DataCompound.create();

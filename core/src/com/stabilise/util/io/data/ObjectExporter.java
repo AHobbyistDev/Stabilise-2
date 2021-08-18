@@ -23,11 +23,10 @@ public class ObjectExporter {
     //private static final Log LOG_IMP = Log.getAgent("DataImporter");
     
     // No final fields and no transient fields
-    private static final Predicate<Field> ALLOWED_TO_EXPORT = f -> {
-        return !Modifier.isFinal(f.getModifiers()) && !Modifier.isTransient(f.getModifiers());
-    };
+    private static final Predicate<Field> ALLOWED_TO_EXPORT = f ->
+            !Modifier.isFinal(f.getModifiers()) && !Modifier.isTransient(f.getModifiers());
     
-    private ObjectExporter() {} // non-instnatiable
+    private ObjectExporter() {} // non-instantiable
     
     
     /**

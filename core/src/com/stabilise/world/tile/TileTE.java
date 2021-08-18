@@ -1,7 +1,6 @@
 package com.stabilise.world.tile;
 
 import com.stabilise.entity.Position;
-import com.stabilise.world.World;
 import com.stabilise.world.WorldProvider;
 import com.stabilise.world.tile.tileentity.TileEntity;
 
@@ -18,7 +17,7 @@ public abstract class TileTE<T extends TileEntity> extends Tile {
     
     /**
      * Creates the TileEntity. This is invoked by {@link
-     * #handlePlace(World, Position)}.
+     * #handlePlace(WorldProvider, Position)}.
      * 
      * @return The tile entity. Never null.
      */

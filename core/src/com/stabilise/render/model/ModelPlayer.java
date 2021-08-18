@@ -117,7 +117,7 @@ public class ModelPlayer extends Model {
     /**
      * Sets the horizontal flip of the model.
      * 
-     * @param flipped Whether or not the model should be flipped.
+     * @param flipped Whether the model should be flipped.
      */
     public void setFlipped(boolean flipped) {
         if(this.flipped == flipped)

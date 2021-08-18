@@ -21,7 +21,7 @@ public class DataInStream extends DataInputStream {
      * @throws IOException if an I/O error occurs.
      */
     public String readString() throws IOException {
-        int length = (int)readShort();
+        int length = readShort();
         StringBuilder sb = new StringBuilder(length);
         while(length-- > 0)
             sb.append(readChar());

@@ -137,7 +137,7 @@ public class Version implements Comparable<Version>, Printable, Cloneable {
      * Returns {@code true} if this is an earlier version than {@code v}.
      */
     public boolean precedes(Version v) {
-        return compareTo(v) == -1;
+        return compareTo(v) < 0;
     }
     
     /**

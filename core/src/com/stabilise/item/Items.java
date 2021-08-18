@@ -4,7 +4,7 @@ package com.stabilise.item;
  * This class contains explicit references to all the items in the game.
  * 
  * <p>Note that this class should only be loaded into memory <i>after</i>
- * {@link Item.ITEMS} has been populated by invocation of
+ * {@link Item#ITEMS} has been populated by invocation of
  * {@link Item#registerItems()}.
  */
 public class Items {
@@ -19,7 +19,7 @@ public class Items {
     static {
         if(!Item.isRegistered())
             throw new IllegalStateException(
-                    Items.class.toString() + " loaded into memory before"
+                    Items.class + " loaded into memory before"
                             + "Item.registerItems() was invoked!"
             );
     }

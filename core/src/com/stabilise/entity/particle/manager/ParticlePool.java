@@ -107,7 +107,7 @@ class ParticlePool<T extends Particle> {
     /**
      * Reclaims a particle into this pool. This should only be invoked by a
      * particle when it is registered as destroyed (i.e. from within
-     * {@link Particle#updateAndCheck(World)}).
+     * {@link Particle#updateAndCheck(World, float)}).
      */
     @SuppressWarnings("unchecked")
     public void reclaim(Particle p) {
