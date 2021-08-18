@@ -189,10 +189,10 @@ public class CPlayerController extends CController implements Controllable, Inpu
                 world.getTileAt(p).handleInteract(world, p, e);
                 break;
             case PREV_TILE:
-                scrolled(-1);
+                scrolled(0,-1);
                 break;
             case NEXT_TILE:
-                scrolled(1);
+                scrolled(0,1);
                 break;
             case CLEAR_INVENTORY:
                 if(e.core instanceof IContainer)
@@ -308,13 +308,13 @@ public class CPlayerController extends CController implements Controllable, Inpu
     }
     
     @Override
-    public boolean scrolled(int amount) {
+    public boolean scrolled(float amountX, float amountY) {
         if(Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
-            radius -= amount;
+            radius -= amountY;
             if(radius < 1)
                 radius = 0.5f;
         } else
-            tileID = 1 + Maths.remainder(tileID + amount - 1, maxTileID);
+            tileID = 1 + Maths.remainder(tileID + (int)amountY - 1, maxTileID);
         return true;
     }
     

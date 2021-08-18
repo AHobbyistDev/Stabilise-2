@@ -135,7 +135,7 @@ public class TileRenderer implements Renderer {
                 int id = slice.getWallIDAt(tx, ty);
                 if(id != 0 && pred.test(cx, cy)) { // i.e. not air
                     // Temporary wall lighting; 2 + light/2
-                    wr.batch.setColor(lightLevels[1 + slice.getLightAt(tx, ty)/4]);
+                    wr.batch.setPackedColor(lightLevels[1 + slice.getLightAt(tx, ty)/4]);
                     wr.batch.draw(tiles[id], cx, cy, 1f, 1f);
                 }
                 cx += 1f;
@@ -150,7 +150,7 @@ public class TileRenderer implements Renderer {
             for(int tx = xMin; tx <= xMax; tx++) {
                 int id = slice.getTileIDAt(tx, ty);
                 if(id != 0 && pred.test(cx, cy)) { // i.e. not air
-                    wr.batch.setColor(lightLevels[slice.getLightAt(tx, ty)]);
+                    wr.batch.setPackedColor(lightLevels[slice.getLightAt(tx, ty)]);
                     wr.batch.draw(tiles[id], cx, cy, 1f, 1f);
                 }
                 cx += 1f;
