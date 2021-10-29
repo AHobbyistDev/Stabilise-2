@@ -401,7 +401,7 @@ public abstract class CBaseMob extends CCore {
     
     protected void dropItem(World w, Entity e, Item item, int quantity, float chance) {
         if(w.chance(chance)) {
-            Entity ei = Entities.item(w, item.stackOf(quantity));
+            Entity ei = Entities.item(item.stackOf(quantity));
             ei.pos.set(e.pos);
             w.addEntity(ei);
         }

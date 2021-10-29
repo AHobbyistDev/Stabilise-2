@@ -117,7 +117,7 @@ public class Settings {
     }
     
     /**
-     * Checks for whether or not the particles setting is that of the 'all
+     * Checks for whether the particles setting is that of the 'all
      * particles' value. An invocation of this is equivalent to:
      * </pre>
      * {@code Settings.getSettingParticles() == Settings.PARTICLES_ALL}
@@ -131,7 +131,7 @@ public class Settings {
     }
     
     /**
-     * Checks for whether or not the particles setting is that of the 'reduced
+     * Checks for whether the particles setting is that of the 'reduced
      * particles' value. An invocation of this is equivalent to:
      * </pre>
      * {@code Settings.getSettingParticles() == Settings.PARTICLES_REDUCED}
@@ -145,7 +145,7 @@ public class Settings {
     }
     
     /**
-     * Checks for whether or not the particles setting is that of the 'no
+     * Checks for whether the particles setting is that of the 'no
      * particles' value. An invocation of this is equivalent to:
      * </pre>
      * {@code Settings.getSettingParticles() == Settings.PARTICLES_NONE}

@@ -2,7 +2,7 @@ package com.stabilise.util.concurrent.task;
 
 
 /**
- * Possible states for a task and its units to occupy.
+ * Possible states for a Task and its units to occupy.
  */
 enum State {
     

@@ -20,7 +20,7 @@ import com.stabilise.entity.event.EntityEvent;
 import com.stabilise.entity.event.EntityEvent.Type;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
-import com.stabilise.input.Controller.Control;
+import com.stabilise.input.GameControl;
 import com.stabilise.item.IContainer;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Direction;
@@ -36,13 +36,13 @@ import com.stabilise.world.tile.Tiles;
  * A PlayerController is an entity controller component which is managed by
  * player input.
  */
-public class CPlayerController extends CController implements Controllable, InputProcessor {
+public class CPlayerController extends CController implements Controllable<GameControl>, InputProcessor {
     
     private Entity e;
     private CBaseMob mob;
     
     /** A reference to the PlayerController's controller. */
-    public Controller controller;
+    public Controller<GameControl> controller;
     
     /** A reference to the game. (TODO: hopefully temporary?) */
     public final Game game;
@@ -83,20 +83,20 @@ public class CPlayerController extends CController implements Controllable, Inpu
     
     @Override
     public void update(World world, Entity e, float dt) {
-        if(controller.isControlPressed(Control.LEFT) && controller.isControlPressed(Control.RIGHT))
+        if(controller.isControlPressed(GameControl.LEFT) && controller.isControlPressed(GameControl.RIGHT))
             ;// do nothing
-        else if(controller.isControlPressed(Control.LEFT))
+        else if(controller.isControlPressed(GameControl.LEFT))
             mob.move(Direction.LEFT);
-        else if(controller.isControlPressed(Control.RIGHT))
+        else if(controller.isControlPressed(GameControl.RIGHT))
             mob.move(Direction.RIGHT);
         
-        if(controller.isControlPressed(Control.FLYRIGHT))
+        if(controller.isControlPressed(GameControl.FLYRIGHT))
             e.dx += 1f;
-        if(controller.isControlPressed(Control.FLYLEFT))
+        if(controller.isControlPressed(GameControl.FLYLEFT))
             e.dx -= 1f;
-        if(controller.isControlPressed(Control.FLYUP))
+        if(controller.isControlPressed(GameControl.FLYUP))
             e.dy += 1f;
-        if(controller.isControlPressed(Control.FLYDOWN))
+        if(controller.isControlPressed(GameControl.FLYDOWN))
             e.dy -= 1f;
         
         if(worldRenderer == null) {
@@ -131,23 +131,23 @@ public class CPlayerController extends CController implements Controllable, Inpu
     }
     
     @Override
-    public boolean handleControlPress(Control control) {
+    public boolean handleControlPress(GameControl control, int screenX, int screenY, float amount) {
         switch(control) {
             case JUMP:
                 mob.jump();
                 break;
             case ATTACK:
-                if(controller.isControlPressed(Control.UP))
+                if(controller.isControlPressed(GameControl.UP))
                     mob.attack(world, Direction.UP);
-                else if(controller.isControlPressed(Control.DOWN))
+                else if(controller.isControlPressed(GameControl.DOWN))
                     mob.attack(world, Direction.DOWN);
                 else
                     mob.attack(world, mob.facingRight ? Direction.RIGHT : Direction.LEFT);
                 break;
             case SPECIAL:
-                if(controller.isControlPressed(Control.UP))
+                if(controller.isControlPressed(GameControl.UP))
                     mob.specialAttack(world, Direction.UP);
-                else if(controller.isControlPressed(Control.DOWN))
+                else if(controller.isControlPressed(GameControl.DOWN))
                     mob.specialAttack(world, Direction.DOWN);
                 else
                     mob.specialAttack(world, mob.facingRight ? Direction.RIGHT : Direction.LEFT);
@@ -235,7 +235,7 @@ public class CPlayerController extends CController implements Controllable, Inpu
     }
     
     @Override
-    public boolean handleControlRelease(Control control) {
+    public boolean handleControlRelease(GameControl control, int screenX, int screenY) {
         return false;
     }
     

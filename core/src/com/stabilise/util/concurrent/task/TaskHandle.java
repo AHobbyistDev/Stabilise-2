@@ -84,7 +84,7 @@ public interface TaskHandle {
     }
     
     /**
-     * Checks for whether or not the task has been cancelled.
+     * Checks for whether the task has been cancelled.
      * 
      * @return {@code true} if the task has been cancelled; {@code false}
      * otherwise.
@@ -99,8 +99,8 @@ public interface TaskHandle {
      * <p>All non-parallel subtasks will be executed sequentially in order
      * of submission.
      * 
-     * @param parallel Whether or not to execute the subtask in parallel with
-     * other subtasks.
+     * @param parallel Whether to execute the subtask in parallel with other
+     * subtasks.
      * @param r The subtask.
      * 
      * @throws NullPointerException if {@code r} is {@code null}.

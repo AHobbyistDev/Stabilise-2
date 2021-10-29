@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.RandomAccess;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -85,7 +84,7 @@ import com.stabilise.util.Checks;
  * </pre>
  */
 @NotThreadSafe
-public class FragList<E> implements SimpleList<E>, RandomAccess {
+public class FragList<E> implements SimpleList<E> {
     
     /** The backing array.
      * Invariant: length >= size */
@@ -323,7 +322,7 @@ public class FragList<E> implements SimpleList<E>, RandomAccess {
         for(int i = 0; i < Math.min(32, data.length); i++) {
             sb.append("  [");
             if(i == lastElement && i == firstNull)
-                sb.append("FILA");
+                sb.append("FILA"); // wtf does this mean, past me?
             else if(i == firstNull)
                 sb.append("NULL");
             else if(i == lastElement)

@@ -88,7 +88,7 @@ public abstract class Shape implements Exportable {
      * each of its vertices, where applicable, and returns the transformed
      * shape. Each vertex is transformed by
      * <a href=http://en.wikipedia.org/wiki/Matrix_multiplication> multiplying
-     * </a> the the given transformation matrix by said vertex's representative
+     * </a> the given transformation matrix by said vertex's representative
      * 2D vector. This shape is unmodified.
      * 
      * @param m The transformation matrix.

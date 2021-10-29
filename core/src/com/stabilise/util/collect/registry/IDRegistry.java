@@ -156,7 +156,7 @@ public class IDRegistry<K, V> extends Registry<K, V> {
         for(Iterator<Map.Entry<K,V>> i = objects.entrySet().iterator(); i.hasNext();) {
             sb.append("    ");
             Map.Entry<K,V> e = i.next();
-            sb.append(idMap.getKey(e.getKey())).append(": ");
+            sb.append(idMap.getKey(e.getValue())).append(": ");
             sb.append(e.getKey()).append(": ").append(e.getValue());
             if(i.hasNext()) sb.append(',');
             sb.append('\n');

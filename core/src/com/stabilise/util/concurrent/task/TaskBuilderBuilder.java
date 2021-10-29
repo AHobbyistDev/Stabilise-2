@@ -42,7 +42,7 @@ public final class TaskBuilderBuilder {
     /**
      * Sets the task executor.
      * 
-     * @throws IllegalStateException if task building has already began, or the
+     * @throws IllegalStateException if task building has already begun, or the
      * executor has already been set.
      * @throws NullPointerException if {@code executor} is {@code null}.
      */
@@ -57,7 +57,7 @@ public final class TaskBuilderBuilder {
     /**
      * Sets the task name.
      * 
-     * @throws IllegalStateException if task building has already began.
+     * @throws IllegalStateException if task building has already begun.
      * @throws NullPointerException if {@code name} is {@code null}.
      */
     public TaskBuilderBuilder name(String name) {
@@ -69,7 +69,7 @@ public final class TaskBuilderBuilder {
     /**
      * Sets the ReportStrategy to apply to top-level task units.
      * 
-     * @throws IllegalStateException if task building has already began, or the
+     * @throws IllegalStateException if task building has already begun, or the
      * strategy has already been set.
      * @throws NullPointerException if {@code strategy} is {@code null}.
      */
@@ -84,24 +84,24 @@ public final class TaskBuilderBuilder {
     /**
      * Begins building a {@link Task}.
      * 
-     * @throws IllegalStateException if task building has already began, or the
+     * @throws IllegalStateException if task building has already begun, or the
      * executor hasn't been set.
      */
     public TaskBuilder<Void, Task> begin() {
         checkState();
-        return new TaskBuilder<Void, Task>(this);
+        return new TaskBuilder<>(this);
     }
     
     /**
      * Begins building a {@link ReturnTask}.
      * 
-     * @throws IllegalStateException if task building has already began, or the
+     * @throws IllegalStateException if task building has already begun, or the
      * executor hasn't been set.
      */
     public <T> TaskBuilder<T, ReturnTask<T>> beginReturn() {
         checkState();
         this.retBox = new ReturnBox<T>();
-        return new TaskBuilder<T, ReturnTask<T>>(this);
+        return new TaskBuilder<>(this);
     }
     
     /**
@@ -111,7 +111,7 @@ public final class TaskBuilderBuilder {
      * to coerce the compiler to properly infer type arguments (since it fails
      * to do so otherwise and requires casting).
      * 
-     * @throws IllegalStateException if task building has already began, or the
+     * @throws IllegalStateException if task building has already begun, or the
      * executor hasn't been set.
      */
     public <T> TaskBuilder<T, ReturnTask<T>> beginReturn(Class<T> clazz) {

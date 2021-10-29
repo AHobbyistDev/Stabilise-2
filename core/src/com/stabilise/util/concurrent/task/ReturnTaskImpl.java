@@ -1,17 +1,17 @@
 package com.stabilise.util.concurrent.task;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * A ReturnTask, much like a {@link Future}, encapsulates an asynchronous
  * computation. Asides from its associated return value, a ReturnTask is
  * otherwise equivalent to an ordinary Task.
  */
-public class ReturnTaskImpl<T> extends TaskImpl implements ReturnTask<T> {
+class ReturnTaskImpl<T> extends TaskImpl implements ReturnTask<T> {
     
     private final ReturnBox<T> retVal;
     
@@ -44,13 +44,13 @@ public class ReturnTaskImpl<T> extends TaskImpl implements ReturnTask<T> {
     }
     
     @Override
-    public T get(long time, TimeUnit unit) throws InterruptedException,
-            ExecutionException, TimeoutException {
+    public Optional<T> get(long time, TimeUnit unit) throws InterruptedException,
+            ExecutionException {
         if(!await(time, unit))
-            throw new TimeoutException();
+            return Optional.empty();
         if(failed())
             throw new ExecutionException("Task did not complete successfully", failCause.get());
-        return retVal.get(failCause);
+        return Optional.of(retVal.get(failCause));
     }
     
     @Override

@@ -9,9 +9,9 @@ import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
-import com.stabilise.util.io.data.ITag;
+import com.stabilise.util.io.data.IData;
 
-public class StringBox extends MutBox<String> implements ITag {
+public class StringBox extends MutBox<String> implements IData {
     
     /** Returns an empty string */
     public static String defaultValue() { return ""; }
@@ -79,25 +79,43 @@ public class StringBox extends MutBox<String> implements ITag {
     
     
     @Override
-    public boolean isCompatibleType(ITag other) {
-        return other.isString();
+    public DataType type() {
+        return DataType.STRING;
     }
     
     @Override
-    public ITag convertToSameType(ITag other) {
-        if(isSameType(other))
-            return other;
-        return new StringBox(other.getAsString());
+    public boolean canConvertToType(DataType type) {
+        switch(type) {
+            case STRING:
+                return true;
+            default:
+                return false;
+        }
     }
     
-    @Override public boolean isBoolean() { return false; }
-    @Override public boolean isLong()    { return false; }
-    @Override public boolean isDouble()  { return false; }
-    @Override public boolean isString()  { return true;  }
+    @Override
+    public IData convertToType(DataType type) {
+        switch(type) {
+            case STRING:
+                return new StringBox(value);
+            default:
+                throw new RuntimeException("Illegal conversion: String --> " + type);
+        }
+    }
     
-    @Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert string to boolean... yet"); }
-    @Override public long    getAsLong()    { throw Checks.ISE("Can't convert string to long... yet");    }
-    @Override public double  getAsDouble()  { throw Checks.ISE("Can't convert string to double... yet");  }
-    @Override public String  getAsString()  { return value;                                               }
+    //@Override public boolean isBoolean() { return false; }
+    //@Override public boolean isLong()    { return false; }
+    //@Override public boolean isDouble()  { return false; }
+    //@Override public boolean isString()  { return true;  }
+    
+    //@Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert string to boolean... yet"); }
+    //@Override public long    getAsLong()    { throw Checks.ISE("Can't convert string to long... yet");    }
+    //@Override public double  getAsDouble()  { throw Checks.ISE("Can't convert string to double... yet");  }
+    //@Override public String  getAsString()  { return value;                                               }
+    
+    @Override
+    public StringBox duplicate() {
+        return new StringBox(value);
+    }
     
 }

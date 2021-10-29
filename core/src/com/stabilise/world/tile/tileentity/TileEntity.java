@@ -137,7 +137,7 @@ public abstract class TileEntity extends GameObject implements Exportable {
      * 
      * @return The tile entity, or {@code null} if it could not be constructed
      * for whatever reason.
-     * @throws NullPointerException if {@code tag} is {@code null}.
+     * @throws NullPointerException if {@code c} is {@code null}.
      * @throws RuntimeException if tile entity creation failed.
      */
     public static TileEntity createFromCompound(DataCompound c) {

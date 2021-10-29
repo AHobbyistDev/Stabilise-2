@@ -36,7 +36,7 @@ public class TileEntityChest extends TileEntity {
     @Override
     public void handleRemove(World world) {
         for(ItemStack s : items) {
-            Entity e = Entities.item(world, s);
+            Entity e = Entities.item(s);
             e.pos.set(pos, 0.5f, 0.5f);
             world.addEntity(e);
         }

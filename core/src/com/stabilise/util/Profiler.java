@@ -56,9 +56,9 @@ public class Profiler {
      * section being {@link #root}. */
     private final Deque<Section> stack = new ArrayDeque<>();
     
-    /** Whether or not profiling is enabled. */
+    /** Whether profiling is enabled. */
     private boolean enabled;
-    /** Whether or not profiling should be treated as enabled. */
+    /** Whether profiling should be treated as enabled. */
     private boolean effectivelyEnabled;
     
     /** {@code true} if the root section should be reset on flush. */

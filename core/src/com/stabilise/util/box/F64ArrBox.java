@@ -4,18 +4,17 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
-import com.stabilise.util.Checks;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
-import com.stabilise.util.io.data.ITag;
+import com.stabilise.util.io.data.IData;
 
 
 /**
  * Boxes an array of doubles.
  */
-public class F64ArrBox implements ITag {
+public class F64ArrBox implements IData {
     
     /** Returns a zero-length array */
     public static double[] defaultValue() { return new double[0]; }
@@ -87,20 +86,80 @@ public class F64ArrBox implements ITag {
     
     
     @Override
-    public ITag convertToSameType(ITag other) {
-        if(isSameType(other))
-            return other;
-        throw Checks.ISE("Can't convert " + other.getClass().getSimpleName() + "to byte array");
+    public DataType type() {
+        return DataType.F64ARR;
     }
     
-    @Override public boolean isBoolean() { return false; }
-    @Override public boolean isLong()    { return false; }
-    @Override public boolean isDouble()  { return false; }
-    @Override public boolean isString()  { return true;  }
+    @Override
+    public boolean canConvertToType(DataType type) {
+        switch(type) {
+            case F32ARR:
+            case F64ARR:
+            case STRING:
+                return true;
+            default:
+                return false;
+        }
+    }
     
-    @Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert double array to boolean... yet"); }
-    @Override public long    getAsLong()    { throw Checks.ISE("Can't convert double array to long... yet");    }
-    @Override public double  getAsDouble()  { throw Checks.ISE("Can't convert double array to double... yet");  }
-    @Override public String  getAsString()  { return Arrays.toString(value);                                   }
+    @Override
+    public IData convertToType(DataType type) {
+        switch(type) {
+            case I8ARR:
+            {
+                byte[] data = new byte[value.length];
+                for(int i = 0; i < value.length; i++)
+                    data[i] = (byte) value[i];
+                return new I8ArrBox(data);
+            }
+            case I32ARR:
+            {
+                int[] data = new int[value.length];
+                for(int i = 0; i < value.length; i++)
+                    data[i] = (int) value[i];
+                return new I32ArrBox(data);
+            }
+            case I64ARR:
+            {
+                long[] data = new long[value.length];
+                for(int i = 0; i < value.length; i++)
+                    data[i] = (long) value[i];
+                return new I64ArrBox(data);
+            }
+            case F32ARR:
+            {
+                float[] data = new float[value.length];
+                for(int i = 0; i < value.length; i++)
+                    data[i] = (float) value[i];
+                return new F32ArrBox(data);
+            }
+            case F64ARR:
+            {
+                double[] data = new double[value.length];
+                for(int i = 0; i < value.length; i++)
+                    data[i] = value[i];
+                return new F64ArrBox(data);
+            }
+            case STRING:
+                return new StringBox(Arrays.toString(value));
+            default:
+                throw new RuntimeException("Illegal conversion: F64Arr --> " + type);
+        }
+    }
+    
+    //@Override public boolean isBoolean() { return false; }
+    //@Override public boolean isLong()    { return false; }
+    //@Override public boolean isDouble()  { return false; }
+    //@Override public boolean isString()  { return true;  }
+    
+    //@Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert double array to boolean... yet"); }
+    //@Override public long    getAsLong()    { throw Checks.ISE("Can't convert double array to long... yet");    }
+    //@Override public double  getAsDouble()  { throw Checks.ISE("Can't convert double array to double... yet");  }
+    //@Override public String  getAsString()  { return Arrays.toString(value);                                   }
+    
+    @Override
+    public F64ArrBox duplicate() {
+        return new F64ArrBox(value.clone());
+    }
     
 }

@@ -9,12 +9,12 @@ import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.DataList;
-import com.stabilise.util.io.data.ITag;
+import com.stabilise.util.io.data.IData;
 
 /**
  * Boxes an array of bytes.
  */
-public class I8ArrBox implements ITag {
+public class I8ArrBox implements IData {
     
     /** Returns a zero-length array */
     public static byte[] defaultValue() { return new byte[0]; }
@@ -83,20 +83,80 @@ public class I8ArrBox implements ITag {
     
     
     @Override
-    public ITag convertToSameType(ITag other) {
-        if(isSameType(other))
-            return other;
-        throw Checks.ISE("Can't convert " + other.getClass().getSimpleName() + "to byte array");
+    public DataType type() {
+        return DataType.I8ARR;
     }
     
-    @Override public boolean isBoolean() { return false; }
-    @Override public boolean isLong()    { return false; }
-    @Override public boolean isDouble()  { return false; }
-    @Override public boolean isString()  { return true;  }
+    @Override
+    public boolean canConvertToType(DataType type) {
+        switch(type) {
+            case I8ARR:
+            case I32ARR:
+            case I64ARR:
+            case F32ARR:
+            case F64ARR:
+            case STRING:
+                return true;
+            default:
+                return false;
+        }
+    }
     
-    @Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert byte array to boolean... for now"); }
-    @Override public long    getAsLong()    { throw Checks.ISE("Can't convert byte array to long... for now");    }
-    @Override public double  getAsDouble()  { throw Checks.ISE("Can't convert byte array to double... for now");  }
-    @Override public String  getAsString()  { return Arrays.toString(value);                                      }
+    @Override
+    public IData convertToType(DataType type) {
+        switch(type) {
+            case I8ARR:
+            {
+                return new I8ArrBox(value.clone());
+            }
+            case I32ARR:
+            {
+                int[] data = new int[value.length];
+                for(int i = 0; i < value.length; i++)
+                    data[i] = value[i];
+                return new I32ArrBox(data);
+            }
+            case I64ARR:
+            {
+                long[] data = new long[value.length];
+                for(int i = 0; i < value.length; i++)
+                    data[i] = value[i];
+                return new I64ArrBox(data);
+            }
+            case F32ARR:
+            {
+                float[] data = new float[value.length];
+                for(int i = 0; i < value.length; i++)
+                    data[i] = value[i];
+                return new F32ArrBox(data);
+            }
+            case F64ARR:
+            {
+                double[] data = new double[value.length];
+                for(int i = 0; i < value.length; i++)
+                    data[i] = value[i];
+                return new F64ArrBox(data);
+            }
+            case STRING:
+                return new StringBox(Arrays.toString(value));
+            default:
+                throw new RuntimeException("Illegal conversion: I8Arr --> " + type);
+        }
+    }
+    
+    //@Override public boolean isBoolean() { return false; }
+    //@Override public boolean isLong()    { return false; }
+    //@Override public boolean isDouble()  { return false; }
+    //@Override public boolean isString()  { return true;  }
+    
+    //@Override public boolean getAsBoolean() { throw Checks.ISE("Can't convert byte array to boolean... for now"); }
+    //@Override public long    getAsLong()    { throw Checks.ISE("Can't convert byte array to long... for now");    }
+    //@Override public double  getAsDouble()  { throw Checks.ISE("Can't convert byte array to double... for now");  }
+    //@Override public String  getAsString()  { return Arrays.toString(value);                                      }
+    
+    @Override
+    public I8ArrBox duplicate() {
+        return new I8ArrBox(value.clone());
+    }
     
 }

@@ -1,5 +1,6 @@
 package com.stabilise.entity;
 
+import com.badlogic.gdx.math.Vector2;
 import com.stabilise.entity.component.Component;
 import com.stabilise.entity.component.controller.CController;
 import com.stabilise.entity.component.controller.CPlayerController;
@@ -41,6 +42,13 @@ public class Entity extends GameObject implements Exportable {
      * collision with tiles) and for hitbox detection. However, for entities
      * which do not move nor get hit (e.g. portals), this often goes unused. */
     public AABB        aabb;
+    
+    // Rotational data (WORK-IN-PROGRESS)
+    /** The rotational angle of this entity, in degrees measured anticlockwise
+     * from "upwards" */
+    public float       angle = 0f;
+    /** Normal vector that points in this entity's "up" direction. */
+    public Vector2     upDirection = new Vector2(0, 1);
     
     // The three privileged components
     public CCore       core;
@@ -183,7 +191,7 @@ public class Entity extends GameObject implements Exportable {
      * Component#handle(World, Entity, EntityEvent) handle} method returns
      * true, propagation of the event is halted and this method returns false.
      * 
-     * @return true if if the event was fully handled, i.e. no component
+     * @return true if the event was fully handled, i.e. no component
      * consumed the event; false if the event was halted by some component.
      */
     public boolean post(World w, EntityEvent ev) {

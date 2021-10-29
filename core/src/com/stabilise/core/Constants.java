@@ -18,7 +18,7 @@ import com.stabilise.world.Region;
 import com.stabilise.world.Slice;
 
 /**
- * This class contains all of the important universal game constants.
+ * This class contains all the important universal game constants.
  */
 public class Constants {
     

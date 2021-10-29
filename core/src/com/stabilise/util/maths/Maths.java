@@ -8,8 +8,9 @@ import com.badlogic.gdx.math.Vector2;
 /**
  * This class provides some utility methods and fields with mathematical
  * purpose.
+ *
+ * <p>Named "Maths" because "Math" and "MathUtils" are already taken.
  */
-// Named "Maths" because "Math" and "MathUtils" are already taken.
 public class Maths {
     
     // non-instantiable

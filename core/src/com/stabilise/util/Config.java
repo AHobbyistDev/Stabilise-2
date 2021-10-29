@@ -7,12 +7,11 @@ import java.util.Objects;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.util.box.BoolBox;
-import com.stabilise.util.io.data.MapCompound;
 import com.stabilise.util.io.IOUtil;
 import com.stabilise.util.io.data.Compression;
 import com.stabilise.util.io.data.DataCompound;
 import com.stabilise.util.io.data.Format;
-import com.stabilise.util.io.data.ITag;
+import com.stabilise.util.io.data.IData;
 
 /**
  * A robust configuration/settings class. Is backed by a {@code DataCompound},
@@ -28,20 +27,18 @@ import com.stabilise.util.io.data.ITag;
 public class Config {
     
     // TODO: allow comments in a config file, so that users reading the text
-    // file know what the options are and the valid ranges for those options.
-    // Since I delegate the JSON I/O to libgdx, this probably isn't gonna
-    // happen anytime soon.
+    //  file know what the options are and the valid ranges for those options.
+    //  Since I delegate the JSON I/O to libgdx, this probably isn't gonna
+    //  happen anytime soon.
     
     public static final Format CONFIG_FORMAT = Format.JSON;
     
     
     /** Contains the actual config data. */
     public final DataCompound values = CONFIG_FORMAT.newCompound();
-    private final MapCompound valuesAsMap = values.asMapCompound();
     
     /** Holds the types of all accepted values and their default values. */
     public final DataCompound defaults;
-    private final MapCompound defaultsAsMap;
     
     /** The location where this config/settings file is saved. May be null. */
     private final FileHandle fileLoc;
@@ -57,8 +54,7 @@ public class Config {
     public Config(DataCompound defaults, FileHandle fileLoc) {
         DataCompound def = defaults.convert(CONFIG_FORMAT);
         this.defaults = def.immutable();
-        this.defaultsAsMap = def.asMapCompound();
-        this.valuesAsMap.putAll(defaultsAsMap); // fill up the values with the defaults
+        def.copyInto(values); // fill up the values with the defaults
         this.fileLoc = Objects.requireNonNull(fileLoc);
     }
     
@@ -67,18 +63,18 @@ public class Config {
      * anything if no such default exists.
      */
     public void reset(String name) {
-        ITag tag = defaultsAsMap.getData(name);
+        IData tag = defaults.getData(name);
         if(tag == null) // isn't even a valid setting that we're resetting
             return;
-        valuesAsMap.putData(name, tag); // overwrite with the default
+        values.putData(name, tag); // overwrite with the default
     }
     
     /**
      * Resets all values to their defaults.
      */
     public void resetToDefaults() {
-        valuesAsMap.clear();
-        valuesAsMap.putAll(defaultsAsMap);
+        values.clear();
+        defaults.copyInto(values);
     }
     
     /**
@@ -104,20 +100,22 @@ public class Config {
      * @return {@code true} if any entries were changed by this method.
      */
     public boolean sanitise() {
+        // boxed to be modifiable from within a lambda
         BoolBox changes = new BoolBox(false);
-        defaultsAsMap.forEachTag((name,defTag) -> {
-            ITag valueTag = valuesAsMap.getData(name);
+        
+        defaults.forEach((name, def) -> {
+            IData value = values.getData(name);
             // If tag isn't present or is of the completely wrong type, set to
             // the default.
-            if(valueTag == null || !defTag.isCompatibleType(valueTag)) {
-                valuesAsMap.putData(name, defTag);
+            if(value == null || !value.canConvertToTypeOf(def)) {
+                values.putData(name, def);
                 changes.set(true);
             // If tag is there and is of the wrong -- but compatible -- type,
             // just convert and put it in. A type can be of a compatibly wrong
             // type if e.g., the JSON format doesn't distinguish between
             // byte/short/int/long and float/double, so we just correct it.
-            } else if(defTag.isCompatibleType(valueTag)) {
-                valuesAsMap.putData(name, defTag.convertToSameType(valueTag));
+            } else if(value.canConvertToTypeOf(def)) {
+                values.putData(name, value.convertToTypeOf(def));
                 //changes.set(true); // Don't count this as a proper change
             }
         });
@@ -128,10 +126,10 @@ public class Config {
      * Removes any entries that don't have a default.
      */
     public void removeExcessEntries() {
-        Iterator<Map.Entry<String, ITag>> itr = valuesAsMap.iterator();
+        Iterator<Map.Entry<String, IData>> itr = values.iterator();
         while(itr.hasNext()) {
-            Map.Entry<String, ITag> e = itr.next();
-            if(!defaultsAsMap.contains(e.getKey()))
+            Map.Entry<String, IData> e = itr.next();
+            if(!defaults.contains(e.getKey()))
                 itr.remove();
         }
     }
@@ -152,8 +150,8 @@ public class Config {
      * @throws IOException if an I/O error occurs.
      */
     public boolean load() throws IOException {
-        valuesAsMap.clear();
-        boolean sanitised = false;
+        values.clear();
+        boolean sanitised;
         try {
             if(fileLoc.exists())
                 IOUtil.read(fileLoc, values, Compression.UNCOMPRESSED);

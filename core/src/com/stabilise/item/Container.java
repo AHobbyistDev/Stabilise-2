@@ -18,8 +18,6 @@ public abstract class Container implements IContainer,
                                            Exportable {
     
     /**
-     * Checks for whether or not this container is a bounded container.
-     * 
      * @return {@code true} if this container is bounded; {@code false} if it
      * is unbounded.
      */
@@ -48,8 +46,6 @@ public abstract class Container implements IContainer,
      * returned ItemStack is still considered to be held by this Container - to
      * force this Container to relinquish ownership, refer instead to {@link
      * #removeStack(int)}.
-     * 
-     * @param slot The slot.
      * 
      * @return The item stack in the slot, or {@link ItemStack#NO_STACK} if the
      * slot is empty.
@@ -253,7 +249,7 @@ public abstract class Container implements IContainer,
      * certain item.
      * 
      * <p>Note that this may overwrite the contents of the slot regardless of
-     * whether or not it is empty.
+     * whether it is empty.
      * 
      * @param slot The slot.
      * @param stack The stack. This should not be {@code null}; {@link
@@ -298,8 +294,8 @@ public abstract class Container implements IContainer,
     protected abstract ItemStack getAndSetSlot(int slot, ItemStack stack);
     
     /**
-     * Checks for whether or not the specified slot is empty. The returned
-     * value is equivalent to the expression:
+     * Checks for whether the specified slot is empty. The returned value is
+     * equivalent to the expression:
      * <pre>{@link #getStack(int) getStack(slot)} == ItemStack.NO_STACK</pre>
      * 
      * @param slot The slot.
@@ -392,8 +388,6 @@ public abstract class Container implements IContainer,
     
     /*
      * compresses matching adjacent stacks into one stack if possible
-     * 
-     * TODO
      */
     /*
     private void compact() {

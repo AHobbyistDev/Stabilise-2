@@ -10,9 +10,10 @@ import com.stabilise.core.state.MainMenuState;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.component.CCamera;
 import com.stabilise.entity.component.controller.CPlayerController;
+import com.stabilise.input.ControlConfig;
 import com.stabilise.input.Controllable;
 import com.stabilise.input.Controller;
-import com.stabilise.input.Controller.Control;
+import com.stabilise.input.GameControl;
 import com.stabilise.render.WorldRenderer;
 import com.stabilise.util.Debug;
 import com.stabilise.util.Log;
@@ -25,7 +26,7 @@ import com.stabilise.world.multiverse.HostMultiverse.PlayerData;
 /**
  * The game itself.
  */
-public class Game implements Controllable, InputProcessor {
+public class Game implements Controllable<GameControl>, InputProcessor {
     
     /** Whether the game is currently running. */
     public boolean running = true;
@@ -43,7 +44,7 @@ public class Game implements Controllable, InputProcessor {
     public final CCamera camera;
     
     /** The controller. */
-    public Controller controller;
+    public Controller<GameControl> controller;
     /** The player controller. */
     public CPlayerController playerController;
     
@@ -74,7 +75,7 @@ public class Game implements Controllable, InputProcessor {
         
         log.postInfo("Initiating game...");
         
-        controller = new Controller(this);
+        controller = new Controller<>(new ControlConfig<>(GameControl.class),this);
         
         World world = worldBundle.getHostWorld();
         Entity player = worldBundle.getPlayerEntity();
@@ -203,7 +204,7 @@ public class Game implements Controllable, InputProcessor {
     }
     
     @Override
-    public boolean handleControlPress(Control control) {
+    public boolean handleControlPress(GameControl control, int screenX, int screenY, float amount) {
         switch(control) {
             case PAUSE:
                 togglePause();
@@ -271,12 +272,12 @@ public class Game implements Controllable, InputProcessor {
             default:
                 break;
         }
-        return playerController.handleControlPress(control);
+        return playerController.handleControlPress(control, screenX, screenY, amount);
     }
     
     @Override
-    public boolean handleControlRelease(Control control) {
-        return playerController.handleControlRelease(control);
+    public boolean handleControlRelease(GameControl control, int screenX, int screenY) {
+        return playerController.handleControlRelease(control, screenX, screenY);
     }
     
     @Override

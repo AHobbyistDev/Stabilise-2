@@ -1,8 +1,12 @@
 package com.stabilise.util.io.data;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
+import com.google.common.collect.Iterators;
 import javaslang.control.Option;
 
 import com.stabilise.util.Checks;
@@ -106,6 +110,16 @@ public class ImmutableCompound implements DataCompound {
     }
     
     @Override
+    public void putData(String name, IData data) {
+        throw new UnsupportedOperationException("Can't put into an ImmutableCompound!");
+    }
+    
+    @Override
+    public IData getData(String name) {
+        throw new UnsupportedOperationException("Can't directly get data for an ImmutableCompound!");
+    }
+    
+    @Override
     public boolean contains(String name) {
         return compound.contains(name);
     }
@@ -125,16 +139,6 @@ public class ImmutableCompound implements DataCompound {
     @Override public boolean containsF32Arr  (String name) { return compound.containsF32Arr(name);   }
     @Override public boolean containsF64Arr  (String name) { return compound.containsF64Arr(name);   }
     @Override public boolean containsString  (String name) { return compound.containsString(name);   }
-    
-    @Override
-    public DataCompound childCompound(String name) {
-        throw Checks.unsupported();
-    }
-    
-    @Override
-    public DataList childList(String name) {
-        throw Checks.unsupported();
-    }
     
     @Override public void put(String name, DataCompound data) { Checks.unsupported(); }
     @Override public void put(String name, DataList data)     { Checks.unsupported(); }
@@ -188,14 +192,70 @@ public class ImmutableCompound implements DataCompound {
     @Override public Option<double[]> optF64Arr(String name) { return compound.optF64Arr(name); }
     @Override public Option<String>   optString(String name) { return compound.optString(name); }
     
+    @Override
+    public DataCompound childCompound(String name) {
+        throw Checks.unsupported();
+    }
+    
+    @Override
+    public DataList childList(String name) {
+        throw Checks.unsupported();
+    }
+    
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException("Can't clear an ImmutableCompound!");
+    }
+    
     /**
      * {@inheritDoc}
      * 
      * <p>Note: does not wrap the returned compound in an ImmutableCompound.
      */
     @Override
-    public DataCompound copy(Format format) {
-        return compound.copy(format);
+    public DataCompound duplicate(Format format) {
+        return compound.duplicate(format);
     }
     
+    @Override
+    public DataCompound setStrict(boolean strict) {
+        throw new UnsupportedOperationException("Can't set strict for an ImmutableCompound!");
+    }
+    
+    @Override
+    public boolean isStrict() {
+        return compound.isStrict();
+    }
+    
+    @Override
+    public void forEach(BiConsumer<String, IData> action) {
+        compound.forEach((name,data) -> action.accept(name, data.duplicate()));
+    }
+    
+    @Override
+    public Iterator<Map.Entry<String, IData>> iterator() {
+        // Gotta do two stages of wrapping, since a) Iterators have a remove()
+        // method, and b) Map.Entry has setValue()! Additionally, we duplicate
+        // the IData values, so that when exposed they don't pose a mutability
+        // risk.
+        return Iterators.transform(
+                Iterators.unmodifiableIterator(compound.iterator()),
+                entry -> new Map.Entry<String, IData>() {
+                    @Override
+                    public String getKey() {
+                        return entry.getKey();
+                    }
+    
+                    @Override
+                    public IData getValue() {
+                        return entry.getValue().duplicate();
+                    }
+    
+                    @Override
+                    public IData setValue(IData value) {
+                        throw new UnsupportedOperationException("Can't set value for an immutable compound!");
+                    }
+                }
+        );
+    }
 }

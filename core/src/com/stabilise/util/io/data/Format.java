@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import com.stabilise.util.Checks;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.json.JsonCompound;
+import com.stabilise.util.io.data.json.JsonList;
 import com.stabilise.util.io.data.nbt.NBTCompound;
 import com.stabilise.util.io.data.nbt.NBTList;
 import com.stabilise.util.io.data.nbt.NBTType;
@@ -22,7 +22,7 @@ public enum Format {
      */
     NBT(NBTCompound::new, NBTList::new) {
         
-    	// We need to overwrite write the following dummy data in order to be compatible
+    	// We need to write the following dummy data in order to be compatible
     	// with minecraft.
     	
         @Override
@@ -60,15 +60,14 @@ public enum Format {
     /**
      * The JSON format that everyone knows and loves.
      */
-    //JSON(JsonCompound::new, JsonList::new);
-    JSON(JsonCompound::new, () -> {Checks.unsupported("JSON list is NYI"); return null;});
+    JSON(JsonCompound::new, JsonList::new);
     
     // ------------------------------------------------------------------------
     
-    private final Supplier<AbstractCompound> compoundSup;
+    private final Supplier<DataCompound> compoundSup;
     private final Supplier<AbstractDataList> listSup;
     
-    Format(Supplier<AbstractCompound> compoundSup, Supplier<AbstractDataList> listSup) {
+    Format(Supplier<DataCompound> compoundSup, Supplier<AbstractDataList> listSup) {
         this.compoundSup = compoundSup;
         this.listSup = listSup;
     }
@@ -84,16 +83,6 @@ public enum Format {
      * Creates a new list of this format.
      */
     public DataList newList() {
-        return listSup.get();
-    }
-    
-    /** Convenience package-local method. */
-    AbstractCompound newAbstractCompound() {
-        return compoundSup.get();
-    }
-    
-    /** Convenience package-local method. */
-    AbstractDataList newAbstractList() {
         return listSup.get();
     }
     
@@ -128,13 +117,6 @@ public enum Format {
      */
     public void write(DataOutStream out, DataCompound c) throws IOException {
         c.writeData(out);
-    }
-    
-    /**
-     * Returns true if this format is of the same type as the given format.
-     */
-    public boolean sameTypeAs(Format f) {
-        return f == this;
     }
     
     

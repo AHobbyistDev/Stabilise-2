@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 import com.stabilise.util.box.*;
 import com.stabilise.util.collect.registry.RegistryParams;
 import com.stabilise.util.collect.registry.TypeFactory;
-import com.stabilise.util.io.data.ITag;
+import com.stabilise.util.io.data.IData;
 
 
 /**
@@ -31,24 +31,22 @@ public enum NBTType {
     DOUBLE_ARRAY(21, F64ArrBox.class),
     BOOLEAN     (22, BoolBox.class);
     
-    // In actual NBT specification, 12 is long array
-    
     
     public final byte id;
-    private final Class<? extends ITag> type;
-    private final Supplier<ITag> fac;
+    private final Class<? extends IData> type;
+    private final Supplier<IData> fac;
     
-    NBTType(int id, Class<? extends ITag> type) {
+    NBTType(int id, Class<? extends IData> type) {
         this(id, type, null);
     }
     
-    NBTType(int id, Class<? extends ITag> type, Supplier<ITag> fac) {
+    NBTType(int id, Class<? extends IData> type, Supplier<IData> fac) {
         this.id = (byte)id;
         this.type = type;
         this.fac = fac;
     }
     
-    private static final TypeFactory<ITag> registry =
+    private static final TypeFactory<IData> registry =
             new TypeFactory<>(new RegistryParams("NBTTypeRegistry"));
     
     static {
@@ -64,14 +62,14 @@ public enum NBTType {
     /**
      * Creates an NBT tag with the specified ID.
      */
-    public static ITag createTag(byte id) {
+    public static IData createTag(byte id) {
         return registry.create(id);
     }
     
     /**
      * Returns the ID of the given tag, or -1 if {@code s} isn't a valid tag.
      */
-    public static byte tagID(ITag s) {
+    public static byte tagID(IData s) {
         return (byte) registry.getID(s.getClass());
     }
     

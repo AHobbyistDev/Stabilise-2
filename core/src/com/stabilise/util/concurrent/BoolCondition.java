@@ -100,7 +100,7 @@ public class BoolCondition {
 	/**
 	 * See {@link Condition#await(long, TimeUnit)}. This method is essentially
 	 * the same, but only returns either when the value is set to true, or the
-	 * the time has elapsed.
+	 * time has elapsed.
 	 * 
 	 * @throws IllegalArgumentException if {@code time <= 0}.
 	 */

@@ -82,10 +82,10 @@ public class ItemStack implements Exportable {
     }
     
     /**
-     * Checks for whether or not this stack accepts items from the specified
-     * stack. More strictly, this will return {@code true} iff both stacks
-     * contain the same underlying item and this stack is smaller than the
-     * item's {@link Item#getMaxStackSize() max stack size}.
+     * Checks for whether this stack accepts items from the specified stack.
+     * More strictly, this will return {@code true} iff both stacks contain the
+     * same underlying item and this stack is smaller than the item's {@link
+     * Item#getMaxStackSize() max stack size}.
      * 
      * <p>This method will return {@code true} if this stack is {@link
      * #NO_STACK}.

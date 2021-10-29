@@ -1,5 +1,6 @@
 package com.stabilise.util.concurrent.task;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -29,15 +30,18 @@ public interface ReturnTask<T> extends Task {
      * 
      * @param time The maximum time to wait.
      * @param unit The unit of the {@code time} argument.
-     * 
+     *
+     * @return An Optional containing the result, or an empty Optional if the
+     * specified time elapsed before this task could finish.
+     *
      * @throws InterruptedException if the current thread was interrupted while
      * waiting.
      * @throws ExecutionException if the task failed, or didn't set the result.
      * @throws TimeoutException if the specified time elapsed before this task
      * could finish.
      */
-    T get(long time, TimeUnit unit) throws InterruptedException,
-            ExecutionException, TimeoutException;
+    Optional<T> get(long time, TimeUnit unit) throws InterruptedException,
+            ExecutionException;
     
     /**
      * Tries to get the result of this task without blocking.

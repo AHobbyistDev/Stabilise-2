@@ -90,7 +90,8 @@ public final class AppDriver implements Runnable {
      * 
      * @throws IllegalArgumentException if {@code tps < 1}.
      * @throws NullPointerException if both {@code updater} and {@code
-     * renderer} are {@code null}.
+     * renderer} are {@code null}. Both being null makes an AppDriver pretty
+     * pointless!
      */
     public AppDriver(int tps, Runnable updater, Runnable renderer) {
         this.tps = Checks.testMin(tps, 1);

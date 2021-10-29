@@ -36,8 +36,8 @@ public class Worlds {
     /**
      * Creates a new world with a random seed.
      * 
-     * <p>Note that this does NOT check for whether or not a world by the same
-     * name already exists. Such a check should be performed earlier.
+     * <p>Note that this does NOT check for whether a world by the same name
+     * already exists. Such a check should be performed earlier.
      * 
      * @param worldName The world's name.
      * 
@@ -51,8 +51,8 @@ public class Worlds {
     /**
      * Creates a new world.
      * 
-     * <p>Note that this does NOT check for whether or not a world by the same
-     * name already exists. Such a check should be performed earlier.
+     * <p>Note that this does NOT check for whether a world by the same name
+     * already exists. Such a check should be performed earlier.
      * 
      * @param worldName The world's name.
      * @param worldSeed The world's seed.

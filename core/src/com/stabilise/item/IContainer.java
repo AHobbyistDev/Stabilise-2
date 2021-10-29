@@ -21,12 +21,10 @@ public interface IContainer {
     int size();
     
     /**
-     * Checks for whether or not an item stack is able to be added to the
-     * container - that is, whether or not a valid slot exists in which at
-     * least one of the item can be placed.
-     * 
-     * @param stack The item stack.
-     * 
+     * Checks for whether an item stack is may be added to this container - that
+     * is, whether a valid slot exists in which at least one of the item can be
+     * placed.
+     *
      * @return {@code true} if the stack may be to be added; {@code false}
      * otherwise.
      * @throws NullPointerException if {@code stack} is {@code null}.
@@ -68,13 +66,13 @@ public interface IContainer {
     boolean addStack(ItemStack stack);
     
     /**
-     * Checks for whether or not this container contains any number of the
-     * specified item.
+     * Checks for whether this container contains any number of the specified
+     * item.
      */
     boolean contains(Item item);
     
     /**
-     * Checks for whether or not this container contains at least the specified
+     * Checks for whether this container contains at least the specified
      * minimum quantity of the specified item.
      */
     boolean contains(Item item, int minQuantity);

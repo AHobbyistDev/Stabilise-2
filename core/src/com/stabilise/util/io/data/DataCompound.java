@@ -2,29 +2,40 @@ package com.stabilise.util.io.data;
 
 import javaslang.control.Option;
 
-import com.stabilise.util.Checks;
 import com.stabilise.util.box.*;
 
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 /**
- * A DataCompound is the basic unifying building block for this package. A
- * DataCompound is essentially equivalent to any old object - it encapsulates
- * data, and may be saved in a variety of {@link Format}{@code s}.
+ * A {@code DataCompound} is the basic unifying building block for this package.
+ * A {@code DataCompound} is essentially equivalent to any old object - it
+ * encapsulates data, and may be saved in a variety of {@link Format}{@code s}.
  * 
- * <p>There are three primary data-interaction methods for a DataCompound:
+ * <p>There are four primary data-interaction methods for a {@code
+ * DataCompound}, duplicated for each type of data:
  *  
  * <ul>
- * <li>{@code put()} methods. Each of these methods inserts data into this tag;
- *     if data with the specified name already exists, it will be overwritten.
- * <li>{@code get()} methods. Each of these methods get data from this tag. For
- *     each of the {@code get} methods, if data is not present or is present in
- *     a different format (e.g. invoking {@code getBool("foo")} when the data
- *     type of {@code "foo"} is {@code int}), a suitable default will be
- *     returned.
+ * <li>{@code put()} methods. Each of these methods inserts data into a
+ *     compound; if data with the specified name already exists, it will be
+ *     overwritten.
+ * <li>{@code contains()} methods. These return {@code true} if data with the
+ *     specified name is present in a compound either of the specified type,
+ *     or, if the compound is in <tt>relaxed</tt> mode, a type that can be
+ *     converted to the queried type.
+ * <li>{@code get()} methods. Each of these methods get data from a  compound.
+ *     If the data is not present, or is of a different format and the compound
+ *     is in <tt>strict</tt> mode, a suitable default will be returned. If data
+ *     with the queried name is present but of a different format, but that
+ *     format may be converted to the queried type, then in <tt>relaxed</tt>
+ *     mode the data will be converted and returned.
  * <li>{@code opt()} methods. These methods behave like the {@code get()}
  *     methods, but return an {@code Option} instead of a default value.
  * </ul>
  */
-public interface DataCompound extends ITag, IContainerTag<DataCompound> {
+public interface DataCompound extends IDataContainer<DataCompound>,
+                                      Iterable<Map.Entry<String, IData>> {
     
     /**
      * Creates a DataCompound of the format determined the current thread's
@@ -37,6 +48,39 @@ public interface DataCompound extends ITag, IContainerTag<DataCompound> {
         return Format.getDefaultFormat().newCompound();
     }
     
+    // DIRECT PUT/GET METHODS
+    
+    /**
+     * Puts the given {@code IData} object <em>directly</em> into this
+     * DataCompound (think of this as being equivalent to {@link
+     * java.util.Map#put(Object, Object) Map.put()}). The {@code IData} object
+     * should be henceforth considered to be "owned" by this DataCompound, and
+     * so should not be interacted with any further (namely, the data should not
+     * be mutated).
+     *
+     * <p><b>NOTE:</b> This method is provided only for convenience, and it
+     * should rarely, if ever, be used directly -- use the other {@code put()}
+     * methods instead!
+     *
+     * @param name The name to which the given data is to be associated.
+     * @param data The data to insert.
+     *
+     * @throws NullPointerException if either parameter is {@code null}.
+     */
+    void putData(String name, IData data);
+    
+    /**
+     * Gets the raw data value mapped to the given name. Obviously it is better
+     * to use the proper get() or opt() family of methods for most cases, so
+     * only use this if you know what you're doing.
+     *
+     * <p><b>NOTE:</b> This method is provided only for convenience; external
+     * code should try to avoid using this if possible.
+     *
+     * @return null if a tag by the given name isn't present in this compound.
+     */
+    IData getData(String name);
+    
     
     
     /** Returns true if this compound contains data with the specified name. */
@@ -46,8 +90,8 @@ public interface DataCompound extends ITag, IContainerTag<DataCompound> {
      * name; false if either no such data is present or it is of another data
      * type. */
     boolean containsCompound(String name);
-    /** Returns true if this compound contains a list with the specified name
-     * name; false if either no such data is present or it is of another data
+    /** Returns true if this compound contains a list with the specified name;
+     * false if either no such data is present or it is of another data
      * type. */
     boolean containsList    (String name);
     /** Returns true if this compound contains a boolean with the specified
@@ -102,52 +146,6 @@ public interface DataCompound extends ITag, IContainerTag<DataCompound> {
      * name; false if either no such data is present or it is of another data
      * type. */
     boolean containsString  (String name);
-    
-    
-    /**
-     * Gets a compound which is a child of this one. If a compound by the
-     * specified name already exists, it is returned, otherwise one is
-     * created and added to this compound. If another data type under the
-     * specified name is present, it will be overwritten.
-     * 
-     * <p>The returned compound will be of the same format as this one.
-     * 
-     * <p>This method is equivalent to:
-     * 
-     * <pre>
-     * if(this.containsCompound(name)) {
-     *     return this.getCompound(name);
-     * } else {
-     *     DataCompound child = this.format().newCompound();
-     *     this.put(name, child);
-     *     return child;
-     * }
-     * </pre>
-     */
-    DataCompound childCompound(String name);
-    
-    /**
-     * Gets a list which is a child of this compound. If a list by the
-     * specified name already exists, it is returned, otherwise one is created
-     * and added to this compound. If another data type under the specified
-     * name is present, it will be overwritten.
-     * 
-     * <p>The returned list will be of the same format as this compound.
-     * 
-     * <p>This method is equivalent to:
-     * 
-     * <pre>
-     * if(this.containsList(name)) {
-     *     return this.getList(name);
-     * } else {
-     *     DataCompound child = this.format().newList();
-     *     this.put(name, child);
-     *     return child;
-     * }
-     * </pre>
-     */
-    DataList childList(String name);
-    
     
     // <---------------------------- PUT METHODS ---------------------------->
     
@@ -362,57 +360,151 @@ public interface DataCompound extends ITag, IContainerTag<DataCompound> {
      * #containsString(String)} were to return false, None is returned. */
     Option<String>       optString   (String name);
     
-    /**
-     * Clones this DataCompound.
-     */
-    default DataCompound copy() {
-        return copy(format());
-    }
+    
     
     /**
-     * Clones this DataCompound.
-     * 
-     * @param format The desired format of the clone.
+     * Gets a compound which is a child of this one. If a compound by the
+     * specified name already exists, it is returned, otherwise one is
+     * created and added to this compound. If another data type under the
+     * specified name is present, it will be overwritten.
+     *
+     * <p>The returned compound will be of the same format as this one.
+     *
+     * <p>This method is equivalent to (but possibly faster than):
+     *
+     * <pre>
+     * if(this.containsCompound(name)) {
+     *     return this.getCompound(name);
+     * } else {
+     *     DataCompound child = this.format().newCompound();
+     *     this.put(name, child);
+     *     return child;
+     * }
+     * </pre>
      */
-    DataCompound copy(Format format);
+    DataCompound childCompound(String name);
     
     /**
-     * Wraps this {@code DataCompound} in an {@code ImmutableCompound}, or
-     * returns this compound if it is already immutable.
+     * Gets a list which is a child of this compound. If a list by the
+     * specified name already exists, it is returned, otherwise one is created
+     * and added to this compound. If another data type under the specified
+     * name is present, it will be overwritten.
+     *
+     * <p>The returned list will be of the same format as this compound.
+     *
+     * <p>This method is equivalent to (but possibly faster than):
+     *
+     * <pre>
+     * if(this.containsList(name)) {
+     *     return this.getList(name);
+     * } else {
+     *     DataCompound child = this.format().newList();
+     *     this.put(name, child);
+     *     return child;
+     * }
+     * </pre>
      */
-    default ImmutableCompound immutable() {
-        if(this instanceof ImmutableCompound)
-            return (ImmutableCompound) this;
-        else
-            return ImmutableCompound.wrap(this);
-    }
+    DataList childList(String name);
     
     /**
-     * Casts this DataCompound to a MapCompound if able, and throws a
-     * RuntimeException if not. This may be done to expose a number of
-     * additional utility methods that MapCompound provides.
+     * Clears this compound.
      */
-    default MapCompound asMapCompound() {
-    	if(this instanceof MapCompound)
-    		return (MapCompound)this;
-    	throw new RuntimeException("This DataCompound is not a map compound!");
-    }
+    void clear();
     
-    @Override default boolean isBoolean() { return false; }
-    @Override default boolean isLong()    { return false; }
-    @Override default boolean isDouble()  { return false; }
-    @Override default boolean isString()  { return false; }
-    
-    @Override default boolean getAsBoolean() { throw Checks.ISE("Can't convert compound to boolean"); }
-    @Override default long    getAsLong()    { throw Checks.ISE("Can't convert compound to long");    }
-    @Override default double  getAsDouble()  { throw Checks.ISE("Can't convert compound to double");  }
-    @Override default String  getAsString()  { throw Checks.ISE("Can't convert compound to string");  }
     
     @Override
-    default ITag convertToSameType(ITag other) {
-        if(isSameType(other))
-            return other;
-        throw Checks.ISE("Can't convert " + other.getClass().getSimpleName() + " to compound type.");
+    default void read(String name, DataCompound c) {
+        c = c.getCompound(name);
+        if(c != null)
+            c.copyInto(this);
     }
+    
+    @Override
+    default void write(String name, DataCompound o) {
+        o.put(name, this);
+    }
+    
+    @Override
+    default void read(DataList l) {
+        DataCompound c = l.getCompound();
+        if(c != null)
+            c.copyInto(this);
+    }
+    
+    @Override
+    default void write(DataList l) {
+        l.add(this);
+    }
+    
+    @Override
+    default DataType type() {
+        return DataType.COMPOUND;
+    }
+    
+    @Override
+    default boolean canConvertToType(DataType type) {
+        return type.equals(DataType.COMPOUND);
+    }
+    
+    @Override
+    default IData convertToType(DataType type) {
+        if(type.equals(DataType.COMPOUND))
+            return duplicate();
+        else
+            throw new RuntimeException("Illegal conversion: Compound --> " + type);
+    }
+    
+    @Override
+    default DataCompound convert(Format format) {
+        if(this.format().equals(format))
+            return this;
+        else
+            return duplicate(format);
+    }
+    
+    // Even though this already has a default implementation in IDataContainer,
+    // usages don't seem to register that it returns a DataCompound object (and
+    // not just an Object), so to avoid dumb unnecessary typecasts.
+    //@Override
+    //default DataCompound clone() {
+    //    return clone(format());
+    //}
+    
+    @Override
+    default DataCompound duplicate(Format format) {
+        DataCompound c = format.newCompound();
+        copyInto(c);
+        c.setStrict(this.isStrict());
+        return c;
+    }
+    
+    @Override
+    default void copyInto(DataCompound other) {
+        // TODO: Possible unbounded recursion
+        for(Map.Entry<String, IData> entry : this) {
+            String name = entry.getKey();
+            IData data = entry.getValue();
+            // Make sure compounds and lists are cloned into the same format as
+            // other.
+            if(data instanceof DataCompound)
+                other.putData(name, ((DataCompound)data).duplicate(other.format()));
+            else if(data instanceof DataList)
+                other.putData(name, ((DataList)data).duplicate(other.format()));
+            else
+                other.putData(name, data.duplicate());
+        }
+    }
+    
+    @Override
+    default ImmutableCompound immutable() {
+        return ImmutableCompound.wrap(this);
+    }
+    
+    /**
+     * Convenience alternative to {@link #forEach(Consumer)}, which takes a
+     * {@code BiConsumer} rather than a {@code Consumer} of a {@code Map.Entry}
+     * object.
+     */
+    void forEach(BiConsumer<String, IData> action);
     
 }

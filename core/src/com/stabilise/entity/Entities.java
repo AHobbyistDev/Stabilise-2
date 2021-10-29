@@ -7,7 +7,6 @@ import com.stabilise.entity.component.core.*;
 import com.stabilise.entity.component.effect.*;
 import com.stabilise.entity.component.physics.*;
 import com.stabilise.item.ItemStack;
-import com.stabilise.world.World;
 
 /**
  * A convenience class for producing certain entity types. Almost certainly

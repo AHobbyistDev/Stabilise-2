@@ -18,9 +18,9 @@ import com.stabilise.util.annotation.Incomplete;
 import com.stabilise.util.box.*;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
-import com.stabilise.util.io.data.MapCompound;
+import com.stabilise.util.io.data.AbstractDataCompound;
 import com.stabilise.util.io.data.Format;
-import com.stabilise.util.io.data.ITag;
+import com.stabilise.util.io.data.IData;
 
 
 /**
@@ -30,12 +30,12 @@ import com.stabilise.util.io.data.ITag;
  * standard.
  */
 @Incomplete
-public class JsonCompound extends MapCompound {
+public class JsonCompound extends AbstractDataCompound {
     
     private boolean dirty = true;
     private JsonValue json = null;
     
-    public JsonValue toJson() {
+    private JsonValue toJson() {
         if(!dirty)
             return json;
         dirty = false;
@@ -43,9 +43,9 @@ public class JsonCompound extends MapCompound {
         json = new JsonValue(ValueType.object);
         JsonValue child = null;
         
-        for(Map.Entry<String, ITag> entry : data.entrySet()) {
+        for(Map.Entry<String, IData> entry : data.entrySet()) {
             String name = entry.getKey();
-            ITag tag = entry.getValue();
+            IData tag = entry.getValue();
             JsonValue v;
             
             if(tag instanceof JsonCompound) {
@@ -91,7 +91,7 @@ public class JsonCompound extends MapCompound {
         return json;
     }
     
-    public JsonCompound fromJson(JsonValue json) {
+    private JsonCompound fromJson(JsonValue json) {
         if(json.type() != ValueType.object)
             throw new RuntimeException("Not an object");
         this.json = json;
@@ -128,9 +128,9 @@ public class JsonCompound extends MapCompound {
     }
     
     @Override
-    public <T extends ITag> T putData(String name, T t) {
+    public void putData(String name, IData d) {
         dirty = true;
-        return super.putData(name, t);
+        super.putData(name, d);
     }
     
     @Override

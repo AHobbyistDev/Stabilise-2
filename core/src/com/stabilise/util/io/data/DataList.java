@@ -1,13 +1,13 @@
 package com.stabilise.util.io.data;
 
-import com.stabilise.util.Checks;
+import static com.stabilise.util.box.Boxes.box;
 
 /**
  * A DataList is a list which may be written to and read from sequentially.
  * Each of the {@code add()} methods append to the end of this list, and
  * each of the {@code get()} methods reads the next element from the list.
  */
-public interface DataList extends ITag, IContainerTag<DataList> {
+public interface DataList extends IDataContainer<DataList>, Iterable<IData> {
     
     /**
      * Creates a DataCompound of the format determined the current thread's
@@ -28,23 +28,80 @@ public interface DataList extends ITag, IContainerTag<DataList> {
     int size();
     
     /**
-     * Returns if another invocation of a {@code get()} method is valid.
+     * Returns {@code size() == 0}.
+     */
+    default boolean isEmpty() {
+        return size() == 0;
+    }
+    
+    /**
+     * Returns if another invocation of a {@code get()} method is valid and will
+     * return some data without throwing an {@code IndexOutOfBoundsException}.
      */
     boolean hasNext();
+    
+    /**
+     * Gets the next piece of data in this list.
+     *
+     * <p><b>NOTE:</b> This method is provided only for convenience, and it
+     * should rarely, if ever, be used directly -- use the other {@code get()}
+     *  methods instead!
+     *
+     * @throws IndexOutOfBoundsException if there isn't any more data. Make sure
+     * to check {@code hasNext()} first!
+     */
+    IData getNext();
+    
+    /**
+     * Gets a data object from this list. Never {@code null}.
+     *
+     * <p><b>NOTE:</b> This method is provided only for convenience, and it
+     * should rarely, if ever, be used directly -- use the other {@code get()}
+     * methods instead!
+     *
+     * @throws IndexOutOfBoundsException if {@code index} is out of range (i.e.
+     * {@code index < 0 || index >= size()}.
+     */
+    IData getData(int index);
+    
+    /**
+     * Puts the given {@code IData} object <em>directly</em> into this
+     * list. The {@code IData} object should be henceforth considered to be
+     * "owned" by this list, and so should not be interacted with any further
+     * (namely, the data should not be mutated).
+     *
+     * <p><b>NOTE:</b> This method is provided only for convenience, and it
+     * should rarely, if ever, be used directly -- use the other {@code add()}
+     * methods instead!
+     *
+     * @param data The data to insert.
+     *
+     * @throws NullPointerException if {@code data} is {@code null}.
+     */
+    void addData(IData data);
+    
     
     /**
      * Creates a new compound and adds it to this list.
      * 
      * @return The created compound.
      */
-    DataCompound childCompound();
+    default DataCompound childCompound() {
+        DataCompound c = format().newCompound();
+        addData(c);
+        return c;
+    }
     
     /**
      * Creates a new list and adds it to this list.
      * 
      * @return The created list.
      */
-    DataList childList();
+    default DataList childList() {
+        DataList l = format().newList();
+        addData(l);
+        return l;
+    }
     
     /** If {@code data} is of a different format to this list, it will be
      * converted first. */
@@ -65,10 +122,6 @@ public interface DataList extends ITag, IContainerTag<DataList> {
     void add(long[]   data);
     void add(float[]  data);
     void add(double[] data);
-    
-    /** Gets the {@code index-th} tag in this list. This method should
-     * generally be ignored in favour of the specific getter methods. */
-    ITag getTag(int index) throws IndexOutOfBoundsException;
     
     DataCompound getCompound(int index) throws IndexOutOfBoundsException;
     DataList     getList    (int index) throws IndexOutOfBoundsException;
@@ -102,29 +155,96 @@ public interface DataList extends ITag, IContainerTag<DataList> {
     double[] getF64Arr();
     String   getString();
     
-    /**
-     * Wraps this {@code DataList} in an {@code ImmutableList}, or returns this
-     * list if it is already immutable.
-     */
-    default ImmutableList immutable() {
-        return ImmutableList.wrap(this);
+    @Override
+    default void read(String name, DataCompound o) {
+        DataList l = o.getList(name);
+        if(l != null)
+            l.copyInto(this);
     }
     
     @Override
-    default ITag convertToSameType(ITag other) {
-        if(isSameType(other))
-            return other;
-        throw Checks.ISE("Can't convert " + other.getClass().getSimpleName() + " to list type.");
+    default void write(String name, DataCompound o) {
+        o.put(name, this);
     }
     
-    @Override default boolean isBoolean() { return false; }
-    @Override default boolean isLong()    { return false; }
-    @Override default boolean isDouble()  { return false; }
-    @Override default boolean isString()  { return false; }
+    @Override
+    default void read(DataList l) {
+        l = l.getList();
+        if(l != null)
+            l.copyInto(this);
+    }
     
-    @Override default boolean getAsBoolean() { throw Checks.ISE("Can't convert list to boolean"); }
-    @Override default long    getAsLong()    { throw Checks.ISE("Can't convert list to long");    }
-    @Override default double  getAsDouble()  { throw Checks.ISE("Can't convert list to double");  }
-    @Override default String  getAsString()  { throw Checks.ISE("Can't convert list to string");  }
+    @Override
+    default void write(DataList l) {
+        l.add(this);
+    }
+    
+    @Override
+    default DataType type() {
+        return DataType.LIST;
+    }
+    
+    @Override
+    default boolean canConvertToType(DataType type) {
+        return type.equals(DataType.LIST);
+    }
+    
+    @Override
+    default IData convertToType(DataType type) {
+        if(type.equals(DataType.LIST))
+            return this.duplicate();
+        else
+            throw new RuntimeException("Illegal conversion: List --> " + type);
+    }
+    
+    @Override
+    default DataList convert(Format format) {
+        if(this.format().equals(format))
+            return this;
+        else
+            return duplicate(format);
+    }
+    
+    // Even though this already has a default implementation in IDataContainer,
+    // usages don't seem to register that it returns a DataList object (and not
+    // just an Object), so to avoid dumb unnecessary typecasts.
+    @Override
+    default DataList duplicate() {
+        return duplicate(format());
+    }
+    
+    /**
+     * Clones this DataList.
+     *
+     * @param format The desired format of the clone.
+     */
+    default DataList duplicate(Format format) {
+        DataList l = format.newList();
+        copyInto(l);
+        return l;
+    }
+    
+    /**
+     * Copies all the data from this list into the given list, using
+     * {@link IData#duplicate()} whenever applicable.
+     */
+    default void copyInto(DataList other) {
+        // TODO: Possible unbounded recursion
+        for(IData data : this) {
+            // Make sure compounds and lists are cloned into the same format as
+            // other
+            if(data instanceof DataCompound)
+                other.add(((DataCompound)data).duplicate(other.format()));
+            else if(data instanceof DataList)
+                other.add(((DataList)data).duplicate(other.format()));
+            else
+                other.addData(data.duplicate());
+        }
+    }
+    
+    @Override
+    default ImmutableList immutable() {
+        return ImmutableList.wrap(this);
+    }
     
 }
