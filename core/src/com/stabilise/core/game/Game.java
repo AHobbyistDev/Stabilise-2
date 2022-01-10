@@ -43,9 +43,7 @@ public class Game implements Controllable<GameControl>, InputProcessor {
     public final PlayerData playerData;
     public final CCamera camera;
     
-    /** The controller. */
     public Controller<GameControl> controller;
-    /** The player controller. */
     public CPlayerController playerController;
     
     /** The current active menu. */
@@ -75,7 +73,10 @@ public class Game implements Controllable<GameControl>, InputProcessor {
         
         log.postInfo("Initiating game...");
         
-        controller = new Controller<>(new ControlConfig<>(GameControl.class),this);
+        ControlConfig<GameControl> ctrlConfig = new ControlConfig<>(GameControl.class);
+        if(ctrlConfig.loadConfig(GameControl.CONFIG_FILE))
+            ctrlConfig.saveConfig(GameControl.CONFIG_FILE);
+        controller = new Controller<>(ctrlConfig,this);
         
         World world = worldBundle.getHostWorld();
         Entity player = worldBundle.getPlayerEntity();

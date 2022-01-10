@@ -13,9 +13,6 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.SerializationException;
 import com.badlogic.gdx.utils.JsonValue.ValueType;
-import com.stabilise.util.Checks;
-import com.stabilise.util.annotation.Incomplete;
-import com.stabilise.util.box.*;
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
 import com.stabilise.util.io.data.AbstractDataCompound;
@@ -27,15 +24,32 @@ import com.stabilise.util.io.data.IData;
  * Internally a MapCompound just like NBT, but converts to/from a JsonValue
  * object when reading/writing since there's no way in hell that I'm gonna
  * write code that reads/writes files properly compliant with the JSON
- * standard.
+ * standard from scratch.
  */
-@Incomplete
 public class JsonCompound extends AbstractDataCompound {
     
     private boolean dirty = true;
     private JsonValue json = null;
     
-    private JsonValue toJson() {
+    
+    /**
+     * Creates an empty JsonCompound.
+     */
+    public JsonCompound() {
+        super();
+    }
+    
+    /**
+     * Creates a new JsonCompound and populates it from the given JsonValue.
+     *
+     * @throws IllegalArgumentException if {@code !json.isObject()}
+     */
+    public JsonCompound(JsonValue value) {
+        super();
+        fromJson(value);
+    }
+    
+    JsonValue toJson() {
         if(!dirty)
             return json;
         dirty = false;
@@ -48,34 +62,54 @@ public class JsonCompound extends AbstractDataCompound {
             IData tag = entry.getValue();
             JsonValue v;
             
-            if(tag instanceof JsonCompound) {
-                v = ((JsonCompound)tag).toJson();
-            } else if(tag instanceof JsonList) {
-                v = ((JsonList)tag).toJson();
-            } else if(tag instanceof BoolBox) {
-                v = new JsonValue(((BoolBox)tag).get());
-            } else if(tag instanceof I8ArrBox) {
-                //v = new JsonValue(((ByteArrBox)tag).get());
-                throw Checks.unsupported("byte array is no bueno for now");
-            } else if(tag instanceof I8Box) {
-                v = new JsonValue(((I8Box)tag).get());
-            } else if(tag instanceof F64Box) {
-                v = new JsonValue(((F64Box)tag).get());
-            } else if(tag instanceof F32Box) {
-                v = new JsonValue(((F32Box)tag).get());
-            } else if(tag instanceof I32ArrBox) {
-                //v = new JsonValue(((IntArrBox)tag).get());
-                throw Checks.unsupported("int array is no bueno for now");
-            } else if(tag instanceof I32Box) {
-                v = new JsonValue(((I32Box)tag).get());
-            } else if(tag instanceof I64Box) {
-                v = new JsonValue(((I64Box)tag).get());
-            } else if(tag instanceof I16Box) {
-                v = new JsonValue(((I16Box)tag).get());
-            } else if(tag instanceof StringBox) {
-                v = new JsonValue(((StringBox)tag).get());
-            } else {
-                throw new RuntimeException("Unrecognised Tag type");
+            switch(tag.type()) {
+                case COMPOUND:
+                    v = ((JsonCompound)tag).toJson();
+                    break;
+                case LIST:
+                    v = ((JsonList)tag).toJson();
+                    break;
+                case BOOL:
+                    v = new JsonValue(tag.asBool().get());
+                    break;
+                case I8:
+                    v = new JsonValue(tag.asI8().get());
+                    break;
+                case I16:
+                    v = new JsonValue(tag.asI16().get());
+                    break;
+                case I32:
+                    v = new JsonValue(tag.asI32().get());
+                    break;
+                case I64:
+                    v = new JsonValue(tag.asI64().get());
+                    break;
+                case F32:
+                    v = new JsonValue(tag.asF32().get());
+                    break;
+                case F64:
+                    v = new JsonValue(tag.asF64().get());
+                    break;
+                case I8ARR:
+                    v = JsonUtils.I8ArrToJson(tag.asI8Arr().get());
+                    break;
+                case I32ARR:
+                    v = JsonUtils.I32ArrToJson(tag.asI32Arr().get());
+                    break;
+                case I64ARR:
+                    v = JsonUtils.I64ArrToJson(tag.asI64Arr().get());
+                    break;
+                case F32ARR:
+                    v = JsonUtils.F32ArrToJson(tag.asF32Arr().get());
+                    break;
+                case F64ARR:
+                    v = JsonUtils.F64ArrToJson(tag.asF64Arr().get());
+                    break;
+                case STRING:
+                    v = new JsonValue(tag.asString().get());
+                    break;
+                default:
+                    throw new AssertionError();
             }
             
             v.name = name;
@@ -84,53 +118,60 @@ public class JsonCompound extends AbstractDataCompound {
                 json.child = child;
             } else {
                 child.next = v;
+                v.prev = child;
                 child = v;
             }
+            json.size++;
         }
         
         return json;
     }
     
-    private JsonCompound fromJson(JsonValue json) {
-        if(json.type() != ValueType.object)
-            throw new RuntimeException("Not an object");
+    JsonCompound fromJson(JsonValue json) {
+        if(!json.isObject())
+            throw new IllegalArgumentException("Not an object!");
+    
+        data.clear();
         this.json = json;
+        dirty = false;
         
         for(JsonValue val = json.child; val != null; val = val.next) {
             switch(val.type()) {
+                case object:
+                    putData(val.name, new JsonCompound().fromJson(val));
+                    break;
                 case array:
                     putData(val.name, new JsonList().fromJson(val));
                     break;
                 case booleanValue:
                     putData(val.name, box(val.asBoolean()));
                     break;
-                case doubleValue:
-                    putData(val.name, box(val.asDouble()));
-                    break;
                 case longValue:
                     putData(val.name, box(val.asLong()));
                     break;
-                case nullValue:
-                    throw new RuntimeException("no null values allowed");
-                case object:
-                    putData(val.name, new JsonCompound().fromJson(val));
+                case doubleValue:
+                    putData(val.name, box(val.asDouble()));
                     break;
                 case stringValue:
                     putData(val.name, box(val.asString()));
                     break;
+                case nullValue:
+                    // arbitrarily just make it an empty list
+                    putData(val.name, new JsonList());
                 default:
                     throw new AssertionError();
             }
         }
         
-        dirty = false;
         return this;
     }
     
     @Override
-    public void putData(String name, IData d) {
+    protected void setDirty() {
+        // Comment: the dirty flag actually isn't perfect as it doesn't pick up
+        // on if any child lists or compounds have been modified.
         dirty = true;
-        super.putData(name, d);
+        json = null;
     }
     
     @Override

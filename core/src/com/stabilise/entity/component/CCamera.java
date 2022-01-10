@@ -1,5 +1,6 @@
 package com.stabilise.entity.component;
 
+import com.badlogic.gdx.math.Vector2;
 import com.stabilise.entity.Entity;
 import com.stabilise.entity.Position;
 import com.stabilise.entity.PositionFree;
@@ -28,6 +29,11 @@ public class CCamera extends CEntityTracker {
     private final SimpleList<Shake> shakes = new UnorderedArrayList<>();
     
     
+    // TODO: TEMPORARY!!
+    public Vector2 upVector;
+    
+    
+    
     @Override
     public void init(Entity e) {
         super.init(e);
@@ -35,6 +41,9 @@ public class CCamera extends CEntityTracker {
         realPos.set(e.pos);
         realPos.ly += e.aabb.centreY();
         realPos.align();
+        
+        // TODO: TEMPORARY
+        upVector = e.upDirection;
     }
     
     @Override
@@ -108,12 +117,12 @@ public class CCamera extends CEntityTracker {
     
     @Override
     public void importFromCompound(DataCompound c) {
-        super.importFromCompound(c);
+        // nothing to do
     }
     
     @Override
     public void exportToCompound(DataCompound c) {
-        super.exportToCompound(c);
+        // nothing to do
     }
     
     

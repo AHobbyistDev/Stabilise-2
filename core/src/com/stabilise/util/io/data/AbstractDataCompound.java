@@ -38,11 +38,21 @@ public abstract class AbstractDataCompound implements DataCompound {
         Objects.requireNonNull(name);
         Objects.requireNonNull(d);
         if(d instanceof DataCompound)
-            data.put(name,((DataCompound)d).convert(format()));
+            data.put(name, ((DataCompound)d).convert(format()));
         else if(d instanceof DataList)
-            data.put(name,((DataList)d).convert(format()));
+            data.put(name, ((DataList)d).convert(format()));
         else
             data.put(name, d);
+        setDirty();
+    }
+    
+    /**
+     * Like putData() but with fewer checks and no format conversions, to be
+     * used internally when the given values can be trusted
+     */
+    private void putData2(String name, IData d) {
+        data.put(Objects.requireNonNull(name), d);
+        setDirty();
     }
     
     
@@ -74,15 +84,6 @@ public abstract class AbstractDataCompound implements DataCompound {
     @Override public boolean containsF64Arr  (String name) { return containsType(name, DataType.F64ARR);    }
     @Override public boolean containsString  (String name) { return containsType(name, DataType.STRING);    }
     
-    
-    /**
-     * Like putData() but with fewer checks and no format conversions, to be
-     * used internally when the given values can be trusted
-     */
-    private void putData2(String name, IData d) {
-        data.put(Objects.requireNonNull(name), d);
-    }
-    
     @Override public void put(String name, DataCompound data) { putData2(name, data.convert(format())); }
     @Override public void put(String name, DataList data) { putData2(name, data.convert(format())); }
     @Override public void put(String name, boolean data)  { putData2(name, Boxes.box(data)); }
@@ -103,9 +104,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public DataCompound getCompound(String name) {
         IData d = data.get(name);
         if(d instanceof DataCompound)
-            return (DataCompound) d;
+            return d.asCompound();
         else if(!strict && d != null && d.canConvertToType(DataType.COMPOUND))
-            return (DataCompound) d.convertToType(DataType.COMPOUND);
+            return d.convertToType(DataType.COMPOUND).asCompound();
         else
             return format().newCompound();
     }
@@ -114,9 +115,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public DataList getList(String name) {
         IData d = data.get(name);
         if(d instanceof DataList)
-            return (DataList) d;
+            return d.asList();
         else if(!strict && d != null && d.canConvertToType(DataType.LIST))
-            return (DataList) d.convertToType(DataType.LIST);
+            return d.convertToType(DataType.LIST).asList();
         else
             return format().newList();
     }
@@ -129,9 +130,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public boolean getBool(String name) {
         IData d = data.get(name);
         if(d instanceof BoolBox)
-            return ((BoolBox) d).get();
+            return d.asBool().get();
         else if(!strict && d != null && d.canConvertToType(DataType.BOOL))
-            return ((BoolBox) d.convertToType(DataType.BOOL)).get();
+            return d.convertToType(DataType.BOOL).asBool().get();
         else
             return BoolBox.defaultValue();
     }
@@ -140,9 +141,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public byte getI8(String name) {
         IData d = data.get(name);
         if(d instanceof I8Box)
-            return ((I8Box) d).get();
+            return d.asI8().get();
         else if(!strict && d != null && d.canConvertToType(DataType.I8))
-            return ((I8Box) d.convertToType(DataType.I8)).get();
+            return d.convertToType(DataType.I8).asI8().get();
         else
             return I8Box.defaultValue();
     }
@@ -151,9 +152,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public short getI16(String name) {
         IData d = data.get(name);
         if(d instanceof I16Box)
-            return ((I16Box) d).get();
+            return d.asI16().get();
         else if(!strict && d != null && d.canConvertToType(DataType.I16))
-            return ((I16Box) d.convertToType(DataType.I16)).get();
+            return d.convertToType(DataType.I16).asI16().get();
         else
             return I16Box.defaultValue();
     }
@@ -162,9 +163,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public int getI32(String name) {
         IData d = data.get(name);
         if(d instanceof I32Box)
-            return ((I32Box) d).get();
+            return d.asI32().get();
         else if(!strict && d != null && d.canConvertToType(DataType.I32))
-            return ((I32Box) d.convertToType(DataType.I32)).get();
+            return d.convertToType(DataType.I32).asI32().get();
         else
             return I32Box.defaultValue();
     }
@@ -173,9 +174,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public long getI64(String name) {
         IData d = data.get(name);
         if(d instanceof I64Box)
-            return ((I64Box) d).get();
+            return d.asI64().get();
         else if(!strict && d != null && d.canConvertToType(DataType.I64))
-            return ((I64Box) d.convertToType(DataType.I64)).get();
+            return d.convertToType(DataType.I64).asI64().get();
         else
             return I64Box.defaultValue();
     }
@@ -184,9 +185,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public float getF32(String name) {
         IData d = data.get(name);
         if(d instanceof F32Box)
-            return ((F32Box) d).get();
+            return d.asF32().get();
         else if(!strict && d != null && d.canConvertToType(DataType.F32))
-            return ((F32Box) d.convertToType(DataType.F32)).get();
+            return d.convertToType(DataType.F32).asF32().get();
         else
             return F32Box.defaultValue();
     }
@@ -195,9 +196,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public double getF64(String name) {
         IData d = data.get(name);
         if(d instanceof F64Box)
-            return ((F64Box) d).get();
+            return d.asF64().get();
         else if(!strict && d != null && d.canConvertToType(DataType.F64))
-            return ((F64Box) d.convertToType(DataType.F64)).get();
+            return d.convertToType(DataType.F64).asF64().get();
         else
             return F64Box.defaultValue();
     }
@@ -206,9 +207,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public byte[] getI8Arr(String name) {
         IData d = data.get(name);
         if(d instanceof I8ArrBox)
-            return ((I8ArrBox) d).get();
+            return d.asI8Arr().get();
         else if(!strict && d != null && d.canConvertToType(DataType.I8ARR))
-            return ((I8ArrBox) d.convertToType(DataType.I8ARR)).get();
+            return d.convertToType(DataType.I8ARR).asI8Arr().get();
         else
             return I8ArrBox.defaultValue();
     }
@@ -217,9 +218,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public int[] getI32Arr(String name) {
         IData d = data.get(name);
         if(d instanceof I32ArrBox)
-            return ((I32ArrBox) d).get();
+            return d.asI32Arr().get();
         else if(!strict && d != null && d.canConvertToType(DataType.BOOL))
-            return ((I32ArrBox) d.convertToType(DataType.BOOL)).get();
+            return d.convertToType(DataType.BOOL).asI32Arr().get();
         else
             return I32ArrBox.defaultValue();
     }
@@ -228,9 +229,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public long[] getI64Arr(String name) {
         IData d = data.get(name);
         if(d instanceof I64ArrBox)
-            return ((I64ArrBox) d).get();
+            return d.asI64Arr().get();
         else if(!strict && d != null && d.canConvertToType(DataType.I64ARR))
-            return ((I64ArrBox) d.convertToType(DataType.I64ARR)).get();
+            return d.convertToType(DataType.I64ARR).asI64Arr().get();
         else
             return I64ArrBox.defaultValue();
     }
@@ -239,9 +240,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public float[] getF32Arr(String name) {
         IData d = data.get(name);
         if(d instanceof F32ArrBox)
-            return ((F32ArrBox) d).get();
+            return d.asF32Arr().get();
         else if(!strict && d != null && d.canConvertToType(DataType.F32ARR))
-            return ((F32ArrBox) d.convertToType(DataType.F32ARR)).get();
+            return d.convertToType(DataType.F32ARR).asF32Arr().get();
         else
             return F32ArrBox.defaultValue();
     }
@@ -250,9 +251,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public double[] getF64Arr(String name) {
         IData d = data.get(name);
         if(d instanceof F64ArrBox)
-            return ((F64ArrBox) d).get();
+            return d.asF64Arr().get();
         else if(!strict && d != null && d.canConvertToType(DataType.F64ARR))
-            return ((F64ArrBox) d.convertToType(DataType.F64ARR)).get();
+            return d.convertToType(DataType.F64ARR).asF64Arr().get();
         else
             return F64ArrBox.defaultValue();
     }
@@ -261,9 +262,9 @@ public abstract class AbstractDataCompound implements DataCompound {
     public String getString(String name) {
         IData d = data.get(name);
         if(d instanceof StringBox)
-            return ((StringBox) d).get();
+            return d.asString().get();
         else if(!strict && d != null && d.canConvertToType(DataType.STRING))
-            return ((StringBox) d.convertToType(DataType.STRING)).get();
+            return d.convertToType(DataType.STRING).asString().get();
         else
             return StringBox.defaultValue();
     }
@@ -354,6 +355,14 @@ public abstract class AbstractDataCompound implements DataCompound {
     @Override
     public String toString() {
         return toString("");
+    }
+    
+    /**
+     * Called when this compound is modified. Subclasses (namely JsonCompound)
+     * may use this to set a dirty flag.
+     */
+    protected void setDirty() {
+        // nothing in the default impl
     }
     
     /**

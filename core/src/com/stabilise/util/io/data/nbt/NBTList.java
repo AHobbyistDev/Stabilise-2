@@ -1,10 +1,6 @@
 package com.stabilise.util.io.data.nbt;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.function.Consumer;
 
 import com.stabilise.util.io.DataInStream;
 import com.stabilise.util.io.DataOutStream;
@@ -24,6 +20,18 @@ public class NBTList extends AbstractDataList {
     
     public NBTList(int initialCapacity) {
         super(initialCapacity);
+    }
+    
+    @Override
+    protected void checkType(IData d) {
+        if(size() > 0) {
+            if(NBTType.tagID(d) != type) {
+                throw new IllegalArgumentException("Invalid type! (Tried adding "
+                        + d.type() + " to a list containing " + type + ")");
+            }
+        } else {
+            type = NBTType.tagID(d);
+        }
     }
     
     @Override
@@ -47,29 +55,6 @@ public class NBTList extends AbstractDataList {
         
         for(IData t : data)
             t.writeData(out);
-    }
-    
-    // All entries of an NBT list must be of the same type.
-    private void checkType(IData t) {
-        if(data.size() != 0) {
-            if(NBTType.tagID(t) != type)
-                throw new IllegalArgumentException("Attempting to append to a list"
-                        + " a tag of the wrong type!");
-        } else {
-            type = NBTType.tagID(t);
-        }
-    }
-    
-    @Override
-    public void addData(IData t) {
-        checkType(t);
-        super.addData(t);
-    }
-    
-    @Override
-    protected void addData2(IData t) {
-        checkType(t);
-        super.addData2(t);
     }
     
     @Override

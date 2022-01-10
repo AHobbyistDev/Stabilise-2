@@ -77,7 +77,15 @@ public enum NBTType {
      * Returns the tag name for a tag with the specified ID.
      */
     public static String name(byte id) {
-        return NBTType.values()[id-1].toString();
+        //return NBTType.values()[id-1].toString(); // doesn't work for ids after the skip
+    
+        // This should work for now
+        NBTType[] vals = NBTType.values();
+        for(int i = id-1; i < vals.length && id <= vals[i].id; i++) {
+            if(vals[i].id == id)
+                return vals[i].toString();
+        }
+        return "INVALID ID " + id;
     }
     
 }

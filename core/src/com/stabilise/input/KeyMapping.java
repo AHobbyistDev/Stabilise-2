@@ -11,6 +11,10 @@ public class KeyMapping {
         this.heldKeys = heldKeys;
     }
     
+    public boolean hasHeldKeys() {
+        return heldKeys.length > 0;
+    }
+    
     @Override
     public KeyMapping clone() {
         return new KeyMapping(keycode, heldKeys.clone());

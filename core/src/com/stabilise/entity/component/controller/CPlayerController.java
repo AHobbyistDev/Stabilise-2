@@ -225,6 +225,19 @@ public class CPlayerController extends CController implements Controllable<GameC
                 
                 world.addEntity(pe);
                 break;
+            case ROTATE_LEFT:
+                Log.get().postDebug("ROTATE LEFTO");
+                e.angle -= 90;
+                e.upDirection.rotate90(-1);
+                break;
+            case ROTATE_RIGHT:
+                e.angle += 90;
+                e.upDirection.rotate90(1);
+                break;
+            case ROTATE_UP:
+                e.angle += 180;
+                e.upDirection.rotate90(1).rotate90(1); // I'm lazy
+                break;
             case TEST_RANDOM:
                 e.components.forEach(Printable::debugPrint);
                 break;

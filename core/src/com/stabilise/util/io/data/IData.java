@@ -1,5 +1,6 @@
 package com.stabilise.util.io.data;
 
+import com.stabilise.util.box.*;
 import com.stabilise.util.io.Sendable;
 
 /**
@@ -108,7 +109,7 @@ public interface IData extends Sendable {
 	 * Returns {@code this.type() == type}.
 	 */
 	default boolean isType(DataType type) {
-		return this.type().equals(type);
+		return this.type() == type;
 	}
  
 	/**
@@ -118,8 +119,24 @@ public interface IData extends Sendable {
 	 * @throws NullPointerException if {@code other} is {@code null}.
 	 */
 	default boolean isSameTypeAs(IData other) {
-		return type().equals(other.type());
+		return type() == other.type();
 	}
+	
+	// Convenience methods
+	default boolean isCompound() { return isType(DataType.COMPOUND); }
+	default boolean isList()     { return isType(DataType.LIST);     }
+	default boolean isBool()     { return isType(DataType.BOOL);     }
+	default boolean isI8()       { return isType(DataType.I8);       }
+	default boolean isI16()      { return isType(DataType.I16);      }
+	default boolean isI32()      { return isType(DataType.I32);      }
+	default boolean isI64()      { return isType(DataType.I64);      }
+	default boolean isF32()      { return isType(DataType.F32);      }
+	default boolean isF64()      { return isType(DataType.F64);      }
+	default boolean isI8Arr()    { return isType(DataType.I8ARR);    }
+	default boolean isI32Arr()   { return isType(DataType.I32ARR);   }
+	default boolean isI64Arr()   { return isType(DataType.F32ARR);   }
+	default boolean isF64Arr()   { return isType(DataType.F64ARR);   }
+	default boolean isString()   { return isType(DataType.STRING);   }
 	
 	// We need some methods to be able to test and convert between compatible
 	// types to accommodate plaintext data formats such as JSON, in which it is
@@ -163,6 +180,141 @@ public interface IData extends Sendable {
      */
     default IData convertToTypeOf(IData other) {
     	return convertToType(other.type());
+	}
+	
+	/**
+	 * Casts this to a DataCompound. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default DataCompound asCompound() {
+    	return (DataCompound) this;
+	}
+	
+	/**
+	 * Casts this to a DataList. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default DataList asList() {
+    	return (DataList) this;
+	}
+	
+	/**
+	 * Casts this to a BoolBox. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default BoolBox asBool() {
+    	return (BoolBox) this;
+	}
+	
+	/**
+	 * Casts this to a I8Box. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default I8Box asI8() {
+    	return (I8Box) this;
+	}
+	
+	/**
+	 * Casts this to a I16Box. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default I16Box asI16() {
+    	return (I16Box) this;
+	}
+	
+	/**
+	 * Casts this to a I32Box. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default I32Box asI32() {
+    	return (I32Box) this;
+	}
+	
+	/**
+	 * Casts this to a I64Box. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default I64Box asI64() {
+    	return (I64Box) this;
+	}
+	
+	/**
+	 * Casts this to a F32Box. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default F32Box asF32() {
+		return (F32Box) this;
+	}
+	
+	/**
+	 * Casts this to a F64Box. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default F64Box asF64() {
+		return (F64Box) this;
+	}
+	
+	/**
+	 * Casts this to a I8ArrBox. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default I8ArrBox asI8Arr() {
+		return (I8ArrBox) this;
+	}
+	
+	/**
+	 * Casts this to a I32ArrBox. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default I32ArrBox asI32Arr() {
+		return (I32ArrBox) this;
+	}
+	
+	/**
+	 * Casts this to a I64ArrBox. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default I64ArrBox asI64Arr() {
+		return (I64ArrBox) this;
+	}
+	
+	/**
+	 * Casts this to a F32ArrBox. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default F32ArrBox asF32Arr() {
+		return (F32ArrBox) this;
+	}
+	
+	/**
+	 * Casts this to a F64ArrBox. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default F64ArrBox asF64Arr() {
+		return (F64ArrBox) this;
+	}
+	
+	/**
+	 * Casts this to a StringBox. Convenience method.
+	 *
+	 * @throws ClassCastException
+	 */
+	default StringBox asString() {
+    	return (StringBox) this;
 	}
 	
 	/**

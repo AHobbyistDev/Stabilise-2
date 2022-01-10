@@ -53,19 +53,42 @@ public abstract class AbstractDataList implements DataList {
     @Override
     public void addData(IData d) {
         Objects.requireNonNull(d);
+        checkType(d);
         if(d instanceof DataCompound)
-            data.add(((DataCompound)d).convert(format()));
+            data.add(d.asCompound().convert(format()));
         else if(d instanceof DataList)
-            data.add(((DataList)d).convert(format()));
+            data.add(d.asList().convert(format()));
         else
             data.add(d);
+        setDirty();
     }
     
     /**
      * Like {@link #addData(IData)}, but without checks.
      */
     protected void addData2(IData d) {
+        checkType(d);
         data.add(d);
+        setDirty();
+    }
+    
+    /**
+     * Called when data is added to this list.
+     * Subclasses may override this to enforce only a single type. Default
+     * implementation does nothing.
+     */
+    protected void checkType(IData d) {
+        // Do nothing, but an implementation is here for copying & pasting
+        /*
+        if(size() > 0) {
+            if(d.type() != listType) {
+                throw new IllegalArgumentException("Invalid type! (Tried adding "
+                        + d.type() + " to a list containing " + listType + ")");
+            }
+        } else {
+            listType = d.type();
+        }
+        */
     }
     
     // WOW, TRULY I AM A BUG FAN OF REPETITION
@@ -292,6 +315,15 @@ public abstract class AbstractDataList implements DataList {
         // Override to use the (faster) ArrayList.forEach() rather than the
         // default forEach of Iterable.
         data.forEach(action);
+    }
+    
+    
+    /**
+     * Called when this list is modified. Subclasses (namely JsonList)
+     * may use this to set a dirty flag.
+     */
+    protected void setDirty() {
+        // nothing in the default impl
     }
     
 }

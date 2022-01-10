@@ -45,7 +45,7 @@ public interface DataList extends IDataContainer<DataList>, Iterable<IData> {
      *
      * <p><b>NOTE:</b> This method is provided only for convenience, and it
      * should rarely, if ever, be used directly -- use the other {@code get()}
-     *  methods instead!
+     * methods instead!
      *
      * @throws IndexOutOfBoundsException if there isn't any more data. Make sure
      * to check {@code hasNext()} first!
@@ -186,12 +186,12 @@ public interface DataList extends IDataContainer<DataList>, Iterable<IData> {
     
     @Override
     default boolean canConvertToType(DataType type) {
-        return type.equals(DataType.LIST);
+        return type == DataType.LIST;
     }
     
     @Override
     default IData convertToType(DataType type) {
-        if(type.equals(DataType.LIST))
+        if(type == DataType.LIST)
             return this.duplicate();
         else
             throw new RuntimeException("Illegal conversion: List --> " + type);
@@ -199,7 +199,7 @@ public interface DataList extends IDataContainer<DataList>, Iterable<IData> {
     
     @Override
     default DataList convert(Format format) {
-        if(this.format().equals(format))
+        if(this.format() == format)
             return this;
         else
             return duplicate(format);

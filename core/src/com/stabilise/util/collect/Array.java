@@ -195,7 +195,7 @@ public class Array<E> implements Iterable<E> {
         data[data.length - 1] = value;
     }
     
-
+    
     /**
      * Adds a new element to the array, increasing its length by the specified
      * scaling factor as if by:
@@ -238,12 +238,15 @@ public class Array<E> implements Iterable<E> {
     
     /**
      * Resizes the backing array using {@link Arrays#copyOf(Object[], int)}.
+     * Doesn't do anything if the backing array is already of the specified
+     * length.
      * 
      * @throws NegativeArraySizeException if {@code length} is negative.
      * @see Arrays#copyOf(Object[], int)
      */
     public void resize(int length) {
-        data = Arrays.copyOf(data, length);
+        if(data.length != length)
+            data = Arrays.copyOf(data, length);
     }
     
     /**

@@ -1,7 +1,9 @@
 package com.stabilise.input;
 
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.files.FileHandle;
 import com.stabilise.core.Constants;
+import com.stabilise.core.Resources;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +23,12 @@ public enum GameControl implements IControl {
     
     PAUSE           ("pause",        Keys.ESCAPE),
     DEBUG           ("debug",        Keys.F3),
+    
+    // Rotation controls
+    
+    ROTATE_LEFT     ("rotate_left",  Keys.LEFT, Keys.SHIFT_LEFT),
+    ROTATE_RIGHT    ("rotate_right", Keys.RIGHT, Keys.SHIFT_LEFT),
+    ROTATE_UP       ("rotate_up",    Keys.UP, Keys.SHIFT_LEFT),
     
     // Dev controls
     
@@ -87,13 +95,7 @@ public enum GameControl implements IControl {
     //-----=====Static Constants and Variables=====-----
     //--------------------==========--------------------
     
-    //private static boolean initialised = false;
-    
-    //--------------------==========--------------------
-    //------------=====Static Functions=====------------
-    //--------------------==========--------------------
-    
-    
+    public static FileHandle CONFIG_FILE = Resources.DIR_CONFIG.child("controls.txt");
     
     //--------------------==========--------------------
     //-------------=====Nested Classes=====-------------

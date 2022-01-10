@@ -73,8 +73,6 @@ public class WorldRenderer implements Renderer {
     public final CCamera camObj;
     public final CPlayerController controller;
     
-    //public final HUDRenderer hudRenderer;
-    
     public TileRenderer tileRenderer;
     public HUDRenderer hudRenderer;
     
@@ -313,6 +311,9 @@ public class WorldRenderer implements Renderer {
         profiler.start("background"); // root.render.background
         Gdx.gl.glClearColor(BACKGROUND_COL.r, BACKGROUND_COL.g, BACKGROUND_COL.b, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+        
+        camera.rotate(camObj.upVector.angleDeg());
+        
         
         updateMatrices(false);
         

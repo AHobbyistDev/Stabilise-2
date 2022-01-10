@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.IntMap;
-import com.stabilise.util.io.data.DataCompound;
 
 import java.util.Arrays;
 import java.util.OptionalInt;
@@ -28,26 +27,7 @@ public class Controller<T extends Enum<T> & IControl> implements InputProcessor 
             KEYCODE_SCROLL_X = -10,
             KEYCODE_SCROLL_Y = -11;
     
-    /** Whether the controller mappings have been set up. */
-    private static boolean initialised = false;
     
-    
-    /** The actual config data. */
-    //private static final Config CONFIG = new Config(getDefaults(), Resources.DIR_CONFIG.child("controls.txt"));
-    
-    /** The key mappings. Maps keycodes to controls. */
-    //private static final BiMap<Integer, Control> CONTROL_MAP = HashBiMap.create();
-    /** The control mappings. Maps controls to keycodes. The inverse of
-     * {@link #CONTROL_MAP}. */
-    //private static final BiMap<Control, Integer> KEY_MAP = CONTROL_MAP.inverse();
-    
-    
-    
-    
-    
-    static {
-        initialise();
-    }
     
     /** Invoking this loads this class into memory. */
     public static void poke() {}
@@ -80,7 +60,7 @@ public class Controller<T extends Enum<T> & IControl> implements InputProcessor 
      */
     public Controller(ControlConfig<T> config, Controllable<T> focus) {
         this.controls = config.controls;
-    
+        
         bindings = new IntMap<>(controls.length);
         pressedControls = new boolean[controls.length];
         updateBindings(config);
@@ -95,8 +75,8 @@ public class Controller<T extends Enum<T> & IControl> implements InputProcessor 
         // do some conversions...
         
         bindings.clear();
-        for(int i = 0; i < controls.length; i++) {
-            KeyMapping mapping = config.mappings[i];
+        for(T ctrl : controls) {
+            KeyMapping mapping = config.mappings.get(ctrl).get(0);
             KeyBinding binding = bindings.get(mapping.keycode);
             if(binding == null) {
                 binding = new KeyBinding();
@@ -106,18 +86,18 @@ public class Controller<T extends Enum<T> & IControl> implements InputProcessor 
             if(mapping.heldKeys.length == 0) {
                 // If the mapping doesn't have any held keys (i.e. it's just a
                 // straightforward key press)
-                if(!binding.bindCtrl(i))
+                if(!binding.bindCtrl(ctrl.ordinal()))
                     throw new IllegalStateException("Two controls ("
                             + controls[binding.boundCtrl].identifier()  + " and "
-                            + controls[i].identifier() + ") bound to the same key: " +
+                            + ctrl.identifier() + ") bound to the same key: " +
                             keycodeToString(mapping.keycode));
             } else {
                 // The mapping has some held keys. This requires a bit more work
                 // to bind.
-                ConditionalKeyBinding condBinding = new ConditionalKeyBinding(i, mapping.heldKeys);
+                ConditionalKeyBinding condBinding = new ConditionalKeyBinding(ctrl.ordinal(), mapping.heldKeys);
                 binding.growCondBindings();
                 if(binding.hasCondBindings()) {
-                
+                    // TODO
                 } else {
                     binding.condBindings = new ConditionalKeyBinding[1];
                     binding.condBindings[0] = condBinding;
@@ -281,6 +261,12 @@ public class Controller<T extends Enum<T> & IControl> implements InputProcessor 
         return processed;
     }
     
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        return "";
+    }
+    
     //--------------------==========--------------------
     //------------=====Static Functions=====------------
     //--------------------==========--------------------
@@ -307,6 +293,14 @@ public class Controller<T extends Enum<T> & IControl> implements InputProcessor 
         if(keycode >= 0)
             throw new IllegalArgumentException("Button keycode must be negative!");
         return -keycode - 1; // = -(keycode + 1)
+    }
+    
+    /**
+     * Checks for whether the given keycode is a valid one. Equivalent to
+     * {@link #keycodeToString(int) keycodeToString(keycode)} {@code != null}.
+     */
+    public static boolean isValidKeycode(int keycode) {
+        return keycodeToString(keycode) != null;
     }
     
     /**
@@ -341,6 +335,8 @@ public class Controller<T extends Enum<T> & IControl> implements InputProcessor 
      * @see #keycodeToString(int)
      */
     public static OptionalInt stringToKeycode(String s) {
+        // TODO: this is unavoidably case-sensitive because Input.Keys.valueOf()
+        // is. It shouldn't be too hard to write up a fix for this.
         int keycode = Input.Keys.valueOf(s);
         if(keycode != -1)
             return OptionalInt.of(keycode);
@@ -364,10 +360,12 @@ public class Controller<T extends Enum<T> & IControl> implements InputProcessor 
      * loaded into memory.
      */
     private static void initialise() {
+        /*
         if(!initialised) {
             initialised = true;
             loadConfig();
         }
+        */
     }
     
     /**
@@ -485,6 +483,14 @@ public class Controller<T extends Enum<T> & IControl> implements InputProcessor 
         
         boolean matches(ConditionalKeyBinding other) {
             return Arrays.equals(heldKeys, other.heldKeys);
+        }
+    
+        /**
+         * Pass the control array so that we can refer to the controls by name
+         */
+        String toString(IControl[] controls) {
+            StringBuilder sb = new StringBuilder();
+            return sb.toString();
         }
         
     }

@@ -456,7 +456,7 @@ public interface DataCompound extends IDataContainer<DataCompound>,
     
     @Override
     default DataCompound convert(Format format) {
-        if(this.format().equals(format))
+        if(this.format() == format)
             return this;
         else
             return duplicate(format);

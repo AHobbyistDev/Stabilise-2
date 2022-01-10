@@ -217,9 +217,8 @@ public class IOUtil {
     }
     
     /**
-     * Reads a file into a compound of the given format. The returned compound
-     * will be in read mode.
-     * 
+     * Reads a file into a compound of the given format.
+     *
      * @throws NullPointerException if any argument is null.
      * @throws IOException if an I/O error occurs.
      */
@@ -486,7 +485,7 @@ public class IOUtil {
      * Sends a file ({@code in}) across {@code out}. The file should be
      * received using {@link #receiveFile(DataInputStream, FileHandle)}.
      * 
-     * @param checksum Whether or not to send a checksum of the file.
+     * @param checksum Whether to send a checksum of the file.
      * 
      * @throws NullPointerException if either argument is {@code null}.
      * @throws IOException if an I/O error occurs.
